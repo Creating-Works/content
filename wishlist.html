@@ -1,1 +1,870 @@
+<!--
+  wishlist.html
+  v1.8 - Rename sub-tabs: Skills→Share skills, Words→Share words; Other chip last in every set;
+         note field shows as "Elaborate on your wish here" after chip selection; fix Send care
+         using own chip set (selectedCareChips) not selectedSpaceChips
+  v1.7 - Interaction overhaul: one top-level/one people sub-cat open at a time; multi-select
+         chips; fixed My wishlist FAB with count badge; list in drawer
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Appreciation list - Appear Network</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:           #1F699E;
+      --card:         #FFFFFF;
+      --text:         #1A2E42;
+      --soft:         #4A6080;
+      --muted:        #6A8FAF;
+      --brand:        #1F699E;
+      --border:       #DDE4EE;
+      --input-bg:     #F7F9FC;
+      --hover:        #185885;
+      --green:        #E8F5E9;
+      --green-border: #A5D6A7;
+      --green-text:   #2E7D32;
+      --ph:           #B8CCDE;
+      --sel-bg:       #EBF3FA;
+      --sel-border:   #1F699E;
+    }
 
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      padding: 40px 20px 100px;
+      color: var(--text);
+    }
+
+    .card {
+      background: var(--card);
+      max-width: 660px;
+      margin: 0 auto;
+      border-radius: 16px;
+      padding: 52px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.25), 0 4px 16px rgba(0,0,0,0.12);
+    }
+    @media (max-width: 520px) { .card { padding: 32px 20px; } }
+
+    .eyebrow { font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--brand); margin-bottom: 8px; }
+    h1 { font-size: 26px; font-weight: 700; color: var(--text); line-height: 1.3; margin-bottom: 8px; }
+    h2 { font-size: 20px; font-weight: 700; color: var(--text); line-height: 1.3; margin-bottom: 6px; }
+    .subtitle { font-size: 15px; color: var(--soft); font-weight: 300; line-height: 1.7; margin-bottom: 32px; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+    label { display: block; font-size: 14px; color: var(--muted); margin-bottom: 6px; }
+
+    input[type="text"] {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input[type="text"]:focus { border-color: var(--brand); }
+    input[type="text"]::placeholder { color: var(--ph); }
+    .field { margin-bottom: 20px; }
+
+    /* ── Top tabs ── */
+    .top-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+    .top-tab {
+      padding: 10px 18px; border-radius: 24px; border: 2px solid var(--border);
+      background: var(--input-bg); font-size: 14px; font-weight: 500; color: var(--soft);
+      cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.18s;
+    }
+    .top-tab:hover { border-color: var(--brand); color: var(--brand); }
+    .top-tab.active { background: var(--brand); border-color: var(--brand); color: white; }
+
+    /* ── Drill section ── */
+    .drill-section {
+      background: var(--input-bg); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px; margin-bottom: 16px;
+    }
+    .drill-label { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
+    .drill-sub { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .drill-sub-label { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .drill-sub-desc { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+
+    /* ── Sub tabs ── */
+    .sub-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .sub-tab {
+      padding: 8px 16px; border-radius: 20px; border: 1.5px solid var(--border);
+      background: white; font-size: 13px; font-weight: 500; color: var(--soft);
+      cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s;
+    }
+    .sub-tab:hover { border-color: var(--brand); color: var(--brand); }
+    .sub-tab.active { background: var(--brand); border-color: var(--brand); color: white; }
+
+    /* ── Chips ── */
+    .chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
+    .chip {
+      padding: 7px 14px; border-radius: 20px; border: 1.5px solid var(--border);
+      background: white; font-size: 13px; color: var(--soft); cursor: pointer;
+      font-family: 'DM Sans', sans-serif; transition: all 0.15s; user-select: none;
+    }
+    .chip:hover { border-color: var(--brand); color: var(--brand); }
+    .chip.selected { background: var(--sel-bg); border-color: var(--sel-border); color: var(--brand); font-weight: 500; }
+    .chip.other-chip { border-style: dashed; }
+
+    /* ── Skills grid ── */
+    .skills-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+    .skill-chip {
+      padding: 6px 12px; border-radius: 16px; border: 1.5px solid var(--border);
+      background: white; font-size: 12px; color: var(--soft); cursor: pointer;
+      font-family: 'DM Sans', sans-serif; transition: all 0.15s;
+    }
+    .skill-chip:hover { border-color: var(--brand); color: var(--brand); }
+    .skill-chip.selected { background: var(--sel-bg); border-color: var(--sel-border); color: var(--brand); font-weight: 500; }
+    .skill-chip.other-chip { border-style: dashed; font-size: 12px; }
+
+    /* ── Other inline input ── */
+    .other-input-wrap {
+      display: flex; gap: 8px; margin-top: 10px; width: 100%;
+    }
+    .other-input-wrap input { flex: 1; }
+    .btn-other-add {
+      padding: 10px 16px; background: var(--brand); color: white; border: none;
+      border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px;
+      cursor: pointer; white-space: nowrap; transition: background 0.15s;
+    }
+    .btn-other-add:hover { background: var(--hover); }
+
+    /* ── Add area ── */
+    .add-area {
+      margin-top: 16px; padding: 14px; background: white;
+      border: 1px solid var(--border); border-radius: 10px;
+    }
+    .add-area-label { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+    .add-area input { margin-bottom: 10px; }
+    .btn-add {
+      display: block; width: 100%; padding: 12px; background: var(--brand); color: white;
+      border: none; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px;
+      font-weight: 500; cursor: pointer; transition: background 0.15s;
+    }
+    .btn-add:hover { background: var(--hover); }
+    .btn-add:disabled { opacity: 0.4; cursor: default; }
+
+    /* ── FAB ── */
+    .wishlist-fab {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      left: auto;
+      transform: none;
+      background: var(--brand); color: white; border: none; border-radius: 28px;
+      padding: 12px 20px; font-family: 'DM Sans', sans-serif; font-size: 14px;
+      font-weight: 600; cursor: pointer; box-shadow: 0 4px 16px rgba(31,105,158,0.45);
+      transition: background 0.2s; display: flex; align-items: center; gap: 8px;
+      z-index: 9999; white-space: nowrap;
+    }
+    .wishlist-fab:hover { background: var(--hover); }
+    .badge {
+      background: white; color: var(--brand); border-radius: 12px; padding: 2px 8px;
+      font-size: 13px; font-weight: 700; min-width: 22px; text-align: center;
+    }
+
+    /* ── Drawer ── */
+    .drawer-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200;
+      opacity: 0; transition: opacity 0.25s; pointer-events: none;
+    }
+    .drawer-overlay.open { opacity: 1; pointer-events: all; }
+    .drawer {
+      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%) translateY(100%);
+      width: 100%; max-width: 660px; background: white; border-radius: 20px 20px 0 0;
+      padding: 28px 32px 40px; z-index: 201; max-height: 80vh; overflow-y: auto;
+      transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+      box-shadow: 0 -8px 40px rgba(0,0,0,0.2);
+    }
+    .drawer.open { transform: translateX(-50%) translateY(0); }
+    @media (max-width: 520px) { .drawer { padding: 24px 20px 36px; } }
+    .drawer-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; }
+    .drawer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .drawer-title { font-size: 18px; font-weight: 700; color: var(--text); }
+    .btn-close { background: none; border: none; font-size: 20px; color: var(--muted); cursor: pointer; padding: 4px 8px; line-height: 1; }
+
+    /* ── Wish items ── */
+    .wish-item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+    .wish-item.done { opacity: 0.5; }
+    .wish-icon { font-size: 18px; flex-shrink: 0; margin-top: 2px; }
+    .wish-body { flex: 1; min-width: 0; }
+    .wish-cat { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 2px; }
+    .wish-title { font-size: 15px; font-weight: 500; color: var(--text); }
+    .wish-note { font-size: 12px; color: var(--muted); margin-top: 3px; word-break: break-word; }
+    .wish-badge { display: inline-block; margin-top: 5px; font-size: 11px; background: var(--green); color: var(--green-text); border: 1px solid var(--green-border); border-radius: 10px; padding: 2px 8px; }
+    .wish-actions { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
+    .btn-sm { padding: 5px 12px; border-radius: 16px; font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; border: 1.5px solid var(--border); background: white; color: var(--soft); transition: all 0.15s; white-space: nowrap; }
+    .btn-sm.receive { border-color: var(--green-border); color: var(--green-text); }
+    .btn-sm.receive:hover { background: var(--green); }
+    .btn-sm.remove:hover { border-color: #e57373; color: #c62828; }
+
+    /* ── Progress ── */
+    .progress-wrap { margin-bottom: 20px; }
+    .progress-labels { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    .progress-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--brand); border-radius: 3px; transition: width 0.3s; }
+
+    /* ── Buttons ── */
+    .btn-primary { display: block; width: 100%; padding: 14px; background: var(--brand); color: white; border: none; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; cursor: pointer; text-align: center; transition: background 0.15s; margin-top: 20px; }
+    .btn-primary:hover { background: var(--hover); }
+    .btn-secondary { display: block; width: 100%; padding: 12px; background: transparent; color: var(--brand); border: 2px solid var(--brand); border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; cursor: pointer; text-align: center; transition: all 0.15s; margin-top: 10px; }
+    .btn-secondary:hover { background: var(--input-bg); }
+    .btn-outline { display: block; width: 100%; padding: 12px; background: transparent; color: var(--brand); border: 2px solid var(--brand); border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; cursor: pointer; text-align: center; text-decoration: none; transition: all 0.15s; }
+    .btn-outline:hover { background: var(--input-bg); }
+
+    /* ── Share box ── */
+    .share-box { margin-top: 20px; padding: 18px; background: var(--input-bg); border: 1px solid var(--border); border-radius: 10px; }
+    .share-box p { font-size: 14px; color: var(--soft); margin-bottom: 10px; }
+    .share-url { font-size: 12px; color: var(--muted); word-break: break-all; background: white; border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; margin-bottom: 10px; }
+
+    /* ── Review ── */
+    .review-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+    .review-count { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    .btn-edit { padding: 6px 14px; border-radius: 16px; border: 1.5px solid var(--border); background: white; font-size: 13px; color: var(--soft); cursor: pointer; font-family: 'DM Sans', sans-serif; }
+    .btn-edit:hover { border-color: var(--brand); color: var(--brand); }
+    .review-group { margin-bottom: 18px; }
+    .review-group-label { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+    .review-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .review-chip { padding: 6px 12px; border-radius: 16px; background: var(--input-bg); border: 1px solid var(--border); font-size: 13px; color: var(--text); }
+
+    .empty { font-size: 14px; color: var(--muted); padding: 20px 0; text-align: center; }
+
+    /* ── Toast ── */
+    .toast { position: fixed; bottom: 88px; left: 50%; transform: translateX(-50%) translateY(10px); background: var(--text); color: white; padding: 10px 20px; border-radius: 20px; font-size: 13px; opacity: 0; transition: all 0.25s; pointer-events: none; z-index: 999; white-space: nowrap; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    .page-footer { text-align: center; margin-top: 28px; font-size: 12px; color: rgba(255,255,255,0.55); }
+    .page-footer a { color: rgba(255,255,255,0.75); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<div class="card" id="app"></div>
+<div class="toast" id="toast"></div>
+<div class="page-footer">
+  <a href="https://creating.works">Creating Works</a>
+</div>
+
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer"></div>
+
+<button class="wishlist-fab" id="wishlist-fab" onclick="openDrawer()" style="display:none">
+  My wishlist <span class="badge" id="fab-badge">0</span>
+</button>
+
+<script>
+
+// ─── Data ──────────────────────────────────────────────────────────────────
+
+const SKILLS = [
+  'Vision/Product Direction','Strategy','Analytics','Marketing/Outreach',
+  'Research/Data Science','People Development','Project Management','Communications',
+  'Experience Design','Creative','Engineering','General Technology',
+  'HR','Operations/Systems/QA','Finance','Legal','Procurement',
+  'Governance/Policy','Safety/Security','Administration','AI',
+  'Health: Clinical','Trade Skill','Health: Mental/Emotional','Health: Physical/Movement'
+];
+
+const WORDS_SUBS = [
+  { id:'feedback', icon:'🔍', label:'Give me feedback',     presets:['Review my pitch deck','Give honest notes on my portfolio','Beta test my prototype'] },
+  { id:'say',      icon:'🗣',  label:'Say something for me', presets:['Leave a review for my work','Vouch for me to someone who matters','Speak up for my work in a room I\'m not in'] },
+  { id:'write',    icon:'✍️', label:'Write something for me', presets:['Write me a testimonial','Draft a recommendation letter','Help me write my bio'] },
+  { id:'intro',    icon:'🔗', label:'Introduce me to someone', presets:[] }
+];
+
+const CARE_PRESETS = ['A massage','A spa day','A night away'];
+
+const SPACES_SUBS = [
+  { id:'work-create', icon:'🖥',  label:'To work or create', desc:'Studio, workshop, desk',                         presets:['Use of your studio','A quiet room for the day','Access to your workshop'] },
+  { id:'gather',      icon:'🏠',  label:'To gather',          desc:'Your home, a meeting room, a venue',             presets:['Host a meeting at your place','Lend me your space for an event','A venue for the day'] },
+  { id:'enjoy',       icon:'🌅',  label:'To enjoy',           desc:'Somewhere to eat, rest, or experience something', presets:['A table at your favorite spot','A place to rest and reset','Somewhere new to explore'] }
+];
+
+const THINGS_SUBS = [
+  { id:'physical',    icon:'📦', label:'Physical goods', desc:'Books, gear, tools, equipment, art supplies', presets:['A book','Gear or equipment','Art supplies','A tool I need'] },
+  { id:'consumables', icon:'🍵', label:'Consumables',    desc:'Food, drink, ingredients',                   presets:['Coffee','A homemade meal','Local ingredients','Food for the week'] },
+  { id:'money',       icon:'💎', label:'Money',          desc:'Cash, digital, donation, gift cards, crypto, or help me pay for something', presets:['A one-time gift','A recurring contribution','A gift card','Crypto','Help me pay for something'] }
+];
+
+const EXPERIENCES_SUBS = [
+  { id:'for-myself',   icon:'🧘', label:'For myself',               desc:'Something I do alone, on my own terms',      presets:['A night away to reset','A fitness class','A recording session','A digital subscription'] },
+  { id:'with-you',     icon:'🔄', label:'With you',                 desc:'Something we do together - you\'re present', presets:['Co-work for a day','Take a walk','Share a meal'] },
+  { id:'with-someone', icon:'🌐', label:'With someone else',        desc:'You facilitate with a third person',          presets:['2 tickets to a show','4 tickets to a class','A retreat for my team'] },
+  { id:'for-someone',  icon:'💛', label:'For someone I care about', desc:'I want this for them - I\'m not in it',       presets:['A class for my kid','A meal for my family','Something that would make their week'] }
+];
+
+// ─── State ─────────────────────────────────────────────────────────────────
+let mode          = 'builder';
+let viewerData    = null;
+let viewFulfilled = new Set();
+
+let openTopCat    = null;
+let openPeopleSub = null;
+let openSpacesSub = null;
+let openThingsSub = null;
+let openExpSub    = null;
+
+let selectedSkills     = new Set();
+let selectedWordsSubs  = new Set();
+let selectedCareChips  = new Set();   // dedicated set for Send care
+let selectedSpaceChips = new Set();
+let selectedThingChips = new Set();
+let selectedExpChips   = new Set();
+
+let otherSkillOpen  = false;
+let otherSkillText  = '';
+let otherWordsOpen  = false;
+let otherWordsText  = '';
+let otherCareOpen   = false;
+let otherCareText   = '';
+let otherSpaceOpen  = false;
+let otherSpaceText  = '';
+let otherThingOpen  = false;
+let otherThingText  = '';
+let otherExpOpen    = false;
+let otherExpText    = '';
+
+let noteText  = '';
+let shareURL  = '';
+let items     = [];
+let myName    = '';
+
+// ─── Boot ──────────────────────────────────────────────────────────────────
+(function init() {
+  const params  = new URLSearchParams(window.location.search);
+  const encoded = params.get('list');
+  if (encoded) {
+    try { viewerData = JSON.parse(decodeURIComponent(escape(atob(encoded)))); mode = 'viewer'; } catch(_) {}
+    try { viewFulfilled = new Set(JSON.parse(localStorage.getItem('vf_' + encoded.slice(0,24)) || '[]')); } catch(_) {}
+  } else {
+    try { const s = JSON.parse(localStorage.getItem('an_wishlist_18') || '{}'); items = s.items||[]; myName = s.name||''; } catch(_) {}
+  }
+  render();
+})();
+
+function save() { localStorage.setItem('an_wishlist_18', JSON.stringify({ name: myName, items })); }
+function saveViewer() {
+  const encoded = new URLSearchParams(window.location.search).get('list');
+  localStorage.setItem('vf_' + encoded.slice(0,24), JSON.stringify([...viewFulfilled]));
+}
+
+// ─── Navigation ────────────────────────────────────────────────────────────
+function setTopCat(id) {
+  openTopCat = (openTopCat === id) ? null : id;
+  openPeopleSub = null; openSpacesSub = null; openThingsSub = null; openExpSub = null;
+  clearAll(); noteText = ''; render();
+}
+
+function setPeopleSub(id) {
+  openPeopleSub = (openPeopleSub === id) ? null : id;
+  clearAll(); noteText = ''; render();
+}
+
+function setSpacesSub(id) {
+  openSpacesSub = (openSpacesSub === id) ? null : id;
+  clearAll(); noteText = ''; render();
+}
+
+function setThingsSub(id) {
+  openThingsSub = (openThingsSub === id) ? null : id;
+  clearAll(); noteText = ''; render();
+}
+
+function setExpSub(id) {
+  openExpSub = (openExpSub === id) ? null : id;
+  clearAll(); noteText = ''; render();
+}
+
+function clearAll() {
+  selectedSkills.clear(); selectedWordsSubs.clear(); selectedCareChips.clear();
+  selectedSpaceChips.clear(); selectedThingChips.clear(); selectedExpChips.clear();
+  otherSkillOpen = false; otherSkillText = '';
+  otherWordsOpen = false; otherWordsText = '';
+  otherCareOpen  = false; otherCareText  = '';
+  otherSpaceOpen = false; otherSpaceText = '';
+  otherThingOpen = false; otherThingText = '';
+  otherExpOpen   = false; otherExpText   = '';
+}
+
+// ─── Delegated chip clicks ──────────────────────────────────────────────────
+document.addEventListener('click', function(e) {
+  const el = e.target.closest('[data-chip]');
+  if (!el) return;
+  const type = el.dataset.chip;
+  const val  = el.dataset.val;
+  if (type === 'skill') { toggle(selectedSkills, val);     render(); }
+  if (type === 'words') { toggle(selectedWordsSubs, val);  render(); }
+  if (type === 'care')  { toggle(selectedCareChips, val);  render(); }
+  if (type === 'space') { toggle(selectedSpaceChips, val); render(); }
+  if (type === 'thing') { toggle(selectedThingChips, val); render(); }
+  if (type === 'exp')   { toggle(selectedExpChips, val);   render(); }
+});
+
+function toggle(set, val) { set.has(val) ? set.delete(val) : set.add(val); }
+
+// ─── Other chip toggles ────────────────────────────────────────────────────
+function toggleOther(type) {
+  if (type==='skill') { otherSkillOpen = !otherSkillOpen; if (!otherSkillOpen) otherSkillText=''; }
+  if (type==='words') { otherWordsOpen = !otherWordsOpen; if (!otherWordsOpen) otherWordsText=''; }
+  if (type==='care')  { otherCareOpen  = !otherCareOpen;  if (!otherCareOpen)  otherCareText=''; }
+  if (type==='space') { otherSpaceOpen = !otherSpaceOpen; if (!otherSpaceOpen) otherSpaceText=''; }
+  if (type==='thing') { otherThingOpen = !otherThingOpen; if (!otherThingOpen) otherThingText=''; }
+  if (type==='exp')   { otherExpOpen   = !otherExpOpen;   if (!otherExpOpen)   otherExpText=''; }
+  render();
+  setTimeout(() => { const el = document.getElementById('other-input-'+type); if (el) el.focus(); }, 50);
+}
+
+function updateOther(type, val) {
+  if (type==='skill') otherSkillText = val;
+  if (type==='words') otherWordsText = val;
+  if (type==='care')  otherCareText  = val;
+  if (type==='space') otherSpaceText = val;
+  if (type==='thing') otherThingText = val;
+  if (type==='exp')   otherExpText   = val;
+}
+
+function addOther(type) {
+  let text = '';
+  let set, subCat, subLabel, subIcon, topCat;
+  if (type==='skill') { text=otherSkillText; set=selectedSkills; subCat='skills'; subLabel='Share skills'; subIcon='🛠'; topCat='people'; }
+  if (type==='words') { text=otherWordsText; set=selectedWordsSubs; subCat='words'; subLabel='Share words'; subIcon='💬'; topCat='people'; }
+  if (type==='care')  { text=otherCareText;  set=selectedCareChips; subCat='send-care'; subLabel='Send care'; subIcon='🌿'; topCat='people'; }
+  if (type==='space') {
+    text=otherSpaceText;
+    const sub = SPACES_SUBS.find(s=>s.id===openSpacesSub);
+    subCat=openSpacesSub; subLabel=sub?.label||'Spaces'; subIcon=sub?.icon||'🏡'; topCat='spaces';
+  }
+  if (type==='thing') {
+    text=otherThingText;
+    const sub = THINGS_SUBS.find(s=>s.id===openThingsSub);
+    subCat=openThingsSub; subLabel=sub?.label||'Things'; subIcon=sub?.icon||'📦'; topCat='things';
+  }
+  if (type==='exp') {
+    text=otherExpText;
+    const sub = EXPERIENCES_SUBS.find(s=>s.id===openExpSub);
+    subCat=openExpSub; subLabel=sub?.label||'Experiences'; subIcon=sub?.icon||'✨'; topCat='experiences';
+  }
+  text = (text||'').trim();
+  if (!text) { toast('Name it first'); return; }
+  // add as a selected chip value and close the other input
+  set.add(text);
+  if (type==='skill') { otherSkillOpen=false; otherSkillText=''; }
+  if (type==='words') { otherWordsOpen=false; otherWordsText=''; }
+  if (type==='care')  { otherCareOpen=false;  otherCareText=''; }
+  if (type==='space') { otherSpaceOpen=false; otherSpaceText=''; }
+  if (type==='thing') { otherThingOpen=false; otherThingText=''; }
+  if (type==='exp')   { otherExpOpen=false;   otherExpText=''; }
+  render();
+}
+
+// ─── Note ──────────────────────────────────────────────────────────────────
+function updateNote(val) { noteText = val; }
+
+// ─── Add to list ───────────────────────────────────────────────────────────
+function addToList() {
+  const note = noteText.trim();
+  let label = '', subCat = '', subLabel = '', subIcon = '', topCat = '';
+  let hasSelection = false;
+
+  if (openTopCat === 'people') {
+    if (openPeopleSub === 'skills') {
+      if (!selectedSkills.size) { toast('Select at least one skill'); return; }
+      label = [...selectedSkills].join(' + ');
+      subCat='skills'; subLabel='Share skills'; subIcon='🛠'; topCat='people'; hasSelection=true;
+    } else if (openPeopleSub === 'words') {
+      if (!selectedWordsSubs.size) { toast('Select at least one option'); return; }
+      if (selectedWordsSubs.has('intro') && !note) { toast('Use the note field to name who you\'re looking for'); return; }
+      label = [...selectedWordsSubs].map(id => WORDS_SUBS.find(w=>w.id===id)?.label || id).join(' + ');
+      subCat='words'; subLabel='Share words'; subIcon='💬'; topCat='people'; hasSelection=true;
+    } else if (openPeopleSub === 'send-care') {
+      if (!selectedCareChips.size) { toast('Select at least one'); return; }
+      label = [...selectedCareChips].join(' + ');
+      subCat='send-care'; subLabel='Send care'; subIcon='🌿'; topCat='people'; hasSelection=true;
+    }
+  } else if (openTopCat === 'spaces') {
+    if (!openSpacesSub) { toast('Choose a space type first'); return; }
+    if (!selectedSpaceChips.size) { toast('Select at least one option'); return; }
+    const sub = SPACES_SUBS.find(s=>s.id===openSpacesSub);
+    label = [...selectedSpaceChips].join(' + ');
+    subCat=openSpacesSub; subLabel=sub?.label||'Spaces'; subIcon=sub?.icon||'🏡'; topCat='spaces'; hasSelection=true;
+  } else if (openTopCat === 'things') {
+    if (!openThingsSub) { toast('Choose a type first'); return; }
+    if (!selectedThingChips.size) { toast('Select at least one option'); return; }
+    const sub = THINGS_SUBS.find(s=>s.id===openThingsSub);
+    label = [...selectedThingChips].join(' + ');
+    subCat=openThingsSub; subLabel=sub?.label||'Things'; subIcon=sub?.icon||'📦'; topCat='things'; hasSelection=true;
+  } else if (openTopCat === 'experiences') {
+    if (!openExpSub) { toast('Choose an experience type first'); return; }
+    if (!selectedExpChips.size) { toast('Select at least one option'); return; }
+    const sub = EXPERIENCES_SUBS.find(s=>s.id===openExpSub);
+    label = [...selectedExpChips].join(' + ');
+    subCat=openExpSub; subLabel=sub?.label||'Experiences'; subIcon=sub?.icon||'✨'; topCat='experiences'; hasSelection=true;
+  }
+
+  if (!hasSelection) return;
+
+  items.push({ id: uid(), topCat, subCat, subLabel, subIcon, title: label, note, done: false });
+  clearAll(); noteText = '';
+  save(); render(); updateFAB();
+  toast('Added to your list');
+}
+
+// ─── FAB ───────────────────────────────────────────────────────────────────
+function updateFAB() {
+  setTimeout(() => {
+    const fab   = qs('#wishlist-fab');
+    const badge = qs('#fab-badge');
+    if (!fab || !badge) return;
+    fab.style.display = items.length ? 'flex' : 'none';
+    badge.textContent = items.length;
+  }, 0);
+}
+
+// ─── Drawer ────────────────────────────────────────────────────────────────
+function openDrawer() {
+  renderDrawer();
+  qs('#drawer').classList.add('open');
+  qs('#drawer-overlay').classList.add('open');
+}
+
+function closeDrawer() {
+  qs('#drawer').classList.remove('open');
+  qs('#drawer-overlay').classList.remove('open');
+}
+
+function renderDrawer() {
+  const active = items.filter(i=>!i.done);
+  const done   = items.filter(i=> i.done);
+  const total  = items.length;
+  const pct    = total ? Math.round((done.length/total)*100) : 0;
+
+  let html = `
+    <div class="drawer-handle"></div>
+    <div class="drawer-header">
+      <div class="drawer-title">My wishlist (${total})</div>
+      <button class="btn-close" onclick="closeDrawer()">✕</button>
+    </div>`;
+
+  if (total) {
+    html += `
+      <div class="progress-wrap">
+        <div class="progress-labels"><span>${done.length} received</span><span>${active.length} still needed</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      </div>
+      ${active.map(it=>wishItemHTML(it,'builder')).join('')}
+      ${done.length ? `<div class="eyebrow" style="margin:20px 0 10px">Received</div>${done.map(it=>wishItemHTML(it,'builder')).join('')}` : ''}
+      <button class="btn-primary" onclick="closeDrawer();goToReview()">Review + generate shareable link</button>`;
+  } else {
+    html += `<div class="empty">Nothing on your list yet.</div>`;
+  }
+
+  if (shareURL) {
+    html += `
+      <div class="share-box">
+        <p>Share this link with anyone who wants to show up for you:</p>
+        <div class="share-url">${esc(shareURL)}</div>
+        <button class="btn-primary" onclick="copyURL()">Copy link</button>
+      </div>`;
+  }
+
+  qs('#drawer').innerHTML = html;
+}
+
+function goToReview() { mode = 'review'; render(); }
+function goToBuilder() { mode = 'builder'; render(); }
+
+function genShare() {
+  try {
+    const json    = JSON.stringify({ name: myName, items, created: new Date().toISOString() });
+    const encoded = btoa(unescape(encodeURIComponent(json)));
+    shareURL = location.origin + location.pathname + '?list=' + encoded;
+  } catch(e) {
+    toast('Could not generate link - try removing emoji from notes');
+    return;
+  }
+  mode = 'builder';
+  render();
+  setTimeout(() => openDrawer(), 50);
+}
+
+function copyURL() { navigator.clipboard.writeText(shareURL).then(() => toast('Link copied')); }
+function updateName() { myName = (qs('#b-name')||{}).value; save(); }
+
+// ─── Item actions ──────────────────────────────────────────────────────────
+function removeItem(id) { items = items.filter(i=>i.id!==id); save(); updateFAB(); renderDrawer(); }
+
+function toggleDone(id) {
+  if (mode === 'builder') {
+    const it = items.find(i=>i.id===id);
+    if (!it) return;
+    it.done = !it.done;
+    save(); updateFAB(); renderDrawer();
+    toast(it.done ? 'Marked as received' : 'Marked as still needed');
+  } else {
+    const sid = String(id);
+    viewFulfilled.has(sid) ? viewFulfilled.delete(sid) : (viewFulfilled.add(sid), toast('Marked as gifted - thank you'));
+    saveViewer(); render();
+  }
+}
+
+function wishItemHTML(it, ctx) {
+  const isDone = ctx === 'builder' ? it.done : viewFulfilled.has(String(it.id));
+  const idRef  = JSON.stringify(it.id);
+  return `
+    <div class="wish-item${isDone?' done':''}">
+      <div class="wish-icon">${it.subIcon}</div>
+      <div class="wish-body">
+        <div class="wish-cat">${it.subLabel}</div>
+        <div class="wish-title">${esc(it.title)}</div>
+        ${it.note ? `<div class="wish-note">${esc(it.note)}</div>` : ''}
+        ${isDone ? `<div class="wish-badge">${ctx==='builder'?'Received':'Gifted'}</div>` : ''}
+      </div>
+      <div class="wish-actions">
+        ${isDone
+          ? `<button class="btn-sm" onclick="toggleDone(${idRef})">Undo</button>`
+          : `<button class="btn-sm receive" onclick="toggleDone(${idRef})">${ctx==='builder'?'Mark received':'I\'ll gift this'}</button>`}
+        ${ctx==='builder' ? `<button class="btn-sm remove" onclick="removeItem(${idRef})">Remove</button>` : ''}
+      </div>
+    </div>`;
+}
+
+// ─── Render ────────────────────────────────────────────────────────────────
+function render() {
+  qs('#app').innerHTML =
+    mode === 'viewer' ? viewerHTML() :
+    mode === 'review' ? reviewHTML() :
+                        builderHTML();
+  updateFAB();
+}
+
+// ─── Builder ───────────────────────────────────────────────────────────────
+function builderHTML() {
+  return `
+    <div class="eyebrow">Appear Network</div>
+    <h1>Your appreciation list</h1>
+    <p class="subtitle">Tell people how they can show up for you.</p>
+    <div class="field">
+      <label>Your ID</label>
+      <input type="text" id="b-name" value="${esc(myName)}" placeholder="Your Appear Network ID" oninput="updateName()">
+    </div>
+    <hr>
+    <div class="eyebrow" style="margin-bottom:12px">How would you like to receive appreciation?</div>
+    <div class="top-tabs">
+      <button class="top-tab${openTopCat==='people'?' active':''}"      onclick="setTopCat('people')">👥 People</button>
+      <button class="top-tab${openTopCat==='spaces'?' active':''}"      onclick="setTopCat('spaces')">🏡 Spaces</button>
+      <button class="top-tab${openTopCat==='things'?' active':''}"      onclick="setTopCat('things')">📦 Things</button>
+      <button class="top-tab${openTopCat==='experiences'?' active':''}" onclick="setTopCat('experiences')">✨ Experiences</button>
+    </div>
+    ${openTopCat==='people'      ? peopleSection()      : ''}
+    ${openTopCat==='spaces'      ? spacesSection()      : ''}
+    ${openTopCat==='things'      ? thingsSection()      : ''}
+    ${openTopCat==='experiences' ? experiencesSection() : ''}
+  `;
+}
+
+// ─── Helpers: chip row + other + add area ──────────────────────────────────
+function chipRow(chips, type, selectedSet) {
+  const rows = chips.map(p =>
+    `<button class="chip${selectedSet.has(p)?' selected':''}" data-chip="${type}" data-val="${esc(p)}">${esc(p)}</button>`
+  ).join('');
+  const otherOpen = window['other'+cap(type)+'Open'];
+  const otherText = window['other'+cap(type)+'Text'] || '';
+  const otherBtn  = `<button class="chip other-chip${otherOpen?' selected':''}" onclick="toggleOther('${type}')">${otherOpen?'✕ Other':'+ Other'}</button>`;
+  const otherInput = otherOpen ? `
+    <div class="other-input-wrap">
+      <input type="text" id="other-input-${type}" value="${esc(otherText)}" placeholder="Have something specific in mind? (optional)"
+        oninput="updateOther('${type}',this.value)" onkeydown="if(event.key==='Enter')addOther('${type}')">
+      <button class="btn-other-add" onclick="addOther('${type}')">Add</button>
+    </div>` : '';
+  return `<div class="chip-row">${rows}${otherBtn}</div>${otherInput}`;
+}
+
+function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+function addArea(hasSelection) {
+  return hasSelection ? `
+    <div class="add-area">
+      <div class="add-area-label">Elaborate on your wish here (optional)</div>
+      <input type="text" value="${esc(noteText)}" placeholder="Add a note or link" oninput="updateNote(this.value)" onkeydown="if(event.key==='Enter')addToList()">
+      <button class="btn-add" onclick="addToList()">Add to list</button>
+    </div>` : '';
+}
+
+// ─── People ────────────────────────────────────────────────────────────────
+function peopleSection() {
+  let html = `<div class="drill-section">
+    <div class="drill-label">👥 People</div>
+    <div class="sub-tabs">
+      <button class="sub-tab${openPeopleSub==='skills'?   ' active':''}" onclick="setPeopleSub('skills')">🛠 Share skills</button>
+      <button class="sub-tab${openPeopleSub==='words'?    ' active':''}" onclick="setPeopleSub('words')">💬 Share words</button>
+      <button class="sub-tab${openPeopleSub==='send-care'?' active':''}" onclick="setPeopleSub('send-care')">🌿 Send care</button>
+    </div>`;
+
+  if (openPeopleSub === 'skills') {
+    const otherOpen = otherSkillOpen;
+    const otherText = otherSkillText;
+    html += `<div class="drill-sub">
+      <div class="drill-sub-label">🛠 Share skills</div>
+      <div class="drill-sub-desc">Select one or more skills</div>
+      <div class="skills-grid">
+        ${SKILLS.map(s=>`<button class="skill-chip${selectedSkills.has(s)?' selected':''}" data-chip="skill" data-val="${esc(s)}">${esc(s)}</button>`).join('')}
+        <button class="skill-chip other-chip${otherOpen?' selected':''}" onclick="toggleOther('skill')">${otherOpen?'✕ Other':'+ Other'}</button>
+      </div>
+      ${otherOpen ? `<div class="other-input-wrap"><input type="text" id="other-input-skill" value="${esc(otherText)}" placeholder="Have something specific in mind? (optional)" oninput="updateOther('skill',this.value)" onkeydown="if(event.key==='Enter')addOther('skill')"><button class="btn-other-add" onclick="addOther('skill')">Add</button></div>` : ''}
+      ${addArea(selectedSkills.size > 0)}
+    </div>`;
+  }
+
+  if (openPeopleSub === 'words') {
+    html += `<div class="drill-sub">
+      <div class="drill-sub-label">💬 Share words</div>
+      <div class="drill-sub-desc">Select one or more</div>
+      ${chipRow(WORDS_SUBS.map(w=>w.id), 'words', selectedWordsSubs)}
+      ${selectedWordsSubs.has('intro') ? `<div class="drill-sub-desc" style="margin-top:8px">Use the note field below to name who you're looking for.</div>` : ''}
+      ${addArea(selectedWordsSubs.size > 0)}
+    </div>`;
+  }
+
+  if (openPeopleSub === 'send-care') {
+    html += `<div class="drill-sub">
+      <div class="drill-sub-label">🌿 Send care</div>
+      <div class="drill-sub-desc">A gift that tends to me</div>
+      ${chipRow(CARE_PRESETS, 'care', selectedCareChips)}
+      ${addArea(selectedCareChips.size > 0)}
+    </div>`;
+  }
+
+  html += `</div>`;
+  return html;
+}
+
+// ─── Spaces ────────────────────────────────────────────────────────────────
+function spacesSection() {
+  let html = `<div class="drill-section">
+    <div class="drill-label">🏡 Spaces</div>
+    <div class="sub-tabs">
+      ${SPACES_SUBS.map(s=>`<button class="sub-tab${openSpacesSub===s.id?' active':''}" onclick="setSpacesSub('${s.id}')">${s.icon} ${s.label}</button>`).join('')}
+    </div>`;
+  const sub = SPACES_SUBS.find(s=>s.id===openSpacesSub);
+  if (sub) {
+    html += `<div class="drill-sub">
+      <div class="drill-sub-label">${sub.icon} ${sub.label}</div>
+      <div class="drill-sub-desc">${sub.desc}</div>
+      ${chipRow(sub.presets, 'space', selectedSpaceChips)}
+      ${addArea(selectedSpaceChips.size > 0)}
+    </div>`;
+  }
+  html += `</div>`;
+  return html;
+}
+
+// ─── Things ────────────────────────────────────────────────────────────────
+function thingsSection() {
+  let html = `<div class="drill-section">
+    <div class="drill-label">📦 Things</div>
+    <div class="sub-tabs">
+      ${THINGS_SUBS.map(s=>`<button class="sub-tab${openThingsSub===s.id?' active':''}" onclick="setThingsSub('${s.id}')">${s.icon} ${s.label}</button>`).join('')}
+    </div>`;
+  const sub = THINGS_SUBS.find(s=>s.id===openThingsSub);
+  if (sub) {
+    html += `<div class="drill-sub">
+      <div class="drill-sub-label">${sub.icon} ${sub.label}</div>
+      <div class="drill-sub-desc">${sub.desc}</div>
+      ${chipRow(sub.presets, 'thing', selectedThingChips)}
+      ${addArea(selectedThingChips.size > 0)}
+    </div>`;
+  }
+  html += `</div>`;
+  return html;
+}
+
+// ─── Experiences ───────────────────────────────────────────────────────────
+function experiencesSection() {
+  let html = `<div class="drill-section">
+    <div class="drill-label">✨ Experiences</div>
+    <div class="sub-tabs">
+      ${EXPERIENCES_SUBS.map(s=>`<button class="sub-tab${openExpSub===s.id?' active':''}" onclick="setExpSub('${s.id}')">${s.icon} ${s.label}</button>`).join('')}
+    </div>`;
+  const sub = EXPERIENCES_SUBS.find(s=>s.id===openExpSub);
+  if (sub) {
+    html += `<div class="drill-sub">
+      <div class="drill-sub-label">${sub.icon} ${sub.label}</div>
+      <div class="drill-sub-desc">${sub.desc}</div>
+      ${chipRow(sub.presets, 'exp', selectedExpChips)}
+      ${addArea(selectedExpChips.size > 0)}
+    </div>`;
+  }
+  html += `</div>`;
+  return html;
+}
+
+// ─── Review ────────────────────────────────────────────────────────────────
+function reviewHTML() {
+  const grouped = {};
+  for (const it of items) {
+    if (!grouped[it.subCat]) grouped[it.subCat] = { label: it.subLabel, icon: it.subIcon, items:[] };
+    grouped[it.subCat].items.push(it);
+  }
+  const catCount = Object.keys(grouped).length;
+  const total    = items.length;
+  return `
+    <div class="eyebrow">Review your list</div>
+    <div class="review-header">
+      <div><h2>Looks good?</h2><p class="review-count">${total} item${total!==1?'s':''} across ${catCount} categor${catCount!==1?'ies':'y'}</p></div>
+      <button class="btn-edit" onclick="goToBuilder()">← Edit</button>
+    </div>
+    ${Object.values(grouped).map(g=>`
+      <div class="review-group">
+        <div class="review-group-label">${g.icon} ${g.label}</div>
+        <div class="review-chips">
+          ${g.items.map(it=>`<div class="review-chip">${esc(it.title)}${it.note?`<span style="color:var(--muted);font-size:12px;margin-left:6px">· ${esc(it.note)}</span>`:''}</div>`).join('')}
+        </div>
+      </div>`).join('')}
+    <hr>
+    <button class="btn-primary" onclick="genShare()">Generate shareable link</button>`;
+}
+
+// ─── Viewer ────────────────────────────────────────────────────────────────
+function viewerHTML() {
+  const vItems = viewerData.items || [];
+  const name   = viewerData.name  || 'Someone';
+  const active = vItems.filter(i=>!viewFulfilled.has(String(i.id)));
+  const done   = vItems.filter(i=> viewFulfilled.has(String(i.id)));
+  const pct    = vItems.length ? Math.round((done.length/vItems.length)*100) : 0;
+  return `
+    <div class="eyebrow" style="text-align:center">Appear Network</div>
+    <h1 style="text-align:center;margin-bottom:6px">${esc(name)}'s appreciation list</h1>
+    <p class="subtitle" style="text-align:center">Ways to show up for ${esc(name)}.</p>
+    ${vItems.length ? `<div class="progress-wrap"><div class="progress-labels"><span>${done.length} gifted</span><span>${active.length} still open</span></div><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div></div>` : ''}
+    ${active.length ? `<div class="eyebrow" style="margin-bottom:12px">Still needed</div>${active.map(it=>wishItemHTML(it,'viewer')).join('')}` : `<div class="empty">Everything has been gifted. ${esc(name)} is well supported right now.</div>`}
+    ${done.length ? `<div class="eyebrow" style="margin:24px 0 12px">Already gifted</div>${done.map(it=>wishItemHTML(it,'viewer')).join('')}` : ''}
+    <hr>
+    <p style="font-size:13px;color:var(--muted);text-align:center;margin-bottom:14px">Want to create your own list?</p>
+    <a href="${location.origin + location.pathname}" class="btn-outline">Create my list</a>`;
+}
+
+// ─── Helpers ───────────────────────────────────────────────────────────────
+function qs(sel)  { return document.querySelector(sel); }
+function uid()    { return Date.now() + '_' + Math.random().toString(36).slice(2); }
+function esc(s)   { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function toast(msg) {
+  const el = qs('#toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 2400);
+}
+</script>
+
+<!-- v1.8.1 -->
+</body>
+</html>
