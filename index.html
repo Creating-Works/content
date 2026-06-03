@@ -1,1 +1,1275 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- V18 | index.html
+  - Fixed broken comment showing as visible text on page
+
+
+-->
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Circulate - Map Your Flow</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%25' stop-color='%2310B981'/><stop offset='33%25' stop-color='%233B82F6'/><stop offset='66%25' stop-color='%238B5CF6'/><stop offset='100%25' stop-color='%23F43F5E'/></linearGradient></defs><circle cx='18' cy='18' r='16' fill='transparent' stroke='url(%23g)' stroke-width='3'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:       #0B0F1A;
+      --surface:  #141924;
+      --surface2: #1C2333;
+      --border:   #252D3D;
+      --text:     #FFFFFF;
+      --muted:    #94A3B8;
+      --green:    #059669;
+      --blue:     #3B82F6;
+      --purple:   #8B5CF6;
+      --pink:     #F43F5E;
+      --grad: linear-gradient(90deg, #10B981, #3B82F6, #8B5CF6, #F43F5E);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ---- NAV ---- */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      height: 64px;
+      background: rgba(11,15,26,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      position: relative;
+    }
+    .logo-ring {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2.5px solid transparent;
+      background: linear-gradient(var(--bg), var(--bg)) padding-box,
+                  linear-gradient(135deg, #10B981 0%, #3B82F6 100%) border-box;
+    }
+    .logo-arrows {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      animation: spin 6s linear infinite;
+    }
+    @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+    .nav-wordmark {
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-cta {
+      background: var(--text);
+      color: var(--bg);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      border: none;
+      border-radius: 40px;
+      padding: 10px 20px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.85; }
+
+    /* ---- HERO ---- */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(16,185,129,0.12);
+      border: 1px solid rgba(16,185,129,0.3);
+      border-radius: 40px;
+      padding: 6px 16px;
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--green);
+      margin-bottom: 40px;
+    }
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse 2s ease infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+    .hero h1 {
+      font-size: clamp(48px, 8vw, 88px);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      margin-bottom: 8px;
+    }
+    .hero h1 .grad-text {
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-sub {
+      max-width: 620px;
+      font-size: 18px;
+      font-weight: 300;
+      color: var(--muted);
+      line-height: 1.7;
+      margin: 32px auto 48px;
+    }
+    .hero-sub a { color: var(--blue); text-decoration: none; border-bottom: 1px solid rgba(59,130,246,0.4); }
+    .hero-sub a:hover { border-color: var(--blue); }
+    .hero-btns {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .btn-primary {
+      background: var(--green);
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 28px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn-primary:hover { background: #047857; transform: translateY(-1px); }
+    .btn-outline {
+      background: transparent;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 400;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 28px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: border-color 0.2s;
+    }
+    .btn-outline:hover { border-color: var(--muted); }
+
+    /* ---- SECTION WRAPPER ---- */
+    .section { padding: 56px 24px; }
+    .section-inner { max-width: 1100px; margin: 0 auto; }
+    .circle-section .section-label { color: #1F699E; }
+    .section-label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .section-title {
+      font-size: clamp(28px, 4vw, 44px);
+      font-weight: 700;
+      text-align: center;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+    .section-sub {
+      font-size: 17px;
+      color: var(--muted);
+      text-align: center;
+      max-width: 600px;
+      margin: 0 auto 56px;
+      line-height: 1.7;
+    }
+
+    /* ---- CIRCLE OF MUTUAL DEPENDENCE ---- */
+    .circle-section {
+      background: #FFFFFF;
+      border-radius: 24px;
+      padding: 56px 40px;
+      margin: 0 24px;
+    }
+    .circle-scroll {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      scrollbar-width: none;
+    }
+    .circle-scroll::-webkit-scrollbar { display: none; }
+    .circle-card {
+      background: #FFFFFF;
+      border: 1.5px solid #1A2E42;
+      border-radius: 16px;
+      padding: 28px 24px;
+      min-width: 150px;
+      max-width: 180px;
+      flex: 1;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .circle-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 22px;
+    }
+    .circle-card h3 {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: #0F172A;
+    }
+    .circle-card p {
+      font-size: 12px;
+      color: #475569;
+    }
+    .circle-arrow {
+      color: #6A8FAF;
+      font-size: 20px;
+      padding: 0 12px;
+      flex-shrink: 0;
+    }
+
+    /* ---- PRODUCT CARDS ---- */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .product-card {
+      background: #FFFFFF;
+      border: 1px solid #E8EEF4;
+      border-radius: 20px;
+      padding: 36px 28px;
+      display: flex;
+      flex-direction: column;
+    }
+    .product-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-bottom: 24px;
+    }
+    .product-card h3 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #1A2E42;
+    }
+    .product-card p {
+      font-size: 15px;
+      color: #4A6080;
+      line-height: 1.65;
+      flex: 1;
+      margin-bottom: 28px;
+    }
+    .product-link {
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: gap 0.2s;
+    }
+    .product-link:hover { gap: 10px; }
+
+    /* ---- MULTI-STEP FORM ---- */
+    .form-section { padding: 56px 24px; }
+    .form-inner { max-width: 780px; margin: 0 auto; }
+    .form-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 4px;
+      background: var(--border);
+      position: relative;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--grad);
+      background-size: 400% 100%;
+      transition: width 0.4s ease;
+    }
+    .form-step {
+      padding: 40px;
+      display: none;
+    }
+    .form-step.active { display: block; }
+    .step-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .step-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .step-badge {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .step-badge.s1 { background: rgba(16,185,129,0.2); color: var(--green); }
+    .step-badge.s2 { background: rgba(59,130,246,0.2); color: var(--blue); }
+    .step-badge.s3 { background: rgba(244,63,94,0.2); color: var(--pink); }
+    .step-badge.s4 { background: rgba(139,92,246,0.2); color: var(--purple); }
+    .step-title {
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .step-count {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .form-q {
+      margin-bottom: 28px;
+    }
+    .form-q label {
+      display: block;
+      font-size: 16px;
+      font-weight: 400;
+      color: var(--text);
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+    .radio-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 0;
+    }
+    .radio-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 18px;
+      cursor: pointer;
+      flex: 1;
+      min-width: 160px;
+      transition: border-color 0.2s;
+    }
+    .radio-option:hover { border-color: var(--muted); }
+    .radio-option.selected { border-color: var(--green); }
+    .radio-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid var(--muted);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.2s;
+    }
+    .radio-option.selected .radio-dot {
+      border-color: var(--green);
+      background: var(--green);
+    }
+    .radio-option.selected .radio-dot::after {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: white;
+    }
+    .radio-option span { font-size: 14px; font-weight: 300; }
+    textarea.form-input, input.form-input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 300;
+      color: var(--text);
+      resize: vertical;
+      transition: border-color 0.2s;
+      line-height: 1.6;
+    }
+    textarea.form-input { min-height: 100px; }
+    textarea.form-input:focus, input.form-input:focus {
+      outline: none;
+      border-color: var(--green);
+    }
+    textarea.form-input::placeholder, input.form-input::placeholder {
+      color: var(--muted);
+    }
+    .step-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 36px;
+    }
+    .btn-back {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 400;
+      padding: 10px 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: border-color 0.2s;
+    }
+    .btn-back:hover { border-color: var(--muted); color: var(--text); }
+    .btn-next {
+      background: var(--green);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      padding: 12px 24px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.2s;
+    }
+    .btn-next:hover { background: #047857; }
+    .btn-submit {
+      background: transparent;
+      border: 1px solid var(--text);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      padding: 12px 24px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.2s, color 0.2s;
+    }
+    .btn-submit:hover { background: var(--text); color: var(--bg); }
+    .checkbox-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin: 16px 0;
+    }
+    .checkbox-row input[type="checkbox"] {
+      margin-top: 3px;
+      accent-color: var(--green);
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+    .checkbox-row label {
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 300;
+      line-height: 1.5;
+    }
+
+    /* ---- ETHOS ---- */
+    .ethos-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: start;
+    }
+    .ethos-badge {
+      display: inline-block;
+      background: rgba(244,63,94,0.15);
+      color: var(--pink);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+    .ethos-grid h2 {
+      font-size: clamp(28px, 4vw, 40px);
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+    }
+    .ethos-grid p {
+      font-size: 16px;
+      color: var(--muted);
+      line-height: 1.75;
+      margin-bottom: 20px;
+    }
+    .quote-block {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+    }
+    .quote-block p {
+      font-size: 16px;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.7;
+      margin-bottom: 16px;
+    }
+    .quote-attr {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .quote-attr strong { font-size: 14px; font-weight: 700; color: var(--text); }
+    .quote-attr span { font-size: 13px; color: var(--muted); }
+    .attr-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--muted); }
+    .founder-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 36px;
+      text-align: center;
+    }
+    .founder-photo {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--green);
+      margin: 0 auto 16px;
+      display: block;
+    }
+    .founder-name {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .founder-title {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+    .founder-points {
+      list-style: none;
+      text-align: left;
+    }
+    .founder-points li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--muted);
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .founder-points li:last-child { border-bottom: none; }
+    .check { color: var(--green); font-size: 16px; flex-shrink: 0; }
+
+    /* ---- FOOTER ---- */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .footer-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .footer-wordmark {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .footer-sep { color: var(--border); }
+    .footer-tagline { font-size: 13px; color: var(--muted); }
+    .footer-links { display: flex; gap: 24px; }
+    .footer-links a { font-size: 13px; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--text); }
+    .footer-copy { font-size: 12px; color: var(--muted); }
+
+    /* ---- RESPONSIVE ---- */
+    @media (max-width: 768px) {
+      nav { padding: 0 20px; }
+      .nav-links { display: none; }
+      .products-grid { grid-template-columns: 1fr; }
+      .ethos-grid { grid-template-columns: 1fr; }
+      .form-step { padding: 28px 20px; }
+      .circle-section { margin: 0; padding: 40px 20px; }
+      footer { flex-direction: column; align-items: flex-start; }
+      .footer-links { flex-wrap: wrap; gap: 16px; }
+    }
+
+    /* ---- QA POPUP ---- */
+    .qa-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .qa-overlay.active { display: flex; }
+    .qa-modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 620px;
+      max-height: 80vh;
+      overflow-y: auto;
+      padding: 36px;
+      position: relative;
+    }
+    .qa-modal h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .qa-hint {
+      font-size: 13px;
+      font-weight: 300;
+      color: var(--muted);
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+    .qa-item { margin-bottom: 20px; }
+    .qa-q {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .qa-a {
+      font-size: 15px;
+      font-weight: 300;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .qa-btn-row { display:flex; gap:12px; margin-top:24px; }
+    .qa-copy-btn {
+      flex:1;
+      background: linear-gradient(135deg, #10B981, #3B82F6, #8B5CF6);
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      text-decoration:none;
+    }
+    .qa-copy-btn:hover { opacity: 0.88; }
+    .qa-book-btn {
+      flex:1;
+      background: #FFFFFF;
+      color: #0B0F1A;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      border: 1.5px solid #E2E8F0;
+      border-radius: 8px;
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      text-decoration:none;
+    }
+    .qa-book-btn:hover { background: #F1F5F9; }
+    .qa-close-btn {
+      width: 100%;
+      background: transparent;
+      color: var(--muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 400;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 20px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: border-color 0.2s;
+    }
+    .qa-btn-row { display:flex; gap:12px; margin-top:24px; }
+    .qa-book-btn {
+      flex:1;
+      background: #FFFFFF;
+      color: #0B0F1A;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      border: 1.5px solid #E2E8F0;
+      border-radius: 8px;
+      padding: 12px 16px;
+      cursor: pointer;
+      text-decoration: none;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      transition: background 0.2s;
+    }
+    .qa-book-btn:hover { background: #F1F5F9; }
+    .qa-copy-btn { flex:1; }
+    .qa-close-btn:hover { border-color: var(--muted); }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="/" class="nav-logo">
+      <div class="logo-icon">
+        <div class="logo-ring"></div>
+        <svg class="logo-arrows" width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <!-- top: curved right arrow -->
+          <path d="M3.5 7 Q3.5 3.5 7 3.5 H11" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+          <path d="M9.5 2 L11.5 3.5 L9.5 5" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- right: curved down arrow -->
+          <path d="M11 3.5 Q14.5 3.5 14.5 7 V11" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+          <path d="M13 9.5 L14.5 11.5 L16 9.5" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- bottom: curved left arrow -->
+          <path d="M14.5 11 Q14.5 14.5 11 14.5 H7" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+          <path d="M8.5 13 L6.5 14.5 L8.5 16" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- left: curved up arrow -->
+          <path d="M7 14.5 Q3.5 14.5 3.5 11 V7" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+          <path d="M5 8.5 L3.5 6.5 L2 8.5" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <span class="nav-wordmark">circulate</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#map">Circulation map</a></li>
+      <li><a href="#ethos">Our ethos</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" style="padding-bottom:0;">
+    <h1>One profile.<br><span class="grad-text">Three tools to circulate.</span></h1>
+    <div style="display:flex;justify-content:center;margin:24px 0 0;">
+      <div class="hero-badge">
+        <div class="badge-dot"></div>
+        700+ people already circulating
+      </div>
+    </div>
+    <div style="position:relative;width:100%;max-width:1060px;margin:28px auto 0;background:#0D1117;border-radius:20px;overflow:hidden;padding:28px 28px 0;">
+      <img src="https://raw.githubusercontent.com/Circulate-Network/circulate/refs/heads/main/images/Infographic%20for%20Circulate%20with%20Jessie%20Upp.png"
+        alt="Circulate infographic"
+        style="width:100%;display:block;border-radius:12px 12px 0 0;">
+    </div>
+    <p class="hero-sub" style="max-width:700px;margin:36px auto 0;text-align:center;">
+      The wellness coach needs an accountant. The accountant needs a mentor. The mentor needs a doctor. The doctor needs an architect. The architect needs a wellness coach. They're all <a href="#map">1 or 2 degrees</a> from each other - and most of them don't know it yet.
+    </p>
+    <div class="hero-btns" style="margin-top:32px;">
+      <a href="#form" class="btn-primary">Map your flow →</a>
+    </div>
+  </section>
+
+ 
+
+
+  <!-- PRODUCT CARDS -->
+  <section class="section" id="ecosystem">
+    <div class="section-inner">
+      <p class="section-label">One profile, start anywhere</p>
+      <h2 class="section-title">Infrastructure for healthy circulation</h2>
+      <p class="section-sub">What you share in one place shapes what reaches you in all three.</p>
+      <div class="products-grid">
+        <div class="product-card">
+          <div class="product-icon" style="background:rgba(16,185,129,0.15);padding:0;overflow:hidden;"><img src="https://res.cloudinary.com/glide/image/fetch/f_auto,h_150,c_limit/https%3A%2F%2Ffirebasestorage.googleapis.com%2Fv0%2Fb%2Fglide-prod.appspot.com%2Fo%2Ficon-images%252Fanonymous-05255043-007d-48b6-84bf-b7f21cb2ac56.png%3Falt%3Dmedia%26token%3D227af714-e2d8-45df-958b-ff364f6fdc2f" alt="DayBalancer" style="width:100%;height:100%;object-fit:cover;"></div>
+          <h3>DayBalancer</h3>
+          <p>Start by exploring what you love, what you're good at, where you get your energy, and how to apply your skills to serve what is needed - all guided by your values. Healthy circulation of body and mind.</p>
+          <a href="https://app.daybalancer.com/" target="_blank" class="product-link" style="color:var(--green);">Launch DayBalancer ↗</a>
+        </div>
+        <div class="product-card">
+          <div class="product-icon" style="background:rgba(59,130,246,0.15);padding:0;overflow:hidden;"><img src="https://res.cloudinary.com/glide/image/fetch/f_auto,h_150,c_limit/https%3A%2F%2Ffirebasestorage.googleapis.com%2Fv0%2Fb%2Fglide-prod.appspot.com%2Fo%2Ficon-images%252Fanonymous-e3926802-d398-43a2-a0cc-48dfb527f428.png%3Falt%3Dmedia%26token%3Db1489e31-7a71-43de-9feb-3d927592d4a9" alt="Appear Network" style="width:100%;height:100%;object-fit:cover;"></div>
+          <h3>Appear Network</h3>
+          <p>Everyone is accessible. Show up as yourself. Compatible people and opportunities surface within your groups and network. A matching space for your network where people give and receive based on what they have and what they need.</p>
+          <a href="https://appear.network/" target="_blank" class="product-link" style="color:var(--blue);">Launch Appear ↗</a>
+        </div>
+        <div class="product-card">
+          <div class="product-icon" style="background:rgba(244,63,94,0.15);padding:0;overflow:hidden;"><img src="https://res.cloudinary.com/glide/image/fetch/f_auto,h_150,c_limit/https%3A%2F%2Ffirebasestorage.googleapis.com%2Fv0%2Fb%2Fglide-prod.appspot.com%2Fo%2Ficon-images%252Fanonymous-3cb9285e-93c0-4086-939b-1964597ed61e.png%3Falt%3Dmedia%26token%3Da1b97cec-85be-4978-8595-4d7e1393c050" alt="2Gather" style="width:100%;height:100%;object-fit:cover;"></div>
+          <h3>2Gather</h3>
+          <p>Member-led gatherings in person and online where people create community impact together. For people building communities, groups, and teams - AI for team intelligence helps build and sustain projects with the right people.</p>
+          <a href="https://2gather.network/" target="_blank" class="product-link" style="color:var(--pink);">Explore 2Gather ↗</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MULTI-STEP FORM -->
+  <section class="form-section" id="form">
+    <div class="form-inner">
+      <p class="section-label">Map your energy and blockages</p>
+      <h2 class="section-title" style="margin-bottom:12px;">Where do you circulate?</h2>
+      <p class="section-sub">Not sure where to begin? These questions help you begin where it serves you best.</p>
+
+      <div class="form-card">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress" style="width:25%;"></div>
+        </div>
+
+        <!-- STEP 1 -->
+        <div class="form-step active" id="step-1">
+          <div class="step-header">
+            <div class="step-left">
+              <div class="step-badge s1">1</div>
+              <span class="step-title">Tend to self</span>
+            </div>
+            <span class="step-count">1 of 4</span>
+          </div>
+
+          <div class="form-q">
+            <label>When did you last feel like your day was on your terms?</label>
+            <div class="radio-group" id="rg1">
+              <div class="radio-option" onclick="selectRadio('rg1',this,'Today or yesterday')">
+                <div class="radio-dot"></div><span>Today or yesterday</span>
+              </div>
+              <div class="radio-option" onclick="selectRadio('rg1',this,'Last week')">
+                <div class="radio-dot"></div><span>Last week</span>
+              </div>
+              <div class="radio-option" onclick="selectRadio('rg1',this,'Months ago or more')">
+                <div class="radio-dot"></div><span>Months ago or more</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-q">
+            <label>How would you be living your days if money wasn't a factor?</label>
+            <textarea class="form-input" id="q2" placeholder="e.g. More time outdoors, teaching, building things with my hands..."></textarea>
+          </div>
+
+          <div class="form-q">
+            <label>Can you name three things that reliably give you energy right now?</label>
+            <textarea class="form-input" id="q3" placeholder="e.g. Going for walks, swimming, pickleball..."></textarea>
+          </div>
+
+          <div class="step-nav">
+            <div></div>
+            <button class="btn-next" onclick="nextStep(1)">Next ⟶</button>
+          </div>
+        </div>
+
+        <!-- STEP 2 -->
+        <div class="form-step" id="step-2">
+          <div class="step-header">
+            <div class="step-left">
+              <div class="step-badge s2">2</div>
+              <span class="step-title">Tend to your network</span>
+            </div>
+            <span class="step-count">2 of 4</span>
+          </div>
+
+          <div class="form-q">
+            <label>When you need help, do you know who to call? And what do you do?</label>
+            <div class="radio-group" id="rg4">
+              <div class="radio-option" onclick="selectRadio('rg4',this,'I reach out right away')">
+                <div class="radio-dot"></div><span>I reach out right away</span>
+              </div>
+              <div class="radio-option" onclick="selectRadio('rg4',this,'I know who, but pause')">
+                <div class="radio-dot"></div><span>I know who, but pause</span>
+              </div>
+              <div class="radio-option" onclick="selectRadio('rg4',this,'Still figuring out who to reach')">
+                <div class="radio-dot"></div><span>Still figuring out who to reach</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-q">
+            <label>Is there someone in your life who needs what you're good at?</label>
+            <textarea class="form-input" id="q5" placeholder="e.g. My neighbor needs legal advice, a friend needs a website..."></textarea>
+          </div>
+
+          <div class="form-q">
+            <label>How often do you give or receive something that doesn't relate to money?</label>
+            <textarea class="form-input" id="q6" placeholder="e.g. Give feedback on a friend's project, share tools with a neighbor..."></textarea>
+          </div>
+
+          <div class="step-nav">
+            <button class="btn-back" onclick="prevStep(2)">← Back</button>
+            <button class="btn-next" onclick="nextStep(2)">Next ⟶</button>
+          </div>
+        </div>
+
+        <!-- STEP 3 -->
+        <div class="form-step" id="step-3">
+          <div class="step-header">
+            <div class="step-left">
+              <div class="step-badge s3">3</div>
+              <span class="step-title">Tend to community</span>
+            </div>
+            <span class="step-count">3 of 4</span>
+          </div>
+
+          <div class="form-q">
+            <label>Do you have a third place you call your community?</label>
+            <div class="radio-group" id="rg7">
+              <div class="radio-option" onclick="selectRadio('rg7',this,'Yes, I show up regularly')">
+                <div class="radio-dot"></div><span>Yes, I show up regularly</span>
+              </div>
+              <div class="radio-option" onclick="selectRadio('rg7',this,'I go but don\'t feel fully connected')">
+                <div class="radio-dot"></div><span>I go but don't feel fully connected</span>
+              </div>
+              <div class="radio-option" onclick="selectRadio('rg7',this,'Still looking')">
+                <div class="radio-dot"></div><span>Still looking</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-q">
+            <label>Do you have a small group of people you show up for regularly that also gives back?</label>
+            <textarea class="form-input" id="q8" placeholder="e.g. A book club, running group, professional community..."></textarea>
+          </div>
+
+          <div class="form-q">
+            <label>Do you have a local community project that you're inspired by right now?</label>
+            <textarea class="form-input" id="q9" placeholder="e.g. Community garden, skill swap, local co-op..."></textarea>
+          </div>
+
+          <div class="step-nav">
+            <button class="btn-back" onclick="prevStep(3)">← Back</button>
+            <button class="btn-next" onclick="nextStep(3)">Next ⟶</button>
+          </div>
+        </div>
+
+        <!-- STEP 4 -->
+        <div class="form-step" id="step-4">
+          <div class="step-header">
+            <div class="step-left">
+              <div class="step-badge s4">4</div>
+              <span class="step-title">Blockage to circulation</span>
+            </div>
+            <span class="step-count">4 of 4</span>
+          </div>
+
+          <div class="form-q">
+            <label>Where does life feel stuck right now - in yourself, in your relationships, or in something you're trying to build?</label>
+            <textarea class="form-input" id="q10" style="min-height:120px;" placeholder="Describe what's sitting still, in your body, your work, or your community..."></textarea>
+          </div>
+
+          <div class="form-q">
+            <label style="font-size:15px; color:var(--muted); margin-bottom:10px;">Your email address</label>
+            <input type="email" class="form-input" id="user-email" placeholder="you@example.com">
+          </div>
+
+          <div class="checkbox-row">
+            <input type="checkbox" id="send-copy" checked>
+            <label for="send-copy">Email a copy to Jessie Upp - she will personally read it and reach out about next steps</label>
+          </div>
+
+          <div class="step-nav">
+            <button class="btn-back" onclick="prevStep(4)">← Back</button>
+            <button class="btn-submit" onclick="submitForm()">Send my answers ↗</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAP -->
+  <section class="section" id="map" style="padding-top:48px;padding-bottom:0;">
+    <div class="section-inner">
+      <h2 style="font-size:clamp(28px,4vw,40px);font-weight:700;letter-spacing:-0.02em;margin-bottom:16px;">Circulation map</h2>
+      <p style="font-size:16px;font-weight:300;color:var(--muted);margin-bottom:32px;max-width:600px;line-height:1.7;">See how people, skills, and needs connect across the network.</p>
+      <div style="position:relative;width:100%;padding-bottom:56.25%;height:0;border-radius:12px;overflow:hidden;">
+        <iframe src="https://embed.kumu.io/fa27b47160d3ad0d6f5f3c4759ff692f"
+          style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;"
+          allowfullscreen></iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- ETHOS -->
+  <section class="section" id="ethos">
+    <div class="section-inner">
+      <div class="ethos-grid">
+        <div>
+          <span class="ethos-badge">Co-creator ethos</span>
+          <h2>The vision behind Circulate</h2>
+          <p>Money moves between people, but so does time, skill, care, and presence. What circulates - starting in the body, growing into groups, spreading through communities - is how we measure success.</p>
+          <div class="quote-block">
+            <p>"With the help of others, this is what I'm building toward: infrastructure where everyone is accessible, and compatible people find each other based on what they have and what they need."</p>
+            <div class="quote-attr">
+              <strong>Jessie Upp</strong>
+              <div class="attr-dot"></div>
+              <span>Founding Co-Creator</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="founder-card">
+            <img src="https://images.squarespace-cdn.com/content/61737ed17b50983cebb2dcc2/1779563823155-46R330FG6ZYQRKV4EC5X/jessie+upp.jpg?content-type=image%2Fjpeg"
+                 alt="Jessie Upp" class="founder-photo">
+            <div class="founder-name"><a href="https://appear.network/dl/page/s/e13594/r/w.hssQR.Q7CnpNDnVJ6DwQ" target="_blank" style="color:var(--text);text-decoration:none;">Jessie Upp</a></div>
+            <div class="founder-title">Founding Co-Creator</div>
+            <ul class="founder-points">
+              <li><span class="check">✓</span> One profile across all three tools</li>
+              <li><span class="check">✓</span> 700+ people already circulating</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-left">
+      <span class="footer-wordmark">circulate</span>
+    </div>
+    <div class="footer-links">
+      <a href="https://app.daybalancer.com/" target="_blank">DayBalancer</a>
+      <a href="https://appear.network/" target="_blank">Appear Network</a>
+      <a href="https://2gather.network/" target="_blank">2Gather</a>
+    </div>
+    <span class="footer-copy">© 2026 Circulate Network</span>
+  </footer>
+
+
+  <!-- QA POPUP -->
+  <div class="qa-overlay" id="qa-overlay">
+    <div class="qa-modal" id="qa-modal">
+      <h3>Your answers</h3>
+      <p class="qa-hint">Check your email for a copy before closing. You can also copy your answers and paste them into the booking notes when scheduling a call.</p>
+      <div id="qa-content"></div>
+      <div class="qa-btn-row">
+        <button class="qa-copy-btn" onclick="copyAnswers()">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="5" y="5" width="9" height="9" rx="1.5" stroke="white" stroke-width="1.5"/><path d="M3 11V3a1 1 0 011-1h8" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Copy my answers
+        </button>
+        <a href="https://cal.com/jessieupp/25min" target="_blank" class="qa-book-btn">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="12" rx="2" stroke="#0B0F1A" stroke-width="1.5"/><path d="M1 7h14" stroke="#0B0F1A" stroke-width="1.5"/><path d="M5 1v4M11 1v4" stroke="#0B0F1A" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Book a call
+        </a>
+      </div>
+      <button class="qa-close-btn" onclick="closePopup()">Close</button>
+    </div>
+  </div>
+
+  <script>
+    const radioSelections = {};
+
+    function selectRadio(groupId, el, value) {
+      document.querySelectorAll('#' + groupId + ' .radio-option').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+      radioSelections[groupId] = value;
+    }
+
+    function nextStep(current) {
+      document.getElementById('step-' + current).classList.remove('active');
+      document.getElementById('step-' + (current + 1)).classList.add('active');
+      document.getElementById('progress').style.width = ((current + 1) * 25) + '%';
+      document.getElementById('step-' + (current + 1)).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function prevStep(current) {
+      document.getElementById('step-' + current).classList.remove('active');
+      document.getElementById('step-' + (current - 1)).classList.add('active');
+      document.getElementById('progress').style.width = ((current - 1) * 25) + '%';
+      document.getElementById('step-' + (current - 1)).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    async function submitForm() {
+      const email = document.getElementById('user-email').value.trim();
+      const sendCopy = document.getElementById('send-copy').checked;
+      
+
+      let body = 'Circulation intake\n\n';
+      body += 'TEND TO SELF\n';
+      body += 'When did you last feel like your day was "on your terms"?\n' + (radioSelections['rg1'] || '(no answer)') + '\n\n';
+      body += 'How would you be living your days if money wasn\'t a factor?\n' + (document.getElementById('q2').value.trim() || '(no answer)') + '\n\n';
+      body += 'Three things that reliably give you energy:\n' + (document.getElementById('q3').value.trim() || '(no answer)') + '\n\n';
+      body += 'TEND TO YOUR NETWORK\n';
+      body += 'When you need help, do you know who to call?\n' + (radioSelections['rg4'] || '(no answer)') + '\n\n';
+      body += 'Someone in your life who needs what you\'re good at:\n' + (document.getElementById('q5').value.trim() || '(no answer)') + '\n\n';
+      body += 'Giving or receiving something that doesn\'t relate to money:\n' + (document.getElementById('q6').value.trim() || '(no answer)') + '\n\n';
+      body += 'TEND TO COMMUNITY\n';
+      body += 'Do you have a third place you call community?\n' + (radioSelections['rg7'] || '(no answer)') + '\n\n';
+      body += 'A group you show up for that also gives back:\n' + (document.getElementById('q8').value.trim() || '(no answer)') + '\n\n';
+      body += 'A local community project you\'re inspired by:\n' + (document.getElementById('q9').value.trim() || '(no answer)') + '\n\n';
+      body += 'BLOCKAGE TO CIRCULATION\n';
+      body += 'Where does life feel stuck right now?\n' + (document.getElementById('q10').value.trim() || '(no answer)') + '\n\n';
+
+      const btn = document.querySelector('.btn-submit');
+      btn.textContent = 'Sending...';
+      btn.disabled = true;
+
+      const params = new URLSearchParams({
+        userEmail: email,
+        sendCopy: sendCopy,
+        subject: 'Circulation intake',
+        body: body
+      });
+
+      // Show confirmation immediately
+      // Build popup Q&A content
+      const qaQuestions = [
+        { q: 'When did you last feel like your day was "on your terms"?', a: radioSelections['rg1'] || '' },
+        { q: 'How would you be living your days if money wasn\'t a factor?', a: document.getElementById('q2').value.trim() },
+        { q: 'Three things that reliably give you energy', a: document.getElementById('q3').value.trim() },
+        { q: 'When you need help, do you know who to call?', a: radioSelections['rg4'] || '' },
+        { q: 'Someone in your life who needs what you\'re good at', a: document.getElementById('q5').value.trim() },
+        { q: 'Giving or receiving something that doesn\'t relate to money', a: document.getElementById('q6').value.trim() },
+        { q: 'Do you have a third place you call community?', a: radioSelections['rg7'] || '' },
+        { q: 'A group you show up for that also gives back', a: document.getElementById('q8').value.trim() },
+        { q: 'A local community project you\'re inspired by', a: document.getElementById('q9').value.trim() },
+        { q: 'Where does life feel stuck right now?', a: document.getElementById('q10').value.trim() },
+      ];
+      const qaContent = document.getElementById('qa-content');
+      qaContent.innerHTML = qaQuestions.filter(item => item.a).map(item => `
+        <div class="qa-item">
+          <div class="qa-q">${item.q}</div>
+          <div class="qa-a">${item.a}</div>
+        </div>`).join('');
+      document.getElementById('qa-overlay').classList.add('active');
+
+      const formCard = document.querySelector('.form-card');
+      formCard.innerHTML = `
+        <div id="confirm-msg" style="padding:52px;text-align:center;">
+          <div style="font-size:40px;margin-bottom:16px;">✓</div>
+          <h3 style="font-size:20px;font-weight:700;color:#ffffff;margin-bottom:12px;">Answers sent.</h3>
+          <p style="font-size:16px;font-weight:300;color:#7A8AA0;line-height:1.7;">
+            
+          </p>
+        </div>`;
+      setTimeout(() => {
+        document.getElementById('confirm-msg').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 50);
+
+      try {
+        const res = await fetch('https://circulate.jessieupp.workers.dev', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: params.toString()
+        });
+        if (!res.ok) console.error('Worker error:', await res.text());
+      } catch (err) {
+        console.error('Fetch failed:', err);
+      }
+    }
+
+    function closePopup() {
+      document.getElementById('qa-overlay').classList.remove('active');
+    }
+
+
+
+    function copyAnswers() {
+      const items = document.querySelectorAll('#qa-content .qa-item');
+      let text = 'My circulation answers\n\n';
+      items.forEach(item => {
+        const q = item.querySelector('.qa-q').textContent;
+        const a = item.querySelector('.qa-a').textContent;
+        text += q + '\n' + a + '\n\n';
+      });
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.querySelector('.qa-copy-btn');
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = 'Copy answers', 2000);
+      });
+    }
+  </script>
+<!-- V18 -->
+</body>
+</html>
 
