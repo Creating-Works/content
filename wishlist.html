@@ -1,10 +1,7 @@
 <!--
   wishlist.html
-  v1.8 - Rename sub-tabs: Skills→Share skills, Words→Share words; Other chip last in every set;
-         note field shows as "Elaborate on your wish here" after chip selection; fix Send care
-         using own chip set (selectedCareChips) not selectedSpaceChips
-  v1.7 - Interaction overhaul: one top-level/one people sub-cat open at a time; multi-select
-         chips; fixed My wishlist FAB with count badge; list in drawer
+  v1.8.7 - Fix _chips TDZ error: changed let to var so declaration is hoisted
+  v1.8.6 - Registry index approach for chip onclick
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -257,10 +254,7 @@
 
 <div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
 <div class="drawer" id="drawer"></div>
-
-<button class="wishlist-fab" id="wishlist-fab" onclick="openDrawer()" style="display:none">
-  My wishlist <span class="badge" id="fab-badge">0</span>
-</button>
+<div id="fab-container"></div>
 
 <script>
 
@@ -396,19 +390,22 @@ function clearAll() {
   otherExpOpen   = false; otherExpText   = '';
 }
 
-// ─── Delegated chip clicks ──────────────────────────────────────────────────
-document.addEventListener('click', function(e) {
-  const el = e.target.closest('[data-chip]');
-  if (!el) return;
-  const type = el.dataset.chip;
-  const val  = el.dataset.val;
-  if (type === 'skill') { toggle(selectedSkills, val);     render(); }
-  if (type === 'words') { toggle(selectedWordsSubs, val);  render(); }
-  if (type === 'care')  { toggle(selectedCareChips, val);  render(); }
-  if (type === 'space') { toggle(selectedSpaceChips, val); render(); }
-  if (type === 'thing') { toggle(selectedThingChips, val); render(); }
-  if (type === 'exp')   { toggle(selectedExpChips, val);   render(); }
-});
+// ─── Chip registry - avoids quote-escaping in onclick attributes ───────────
+var _chips = [];  // var hoisted to avoid TDZ error
+function regChip(val) { _chips.push(val); return _chips.length - 1; }
+function clearChipRegistry() { _chips = []; }
+
+function chipClick(type, idx) {
+  const val = _chips[idx];
+  if (!val) return;
+  if (type === 'skill') { toggle(selectedSkills, val); }
+  if (type === 'words') { toggle(selectedWordsSubs, val); }
+  if (type === 'care')  { toggle(selectedCareChips, val); }
+  if (type === 'space') { toggle(selectedSpaceChips, val); }
+  if (type === 'thing') { toggle(selectedThingChips, val); }
+  if (type === 'exp')   { toggle(selectedExpChips, val); }
+  render();
+}
 
 function toggle(set, val) { set.has(val) ? set.delete(val) : set.add(val); }
 
@@ -520,15 +517,7 @@ function addToList() {
 }
 
 // ─── FAB ───────────────────────────────────────────────────────────────────
-function updateFAB() {
-  setTimeout(() => {
-    const fab   = qs('#wishlist-fab');
-    const badge = qs('#fab-badge');
-    if (!fab || !badge) return;
-    fab.style.display = items.length ? 'flex' : 'none';
-    badge.textContent = items.length;
-  }, 0);
-}
+function updateFAB() { /* FAB rendered inline in builderHTML */ }
 
 // ─── Drawer ────────────────────────────────────────────────────────────────
 function openDrawer() {
@@ -640,6 +629,7 @@ function wishItemHTML(it, ctx) {
 
 // ─── Render ────────────────────────────────────────────────────────────────
 function render() {
+  clearChipRegistry();
   qs('#app').innerHTML =
     mode === 'viewer' ? viewerHTML() :
     mode === 'review' ? reviewHTML() :
@@ -649,7 +639,11 @@ function render() {
 
 // ─── Builder ───────────────────────────────────────────────────────────────
 function builderHTML() {
+  const fabHTML = items.length
+    ? `<button class="wishlist-fab" onclick="openDrawer()">My wishlist <span class="badge">${items.length}</span></button>`
+    : '';
   return `
+    ${fabHTML}
     <div class="eyebrow">Appear Network</div>
     <h1>Your appreciation list</h1>
     <p class="subtitle">Tell people how they can show up for you.</p>
@@ -674,9 +668,10 @@ function builderHTML() {
 
 // ─── Helpers: chip row + other + add area ──────────────────────────────────
 function chipRow(chips, type, selectedSet) {
-  const rows = chips.map(p =>
-    `<button class="chip${selectedSet.has(p)?' selected':''}" data-chip="${type}" data-val="${esc(p)}">${esc(p)}</button>`
-  ).join('');
+  const rows = chips.map(p => {
+    const idx = regChip(p);
+    return `<button class="chip${selectedSet.has(p)?' selected':''}" onclick="chipClick('${type}',${idx})">${esc(p)}</button>`;
+  }).join('');
   const otherOpen = window['other'+cap(type)+'Open'];
   const otherText = window['other'+cap(type)+'Text'] || '';
   const otherBtn  = `<button class="chip other-chip${otherOpen?' selected':''}" onclick="toggleOther('${type}')">${otherOpen?'✕ Other':'+ Other'}</button>`;
@@ -717,7 +712,7 @@ function peopleSection() {
       <div class="drill-sub-label">🛠 Share skills</div>
       <div class="drill-sub-desc">Select one or more skills</div>
       <div class="skills-grid">
-        ${SKILLS.map(s=>`<button class="skill-chip${selectedSkills.has(s)?' selected':''}" data-chip="skill" data-val="${esc(s)}">${esc(s)}</button>`).join('')}
+        ${SKILLS.map(s=>{ const idx=regChip(s); return `<button class="skill-chip${selectedSkills.has(s)?' selected':''}" onclick="chipClick('skill',${idx})">${esc(s)}</button>`; }).join('')}
         <button class="skill-chip other-chip${otherOpen?' selected':''}" onclick="toggleOther('skill')">${otherOpen?'✕ Other':'+ Other'}</button>
       </div>
       ${otherOpen ? `<div class="other-input-wrap"><input type="text" id="other-input-skill" value="${esc(otherText)}" placeholder="Have something specific in mind? (optional)" oninput="updateOther('skill',this.value)" onkeydown="if(event.key==='Enter')addOther('skill')"><button class="btn-other-add" onclick="addOther('skill')">Add</button></div>` : ''}
@@ -865,6 +860,6 @@ function toast(msg) {
 }
 </script>
 
-<!-- v1.8.1 -->
+<!-- v1.8.7 -->
 </body>
 </html>
