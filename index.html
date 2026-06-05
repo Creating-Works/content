@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<!-- V19 | index.html
+<!-- V21 | index.html
   - Nav wordmark updated to "Creating Works"; ethos heading updated; form subhead removed
 -->
 <head>
@@ -190,6 +190,23 @@
       transition: background 0.2s, transform 0.1s;
     }
     .btn-primary:hover { background: #047857; transform: translateY(-1px); }
+    .btn-rainbow {
+      background: var(--grad);
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 28px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .btn-rainbow:hover { opacity: 0.88; transform: translateY(-1px); }
     .btn-outline {
       background: transparent;
       color: var(--text);
@@ -859,6 +876,7 @@
       The wellness coach needs an accountant. The accountant needs a mentor. The mentor needs a doctor. The doctor needs an architect. The architect needs a wellness coach. They're all <a href="#map">1 or 2 degrees</a> from each other - and most of them don't know it yet.
     </p>
     <div class="hero-btns" style="margin-top:32px;">
+      <a href="http://appear.network" target="_blank" class="btn-rainbow">Start with Appear</a>
       <a href="#form" class="btn-primary">Map your flow →</a>
     </div>
   </section>
@@ -1266,6 +1284,6 @@
       });
     }
   </script>
-<!-- V19 -->
+<!-- V21 -->
 </body>
 </html>
