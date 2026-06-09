@@ -1,7 +1,8 @@
 <!--
   wishlist.html
-  v1.8.7 - Fix _chips TDZ error: changed let to var so declaration is hoisted
-  v1.8.6 - Registry index approach for chip onclick
+  v1.9 - Remove Send care from People (moves to Experiences→For myself); remove Spaces→To enjoy;
+         add Labor to Share skills; strip who from For someone I care about presets
+  v1.8.7 - Fix _chips TDZ hoisting error
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -266,7 +267,7 @@ const SKILLS = [
   'Experience Design','Creative','Engineering','General Technology',
   'HR','Operations/Systems/QA','Finance','Legal','Procurement',
   'Governance/Policy','Safety/Security','Administration','AI',
-  'Health: Clinical','Trade Skill','Health: Mental/Emotional','Health: Physical/Movement'
+  'Health: Clinical','Trade Skill','Health: Mental/Emotional','Health: Physical/Movement','Labor'
 ];
 
 const WORDS_SUBS = [
@@ -276,12 +277,9 @@ const WORDS_SUBS = [
   { id:'intro',    icon:'🔗', label:'Introduce me to someone', presets:[] }
 ];
 
-const CARE_PRESETS = ['A massage','A spa day','A night away'];
-
 const SPACES_SUBS = [
-  { id:'work-create', icon:'🖥',  label:'To work or create', desc:'Studio, workshop, desk',                         presets:['Use of your studio','A quiet room for the day','Access to your workshop'] },
-  { id:'gather',      icon:'🏠',  label:'To gather',          desc:'Your home, a meeting room, a venue',             presets:['Host a meeting at your place','Lend me your space for an event','A venue for the day'] },
-  { id:'enjoy',       icon:'🌅',  label:'To enjoy',           desc:'Somewhere to eat, rest, or experience something', presets:['A table at your favorite spot','A place to rest and reset','Somewhere new to explore'] }
+  { id:'work-create', icon:'🖥',  label:'To work or create', desc:'Studio, workshop, desk',         presets:['Use of your studio','A quiet room for the day','Access to your workshop'] },
+  { id:'gather',      icon:'🏠',  label:'To gather',          desc:'Your home, a meeting room, a venue', presets:['Host a meeting at your place','Lend me your space for an event','A venue for the day'] }
 ];
 
 const THINGS_SUBS = [
@@ -291,10 +289,10 @@ const THINGS_SUBS = [
 ];
 
 const EXPERIENCES_SUBS = [
-  { id:'for-myself',   icon:'🧘', label:'For myself',               desc:'Something I do alone, on my own terms',      presets:['A night away to reset','A fitness class','A recording session','A digital subscription'] },
+  { id:'for-myself',   icon:'🧘', label:'For myself',               desc:'Something I do alone, on my own terms',      presets:['A massage','A spa day','A night away','A fitness class','A recording session','A digital subscription'] },
   { id:'with-you',     icon:'🔄', label:'With you',                 desc:'Something we do together - you\'re present', presets:['Co-work for a day','Take a walk','Share a meal'] },
   { id:'with-someone', icon:'🌐', label:'With someone else',        desc:'You facilitate with a third person',          presets:['2 tickets to a show','4 tickets to a class','A retreat for my team'] },
-  { id:'for-someone',  icon:'💛', label:'For someone I care about', desc:'I want this for them - I\'m not in it',       presets:['A class for my kid','A meal for my family','Something that would make their week'] }
+  { id:'for-someone',  icon:'💛', label:'For someone I care about', desc:'I want this for them - I\'m not in it',       presets:['A class','A meal','A ticket'] }
 ];
 
 // ─── State ─────────────────────────────────────────────────────────────────
@@ -310,7 +308,6 @@ let openExpSub    = null;
 
 let selectedSkills     = new Set();
 let selectedWordsSubs  = new Set();
-let selectedCareChips  = new Set();   // dedicated set for Send care
 let selectedSpaceChips = new Set();
 let selectedThingChips = new Set();
 let selectedExpChips   = new Set();
@@ -319,8 +316,6 @@ let otherSkillOpen  = false;
 let otherSkillText  = '';
 let otherWordsOpen  = false;
 let otherWordsText  = '';
-let otherCareOpen   = false;
-let otherCareText   = '';
 let otherSpaceOpen  = false;
 let otherSpaceText  = '';
 let otherThingOpen  = false;
@@ -380,11 +375,10 @@ function setExpSub(id) {
 }
 
 function clearAll() {
-  selectedSkills.clear(); selectedWordsSubs.clear(); selectedCareChips.clear();
+  selectedSkills.clear(); selectedWordsSubs.clear();
   selectedSpaceChips.clear(); selectedThingChips.clear(); selectedExpChips.clear();
   otherSkillOpen = false; otherSkillText = '';
   otherWordsOpen = false; otherWordsText = '';
-  otherCareOpen  = false; otherCareText  = '';
   otherSpaceOpen = false; otherSpaceText = '';
   otherThingOpen = false; otherThingText = '';
   otherExpOpen   = false; otherExpText   = '';
@@ -400,7 +394,6 @@ function chipClick(type, idx) {
   if (!val) return;
   if (type === 'skill') { toggle(selectedSkills, val); }
   if (type === 'words') { toggle(selectedWordsSubs, val); }
-  if (type === 'care')  { toggle(selectedCareChips, val); }
   if (type === 'space') { toggle(selectedSpaceChips, val); }
   if (type === 'thing') { toggle(selectedThingChips, val); }
   if (type === 'exp')   { toggle(selectedExpChips, val); }
@@ -413,7 +406,6 @@ function toggle(set, val) { set.has(val) ? set.delete(val) : set.add(val); }
 function toggleOther(type) {
   if (type==='skill') { otherSkillOpen = !otherSkillOpen; if (!otherSkillOpen) otherSkillText=''; }
   if (type==='words') { otherWordsOpen = !otherWordsOpen; if (!otherWordsOpen) otherWordsText=''; }
-  if (type==='care')  { otherCareOpen  = !otherCareOpen;  if (!otherCareOpen)  otherCareText=''; }
   if (type==='space') { otherSpaceOpen = !otherSpaceOpen; if (!otherSpaceOpen) otherSpaceText=''; }
   if (type==='thing') { otherThingOpen = !otherThingOpen; if (!otherThingOpen) otherThingText=''; }
   if (type==='exp')   { otherExpOpen   = !otherExpOpen;   if (!otherExpOpen)   otherExpText=''; }
@@ -424,7 +416,6 @@ function toggleOther(type) {
 function updateOther(type, val) {
   if (type==='skill') otherSkillText = val;
   if (type==='words') otherWordsText = val;
-  if (type==='care')  otherCareText  = val;
   if (type==='space') otherSpaceText = val;
   if (type==='thing') otherThingText = val;
   if (type==='exp')   otherExpText   = val;
@@ -435,7 +426,6 @@ function addOther(type) {
   let set, subCat, subLabel, subIcon, topCat;
   if (type==='skill') { text=otherSkillText; set=selectedSkills; subCat='skills'; subLabel='Share skills'; subIcon='🛠'; topCat='people'; }
   if (type==='words') { text=otherWordsText; set=selectedWordsSubs; subCat='words'; subLabel='Share words'; subIcon='💬'; topCat='people'; }
-  if (type==='care')  { text=otherCareText;  set=selectedCareChips; subCat='send-care'; subLabel='Send care'; subIcon='🌿'; topCat='people'; }
   if (type==='space') {
     text=otherSpaceText;
     const sub = SPACES_SUBS.find(s=>s.id===openSpacesSub);
@@ -457,7 +447,6 @@ function addOther(type) {
   set.add(text);
   if (type==='skill') { otherSkillOpen=false; otherSkillText=''; }
   if (type==='words') { otherWordsOpen=false; otherWordsText=''; }
-  if (type==='care')  { otherCareOpen=false;  otherCareText=''; }
   if (type==='space') { otherSpaceOpen=false; otherSpaceText=''; }
   if (type==='thing') { otherThingOpen=false; otherThingText=''; }
   if (type==='exp')   { otherExpOpen=false;   otherExpText=''; }
@@ -483,10 +472,6 @@ function addToList() {
       if (selectedWordsSubs.has('intro') && !note) { toast('Use the note field to name who you\'re looking for'); return; }
       label = [...selectedWordsSubs].map(id => WORDS_SUBS.find(w=>w.id===id)?.label || id).join(' + ');
       subCat='words'; subLabel='Share words'; subIcon='💬'; topCat='people'; hasSelection=true;
-    } else if (openPeopleSub === 'send-care') {
-      if (!selectedCareChips.size) { toast('Select at least one'); return; }
-      label = [...selectedCareChips].join(' + ');
-      subCat='send-care'; subLabel='Send care'; subIcon='🌿'; topCat='people'; hasSelection=true;
     }
   } else if (openTopCat === 'spaces') {
     if (!openSpacesSub) { toast('Choose a space type first'); return; }
@@ -700,9 +685,8 @@ function peopleSection() {
   let html = `<div class="drill-section">
     <div class="drill-label">👥 People</div>
     <div class="sub-tabs">
-      <button class="sub-tab${openPeopleSub==='skills'?   ' active':''}" onclick="setPeopleSub('skills')">🛠 Share skills</button>
-      <button class="sub-tab${openPeopleSub==='words'?    ' active':''}" onclick="setPeopleSub('words')">💬 Share words</button>
-      <button class="sub-tab${openPeopleSub==='send-care'?' active':''}" onclick="setPeopleSub('send-care')">🌿 Send care</button>
+      <button class="sub-tab${openPeopleSub==='skills'?' active':''}" onclick="setPeopleSub('skills')">🛠 Share skills</button>
+      <button class="sub-tab${openPeopleSub==='words'?' active':''}" onclick="setPeopleSub('words')">💬 Share words</button>
     </div>`;
 
   if (openPeopleSub === 'skills') {
@@ -730,14 +714,6 @@ function peopleSection() {
     </div>`;
   }
 
-  if (openPeopleSub === 'send-care') {
-    html += `<div class="drill-sub">
-      <div class="drill-sub-label">🌿 Send care</div>
-      <div class="drill-sub-desc">A gift that tends to me</div>
-      ${chipRow(CARE_PRESETS, 'care', selectedCareChips)}
-      ${addArea(selectedCareChips.size > 0)}
-    </div>`;
-  }
 
   html += `</div>`;
   return html;
@@ -860,6 +836,6 @@ function toast(msg) {
 }
 </script>
 
-<!-- v1.8.7 -->
+<!-- v1.9 -->
 </body>
 </html>
