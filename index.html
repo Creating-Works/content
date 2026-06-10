@@ -316,36 +316,66 @@
       background: #FFFFFF;
       border: 1px solid #E8EEF4;
       border-radius: 20px;
-      padding: 36px 28px;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .product-card-top {
+      padding: 28px 28px 24px;
       display: flex;
       flex-direction: column;
     }
-    .product-icon {
-      width: 52px;
-      height: 52px;
-      border-radius: 14px;
+    .product-tend {
+      font-size: 22px;
+      font-weight: 800;
+      color: #1A2E42;
+      margin-bottom: 6px;
+      line-height: 1.2;
+    }
+    .product-tagline {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .product-card-body {
+      padding: 0 28px 28px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+    .product-tool-row {
       display: flex;
       align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      margin-bottom: 24px;
+      gap: 12px;
+      margin-bottom: 14px;
     }
-    .product-card h3 {
-      font-size: 20px;
+    .product-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    .product-icon img { width:100%;height:100%;object-fit:cover; }
+    .product-tool-name {
+      font-size: 14px;
       font-weight: 700;
-      margin-bottom: 12px;
       color: #1A2E42;
+      letter-spacing: 0.01em;
     }
     .product-card p {
-      font-size: 15px;
+      font-size: 14px;
       color: #4A6080;
       line-height: 1.65;
       flex: 1;
-      margin-bottom: 28px;
+      margin-bottom: 24px;
     }
     .product-link {
-      font-size: 14px;
-      font-weight: 500;
+      font-size: 13px;
+      font-weight: 600;
       text-decoration: none;
       display: inline-flex;
       align-items: center;
@@ -353,6 +383,23 @@
       transition: gap 0.2s;
     }
     .product-link:hover { gap: 10px; }
+    .product-btn {
+      display: inline-block;
+      padding: 11px 18px;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: opacity 0.2s;
+      margin-top: auto;
+    }
+    .product-btn:hover { opacity: 0.88; }
+    .product-card-divider {
+      height: 3px;
+      width: 100%;
+    }
+
 
     /* ---- MULTI-STEP FORM ---- */
     .form-section { padding: 56px 24px; }
@@ -891,24 +938,58 @@
       <h2 class="section-title">Infrastructure for healthy circulation</h2>
       <p class="section-sub">What you share in one place shapes what reaches you in all three.</p>
       <div class="products-grid">
+
+        <!-- DAYBALANCER -->
         <div class="product-card">
-          <div class="product-icon" style="background:rgba(16,185,129,0.15);padding:0;overflow:hidden;"><img src="https://res.cloudinary.com/glide/image/fetch/f_auto,h_150,c_limit/https%3A%2F%2Ffirebasestorage.googleapis.com%2Fv0%2Fb%2Fglide-prod.appspot.com%2Fo%2Ficon-images%252Fanonymous-05255043-007d-48b6-84bf-b7f21cb2ac56.png%3Falt%3Dmedia%26token%3D227af714-e2d8-45df-958b-ff364f6fdc2f" alt="DayBalancer" style="width:100%;height:100%;object-fit:cover;"></div>
-          <h3>DayBalancer</h3>
-          <p>Start by exploring what you love, what you're good at, where you get your energy, and how to apply your skills to serve what is needed - all guided by your values. Healthy circulation of body and mind.</p>
-          <a href="https://app.daybalancer.com/" target="_blank" class="product-link" style="color:var(--green);">Launch DayBalancer to tend to yourself ↗</a>
+          <div class="product-card-divider" style="background:var(--green);"></div>
+          <div class="product-card-top">
+            <div class="product-tend">Tend to yourself</div>
+            <div class="product-tagline" style="color:var(--green);">We ask questions. You discover answers.</div>
+          </div>
+          <div class="product-card-body">
+            <div class="product-tool-row">
+              <div class="product-icon"><img src="https://res.cloudinary.com/glide/image/fetch/f_auto,h_150,c_limit/https%3A%2F%2Ffirebasestorage.googleapis.com%2Fv0%2Fb%2Fglide-prod.appspot.com%2Fo%2Ficon-images%252Fanonymous-05255043-007d-48b6-84bf-b7f21cb2ac56.png%3Falt%3Dmedia%26token%3D227af714-e2d8-45df-958b-ff364f6fdc2f" alt="DayBalancer"></div>
+              <span class="product-tool-name">DayBalancer</span>
+            </div>
+            <p>Explore what you love, what you're good at, and where you get your energy. Say what lights you up and what you need — guided by your values.</p>
+            <a href="https://app.daybalancer.com/" target="_blank" class="product-btn" style="background:#059669;">Launch to tend to yourself ↗</a>
+          </div>
         </div>
+
+        <!-- APPEAR NETWORK -->
         <div class="product-card">
-          <div class="product-icon" style="background:rgba(59,130,246,0.15);padding:0;overflow:hidden;"><img src="https://res.cloudinary.com/glide/image/fetch/f_auto,h_150,c_limit/https%3A%2F%2Ffirebasestorage.googleapis.com%2Fv0%2Fb%2Fglide-prod.appspot.com%2Fo%2Ficon-images%252Fanonymous-e3926802-d398-43a2-a0cc-48dfb527f428.png%3Falt%3Dmedia%26token%3Db1489e31-7a71-43de-9feb-3d927592d4a9" alt="Appear Network" style="width:100%;height:100%;object-fit:cover;"></div>
-          <h3>Appear Network</h3>
-          <p>Everyone is accessible. Show up as yourself. Compatible people and opportunities surface within your groups and network. A matching space for your network where people give and receive based on what they have and what they need.</p>
-          <a href="https://appear.network/" target="_blank" class="product-link" style="color:var(--blue);">Launch Appear to tend to your network ↗</a>
+          <div class="product-card-divider" style="background:#1D4ED8;"></div>
+          <div class="product-card-top">
+            <div class="product-tend">Tend to your network</div>
+            <div class="product-tagline" style="color:#1D4ED8;">Find compatible people and opportunities.</div>
+          </div>
+          <div class="product-card-body">
+            <div class="product-tool-row">
+              <div class="product-icon"><img src="https://res.cloudinary.com/glide/image/fetch/f_auto,h_150,c_limit/https%3A%2F%2Ffirebasestorage.googleapis.com%2Fv0%2Fb%2Fglide-prod.appspot.com%2Fo%2Ficon-images%252Fanonymous-e3926802-d398-43a2-a0cc-48dfb527f428.png%3Falt%3Dmedia%26token%3Db1489e31-7a71-43de-9feb-3d927592d4a9" alt="Appear Network"></div>
+              <span class="product-tool-name">Appear Network</span>
+            </div>
+            <p>Show up as yourself. Compatible people and opportunities surface within your groups and network — a space where people give and receive based on what they have and what they need.</p>
+            <a href="https://appear.network/" target="_blank" class="product-btn" style="background:#1D4ED8;">Launch to tend to your network ↗</a>
+          </div>
         </div>
+
+        <!-- 2GATHER -->
         <div class="product-card">
-          <div class="product-icon" style="background:rgba(244,63,94,0.15);padding:0;overflow:hidden;"><img src="https://res.cloudinary.com/glide/image/fetch/f_auto,h_150,c_limit/https%3A%2F%2Ffirebasestorage.googleapis.com%2Fv0%2Fb%2Fglide-prod.appspot.com%2Fo%2Ficon-images%252Fanonymous-3cb9285e-93c0-4086-939b-1964597ed61e.png%3Falt%3Dmedia%26token%3Da1b97cec-85be-4978-8595-4d7e1393c050" alt="2Gather" style="width:100%;height:100%;object-fit:cover;"></div>
-          <h3>2Gather</h3>
-          <p>Member-led gatherings in person and online where people create community impact together. For people building communities, groups, and teams - AI for team intelligence helps build and sustain projects with the right people.</p>
-          <a href="https://2gather.network/" target="_blank" class="product-link" style="color:var(--pink);">Launch 2Gather to tend to community ↗</a>
+          <div class="product-card-divider" style="background:#BE123C;"></div>
+          <div class="product-card-top">
+            <div class="product-tend">Tend to community</div>
+            <div class="product-tagline" style="color:#BE123C;">Give what you can. Receive what you need.</div>
+          </div>
+          <div class="product-card-body">
+            <div class="product-tool-row">
+              <div class="product-icon"><img src="https://res.cloudinary.com/glide/image/fetch/f_auto,h_150,c_limit/https%3A%2F%2Ffirebasestorage.googleapis.com%2Fv0%2Fb%2Fglide-prod.appspot.com%2Fo%2Ficon-images%252Fanonymous-3cb9285e-93c0-4086-939b-1964597ed61e.png%3Falt%3Dmedia%26token%3Da1b97cec-85be-4978-8595-4d7e1393c050" alt="2Gather"></div>
+              <span class="product-tool-name">2Gather</span>
+            </div>
+            <p>Member-led gatherings in person and online where people create community impact together. Mutual support becomes possible when you gather.</p>
+            <a href="https://2gather.network/" target="_blank" class="product-btn" style="background:#BE123C;">Launch to tend to community ↗</a>
+          </div>
         </div>
+
       </div>
     </div>
   </section>
@@ -1116,7 +1197,7 @@
             <img src="https://images.squarespace-cdn.com/content/61737ed17b50983cebb2dcc2/1779563823155-46R330FG6ZYQRKV4EC5X/jessie+upp.jpg?content-type=image%2Fjpeg"
                  alt="Jessie Upp" class="founder-photo">
             <div class="founder-name"><a href="https://appear.network/dl/page/s/e13594/r/w.hssQR.Q7CnpNDnVJ6DwQ" target="_blank" style="color:var(--text);text-decoration:none;">Jessie Upp</a></div>
-            <div class="founder-title">Founding Co-Creator</div>
+            <div class="founder-title">Founding Co-Creator &nbsp;·&nbsp; <a href="https://appear.network/dl/groups/m/a6bc49/r/7LXDK-P.R7KAimhUCBBHOQ/m/f2b394/r/7LXDK-P.R7KAimhUCBBHOQ" target="_blank" style="color:var(--green);text-decoration:none;font-weight:600;">Founding Advisors</a></div>
             <ul class="founder-points">
               <li><span class="check">✓</span> One profile across all three tools</li>
               <li><span class="check">✓</span> 700+ people already circulating</li>
