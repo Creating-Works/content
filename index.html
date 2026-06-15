@@ -1,9 +1,9 @@
-<!-- 
-  LAST CHANGE: Removed multi-step form section and related CSS
-  Version: V27 | Date: 2026-06-15
--->
 <!DOCTYPE html>
 <html lang="en">
+<!-- 
+  LAST CHANGE: Re-applied all V22-V27 changes: form removed, product cards redesigned, 6 needs line, arborist, ethos white bg, advisors link
+  Version: V28 | Date: 2026-06-15
+-->
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -411,8 +411,8 @@
     }
     .ethos-badge {
       display: inline-block;
-      background: rgba(244,63,94,0.15);
-      color: var(--pink);
+      background: rgba(190,18,60,0.1);
+      color: #BE123C;
       font-size: 11px;
       font-weight: 500;
       letter-spacing: 0.1em;
@@ -430,20 +430,20 @@
     }
     .ethos-grid p {
       font-size: 16px;
-      color: var(--muted);
+      color: #4A5568;
       line-height: 1.75;
       margin-bottom: 20px;
     }
     .quote-block {
-      background: var(--surface2);
-      border: 1px solid var(--border);
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
       border-radius: 12px;
       padding: 24px 28px;
     }
     .quote-block p {
       font-size: 16px;
       font-style: italic;
-      color: var(--text);
+      color: #1A202C;
       line-height: 1.7;
       margin-bottom: 16px;
     }
@@ -452,12 +452,13 @@
       align-items: center;
       gap: 10px;
     }
-    .quote-attr strong { font-size: 14px; font-weight: 700; color: var(--text); }
-    .quote-attr span { font-size: 13px; color: var(--muted); }
+    .quote-attr strong { font-size: 14px; font-weight: 700; color: #1A202C; }
+    .quote-attr span { font-size: 13px; color: #718096; }
     .attr-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--muted); }
     .founder-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
       border-radius: 20px;
       padding: 36px;
       text-align: center;
@@ -478,7 +479,7 @@
     }
     .founder-title {
       font-size: 13px;
-      color: var(--muted);
+      color: #718096;
       margin-bottom: 24px;
     }
     .founder-points {
@@ -490,9 +491,9 @@
       align-items: center;
       gap: 10px;
       font-size: 14px;
-      color: var(--muted);
+      color: #4A5568;
       padding: 8px 0;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid #E2E8F0;
     }
     .founder-points li:last-child { border-bottom: none; }
     .check { color: var(--green); font-size: 16px; flex-shrink: 0; }
@@ -797,7 +798,7 @@
   </section>
 
   <!-- ETHOS -->
-  <section class="section" id="ethos">
+  <section class="section" id="ethos" style="background:#FFFFFF;">
     <div class="section-inner">
       <div class="ethos-grid">
         <div>
@@ -807,7 +808,7 @@
           <div class="quote-block">
             <p>"With the help of others, this is what I'm building toward: infrastructure where everyone is accessible, and compatible people find each other based on what they have and what they need."</p>
             <div class="quote-attr">
-              <strong><a href="https://appear.network/dl/page/s/e13594/r/w.hssQR.Q7CnpNDnVJ6DwQ" target="_blank" style="color:var(--text);text-decoration:none;">Jessie Upp</a></strong>
+              <strong><a href="https://appear.network/dl/page/s/e13594/r/w.hssQR.Q7CnpNDnVJ6DwQ" target="_blank" style="color:#1A202C;text-decoration:none;">Jessie Upp</a></strong>
               <div class="attr-dot"></div>
               <span>Founding Co-Creator</span>
             </div>
@@ -817,8 +818,8 @@
           <div class="founder-card">
             <img src="https://images.squarespace-cdn.com/content/61737ed17b50983cebb2dcc2/1779563823155-46R330FG6ZYQRKV4EC5X/jessie+upp.jpg?content-type=image%2Fjpeg"
                  alt="Jessie Upp" class="founder-photo">
-            <div class="founder-name"><a href="https://appear.network/dl/page/s/e13594/r/w.hssQR.Q7CnpNDnVJ6DwQ" target="_blank" style="color:var(--text);text-decoration:none;">Jessie Upp</a></div>
-            <div class="founder-title">Founding Co-Creator &nbsp;·&nbsp; <a href="https://appear.network/dl/groups/m/a6bc49/r/7LXDK-P.R7KAimhUCBBHOQ/m/f2b394/r/7LXDK-P.R7KAimhUCBBHOQ" target="_blank" style="color:var(--green);text-decoration:none;font-weight:600;">Founding Advisors</a></div>
+            <div class="founder-name"><a href="https://appear.network/dl/page/s/e13594/r/w.hssQR.Q7CnpNDnVJ6DwQ" target="_blank" style="color:#0F172A;text-decoration:none;">Jessie Upp</a></div>
+            <div class="founder-title">Founding Co-Creator &nbsp;·&nbsp; <a href="https://appear.network/dl/groups/m/a6bc49/r/7LXDK-P.R7KAimhUCBBHOQ" target="_blank" style="color:var(--green);text-decoration:none;font-weight:600;">Founding Advisors</a></div>
             <ul class="founder-points">
               <li><span class="check">✓</span> One profile across all three tools</li>
               <li><span class="check">✓</span> 700+ people already circulating</li>
@@ -987,9 +988,9 @@
       });
     }
   </script>
+<!-- 
+  LAST CHANGE: Re-applied all V22-V27 changes: form removed, product cards redesigned, 6 needs line, arborist, ethos white bg, advisors link
+  Version: V28 | Date: 2026-06-15
+-->
 </body>
 </html>
-<!-- 
-  LAST CHANGE: Removed multi-step form section and related CSS
-  Version: V27 | Date: 2026-06-15
--->
