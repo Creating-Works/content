@@ -1,6 +1,6 @@
 <!-- 
-  LAST CHANGE: Fix Founding Advisors link
-  Version: V2.12 | Date: 2026-06-15
+  LAST CHANGE: Fix nav mobile visibility; reduce gap/font; all 4 links show
+  Version: V2.14 | Date: 2026-06-15
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -80,8 +80,8 @@
     }
     @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
     .nav-wordmark { font-size: 18px; font-weight: 500; color: var(--text); letter-spacing: -0.01em; }
-    .nav-links { display: flex; align-items: center; gap: 32px; list-style: none; }
-    .nav-links a { font-size: 14px; font-weight: 400; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+    .nav-links { display: flex; align-items: center; gap: 20px; list-style: none; }
+    .nav-links a { font-size: 13px; font-weight: 400; color: var(--muted); text-decoration: none; transition: color 0.2s; white-space: nowrap; }
     .nav-links a:hover { color: var(--text); }
     .nav-cta {
       background: var(--text); color: var(--bg);
@@ -306,9 +306,14 @@
 
     /* ---- RESPONSIVE ---- */
     @media (max-width: 720px) {
-      nav { padding: 0 20px; }
+      nav { padding: 0 16px; }
+      .nav-links { gap: 12px; }
+      .nav-links a { font-size: 11px; }
       .compare-grid { grid-template-columns: 1fr; }
       footer { flex-direction: column; align-items: flex-start; padding: 24px 20px; }
+    }
+    @media (max-width: 480px) {
+      .nav-links li:first-child { display: none; } /* hide Home on very small screens */
     }
   </style>
 </head>
@@ -499,7 +504,7 @@
           <img src="https://images.squarespace-cdn.com/content/61737ed17b50983cebb2dcc2/1779563823155-46R330FG6ZYQRKV4EC5X/jessie+upp.jpg?content-type=image%2Fjpeg" alt="Jessie Upp" class="quote-photo">
           <div>
             <div class="quote-name">Jessie Upp</div>
-            <div class="quote-title">Founding Co-Creator · <a href="https://appear.network/dl/groups/m/a6bc49/r/7LXDK-P.R7KAimhUCBBHOQ" target="_blank" style="color:#1b6896;text-decoration:none;">Founding Advisors</a></div>
+            <div class="quote-title">Creating Works Founding Co-Creator<br><a href="https://appear.network/dl/groups/m/a6bc49/r/7LXDK-P.R7KAimhUCBBHOQ" target="_blank" style="color:#1b6896;text-decoration:none;">Founding Advisors</a></div>
           </div>
         </div>
       </div>
@@ -509,7 +514,7 @@
 
   <!-- CONTACT CTA -->
   <div class="contact-cta">
-    <h2>Ready to host a <span class="grad-text">Coop Networking Event?</span></h2>
+    <h2>Ready to host a <span class="grad-text">Networking Event?</span></h2>
     <p>Contact us to discuss your event and we'll help you get set up.</p>
     <a href="mailto:hello@creating.works" class="btn">Email hello@creating.works</a>
   </div>
@@ -530,6 +535,6 @@
 </body>
 </html>
 <!-- 
-  LAST CHANGE: Fix Founding Advisors link
-  Version: V2.12 | Date: 2026-06-15
+  LAST CHANGE: Fix nav mobile visibility; reduce gap/font; all 4 links show
+  Version: V2.14 | Date: 2026-06-15
 -->
