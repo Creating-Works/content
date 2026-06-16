@@ -1,6 +1,6 @@
 <!-- 
-  LAST CHANGE: Hero heading changed from "Coop Networking" to "Networking"
-  Version: V2.2 | Date: 2026-06-11
+  LAST CHANGE: Nav logo links to creating.works
+  Version: V2.5 | Date: 2026-06-15
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -142,7 +142,7 @@
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
     .hero-sub {
-      font-size: clamp(16px, 2vw, 20px); color: var(--muted);
+      font-size: clamp(16px, 2vw, 20px); color: #CBD5E1;
       max-width: 560px; line-height: 1.6; margin-bottom: 40px;
     }
     .hero-cta {
@@ -192,65 +192,79 @@
     .compare-card.good ul li::before { display: none; }
 
     /* ---- PHASE SECTIONS ---- */
-    .phases { display: flex; flex-direction: column; gap: 48px; margin-bottom: 64px; }
+    .phases { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; margin-bottom: 64px; }
     .phase-block { position: relative; }
+
+    /* Higher contrast on dark sections */
+    .compare-card ul li { font-size: 15px; color: #CBD5E1; line-height: 1.5; padding-left: 20px; position: relative; }
+    .compare-card ul li::before { content: '—'; position: absolute; left: 0; color: #475569; }
+    .compare-card.good ul li { color: #F1F5F9; padding-left: 0; }
+    .compare-card.good ul li::before { display: none; }
+    .compare-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 20px; color: #94A3B8; letter-spacing: 0.01em; }
+    .section-sub { font-size: 17px; color: #94A3B8; line-height: 1.65; max-width: 680px; margin-bottom: 48px; }
+
+    @media (max-width: 720px) {
+      .phases { grid-template-columns: 1fr; gap: 32px; }
+    }
     .phase-label {
       display: inline-flex; align-items: center; gap: 8px;
       font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
-      text-transform: uppercase; color: var(--green);
-      background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.25);
+      text-transform: uppercase; color: #059669;
+      background: rgba(5,150,105,0.08); border: 1px solid rgba(5,150,105,0.2);
       border-radius: 40px; padding: 5px 14px; margin-bottom: 20px;
     }
     .phase-items { display: flex; flex-direction: column; gap: 16px; }
     .phase-item {
-      background: var(--surface); border: 1px solid var(--border);
+      background: #f9fafb; border: 1px solid #e5e7eb;
       border-radius: 14px; padding: 20px 24px;
       display: flex; gap: 16px; align-items: flex-start;
     }
     .phase-item-icon {
       width: 36px; height: 36px; border-radius: 10px;
-      background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.2);
+      background: #EBF5FB; border: 1px solid #AED6F1;
       display: flex; align-items: center; justify-content: center;
       font-size: 16px; flex-shrink: 0;
     }
     .phase-item-text strong {
-      display: block; font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 4px;
+      display: block; font-size: 15px; font-weight: 700; color: #1a1a2e; margin-bottom: 4px;
     }
-    .phase-item-text span { font-size: 14px; color: var(--muted); line-height: 1.55; }
-    .phase-item-text a { color: var(--green); text-decoration: none; }
+    .phase-item-text span { font-size: 14px; color: #6b7280; line-height: 1.55; }
+    .phase-item-text a { color: #1b6896; text-decoration: none; }
     .phase-item-text a:hover { text-decoration: underline; }
 
     /* ---- OPTIONAL SECTION ---- */
     .optional-card {
-      background: var(--surface2); border: 1px solid var(--border);
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
       border-radius: 20px; padding: 40px 36px; margin-bottom: 48px;
+      color: #1a1a2e;
     }
-    .optional-card h3 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
-    .optional-card .optional-sub { font-size: 15px; color: var(--muted); margin-bottom: 28px; }
+    .optional-card h3 { font-size: 22px; font-weight: 700; margin-bottom: 8px; color: #1a1a2e; }
+    .optional-card .optional-sub { font-size: 15px; color: #6b7280; margin-bottom: 28px; }
     .optional-phase-label {
       font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
-      text-transform: uppercase; color: #C4B5FD;
+      text-transform: uppercase; color: #1b6896;
       margin-bottom: 12px; margin-top: 24px;
     }
     .optional-items { display: flex; flex-direction: column; gap: 10px; }
     .optional-item {
       display: flex; align-items: flex-start; gap: 10px;
-      font-size: 14px; color: var(--muted); line-height: 1.55;
+      font-size: 14px; color: #6b7280; line-height: 1.55;
     }
-    .optional-item::before { content: '→'; color: #C4B5FD; flex-shrink: 0; margin-top: 1px; }
+    .optional-item::before { content: '→'; color: #1b6896; flex-shrink: 0; margin-top: 1px; }
 
     /* ---- QUOTE ---- */
     .quote-block {
-      background: linear-gradient(135deg, rgba(16,185,129,0.08), rgba(59,130,246,0.08));
-      border: 1px solid rgba(16,185,129,0.2);
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
       border-radius: 20px; padding: 40px 36px;
       text-align: center; margin-bottom: 48px;
     }
     .quote-block blockquote {
       font-size: clamp(17px, 2vw, 21px); font-weight: 400; font-style: italic;
-      color: var(--text); line-height: 1.6; margin-bottom: 16px;
+      color: #1a1a2e; line-height: 1.6; margin-bottom: 16px;
     }
-    .quote-block cite { font-size: 13px; color: var(--muted); font-style: normal; }
+    .quote-block cite { font-size: 13px; color: #6b7280; font-style: normal; }
     .quote-author {
       display: flex; align-items: center; gap: 14px;
       justify-content: center; margin-top: 20px;
@@ -258,10 +272,10 @@
     .quote-photo {
       width: 48px; height: 48px; border-radius: 50%;
       object-fit: cover;
-      border: 2px solid rgba(16,185,129,0.4);
+      border: 2px solid #AED6F1;
     }
-    .quote-name { font-size: 15px; font-weight: 700; color: var(--text); text-align: left; }
-    .quote-title { font-size: 12px; color: var(--muted); text-align: left; margin-top: 2px; }
+    .quote-name { font-size: 15px; font-weight: 700; color: #1a1a2e; text-align: left; }
+    .quote-title { font-size: 12px; color: #6b7280; text-align: left; margin-top: 2px; }
 
     /* ---- CONTACT CTA ---- */
     .contact-cta {
@@ -302,7 +316,7 @@
 
   <!-- NAV -->
   <nav>
-    <a href="index.html" class="nav-logo">
+    <a href="https://creating.works" class="nav-logo">
       <div class="logo-icon">
         <div class="logo-ring"></div>
         <svg class="logo-arrows" width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -332,7 +346,6 @@
       <div class="hero-badge"><span class="badge-dot"></span> 2Gather powered by Creating Works</div>
       <h1>Networking<br><span class="grad-text">Events</span></h1>
       <p class="hero-sub">Where networking becomes mutually beneficial — and keeps delivering value long after the room closes.</p>
-      <a href="#compare" class="hero-cta">See how it works ↓</a>
     </div>
   </section>
 
@@ -367,11 +380,12 @@
 
       </div>
 
-      <!-- AUTHENTIC RELATIONSHIPS -->
-      <p class="section-label">Create authentic relationships</p>
-      <h2 class="section-title">Where momentum keeps going</h2>
-      <p class="section-sub">Groups work hard to create local networking experiences, but momentum often slows down between events. We help you engage in a hybrid experience that creates authentic relationships and local work exchanges.</p>
-      <p style="font-size:15px;color:var(--muted);margin-bottom:48px;">Post your event on our <a href="https://gather.2gather.network/" target="_blank" style="color:var(--green);text-decoration:none;">2Gather event calendar</a> and use tags for easy discovery.</p>
+      <!-- AUTHENTIC RELATIONSHIPS - white card -->
+      <div style="background:#ffffff;border:1px solid #e5e7eb;border-radius:20px;padding:40px 36px;margin-bottom:48px;">
+        <p class="section-label" style="color:#1b6896;">Create authentic relationships</p>
+        <h2 class="section-title" style="color:#1a1a2e;">Where momentum keeps going</h2>
+        <p class="section-sub" style="color:#6b7280;">Groups work hard to create local networking experiences, but momentum often slows down between events. We help you engage in a hybrid experience that creates authentic relationships and local work exchanges.</p>
+        <p style="font-size:15px;color:#6b7280;margin-bottom:48px;">Post your event on our <a href="https://gather.2gather.network/" target="_blank" style="color:#1b6896;text-decoration:none;">2Gather event calendar</a> and use tags for easy discovery.</p>
 
       <!-- PHASES -->
       <div class="phases">
@@ -457,12 +471,13 @@
           </div>
         </div>
 
-      </div>
+      </div><!-- end phases -->
+      </div><!-- end white card -->
 
       <!-- OPTIONAL -->
       <div class="optional-card">
         <h3>Optional customized experience</h3>
-        <p class="optional-sub">In addition to the free experience, we offer the following through <a href="mailto:hello@creating.works" style="color:#C4B5FD;text-decoration:none;">paid offerings</a></p>
+        <p class="optional-sub">In addition to the free experience, we offer the following through <a href="mailto:hello@creating.works" style="color:#1b6896;text-decoration:none;">paid offerings</a></p>
 
         <div class="optional-phase-label">Before the event</div>
         <p style="font-size:14px;color:var(--muted);line-height:1.6;">Communicate the goals of your event with a Creating Works partner to create measurable event success metrics.</p>
@@ -483,7 +498,7 @@
           <img src="https://images.squarespace-cdn.com/content/61737ed17b50983cebb2dcc2/1779563823155-46R330FG6ZYQRKV4EC5X/jessie+upp.jpg?content-type=image%2Fjpeg" alt="Jessie Upp" class="quote-photo">
           <div>
             <div class="quote-name">Jessie Upp</div>
-            <div class="quote-title">Founding Co-Creator, Creating Works</div>
+            <div class="quote-title">Founding Co-Creator · <a href="index.html#advisors" style="color:#1b6896;text-decoration:none;">Founding Advisors</a></div>
           </div>
         </div>
       </div>
@@ -514,6 +529,6 @@
 </body>
 </html>
 <!-- 
-  LAST CHANGE: Hero heading changed from "Coop Networking" to "Networking"
-  Version: V2.2 | Date: 2026-06-11
+  LAST CHANGE: Nav logo links to creating.works
+  Version: V2.5 | Date: 2026-06-15
 -->
