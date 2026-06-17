@@ -1,6 +1,6 @@
 <!--
   support.html
-  v2.11 - Acts of service tab; single-word chips; inline share on review; truncated URL display
+  v2.12 - Modal z-index above drawer; close drawer before modal; clean subCat display
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -244,7 +244,7 @@
     .page-footer a { color: rgba(255,255,255,0.75); text-decoration: none; }
 
     /* ── Sign-in modal ── */
-    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:300; align-items:flex-start; justify-content:center; padding:16px 20px 20px; overscroll-behavior:none; }
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:500; align-items:flex-start; justify-content:center; padding:16px 20px 20px; overscroll-behavior:none; }
     .modal-overlay.open { display:flex; }
     .modal { background:#fff; border-radius:16px; padding:32px; max-width:400px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,.2); text-align:center; }
     .modal-title { font-size:18px; font-weight:700; color:var(--text); margin-bottom:10px; }
@@ -350,7 +350,7 @@ function updateDebug() {
   if (el && _appearId) el.textContent = _appearId;
 }
 
-function openSigninModal()  { document.getElementById('signin-modal').classList.add('open'); }
+function openSigninModal()  { closeDrawer(); document.getElementById('signin-modal').classList.add('open'); }
 function closeSigninModal() { document.getElementById('signin-modal').classList.remove('open'); }
 
 // ─── State ─────────────────────────────────────────────────────────────────
@@ -697,7 +697,7 @@ function wishItemHTML(it, ctx) {
     <div class="wish-item${isDone?' done':''}">
       <div class="wish-icon">${it.subIcon}</div>
       <div class="wish-body">
-        <div class="wish-cat">${it.subLabel}</div>
+        <div class="wish-cat">${(it.subLabel||it.subCat||'').replace(/_/g,' ').replace(/-/g,' ')}</div>
         <div class="wish-title">${esc(it.title)}</div>
         ${it.note ? `<div class="wish-note">${esc(it.note)}</div>` : ''}
         ${isDone ? `<div class="wish-badge">${ctx==='builder'?'Received':'Gifted'}</div>` : ''}
@@ -912,6 +912,6 @@ function toast(msg) {
 }
 </script>
 
-<!-- v2.11 -->
+<!-- v2.12 -->
 </body>
 </html>
