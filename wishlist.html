@@ -1,15 +1,15 @@
 <!--
   wishlist.html
-  v1.9 - Remove Send care from People (moves to Experiences→For myself); remove Spaces→To enjoy;
-         add Labor to Share skills; strip who from For someone I care about presets
-  v1.8.7 - Fix _chips TDZ hoisting error
+  v2.0 - People removed; Experiences renamed Actions; Share skills + Share words move into Actions;
+         Actions use open text only with examples in description; removed Appear Network eyebrow
+
 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Appreciation list - Appear Network</title>
+  <title>Appreciation list - Creating Works</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -288,11 +288,13 @@ const THINGS_SUBS = [
   { id:'money',       icon:'💎', label:'Money',          desc:'Cash, digital, donation, gift cards, crypto, or help me pay for something', presets:['A one-time gift','A recurring contribution','A gift card','Crypto','Help me pay for something'] }
 ];
 
-const EXPERIENCES_SUBS = [
-  { id:'for-myself',   icon:'🧘', label:'For myself',               desc:'Something I do alone, on my own terms',      presets:['A massage','A spa day','A night away','A fitness class','A recording session','A digital subscription'] },
-  { id:'with-you',     icon:'🔄', label:'With you',                 desc:'Something we do together - you\'re present', presets:['Co-work for a day','Take a walk','Share a meal'] },
-  { id:'with-someone', icon:'🌐', label:'With someone else',        desc:'You facilitate with a third person',          presets:['2 tickets to a show','4 tickets to a class','A retreat for my team'] },
-  { id:'for-someone',  icon:'💛', label:'For someone I care about', desc:'I want this for them - I\'m not in it',       presets:['A class','A meal','A ticket'] }
+const ACTIONS_SUBS = [
+  { id:'share-skills', icon:'🛠',  label:'Share skills',             desc:'Do something for me. Examples: proofread my bio, fix my website, help me move, join my brainstorm' },
+  { id:'share-words',  icon:'💬',  label:'Share words',              desc:'Say or write something, give feedback, or introduce me to someone. Examples: write me a testimonial, leave a review, connect me with someone who gets what I'm building' },
+  { id:'for-myself',   icon:'🧘',  label:'For myself',               desc:'Something I do alone, on my own terms. Examples: a massage, a spa day, a night away, a fitness class, a recording session' },
+  { id:'with-you',     icon:'🔄',  label:'With you',                 desc:'Something we do together - you're present. Examples: co-work for a day, take a walk, share a meal' },
+  { id:'with-someone', icon:'🌐',  label:'With someone else',        desc:'You facilitate with a third person. Examples: 2 tickets to a show, a class for someone I love, a retreat for my team' },
+  { id:'for-someone',  icon:'💛',  label:'For someone I care about', desc:'I want this for them - I'm not in it. Examples: a class, a meal, a ticket' }
 ];
 
 // ─── State ─────────────────────────────────────────────────────────────────
@@ -301,21 +303,14 @@ let viewerData    = null;
 let viewFulfilled = new Set();
 
 let openTopCat    = null;
-let openPeopleSub = null;
 let openSpacesSub = null;
 let openThingsSub = null;
-let openExpSub    = null;
+let openActionSub = null;
 
-let selectedSkills     = new Set();
-let selectedWordsSubs  = new Set();
 let selectedSpaceChips = new Set();
 let selectedThingChips = new Set();
-let selectedExpChips   = new Set();
 
-let otherSkillOpen  = false;
-let otherSkillText  = '';
-let otherWordsOpen  = false;
-let otherWordsText  = '';
+
 let otherSpaceOpen  = false;
 let otherSpaceText  = '';
 let otherThingOpen  = false;
@@ -350,12 +345,7 @@ function saveViewer() {
 // ─── Navigation ────────────────────────────────────────────────────────────
 function setTopCat(id) {
   openTopCat = (openTopCat === id) ? null : id;
-  openPeopleSub = null; openSpacesSub = null; openThingsSub = null; openExpSub = null;
-  clearAll(); noteText = ''; render();
-}
-
-function setPeopleSub(id) {
-  openPeopleSub = (openPeopleSub === id) ? null : id;
+  openSpacesSub = null; openThingsSub = null; openActionSub = null;
   clearAll(); noteText = ''; render();
 }
 
@@ -369,14 +359,13 @@ function setThingsSub(id) {
   clearAll(); noteText = ''; render();
 }
 
-function setExpSub(id) {
-  openExpSub = (openExpSub === id) ? null : id;
+function setActionSub(id) {
+  openActionSub = (openActionSub === id) ? null : id;
   clearAll(); noteText = ''; render();
 }
 
 function clearAll() {
-  selectedSkills.clear(); selectedWordsSubs.clear();
-  selectedSpaceChips.clear(); selectedThingChips.clear(); selectedExpChips.clear();
+  selectedSpaceChips.clear(); selectedThingChips.clear();
   otherSkillOpen = false; otherSkillText = '';
   otherWordsOpen = false; otherWordsText = '';
   otherSpaceOpen = false; otherSpaceText = '';
@@ -392,11 +381,8 @@ function clearChipRegistry() { _chips = []; }
 function chipClick(type, idx) {
   const val = _chips[idx];
   if (!val) return;
-  if (type === 'skill') { toggle(selectedSkills, val); }
-  if (type === 'words') { toggle(selectedWordsSubs, val); }
   if (type === 'space') { toggle(selectedSpaceChips, val); }
   if (type === 'thing') { toggle(selectedThingChips, val); }
-  if (type === 'exp')   { toggle(selectedExpChips, val); }
   render();
 }
 
@@ -404,21 +390,15 @@ function toggle(set, val) { set.has(val) ? set.delete(val) : set.add(val); }
 
 // ─── Other chip toggles ────────────────────────────────────────────────────
 function toggleOther(type) {
-  if (type==='skill') { otherSkillOpen = !otherSkillOpen; if (!otherSkillOpen) otherSkillText=''; }
-  if (type==='words') { otherWordsOpen = !otherWordsOpen; if (!otherWordsOpen) otherWordsText=''; }
   if (type==='space') { otherSpaceOpen = !otherSpaceOpen; if (!otherSpaceOpen) otherSpaceText=''; }
   if (type==='thing') { otherThingOpen = !otherThingOpen; if (!otherThingOpen) otherThingText=''; }
-  if (type==='exp')   { otherExpOpen   = !otherExpOpen;   if (!otherExpOpen)   otherExpText=''; }
   render();
   setTimeout(() => { const el = document.getElementById('other-input-'+type); if (el) el.focus(); }, 50);
 }
 
 function updateOther(type, val) {
-  if (type==='skill') otherSkillText = val;
-  if (type==='words') otherWordsText = val;
   if (type==='space') otherSpaceText = val;
   if (type==='thing') otherThingText = val;
-  if (type==='exp')   otherExpText   = val;
 }
 
 function addOther(type) {
@@ -438,18 +418,15 @@ function addOther(type) {
   }
   if (type==='exp') {
     text=otherExpText;
-    const sub = EXPERIENCES_SUBS.find(s=>s.id===openExpSub);
-    subCat=openExpSub; subLabel=sub?.label||'Experiences'; subIcon=sub?.icon||'✨'; topCat='experiences';
+    const sub = ACTIONS_SUBS.find(s=>s.id===openActionSub);
+    subCat=openActionSub; subLabel=sub?.label||'Actions'; subIcon=sub?.icon||'✨'; topCat='actions';
   }
   text = (text||'').trim();
   if (!text) { toast('Name it first'); return; }
   // add as a selected chip value and close the other input
   set.add(text);
-  if (type==='skill') { otherSkillOpen=false; otherSkillText=''; }
-  if (type==='words') { otherWordsOpen=false; otherWordsText=''; }
   if (type==='space') { otherSpaceOpen=false; otherSpaceText=''; }
   if (type==='thing') { otherThingOpen=false; otherThingText=''; }
-  if (type==='exp')   { otherExpOpen=false;   otherExpText=''; }
   render();
 }
 
@@ -462,17 +439,12 @@ function addToList() {
   let label = '', subCat = '', subLabel = '', subIcon = '', topCat = '';
   let hasSelection = false;
 
-  if (openTopCat === 'people') {
-    if (openPeopleSub === 'skills') {
-      if (!selectedSkills.size) { toast('Select at least one skill'); return; }
-      label = [...selectedSkills].join(' + ');
-      subCat='skills'; subLabel='Share skills'; subIcon='🛠'; topCat='people'; hasSelection=true;
-    } else if (openPeopleSub === 'words') {
-      if (!selectedWordsSubs.size) { toast('Select at least one option'); return; }
-      if (selectedWordsSubs.has('intro') && !note) { toast('Use the note field to name who you\'re looking for'); return; }
-      label = [...selectedWordsSubs].map(id => WORDS_SUBS.find(w=>w.id===id)?.label || id).join(' + ');
-      subCat='words'; subLabel='Share words'; subIcon='💬'; topCat='people'; hasSelection=true;
-    }
+  if (openTopCat === 'actions') {
+    if (!openActionSub) { toast('Choose a type first'); return; }
+    if (!note) { toast('Tell me what you need'); return; }
+    const sub = ACTIONS_SUBS.find(s=>s.id===openActionSub);
+    label = note;
+    subCat=openActionSub; subLabel=sub?.label||'Actions'; subIcon=sub?.icon||'✨'; topCat='actions'; hasSelection=true;
   } else if (openTopCat === 'spaces') {
     if (!openSpacesSub) { toast('Choose a space type first'); return; }
     if (!selectedSpaceChips.size) { toast('Select at least one option'); return; }
@@ -485,19 +457,13 @@ function addToList() {
     const sub = THINGS_SUBS.find(s=>s.id===openThingsSub);
     label = [...selectedThingChips].join(' + ');
     subCat=openThingsSub; subLabel=sub?.label||'Things'; subIcon=sub?.icon||'📦'; topCat='things'; hasSelection=true;
-  } else if (openTopCat === 'experiences') {
-    if (!openExpSub) { toast('Choose an experience type first'); return; }
-    if (!selectedExpChips.size) { toast('Select at least one option'); return; }
-    const sub = EXPERIENCES_SUBS.find(s=>s.id===openExpSub);
-    label = [...selectedExpChips].join(' + ');
-    subCat=openExpSub; subLabel=sub?.label||'Experiences'; subIcon=sub?.icon||'✨'; topCat='experiences'; hasSelection=true;
   }
 
   if (!hasSelection) return;
 
-  items.push({ id: uid(), topCat, subCat, subLabel, subIcon, title: label, note, done: false });
+  items.push({ id: uid(), topCat, subCat, subLabel, subIcon, title: label, note:'', done: false });
   clearAll(); noteText = '';
-  save(); render(); updateFAB();
+  save(); render();
   toast('Added to your list');
 }
 
@@ -629,25 +595,22 @@ function builderHTML() {
     : '';
   return `
     ${fabHTML}
-    <div class="eyebrow">Appear Network</div>
     <h1>Your appreciation list</h1>
     <p class="subtitle">Tell people how they can show up for you.</p>
     <div class="field">
       <label>Your ID</label>
-      <input type="text" id="b-name" value="${esc(myName)}" placeholder="Your Appear Network ID" oninput="updateName()">
+      <input type="text" id="b-name" value="${esc(myName)}" placeholder="Your member ID" oninput="updateName()">
     </div>
     <hr>
     <div class="eyebrow" style="margin-bottom:12px">How would you like to receive appreciation?</div>
     <div class="top-tabs">
-      <button class="top-tab${openTopCat==='people'?' active':''}"      onclick="setTopCat('people')">👥 People</button>
-      <button class="top-tab${openTopCat==='spaces'?' active':''}"      onclick="setTopCat('spaces')">🏡 Spaces</button>
-      <button class="top-tab${openTopCat==='things'?' active':''}"      onclick="setTopCat('things')">📦 Things</button>
-      <button class="top-tab${openTopCat==='experiences'?' active':''}" onclick="setTopCat('experiences')">✨ Experiences</button>
+      <button class="top-tab${openTopCat==='spaces'?' active':''}"  onclick="setTopCat('spaces')">🏡 Spaces</button>
+      <button class="top-tab${openTopCat==='things'?' active':''}"  onclick="setTopCat('things')">📦 Things</button>
+      <button class="top-tab${openTopCat==='actions'?' active':''}" onclick="setTopCat('actions')">✨ Actions</button>
     </div>
-    ${openTopCat==='people'      ? peopleSection()      : ''}
-    ${openTopCat==='spaces'      ? spacesSection()      : ''}
-    ${openTopCat==='things'      ? thingsSection()      : ''}
-    ${openTopCat==='experiences' ? experiencesSection() : ''}
+    ${openTopCat==='spaces'  ? spacesSection()  : ''}
+    ${openTopCat==='things'  ? thingsSection()  : ''}
+    ${openTopCat==='actions' ? actionsSection() : ''}
   `;
 }
 
@@ -671,52 +634,16 @@ function chipRow(chips, type, selectedSet) {
 
 function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
-function addArea(hasSelection) {
-  return hasSelection ? `
+function addArea(hasSelection, isAction) {
+  if (!hasSelection) return '';
+  const lbl   = isAction ? 'What do you need?' : 'Anything to add? (optional)';
+  const ph    = isAction ? 'Describe your wish...' : 'Add a note or link';
+  return `
     <div class="add-area">
-      <div class="add-area-label">Elaborate on your wish here (optional)</div>
-      <input type="text" value="${esc(noteText)}" placeholder="Add a note or link" oninput="updateNote(this.value)" onkeydown="if(event.key==='Enter')addToList()">
+      <div class="add-area-label">${lbl}</div>
+      <input type="text" value="${esc(noteText)}" placeholder="${ph}" oninput="updateNote(this.value)" onkeydown="if(event.key==='Enter')addToList()">
       <button class="btn-add" onclick="addToList()">Add to list</button>
-    </div>` : '';
-}
-
-// ─── People ────────────────────────────────────────────────────────────────
-function peopleSection() {
-  let html = `<div class="drill-section">
-    <div class="drill-label">👥 People</div>
-    <div class="sub-tabs">
-      <button class="sub-tab${openPeopleSub==='skills'?' active':''}" onclick="setPeopleSub('skills')">🛠 Share skills</button>
-      <button class="sub-tab${openPeopleSub==='words'?' active':''}" onclick="setPeopleSub('words')">💬 Share words</button>
     </div>`;
-
-  if (openPeopleSub === 'skills') {
-    const otherOpen = otherSkillOpen;
-    const otherText = otherSkillText;
-    html += `<div class="drill-sub">
-      <div class="drill-sub-label">🛠 Share skills</div>
-      <div class="drill-sub-desc">Select one or more skills</div>
-      <div class="skills-grid">
-        ${SKILLS.map(s=>{ const idx=regChip(s); return `<button class="skill-chip${selectedSkills.has(s)?' selected':''}" onclick="chipClick('skill',${idx})">${esc(s)}</button>`; }).join('')}
-        <button class="skill-chip other-chip${otherOpen?' selected':''}" onclick="toggleOther('skill')">${otherOpen?'✕ Other':'+ Other'}</button>
-      </div>
-      ${otherOpen ? `<div class="other-input-wrap"><input type="text" id="other-input-skill" value="${esc(otherText)}" placeholder="Have something specific in mind? (optional)" oninput="updateOther('skill',this.value)" onkeydown="if(event.key==='Enter')addOther('skill')"><button class="btn-other-add" onclick="addOther('skill')">Add</button></div>` : ''}
-      ${addArea(selectedSkills.size > 0)}
-    </div>`;
-  }
-
-  if (openPeopleSub === 'words') {
-    html += `<div class="drill-sub">
-      <div class="drill-sub-label">💬 Share words</div>
-      <div class="drill-sub-desc">Select one or more</div>
-      ${chipRow(WORDS_SUBS.map(w=>w.id), 'words', selectedWordsSubs)}
-      ${selectedWordsSubs.has('intro') ? `<div class="drill-sub-desc" style="margin-top:8px">Use the note field below to name who you're looking for.</div>` : ''}
-      ${addArea(selectedWordsSubs.size > 0)}
-    </div>`;
-  }
-
-
-  html += `</div>`;
-  return html;
 }
 
 // ─── Spaces ────────────────────────────────────────────────────────────────
@@ -759,22 +686,23 @@ function thingsSection() {
   return html;
 }
 
-// ─── Experiences ───────────────────────────────────────────────────────────
-function experiencesSection() {
+// ─── Actions ──────────────────────────────────────────────────────────────
+function actionsSection() {
   let html = `<div class="drill-section">
-    <div class="drill-label">✨ Experiences</div>
+    <div class="drill-label">✨ Actions</div>
     <div class="sub-tabs">
-      ${EXPERIENCES_SUBS.map(s=>`<button class="sub-tab${openExpSub===s.id?' active':''}" onclick="setExpSub('${s.id}')">${s.icon} ${s.label}</button>`).join('')}
+      ${ACTIONS_SUBS.map(s=>`<button class="sub-tab${openActionSub===s.id?' active':''}" onclick="setActionSub('${s.id}')">${s.icon} ${s.label}</button>`).join('')}
     </div>`;
-  const sub = EXPERIENCES_SUBS.find(s=>s.id===openExpSub);
+
+  const sub = ACTIONS_SUBS.find(s=>s.id===openActionSub);
   if (sub) {
     html += `<div class="drill-sub">
       <div class="drill-sub-label">${sub.icon} ${sub.label}</div>
       <div class="drill-sub-desc">${sub.desc}</div>
-      ${chipRow(sub.presets, 'exp', selectedExpChips)}
-      ${addArea(selectedExpChips.size > 0)}
+      ${addArea(true, true)}
     </div>`;
   }
+
   html += `</div>`;
   return html;
 }
@@ -813,7 +741,7 @@ function viewerHTML() {
   const done   = vItems.filter(i=> viewFulfilled.has(String(i.id)));
   const pct    = vItems.length ? Math.round((done.length/vItems.length)*100) : 0;
   return `
-    <div class="eyebrow" style="text-align:center">Appear Network</div>
+    <div class="eyebrow" style="text-align:center">Creating Works</div>
     <h1 style="text-align:center;margin-bottom:6px">${esc(name)}'s appreciation list</h1>
     <p class="subtitle" style="text-align:center">Ways to show up for ${esc(name)}.</p>
     ${vItems.length ? `<div class="progress-wrap"><div class="progress-labels"><span>${done.length} gifted</span><span>${active.length} still open</span></div><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div></div>` : ''}
@@ -836,6 +764,6 @@ function toast(msg) {
 }
 </script>
 
-<!-- v1.9 -->
+<!-- v2.0 -->
 </body>
 </html>
