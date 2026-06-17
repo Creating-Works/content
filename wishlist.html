@@ -1,8 +1,6 @@
 <!--
   wishlist.html
-  v2.0 - People removed; Experiences renamed Actions; Share skills + Share words move into Actions;
-         Actions use open text only with examples in description; removed Appear Network eyebrow
-
+  v2.3 - For myself shows 3 chips then text; With you/others/someone go straight to desc + text
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -289,12 +287,16 @@ const THINGS_SUBS = [
 ];
 
 const ACTIONS_SUBS = [
-  { id:'share-skills', icon:'🛠',  label:'Share skills',             desc:'Do something for me. Examples: proofread my bio, fix my website, help me move, join my brainstorm' },
-  { id:'share-words',  icon:'💬',  label:'Share words',              desc:'Say or write something, give feedback, or introduce me to someone. Examples: write me a testimonial, leave a review, connect me with someone who gets what I'm building' },
-  { id:'for-myself',   icon:'🧘',  label:'For myself',               desc:'Something I do alone, on my own terms. Examples: a massage, a spa day, a night away, a fitness class, a recording session' },
-  { id:'with-you',     icon:'🔄',  label:'With you',                 desc:'Something we do together - you're present. Examples: co-work for a day, take a walk, share a meal' },
-  { id:'with-someone', icon:'🌐',  label:'With someone else',        desc:'You facilitate with a third person. Examples: 2 tickets to a show, a class for someone I love, a retreat for my team' },
-  { id:'for-someone',  icon:'💛',  label:'For someone I care about', desc:'I want this for them - I'm not in it. Examples: a class, a meal, a ticket' }
+  { id:'for-myself',   icon:'🧘', label:'For myself',               expDesc:"Examples: a massage, a spa day, a night away, a fitness class, a recording session" },
+  { id:'with-you',     icon:'🔄', label:'With you',                 expDesc:"Examples: co-work for a day, take a walk, share a meal" },
+  { id:'with-someone', icon:'🌐', label:'With someone else',        expDesc:"Examples: 2 tickets to a show, a class, a retreat for my team" },
+  { id:'for-someone',  icon:'💛', label:'For someone I care about', expDesc:"Examples: a class, a meal, a ticket" }
+];
+
+const ACTION_CHIPS = [
+  { id:'skills',     icon:'🛠', label:'Share skills',      desc:"Do something for me. Examples: proofread my bio, fix my website, help me move, join my brainstorm" },
+  { id:'words',      icon:'💬', label:'Share words',       desc:"Say or write something, give feedback, or introduce me to someone. Examples: write me a testimonial, leave a review, connect me with someone who gets what I'm building" },
+  { id:'experience', icon:'✨', label:'Share an experience', desc:null }
 ];
 
 // ─── State ─────────────────────────────────────────────────────────────────
@@ -305,10 +307,9 @@ let viewFulfilled = new Set();
 let openTopCat    = null;
 let openSpacesSub = null;
 let openThingsSub = null;
-let openActionSub = null;
+let openActionSub  = null;
+let selectedActionChip = null;
 
-let selectedSpaceChips = new Set();
-let selectedThingChips = new Set();
 
 
 let otherSpaceOpen  = false;
@@ -361,11 +362,16 @@ function setThingsSub(id) {
 
 function setActionSub(id) {
   openActionSub = (openActionSub === id) ? null : id;
-  clearAll(); noteText = ''; render();
+  selectedActionChip = null; noteText = ''; render();
+}
+
+function setActionChip(id) {
+  selectedActionChip = (selectedActionChip === id) ? null : id;
+  noteText = ''; render();
 }
 
 function clearAll() {
-  selectedSpaceChips.clear(); selectedThingChips.clear();
+  selectedActionChip = null;
   otherSkillOpen = false; otherSkillText = '';
   otherWordsOpen = false; otherWordsText = '';
   otherSpaceOpen = false; otherSpaceText = '';
@@ -381,8 +387,6 @@ function clearChipRegistry() { _chips = []; }
 function chipClick(type, idx) {
   const val = _chips[idx];
   if (!val) return;
-  if (type === 'space') { toggle(selectedSpaceChips, val); }
-  if (type === 'thing') { toggle(selectedThingChips, val); }
   render();
 }
 
@@ -390,15 +394,11 @@ function toggle(set, val) { set.has(val) ? set.delete(val) : set.add(val); }
 
 // ─── Other chip toggles ────────────────────────────────────────────────────
 function toggleOther(type) {
-  if (type==='space') { otherSpaceOpen = !otherSpaceOpen; if (!otherSpaceOpen) otherSpaceText=''; }
-  if (type==='thing') { otherThingOpen = !otherThingOpen; if (!otherThingOpen) otherThingText=''; }
   render();
   setTimeout(() => { const el = document.getElementById('other-input-'+type); if (el) el.focus(); }, 50);
 }
 
 function updateOther(type, val) {
-  if (type==='space') otherSpaceText = val;
-  if (type==='thing') otherThingText = val;
 }
 
 function addOther(type) {
@@ -425,8 +425,6 @@ function addOther(type) {
   if (!text) { toast('Name it first'); return; }
   // add as a selected chip value and close the other input
   set.add(text);
-  if (type==='space') { otherSpaceOpen=false; otherSpaceText=''; }
-  if (type==='thing') { otherThingOpen=false; otherThingText=''; }
   render();
 }
 
@@ -441,21 +439,25 @@ function addToList() {
 
   if (openTopCat === 'actions') {
     if (!openActionSub) { toast('Choose a type first'); return; }
+    if (openActionSub === 'for-myself' && !selectedActionChip) { toast('Choose skills, words, or an experience'); return; }
     if (!note) { toast('Tell me what you need'); return; }
-    const sub = ACTIONS_SUBS.find(s=>s.id===openActionSub);
+    const sub  = ACTIONS_SUBS.find(s=>s.id===openActionSub);
+    const chip = ACTION_CHIPS.find(c=>c.id===selectedActionChip);
     label = note;
-    subCat=openActionSub; subLabel=sub?.label||'Actions'; subIcon=sub?.icon||'✨'; topCat='actions'; hasSelection=true;
+    subCat = openActionSub + (selectedActionChip ? '_'+selectedActionChip : '');
+    subLabel = selectedActionChip ? (chip?.label||'Action') + ' · ' + (sub?.label||'') : (sub?.label||'Actions');
+    subIcon = chip?.icon || sub?.icon || '✨'; topCat='actions'; hasSelection=true;
   } else if (openTopCat === 'spaces') {
     if (!openSpacesSub) { toast('Choose a space type first'); return; }
-    if (!selectedSpaceChips.size) { toast('Select at least one option'); return; }
+    if (!note) { toast('Tell me what you need'); return; }
     const sub = SPACES_SUBS.find(s=>s.id===openSpacesSub);
-    label = [...selectedSpaceChips].join(' + ');
+    label = note;
     subCat=openSpacesSub; subLabel=sub?.label||'Spaces'; subIcon=sub?.icon||'🏡'; topCat='spaces'; hasSelection=true;
   } else if (openTopCat === 'things') {
     if (!openThingsSub) { toast('Choose a type first'); return; }
-    if (!selectedThingChips.size) { toast('Select at least one option'); return; }
+    if (!note) { toast('Tell me what you need'); return; }
     const sub = THINGS_SUBS.find(s=>s.id===openThingsSub);
-    label = [...selectedThingChips].join(' + ');
+    label = note;
     subCat=openThingsSub; subLabel=sub?.label||'Things'; subIcon=sub?.icon||'📦'; topCat='things'; hasSelection=true;
   }
 
@@ -658,8 +660,7 @@ function spacesSection() {
     html += `<div class="drill-sub">
       <div class="drill-sub-label">${sub.icon} ${sub.label}</div>
       <div class="drill-sub-desc">${sub.desc}</div>
-      ${chipRow(sub.presets, 'space', selectedSpaceChips)}
-      ${addArea(selectedSpaceChips.size > 0)}
+      ${addArea(true, false)}
     </div>`;
   }
   html += `</div>`;
@@ -678,8 +679,7 @@ function thingsSection() {
     html += `<div class="drill-sub">
       <div class="drill-sub-label">${sub.icon} ${sub.label}</div>
       <div class="drill-sub-desc">${sub.desc}</div>
-      ${chipRow(sub.presets, 'thing', selectedThingChips)}
-      ${addArea(selectedThingChips.size > 0)}
+      ${addArea(true, false)}
     </div>`;
   }
   html += `</div>`;
@@ -688,19 +688,42 @@ function thingsSection() {
 
 // ─── Actions ──────────────────────────────────────────────────────────────
 function actionsSection() {
+  const sub  = ACTIONS_SUBS.find(s=>s.id===openActionSub);
+  const chip = ACTION_CHIPS.find(c=>c.id===selectedActionChip);
+  const isForMyself = openActionSub === 'for-myself';
+
+  // Description for selected chip (For myself only)
+  let chipDesc = '';
+  if (chip && isForMyself) {
+    chipDesc = chip.id === 'experience' ? sub.expDesc : chip.desc;
+  }
+
   let html = `<div class="drill-section">
     <div class="drill-label">✨ Actions</div>
     <div class="sub-tabs">
       ${ACTIONS_SUBS.map(s=>`<button class="sub-tab${openActionSub===s.id?' active':''}" onclick="setActionSub('${s.id}')">${s.icon} ${s.label}</button>`).join('')}
     </div>`;
 
-  const sub = ACTIONS_SUBS.find(s=>s.id===openActionSub);
   if (sub) {
     html += `<div class="drill-sub">
-      <div class="drill-sub-label">${sub.icon} ${sub.label}</div>
-      <div class="drill-sub-desc">${sub.desc}</div>
-      ${addArea(true, true)}
-    </div>`;
+      <div class="drill-sub-label">${sub.icon} ${sub.label}</div>`;
+
+    if (isForMyself) {
+      // Show 3 chips first, then description + text after chip selected
+      html += `<div class="chip-row" style="margin-bottom:12px">
+        ${ACTION_CHIPS.map(c=>`<button class="chip${selectedActionChip===c.id?' selected':''}" onclick="setActionChip('${c.id}')">${c.icon} ${c.label}</button>`).join('')}
+      </div>`;
+      if (chip) {
+        html += `<div class="drill-sub-desc">${chipDesc}</div>`;
+        html += addArea(true, true);
+      }
+    } else {
+      // With you / With someone else / For someone I care about - desc + text directly
+      html += `<div class="drill-sub-desc">${sub.expDesc}</div>`;
+      html += addArea(true, true);
+    }
+
+    html += `</div>`;
   }
 
   html += `</div>`;
@@ -764,6 +787,6 @@ function toast(msg) {
 }
 </script>
 
-<!-- v2.0 -->
+<!-- v2.3 -->
 </body>
 </html>
