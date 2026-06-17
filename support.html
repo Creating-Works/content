@@ -1,13 +1,14 @@
 <!--
-  wishlist.html
-  v2.4 - Identity: getMemberId() wired; sign-in modal gates addToList when no ID found
+  support.html
+  v2.5 - Renamed to support.html; all copy updated to support framing; 🌱 favicon
 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Appreciation list - Creating Works</title>
+  <title>Ways to support me - Creating Works</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -151,7 +152,7 @@
     .btn-add:disabled { opacity: 0.4; cursor: default; }
 
     /* ── FAB ── */
-    .wishlist-fab {
+    .support-fab {
       position: fixed;
       top: 20px;
       right: 20px;
@@ -163,7 +164,7 @@
       transition: background 0.2s; display: flex; align-items: center; gap: 8px;
       z-index: 9999; white-space: nowrap;
     }
-    .wishlist-fab:hover { background: var(--hover); }
+    .support-fab:hover { background: var(--hover); }
     .badge {
       background: white; color: var(--brand); border-radius: 12px; padding: 2px 8px;
       font-size: 13px; font-weight: 700; min-width: 22px; text-align: center;
@@ -271,8 +272,8 @@
 <!-- Sign-in modal -->
 <div class="modal-overlay" id="signin-modal" onclick="if(event.target===this)closeSigninModal()">
   <div class="modal">
-    <div class="modal-title">Add your wishlist</div>
-    <div class="modal-body">Sign in or sign up to save your wishlist and share it with others.<br><br><a href="https://appear.network">Go to Appear Network →</a></div>
+    <div class="modal-title">Add your support list</div>
+    <div class="modal-body">Sign in or sign up to save your support list and share it with others.<br><br><a href="https://appear.network">Go to Appear Network →</a></div>
     <button class="btn-primary" style="margin-top:0" onclick="closeSigninModal()">Got it</button>
   </div>
 </div>
@@ -373,13 +374,13 @@ let myName    = '';
     try { viewerData = JSON.parse(decodeURIComponent(escape(atob(encoded)))); mode = 'viewer'; } catch(_) {}
     try { viewFulfilled = new Set(JSON.parse(localStorage.getItem('vf_' + encoded.slice(0,24)) || '[]')); } catch(_) {}
   } else {
-    try { const s = JSON.parse(localStorage.getItem('an_wishlist_18') || '{}'); items = s.items||[]; myName = s.name||''; } catch(_) {}
+    try { const s = JSON.parse(localStorage.getItem('an_support_25') || '{}'); items = s.items||[]; myName = s.name||''; } catch(_) {}
     if (_appearId && !myName) myName = _appearId;
   }
   render();
 })();
 
-function save() { localStorage.setItem('an_wishlist_18', JSON.stringify({ name: myName, items })); }
+function save() { localStorage.setItem('an_support_25', JSON.stringify({ name: myName, items })); }
 function saveViewer() {
   const encoded = new URLSearchParams(window.location.search).get('list');
   localStorage.setItem('vf_' + encoded.slice(0,24), JSON.stringify([...viewFulfilled]));
@@ -536,7 +537,7 @@ function renderDrawer() {
   let html = `
     <div class="drawer-handle"></div>
     <div class="drawer-header">
-      <div class="drawer-title">My wishlist (${total})</div>
+      <div class="drawer-title">My support list (${total})</div>
       <button class="btn-close" onclick="closeDrawer()">✕</button>
     </div>`;
 
@@ -550,7 +551,7 @@ function renderDrawer() {
       ${done.length ? `<div class="eyebrow" style="margin:20px 0 10px">Received</div>${done.map(it=>wishItemHTML(it,'builder')).join('')}` : ''}
       <button class="btn-primary" onclick="closeDrawer();goToReview()">Review + generate shareable link</button>`;
   } else {
-    html += `<div class="empty">Nothing on your list yet.</div>`;
+    html += `<div class="empty">Nothing on your support list yet.</div>`;
   }
 
   if (shareURL) {
@@ -636,12 +637,12 @@ function render() {
 // ─── Builder ───────────────────────────────────────────────────────────────
 function builderHTML() {
   const fabHTML = items.length
-    ? `<button class="wishlist-fab" onclick="openDrawer()">My wishlist <span class="badge">${items.length}</span></button>`
+    ? `<button class="support-fab" onclick="openDrawer()">My support list <span class="badge">${items.length}</span></button>`
     : '';
   return `
     ${fabHTML}
-    <h1>Your appreciation list</h1>
-    <p class="subtitle">Tell people how they can show up for you.</p>
+    <h1>Ways to support me</h1>
+    <p class="subtitle">When someone wants to show appreciation for what you gave them, here's how they can support you.</p>
     <div class="field">
       <label>Your ID</label>
       <input type="text" id="b-name" value="${esc(myName)}" placeholder="Your member ID" oninput="updateName()">
@@ -783,7 +784,7 @@ function reviewHTML() {
   const catCount = Object.keys(grouped).length;
   const total    = items.length;
   return `
-    <div class="eyebrow">Review your list</div>
+    <div class="eyebrow">Review your support list</div>
     <div class="review-header">
       <div><h2>Looks good?</h2><p class="review-count">${total} item${total!==1?'s':''} across ${catCount} categor${catCount!==1?'ies':'y'}</p></div>
       <button class="btn-edit" onclick="goToBuilder()">← Edit</button>
@@ -808,14 +809,14 @@ function viewerHTML() {
   const pct    = vItems.length ? Math.round((done.length/vItems.length)*100) : 0;
   return `
     <div class="eyebrow" style="text-align:center">Creating Works</div>
-    <h1 style="text-align:center;margin-bottom:6px">${esc(name)}'s appreciation list</h1>
-    <p class="subtitle" style="text-align:center">Ways to show up for ${esc(name)}.</p>
+    <h1 style="text-align:center;margin-bottom:6px">Ways to support ${esc(name)}</h1>
+    <p class="subtitle" style="text-align:center">Here's how ${esc(name)} would like to be supported.</p>
     ${vItems.length ? `<div class="progress-wrap"><div class="progress-labels"><span>${done.length} gifted</span><span>${active.length} still open</span></div><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div></div>` : ''}
-    ${active.length ? `<div class="eyebrow" style="margin-bottom:12px">Still needed</div>${active.map(it=>wishItemHTML(it,'viewer')).join('')}` : `<div class="empty">Everything has been gifted. ${esc(name)} is well supported right now.</div>`}
+    ${active.length ? `<div class="eyebrow" style="margin-bottom:12px">Still needed</div>${active.map(it=>wishItemHTML(it,'viewer')).join('')}` : `<div class="empty">${esc(name)} is well supported right now - everything has been offered.</div>`}
     ${done.length ? `<div class="eyebrow" style="margin:24px 0 12px">Already gifted</div>${done.map(it=>wishItemHTML(it,'viewer')).join('')}` : ''}
     <hr>
-    <p style="font-size:13px;color:var(--muted);text-align:center;margin-bottom:14px">Want to create your own list?</p>
-    <a href="${location.origin + location.pathname}" class="btn-outline">Create my list</a>`;
+    <p style="font-size:13px;color:var(--muted);text-align:center;margin-bottom:14px">Want to share ways people can support you?</p>
+    <a href="${location.origin + location.pathname}" class="btn-outline">Create my support list</a>`;
 }
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
@@ -830,6 +831,6 @@ function toast(msg) {
 }
 </script>
 
-<!-- v2.4 -->
+<!-- v2.5 -->
 </body>
 </html>
