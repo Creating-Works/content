@@ -1,6 +1,6 @@
 <!--
   support.html
-  v2.5 - Renamed to support.html; all copy updated to support framing; 🌱 favicon
+  v2.6 - GS_URL wired; saveSupportItem on add; getSupportList on load; Spaces collapsed; ID field → member card display
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -299,8 +299,7 @@ const WORDS_SUBS = [
 ];
 
 const SPACES_SUBS = [
-  { id:'work-create', icon:'🖥',  label:'To work or create', desc:'Studio, workshop, desk',         presets:['Use of your studio','A quiet room for the day','Access to your workshop'] },
-  { id:'gather',      icon:'🏠',  label:'To gather',          desc:'Your home, a meeting room, a venue', presets:['Host a meeting at your place','Lend me your space for an event','A venue for the day'] }
+  { id:'space', icon:'🏡', label:'A space', desc:'Your home, a meeting room, a venue, studio, workshop, desk' }
 ];
 
 const THINGS_SUBS = [
@@ -337,6 +336,8 @@ let _appearId = getMemberId();
     try { localStorage.setItem('appear-id', _appearId); } catch(e) {}
   }
 })();
+
+const GS_URL = 'https://script.google.com/macros/s/AKfycbzEavMnG4tMeWemoT5FLu9f_zjlKVIJsZLueG4nhw9akK0_nZqpbkZiXrAlWu1Fyhq9/exec';
 
 function openSigninModal()  { document.getElementById('signin-modal').classList.add('open'); }
 function closeSigninModal() { document.getElementById('signin-modal').classList.remove('open'); }
@@ -376,9 +377,37 @@ let myName    = '';
   } else {
     try { const s = JSON.parse(localStorage.getItem('an_support_25') || '{}'); items = s.items||[]; myName = s.name||''; } catch(_) {}
     if (_appearId && !myName) myName = _appearId;
+    if (_appearId) loadSupportList();
   }
   render();
 })();
+
+async function loadSupportList() {
+  try {
+    const res  = await fetch(GS_URL + '?action=getSupportList&appearId=' + encodeURIComponent(_appearId));
+    const data = await res.json();
+    if (data.status === 'ok' && data.items && data.items.length) {
+      // Merge sheet items - don't overwrite locally added ones
+      const existingTitles = new Set(items.map(i => i.title));
+      data.items.forEach(function(r) {
+        if (!existingTitles.has(r.item)) {
+          items.push({
+            id: uid(),
+            topCat:   r.category,
+            subCat:   r.subCategory,
+            subLabel: r.subCategory,
+            subIcon:  '🌱',
+            title:    r.item,
+            note:     r.note || '',
+            done:     false
+          });
+        }
+      });
+      save();
+      render();
+    }
+  } catch(e) {}
+}
 
 function save() { localStorage.setItem('an_support_25', JSON.stringify({ name: myName, items })); }
 function saveViewer() {
@@ -507,10 +536,20 @@ function addToList() {
 
   if (!hasSelection) return;
 
-  items.push({ id: uid(), topCat, subCat, subLabel, subIcon, title: label, note:'', done: false });
+  const newItem = { id: uid(), topCat, subCat, subLabel, subIcon, title: label, note:'', done: false };
+  items.push(newItem);
   clearAll(); noteText = '';
   save(); render();
   toast('Added to your list');
+  if (_appearId) {
+    fetch(GS_URL + '?action=saveSupportItem'
+      + '&appearId=' + encodeURIComponent(_appearId)
+      + '&category=' + encodeURIComponent(topCat)
+      + '&subCategory=' + encodeURIComponent(subCat)
+      + '&item=' + encodeURIComponent(label)
+      + '&note=' + encodeURIComponent('')
+    ).catch(() => {});
+  }
 }
 
 // ─── FAB ───────────────────────────────────────────────────────────────────
@@ -643,12 +682,9 @@ function builderHTML() {
     ${fabHTML}
     <h1>Ways to support me</h1>
     <p class="subtitle">When someone wants to show appreciation for what you gave them, here's how they can support you.</p>
-    <div class="field">
-      <label>Your ID</label>
-      <input type="text" id="b-name" value="${esc(myName)}" placeholder="Your member ID" oninput="updateName()">
-    </div>
+    ${_appearId ? `<div style="font-size:12px;color:var(--muted);text-align:right;margin-bottom:20px;">🌱 ${esc(_appearId)}</div>` : ''}
     <hr>
-    <div class="eyebrow" style="margin-bottom:12px">How would you like to receive appreciation?</div>
+    <div class="eyebrow" style="margin-bottom:12px">How can people support you?</div>
     <div class="top-tabs">
       <button class="top-tab${openTopCat==='spaces'?' active':''}"  onclick="setTopCat('spaces')">🏡 Spaces</button>
       <button class="top-tab${openTopCat==='things'?' active':''}"  onclick="setTopCat('things')">📦 Things</button>
@@ -831,6 +867,6 @@ function toast(msg) {
 }
 </script>
 
-<!-- v2.5 -->
+<!-- v2.6 -->
 </body>
 </html>
