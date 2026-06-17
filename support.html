@@ -1,6 +1,6 @@
 <!--
   support.html
-  v2.12 - Modal z-index above drawer; close drawer before modal; clean subCat display
+  v2.13 - Living things chip; Review my list button; viewer copy fixes; modal top fix
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -244,7 +244,7 @@
     .page-footer a { color: rgba(255,255,255,0.75); text-decoration: none; }
 
     /* ── Sign-in modal ── */
-    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:500; align-items:flex-start; justify-content:center; padding:16px 20px 20px; overscroll-behavior:none; }
+    .modal-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,.45); z-index:500; align-items:flex-start; justify-content:flex-start; padding:16px 20px 20px; overflow-y:auto; }
     .modal-overlay.open { display:flex; }
     .modal { background:#fff; border-radius:16px; padding:32px; max-width:400px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,.2); text-align:center; }
     .modal-title { font-size:18px; font-weight:700; color:var(--text); margin-bottom:10px; }
@@ -309,9 +309,10 @@ const SPACES_SUBS = [
 ];
 
 const THINGS_SUBS = [
-  { id:'physical',    icon:'📦', label:'Physical goods', desc:'Examples: a book, gear or equipment, art supplies, a tool I need', presets:['A book','Gear or equipment','Art supplies','A tool I need'] },
-  { id:'consumables', icon:'🍵', label:'Consumables',    desc:'Examples: coffee, a homemade meal, local ingredients, food for the week',                   presets:['Coffee','A homemade meal','Local ingredients','Food for the week'] },
-  { id:'money',       icon:'💎', label:'Money',          desc:'Examples: a one-time gift, a recurring contribution, a gift card, help me pay for something', presets:['A one-time gift','A recurring contribution','A gift card','Crypto','Help me pay for something'] }
+  { id:'physical',    icon:'📦', label:'Physical goods', desc:'Examples: a book, gear or equipment, art supplies, a tool I need' },
+  { id:'consumables', icon:'🍵', label:'Consumables',    desc:'Examples: coffee, a homemade meal, local ingredients, food for the week' },
+  { id:'money',       icon:'💎', label:'Money',          desc:'Examples: a one-time gift, a recurring contribution, a gift card, help me pay for something' },
+  { id:'living',      icon:'🪴', label:'Living things', desc:'Examples: a Persian cucumber plant, a bouquet of flowers, eggplant seeds, a clipping from your garden, ladybugs for my garden' }
 ];
 
 const ACTIONS_SUBS = [
@@ -607,7 +608,7 @@ function renderDrawer() {
       </div>
       ${active.map(it=>wishItemHTML(it,'builder')).join('')}
       ${done.length ? `<div class="eyebrow" style="margin:20px 0 10px">Received</div>${done.map(it=>wishItemHTML(it,'builder')).join('')}` : ''}
-      <button class="btn-primary" onclick="closeDrawer();goToReview()">Review + generate shareable link</button>`;
+      <button class="btn-primary" onclick="closeDrawer();goToReview()">Review my list</button>`;
   } else {
     html += `<div class="empty">Nothing on your support list yet.</div>`;
   }
@@ -889,15 +890,14 @@ function viewerHTML() {
   const done   = vItems.filter(i=> viewFulfilled.has(String(i.id)));
   const pct    = vItems.length ? Math.round((done.length/vItems.length)*100) : 0;
   return `
-    <div class="eyebrow" style="text-align:center">Creating Works</div>
-    <h1 style="text-align:center;margin-bottom:6px">Ways to support ${esc(name)}</h1>
-    <p class="subtitle" style="text-align:center">Here's how ${esc(name)} would like to be supported.</p>
+    <h1 style="text-align:center;margin-bottom:6px">Ways to support</h1>
+    <p class="subtitle" style="text-align:center">I welcome support in any of the following ways.</p>
     ${vItems.length ? `<div class="progress-wrap"><div class="progress-labels"><span>${done.length} gifted</span><span>${active.length} still open</span></div><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div></div>` : ''}
     ${active.length ? `<div class="eyebrow" style="margin-bottom:12px">Still needed</div>${active.map(it=>wishItemHTML(it,'viewer')).join('')}` : `<div class="empty">${esc(name)} is well supported right now - everything has been offered.</div>`}
     ${done.length ? `<div class="eyebrow" style="margin:24px 0 12px">Already gifted</div>${done.map(it=>wishItemHTML(it,'viewer')).join('')}` : ''}
     <hr>
-    <p style="font-size:13px;color:var(--muted);text-align:center;margin-bottom:14px">Want to share ways people can support you?</p>
-    <a href="${location.origin + location.pathname}" class="btn-outline">Create my support list</a>`;
+    <a href="https://appear.network/dl/support" class="btn-outline" style="margin-bottom:10px">View my Appear profile</a>
+    <a href="https://creating.works/support.html" class="btn-outline">Create my support list</a>`;
 }
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
@@ -912,6 +912,6 @@ function toast(msg) {
 }
 </script>
 
-<!-- v2.12 -->
+<!-- v2.13 -->
 </body>
 </html>
