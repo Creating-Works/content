@@ -1,6 +1,6 @@
 <!--
   support.html
-  v2.13 - Living things chip; Review my list button; viewer copy fixes; modal top fix
+  v2.14 - Local request checkbox; location modal; gift trail; readable labels; share flow fixed
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -284,6 +284,27 @@
   </div>
 </div>
 
+<!-- Location prompt modal -->
+<div class="modal-overlay" id="location-modal">
+  <div class="modal">
+    <div class="modal-title">Help local supporters find you</div>
+    <div class="modal-body" style="margin-bottom:16px">You have local requests on your list. Add your county so people nearby can support you.</div>
+    <input type="text" id="county-input" placeholder="Your county" style="margin-bottom:10px" oninput="locationCounty=this.value">
+    <button id="gps-btn" onclick="captureGPS()" style="width:100%;padding:9px;background:transparent;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--soft);cursor:pointer;margin-bottom:14px;transition:all 0.15s;">📍 Use my location instead</button>
+    <button class="btn-primary" style="margin-top:0" onclick="saveLocationAndClose()">Save</button>
+    <button class="btn-secondary" style="margin-top:8px" onclick="closeLocationModal()">Skip for now</button>
+  </div>
+</div>
+
+<!-- Gift sign-in modal -->
+<div class="modal-overlay" id="gift-signin-modal" onclick="if(event.target===this)closeGiftSigninModal()">
+  <div class="modal">
+    <div class="modal-title">Sign in to gift this</div>
+    <div class="modal-body">Sign in or sign up so the person knows who wants to support them.<br><br><a href="https://appear.network">Go to Appear Network →</a></div>
+    <button class="btn-primary" style="margin-top:0" onclick="closeGiftSigninModal()">Got it</button>
+  </div>
+</div>
+
 <script>
 
 // ─── Data ──────────────────────────────────────────────────────────────────
@@ -378,6 +399,9 @@ let noteText     = '';
 let locationText = '';
 let locationLat  = null;
 let locationLng  = null;
+let isLocalRequest = false;
+let locationCounty = '';
+let showLocationPrompt = false;
 let shareURL  = '';
 let items     = [];
 let myName    = '';
@@ -461,6 +485,7 @@ function setActionChip(id) {
 function clearAll() {
   selectedActionChip = null;
   locationText = ''; locationLat = null; locationLng = null;
+  isLocalRequest = false;
   otherSkillOpen = false; otherSkillText = '';
   otherWordsOpen = false; otherWordsText = '';
   otherSpaceOpen = false; otherSpaceText = '';
@@ -553,11 +578,13 @@ function addToList() {
 
   if (!hasSelection) return;
 
-  const newItem = { id: uid(), topCat, subCat, subLabel, subIcon, title: label, note:'', done: false };
+  const newItem = { id: uid(), topCat, subCat, subLabel, subIcon, title: label, note:'', done: false, local: isLocalRequest };
   items.push(newItem);
+  const wasLocal = isLocalRequest;
   clearAll(); noteText = '';
   save(); render();
   toast('Added to your list');
+  if (wasLocal) openLocationModal();
   if (_appearId) {
     fetch(GS_URL + '?action=saveSupportItem'
       + '&appearId='    + encodeURIComponent(_appearId)
@@ -608,7 +635,7 @@ function renderDrawer() {
       </div>
       ${active.map(it=>wishItemHTML(it,'builder')).join('')}
       ${done.length ? `<div class="eyebrow" style="margin:20px 0 10px">Received</div>${done.map(it=>wishItemHTML(it,'builder')).join('')}` : ''}
-      <button class="btn-primary" onclick="closeDrawer();goToReview()">Review my list</button>`;
+      <button class="btn-primary" onclick="closeDrawer();genShareAndReview()">🔗 Share this</button>`;
   } else {
     html += `<div class="empty">Nothing on your support list yet.</div>`;
   }
@@ -640,6 +667,19 @@ function genShare() {
   mode = 'builder';
   render();
   setTimeout(() => openDrawer(), 50);
+}
+
+function genShareAndReview() {
+  try {
+    const json    = JSON.stringify({ name: myName, items, created: new Date().toISOString() });
+    const encoded = btoa(unescape(encodeURIComponent(json)));
+    shareURL = location.origin + location.pathname + '?list=' + encoded;
+  } catch(e) {
+    toast('Could not generate link');
+    return;
+  }
+  mode = 'review';
+  render();
 }
 
 function genShareInline() {
@@ -706,7 +746,7 @@ function wishItemHTML(it, ctx) {
       <div class="wish-actions">
         ${isDone
           ? `<button class="btn-sm" onclick="toggleDone(${idRef})">Undo</button>`
-          : `<button class="btn-sm receive" onclick="toggleDone(${idRef})">${ctx==='builder'?'Mark received':'I\'ll gift this'}</button>`}
+          : ctx==='viewer' ? `<button class="btn-sm receive" onclick="giftItem(${JSON.stringify(viewerData?.name||'')},${JSON.stringify(it.title)})">'I\'ll gift this'</button>` : `<button class="btn-sm receive" onclick="toggleDone(${idRef})">Mark received</button>`}
         ${ctx==='builder' ? `<button class="btn-sm remove" onclick="removeItem(${idRef})">Remove</button>` : ''}
       </div>
     </div>`;
@@ -775,8 +815,12 @@ function addArea(hasSelection, isAction) {
   return `
     <div class="add-area">
       <div class="add-area-label">Details</div>
-      <input type="text" value="${esc(noteText)}" placeholder="Describe your wish..." oninput="updateNote(this.value)" onkeydown="if(event.key==='Enter')addToList()" style="margin-bottom:${isAction?'4px':'10px'}">
+      <input type="text" value="${esc(noteText)}" placeholder="" oninput="updateNote(this.value)" onkeydown="if(event.key==='Enter')addToList()" style="margin-bottom:${isAction?'4px':'10px'}">
       ${locationField}
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;margin-top:4px;">
+        <input type="checkbox" id="local-check" ${isLocalRequest?'checked':''} onchange="toggleLocalRequest(this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:var(--brand)">
+        <label for="local-check" style="font-size:13px;color:var(--soft);cursor:pointer;">📍 This is a local request</label>
+      </div>
       <button class="btn-add" onclick="addToList()">Add to list</button>
     </div>`;
 }
@@ -866,13 +910,14 @@ function reviewHTML() {
   const total    = items.length;
   return `
     <div class="eyebrow">Review your support list</div>
+    <button onclick="goToBuilder()" style="background:none;border:none;color:var(--brand);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;padding:0;margin-bottom:16px;">← Back</button>
     <div class="review-header">
       <div><h2>Looks good?</h2><p class="review-count">${total} item${total!==1?'s':''} across ${catCount} categor${catCount!==1?'ies':'y'}</p></div>
       <button class="btn-edit" onclick="goToBuilder()">← Edit</button>
     </div>
     ${Object.values(grouped).map(g=>`
       <div class="review-group">
-        <div class="review-group-label">${g.icon} ${g.label}</div>
+        <div class="review-group-label">${g.icon} ${(g.label||"").replace(/_/g," ").replace(/-/g," ")}</div>
         <div class="review-chips">
           ${g.items.map(it=>`<div class="review-chip">${esc(it.title)}${it.note?`<span style="color:var(--muted);font-size:12px;margin-left:6px">· ${esc(it.note)}</span>`:''}</div>`).join('')}
         </div>
@@ -912,6 +957,6 @@ function toast(msg) {
 }
 </script>
 
-<!-- v2.13 -->
+<!-- v2.14 -->
 </body>
 </html>
