@@ -1,6 +1,6 @@
 <!--
   support.html
-  v2.9 - Share labor chip; Is this you? modal; modals anchored to top
+  v2.10 - Location field + Use my location button on Actions; lat/lng saved to sheet
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -373,7 +373,10 @@ let otherThingText  = '';
 let otherExpOpen    = false;
 let otherExpText    = '';
 
-let noteText  = '';
+let noteText     = '';
+let locationText = '';
+let locationLat  = null;
+let locationLng  = null;
 let shareURL  = '';
 let items     = [];
 let myName    = '';
@@ -456,6 +459,7 @@ function setActionChip(id) {
 
 function clearAll() {
   selectedActionChip = null;
+  locationText = ''; locationLat = null; locationLng = null;
   otherSkillOpen = false; otherSkillText = '';
   otherWordsOpen = false; otherWordsText = '';
   otherSpaceOpen = false; otherSpaceText = '';
@@ -555,11 +559,14 @@ function addToList() {
   toast('Added to your list');
   if (_appearId) {
     fetch(GS_URL + '?action=saveSupportItem'
-      + '&appearId=' + encodeURIComponent(_appearId)
-      + '&category=' + encodeURIComponent(topCat)
+      + '&appearId='    + encodeURIComponent(_appearId)
+      + '&category='    + encodeURIComponent(topCat)
       + '&subCategory=' + encodeURIComponent(subCat)
-      + '&item=' + encodeURIComponent(label)
-      + '&note=' + encodeURIComponent('')
+      + '&item='        + encodeURIComponent(label)
+      + '&note='        + encodeURIComponent(note)
+      + '&location='    + encodeURIComponent(locationText)
+      + '&lat='         + encodeURIComponent(locationLat || '')
+      + '&lng='         + encodeURIComponent(locationLng || '')
     ).catch(() => {});
   }
 }
@@ -731,12 +738,15 @@ function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
 function addArea(hasSelection, isAction) {
   if (!hasSelection) return '';
-  const lbl = 'Details';
-  const ph  = 'Describe your wish...';
+  const locationField = isAction ? `
+    <div class="add-area-label" style="margin-top:14px">Is there a specific location in mind?</div>
+    <input type="text" id="location-input" value="${esc(locationText)}" placeholder="A café, restaurant, retreat center, venue, ski lodge, vacation spot..." oninput="updateLocation(this.value)" style="margin-bottom:8px">
+    <button id="use-location-btn" onclick="useMyLocation()" style="width:100%;padding:9px;background:transparent;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--soft);cursor:pointer;margin-bottom:10px;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--brand)'" onmouseout="this.style.borderColor='var(--border)'">📍 Use my location</button>` : '';
   return `
     <div class="add-area">
-      <div class="add-area-label">${lbl}</div>
-      <input type="text" value="${esc(noteText)}" placeholder="${ph}" oninput="updateNote(this.value)" onkeydown="if(event.key==='Enter')addToList()">
+      <div class="add-area-label">Details</div>
+      <input type="text" value="${esc(noteText)}" placeholder="Describe your wish..." oninput="updateNote(this.value)" onkeydown="if(event.key==='Enter')addToList()" style="margin-bottom:${isAction?'4px':'10px'}">
+      ${locationField}
       <button class="btn-add" onclick="addToList()">Add to list</button>
     </div>`;
 }
@@ -872,6 +882,6 @@ function toast(msg) {
 }
 </script>
 
-<!-- v2.9 -->
+<!-- v2.10 -->
 </body>
 </html>
