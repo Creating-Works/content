@@ -1,6 +1,6 @@
 <!--
   support.html
-  v2.8 - Experience chip first; With you removed; With someone; tab order Things/Actions/Spaces
+  v2.9 - Share labor chip; Is this you? modal; modals anchored to top
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -244,17 +244,12 @@
     .page-footer a { color: rgba(255,255,255,0.75); text-decoration: none; }
 
     /* ── Sign-in modal ── */
-    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:300; align-items:center; justify-content:center; padding:20px; overscroll-behavior:none; }
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:300; align-items:flex-start; justify-content:center; padding:48px 20px 20px; overscroll-behavior:none; }
     .modal-overlay.open { display:flex; }
     .modal { background:#fff; border-radius:16px; padding:32px; max-width:400px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,.2); text-align:center; }
     .modal-title { font-size:18px; font-weight:700; color:var(--text); margin-bottom:10px; }
     .modal-body { font-size:14px; color:var(--soft); line-height:1.6; margin-bottom:24px; }
     .modal-body a { color:var(--brand); font-weight:600; text-decoration:none; }
-    @media (max-width:520px) {
-      .modal-overlay { align-items:flex-end; padding:0; }
-      .modal { border-radius:20px 20px 0 0; max-width:100%; padding:28px 20px 36px; }
-      .modal::before { content:""; display:block; width:40px; height:4px; background:var(--border); border-radius:2px; margin:-14px auto 20px; }
-    }
   </style>
 </head>
 <body>
@@ -276,6 +271,16 @@
     <div class="modal-title">Add your support list</div>
     <div class="modal-body">Sign in or sign up to save your support list and share it with others.<br><br><a href="https://appear.network">Go to Appear Network →</a></div>
     <button class="btn-primary" style="margin-top:0" onclick="closeSigninModal()">Got it</button>
+  </div>
+</div>
+
+<!-- Is this you? modal -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal">
+    <div class="modal-title">Is this you?</div>
+    <div class="modal-body">We found the ID <strong id="confirm-id-display"></strong>. Is that you?</div>
+    <button class="btn-primary" style="margin-top:0" onclick="confirmIdentity()">Yes, that's me</button>
+    <button class="btn-secondary" style="margin-top:10px" onclick="denyIdentity()">No, sign in instead</button>
   </div>
 </div>
 
@@ -317,8 +322,9 @@ const ACTIONS_SUBS = [
 
 const ACTION_CHIPS = [
   { id:'experience', icon:'✨', label:'Share an experience', desc:null },
-  { id:'skills',     icon:'🛠', label:'Share skills',      desc:"Apply your skills for something I need. Examples: fix my website, help me move, fix my plumbing, help me file my taxes" },
-  { id:'words',      icon:'💬', label:'Share words',       desc:"Examples: write me a testimonial, give feedback, or introduce me to someone." }
+  { id:'skills',     icon:'🛠', label:'Share skills',       desc:"Apply your skills for something I need. Examples: fix my website, help me move, fix my plumbing, help me file my taxes" },
+  { id:'words',      icon:'💬', label:'Share words',        desc:"Examples: write me a testimonial, give feedback, or introduce me to someone." },
+  { id:'labor',      icon:'💪', label:'Share labor',        desc:"Show up and help. Examples: help me move, set up for an event, garden with me, build something together" }
 ];
 
 // ─── Identity ──────────────────────────────────────────────────────────────
@@ -385,6 +391,7 @@ let myName    = '';
     if (_appearId) loadSupportList();
   }
   render();
+  if (_pendingId) openConfirmModal(_pendingId);
 })();
 
 async function loadSupportList() {
@@ -865,6 +872,6 @@ function toast(msg) {
 }
 </script>
 
-<!-- v2.8 -->
+<!-- v2.9 -->
 </body>
 </html>
