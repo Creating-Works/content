@@ -1,6 +1,6 @@
 <!--
   support.html
-  v2.10 - Location field + Use my location button on Actions; lat/lng saved to sheet
+  v2.11 - Acts of service tab; single-word chips; inline share on review; truncated URL display
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -244,7 +244,7 @@
     .page-footer a { color: rgba(255,255,255,0.75); text-decoration: none; }
 
     /* ── Sign-in modal ── */
-    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:300; align-items:flex-start; justify-content:center; padding:48px 20px 20px; overscroll-behavior:none; }
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:300; align-items:flex-start; justify-content:center; padding:16px 20px 20px; overscroll-behavior:none; }
     .modal-overlay.open { display:flex; }
     .modal { background:#fff; border-radius:16px; padding:32px; max-width:400px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,.2); text-align:center; }
     .modal-title { font-size:18px; font-weight:700; color:var(--text); margin-bottom:10px; }
@@ -321,10 +321,10 @@ const ACTIONS_SUBS = [
 ];
 
 const ACTION_CHIPS = [
-  { id:'experience', icon:'✨', label:'Share an experience', desc:null },
-  { id:'skills',     icon:'🛠', label:'Share skills',       desc:"Apply your skills for something I need. Examples: fix my website, help me move, fix my plumbing, help me file my taxes" },
-  { id:'words',      icon:'💬', label:'Share words',        desc:"Examples: write me a testimonial, give feedback, or introduce me to someone." },
-  { id:'labor',      icon:'💪', label:'Share labor',        desc:"Show up and help. Examples: help me move, set up for an event, garden with me, build something together" }
+  { id:'experience', icon:'✨', label:'Experience', desc:null },
+  { id:'skills',     icon:'🛠', label:'Skills',     desc:"Apply your skills for something I need. Examples: fix my website, help me move, fix my plumbing, help me file my taxes" },
+  { id:'words',      icon:'💬', label:'Words',      desc:"Examples: write me a testimonial, give feedback, or introduce me to someone." },
+  { id:'labor',      icon:'💪', label:'Labor',      desc:"Show up and help. Examples: help me move, set up for an event, garden with me, build something together" }
 ];
 
 // ─── Identity ──────────────────────────────────────────────────────────────
@@ -641,6 +641,35 @@ function genShare() {
   setTimeout(() => openDrawer(), 50);
 }
 
+function genShareInline() {
+  try {
+    const json    = JSON.stringify({ name: myName, items, created: new Date().toISOString() });
+    const encoded = btoa(unescape(encodeURIComponent(json)));
+    shareURL = location.origin + location.pathname + '?list=' + encoded;
+  } catch(e) {
+    toast('Could not generate link');
+    return;
+  }
+  // Show link inline on review screen
+  const area = qs('#share-area-review');
+  const btn  = qs('#share-btn-review');
+  if (area) {
+    const display = shareURL.length > 48 ? shareURL.slice(0, 48) + '...' : shareURL;
+    area.innerHTML = `
+      <div style="background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px;">
+        <div style="font-size:13px;color:var(--soft);margin-bottom:8px;">Your shareable link</div>
+        <div style="font-size:12px;color:var(--muted);word-break:break-all;background:white;border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(display)}</div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:12px;font-style:italic;">This will also be shared on your Appear page.</p>
+        <button class="btn-primary" style="margin-top:0" onclick="copyShareURL()">Copy link</button>
+      </div>`;
+  }
+  if (btn) btn.style.display = 'none';
+}
+
+function copyShareURL() {
+  navigator.clipboard.writeText(shareURL).then(() => toast('Link copied'));
+}
+
 function copyURL() { navigator.clipboard.writeText(shareURL).then(() => toast('Link copied')); }
 function updateName() { myName = (qs('#b-name')||{}).value; save(); }
 
@@ -707,7 +736,7 @@ function builderHTML() {
     <div class="eyebrow" style="margin-bottom:12px">How can people support you?</div>
     <div class="top-tabs">
       <button class="top-tab${openTopCat==='things'?' active':''}"  onclick="setTopCat('things')">📦 Things</button>
-      <button class="top-tab${openTopCat==='actions'?' active':''}" onclick="setTopCat('actions')">✨ Actions</button>
+      <button class="top-tab${openTopCat==='actions'?' active':''}" onclick="setTopCat('actions')">✨ Acts of service</button>
       <button class="top-tab${openTopCat==='spaces'?' active':''}"  onclick="setTopCat('spaces')">🏡 Spaces</button>
     </div>
     ${openTopCat==='things'  ? thingsSection()  : ''}
@@ -794,7 +823,7 @@ function actionsSection() {
   }
 
   let html = `<div class="drill-section">
-    <div class="drill-label">✨ Actions</div>
+    <div class="drill-label">✨ Acts of service</div>
     <div class="sub-tabs">
       ${ACTIONS_SUBS.map(s=>`<button class="sub-tab${openActionSub===s.id?' active':''}" onclick="setActionSub('${s.id}')">${s.icon} ${s.label}</button>`).join('')}
     </div>`;
@@ -848,7 +877,8 @@ function reviewHTML() {
         </div>
       </div>`).join('')}
     <hr>
-    <button class="btn-primary" onclick="genShare()">Generate shareable link</button>`;
+    <div id="share-area-review"></div>
+    <button class="btn-primary" id="share-btn-review" onclick="genShareInline()">Share this</button>`;
 }
 
 // ─── Viewer ────────────────────────────────────────────────────────────────
@@ -882,6 +912,6 @@ function toast(msg) {
 }
 </script>
 
-<!-- v2.10 -->
+<!-- v2.11 -->
 </body>
 </html>
