@@ -1,4 +1,4 @@
-<!-- Version: V2.17 | LAST CHANGE: Add to list resets to top chips + opens drawer; drawer anchored to top; remove review screen; drawer My list shows generate/copy link + share URL; remove progress bar; Received/Given show count + profile photo + link; Mark as gifted + Remove wired up | Date: 2026-06-17 -->
+<!-- Version: V2.18 | LAST CHANGE: Fix drawer for Glide using events.html modal pattern; photo in "Is this you?"; newest items first; fix toast; location label + no placeholder | Date: 2026-06-17 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -161,25 +161,19 @@
       font-size: 13px; font-weight: 700; min-width: 22px; text-align: center;
     }
 
-    /* ── Drawer ── */
-    .drawer-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200;
-      opacity: 0; transition: opacity 0.25s; pointer-events: none;
+    /* ── Modals + drawer (events.html pattern) ── */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:500; align-items:center; justify-content:center; padding:20px; overscroll-behavior:none; touch-action:pan-y; }
+    .modal-overlay.open { display:flex; }
+    .modal { background:#fff; border-radius:16px; padding:32px; max-width:560px; width:100%; max-height:90vh; overflow-y:auto; -webkit-overflow-scrolling:touch; box-shadow:0 20px 60px rgba(0,0,0,.2); }
+    @media(max-width:768px) {
+      .modal-overlay { align-items:flex-end; justify-content:stretch; padding:0; }
+      .modal { border-radius:20px 20px 0 0; max-width:100%; width:100%; max-height:92vh; padding:28px 20px 32px; margin:0; box-shadow:0 -4px 24px rgba(0,0,0,.15); transform:translateY(100%); transition:transform .3s cubic-bezier(.32,.72,0,1); overflow-y:auto; }
+      .modal::before { content:""; display:block; width:40px; height:4px; background:var(--border); border-radius:2px; margin:-16px auto 20px; }
+      .modal-overlay.open .modal { transform:translateY(0); }
     }
-    .drawer-overlay.open { opacity: 1; pointer-events: all; }
-    .drawer {
-      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%) translateY(100%);
-      width: 100%; max-width: 660px; background: white; border-radius: 20px 20px 0 0;
-      padding: 28px 32px 40px; z-index: 201; max-height: 80vh; overflow-y: auto;
-      transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
-      box-shadow: 0 -8px 40px rgba(0,0,0,0.2);
-    }
-    .drawer.open { transform: translateX(-50%) translateY(0); }
-    @media (max-width: 520px) { .drawer { padding: 24px 20px 36px; } }
-    .drawer-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; }
-    .drawer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-    .drawer-title { font-size: 18px; font-weight: 700; color: var(--text); }
-    .btn-close { background: none; border: none; font-size: 20px; color: var(--muted); cursor: pointer; padding: 4px 8px; line-height: 1; }
+    .modal-title { font-size:18px; font-weight:700; color:var(--text); margin-bottom:10px; }
+    .modal-body { font-size:14px; color:var(--soft); line-height:1.6; margin-bottom:24px; }
+    .modal-body a { color:var(--brand); font-weight:600; text-decoration:none; }
 
     /* ── Drawer tabs ── */
     .drawer-tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 20px; }
@@ -245,14 +239,6 @@
     .page-footer { text-align: center; margin-top: 28px; font-size: 12px; color: rgba(255,255,255,0.55); }
     .page-footer a { color: rgba(255,255,255,0.75); text-decoration: none; }
 
-    /* ── Modals ── */
-    .modal-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,.45); z-index:500; align-items:flex-start; justify-content:flex-start; padding:48px 20px 20px; overflow-y:auto; }
-    .modal-overlay.open { display:flex; }
-    .modal { background:#fff; border-radius:16px; padding:32px; max-width:400px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,.2); text-align:center; }
-    .modal-title { font-size:18px; font-weight:700; color:var(--text); margin-bottom:10px; }
-    .modal-body { font-size:14px; color:var(--soft); line-height:1.6; margin-bottom:24px; }
-    .modal-body a { color:var(--brand); font-weight:600; text-decoration:none; }
-
     /* ── Anonymous choice buttons ── */
     .anon-options { display:flex; flex-direction:column; gap:10px; }
     .btn-anon { padding:12px 16px; border-radius:10px; border:1.5px solid var(--border); background:white; font-family:'DM Sans',sans-serif; font-size:14px; color:var(--text); cursor:pointer; transition:all 0.15s; text-align:left; }
@@ -279,9 +265,11 @@
 </div>
 <div id="debug-id" style="text-align:center;margin-top:12px;font-size:11px;color:#1F699E;user-select:all;"></div>
 
-<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
-<div class="drawer" id="drawer"></div>
-<div id="fab-container"></div>
+<div class="modal-overlay" id="gift-drawer-modal" onclick="if(event.target===this)closeDrawer()">
+  <div class="modal" id="gift-drawer-inner" style="text-align:left;padding-top:32px;">
+    <div id="gift-drawer-content"></div>
+  </div>
+</div>
 
 <!-- Sign-in modal -->
 <div class="modal-overlay" id="signin-modal" onclick="if(event.target===this)closeSigninModal()">
@@ -294,7 +282,8 @@
 
 <!-- Is this you? modal -->
 <div class="modal-overlay" id="confirm-modal">
-  <div class="modal">
+  <div class="modal" style="text-align:center;">
+    <img id="confirm-photo" src="" alt="" style="display:none;width:72px;height:72px;border-radius:50%;object-fit:cover;margin:0 auto 16px;border:2px solid var(--border);">
     <div class="modal-title">Is this you?</div>
     <div class="modal-body">We found the ID <strong id="confirm-id-display"></strong>. Is that you?</div>
     <button class="btn-primary" style="margin-top:0" onclick="confirmIdentity()">Yes, that's me</button>
@@ -423,7 +412,18 @@ function closeSigninModal() { document.getElementById('signin-modal').classList.
 
 function openConfirmModal(id) {
   document.getElementById('confirm-id-display').textContent = id;
+  document.getElementById('confirm-photo').style.display = 'none';
   document.getElementById('confirm-modal').classList.add('open');
+  // Fetch photo
+  fetch(GS_URL + '?action=lookupProfile&appearId=' + encodeURIComponent(id))
+    .then(r => r.json())
+    .then(data => {
+      if (data.found && data.photo) {
+        const img = document.getElementById('confirm-photo');
+        img.src = data.photo;
+        img.style.display = 'block';
+      }
+    }).catch(() => {});
 }
 function confirmIdentity() {
   _appearId = _pendingId;
@@ -694,7 +694,7 @@ function addToList() {
   if (openTopCat === 'actions') {
     if (!openActionSub) { toast('Choose a type first'); return; }
     if (openActionSub === 'for-myself' && !selectedActionChip) { toast('Choose skills, words, or an experience'); return; }
-    if (!note) { toast('Tell me what you need'); return; }
+    if (!note) { toast('Please share some details'); return; }
     const sub  = ACTIONS_SUBS.find(s=>s.id===openActionSub);
     const chip = ACTION_CHIPS.find(c=>c.id===selectedActionChip);
     label = note;
@@ -716,17 +716,15 @@ function addToList() {
   if (!hasSelection) return;
 
   const newItem = { id: uid(), topCat, subCat, subLabel, subIcon, title: label, note:'', done: false, local: isLocalRequest };
-  items.push(newItem);
+  items.unshift(newItem);
   const wasLocal = isLocalRequest;
-  // Reset all selection state, return to top-level chips
   openTopCat = null; openSpacesSub = null; openThingsSub = null; openActionSub = null;
   clearAll(); noteText = '';
   save(); render();
-  // Open drawer to My list
+  toast('Added to your list');
   drawerTab = 'list';
   renderDrawer();
-  qs('#drawer').classList.add('open');
-  qs('#drawer-overlay').classList.add('open');
+  document.getElementById('gift-drawer-modal').classList.add('open');
   if (wasLocal) openLocationModal();
   if (_appearId) {
     fetch(GS_URL + '?action=saveSupportItem'
@@ -748,13 +746,11 @@ function openDrawer() {
   drawerTab = 'list';
   historyLoaded = false;
   renderDrawer();
-  qs('#drawer').classList.add('open');
-  qs('#drawer-overlay').classList.add('open');
+  document.getElementById('gift-drawer-modal').classList.add('open');
 }
 
 function closeDrawer() {
-  qs('#drawer').classList.remove('open');
-  qs('#drawer-overlay').classList.remove('open');
+  document.getElementById('gift-drawer-modal').classList.remove('open');
 }
 
 function setDrawerTab(tab) {
@@ -776,42 +772,36 @@ function renderDrawer() {
       <button class="drawer-tab${drawerTab==='given'?' active':''}" onclick="setDrawerTab('given')">Given</button>
     </div>`;
 
-  let html = `
-    <div class="drawer-handle"></div>
-    <div class="drawer-header">
-      <div class="drawer-title">My gift list 🎁</div>
-      <button class="btn-close" onclick="closeDrawer()">✕</button>
-    </div>
-    ${tabs}`;
+  let body = '';
 
   if (drawerTab === 'list') {
     if (items.length) {
-      html += active.map(it=>wishItemHTML(it,'builder')).join('');
+      body += active.map(it=>wishItemHTML(it,'builder')).join('');
       if (done.length) {
-        html += `<div class="eyebrow" style="margin:20px 0 10px">Gifted</div>${done.map(it=>wishItemHTML(it,'builder')).join('')}`;
+        body += `<div class="eyebrow" style="margin:20px 0 10px">Gifted</div>${done.map(it=>wishItemHTML(it,'builder')).join('')}`;
       }
       if (shareURL) {
-        html += `
+        body += `
           <div style="margin-top:20px;padding:14px;background:var(--input-bg);border:1px solid var(--border);border-radius:10px;">
             <div style="font-size:13px;color:var(--soft);margin-bottom:8px;">Share your list with anyone:</div>
             <div style="font-size:12px;color:var(--muted);word-break:break-all;background:white;border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:12px;">${esc(shareURL)}</div>
             <button class="btn-primary" style="margin-top:0" onclick="copyURL()">🔗 Copy link</button>
           </div>`;
       } else {
-        html += `<button class="btn-primary" style="margin-top:20px" onclick="generateLink()">Generate link to share</button>`;
+        body += `<button class="btn-primary" style="margin-top:20px" onclick="generateLink()">Generate link to share</button>`;
       }
     } else {
-      html += `<div class="empty">Nothing on your gift list yet.</div>`;
+      body += `<div class="empty">Nothing on your gift list yet.</div>`;
     }
 
   } else if (drawerTab === 'received') {
     if (!historyLoaded) {
-      html += `<div class="empty">Loading...</div>`;
+      body += `<div class="empty">Loading...</div>`;
     } else if (!giftHistory.received.length) {
-      html += `<div class="empty">No gifts received yet.</div>`;
+      body += `<div class="empty">No gifts received yet.</div>`;
     } else {
-      html += `<div class="history-count">${giftHistory.received.length} received</div>`;
-      html += giftHistory.received.map(g => {
+      body += `<div class="history-count">${giftHistory.received.length} received</div>`;
+      body += giftHistory.received.map(g => {
         const photo = g.gifterPhoto || '';
         const profileUrl = g.gifterAppearId ? 'https://appear.network/dl/page/s/e13594/r/' + g.gifterAppearId : '';
         const photoEl = photo
@@ -835,12 +825,12 @@ function renderDrawer() {
 
   } else if (drawerTab === 'given') {
     if (!historyLoaded) {
-      html += `<div class="empty">Loading...</div>`;
+      body += `<div class="empty">Loading...</div>`;
     } else if (!giftHistory.given.length) {
-      html += `<div class="empty">No gifts given yet.</div>`;
+      body += `<div class="empty">No gifts given yet.</div>`;
     } else {
-      html += `<div class="history-count">${giftHistory.given.length} given</div>`;
-      html += giftHistory.given.map(g => {
+      body += `<div class="history-count">${giftHistory.given.length} given</div>`;
+      body += giftHistory.given.map(g => {
         const photo = g.ownerPhoto || '';
         const profileUrl = g.ownerAppearId ? 'https://appear.network/dl/page/s/e13594/r/' + g.ownerAppearId : '';
         const photoEl = photo
@@ -858,7 +848,13 @@ function renderDrawer() {
     }
   }
 
-  qs('#drawer').innerHTML = html;
+  const drawerHeader = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div style="font-size:18px;font-weight:700;color:var(--text);">My gift list 🎁</div>
+      <button style="background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;padding:4px 8px;line-height:1;" onclick="closeDrawer()">✕</button>
+    </div>`;
+
+  qs('#gift-drawer-content').innerHTML = drawerHeader + tabs + body;
 }
 
 function formatDate(ts) {
@@ -1020,8 +1016,8 @@ function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 function addArea(hasSelection, isAction) {
   if (!hasSelection) return '';
   const locationField = isLocalRequest ? `
-    <div class="add-area-label" style="margin-top:14px">Do you have a specific location in mind?</div>
-    <input type="text" id="location-input" value="${esc(locationText)}" placeholder="A café, restaurant, retreat center, venue, ski lodge, vacation spot..." oninput="updateLocation(this.value)" style="margin-bottom:10px">` : '';
+    <div class="add-area-label" style="margin-top:14px">If applicable, reference a preferred place or two in mind:</div>
+    <input type="text" id="location-input" value="${esc(locationText)}" placeholder="" oninput="updateLocation(this.value)" style="margin-bottom:10px">` : '';
   return `
     <div class="add-area">
       <div class="add-area-label">Details <span style="color:#c0392b">*</span></div>
@@ -1161,6 +1157,6 @@ function toast(msg) {
 }
 </script>
 
-<!-- V2.17 -->
+<!-- V2.18 -->
 </body>
 </html>
