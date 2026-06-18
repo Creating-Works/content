@@ -1,4 +1,4 @@
-<!-- Version: V2.19 | LAST CHANGE: Fix onclick bug in wish items using item registry; toast to top with myevents colors; truncate URL display; sentence case labels | Date: 2026-06-17 -->
+<!-- Version: V2.21 | LAST CHANGE: Is this you? once only; share URL persists; generate link above tabs; no anon modal for owner; modals to top; tab overlay fix; edit pencil only; pagination 5/page; category label fix | Date: 2026-06-18 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -162,14 +162,13 @@
     }
 
     /* ── Modals + drawer (events.html pattern) ── */
-    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:500; align-items:center; justify-content:center; padding:20px; overscroll-behavior:none; touch-action:pan-y; }
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:500; align-items:flex-start; justify-content:center; padding:12px 0 0; overscroll-behavior:none; touch-action:pan-y; }
     .modal-overlay.open { display:flex; }
-    .modal { background:#fff; border-radius:16px; padding:32px; max-width:560px; width:100%; max-height:90vh; overflow-y:auto; -webkit-overflow-scrolling:touch; box-shadow:0 20px 60px rgba(0,0,0,.2); }
+    .modal { background:#fff; border-radius:16px; padding:32px; max-width:560px; width:100%; max-height:92vh; overflow-y:auto; -webkit-overflow-scrolling:touch; box-shadow:0 20px 60px rgba(0,0,0,.2); }
     @media(max-width:768px) {
-      .modal-overlay { align-items:flex-end; justify-content:stretch; padding:0; }
-      .modal { border-radius:20px 20px 0 0; max-width:100%; width:100%; max-height:92vh; padding:28px 20px 32px; margin:0; box-shadow:0 -4px 24px rgba(0,0,0,.15); transform:translateY(100%); transition:transform .3s cubic-bezier(.32,.72,0,1); overflow-y:auto; }
-      .modal::before { content:""; display:block; width:40px; height:4px; background:var(--border); border-radius:2px; margin:-16px auto 20px; }
-      .modal-overlay.open .modal { transform:translateY(0); }
+      .modal-overlay { align-items:flex-start; justify-content:stretch; padding:0; }
+      .modal { border-radius:20px 20px 0 0; max-width:100%; width:100%; max-height:96vh; padding:16px 20px 32px; margin:0; margin-top:4vh; box-shadow:0 -4px 24px rgba(0,0,0,.15); overflow-y:auto; }
+      .modal::before { content:""; display:block; width:40px; height:4px; background:var(--border); border-radius:2px; margin:0 auto 16px; }
     }
     .modal-title { font-size:18px; font-weight:700; color:var(--text); margin-bottom:10px; }
     .modal-body { font-size:14px; color:var(--soft); line-height:1.6; margin-bottom:24px; }
@@ -306,7 +305,7 @@
 <div class="modal-overlay" id="gift-signin-modal" onclick="if(event.target===this)closeGiftSigninModal()">
   <div class="modal">
     <div class="modal-title">Sign in to gift this</div>
-    <div class="modal-body">Sign in or sign up so the person knows who wants to give to them.<br><br><a href="https://appear.network">Go to Appear Network →</a></div>
+    <div class="modal-body">Sign in or sign up so the person knows who wants to give to them.<br><br><a href="https://appear.network/dl/giving">Go to Appear Network →</a></div>
     <button class="btn-primary" style="margin-top:0" onclick="closeGiftSigninModal()">Got it</button>
   </div>
 </div>
@@ -378,19 +377,24 @@ function getMemberId() {
 
 let _appearId = getMemberId();
 let _pendingId = null;
+let _ownerAppearId = null; // owner of the list being viewed
 
 (function() {
-  // If URL has an ID and it's different from localStorage, prompt confirmation
   const params = new URLSearchParams(window.location.search);
-  const urlId = params.get('id') || params.get('memberCard');
+  const urlId  = params.get('id') || params.get('memberCard');
+  const listParam = params.get('list');
+
+  // Read owner from URL
+  _ownerAppearId = params.get('owner') || null;
+
   if (urlId) {
     let stored = null;
-    try { stored = localStorage.getItem('appear-id'); } catch(e) {}
-    // Skip confirm if already confirmed via events.html or matches localStorage
-    const alreadyConfirmed = stored === urlId;
-    if (!alreadyConfirmed) {
+    let confirmed = false;
+    try { stored = localStorage.getItem('appear-id'); confirmed = localStorage.getItem('appear-id-confirmed') === 'true'; } catch(e) {}
+    const alreadyConfirmed = stored === urlId || confirmed;
+    if (!alreadyConfirmed && !listParam) {
       _pendingId = urlId;
-      _appearId = null; // hold off until confirmed
+      _appearId = null;
     } else {
       _appearId = urlId;
       try { localStorage.setItem('appear-id', _appearId); } catch(e) {}
@@ -428,7 +432,10 @@ function openConfirmModal(id) {
 function confirmIdentity() {
   _appearId = _pendingId;
   _pendingId = null;
-  try { localStorage.setItem('appear-id', _appearId); } catch(e) {}
+  try {
+    localStorage.setItem('appear-id', _appearId);
+    localStorage.setItem('appear-id-confirmed', 'true');
+  } catch(e) {}
   document.getElementById('confirm-modal').classList.remove('open');
   loadSupportList();
   render();
@@ -493,9 +500,11 @@ function openGiftSigninModal()  { document.getElementById('gift-signin-modal').c
 let _pendingGiftOwner = null;
 let _pendingGiftItem  = null;
 
-function giftItem(ownerAppearId, itemTitle) {
+function giftItem(itemTitle) {
   if (!_appearId) { openGiftSigninModal(); return; }
-  _pendingGiftOwner = ownerAppearId;
+  const ownerForGift = _ownerAppearId || (viewerData ? viewerData.name : '');
+  if (!ownerForGift) { toast('Could not identify list owner'); return; }
+  _pendingGiftOwner = ownerForGift;
   _pendingGiftItem  = itemTitle;
   document.getElementById('anon-modal').classList.add('open');
 }
@@ -562,15 +571,28 @@ let myName         = '';
 let drawerTab = 'list'; // 'list' | 'received' | 'given'
 let giftHistory = { received: [], given: [] };
 let historyLoaded = false;
+let drawerPage = 1;
+const ITEMS_PER_PAGE = 5;
+
+// Restore shareURL from localStorage
+try { shareURL = localStorage.getItem('giving_shareURL') || ''; } catch(e) {}
 
 // ─── Boot ──────────────────────────────────────────────────────────────────
 (function init() {
   const params  = new URLSearchParams(window.location.search);
   const encoded = params.get('list');
   if (encoded) {
-    try { viewerData = JSON.parse(decodeURIComponent(escape(atob(encoded)))); mode = 'viewer'; } catch(_) {}
+    try {
+      const decoded = JSON.parse(decodeURIComponent(escape(atob(encoded))));
+      viewerData = decoded;
+      mode = 'viewer';
+    } catch(_) {
+      // Decode failed - fall through to builder
+      mode = 'builder';
+    }
     try { viewFulfilled = new Set(JSON.parse(localStorage.getItem('vf_' + encoded.slice(0,24)) || '[]')); } catch(_) {}
-  } else {
+  }
+  if (mode === 'builder') {
     try { const s = JSON.parse(localStorage.getItem('an_support_25') || '{}'); items = s.items||[]; myName = s.name||''; } catch(_) {}
     if (_appearId && !myName) myName = _appearId;
     if (_appearId) loadSupportList();
@@ -652,8 +674,31 @@ function clearChipRegistry() { _chips = []; _items = []; }
 function chipClick(type, idx) { const val = _chips[idx]; if (!val) return; render(); }
 function toggle(set, val) { set.has(val) ? set.delete(val) : set.add(val); }
 
-function toggleDoneByIdx(idx) { const id = _items[idx]; if (id !== undefined) toggleDone(id); }
-function removeItemByIdx(idx)  { const id = _items[idx]; if (id !== undefined) removeItem(id); }
+let _editingItemId = null;
+
+function editItemByIdx(idx) {
+  const id = _items[idx];
+  if (!id) return;
+  _editingItemId = (_editingItemId === id) ? null : id;
+  clearChipRegistry();
+  renderDrawer();
+}
+
+function saveEditByIdx(idx) {
+  const id = _items[idx];
+  if (!id) return;
+  const it = items.find(i=>i.id===id);
+  if (!it) return;
+  const titleEl = document.getElementById('edit-title-' + idx);
+  const noteEl  = document.getElementById('edit-note-' + idx);
+  if (titleEl) it.title = titleEl.value.trim() || it.title;
+  if (noteEl)  it.note  = noteEl.value.trim();
+  _editingItemId = null;
+  save();
+  clearChipRegistry();
+  renderDrawer();
+  toast('Saved');
+}
 
 function toggleOther(type) {
   render();
@@ -750,6 +795,7 @@ function updateFAB() { /* FAB rendered inline in builderHTML */ }
 function openDrawer() {
   drawerTab = 'list';
   historyLoaded = false;
+  clearChipRegistry(); // rebuild _items registry fresh
   renderDrawer();
   document.getElementById('gift-drawer-modal').classList.add('open');
 }
@@ -758,17 +804,32 @@ function closeDrawer() {
   document.getElementById('gift-drawer-modal').classList.remove('open');
 }
 
+function setDrawerPage(page) { drawerPage = page; clearChipRegistry(); renderDrawer(); }
+
 function setDrawerTab(tab) {
   drawerTab = tab;
+  drawerPage = 1;
   if ((tab === 'received' || tab === 'given') && !historyLoaded) {
     loadGiftHistory();
   }
+  clearChipRegistry();
   renderDrawer();
 }
 
 function renderDrawer() {
   const active = items.filter(i=>!i.done);
   const done   = items.filter(i=> i.done);
+
+  // Share link area above tabs
+  const displayURL = shareURL ? (shareURL.length > 48 ? shareURL.slice(0,48)+'...' : shareURL) : '';
+  const shareLine = shareURL
+    ? `<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <div style="flex:1;font-size:12px;color:var(--muted);background:var(--input-bg);border:1px solid var(--border);border-radius:6px;padding:7px 10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(displayURL)}</div>
+        <button onclick="copyURL()" style="flex-shrink:0;padding:7px 12px;background:var(--brand);color:white;border:none;border-radius:8px;font-size:14px;cursor:pointer;">📋</button>
+      </div>`
+    : `<div style="text-align:center;margin-bottom:12px;">
+        <button onclick="generateLink()" style="padding:8px 16px;background:transparent;border:1.5px solid var(--border);border-radius:20px;font-size:13px;color:var(--soft);font-family:'DM Sans',sans-serif;cursor:pointer;">Generate link to share</button>
+      </div>`;
 
   const tabs = `
     <div class="drawer-tabs">
@@ -781,20 +842,24 @@ function renderDrawer() {
 
   if (drawerTab === 'list') {
     if (items.length) {
-      body += active.map(it=>wishItemHTML(it,'builder')).join('');
+      // Pagination
+      const totalPages = Math.ceil(active.length / ITEMS_PER_PAGE);
+      const page = Math.max(1, Math.min(drawerPage, totalPages || 1));
+      const start = (page - 1) * ITEMS_PER_PAGE;
+      const pageItems = active.slice(start, start + ITEMS_PER_PAGE);
+
+      body += pageItems.map(it=>wishItemHTML(it,'builder')).join('');
+
+      if (totalPages > 1) {
+        let pages = '';
+        for (let i = 1; i <= totalPages; i++) {
+          pages += `<button onclick="setDrawerPage(${i})" style="width:32px;height:32px;border-radius:8px;border:1.5px solid ${i===page?'var(--brand)':'var(--border)'};background:${i===page?'var(--sel-bg)':'white'};color:${i===page?'var(--brand)':'var(--soft)'};font-size:13px;font-weight:${i===page?'700':'400'};cursor:pointer;font-family:'DM Sans',sans-serif;">${i}</button>`;
+        }
+        body += `<div style="display:flex;gap:6px;justify-content:center;margin-top:16px;flex-wrap:wrap;">${pages}</div>`;
+      }
+
       if (done.length) {
         body += `<div class="eyebrow" style="margin:20px 0 10px">Gifted</div>${done.map(it=>wishItemHTML(it,'builder')).join('')}`;
-      }
-      if (shareURL) {
-        const displayURL = shareURL.length > 48 ? shareURL.slice(0, 48) + '...' : shareURL;
-        body += `
-          <div style="margin-top:20px;padding:14px;background:var(--input-bg);border:1px solid var(--border);border-radius:10px;">
-            <div style="font-size:13px;color:var(--soft);margin-bottom:8px;">Share your list with anyone:</div>
-            <div style="font-size:12px;color:var(--muted);word-break:break-all;background:white;border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:12px;">${esc(displayURL)}</div>
-            <button class="btn-primary" style="margin-top:0" onclick="copyURL()">🔗 Copy link</button>
-          </div>`;
-      } else {
-        body += `<button class="btn-primary" style="margin-top:20px" onclick="generateLink()">Generate link to share</button>`;
       }
     } else {
       body += `<div class="empty">Nothing on your gift list yet.</div>`;
@@ -855,12 +920,12 @@ function renderDrawer() {
   }
 
   const drawerHeader = `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
       <div style="font-size:18px;font-weight:700;color:var(--text);">My gift list 🎁</div>
       <button style="background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;padding:4px 8px;line-height:1;" onclick="closeDrawer()">✕</button>
     </div>`;
 
-  qs('#gift-drawer-content').innerHTML = drawerHeader + tabs + body;
+  qs('#gift-drawer-content').innerHTML = drawerHeader + shareLine + tabs + body;
 }
 
 function formatDate(ts) {
@@ -875,7 +940,9 @@ function generateLink() {
   try {
     const json    = JSON.stringify({ name: myName, items, created: new Date().toISOString() });
     const encoded = btoa(unescape(encodeURIComponent(json)));
-    shareURL = location.origin + location.pathname + '?list=' + encoded;
+    const ownerParam = _appearId ? '&owner=' + encodeURIComponent(_appearId) : '';
+    shareURL = location.origin + location.pathname + '?list=' + encoded + ownerParam;
+    try { localStorage.setItem('giving_shareURL', shareURL); } catch(e) {}
   } catch(e) { toast('Could not generate link'); return; }
   renderDrawer();
 }
@@ -930,40 +997,66 @@ function toggleDone(id) {
     it.done = !it.done;
     save();
     renderDrawer();
-    if (it.done && _appearId) {
-      _pendingGiftOwner = _appearId;
-      _pendingGiftItem  = it.title;
-      document.getElementById('anon-modal').classList.add('open');
+    if (it.done) {
+      toast('Marked as gifted');
+      if (_appearId) {
+        fetch(GS_URL + '?action=saveGift'
+          + '&gifterAppearId=' + encodeURIComponent(_appearId)
+          + '&ownerAppearId='  + encodeURIComponent(_appearId)
+          + '&item='           + encodeURIComponent(it.title)
+          + '&anonymous=false'
+        ).catch(() => {});
+      }
     }
   } else {
     const sid = String(id);
-    viewFulfilled.has(sid) ? viewFulfilled.delete(sid) : (viewFulfilled.add(sid), toast('Marked as gifted - thank you'));
+    viewFulfilled.has(sid) ? viewFulfilled.delete(sid) : viewFulfilled.add(sid);
     saveViewer(); render();
   }
+}
+
+function normCatLabel(raw) {
+  // Convert raw subCat/subLabel to readable sentence case
+  const s = (raw||'').replace(/_/g,' ').replace(/-/g,' ').trim();
+  return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
 }
 
 function wishItemHTML(it, ctx) {
   const isDone = ctx === 'builder' ? it.done : viewFulfilled.has(String(it.id));
   const idx = regItem(it.id);
-  const ownerIdJson = JSON.stringify(viewerData ? (viewerData.name || '') : '');
-  const catLabel = (it.subLabel||it.subCat||'').replace(/_/g,' ').replace(/-/g,' ');
-  // Sentence case: capitalize first letter only
-  const catDisplay = catLabel.charAt(0).toUpperCase() + catLabel.slice(1).toLowerCase();
+  // Use subLabel if it's clean, else fall back to subCat
+  const rawLabel = (it.subLabel && !it.subLabel.includes('_') && !it.subLabel.includes('-'))
+    ? it.subLabel
+    : it.subCat || '';
+  const catDisplay = normCatLabel(rawLabel);
+  const isEditing = ctx === 'builder' && _editingItemId === it.id;
+
+  const editForm = isEditing ? `
+    <div style="margin-top:10px;padding:12px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Title</div>
+      <input type="text" id="edit-title-${idx}" value="${esc(it.title)}" style="margin-bottom:8px;font-size:14px;width:100%;background:white;border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-family:'DM Sans',sans-serif;">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Details</div>
+      <input type="text" id="edit-note-${idx}" value="${esc(it.note||'')}" placeholder="" style="margin-bottom:10px;font-size:14px;width:100%;background:white;border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-family:'DM Sans',sans-serif;">
+      <button class="btn-add" onclick="saveEditByIdx(${idx})" style="font-size:13px;padding:9px;">Save</button>
+    </div>` : '';
+
   return `
     <div class="wish-item${isDone?' done':''}">
-      <div class="wish-icon">${it.subIcon}</div>
-      <div class="wish-body">
+      <div class="wish-icon">${it.subIcon||'🌱'}</div>
+      <div class="wish-body" style="min-width:0;flex:1;">
         <div class="wish-cat">${esc(catDisplay)}</div>
         <div class="wish-title">${esc(it.title)}</div>
-        ${it.note ? `<div class="wish-note">${esc(it.note)}</div>` : ''}
+        ${it.note && !isEditing ? `<div class="wish-note">${esc(it.note)}</div>` : ''}
         ${isDone ? `<div class="wish-badge">Gifted</div>` : ''}
+        ${editForm}
       </div>
-      <div class="wish-actions">
+      <div class="wish-actions" style="flex-shrink:0;display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
         ${isDone
           ? `<button class="btn-sm" onclick="toggleDoneByIdx(${idx})">Undo</button>`
           : ctx==='viewer'
-            ? `<button class="btn-sm receive" onclick="giftItem(${ownerIdJson},${JSON.stringify(it.title)})">I'll give this</button>`
+            ? `<button class="btn-sm receive" onclick="giftItem(${JSON.stringify(it.title)})">I'll give this</button>`
             : `<button class="btn-sm receive" onclick="toggleDoneByIdx(${idx})">Mark as gifted</button>`}
+        ${ctx==='builder' ? `<button class="btn-sm" onclick="editItemByIdx(${idx})" style="font-size:16px;padding:4px 10px;">${isEditing?'✕':'✏️'}</button>` : ''}
         ${ctx==='builder' ? `<button class="btn-sm remove" onclick="removeItemByIdx(${idx})">Remove</button>` : ''}
       </div>
     </div>`;
@@ -1149,8 +1242,8 @@ function viewerHTML() {
     ${active.length ? `<div class="eyebrow" style="margin-bottom:12px">Still open</div>${active.map(it=>wishItemHTML(it,'viewer')).join('')}` : `<div class="empty">${esc(name)} is well supported right now - everything has been offered.</div>`}
     ${done.length ? `<div class="eyebrow" style="margin:24px 0 12px">Already gifted</div>${done.map(it=>wishItemHTML(it,'viewer')).join('')}` : ''}
     <hr>
-    <a href="https://appear.network/dl/support" class="btn-outline" style="margin-bottom:10px">View my Appear profile</a>
-    <a href="https://creating.works/gifts.html" class="btn-outline">Create my gift list</a>`;
+    <a href="https://appear.network/dl/giving" class="btn-outline" style="margin-bottom:10px">View my Appear profile</a>
+    <a href="https://creating.works/giving.html" class="btn-outline">Create my gift list</a>`;
 }
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
@@ -1165,6 +1258,6 @@ function toast(msg) {
 }
 </script>
 
-<!-- V2.19 -->
+<!-- V2.21 -->
 </body>
 </html>
