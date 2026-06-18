@@ -1,4 +1,4 @@
-<!-- Version: V2.22 | LAST CHANGE: Fix Is this you? skip logic; fix _items registry; gifted section full opacity+functional; edit mode Save+Cancel side by side; Remove→✕; Copy 🔗; Received/Given data fix | Date: 2026-06-18 -->
+<!-- Version: V2.23 | LAST CHANGE: Split chip/_items registries; gift without signing in (name form); gifterName to sheet; ✕ close button hidden behind FAB | Date: 2026-06-18 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -301,12 +301,18 @@
   </div>
 </div>
 
-<!-- Gift sign-in modal -->
+<!-- Gift choice modal - sign in OR give with name -->
 <div class="modal-overlay" id="gift-signin-modal" onclick="if(event.target===this)closeGiftSigninModal()">
-  <div class="modal">
-    <div class="modal-title">Sign in to gift this</div>
-    <div class="modal-body">Sign in or sign up so the person knows who wants to give to them.<br><br><a href="https://appear.network/dl/giving">Go to Appear Network →</a></div>
-    <button class="btn-primary" style="margin-top:0" onclick="closeGiftSigninModal()">Got it</button>
+  <div class="modal" style="text-align:center;">
+    <div class="modal-title">Want to give this?</div>
+    <div class="modal-body" style="margin-bottom:16px">Sign in so they know it's you, or give with just your name.</div>
+    <a href="https://appear.network/dl/giving" class="btn-primary" style="display:block;text-decoration:none;margin-bottom:10px;">Sign in to Appear</a>
+    <div style="border-top:1px solid var(--border);padding-top:16px;margin-top:6px;">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:10px;">Or give without signing in:</div>
+      <input type="text" id="gifter-name-input" placeholder="Your name" style="margin-bottom:10px;">
+      <button class="btn-primary" style="margin-top:0" onclick="giveWithName()">Give this 🎁</button>
+    </div>
+    <button class="btn-secondary" style="margin-top:10px" onclick="closeGiftSigninModal()">Cancel</button>
   </div>
 </div>
 
@@ -498,11 +504,17 @@ let _pendingGiftOwner = null;
 let _pendingGiftItem  = null;
 
 function giftItem(itemTitle) {
-  if (!_appearId) { openGiftSigninModal(); return; }
   const ownerForGift = _ownerAppearId || (viewerData ? viewerData.name : '');
   if (!ownerForGift) { toast('Could not identify list owner'); return; }
   _pendingGiftOwner = ownerForGift;
   _pendingGiftItem  = itemTitle;
+  if (!_appearId) {
+    // Clear name input and open choice modal
+    const nameEl = document.getElementById('gifter-name-input');
+    if (nameEl) nameEl.value = '';
+    openGiftSigninModal();
+    return;
+  }
   document.getElementById('anon-modal').classList.add('open');
 }
 
@@ -512,17 +524,40 @@ function closeAnonModal() {
   document.getElementById('anon-modal').classList.remove('open');
 }
 
+function giveWithName() {
+  const nameEl = document.getElementById('gifter-name-input');
+  const name = nameEl ? nameEl.value.trim() : '';
+  if (!name) { toast('Please enter your name'); return; }
+  closeGiftSigninModal();
+  if (!_pendingGiftOwner || !_pendingGiftItem) return;
+  fetch(GS_URL + '?action=saveGift'
+    + '&gifterAppearId=' + encodeURIComponent('')
+    + '&gifterName='     + encodeURIComponent(name)
+    + '&ownerAppearId='  + encodeURIComponent(_pendingGiftOwner)
+    + '&item='           + encodeURIComponent(_pendingGiftItem)
+    + '&anonymous=false'
+  ).catch(() => {});
+  toast('Thank you! They will be notified this has moved to redeemed 🎁');
+  if (mode === 'viewer') {
+    const it = (viewerData.items || []).find(i => i.title === _pendingGiftItem);
+    if (it) { viewFulfilled.add(String(it.id)); saveViewer(); }
+    render();
+  }
+  _pendingGiftOwner = null;
+  _pendingGiftItem  = null;
+}
+
 function confirmGift(anonymous) {
   document.getElementById('anon-modal').classList.remove('open');
   if (!_pendingGiftOwner || !_pendingGiftItem) return;
   fetch(GS_URL + '?action=saveGift'
     + '&gifterAppearId=' + encodeURIComponent(_appearId)
+    + '&gifterName='     + encodeURIComponent('')
     + '&ownerAppearId='  + encodeURIComponent(_pendingGiftOwner)
     + '&item='           + encodeURIComponent(_pendingGiftItem)
     + '&anonymous='      + encodeURIComponent(anonymous ? 'true' : 'false')
   ).catch(() => {});
-  toast(anonymous ? 'Gift sent anonymously 🎁' : 'Gift sent 🎁');
-  // Mark fulfilled locally in viewer
+  toast('Thank you! They will be notified this has moved to redeemed 🎁');
   if (mode === 'viewer') {
     const it = (viewerData.items || []).find(i => i.title === _pendingGiftItem);
     if (it) { viewFulfilled.add(String(it.id)); saveViewer(); }
@@ -661,12 +696,13 @@ function clearAll() {
   otherExpOpen   = false; otherExpText   = '';
 }
 
-// ─── Chip + item registry ──────────────────────────────────────────────────
+// ─── Chip + item registries (separate - never clear together) ──────────────
 var _chips = [];
 var _items = [];
 function regChip(val) { _chips.push(val); return _chips.length - 1; }
 function regItem(id)  { _items.push(id);  return _items.length - 1; }
-function clearChipRegistry() { _chips = []; _items = []; }
+function clearChipRegistry() { _chips = []; }   // called by render() only
+function clearItemRegistry()  { _items = []; }   // called by renderDrawer() only
 
 function chipClick(type, idx) { const val = _chips[idx]; if (!val) return; render(); }
 function toggle(set, val) { set.has(val) ? set.delete(val) : set.add(val); }
@@ -792,7 +828,7 @@ function updateFAB() { /* FAB rendered inline in builderHTML */ }
 function openDrawer() {
   drawerTab = 'list';
   historyLoaded = false;
-  clearChipRegistry(); // rebuild _items registry fresh
+  clearItemRegistry();
   renderDrawer();
   document.getElementById('gift-drawer-modal').classList.add('open');
 }
@@ -801,7 +837,7 @@ function closeDrawer() {
   document.getElementById('gift-drawer-modal').classList.remove('open');
 }
 
-function setDrawerPage(page) { drawerPage = page; clearChipRegistry(); renderDrawer(); }
+function setDrawerPage(page) { drawerPage = page; clearItemRegistry(); renderDrawer(); }
 
 function setDrawerTab(tab) {
   drawerTab = tab;
@@ -809,12 +845,12 @@ function setDrawerTab(tab) {
   if ((tab === 'received' || tab === 'given') && !historyLoaded) {
     loadGiftHistory();
   }
-  clearChipRegistry();
+  clearItemRegistry();
   renderDrawer();
 }
 
 function renderDrawer() {
-  clearChipRegistry(); // always rebuild _items registry fresh
+  clearItemRegistry(); // items only - never touches _chips
   const active = items.filter(i=>!i.done);
   const done   = items.filter(i=> i.done);
 
@@ -918,9 +954,9 @@ function renderDrawer() {
   }
 
   const drawerHeader = `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-right:4px;">
       <div style="font-size:18px;font-weight:700;color:var(--text);">My gift list 🎁</div>
-      <button style="background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;padding:4px 8px;line-height:1;" onclick="closeDrawer()">✕</button>
+      <button onclick="closeDrawer()" style="background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:4px 8px;line-height:1;border-radius:8px;">✕</button>
     </div>`;
 
   qs('#gift-drawer-content').innerHTML = drawerHeader + shareLine + tabs + body;
@@ -1066,7 +1102,7 @@ function wishItemHTML(it, ctx) {
 
 // ─── Render ────────────────────────────────────────────────────────────────
 function render() {
-  clearChipRegistry();
+  clearChipRegistry(); // chips only - never touches _items
   updateDebug();
   qs('#app').innerHTML =
     mode === 'viewer' ? viewerHTML() : builderHTML();
@@ -1260,6 +1296,6 @@ function toast(msg) {
 }
 </script>
 
-<!-- V2.22 -->
+<!-- V2.23 -->
 </body>
 </html>
