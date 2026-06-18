@@ -1,4 +1,4 @@
-<!-- Version: V2.18 | LAST CHANGE: Fix drawer for Glide using events.html modal pattern; photo in "Is this you?"; newest items first; fix toast; location label + no placeholder | Date: 2026-06-17 -->
+<!-- Version: V2.19 | LAST CHANGE: Fix onclick bug in wish items using item registry; toast to top with myevents colors; truncate URL display; sentence case labels | Date: 2026-06-17 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -233,8 +233,8 @@
     .empty { font-size: 14px; color: var(--muted); padding: 20px 0; text-align: center; }
 
     /* ── Toast ── */
-    .toast { position: fixed; bottom: 88px; left: 50%; transform: translateX(-50%) translateY(10px); background: var(--text); color: white; padding: 10px 20px; border-radius: 20px; font-size: 13px; opacity: 0; transition: all 0.25s; pointer-events: none; z-index: 999; white-space: nowrap; }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast { position:fixed; top:24px; left:50%; transform:translateX(-50%); background:#1a1a2e; color:white; padding:10px 20px; border-radius:20px; font-size:14px; font-weight:700; opacity:0; transition:opacity 0.3s; pointer-events:none; z-index:9999; white-space:nowrap; }
+    .toast.show { opacity:1; }
 
     .page-footer { text-align: center; margin-top: 28px; font-size: 12px; color: rgba(255,255,255,0.55); }
     .page-footer a { color: rgba(255,255,255,0.75); text-decoration: none; }
@@ -295,7 +295,7 @@
 <div class="modal-overlay" id="location-modal">
   <div class="modal">
     <div class="modal-title">Local gifts</div>
-    <div class="modal-body" style="margin-bottom:16px">Add your postal code so people nearby can give to you.</div>
+    <div class="modal-body" style="margin-bottom:16px">You added a local request. Add your postal code so people nearby can give to you.</div>
     <input type="text" id="postal-input" placeholder="Your postal code" style="margin-bottom:14px" oninput="locationPostal=this.value">
     <button class="btn-primary" style="margin-top:0" onclick="saveLocationAndClose()">Save</button>
     <button class="btn-secondary" style="margin-top:8px" onclick="closeLocationModal()">Skip for now</button>
@@ -642,13 +642,18 @@ function clearAll() {
   otherExpOpen   = false; otherExpText   = '';
 }
 
-// ─── Chip registry ─────────────────────────────────────────────────────────
+// ─── Chip + item registry ──────────────────────────────────────────────────
 var _chips = [];
+var _items = [];
 function regChip(val) { _chips.push(val); return _chips.length - 1; }
-function clearChipRegistry() { _chips = []; }
+function regItem(id)  { _items.push(id);  return _items.length - 1; }
+function clearChipRegistry() { _chips = []; _items = []; }
 
 function chipClick(type, idx) { const val = _chips[idx]; if (!val) return; render(); }
 function toggle(set, val) { set.has(val) ? set.delete(val) : set.add(val); }
+
+function toggleDoneByIdx(idx) { const id = _items[idx]; if (id !== undefined) toggleDone(id); }
+function removeItemByIdx(idx)  { const id = _items[idx]; if (id !== undefined) removeItem(id); }
 
 function toggleOther(type) {
   render();
@@ -781,10 +786,11 @@ function renderDrawer() {
         body += `<div class="eyebrow" style="margin:20px 0 10px">Gifted</div>${done.map(it=>wishItemHTML(it,'builder')).join('')}`;
       }
       if (shareURL) {
+        const displayURL = shareURL.length > 48 ? shareURL.slice(0, 48) + '...' : shareURL;
         body += `
           <div style="margin-top:20px;padding:14px;background:var(--input-bg);border:1px solid var(--border);border-radius:10px;">
             <div style="font-size:13px;color:var(--soft);margin-bottom:8px;">Share your list with anyone:</div>
-            <div style="font-size:12px;color:var(--muted);word-break:break-all;background:white;border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:12px;">${esc(shareURL)}</div>
+            <div style="font-size:12px;color:var(--muted);word-break:break-all;background:white;border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:12px;">${esc(displayURL)}</div>
             <button class="btn-primary" style="margin-top:0" onclick="copyURL()">🔗 Copy link</button>
           </div>`;
       } else {
@@ -938,25 +944,27 @@ function toggleDone(id) {
 
 function wishItemHTML(it, ctx) {
   const isDone = ctx === 'builder' ? it.done : viewFulfilled.has(String(it.id));
-  const idRef  = JSON.stringify(it.id);
-  // For viewer: pass ownerAppearId correctly from viewerData.name (which IS the member ID)
+  const idx = regItem(it.id);
   const ownerIdJson = JSON.stringify(viewerData ? (viewerData.name || '') : '');
+  const catLabel = (it.subLabel||it.subCat||'').replace(/_/g,' ').replace(/-/g,' ');
+  // Sentence case: capitalize first letter only
+  const catDisplay = catLabel.charAt(0).toUpperCase() + catLabel.slice(1).toLowerCase();
   return `
     <div class="wish-item${isDone?' done':''}">
       <div class="wish-icon">${it.subIcon}</div>
       <div class="wish-body">
-        <div class="wish-cat">${(it.subLabel||it.subCat||'').replace(/_/g,' ').replace(/-/g,' ')}</div>
+        <div class="wish-cat">${esc(catDisplay)}</div>
         <div class="wish-title">${esc(it.title)}</div>
         ${it.note ? `<div class="wish-note">${esc(it.note)}</div>` : ''}
-        ${isDone ? `<div class="wish-badge">${ctx==='builder'?'Gifted':'Gifted'}</div>` : ''}
+        ${isDone ? `<div class="wish-badge">Gifted</div>` : ''}
       </div>
       <div class="wish-actions">
         ${isDone
-          ? `<button class="btn-sm" onclick="toggleDone(${idRef})">Undo</button>`
+          ? `<button class="btn-sm" onclick="toggleDoneByIdx(${idx})">Undo</button>`
           : ctx==='viewer'
             ? `<button class="btn-sm receive" onclick="giftItem(${ownerIdJson},${JSON.stringify(it.title)})">I'll give this</button>`
-            : `<button class="btn-sm receive" onclick="toggleDone(${idRef})">Mark as gifted</button>`}
-        ${ctx==='builder' ? `<button class="btn-sm remove" onclick="removeItem(${idRef})">Remove</button>` : ''}
+            : `<button class="btn-sm receive" onclick="toggleDoneByIdx(${idx})">Mark as gifted</button>`}
+        ${ctx==='builder' ? `<button class="btn-sm remove" onclick="removeItemByIdx(${idx})">Remove</button>` : ''}
       </div>
     </div>`;
 }
@@ -1157,6 +1165,6 @@ function toast(msg) {
 }
 </script>
 
-<!-- V2.18 -->
+<!-- V2.19 -->
 </body>
 </html>
