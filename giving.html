@@ -1,4 +1,4 @@
-<!-- Version: V2.21 | LAST CHANGE: Is this you? once only; share URL persists; generate link above tabs; no anon modal for owner; modals to top; tab overlay fix; edit pencil only; pagination 5/page; category label fix | Date: 2026-06-18 -->
+<!-- Version: V2.22 | LAST CHANGE: Fix Is this you? skip logic; fix _items registry; gifted section full opacity+functional; edit mode Save+Cancel side by side; Remove→✕; Copy 🔗; Received/Given data fix | Date: 2026-06-18 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -389,10 +389,10 @@ let _ownerAppearId = null; // owner of the list being viewed
 
   if (urlId) {
     let stored = null;
-    let confirmed = false;
-    try { stored = localStorage.getItem('appear-id'); confirmed = localStorage.getItem('appear-id-confirmed') === 'true'; } catch(e) {}
-    const alreadyConfirmed = stored === urlId || confirmed;
-    if (!alreadyConfirmed && !listParam) {
+    try { stored = localStorage.getItem('appear-id'); } catch(e) {}
+    // Skip confirm if URL id matches what's already stored
+    const alreadyKnown = stored === urlId;
+    if (!alreadyKnown && !listParam) {
       _pendingId = urlId;
       _appearId = null;
     } else {
@@ -432,10 +432,7 @@ function openConfirmModal(id) {
 function confirmIdentity() {
   _appearId = _pendingId;
   _pendingId = null;
-  try {
-    localStorage.setItem('appear-id', _appearId);
-    localStorage.setItem('appear-id-confirmed', 'true');
-  } catch(e) {}
+  try { localStorage.setItem('appear-id', _appearId); } catch(e) {}
   document.getElementById('confirm-modal').classList.remove('open');
   loadSupportList();
   render();
@@ -817,6 +814,7 @@ function setDrawerTab(tab) {
 }
 
 function renderDrawer() {
+  clearChipRegistry(); // always rebuild _items registry fresh
   const active = items.filter(i=>!i.done);
   const done   = items.filter(i=> i.done);
 
@@ -825,7 +823,7 @@ function renderDrawer() {
   const shareLine = shareURL
     ? `<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
         <div style="flex:1;font-size:12px;color:var(--muted);background:var(--input-bg);border:1px solid var(--border);border-radius:6px;padding:7px 10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(displayURL)}</div>
-        <button onclick="copyURL()" style="flex-shrink:0;padding:7px 12px;background:var(--brand);color:white;border:none;border-radius:8px;font-size:14px;cursor:pointer;">📋</button>
+        <button onclick="copyURL()" style="flex-shrink:0;padding:7px 14px;background:var(--brand);color:white;border:none;border-radius:8px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;">Copy 🔗</button>
       </div>`
     : `<div style="text-align:center;margin-bottom:12px;">
         <button onclick="generateLink()" style="padding:8px 16px;background:transparent;border:1.5px solid var(--border);border-radius:20px;font-size:13px;color:var(--soft);font-family:'DM Sans',sans-serif;cursor:pointer;">Generate link to share</button>
@@ -1016,7 +1014,6 @@ function toggleDone(id) {
 }
 
 function normCatLabel(raw) {
-  // Convert raw subCat/subLabel to readable sentence case
   const s = (raw||'').replace(/_/g,' ').replace(/-/g,' ').trim();
   return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
 }
@@ -1024,10 +1021,8 @@ function normCatLabel(raw) {
 function wishItemHTML(it, ctx) {
   const isDone = ctx === 'builder' ? it.done : viewFulfilled.has(String(it.id));
   const idx = regItem(it.id);
-  // Use subLabel if it's clean, else fall back to subCat
   const rawLabel = (it.subLabel && !it.subLabel.includes('_') && !it.subLabel.includes('-'))
-    ? it.subLabel
-    : it.subCat || '';
+    ? it.subLabel : it.subCat || '';
   const catDisplay = normCatLabel(rawLabel);
   const isEditing = ctx === 'builder' && _editingItemId === it.id;
 
@@ -1037,27 +1032,34 @@ function wishItemHTML(it, ctx) {
       <input type="text" id="edit-title-${idx}" value="${esc(it.title)}" style="margin-bottom:8px;font-size:14px;width:100%;background:white;border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-family:'DM Sans',sans-serif;">
       <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Details</div>
       <input type="text" id="edit-note-${idx}" value="${esc(it.note||'')}" placeholder="" style="margin-bottom:10px;font-size:14px;width:100%;background:white;border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-family:'DM Sans',sans-serif;">
-      <button class="btn-add" onclick="saveEditByIdx(${idx})" style="font-size:13px;padding:9px;">Save</button>
+      <div style="display:flex;gap:8px;">
+        <button onclick="saveEditByIdx(${idx})" style="flex:1;padding:9px;background:var(--brand);color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;">Save</button>
+        <button onclick="editItemByIdx(${idx})" style="flex:1;padding:9px;background:white;color:var(--soft);border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;">Cancel</button>
+      </div>
     </div>` : '';
 
+  // Action buttons - hide all except cancel when editing
+  const actionButtons = isEditing ? '' : `
+    ${isDone
+      ? `<button class="btn-sm" onclick="toggleDoneByIdx(${idx})">Undo</button>`
+      : ctx==='viewer'
+        ? `<button class="btn-sm receive" onclick="giftItem(${JSON.stringify(it.title)})">I'll give this</button>`
+        : `<button class="btn-sm receive" onclick="toggleDoneByIdx(${idx})">Mark as gifted</button>`}
+    ${ctx==='builder' ? `<button class="btn-sm" onclick="editItemByIdx(${idx})" style="font-size:16px;padding:4px 10px;">✏️</button>` : ''}
+    ${ctx==='builder' ? `<button class="btn-sm remove" onclick="removeItemByIdx(${idx})" style="font-size:16px;padding:4px 10px;">✕</button>` : ''}`;
+
   return `
-    <div class="wish-item${isDone?' done':''}">
+    <div class="wish-item">
       <div class="wish-icon">${it.subIcon||'🌱'}</div>
       <div class="wish-body" style="min-width:0;flex:1;">
         <div class="wish-cat">${esc(catDisplay)}</div>
-        <div class="wish-title">${esc(it.title)}</div>
+        <div class="wish-title" style="${isDone?'color:var(--muted);':''}">${esc(it.title)}</div>
         ${it.note && !isEditing ? `<div class="wish-note">${esc(it.note)}</div>` : ''}
         ${isDone ? `<div class="wish-badge">Gifted</div>` : ''}
         ${editForm}
       </div>
       <div class="wish-actions" style="flex-shrink:0;display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
-        ${isDone
-          ? `<button class="btn-sm" onclick="toggleDoneByIdx(${idx})">Undo</button>`
-          : ctx==='viewer'
-            ? `<button class="btn-sm receive" onclick="giftItem(${JSON.stringify(it.title)})">I'll give this</button>`
-            : `<button class="btn-sm receive" onclick="toggleDoneByIdx(${idx})">Mark as gifted</button>`}
-        ${ctx==='builder' ? `<button class="btn-sm" onclick="editItemByIdx(${idx})" style="font-size:16px;padding:4px 10px;">${isEditing?'✕':'✏️'}</button>` : ''}
-        ${ctx==='builder' ? `<button class="btn-sm remove" onclick="removeItemByIdx(${idx})">Remove</button>` : ''}
+        ${actionButtons}
       </div>
     </div>`;
 }
@@ -1258,6 +1260,6 @@ function toast(msg) {
 }
 </script>
 
-<!-- V2.21 -->
+<!-- V2.22 -->
 </body>
 </html>
