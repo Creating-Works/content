@@ -1,13 +1,10 @@
-<!--
-  support.html
-  v2.14 - Local request checkbox; location modal; gift trail; readable labels; share flow fixed
--->
+<!-- Version: V2.15 LAST CHANGE: Rename to gifts/give language; Given/Received tabs; anonymous modal; giftItem fix; sheet writes for mark gifted + remove; missing functions defined. Version: V2.15 | Date: 2026-06-17 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ways to support me - Creating Works</title>
+  <title>Ways to give to me - Creating Works</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&display=swap" rel="stylesheet">
   <style>
@@ -125,9 +122,7 @@
     .skill-chip.other-chip { border-style: dashed; font-size: 12px; }
 
     /* ── Other inline input ── */
-    .other-input-wrap {
-      display: flex; gap: 8px; margin-top: 10px; width: 100%;
-    }
+    .other-input-wrap { display: flex; gap: 8px; margin-top: 10px; width: 100%; }
     .other-input-wrap input { flex: 1; }
     .btn-other-add {
       padding: 10px 16px; background: var(--brand); color: white; border: none;
@@ -153,11 +148,7 @@
 
     /* ── FAB ── */
     .support-fab {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      left: auto;
-      transform: none;
+      position: fixed; top: 20px; right: 20px; left: auto; transform: none;
       background: var(--brand); color: white; border: none; border-radius: 28px;
       padding: 12px 20px; font-family: 'DM Sans', sans-serif; font-size: 14px;
       font-weight: 600; cursor: pointer; box-shadow: 0 4px 16px rgba(31,105,158,0.45);
@@ -186,9 +177,20 @@
     .drawer.open { transform: translateX(-50%) translateY(0); }
     @media (max-width: 520px) { .drawer { padding: 24px 20px 36px; } }
     .drawer-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; }
-    .drawer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .drawer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
     .drawer-title { font-size: 18px; font-weight: 700; color: var(--text); }
     .btn-close { background: none; border: none; font-size: 20px; color: var(--muted); cursor: pointer; padding: 4px 8px; line-height: 1; }
+
+    /* ── Drawer tabs ── */
+    .drawer-tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 20px; }
+    .drawer-tab {
+      flex: 1; padding: 10px; text-align: center; font-size: 14px; font-weight: 500;
+      color: var(--muted); cursor: pointer; border: none; background: none;
+      font-family: 'DM Sans', sans-serif; border-bottom: 2px solid transparent;
+      margin-bottom: -2px; transition: all 0.15s;
+    }
+    .drawer-tab:hover { color: var(--brand); }
+    .drawer-tab.active { color: var(--brand); border-bottom-color: var(--brand); font-weight: 600; }
 
     /* ── Wish items ── */
     .wish-item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--border); }
@@ -243,13 +245,24 @@
     .page-footer { text-align: center; margin-top: 28px; font-size: 12px; color: rgba(255,255,255,0.55); }
     .page-footer a { color: rgba(255,255,255,0.75); text-decoration: none; }
 
-    /* ── Sign-in modal ── */
-    .modal-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,.45); z-index:500; align-items:flex-start; justify-content:flex-start; padding:16px 20px 20px; overflow-y:auto; }
+    /* ── Modals ── */
+    .modal-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,.45); z-index:500; align-items:flex-start; justify-content:flex-start; padding:48px 20px 20px; overflow-y:auto; }
     .modal-overlay.open { display:flex; }
     .modal { background:#fff; border-radius:16px; padding:32px; max-width:400px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,.2); text-align:center; }
     .modal-title { font-size:18px; font-weight:700; color:var(--text); margin-bottom:10px; }
     .modal-body { font-size:14px; color:var(--soft); line-height:1.6; margin-bottom:24px; }
     .modal-body a { color:var(--brand); font-weight:600; text-decoration:none; }
+
+    /* ── Anonymous choice buttons ── */
+    .anon-options { display:flex; flex-direction:column; gap:10px; }
+    .btn-anon { padding:12px 16px; border-radius:10px; border:1.5px solid var(--border); background:white; font-family:'DM Sans',sans-serif; font-size:14px; color:var(--text); cursor:pointer; transition:all 0.15s; text-align:left; }
+    .btn-anon:hover { border-color:var(--brand); color:var(--brand); }
+
+    /* ── History item (Given/Received tabs) ── */
+    .history-item { padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .history-item:last-child { border-bottom: none; }
+    .history-title { font-size: 14px; font-weight: 500; color: var(--text); }
+    .history-meta { font-size: 12px; color: var(--muted); margin-top: 3px; }
   </style>
 </head>
 <body>
@@ -268,8 +281,8 @@
 <!-- Sign-in modal -->
 <div class="modal-overlay" id="signin-modal" onclick="if(event.target===this)closeSigninModal()">
   <div class="modal">
-    <div class="modal-title">Add your support list</div>
-    <div class="modal-body">Sign in or sign up to save your support list and share it with others.<br><br><a href="https://appear.network">Go to Appear Network →</a></div>
+    <div class="modal-title">Add your gift list</div>
+    <div class="modal-body">Sign in or sign up to save your gift list and share it with others.<br><br><a href="https://appear.network">Go to Appear Network →</a></div>
     <button class="btn-primary" style="margin-top:0" onclick="closeSigninModal()">Got it</button>
   </div>
 </div>
@@ -288,7 +301,7 @@
 <div class="modal-overlay" id="location-modal">
   <div class="modal">
     <div class="modal-title">Help local supporters find you</div>
-    <div class="modal-body" style="margin-bottom:16px">You have local requests on your list. Add your county so people nearby can support you.</div>
+    <div class="modal-body" style="margin-bottom:16px">You have local requests on your list. Add your county so people nearby can give to you.</div>
     <input type="text" id="county-input" placeholder="Your county" style="margin-bottom:10px" oninput="locationCounty=this.value">
     <button id="gps-btn" onclick="captureGPS()" style="width:100%;padding:9px;background:transparent;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--soft);cursor:pointer;margin-bottom:14px;transition:all 0.15s;">📍 Use my location instead</button>
     <button class="btn-primary" style="margin-top:0" onclick="saveLocationAndClose()">Save</button>
@@ -300,8 +313,21 @@
 <div class="modal-overlay" id="gift-signin-modal" onclick="if(event.target===this)closeGiftSigninModal()">
   <div class="modal">
     <div class="modal-title">Sign in to gift this</div>
-    <div class="modal-body">Sign in or sign up so the person knows who wants to support them.<br><br><a href="https://appear.network">Go to Appear Network →</a></div>
+    <div class="modal-body">Sign in or sign up so the person knows who wants to give to them.<br><br><a href="https://appear.network">Go to Appear Network →</a></div>
     <button class="btn-primary" style="margin-top:0" onclick="closeGiftSigninModal()">Got it</button>
+  </div>
+</div>
+
+<!-- Anonymous choice modal -->
+<div class="modal-overlay" id="anon-modal">
+  <div class="modal">
+    <div class="modal-title">How do you want to give?</div>
+    <div class="modal-body" style="margin-bottom:16px">Let them know it's from you, or give anonymously.</div>
+    <div class="anon-options">
+      <button class="btn-anon" onclick="confirmGift(false)">🙋 Let them know it's from me</button>
+      <button class="btn-anon" onclick="confirmGift(true)">🎁 Give anonymously</button>
+    </div>
+    <button class="btn-secondary" style="margin-top:14px" onclick="closeAnonModal()">Cancel</button>
   </div>
 </div>
 
@@ -338,7 +364,7 @@ const THINGS_SUBS = [
 
 const ACTIONS_SUBS = [
   { id:'for-myself',   icon:'🧘', label:'For myself',               expDesc:"Examples: a massage, a spa day, a night away, a fitness class, a recording session" },
-  { id:'with-someone', icon:'🌐', label:'With someone',       expDesc:"Examples: meal out for 2-6 people at a place you choose, 4 tickets to the zoo, 2 tickets to a show" },
+  { id:'with-someone', icon:'🌐', label:'With someone',             expDesc:"Examples: meal out for 2-6 people at a place you choose, 4 tickets to the zoo, 2 tickets to a show" },
   { id:'for-someone',  icon:'💛', label:'For someone I care about', expDesc:"Examples: a class, a meal, a ticket" }
 ];
 
@@ -350,7 +376,6 @@ const ACTION_CHIPS = [
 ];
 
 // ─── Identity ──────────────────────────────────────────────────────────────
-// getMemberId - reads memberCard or id from URL param, falls back to localStorage
 function getMemberId() {
   const params = new URLSearchParams(window.location.search);
   const urlParam = params.get('id') || params.get('memberCard');
@@ -359,8 +384,25 @@ function getMemberId() {
 }
 
 let _appearId = getMemberId();
+let _pendingId = null;
+
 (function() {
-  if (_appearId) {
+  // If URL has an ID and it's different from localStorage, prompt confirmation
+  const params = new URLSearchParams(window.location.search);
+  const urlId = params.get('id') || params.get('memberCard');
+  if (urlId) {
+    let stored = null;
+    try { stored = localStorage.getItem('appear-id'); } catch(e) {}
+    // Skip confirm if already confirmed via events.html or matches localStorage
+    const alreadyConfirmed = stored === urlId;
+    if (!alreadyConfirmed) {
+      _pendingId = urlId;
+      _appearId = null; // hold off until confirmed
+    } else {
+      _appearId = urlId;
+      try { localStorage.setItem('appear-id', _appearId); } catch(e) {}
+    }
+  } else if (_appearId) {
     try { localStorage.setItem('appear-id', _appearId); } catch(e) {}
   }
 })();
@@ -375,6 +417,113 @@ function updateDebug() {
 function openSigninModal()  { closeDrawer(); document.getElementById('signin-modal').classList.add('open'); }
 function closeSigninModal() { document.getElementById('signin-modal').classList.remove('open'); }
 
+function openConfirmModal(id) {
+  document.getElementById('confirm-id-display').textContent = id;
+  document.getElementById('confirm-modal').classList.add('open');
+}
+function confirmIdentity() {
+  _appearId = _pendingId;
+  _pendingId = null;
+  try { localStorage.setItem('appear-id', _appearId); } catch(e) {}
+  document.getElementById('confirm-modal').classList.remove('open');
+  loadSupportList();
+  render();
+}
+function denyIdentity() {
+  _pendingId = null;
+  document.getElementById('confirm-modal').classList.remove('open');
+  openSigninModal();
+}
+
+function openLocationModal()  { document.getElementById('location-modal').classList.add('open'); }
+function closeLocationModal() { document.getElementById('location-modal').classList.remove('open'); }
+
+function saveLocationAndClose() {
+  const county = locationCounty.trim();
+  if (!county && !locationLat) { toast('Add your county or use your location'); return; }
+  if (_appearId) {
+    fetch(GS_URL + '?action=saveLocation'
+      + '&appearId=' + encodeURIComponent(_appearId)
+      + '&county='   + encodeURIComponent(county)
+      + '&lat='      + encodeURIComponent(locationLat || '')
+      + '&lng='      + encodeURIComponent(locationLng || '')
+    ).catch(() => {});
+  }
+  closeLocationModal();
+  toast('Location saved');
+}
+
+function captureGPS() {
+  const btn = document.getElementById('gps-btn');
+  if (!navigator.geolocation) { toast('Location not available'); return; }
+  if (btn) btn.textContent = '📍 Getting location...';
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      locationLat = pos.coords.latitude;
+      locationLng = pos.coords.longitude;
+      if (btn) btn.textContent = '✓ Location captured';
+    },
+    () => { if (btn) btn.textContent = '📍 Use my location instead'; toast('Could not get location'); }
+  );
+}
+
+function useMyLocation() {
+  if (!navigator.geolocation) { toast('Location not available'); return; }
+  const btn = document.getElementById('use-location-btn');
+  if (btn) btn.textContent = '📍 Getting location...';
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      locationLat = pos.coords.latitude;
+      locationLng = pos.coords.longitude;
+      if (btn) btn.textContent = '✓ Location captured';
+    },
+    () => { if (btn) btn.textContent = '📍 Use my location'; toast('Could not get location'); }
+  );
+}
+
+function updateLocation(val) { locationText = val; }
+function toggleLocalRequest(checked) { isLocalRequest = checked; }
+
+function closeGiftSigninModal() { document.getElementById('gift-signin-modal').classList.remove('open'); }
+function openGiftSigninModal()  { document.getElementById('gift-signin-modal').classList.add('open'); }
+
+// ─── Anonymous modal ────────────────────────────────────────────────────────
+let _pendingGiftOwner = null;
+let _pendingGiftItem  = null;
+
+function giftItem(ownerAppearId, itemTitle) {
+  if (!_appearId) { openGiftSigninModal(); return; }
+  _pendingGiftOwner = ownerAppearId;
+  _pendingGiftItem  = itemTitle;
+  document.getElementById('anon-modal').classList.add('open');
+}
+
+function closeAnonModal() {
+  _pendingGiftOwner = null;
+  _pendingGiftItem  = null;
+  document.getElementById('anon-modal').classList.remove('open');
+}
+
+function confirmGift(anonymous) {
+  document.getElementById('anon-modal').classList.remove('open');
+  if (!_pendingGiftOwner || !_pendingGiftItem) return;
+  fetch(GS_URL + '?action=saveGift'
+    + '&gifterAppearId=' + encodeURIComponent(_appearId)
+    + '&ownerAppearId='  + encodeURIComponent(_pendingGiftOwner)
+    + '&item='           + encodeURIComponent(_pendingGiftItem)
+    + '&anonymous='      + encodeURIComponent(anonymous ? 'true' : 'false')
+  ).catch(() => {});
+  toast(anonymous ? 'Gift sent anonymously 🎁' : 'Gift sent 🎁');
+  // Mark fulfilled locally in viewer
+  if (mode === 'viewer') {
+    const it = (viewerData.items || []).find(i => i.title === _pendingGiftItem);
+    if (it) { viewFulfilled.add(String(it.id)); saveViewer(); }
+    render();
+  }
+  _pendingGiftOwner = null;
+  _pendingGiftItem  = null;
+}
+
 // ─── State ─────────────────────────────────────────────────────────────────
 let mode          = 'builder';
 let viewerData    = null;
@@ -386,25 +535,31 @@ let openThingsSub = null;
 let openActionSub  = null;
 let selectedActionChip = null;
 
-
-
 let otherSpaceOpen  = false;
 let otherSpaceText  = '';
 let otherThingOpen  = false;
 let otherThingText  = '';
 let otherExpOpen    = false;
 let otherExpText    = '';
+let otherSkillOpen  = false;
+let otherSkillText  = '';
+let otherWordsOpen  = false;
+let otherWordsText  = '';
 
-let noteText     = '';
-let locationText = '';
-let locationLat  = null;
-let locationLng  = null;
+let noteText       = '';
+let locationText   = '';
+let locationLat    = null;
+let locationLng    = null;
 let isLocalRequest = false;
 let locationCounty = '';
-let showLocationPrompt = false;
-let shareURL  = '';
-let items     = [];
-let myName    = '';
+let shareURL       = '';
+let items          = [];
+let myName         = '';
+
+// Drawer tab state
+let drawerTab = 'list'; // 'list' | 'received' | 'given'
+let giftHistory = { received: [], given: [] };
+let historyLoaded = false;
 
 // ─── Boot ──────────────────────────────────────────────────────────────────
 (function init() {
@@ -427,24 +582,30 @@ async function loadSupportList() {
     const res  = await fetch(GS_URL + '?action=getSupportList&appearId=' + encodeURIComponent(_appearId));
     const data = await res.json();
     if (data.status === 'ok' && data.items && data.items.length) {
-      // Merge sheet items - don't overwrite locally added ones
       const existingTitles = new Set(items.map(i => i.title));
       data.items.forEach(function(r) {
         if (!existingTitles.has(r.item)) {
           items.push({
-            id: uid(),
-            topCat:   r.category,
-            subCat:   r.subCategory,
-            subLabel: r.subCategory,
-            subIcon:  '🌱',
-            title:    r.item,
-            note:     r.note || '',
-            done:     false
+            id: uid(), topCat: r.category, subCat: r.subCategory,
+            subLabel: r.subCategory, subIcon: '🌱', title: r.item,
+            note: r.note || '', done: false
           });
         }
       });
-      save();
-      render();
+      save(); render();
+    }
+  } catch(e) {}
+}
+
+async function loadGiftHistory() {
+  if (!_appearId) return;
+  try {
+    const res  = await fetch(GS_URL + '?action=getGiftHistory&appearId=' + encodeURIComponent(_appearId));
+    const data = await res.json();
+    if (data.status === 'ok') {
+      giftHistory = { received: data.received || [], given: data.given || [] };
+      historyLoaded = true;
+      renderDrawer();
     }
   } catch(e) {}
 }
@@ -452,6 +613,7 @@ async function loadSupportList() {
 function save() { localStorage.setItem('an_support_25', JSON.stringify({ name: myName, items })); }
 function saveViewer() {
   const encoded = new URLSearchParams(window.location.search).get('list');
+  if (!encoded) return;
   localStorage.setItem('vf_' + encoded.slice(0,24), JSON.stringify([...viewFulfilled]));
 }
 
@@ -462,25 +624,10 @@ function setTopCat(id) {
   clearAll(); noteText = ''; render();
 }
 
-function setSpacesSub(id) {
-  openSpacesSub = (openSpacesSub === id) ? null : id;
-  clearAll(); noteText = ''; render();
-}
-
-function setThingsSub(id) {
-  openThingsSub = (openThingsSub === id) ? null : id;
-  clearAll(); noteText = ''; render();
-}
-
-function setActionSub(id) {
-  openActionSub = (openActionSub === id) ? null : id;
-  selectedActionChip = null; noteText = ''; render();
-}
-
-function setActionChip(id) {
-  selectedActionChip = (selectedActionChip === id) ? null : id;
-  noteText = ''; render();
-}
+function setSpacesSub(id) { openSpacesSub = (openSpacesSub === id) ? null : id; clearAll(); noteText = ''; render(); }
+function setThingsSub(id) { openThingsSub = (openThingsSub === id) ? null : id; clearAll(); noteText = ''; render(); }
+function setActionSub(id) { openActionSub = (openActionSub === id) ? null : id; selectedActionChip = null; noteText = ''; render(); }
+function setActionChip(id) { selectedActionChip = (selectedActionChip === id) ? null : id; noteText = ''; render(); }
 
 function clearAll() {
   selectedActionChip = null;
@@ -493,33 +640,25 @@ function clearAll() {
   otherExpOpen   = false; otherExpText   = '';
 }
 
-// ─── Chip registry - avoids quote-escaping in onclick attributes ───────────
-var _chips = [];  // var hoisted to avoid TDZ error
+// ─── Chip registry ─────────────────────────────────────────────────────────
+var _chips = [];
 function regChip(val) { _chips.push(val); return _chips.length - 1; }
 function clearChipRegistry() { _chips = []; }
 
-function chipClick(type, idx) {
-  const val = _chips[idx];
-  if (!val) return;
-  render();
-}
-
+function chipClick(type, idx) { const val = _chips[idx]; if (!val) return; render(); }
 function toggle(set, val) { set.has(val) ? set.delete(val) : set.add(val); }
 
-// ─── Other chip toggles ────────────────────────────────────────────────────
 function toggleOther(type) {
   render();
   setTimeout(() => { const el = document.getElementById('other-input-'+type); if (el) el.focus(); }, 50);
 }
-
-function updateOther(type, val) {
-}
+function updateOther(type, val) {}
 
 function addOther(type) {
   let text = '';
   let set, subCat, subLabel, subIcon, topCat;
-  if (type==='skill') { text=otherSkillText; set=selectedSkills; subCat='skills'; subLabel='Share skills'; subIcon='🛠'; topCat='people'; }
-  if (type==='words') { text=otherWordsText; set=selectedWordsSubs; subCat='words'; subLabel='Share words'; subIcon='💬'; topCat='people'; }
+  if (type==='skill') { text=otherSkillText; subCat='skills'; subLabel='Share skills'; subIcon='🛠'; topCat='people'; }
+  if (type==='words') { text=otherWordsText; subCat='words'; subLabel='Share words'; subIcon='💬'; topCat='people'; }
   if (type==='space') {
     text=otherSpaceText;
     const sub = SPACES_SUBS.find(s=>s.id===openSpacesSub);
@@ -537,8 +676,6 @@ function addOther(type) {
   }
   text = (text||'').trim();
   if (!text) { toast('Name it first'); return; }
-  // add as a selected chip value and close the other input
-  set.add(text);
   render();
 }
 
@@ -566,14 +703,12 @@ function addToList() {
     if (!openSpacesSub) { toast('Choose a space type first'); return; }
     if (!note) { toast('Tell me what you need'); return; }
     const sub = SPACES_SUBS.find(s=>s.id===openSpacesSub);
-    label = note;
-    subCat=openSpacesSub; subLabel=sub?.label||'Spaces'; subIcon=sub?.icon||'🏡'; topCat='spaces'; hasSelection=true;
+    label = note; subCat=openSpacesSub; subLabel=sub?.label||'Spaces'; subIcon=sub?.icon||'🏡'; topCat='spaces'; hasSelection=true;
   } else if (openTopCat === 'things') {
     if (!openThingsSub) { toast('Choose a type first'); return; }
     if (!note) { toast('Tell me what you need'); return; }
     const sub = THINGS_SUBS.find(s=>s.id===openThingsSub);
-    label = note;
-    subCat=openThingsSub; subLabel=sub?.label||'Things'; subIcon=sub?.icon||'📦'; topCat='things'; hasSelection=true;
+    label = note; subCat=openThingsSub; subLabel=sub?.label||'Things'; subIcon=sub?.icon||'📦'; topCat='things'; hasSelection=true;
   }
 
   if (!hasSelection) return;
@@ -604,6 +739,8 @@ function updateFAB() { /* FAB rendered inline in builderHTML */ }
 
 // ─── Drawer ────────────────────────────────────────────────────────────────
 function openDrawer() {
+  drawerTab = 'list';
+  historyLoaded = false;
   renderDrawer();
   qs('#drawer').classList.add('open');
   qs('#drawer-overlay').classList.add('open');
@@ -614,72 +751,104 @@ function closeDrawer() {
   qs('#drawer-overlay').classList.remove('open');
 }
 
+function setDrawerTab(tab) {
+  drawerTab = tab;
+  if ((tab === 'received' || tab === 'given') && !historyLoaded) {
+    loadGiftHistory();
+  }
+  renderDrawer();
+}
+
 function renderDrawer() {
   const active = items.filter(i=>!i.done);
   const done   = items.filter(i=> i.done);
   const total  = items.length;
   const pct    = total ? Math.round((done.length/total)*100) : 0;
+  const openCount = active.length;
+
+  const tabs = `
+    <div class="drawer-tabs">
+      <button class="drawer-tab${drawerTab==='list'?' active':''}" onclick="setDrawerTab('list')">My list</button>
+      <button class="drawer-tab${drawerTab==='received'?' active':''}" onclick="setDrawerTab('received')">Received</button>
+      <button class="drawer-tab${drawerTab==='given'?' active':''}" onclick="setDrawerTab('given')">Given</button>
+    </div>`;
 
   let html = `
     <div class="drawer-handle"></div>
     <div class="drawer-header">
-      <div class="drawer-title">My support list (${total})</div>
+      <div class="drawer-title">My gift list 🎁</div>
       <button class="btn-close" onclick="closeDrawer()">✕</button>
-    </div>`;
+    </div>
+    ${tabs}`;
 
-  if (total) {
-    html += `
-      <div class="progress-wrap">
-        <div class="progress-labels"><span>${done.length} received</span><span>${active.length} still needed</span></div>
-        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-      </div>
-      ${active.map(it=>wishItemHTML(it,'builder')).join('')}
-      ${done.length ? `<div class="eyebrow" style="margin:20px 0 10px">Received</div>${done.map(it=>wishItemHTML(it,'builder')).join('')}` : ''}
-      <button class="btn-primary" onclick="closeDrawer();genShareAndReview()">🔗 Share this</button>`;
-  } else {
-    html += `<div class="empty">Nothing on your support list yet.</div>`;
-  }
-
-  if (shareURL) {
-    html += `
-      <div class="share-box">
-        <p>Share this link with anyone who wants to show up for you:</p>
-        <div class="share-url">${esc(shareURL)}</div>
-        <button class="btn-primary" onclick="copyURL()">Copy link</button>
-      </div>`;
+  if (drawerTab === 'list') {
+    if (total) {
+      html += `
+        <div class="progress-wrap">
+          <div class="progress-labels">
+            <span>${done.length} gifted</span>
+            <span>${openCount} open for giving 🎁</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+        </div>
+        ${active.map(it=>wishItemHTML(it,'builder')).join('')}
+        ${done.length ? `<div class="eyebrow" style="margin:20px 0 10px">Gifted</div>${done.map(it=>wishItemHTML(it,'builder')).join('')}` : ''}
+        <button class="btn-primary" onclick="closeDrawer();genShareAndReview()">🔗 Copy link</button>`;
+    } else {
+      html += `<div class="empty">Nothing on your gift list yet.</div>`;
+    }
+    if (shareURL) {
+      html += `
+        <div class="share-box">
+          <p>Share this link with anyone who wants to give to you:</p>
+          <div class="share-url">${esc(shareURL)}</div>
+          <button class="btn-primary" onclick="copyURL()">🔗 Copy link</button>
+        </div>`;
+    }
+  } else if (drawerTab === 'received') {
+    if (!historyLoaded) {
+      html += `<div class="empty">Loading...</div>`;
+    } else if (!giftHistory.received.length) {
+      html += `<div class="empty">No gifts received yet.</div>`;
+    } else {
+      html += giftHistory.received.map(g => `
+        <div class="history-item">
+          <div class="history-title">${esc(g.item)}</div>
+          <div class="history-meta">${g.anonymous === 'true' ? 'Given anonymously' : ('From ' + esc(g.gifterAppearId))} · ${formatDate(g.timestamp)}</div>
+        </div>`).join('');
+    }
+  } else if (drawerTab === 'given') {
+    if (!historyLoaded) {
+      html += `<div class="empty">Loading...</div>`;
+    } else if (!giftHistory.given.length) {
+      html += `<div class="empty">No gifts given yet.</div>`;
+    } else {
+      html += giftHistory.given.map(g => `
+        <div class="history-item">
+          <div class="history-title">${esc(g.item)}</div>
+          <div class="history-meta">To ${esc(g.ownerAppearId)} · ${formatDate(g.timestamp)}</div>
+        </div>`).join('');
+    }
   }
 
   qs('#drawer').innerHTML = html;
 }
 
-function goToReview() { mode = 'review'; render(); }
-function goToBuilder() { mode = 'builder'; render(); }
-
-function genShare() {
-  try {
-    const json    = JSON.stringify({ name: myName, items, created: new Date().toISOString() });
-    const encoded = btoa(unescape(encodeURIComponent(json)));
-    shareURL = location.origin + location.pathname + '?list=' + encoded;
-  } catch(e) {
-    toast('Could not generate link - try removing emoji from notes');
-    return;
-  }
-  mode = 'builder';
-  render();
-  setTimeout(() => openDrawer(), 50);
+function formatDate(ts) {
+  if (!ts) return '';
+  try { return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); } catch(e) { return ''; }
 }
+
+function goToReview()  { mode = 'review';  render(); }
+function goToBuilder() { mode = 'builder'; render(); }
 
 function genShareAndReview() {
   try {
     const json    = JSON.stringify({ name: myName, items, created: new Date().toISOString() });
     const encoded = btoa(unescape(encodeURIComponent(json)));
     shareURL = location.origin + location.pathname + '?list=' + encoded;
-  } catch(e) {
-    toast('Could not generate link');
-    return;
-  }
-  mode = 'review';
-  render();
+  } catch(e) { toast('Could not generate link'); return; }
+  mode = 'review'; render();
 }
 
 function genShareInline() {
@@ -687,11 +856,7 @@ function genShareInline() {
     const json    = JSON.stringify({ name: myName, items, created: new Date().toISOString() });
     const encoded = btoa(unescape(encodeURIComponent(json)));
     shareURL = location.origin + location.pathname + '?list=' + encoded;
-  } catch(e) {
-    toast('Could not generate link');
-    return;
-  }
-  // Show link inline on review screen
+  } catch(e) { toast('Could not generate link'); return; }
   const area = qs('#share-area-review');
   const btn  = qs('#share-btn-review');
   if (area) {
@@ -701,21 +866,29 @@ function genShareInline() {
         <div style="font-size:13px;color:var(--soft);margin-bottom:8px;">Your shareable link</div>
         <div style="font-size:12px;color:var(--muted);word-break:break-all;background:white;border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(display)}</div>
         <p style="font-size:12px;color:var(--muted);margin-bottom:12px;font-style:italic;">This will also be shared on your Appear page.</p>
-        <button class="btn-primary" style="margin-top:0" onclick="copyShareURL()">Copy link</button>
+        <button class="btn-primary" style="margin-top:0" onclick="copyShareURL()">🔗 Copy link</button>
       </div>`;
   }
   if (btn) btn.style.display = 'none';
 }
 
-function copyShareURL() {
-  navigator.clipboard.writeText(shareURL).then(() => toast('Link copied'));
-}
-
-function copyURL() { navigator.clipboard.writeText(shareURL).then(() => toast('Link copied')); }
-function updateName() { myName = (qs('#b-name')||{}).value; save(); }
+function copyShareURL() { navigator.clipboard.writeText(shareURL).then(() => toast('Link copied')); }
+function copyURL()      { navigator.clipboard.writeText(shareURL).then(() => toast('Link copied')); }
+function updateName()   { myName = (qs('#b-name')||{}).value; save(); }
 
 // ─── Item actions ──────────────────────────────────────────────────────────
-function removeItem(id) { items = items.filter(i=>i.id!==id); save(); updateFAB(); renderDrawer(); }
+function removeItem(id) {
+  const it = items.find(i=>i.id===id);
+  items = items.filter(i=>i.id!==id);
+  save(); updateFAB(); renderDrawer();
+  // Write cancellation to sheet
+  if (_appearId && it) {
+    fetch(GS_URL + '?action=cancelSupportItem'
+      + '&appearId=' + encodeURIComponent(_appearId)
+      + '&item='     + encodeURIComponent(it.title)
+    ).catch(() => {});
+  }
+}
 
 function toggleDone(id) {
   if (mode === 'builder') {
@@ -723,7 +896,14 @@ function toggleDone(id) {
     if (!it) return;
     it.done = !it.done;
     save(); updateFAB(); renderDrawer();
-    toast(it.done ? 'Marked as received' : 'Marked as still needed');
+    toast(it.done ? 'Marked as gifted 🎁' : 'Marked as still open');
+    // Write to sheet when marked as gifted
+    if (it.done && _appearId) {
+      // Open anonymous choice for self-marking
+      _pendingGiftOwner = _appearId;
+      _pendingGiftItem  = it.title;
+      document.getElementById('anon-modal').classList.add('open');
+    }
   } else {
     const sid = String(id);
     viewFulfilled.has(sid) ? viewFulfilled.delete(sid) : (viewFulfilled.add(sid), toast('Marked as gifted - thank you'));
@@ -734,6 +914,8 @@ function toggleDone(id) {
 function wishItemHTML(it, ctx) {
   const isDone = ctx === 'builder' ? it.done : viewFulfilled.has(String(it.id));
   const idRef  = JSON.stringify(it.id);
+  // For viewer: pass ownerAppearId correctly from viewerData.name (which IS the member ID)
+  const ownerIdJson = JSON.stringify(viewerData ? (viewerData.name || '') : '');
   return `
     <div class="wish-item${isDone?' done':''}">
       <div class="wish-icon">${it.subIcon}</div>
@@ -741,12 +923,14 @@ function wishItemHTML(it, ctx) {
         <div class="wish-cat">${(it.subLabel||it.subCat||'').replace(/_/g,' ').replace(/-/g,' ')}</div>
         <div class="wish-title">${esc(it.title)}</div>
         ${it.note ? `<div class="wish-note">${esc(it.note)}</div>` : ''}
-        ${isDone ? `<div class="wish-badge">${ctx==='builder'?'Received':'Gifted'}</div>` : ''}
+        ${isDone ? `<div class="wish-badge">${ctx==='builder'?'Gifted':'Gifted'}</div>` : ''}
       </div>
       <div class="wish-actions">
         ${isDone
           ? `<button class="btn-sm" onclick="toggleDone(${idRef})">Undo</button>`
-          : ctx==='viewer' ? `<button class="btn-sm receive" onclick="giftItem(${JSON.stringify(viewerData?.name||'')},${JSON.stringify(it.title)})">'I\'ll gift this'</button>` : `<button class="btn-sm receive" onclick="toggleDone(${idRef})">Mark received</button>`}
+          : ctx==='viewer'
+            ? `<button class="btn-sm receive" onclick="giftItem(${ownerIdJson},${JSON.stringify(it.title)})">I'll give this</button>`
+            : `<button class="btn-sm receive" onclick="toggleDone(${idRef})">Mark as gifted</button>`}
         ${ctx==='builder' ? `<button class="btn-sm remove" onclick="removeItem(${idRef})">Remove</button>` : ''}
       </div>
     </div>`;
@@ -765,16 +949,16 @@ function render() {
 
 // ─── Builder ───────────────────────────────────────────────────────────────
 function builderHTML() {
+  const openCount = items.filter(i=>!i.done).length;
   const fabHTML = items.length
-    ? `<button class="support-fab" onclick="openDrawer()">My support list <span class="badge">${items.length}</span></button>`
+    ? `<button class="support-fab" onclick="openDrawer()">My gift list 🎁 <span class="badge">${items.length}</span></button>`
     : '';
   return `
     ${fabHTML}
-    <h1>Ways to support me</h1>
-    <p class="subtitle">When someone wants to show appreciation for what you gave them, here's how they can support you.</p>
-
+    <h1>Ways to give to me</h1>
+    <p class="subtitle">When someone wants to share appreciation for you, share ways for them to give to you.</p>
     <hr>
-    <div class="eyebrow" style="margin-bottom:12px">How can people support you?</div>
+    <div class="eyebrow" style="margin-bottom:12px">How can people give to you?</div>
     <div class="top-tabs">
       <button class="top-tab${openTopCat==='things'?' active':''}"  onclick="setTopCat('things')">📦 Things</button>
       <button class="top-tab${openTopCat==='actions'?' active':''}" onclick="setTopCat('actions')">✨ Acts of service</button>
@@ -861,7 +1045,6 @@ function actionsSection() {
   const chip = ACTION_CHIPS.find(c=>c.id===selectedActionChip);
   const isForMyself = openActionSub === 'for-myself';
 
-  // Description for selected chip (For myself only)
   let chipDesc = '';
   if (chip && isForMyself) {
     chipDesc = chip.id === 'experience' ? sub.expDesc : chip.desc;
@@ -876,9 +1059,7 @@ function actionsSection() {
   if (sub) {
     html += `<div class="drill-sub">
       <div class="drill-sub-label">${sub.icon} ${sub.label}</div>`;
-
     if (isForMyself) {
-      // Show 3 chips first, then description + text after chip selected
       html += `<div class="chip-row" style="margin-bottom:12px">
         ${ACTION_CHIPS.map(c=>`<button class="chip${selectedActionChip===c.id?' selected':''}" onclick="setActionChip('${c.id}')">${c.icon} ${c.label}</button>`).join('')}
       </div>`;
@@ -887,14 +1068,11 @@ function actionsSection() {
         html += addArea(true, true);
       }
     } else {
-      // With you / With someone else / For someone I care about - desc + text directly
       html += `<div class="drill-sub-desc">${sub.expDesc}</div>`;
       html += addArea(true, true);
     }
-
     html += `</div>`;
   }
-
   html += `</div>`;
   return html;
 }
@@ -909,7 +1087,7 @@ function reviewHTML() {
   const catCount = Object.keys(grouped).length;
   const total    = items.length;
   return `
-    <div class="eyebrow">Review your support list</div>
+    <div class="eyebrow">Review your gift list</div>
     <button onclick="goToBuilder()" style="background:none;border:none;color:var(--brand);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;padding:0;margin-bottom:16px;">← Back</button>
     <div class="review-header">
       <div><h2>Looks good?</h2><p class="review-count">${total} item${total!==1?'s':''} across ${catCount} categor${catCount!==1?'ies':'y'}</p></div>
@@ -924,7 +1102,7 @@ function reviewHTML() {
       </div>`).join('')}
     <hr>
     <div id="share-area-review"></div>
-    <button class="btn-primary" id="share-btn-review" onclick="genShareInline()">Share this</button>`;
+    <button class="btn-primary" id="share-btn-review" onclick="genShareInline()">🔗 Copy link</button>`;
 }
 
 // ─── Viewer ────────────────────────────────────────────────────────────────
@@ -935,14 +1113,14 @@ function viewerHTML() {
   const done   = vItems.filter(i=> viewFulfilled.has(String(i.id)));
   const pct    = vItems.length ? Math.round((done.length/vItems.length)*100) : 0;
   return `
-    <h1 style="text-align:center;margin-bottom:6px">Ways to support</h1>
-    <p class="subtitle" style="text-align:center">I welcome support in any of the following ways.</p>
+    <h1 style="text-align:center;margin-bottom:6px">Ways to give to me</h1>
+    <p class="subtitle" style="text-align:center">If you're curious how to give to me, here are some possibilities.</p>
     ${vItems.length ? `<div class="progress-wrap"><div class="progress-labels"><span>${done.length} gifted</span><span>${active.length} still open</span></div><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div></div>` : ''}
-    ${active.length ? `<div class="eyebrow" style="margin-bottom:12px">Still needed</div>${active.map(it=>wishItemHTML(it,'viewer')).join('')}` : `<div class="empty">${esc(name)} is well supported right now - everything has been offered.</div>`}
+    ${active.length ? `<div class="eyebrow" style="margin-bottom:12px">Still open</div>${active.map(it=>wishItemHTML(it,'viewer')).join('')}` : `<div class="empty">${esc(name)} is well supported right now - everything has been offered.</div>`}
     ${done.length ? `<div class="eyebrow" style="margin:24px 0 12px">Already gifted</div>${done.map(it=>wishItemHTML(it,'viewer')).join('')}` : ''}
     <hr>
     <a href="https://appear.network/dl/support" class="btn-outline" style="margin-bottom:10px">View my Appear profile</a>
-    <a href="https://creating.works/support.html" class="btn-outline">Create my support list</a>`;
+    <a href="https://creating.works/gifts.html" class="btn-outline">Create my gift list</a>`;
 }
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
@@ -957,6 +1135,6 @@ function toast(msg) {
 }
 </script>
 
-<!-- v2.14 -->
+<!-- V2.15 -->
 </body>
 </html>
