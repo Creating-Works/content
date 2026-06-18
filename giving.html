@@ -1,4 +1,4 @@
-<!-- Version: V2.24 | LAST CHANGE: Assign all onclick-called functions to window scope to fix ReferenceError in browser context | Date: 2026-06-18 -->
+<!-- Version: V2.25 | LAST CHANGE: Declare _chips and _items on window to fix viewer mode render; I'll give this 🎁 | Date: 2026-06-18 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -697,23 +697,23 @@ function clearAll() {
 }
 
 // ─── Chip + item registries (separate - never clear together) ──────────────
-var _chips = [];
-var _items = [];
-function regChip(val) { _chips.push(val); return _chips.length - 1; }
-function regItem(id)  { _items.push(id);  return _items.length - 1; }
-function clearChipRegistry() { _chips = []; }   // called by render() only
-function clearItemRegistry()  { _items = []; }   // called by renderDrawer() only
+window._chips = [];
+window._items = [];
+function regChip(val) { window._chips.push(val); return window._chips.length - 1; }
+function regItem(id)  { window._items.push(id);  return window._items.length - 1; }
+function clearChipRegistry() { window._chips = []; }   // called by render() only
+function clearItemRegistry()  { window._items = []; }   // called by renderDrawer() only
 
-function chipClick(type, idx) { const val = _chips[idx]; if (!val) return; render(); }
+function chipClick(type, idx) { const val = window._chips[idx]; if (!val) return; render(); }
 function toggle(set, val) { set.has(val) ? set.delete(val) : set.add(val); }
 
 let _editingItemId = null;
 
-function toggleDoneByIdx(idx) { const id = _items[idx]; if (id !== undefined) toggleDone(id); }
-function removeItemByIdx(idx)  { const id = _items[idx]; if (id !== undefined) removeItem(id); }
+function toggleDoneByIdx(idx) { const id = window._items[idx]; if (id !== undefined) toggleDone(id); }
+function removeItemByIdx(idx)  { const id = window._items[idx]; if (id !== undefined) removeItem(id); }
 
 function editItemByIdx(idx) {
-  const id = _items[idx];
+  const id = window._items[idx];
   if (!id) return;
   _editingItemId = (_editingItemId === id) ? null : id;
   clearChipRegistry();
@@ -721,7 +721,7 @@ function editItemByIdx(idx) {
 }
 
 function saveEditByIdx(idx) {
-  const id = _items[idx];
+  const id = window._items[idx];
   if (!id) return;
   const it = items.find(i=>i.id===id);
   if (!it) return;
@@ -1082,7 +1082,7 @@ function wishItemHTML(it, ctx) {
     ${isDone
       ? `<button class="btn-sm" onclick="toggleDoneByIdx(${idx})">Undo</button>`
       : ctx==='viewer'
-        ? `<button class="btn-sm receive" onclick="giftItem(${JSON.stringify(it.title)})">I'll give this</button>`
+        ? `<button class="btn-sm receive" onclick="giftItem(${JSON.stringify(it.title)})">I'll give this 🎁</button>`
         : `<button class="btn-sm receive" onclick="toggleDoneByIdx(${idx})">Mark as gifted</button>`}
     ${ctx==='builder' ? `<button class="btn-sm" onclick="editItemByIdx(${idx})" style="font-size:16px;padding:4px 10px;">✏️</button>` : ''}
     ${ctx==='builder' ? `<button class="btn-sm remove" onclick="removeItemByIdx(${idx})" style="font-size:16px;padding:4px 10px;">✕</button>` : ''}`;
@@ -1338,4 +1338,4 @@ window.copyShareURL        = copyShareURL;
 </script>
 </body>
 </html>
-<!-- V2.24 -->
+<!-- V2.25 -->
