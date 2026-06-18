@@ -1,4 +1,4 @@
-<!-- Version: V2.23 | LAST CHANGE: Split chip/_items registries; gift without signing in (name form); gifterName to sheet; ✕ close button hidden behind FAB | Date: 2026-06-18 -->
+<!-- Version: V2.24 | LAST CHANGE: Assign all onclick-called functions to window scope to fix ReferenceError in browser context | Date: 2026-06-18 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -709,6 +709,9 @@ function toggle(set, val) { set.has(val) ? set.delete(val) : set.add(val); }
 
 let _editingItemId = null;
 
+function toggleDoneByIdx(idx) { const id = _items[idx]; if (id !== undefined) toggleDone(id); }
+function removeItemByIdx(idx)  { const id = _items[idx]; if (id !== undefined) removeItem(id); }
+
 function editItemByIdx(idx) {
   const id = _items[idx];
   if (!id) return;
@@ -1294,8 +1297,45 @@ function toast(msg) {
   el.classList.add('show');
   setTimeout(()=>el.classList.remove('show'), 2400);
 }
-</script>
 
-<!-- V2.23 -->
+// ─── Window assignments (required for inline onclick access) ───────────────
+window.toggleDoneByIdx     = toggleDoneByIdx;
+window.removeItemByIdx     = removeItemByIdx;
+window.editItemByIdx       = editItemByIdx;
+window.saveEditByIdx       = saveEditByIdx;
+window.setDrawerTab        = setDrawerTab;
+window.setDrawerPage       = setDrawerPage;
+window.openDrawer          = openDrawer;
+window.closeDrawer         = closeDrawer;
+window.copyURL             = copyURL;
+window.generateLink        = generateLink;
+window.giftItem            = giftItem;
+window.confirmGift         = confirmGift;
+window.giveWithName        = giveWithName;
+window.closeGiftSigninModal = closeGiftSigninModal;
+window.closeAnonModal      = closeAnonModal;
+window.toggleDone          = toggleDone;
+window.setTopCat           = setTopCat;
+window.setThingsSub        = setThingsSub;
+window.setActionSub        = setActionSub;
+window.setActionChip       = setActionChip;
+window.setSpacesSub        = setSpacesSub;
+window.addToList           = addToList;
+window.updateNote          = updateNote;
+window.updateLocation      = updateLocation;
+window.toggleLocalRequest  = toggleLocalRequest;
+window.chipClick           = chipClick;
+window.toggleOther         = toggleOther;
+window.addOther            = addOther;
+window.updateOther         = updateOther;
+window.confirmIdentity     = confirmIdentity;
+window.denyIdentity        = denyIdentity;
+window.closeSigninModal    = closeSigninModal;
+window.closeLocationModal  = closeLocationModal;
+window.saveLocationAndClose = saveLocationAndClose;
+window.captureGPS          = captureGPS;
+window.copyShareURL        = copyShareURL;
+</script>
 </body>
 </html>
+<!-- V2.24 -->
