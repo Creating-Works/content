@@ -1,4 +1,4 @@
-<!-- Version: V2.15 LAST CHANGE: Rename to gifts/give language; Given/Received tabs; anonymous modal; giftItem fix; sheet writes for mark gifted + remove; missing functions defined. Version: V2.15 | Date: 2026-06-17 -->
+<!-- Version: V2.17 | LAST CHANGE: Add to list resets to top chips + opens drawer; drawer anchored to top; remove review screen; drawer My list shows generate/copy link + share URL; remove progress bar; Received/Given show count + profile photo + link; Mark as gifted + Remove wired up | Date: 2026-06-17 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -259,10 +259,15 @@
     .btn-anon:hover { border-color:var(--brand); color:var(--brand); }
 
     /* ── History item (Given/Received tabs) ── */
-    .history-item { padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .history-item { display:flex; align-items:center; gap:12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
     .history-item:last-child { border-bottom: none; }
+    .history-photo { width:40px; height:40px; border-radius:50%; object-fit:cover; background:var(--input-bg); border:1px solid var(--border); flex-shrink:0; }
+    .history-photo-placeholder { width:40px; height:40px; border-radius:50%; background:var(--input-bg); border:1px solid var(--border); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:18px; }
+    .history-body { flex:1; min-width:0; }
     .history-title { font-size: 14px; font-weight: 500; color: var(--text); }
     .history-meta { font-size: 12px; color: var(--muted); margin-top: 3px; }
+    .history-meta a { color:var(--brand); text-decoration:none; }
+    .history-count { font-size:13px; color:var(--muted); margin-bottom:16px; }
   </style>
 </head>
 <body>
@@ -300,10 +305,9 @@
 <!-- Location prompt modal -->
 <div class="modal-overlay" id="location-modal">
   <div class="modal">
-    <div class="modal-title">Help local supporters find you</div>
-    <div class="modal-body" style="margin-bottom:16px">You have local requests on your list. Add your county so people nearby can give to you.</div>
-    <input type="text" id="county-input" placeholder="Your county" style="margin-bottom:10px" oninput="locationCounty=this.value">
-    <button id="gps-btn" onclick="captureGPS()" style="width:100%;padding:9px;background:transparent;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--soft);cursor:pointer;margin-bottom:14px;transition:all 0.15s;">📍 Use my location instead</button>
+    <div class="modal-title">Local gifts</div>
+    <div class="modal-body" style="margin-bottom:16px">Add your postal code so people nearby can give to you.</div>
+    <input type="text" id="postal-input" placeholder="Your postal code" style="margin-bottom:14px" oninput="locationPostal=this.value">
     <button class="btn-primary" style="margin-top:0" onclick="saveLocationAndClose()">Save</button>
     <button class="btn-secondary" style="margin-top:8px" onclick="closeLocationModal()">Skip for now</button>
   </div>
@@ -370,9 +374,9 @@ const ACTIONS_SUBS = [
 
 const ACTION_CHIPS = [
   { id:'experience', icon:'✨', label:'Experience', desc:null },
-  { id:'skills',     icon:'🛠', label:'Skills',     desc:"Apply your skills for something I need. Examples: fix my website, help me move, fix my plumbing, help me file my taxes" },
+  { id:'skills',     icon:'🛠', label:'Skills',     desc:"Examples: fix my website, help me move, fix my plumbing, help me file my taxes" },
   { id:'words',      icon:'💬', label:'Words',      desc:"Examples: write me a testimonial, give feedback, or introduce me to someone." },
-  { id:'labor',      icon:'💪', label:'Labor',      desc:"Show up and help. Examples: help me move, set up for an event, garden with me, build something together" }
+  { id:'labor',      icon:'💪', label:'Labor',      desc:"Examples: help me move, set up for an event, garden with me, build something together" }
 ];
 
 // ─── Identity ──────────────────────────────────────────────────────────────
@@ -439,14 +443,12 @@ function openLocationModal()  { document.getElementById('location-modal').classL
 function closeLocationModal() { document.getElementById('location-modal').classList.remove('open'); }
 
 function saveLocationAndClose() {
-  const county = locationCounty.trim();
-  if (!county && !locationLat) { toast('Add your county or use your location'); return; }
+  const postal = locationPostal.trim();
+  if (!postal) { toast('Add your postal code'); return; }
   if (_appearId) {
     fetch(GS_URL + '?action=saveLocation'
       + '&appearId=' + encodeURIComponent(_appearId)
-      + '&county='   + encodeURIComponent(county)
-      + '&lat='      + encodeURIComponent(locationLat || '')
-      + '&lng='      + encodeURIComponent(locationLng || '')
+      + '&postal='   + encodeURIComponent(postal)
     ).catch(() => {});
   }
   closeLocationModal();
@@ -482,7 +484,7 @@ function useMyLocation() {
 }
 
 function updateLocation(val) { locationText = val; }
-function toggleLocalRequest(checked) { isLocalRequest = checked; }
+function toggleLocalRequest(checked) { isLocalRequest = checked; render(); }
 
 function closeGiftSigninModal() { document.getElementById('gift-signin-modal').classList.remove('open'); }
 function openGiftSigninModal()  { document.getElementById('gift-signin-modal').classList.add('open'); }
@@ -551,7 +553,7 @@ let locationText   = '';
 let locationLat    = null;
 let locationLng    = null;
 let isLocalRequest = false;
-let locationCounty = '';
+let locationPostal = '';
 let shareURL       = '';
 let items          = [];
 let myName         = '';
@@ -632,7 +634,7 @@ function setActionChip(id) { selectedActionChip = (selectedActionChip === id) ? 
 function clearAll() {
   selectedActionChip = null;
   locationText = ''; locationLat = null; locationLng = null;
-  isLocalRequest = false;
+  isLocalRequest = false; locationPostal = '';
   otherSkillOpen = false; otherSkillText = '';
   otherWordsOpen = false; otherWordsText = '';
   otherSpaceOpen = false; otherSpaceText = '';
@@ -716,9 +718,15 @@ function addToList() {
   const newItem = { id: uid(), topCat, subCat, subLabel, subIcon, title: label, note:'', done: false, local: isLocalRequest };
   items.push(newItem);
   const wasLocal = isLocalRequest;
+  // Reset all selection state, return to top-level chips
+  openTopCat = null; openSpacesSub = null; openThingsSub = null; openActionSub = null;
   clearAll(); noteText = '';
   save(); render();
-  toast('Added to your list');
+  // Open drawer to My list
+  drawerTab = 'list';
+  renderDrawer();
+  qs('#drawer').classList.add('open');
+  qs('#drawer-overlay').classList.add('open');
   if (wasLocal) openLocationModal();
   if (_appearId) {
     fetch(GS_URL + '?action=saveSupportItem'
@@ -728,8 +736,6 @@ function addToList() {
       + '&item='        + encodeURIComponent(label)
       + '&note='        + encodeURIComponent(note)
       + '&location='    + encodeURIComponent(locationText)
-      + '&lat='         + encodeURIComponent(locationLat || '')
-      + '&lng='         + encodeURIComponent(locationLng || '')
     ).catch(() => {});
   }
 }
@@ -762,9 +768,6 @@ function setDrawerTab(tab) {
 function renderDrawer() {
   const active = items.filter(i=>!i.done);
   const done   = items.filter(i=> i.done);
-  const total  = items.length;
-  const pct    = total ? Math.round((done.length/total)*100) : 0;
-  const openCount = active.length;
 
   const tabs = `
     <div class="drawer-tabs">
@@ -782,52 +785,76 @@ function renderDrawer() {
     ${tabs}`;
 
   if (drawerTab === 'list') {
-    if (total) {
-      html += `
-        <div class="progress-wrap">
-          <div class="progress-labels">
-            <span>${done.length} gifted</span>
-            <span>${openCount} open for giving 🎁</span>
-          </div>
-          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-        </div>
-        ${active.map(it=>wishItemHTML(it,'builder')).join('')}
-        ${done.length ? `<div class="eyebrow" style="margin:20px 0 10px">Gifted</div>${done.map(it=>wishItemHTML(it,'builder')).join('')}` : ''}
-        <button class="btn-primary" onclick="closeDrawer();genShareAndReview()">🔗 Copy link</button>`;
+    if (items.length) {
+      html += active.map(it=>wishItemHTML(it,'builder')).join('');
+      if (done.length) {
+        html += `<div class="eyebrow" style="margin:20px 0 10px">Gifted</div>${done.map(it=>wishItemHTML(it,'builder')).join('')}`;
+      }
+      if (shareURL) {
+        html += `
+          <div style="margin-top:20px;padding:14px;background:var(--input-bg);border:1px solid var(--border);border-radius:10px;">
+            <div style="font-size:13px;color:var(--soft);margin-bottom:8px;">Share your list with anyone:</div>
+            <div style="font-size:12px;color:var(--muted);word-break:break-all;background:white;border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:12px;">${esc(shareURL)}</div>
+            <button class="btn-primary" style="margin-top:0" onclick="copyURL()">🔗 Copy link</button>
+          </div>`;
+      } else {
+        html += `<button class="btn-primary" style="margin-top:20px" onclick="generateLink()">Generate link to share</button>`;
+      }
     } else {
       html += `<div class="empty">Nothing on your gift list yet.</div>`;
     }
-    if (shareURL) {
-      html += `
-        <div class="share-box">
-          <p>Share this link with anyone who wants to give to you:</p>
-          <div class="share-url">${esc(shareURL)}</div>
-          <button class="btn-primary" onclick="copyURL()">🔗 Copy link</button>
-        </div>`;
-    }
+
   } else if (drawerTab === 'received') {
     if (!historyLoaded) {
       html += `<div class="empty">Loading...</div>`;
     } else if (!giftHistory.received.length) {
       html += `<div class="empty">No gifts received yet.</div>`;
     } else {
-      html += giftHistory.received.map(g => `
-        <div class="history-item">
-          <div class="history-title">${esc(g.item)}</div>
-          <div class="history-meta">${g.anonymous === 'true' ? 'Given anonymously' : ('From ' + esc(g.gifterAppearId))} · ${formatDate(g.timestamp)}</div>
-        </div>`).join('');
+      html += `<div class="history-count">${giftHistory.received.length} received</div>`;
+      html += giftHistory.received.map(g => {
+        const photo = g.gifterPhoto || '';
+        const profileUrl = g.gifterAppearId ? 'https://appear.network/dl/page/s/e13594/r/' + g.gifterAppearId : '';
+        const photoEl = photo
+          ? `<img class="history-photo" src="${esc(photo)}" alt="">`
+          : `<div class="history-photo-placeholder">🌱</div>`;
+        const from = g.anonymous === 'true'
+          ? 'Given anonymously'
+          : profileUrl
+            ? `From <a href="${esc(profileUrl)}" target="_blank">${esc(g.gifterAppearId)}</a>`
+            : `From ${esc(g.gifterAppearId)}`;
+        return `
+          <div class="history-item">
+            ${photoEl}
+            <div class="history-body">
+              <div class="history-title">${esc(g.item)}</div>
+              <div class="history-meta">${from} · ${formatDate(g.timestamp)}</div>
+            </div>
+          </div>`;
+      }).join('');
     }
+
   } else if (drawerTab === 'given') {
     if (!historyLoaded) {
       html += `<div class="empty">Loading...</div>`;
     } else if (!giftHistory.given.length) {
       html += `<div class="empty">No gifts given yet.</div>`;
     } else {
-      html += giftHistory.given.map(g => `
-        <div class="history-item">
-          <div class="history-title">${esc(g.item)}</div>
-          <div class="history-meta">To ${esc(g.ownerAppearId)} · ${formatDate(g.timestamp)}</div>
-        </div>`).join('');
+      html += `<div class="history-count">${giftHistory.given.length} given</div>`;
+      html += giftHistory.given.map(g => {
+        const photo = g.ownerPhoto || '';
+        const profileUrl = g.ownerAppearId ? 'https://appear.network/dl/page/s/e13594/r/' + g.ownerAppearId : '';
+        const photoEl = photo
+          ? `<img class="history-photo" src="${esc(photo)}" alt="">`
+          : `<div class="history-photo-placeholder">🌱</div>`;
+        return `
+          <div class="history-item">
+            ${photoEl}
+            <div class="history-body">
+              <div class="history-title">${esc(g.item)}</div>
+              <div class="history-meta">To <a href="${esc(profileUrl)}" target="_blank">${esc(g.ownerAppearId)}</a> · ${formatDate(g.timestamp)}</div>
+            </div>
+          </div>`;
+      }).join('');
     }
   }
 
@@ -842,13 +869,17 @@ function formatDate(ts) {
 function goToReview()  { mode = 'review';  render(); }
 function goToBuilder() { mode = 'builder'; render(); }
 
-function genShareAndReview() {
+function generateLink() {
   try {
     const json    = JSON.stringify({ name: myName, items, created: new Date().toISOString() });
     const encoded = btoa(unescape(encodeURIComponent(json)));
     shareURL = location.origin + location.pathname + '?list=' + encoded;
   } catch(e) { toast('Could not generate link'); return; }
-  mode = 'review'; render();
+  renderDrawer();
+}
+
+function genShareAndReview() {
+  generateLink();
 }
 
 function genShareInline() {
@@ -880,8 +911,8 @@ function updateName()   { myName = (qs('#b-name')||{}).value; save(); }
 function removeItem(id) {
   const it = items.find(i=>i.id===id);
   items = items.filter(i=>i.id!==id);
-  save(); updateFAB(); renderDrawer();
-  // Write cancellation to sheet
+  save();
+  renderDrawer();
   if (_appearId && it) {
     fetch(GS_URL + '?action=cancelSupportItem'
       + '&appearId=' + encodeURIComponent(_appearId)
@@ -895,11 +926,9 @@ function toggleDone(id) {
     const it = items.find(i=>i.id===id);
     if (!it) return;
     it.done = !it.done;
-    save(); updateFAB(); renderDrawer();
-    toast(it.done ? 'Marked as gifted 🎁' : 'Marked as still open');
-    // Write to sheet when marked as gifted
+    save();
+    renderDrawer();
     if (it.done && _appearId) {
-      // Open anonymous choice for self-marking
       _pendingGiftOwner = _appearId;
       _pendingGiftItem  = it.title;
       document.getElementById('anon-modal').classList.add('open');
@@ -941,9 +970,7 @@ function render() {
   clearChipRegistry();
   updateDebug();
   qs('#app').innerHTML =
-    mode === 'viewer' ? viewerHTML() :
-    mode === 'review' ? reviewHTML() :
-                        builderHTML();
+    mode === 'viewer' ? viewerHTML() : builderHTML();
   updateFAB();
 }
 
@@ -992,19 +1019,18 @@ function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
 function addArea(hasSelection, isAction) {
   if (!hasSelection) return '';
-  const locationField = isAction ? `
-    <div class="add-area-label" style="margin-top:14px">Is there a specific location in mind?</div>
-    <input type="text" id="location-input" value="${esc(locationText)}" placeholder="A café, restaurant, retreat center, venue, ski lodge, vacation spot..." oninput="updateLocation(this.value)" style="margin-bottom:8px">
-    <button id="use-location-btn" onclick="useMyLocation()" style="width:100%;padding:9px;background:transparent;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--soft);cursor:pointer;margin-bottom:10px;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--brand)'" onmouseout="this.style.borderColor='var(--border)'">📍 Use my location</button>` : '';
+  const locationField = isLocalRequest ? `
+    <div class="add-area-label" style="margin-top:14px">Do you have a specific location in mind?</div>
+    <input type="text" id="location-input" value="${esc(locationText)}" placeholder="A café, restaurant, retreat center, venue, ski lodge, vacation spot..." oninput="updateLocation(this.value)" style="margin-bottom:10px">` : '';
   return `
     <div class="add-area">
-      <div class="add-area-label">Details</div>
-      <input type="text" value="${esc(noteText)}" placeholder="" oninput="updateNote(this.value)" onkeydown="if(event.key==='Enter')addToList()" style="margin-bottom:${isAction?'4px':'10px'}">
-      ${locationField}
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;margin-top:4px;">
+      <div class="add-area-label">Details <span style="color:#c0392b">*</span></div>
+      <input type="text" value="${esc(noteText)}" placeholder="Please share some details" oninput="updateNote(this.value)" onkeydown="if(event.key==='Enter')addToList()" style="margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:${isLocalRequest?'10px':'10px'};margin-top:0;">
         <input type="checkbox" id="local-check" ${isLocalRequest?'checked':''} onchange="toggleLocalRequest(this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:var(--brand)">
         <label for="local-check" style="font-size:13px;color:var(--soft);cursor:pointer;">📍 This is a local request</label>
       </div>
+      ${locationField}
       <button class="btn-add" onclick="addToList()">Add to list</button>
     </div>`;
 }
@@ -1135,6 +1161,6 @@ function toast(msg) {
 }
 </script>
 
-<!-- V2.15 -->
+<!-- V2.17 -->
 </body>
 </html>
