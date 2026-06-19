@@ -1,4 +1,4 @@
-<!-- Version: V2.25 | LAST CHANGE: Declare _chips and _items on window to fix viewer mode render; I'll give this 🎁 | Date: 2026-06-18 -->
+<!-- Version: V2.26 | LAST CHANGE: Declare _chips and _items on window to fix viewer mode render; I'll give this 🎁 | Date: 2026-06-18 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -330,6 +330,9 @@
 </div>
 
 <script>
+// ─── Registry init (must be first - init() runs before declarations below) ─
+window._chips = [];
+window._items = [];
 
 // ─── Data ──────────────────────────────────────────────────────────────────
 
@@ -1338,4 +1341,4 @@ window.copyShareURL        = copyShareURL;
 </script>
 </body>
 </html>
-<!-- V2.25 -->
+<!-- V2.26 -->
