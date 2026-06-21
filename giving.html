@@ -1,4 +1,4 @@
-<!-- Version: V2.26 | LAST CHANGE: Declare _chips and _items on window to fix viewer mode render; I'll give this 🎁 | Date: 2026-06-18 -->
+<!-- Version: V2.28 | LAST CHANGE: Placeholder circle for loading photo in Is this you modal; Haircut under Skills; Details placeholder text updated; Help me move under Labor; trash emoji for remove; horizontal action buttons | Date: 2026-06-19 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -194,7 +194,7 @@
     .wish-title { font-size: 15px; font-weight: 500; color: var(--text); }
     .wish-note { font-size: 12px; color: var(--muted); margin-top: 3px; word-break: break-word; }
     .wish-badge { display: inline-block; margin-top: 5px; font-size: 11px; background: var(--green); color: var(--green-text); border: 1px solid var(--green-border); border-radius: 10px; padding: 2px 8px; }
-    .wish-actions { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
+    .wish-actions { display: flex; flex-direction: row; gap: 6px; flex-shrink: 0; flex-wrap: wrap; align-items: center; }
     .btn-sm { padding: 5px 12px; border-radius: 16px; font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; border: 1.5px solid var(--border); background: white; color: var(--soft); transition: all 0.15s; white-space: nowrap; }
     .btn-sm.receive { border-color: var(--green-border); color: var(--green-text); }
     .btn-sm.receive:hover { background: var(--green); }
@@ -282,6 +282,7 @@
 <!-- Is this you? modal -->
 <div class="modal-overlay" id="confirm-modal">
   <div class="modal" style="text-align:center;">
+    <div id="confirm-photo-placeholder" style="width:72px;height:72px;border-radius:50%;margin:0 auto 16px;border:2px solid var(--border);background:var(--input-bg);display:flex;align-items:center;justify-content:center;font-size:28px;">🌱</div>
     <img id="confirm-photo" src="" alt="" style="display:none;width:72px;height:72px;border-radius:50%;object-fit:cover;margin:0 auto 16px;border:2px solid var(--border);">
     <div class="modal-title">Is this you?</div>
     <div class="modal-body">We found the ID <strong id="confirm-id-display"></strong>. Is that you?</div>
@@ -371,7 +372,7 @@ const ACTIONS_SUBS = [
 
 const ACTION_CHIPS = [
   { id:'experience', icon:'✨', label:'Experience', desc:null },
-  { id:'skills',     icon:'🛠', label:'Skills',     desc:"Examples: fix my website, help me move, fix my plumbing, help me file my taxes" },
+  { id:'skills',     icon:'🛠', label:'Skills',     desc:"Examples: fix my website, haircut, fix my plumbing, help me file my taxes" },
   { id:'words',      icon:'💬', label:'Words',      desc:"Examples: write me a testimonial, give feedback, or introduce me to someone." },
   { id:'labor',      icon:'💪', label:'Labor',      desc:"Examples: help me move, set up for an event, garden with me, build something together" }
 ];
@@ -426,6 +427,7 @@ function closeSigninModal() { document.getElementById('signin-modal').classList.
 function openConfirmModal(id) {
   document.getElementById('confirm-id-display').textContent = id;
   document.getElementById('confirm-photo').style.display = 'none';
+  document.getElementById('confirm-photo-placeholder').style.display = 'flex';
   document.getElementById('confirm-modal').classList.add('open');
   // Fetch photo
   fetch(GS_URL + '?action=lookupProfile&appearId=' + encodeURIComponent(id))
@@ -433,8 +435,11 @@ function openConfirmModal(id) {
     .then(data => {
       if (data.found && data.photo) {
         const img = document.getElementById('confirm-photo');
+        img.onload = () => {
+          document.getElementById('confirm-photo-placeholder').style.display = 'none';
+          img.style.display = 'block';
+        };
         img.src = data.photo;
-        img.style.display = 'block';
       }
     }).catch(() => {});
 }
@@ -454,6 +459,28 @@ function denyIdentity() {
 
 function openLocationModal()  { document.getElementById('location-modal').classList.add('open'); }
 function closeLocationModal() { document.getElementById('location-modal').classList.remove('open'); }
+
+function togglePostalEdit() {
+  postalEditing = !postalEditing;
+  renderDrawer();
+}
+
+function savePostalSettings() {
+  const el = document.getElementById('postal-settings-input');
+  const postal = el ? el.value.trim() : '';
+  if (!postal) { toast('Add your postal code'); return; }
+  savedPostal = postal;
+  try { localStorage.setItem('giving_postal', savedPostal); } catch(e) {}
+  if (_appearId) {
+    fetch(GS_URL + '?action=saveLocation'
+      + '&appearId=' + encodeURIComponent(_appearId)
+      + '&postal='   + encodeURIComponent(postal)
+    ).catch(() => {});
+  }
+  postalEditing = false;
+  renderDrawer();
+  toast('Postal code saved');
+}
 
 function saveLocationAndClose() {
   const postal = locationPostal.trim();
@@ -598,6 +625,9 @@ let locationLat    = null;
 let locationLng    = null;
 let isLocalRequest = false;
 let locationPostal = '';
+let savedPostal = '';
+let postalEditing = false;
+try { savedPostal = localStorage.getItem('giving_postal') || ''; } catch(e) {}
 let shareURL       = '';
 let items          = [];
 let myName         = '';
@@ -860,6 +890,17 @@ function renderDrawer() {
   const active = items.filter(i=>!i.done);
   const done   = items.filter(i=> i.done);
 
+  // Postal code settings row
+  const postalLine = postalEditing
+    ? `<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <input type="text" id="postal-settings-input" value="${esc(savedPostal)}" placeholder="Postal code" style="flex:1;font-size:13px;padding:7px 10px;">
+        <button onclick="savePostalSettings()" style="flex-shrink:0;padding:7px 14px;background:var(--brand);color:white;border:none;border-radius:8px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;">Save</button>
+      </div>`
+    : `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:12px;color:var(--muted);">
+        <span>📍 ${savedPostal ? esc(savedPostal) : 'No postal code set'}</span>
+        <button onclick="togglePostalEdit()" style="background:none;border:none;color:var(--brand);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:underline;">${savedPostal ? 'Edit' : 'Add'}</button>
+      </div>`;
+
   // Share link area above tabs
   const displayURL = shareURL ? (shareURL.length > 48 ? shareURL.slice(0,48)+'...' : shareURL) : '';
   const shareLine = shareURL
@@ -965,7 +1006,7 @@ function renderDrawer() {
       <button onclick="closeDrawer()" style="background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:4px 8px;line-height:1;border-radius:8px;">✕</button>
     </div>`;
 
-  qs('#gift-drawer-content').innerHTML = drawerHeader + shareLine + tabs + body;
+  qs('#gift-drawer-content').innerHTML = drawerHeader + (drawerTab === 'list' ? postalLine : '') + shareLine + tabs + body;
 }
 
 function formatDate(ts) {
@@ -983,6 +1024,12 @@ function generateLink() {
     const ownerParam = _appearId ? '&owner=' + encodeURIComponent(_appearId) : '';
     shareURL = location.origin + location.pathname + '?list=' + encoded + ownerParam;
     try { localStorage.setItem('giving_shareURL', shareURL); } catch(e) {}
+    if (_appearId) {
+      fetch(GS_URL + '?action=saveShareURL'
+        + '&appearId=' + encodeURIComponent(_appearId)
+        + '&url='      + encodeURIComponent(shareURL)
+      ).catch(() => {});
+    }
   } catch(e) { toast('Could not generate link'); return; }
   renderDrawer();
 }
@@ -1088,7 +1135,7 @@ function wishItemHTML(it, ctx) {
         ? `<button class="btn-sm receive" onclick="giftItem(${JSON.stringify(it.title)})">I'll give this 🎁</button>`
         : `<button class="btn-sm receive" onclick="toggleDoneByIdx(${idx})">Mark as gifted</button>`}
     ${ctx==='builder' ? `<button class="btn-sm" onclick="editItemByIdx(${idx})" style="font-size:16px;padding:4px 10px;">✏️</button>` : ''}
-    ${ctx==='builder' ? `<button class="btn-sm remove" onclick="removeItemByIdx(${idx})" style="font-size:16px;padding:4px 10px;">✕</button>` : ''}`;
+    ${ctx==='builder' ? `<button class="btn-sm remove" onclick="removeItemByIdx(${idx})" style="font-size:16px;padding:4px 10px;">🗑️</button>` : ''}`;
 
   return `
     <div class="wish-item">
@@ -1100,7 +1147,7 @@ function wishItemHTML(it, ctx) {
         ${isDone ? `<div class="wish-badge">Gifted</div>` : ''}
         ${editForm}
       </div>
-      <div class="wish-actions" style="flex-shrink:0;display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+      <div class="wish-actions" style="flex-shrink:0;display:flex;flex-direction:row;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
         ${actionButtons}
       </div>
     </div>`;
@@ -1158,14 +1205,17 @@ function chipRow(chips, type, selectedSet) {
 
 function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
-function addArea(hasSelection, isAction) {
+function addArea(hasSelection, isAction, descText) {
   if (!hasSelection) return '';
   const locationField = isLocalRequest ? `
     <div class="add-area-label" style="margin-top:14px">If applicable, reference a preferred place or two in mind:</div>
     <input type="text" id="location-input" value="${esc(locationText)}" placeholder="" oninput="updateLocation(this.value)" style="margin-bottom:10px">` : '';
+  const labelText = descText
+    ? `Share details below. ${descText.replace(/^Examples:\s*/i, 'Examples: ')}`
+    : 'Share details below.';
   return `
     <div class="add-area">
-      <div class="add-area-label">Details <span style="color:#c0392b">*</span></div>
+      <div class="add-area-label">${esc(labelText)} <span style="color:#c0392b">*</span></div>
       <input type="text" value="${esc(noteText)}" placeholder="Please share some details" oninput="updateNote(this.value)" onkeydown="if(event.key==='Enter')addToList()" style="margin-bottom:10px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:${isLocalRequest?'10px':'10px'};margin-top:0;">
         <input type="checkbox" id="local-check" ${isLocalRequest?'checked':''} onchange="toggleLocalRequest(this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:var(--brand)">
@@ -1182,8 +1232,7 @@ function spacesSection() {
   if (!openSpacesSub) openSpacesSub = sub.id;
   return `<div class="drill-section">
     <div class="drill-label">🏡 Spaces</div>
-    <div class="drill-sub-desc" style="margin-bottom:12px">${sub.desc}</div>
-    ${addArea(true, false)}
+    ${addArea(true, false, sub.desc)}
   </div>`;
 }
 
@@ -1198,8 +1247,7 @@ function thingsSection() {
   if (sub) {
     html += `<div class="drill-sub">
       <div class="drill-sub-label">${sub.icon} ${sub.label}</div>
-      <div class="drill-sub-desc">${sub.desc}</div>
-      ${addArea(true, false)}
+      ${addArea(true, false, sub.desc)}
     </div>`;
   }
   html += `</div>`;
@@ -1231,12 +1279,10 @@ function actionsSection() {
         ${ACTION_CHIPS.map(c=>`<button class="chip${selectedActionChip===c.id?' selected':''}" onclick="setActionChip('${c.id}')">${c.icon} ${c.label}</button>`).join('')}
       </div>`;
       if (chip) {
-        html += `<div class="drill-sub-desc">${chipDesc}</div>`;
-        html += addArea(true, true);
+        html += addArea(true, true, chipDesc);
       }
     } else {
-      html += `<div class="drill-sub-desc">${sub.expDesc}</div>`;
-      html += addArea(true, true);
+      html += addArea(true, true, sub.expDesc);
     }
     html += `</div>`;
   }
@@ -1338,7 +1384,9 @@ window.closeLocationModal  = closeLocationModal;
 window.saveLocationAndClose = saveLocationAndClose;
 window.captureGPS          = captureGPS;
 window.copyShareURL        = copyShareURL;
+window.togglePostalEdit    = togglePostalEdit;
+window.savePostalSettings  = savePostalSettings;
 </script>
 </body>
 </html>
-<!-- V2.26 -->
+<!-- V2.28 -->
