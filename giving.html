@@ -1,4 +1,4 @@
-<!-- Version: V2.28 | LAST CHANGE: Placeholder circle for loading photo in Is this you modal; Haircut under Skills; Details placeholder text updated; Help me move under Labor; trash emoji for remove; horizontal action buttons | Date: 2026-06-19 -->
+<!-- Version: V2.29 | LAST CHANGE: Skip Is this you? entirely when ?id= is in URL - trust Glide param directly | Date: 2026-06-21 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -398,17 +398,10 @@ let _ownerAppearId = null; // owner of the list being viewed
   _ownerAppearId = params.get('owner') || null;
 
   if (urlId) {
-    let stored = null;
-    try { stored = localStorage.getItem('appear-id'); } catch(e) {}
-    // Skip confirm if URL id matches what's already stored
-    const alreadyKnown = stored === urlId;
-    if (!alreadyKnown && !listParam) {
-      _pendingId = urlId;
-      _appearId = null;
-    } else {
-      _appearId = urlId;
-      try { localStorage.setItem('appear-id', _appearId); } catch(e) {}
-    }
+    // Always trust ?id= from URL (Glide passes this reliably)
+    // Never show "Is this you?" - localStorage can't be trusted across Glide sessions
+    _appearId = urlId;
+    try { localStorage.setItem('appear-id', _appearId); } catch(e) {}
   } else if (_appearId) {
     try { localStorage.setItem('appear-id', _appearId); } catch(e) {}
   }
@@ -1389,4 +1382,4 @@ window.savePostalSettings  = savePostalSettings;
 </script>
 </body>
 </html>
-<!-- V2.28 -->
+<!-- V2.29 -->
