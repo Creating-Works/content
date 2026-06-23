@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<!--
+  potluck.html Version 1.0
+  v1.0 - initial build - admin only - category and role claim for Face Festival
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Potluck — 2Gather</title>
+  <style>
+    :root {
+      --primary: #1B6896;
+      --primary-dark: #154F74;
+      --primary-light: #E8F2F9;
+      --green: #4CAF7D;
+      --light: #F5F7FA;
+      --border: #DCE3EA;
+      --dark: #2C3A47;
+      --muted: #4A5A6B;
+      --white: #FFFFFF;
+    }
+
+    body { font-family: 'Nunito Sans','Segoe UI',sans-serif; background:var(--light); color:var(--dark); margin:0; }
+
+    .header { background:var(--primary); padding:14px 20px; display:flex; align-items:center; gap:10px; }
+
+    .page-body { max-width:900px; margin:0 auto; padding:24px 20px; width:100%; box-sizing:border-box; min-height:100vh; }
+
+    .btn { display:inline-block; background:var(--primary); color:white; border:none; border-radius:8px; padding:11px 22px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; transition:background .15s; white-space:nowrap; text-decoration:none; }
+    .btn:hover { background:var(--primary-dark); }
+    .btn-outline { background:var(--white); color:var(--dark); border:1.5px solid var(--border); }
+    .btn-outline:hover { background:var(--light); }
+    .btn-green { background:var(--green); color:white; border:none; }
+    .btn-green:hover { background:#3d9e6a; }
+    .btn-sm { padding:7px 14px; font-size:13px; }
+    .btn-danger { background:#e53e3e; color:white; border:none; }
+    .btn-danger:hover { background:#c53030; }
+
+    .card { background:var(--white); border-radius:12px; border:1px solid var(--border); box-shadow:0 2px 6px rgba(0,0,0,.05); padding:16px 18px; margin-bottom:12px; }
+
+    .section-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin:20px 0 10px; }
+
+    .chip-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+    .chip { display:inline-block; padding:7px 14px; border-radius:20px; font-size:13px; font-weight:700; cursor:pointer; border:1.5px solid var(--border); background:var(--white); color:var(--dark); transition:all .15s; }
+    .chip:hover { border-color:var(--primary); color:var(--primary); }
+    .chip.active { background:var(--primary); color:white; border-color:var(--primary); }
+    .chip.claimed { background:var(--green); color:white; border-color:var(--green); }
+
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:1000; align-items:flex-start; justify-content:center; padding-top:48px; }
+    .modal-overlay.open { display:flex; }
+    .modal { background:var(--white); border-radius:16px; padding:28px 24px; max-width:440px; width:92%; max-height:80vh; overflow-y:auto; box-shadow:0 8px 32px rgba(0,0,0,.18); }
+    .modal-title { font-size:18px; font-weight:800; margin:0 0 6px; color:var(--dark); }
+    .modal-sub { font-size:13px; color:var(--muted); margin:0 0 18px; }
+
+    .claim-row { display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border); gap:12px; }
+    .claim-row:last-child { border-bottom:none; }
+    .claim-info { flex:1; }
+    .claim-name { font-size:14px; font-weight:700; color:var(--dark); }
+    .claim-role { font-size:12px; color:var(--muted); margin-top:2px; }
+
+    .event-header { margin-bottom:24px; }
+    .event-title { font-size:20px; font-weight:800; color:var(--dark); margin:0 0 4px; }
+    .event-date { font-size:13px; color:var(--muted); }
+
+    .empty-state { text-align:center; padding:40px 20px; color:var(--muted); font-size:14px; }
+
+    #toast { position:fixed; top:24px; left:50%; transform:translateX(-50%); background:#1a1a2e; color:white; font-weight:700; border-radius:8px; padding:10px 20px; opacity:0; transition:opacity .3s; z-index:9999; pointer-events:none; }
+    #toast.show { opacity:1; }
+
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .spinner { width:32px; height:32px; border:3px solid var(--border); border-top-color:var(--primary); border-radius:50%; animation:spin 1s linear infinite; margin:0 auto 12px; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <a href="events.html" style="color:rgba(255,255,255,.7);text-decoration:none;font-size:13px;">← Events</a>
+  <span style="color:#fff;font-size:17px;font-weight:800;flex:1;text-align:center;">What are you bringing?</span>
+</div>
+
+<div class="page-body">
+
+  <!-- signed out -->
+  <div id="signed-out-msg" style="display:none;text-align:center;padding:40px 20px;">
+    <p style="font-size:16px;font-weight:700;color:#1a1a2e;margin-bottom:8px;">Sign in to use this page</p>
+    <p style="font-size:14px;color:#6b7280;">
+      <a href="https://appear.network" style="color:#154F74;font-weight:600;">Go to Appear Network</a> and open this page from your profile.
+    </p>
+  </div>
+
+  <!-- not admin -->
+  <div id="not-admin-msg" style="display:none;text-align:center;padding:40px 20px;">
+    <p style="font-size:16px;font-weight:700;color:#1a1a2e;margin-bottom:8px;">This page is not available yet.</p>
+    <p style="font-size:14px;color:#6b7280;">Check back soon.</p>
+  </div>
+
+  <!-- loading -->
+  <div id="loading" style="text-align:center;padding:40px 20px;color:#6b7280;font-size:15px;">
+    <div class="spinner"></div>
+    Loading...
+  </div>
+
+  <!-- main -->
+  <div id="main-content" style="display:none;">
+
+    <div class="event-header">
+      <div class="event-title" id="event-title">—</div>
+      <div class="event-date" id="event-date"></div>
+    </div>
+
+    <!-- who's bringing what -->
+    <div class="section-title">What people are bringing</div>
+    <div id="claims-list">
+      <div class="empty-state">No one has added their offering yet. Be the first.</div>
+    </div>
+
+    <!-- add offering -->
+    <div style="margin-top:24px;">
+      <button class="btn" onclick="window.openCategoryModal()">+ Add what you bring</button>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- category modal -->
+<div class="modal-overlay" id="category-modal">
+  <div class="modal">
+    <div class="modal-title">What do you bring?</div>
+    <div class="modal-sub">Pick a category then choose your role.</div>
+
+    <div class="section-title">Category</div>
+    <div class="chip-row" id="category-chips"></div>
+
+    <div id="role-section" style="display:none;">
+      <div class="section-title" id="role-section-title">Role</div>
+      <div class="chip-row" id="role-chips"></div>
+    </div>
+
+    <div id="selected-summary" style="display:none;margin:16px 0;padding:12px 16px;background:var(--primary-light);border-radius:8px;font-size:14px;color:var(--primary-dark);font-weight:700;"></div>
+
+    <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;">
+      <button class="btn btn-green" id="save-btn" style="display:none;" onclick="window.saveClaim()">Add this to my offerings</button>
+      <button class="btn btn-outline" onclick="window.closeCategoryModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ─── CATEGORIES ───────────────────────────────────────────────
+var CATEGORIES = [
+  { name: "MEDICAL", roles: ["Physician","Dentist","Optometrist","Nurse Practitioner","Pharmacist","Chiropractor","Physical Therapist","Occupational Therapist","Speech Therapist","Midwife","Psychiatrist","Public Health Advisor"] },
+  { name: "WELLBEING", roles: ["Personal Trainer","Yoga Instructor","Massage Therapist","Nutritionist","Therapist","Counselor","Life Coach","Acupuncturist","Naturopath","Dietitian","Somatic Practitioner","Holistic Practitioner","Geriatric Care Manager","Disability Support Specialist","Psychologist","Systems Psychology Advisor"] },
+  { name: "BUILDING, HOME", roles: ["Handyman","General Contractor","Plumber","Electrician","HVAC Technician","Painter","Flooring Specialist","Roofer","Window Specialist","Insulation Specialist","Architect","Interior Designer","Professional Organizer","House Cleaner","Mover","Realtor","Mortgage Broker","Housing Security Advisor","Superintendent Advisor"] },
+  { name: "LAND, WATER, FOOD", roles: ["Farmer","Community Gardener","Landscaper","Arborist","Butcher","Baker","Brewer","Pest Control Specialist","Water Quality Specialist","Hydrologist","Water Systems Technician","Well Driller","Irrigation Specialist","Local Food Supplier","Caterer","Personal Chef","Food Security Advisor","Ecologist Advisor"] },
+  { name: "FINANCE", roles: ["Financial Advisor","Retirement Planner","Accountant","Bookkeeper","Tax Preparer","Estate Planner","Trust Attorney","Family Law Attorney","Business Attorney","Immigration Attorney","Insurance Agent","Credit Counselor","Notary","End-of-Life Planner","Bankruptcy Attorney","Identity Theft Specialist","Economist Advisor"] },
+  { name: "CREATIVE, EXPRESSIVE ARTS", roles: ["Photographer","Videographer","Graphic Designer","Muralist","Illustrator","Musician","DJ","Singer","Dancer","Actor","Filmmaker","Writer","Poet","Tattoo Artist","Jewelry Maker","Fashion Designer","Textile Artist","Woodworker","Ceramicist","Community Arts Advisor"] },
+  { name: "TECHNOLOGY, COMMUNICATIONS", roles: ["Web Designer","Web Developer","Software Engineer","App Developer","IT Support Specialist","Network Engineer","Cybersecurity Specialist","Social Media Manager","Digital Marketer","SEO Specialist","Copywriter","Podcast Producer","IT Architect Advisor"] },
+  { name: "BUSINESS, PROFESSIONAL SERVICES", roles: ["Business Coach","HR Specialist","Recruiter","Project Manager","Executive Assistant","Virtual Assistant","Translator","Business Consultant","Brand Strategist","Public Relations Specialist","Grant Writer","Immigration Attorney","Housing Rights Attorney","Disability Rights Attorney","Civil Rights Attorney","Consumer Rights Attorney","Business Architect Advisor"] },
+  { name: "EVENTS, GATHERING", roles: ["Event Planner","Venue Manager","Caterer","DJ","Photographer","Videographer","Florist","Decorator","Sound Engineer","Lighting Technician","MC","Facilitator","Event Production Advisor"] },
+  { name: "COMMUNITY, CIVIC LIFE", roles: ["Nonprofit Leader","Volunteer Coordinator","Community Organizer","Social Worker","Public Safety Officer","School Board Member","City Council Member","Environmental Advocate","Cultural Preservationist","Faith Leader","Urban Planner","Housing Advocate","Disability Advocate","Civic Systems Advisor","Community Elder"] },
+  { name: "CARE, CONNECTION", roles: ["Doula","Child Care Provider","Foster Parent","Adoption Specialist","Pediatrician","School Counselor","Family Therapist","Animal Behaviorist","Pet Sitter","Dog Trainer","Veterinarian","Exotic Animal Specialist","Elder Companion","Grief Counselor","Crisis Counselor","Peer Support Specialist","Parent Advocate","Spiritual Advocate","Care Elder Advisor"] },
+  { name: "BEAUTY", roles: ["Hair Stylist","Barber","Makeup Artist","Esthetician","Nail Technician","Lash Technician","Brow Specialist","Colorist","Natural Hair Specialist","Cosmetology Educator"] },
+  { name: "PLAY, SPORT", roles: ["Youth Soccer Coach","Swimming Coach","Basketball Coach","Baseball Coach","Volleyball Coach","Tennis Coach","Martial Arts Instructor","Dance Coach","Gymnastics Coach","Track Coach","Recreation Advisor"] },
+  { name: "TRANSPORTATION, MOBILITY", roles: ["Auto Mechanic","Auto Dealer","Rideshare Driver","Taxi Driver","Truck Driver","Delivery Driver","Bike Shop Owner","Moving Specialist","Logistics Coordinator","Public Transit Advocate","Transportation Systems Advisor"] },
+  { name: "COMMUNITY ELDERS", roles: ["Neighborhood Elder","Cultural Elder","Spiritual Elder","Land Elder","Family Elder","Civic Elder","Trades Elder"] }
+];
+
+// ─── GS URL ───────────────────────────────────────────────────
+var GS_URL = "https://script.google.com/macros/s/AKfycbzEavMnG4tMeWemoT5FLu9f_zjlKVIJsZLueG4nhw9akK0_nZqpbkZiXrAlWv1Fyhq9/exec";
+
+// ─── STATE ────────────────────────────────────────────────────
+var _appearId = null;
+var _eventId = null;
+var _claims = [];
+var _selectedCategory = null;
+var _selectedRole = null;
+
+// chip registry
+window._chips = [];
+
+// ─── IDENTITY ─────────────────────────────────────────────────
+function getMemberId() {
+  try { return localStorage.getItem("appear-id"); } catch(e) { return null; }
+}
+
+function initIdentity() {
+  var params = new URLSearchParams(window.location.search);
+  _appearId = params.get("id") || getMemberId() || params.get("memberCard") || null;
+  _eventId = params.get("eventId") || null;
+
+  if (!_appearId) {
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("signed-out-msg").style.display = "block";
+    return false;
+  }
+
+  if (!params.get("id")) {
+    var newUrl = window.location.pathname + "?id=" + encodeURIComponent(_appearId);
+    if (_eventId) newUrl += "&eventId=" + encodeURIComponent(_eventId);
+    history.replaceState(null, "", newUrl);
+  }
+
+  // admin check
+  var normalized = _appearId.replace(/\./g, "");
+  if (normalized !== "whss") {
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("not-admin-msg").style.display = "block";
+    return false;
+  }
+
+  return true;
+}
+
+// ─── INIT ─────────────────────────────────────────────────────
+async function init() {
+  if (!initIdentity()) return;
+  await loadEventDetails();
+  await loadClaims();
+  document.getElementById("loading").style.display = "none";
+  document.getElementById("main-content").style.display = "block";
+}
+
+// ─── LOAD EVENT ───────────────────────────────────────────────
+async function loadEventDetails() {
+  if (!_eventId) {
+    document.getElementById("event-title").textContent = "Face Festival";
+    return;
+  }
+  try {
+    var res = await fetch(GS_URL + "?action=getEvents&t=" + Date.now());
+    var data = await res.json();
+    var events = data.events || [];
+    var ev = events.find(function(e) { return String(e.id) === String(_eventId); });
+    if (ev) {
+      document.getElementById("event-title").textContent = ev.title || "Event";
+      document.getElementById("event-date").textContent = ev.date || "";
+    }
+  } catch(e) {
+    document.getElementById("event-title").textContent = "Face Festival";
+  }
+}
+
+// ─── LOAD CLAIMS ──────────────────────────────────────────────
+async function loadClaims() {
+  try {
+    var url = GS_URL + "?action=getPotluckItems&eventId=" + encodeURIComponent(_eventId || "");
+    var res = await fetch(url);
+    var data = await res.json();
+    _claims = (data.items || []).filter(function(r) { return r.status !== "removed"; });
+    renderClaims();
+  } catch(e) {
+    _claims = [];
+    renderClaims();
+  }
+}
+
+// ─── RENDER CLAIMS ────────────────────────────────────────────
+function renderClaims() {
+  var container = document.getElementById("claims-list");
+  if (!_claims.length) {
+    container.innerHTML = '<div class="empty-state">No one has added their offering yet. Be the first.</div>';
+    return;
+  }
+
+  window._chips = [];
+  var html = "";
+  _claims.forEach(function(c, i) {
+    var isMe = c.appearId === _appearId;
+    var idx = window._chips.length;
+    window._chips.push(c);
+    html += '<div class="card claim-row">';
+    html += '<div class="claim-info">';
+    html += '<div class="claim-name">' + escHtml(c.appearId) + '</div>';
+    html += '<div class="claim-role">' + escHtml(c.category) + ' - ' + escHtml(c.role) + '</div>';
+    html += '</div>';
+    if (isMe) {
+      html += '<button class="btn btn-danger btn-sm" onclick="window.removeClaim(' + idx + ')">Remove</button>';
+    }
+    html += '</div>';
+  });
+  container.innerHTML = html;
+}
+
+// ─── REMOVE CLAIM ─────────────────────────────────────────────
+async function removeClaim(idx) {
+  var c = window._chips[idx];
+  if (!c) return;
+  try {
+    await fetch(GS_URL + "?action=removePotluckItem"
+      + "&eventId=" + encodeURIComponent(_eventId || "")
+      + "&appearId=" + encodeURIComponent(_appearId)
+      + "&category=" + encodeURIComponent(c.category)
+      + "&role=" + encodeURIComponent(c.role));
+    showToast("Removed.");
+    await loadClaims();
+  } catch(e) {
+    showToast("Something went wrong. Try again.");
+  }
+}
+
+// ─── CATEGORY MODAL ───────────────────────────────────────────
+function openCategoryModal() {
+  _selectedCategory = null;
+  _selectedRole = null;
+  document.getElementById("role-section").style.display = "none";
+  document.getElementById("selected-summary").style.display = "none";
+  document.getElementById("save-btn").style.display = "none";
+  renderCategoryChips();
+  document.getElementById("category-modal").classList.add("open");
+}
+window.openCategoryModal = openCategoryModal;
+
+function closeCategoryModal() {
+  document.getElementById("category-modal").classList.remove("open");
+}
+window.closeCategoryModal = closeCategoryModal;
+
+function renderCategoryChips() {
+  var container = document.getElementById("category-chips");
+  window._chips = [];
+  var html = "";
+  CATEGORIES.forEach(function(cat, i) {
+    var idx = window._chips.length;
+    window._chips.push({ type: "category", value: cat.name });
+    html += '<span class="chip" id="cat-chip-' + i + '" onclick="window.selectCategory(' + idx + ',' + i + ')">' + escHtml(cat.name) + '</span>';
+  });
+  container.innerHTML = html;
+}
+
+function selectCategory(idx, catIdx) {
+  _selectedCategory = CATEGORIES[catIdx].name;
+  _selectedRole = null;
+
+  // highlight chip
+  document.querySelectorAll("#category-chips .chip").forEach(function(el) { el.classList.remove("active"); });
+  document.getElementById("cat-chip-" + catIdx).classList.add("active");
+
+  // render roles
+  document.getElementById("role-section-title").textContent = _selectedCategory;
+  renderRoleChips(CATEGORIES[catIdx].roles);
+  document.getElementById("role-section").style.display = "block";
+  document.getElementById("selected-summary").style.display = "none";
+  document.getElementById("save-btn").style.display = "none";
+}
+window.selectCategory = selectCategory;
+
+function renderRoleChips(roles) {
+  var container = document.getElementById("role-chips");
+  // remove old role chips from registry (keep category chips)
+  var catCount = CATEGORIES.length;
+  window._chips = window._chips.slice(0, catCount);
+
+  var html = "";
+  roles.forEach(function(role, i) {
+    var idx = window._chips.length;
+    window._chips.push({ type: "role", value: role });
+    var alreadyClaimed = _claims.some(function(c) {
+      return c.appearId === _appearId && c.category === _selectedCategory && c.role === role;
+    });
+    var chipClass = alreadyClaimed ? "chip claimed" : "chip";
+    html += '<span class="' + chipClass + '" id="role-chip-' + i + '" onclick="window.selectRole(' + idx + ',' + i + ')">' + escHtml(role) + '</span>';
+  });
+  container.innerHTML = html;
+}
+
+function selectRole(idx, roleIdx) {
+  var chip = window._chips[idx];
+  if (!chip) return;
+  _selectedRole = chip.value;
+
+  document.querySelectorAll("#role-chips .chip").forEach(function(el) { el.classList.remove("active"); });
+  document.getElementById("role-chip-" + roleIdx).classList.add("active");
+
+  var summary = document.getElementById("selected-summary");
+  summary.textContent = _selectedCategory + " - " + _selectedRole;
+  summary.style.display = "block";
+  document.getElementById("save-btn").style.display = "inline-block";
+}
+window.selectRole = selectRole;
+
+// ─── SAVE CLAIM ───────────────────────────────────────────────
+async function saveClaim() {
+  if (!_selectedCategory || !_selectedRole) return;
+
+  // check duplicate
+  var alreadyHas = _claims.some(function(c) {
+    return c.appearId === _appearId && c.category === _selectedCategory && c.role === _selectedRole;
+  });
+  if (alreadyHas) {
+    showToast("You already added this role.");
+    return;
+  }
+
+  try {
+    await fetch(GS_URL + "?action=savePotluckItem"
+      + "&eventId=" + encodeURIComponent(_eventId || "")
+      + "&appearId=" + encodeURIComponent(_appearId)
+      + "&category=" + encodeURIComponent(_selectedCategory)
+      + "&role=" + encodeURIComponent(_selectedRole)
+      + "&timestamp=" + encodeURIComponent(new Date().toISOString()));
+    closeCategoryModal();
+    showToast("Added to your offerings.");
+    await loadClaims();
+  } catch(e) {
+    showToast("Something went wrong. Try again.");
+  }
+}
+window.saveClaim = saveClaim;
+
+// ─── TOAST ────────────────────────────────────────────────────
+function showToast(msg) {
+  var t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(function() { t.classList.remove("show"); }, 2800);
+}
+
+// ─── UTILS ────────────────────────────────────────────────────
+function escHtml(str) {
+  return String(str || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+init();
+</script>
+
+<!-- potluck.html v1.0 -->
+</body>
+</html>
