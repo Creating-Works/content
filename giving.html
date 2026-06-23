@@ -1,4 +1,4 @@
-<!-- Version: V2.30 | LAST CHANGE: Remove postal modal from add flow; remove Gifted section from My list; Received items get Move back button; Given empty state text update | Date: 2026-06-22 -->
+<!-- Version: V2.31 | LAST CHANGE: User-specific localStorage key; viewer mode uses ?owner= and fetches live from sheet; generateLink produces simple owner URL | Date: 2026-06-22 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -632,29 +632,32 @@ let historyLoaded = false;
 let drawerPage = 1;
 const ITEMS_PER_PAGE = 5;
 
-// Restore shareURL from localStorage
+// shareURL restored on boot if previously generated
 try { shareURL = localStorage.getItem('giving_shareURL') || ''; } catch(e) {}
 
 // ─── Boot ──────────────────────────────────────────────────────────────────
 (function init() {
-  const params  = new URLSearchParams(window.location.search);
-  const encoded = params.get('list');
-  if (encoded) {
-    try {
-      const decoded = JSON.parse(decodeURIComponent(escape(atob(encoded))));
-      viewerData = decoded;
-      mode = 'viewer';
-    } catch(_) {
-      // Decode failed - fall through to builder
-      mode = 'builder';
-    }
-    try { viewFulfilled = new Set(JSON.parse(localStorage.getItem('vf_' + encoded.slice(0,24)) || '[]')); } catch(_) {}
+  const params    = new URLSearchParams(window.location.search);
+  const ownerParam = params.get('owner');
+
+  // Viewer mode: ?owner= present and different from signed-in user
+  if (ownerParam && ownerParam !== _appearId) {
+    _ownerAppearId = ownerParam;
+    mode = 'viewer';
   }
+
   if (mode === 'builder') {
-    try { const s = JSON.parse(localStorage.getItem('an_support_25') || '{}'); items = s.items||[]; myName = s.name||''; } catch(_) {}
+    // User-specific localStorage key - prevents cross-user cache contamination
+    const cacheKey = _appearId ? 'an_support_' + _appearId.replace(/\./g,'') : 'an_support_anon';
+    try { const s = JSON.parse(localStorage.getItem(cacheKey) || '{}'); items = s.items||[]; myName = s.name||''; } catch(_) {}
     if (_appearId && !myName) myName = _appearId;
     if (_appearId) loadSupportList();
   }
+
+  if (mode === 'viewer') {
+    loadViewerList();
+  }
+
   render();
   if (_pendingId) openConfirmModal(_pendingId);
 })();
@@ -663,18 +666,39 @@ async function loadSupportList() {
   try {
     const res  = await fetch(GS_URL + '?action=getSupportList&appearId=' + encodeURIComponent(_appearId));
     const data = await res.json();
-    if (data.status === 'ok' && data.items && data.items.length) {
-      const existingTitles = new Set(items.map(i => i.title));
-      data.items.forEach(function(r) {
-        if (!existingTitles.has(r.item)) {
-          items.push({
-            id: uid(), topCat: r.category, subCat: r.subCategory,
-            subLabel: r.subCategory, subIcon: '🌱', title: r.item,
-            note: r.note || '', done: false
-          });
-        }
+    if (data.status === 'ok' && data.items) {
+      // Replace entirely from sheet - never merge with local cache
+      items = data.items.map(function(r) {
+        return {
+          id: uid(), topCat: r.category, subCat: r.subCategory,
+          subLabel: r.subCategory, subIcon: '🌱', title: r.item,
+          note: r.note || '', done: false
+        };
       });
       save(); render();
+    }
+  } catch(e) {}
+}
+
+async function loadViewerList() {
+  if (!_ownerAppearId) return;
+  try {
+    const res  = await fetch(GS_URL + '?action=getSupportList&appearId=' + encodeURIComponent(_ownerAppearId));
+    const data = await res.json();
+    if (data.status === 'ok' && data.items) {
+      viewerData = {
+        name: _ownerAppearId,
+        items: data.items.map(function(r) {
+          return {
+            id: r.item + '_' + (r.timestamp||''),
+            topCat: r.category, subCat: r.subCategory,
+            subLabel: r.subCategory, subIcon: '🌱',
+            title: r.item, note: r.note || '', done: false
+          };
+        }),
+        created: new Date().toISOString()
+      };
+      render();
     }
   } catch(e) {}
 }
@@ -692,7 +716,10 @@ async function loadGiftHistory() {
   } catch(e) {}
 }
 
-function save() { localStorage.setItem('an_support_25', JSON.stringify({ name: myName, items })); }
+function save() {
+  const cacheKey = _appearId ? 'an_support_' + _appearId.replace(/\./g,'') : 'an_support_anon';
+  localStorage.setItem(cacheKey, JSON.stringify({ name: myName, items }));
+}
 function saveViewer() {
   const encoded = new URLSearchParams(window.location.search).get('list');
   if (!encoded) return;
@@ -1007,45 +1034,18 @@ function goToReview()  { mode = 'review';  render(); }
 function goToBuilder() { mode = 'builder'; render(); }
 
 function generateLink() {
-  try {
-    const json    = JSON.stringify({ name: myName, items, created: new Date().toISOString() });
-    const encoded = btoa(unescape(encodeURIComponent(json)));
-    const ownerParam = _appearId ? '&owner=' + encodeURIComponent(_appearId) : '';
-    shareURL = location.origin + location.pathname + '?list=' + encoded + ownerParam;
-    try { localStorage.setItem('giving_shareURL', shareURL); } catch(e) {}
-    if (_appearId) {
-      fetch(GS_URL + '?action=saveShareURL'
-        + '&appearId=' + encodeURIComponent(_appearId)
-        + '&url='      + encodeURIComponent(shareURL)
-      ).catch(() => {});
-    }
-  } catch(e) { toast('Could not generate link'); return; }
+  if (!_appearId) { toast('Sign in to generate a link'); return; }
+  shareURL = location.origin + location.pathname + '?owner=' + encodeURIComponent(_appearId);
+  try { localStorage.setItem('giving_shareURL', shareURL); } catch(e) {}
+  fetch(GS_URL + '?action=saveShareURL'
+    + '&appearId=' + encodeURIComponent(_appearId)
+    + '&url='      + encodeURIComponent(shareURL)
+  ).catch(() => {});
   renderDrawer();
 }
 
 function genShareAndReview() {
   generateLink();
-}
-
-function genShareInline() {
-  try {
-    const json    = JSON.stringify({ name: myName, items, created: new Date().toISOString() });
-    const encoded = btoa(unescape(encodeURIComponent(json)));
-    shareURL = location.origin + location.pathname + '?list=' + encoded;
-  } catch(e) { toast('Could not generate link'); return; }
-  const area = qs('#share-area-review');
-  const btn  = qs('#share-btn-review');
-  if (area) {
-    const display = shareURL.length > 48 ? shareURL.slice(0, 48) + '...' : shareURL;
-    area.innerHTML = `
-      <div style="background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px;">
-        <div style="font-size:13px;color:var(--soft);margin-bottom:8px;">Your shareable link</div>
-        <div style="font-size:12px;color:var(--muted);word-break:break-all;background:white;border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(display)}</div>
-        <p style="font-size:12px;color:var(--muted);margin-bottom:12px;font-style:italic;">This will also be shared on your Appear page.</p>
-        <button class="btn-primary" style="margin-top:0" onclick="copyShareURL()">🔗 Copy link</button>
-      </div>`;
-  }
-  if (btn) btn.style.display = 'none';
 }
 
 function copyShareURL() { navigator.clipboard.writeText(shareURL).then(() => toast('Link copied')); }
@@ -1412,4 +1412,4 @@ window.moveBackToList      = moveBackToList;
 </script>
 </body>
 </html>
-<!-- V2.30 -->
+<!-- V2.31 -->
