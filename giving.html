@@ -1,4 +1,4 @@
-<!-- Version: V2.29 | LAST CHANGE: Skip Is this you? entirely when ?id= is in URL - trust Glide param directly | Date: 2026-06-21 -->
+<!-- Version: V2.30 | LAST CHANGE: Remove postal modal from add flow; remove Gifted section from My list; Received items get Move back button; Given empty state text update | Date: 2026-06-22 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -829,7 +829,6 @@ function addToList() {
 
   const newItem = { id: uid(), topCat, subCat, subLabel, subIcon, title: label, note:'', done: false, local: isLocalRequest };
   items.unshift(newItem);
-  const wasLocal = isLocalRequest;
   openTopCat = null; openSpacesSub = null; openThingsSub = null; openActionSub = null;
   clearAll(); noteText = '';
   save(); render();
@@ -837,7 +836,6 @@ function addToList() {
   drawerTab = 'list';
   renderDrawer();
   document.getElementById('gift-drawer-modal').classList.add('open');
-  if (wasLocal) openLocationModal();
   if (_appearId) {
     fetch(GS_URL + '?action=saveSupportItem'
       + '&appearId='    + encodeURIComponent(_appearId)
@@ -931,10 +929,6 @@ function renderDrawer() {
         }
         body += `<div style="display:flex;gap:6px;justify-content:center;margin-top:16px;flex-wrap:wrap;">${pages}</div>`;
       }
-
-      if (done.length) {
-        body += `<div class="eyebrow" style="margin:20px 0 10px">Gifted</div>${done.map(it=>wishItemHTML(it,'builder')).join('')}`;
-      }
     } else {
       body += `<div class="empty">Nothing on your gift list yet.</div>`;
     }
@@ -957,12 +951,14 @@ function renderDrawer() {
           : profileUrl
             ? `From <a href="${esc(profileUrl)}" target="_blank">${esc(g.gifterAppearId)}</a>`
             : `From ${esc(g.gifterAppearId)}`;
+        const itemJson = JSON.stringify({ category: g.category||'', subCategory: g.subCategory||'', item: g.item, note: g.note||'' });
         return `
           <div class="history-item">
             ${photoEl}
             <div class="history-body">
               <div class="history-title">${esc(g.item)}</div>
               <div class="history-meta">${from} · ${formatDate(g.timestamp)}</div>
+              <button onclick="moveBackToList(${esc(JSON.stringify(itemJson))})" style="margin-top:6px;padding:4px 10px;background:transparent;border:1px solid var(--border);border-radius:6px;font-size:12px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;">Move back to open list</button>
             </div>
           </div>`;
       }).join('');
@@ -972,7 +968,7 @@ function renderDrawer() {
     if (!historyLoaded) {
       body += `<div class="empty">Loading...</div>`;
     } else if (!giftHistory.given.length) {
-      body += `<div class="empty">No gifts given yet.</div>`;
+      body += `<div class="empty">You haven't given any gifts yet.</div>`;
     } else {
       body += `<div class="history-count">${giftHistory.given.length} given</div>`;
       body += giftHistory.given.map(g => {
@@ -1068,6 +1064,39 @@ function removeItem(id) {
       + '&item='     + encodeURIComponent(it.title)
     ).catch(() => {});
   }
+}
+
+function moveBackToList(itemJson) {
+  let data;
+  try { data = JSON.parse(itemJson); } catch(e) { toast('Could not restore item'); return; }
+  const newItem = {
+    id: uid(),
+    topCat: data.category || 'things',
+    subCat: data.subCategory || '',
+    subLabel: data.subCategory || '',
+    subIcon: '🌱',
+    title: data.item,
+    note: data.note || '',
+    done: false,
+    local: false
+  };
+  items.unshift(newItem);
+  save();
+  if (_appearId) {
+    fetch(GS_URL + '?action=saveSupportItem'
+      + '&appearId='    + encodeURIComponent(_appearId)
+      + '&category='    + encodeURIComponent(newItem.topCat)
+      + '&subCategory=' + encodeURIComponent(newItem.subCat)
+      + '&item='        + encodeURIComponent(newItem.title)
+      + '&note='        + encodeURIComponent(newItem.note)
+      + '&location='    + encodeURIComponent('')
+    ).catch(() => {});
+  }
+  drawerTab = 'list';
+  historyLoaded = false;
+  clearItemRegistry();
+  renderDrawer();
+  toast('Moved back to your list');
 }
 
 function toggleDone(id) {
@@ -1379,7 +1408,8 @@ window.captureGPS          = captureGPS;
 window.copyShareURL        = copyShareURL;
 window.togglePostalEdit    = togglePostalEdit;
 window.savePostalSettings  = savePostalSettings;
+window.moveBackToList      = moveBackToList;
 </script>
 </body>
 </html>
-<!-- V2.29 -->
+<!-- V2.30 -->
