@@ -1,4 +1,4 @@
-<!-- Version: V1.4 | Last change: Screen 2 heading updated, admin event selector removed, Update button removed, language and zip at top of profile summary, language on skills screen, search field border fix, rec breadcrumbs, ideas from all 5 rec types, new rec-map structure | Date: 2026-06-24 -->
+<!-- Version: V1.5 | Last change: Remove language/location screen from flow, flow is now 4 screens, remove language display from non-profile screens, fix recreation search pool and idea chips | Date: 2026-06-24 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,18 +19,15 @@
     .card { background: var(--card); max-width: 660px; margin: 0 auto; border-radius: 16px; padding: 52px; box-shadow: 0 24px 64px rgba(0,0,0,0.25), 0 4px 16px rgba(0,0,0,0.12); position: relative; }
     @media (max-width: 520px) { .card { padding: 32px 20px; } }
 
-    /* My ikigai button */
     .ikigai-btn { position: absolute; top: 20px; right: 20px; display: flex; align-items: center; gap: 8px; background: var(--sel-bg); border: 1.5px solid var(--sel-border); border-radius: 24px; padding: 6px 14px 6px 6px; font-size: 13px; font-weight: 600; color: var(--brand); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.15s; }
     .ikigai-btn:hover { background: #d6eaf8; }
-    .ikigai-photo { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--sel-border); background: var(--input-bg); display: flex; align-items: center; justify-content: center; font-size: 14px; overflow: hidden; flex-shrink: 0; }
+    .ikigai-photo { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--sel-border); background: var(--input-bg); display: flex; align-items: center; justify-content: center; font-size: 14px; overflow: hidden; flex-shrink: 0; }
     .ikigai-photo img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 
-    /* Footer */
     .footer { text-align: center; margin-top: 20px; }
     .footer a { color: white; font-size: 13px; text-decoration: none; opacity: 0.85; font-family: 'DM Sans', sans-serif; }
     .footer a:hover { opacity: 1; }
 
-    /* Typography */
     h2 { font-size: 20px; font-weight: 700; color: var(--text); line-height: 1.3; margin-bottom: 6px; }
     .subtitle { font-size: 15px; color: var(--soft); font-weight: 300; line-height: 1.7; margin-bottom: 20px; }
     hr { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
@@ -41,14 +38,75 @@
     select { width: 100%; background: var(--input-bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--text); outline: none; }
     select:focus { border-color: var(--brand); }
 
-    /* Progress */
     .progress-wrap { margin-bottom: 28px; }
     .progress-steps { display: flex; gap: 6px; margin-bottom: 8px; }
     .progress-step { flex: 1; height: 4px; border-radius: 2px; background: var(--border); transition: background 0.3s; }
     .progress-step.done { background: var(--brand); }
     .progress-label { font-size: 12px; color: var(--muted); }
 
-    /* Language */
+    .inline-edit-row { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--soft); flex-wrap: wrap; }
+    .btn-link { background: none; border: none; color: var(--brand); font-size: 14px; cursor: pointer; font-family: 'DM Sans', sans-serif; padding: 0; }
+    .btn-link:hover { opacity: 0.7; }
+
+    .search-wrap { position: relative; margin-bottom: 0; }
+    .search-wrap input { padding-left: 36px; border-radius: 8px; }
+    .search-wrap input.has-results { border-radius: 8px 8px 0 0; border-bottom-color: transparent; }
+    .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 15px; pointer-events: none; }
+    .search-results { background: white; border: 1px solid var(--border); border-top: none; border-radius: 0 0 10px 10px; max-height: 220px; overflow-y: auto; box-shadow: 0 6px 20px rgba(0,0,0,0.08); margin-bottom: 14px; }
+    .search-result-item { padding: 10px 14px; font-size: 14px; color: var(--text); cursor: pointer; border-bottom: 1px solid var(--border); transition: background 0.1s; }
+    .search-result-item:last-child { border-bottom: none; }
+    .search-result-item:hover { background: var(--sel-bg); }
+    .search-result-breadcrumb { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .add-custom-row { padding: 10px 14px; font-size: 14px; color: var(--brand); font-weight: 600; cursor: pointer; border: 1px solid var(--border); border-top: none; border-radius: 0 0 10px 10px; background: var(--sel-bg); margin-bottom: 14px; }
+    .add-custom-row:hover { background: var(--border); }
+    .custom-add-box { background: var(--input-bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 14px; }
+    .custom-add-box label { margin-bottom: 6px; }
+    .custom-add-box select { margin-bottom: 10px; }
+    .custom-add-confirm { background: var(--brand); color: white; border: none; border-radius: 8px; padding: 10px 20px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; }
+    .custom-add-cancel { background: none; border: none; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; margin-left: 10px; }
+
+    .breadcrumb { font-size: 12px; color: var(--muted); margin-bottom: 10px; margin-top: 6px; }
+    .breadcrumb span { color: var(--brand); font-weight: 500; }
+
+    .tags-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 16px 0 8px; }
+    .tags-wrap { display: flex; flex-wrap: wrap; gap: 8px; min-height: 32px; }
+    .tag { display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 20px; background: var(--sel-bg); border: 1.5px solid var(--sel-border); font-size: 13px; color: var(--brand); font-weight: 500; }
+    .tag-remove { cursor: pointer; font-size: 15px; color: var(--muted); line-height: 1; }
+
+    .practice-wrap { margin-top: 16px; }
+    .practice-item { background: var(--input-bg); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; }
+    .practice-item-name { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .practice-item-cat { font-size: 11px; color: var(--muted); margin-bottom: 10px; }
+    .practice-options { display: flex; flex-wrap: wrap; gap: 8px; }
+    .practice-btn { padding: 6px 14px; border-radius: 16px; border: 1.5px solid var(--border); background: white; font-size: 12px; color: var(--soft); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+    .practice-btn:hover { border-color: var(--brand); color: var(--brand); }
+    .practice-btn.selected { background: var(--brand); border-color: var(--brand); color: white; font-weight: 500; }
+    .practice-remove { margin-top: 10px; font-size: 12px; color: var(--muted); cursor: pointer; display: inline-block; }
+    .practice-remove:hover { color: var(--text); }
+
+    .cat-filter-wrap { margin-top: 16px; }
+
+    .idea-section { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .idea-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+    .idea-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+    .idea-chip { padding: 6px 13px; border-radius: 18px; border: 1.5px dashed var(--border); background: var(--input-bg); font-size: 12px; color: var(--soft); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+    .idea-chip:hover { border-color: var(--brand); color: var(--brand); border-style: solid; background: var(--sel-bg); }
+
+    .nav-row { display: flex; gap: 12px; margin-top: 28px; }
+    .btn-back { flex: 1; padding: 14px; border-radius: 10px; border: 1.5px solid var(--border); background: white; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; color: var(--soft); cursor: pointer; transition: all 0.15s; }
+    .btn-back:hover { border-color: var(--brand); color: var(--brand); }
+    .btn-next { flex: 2; padding: 14px; border-radius: 10px; border: none; background: var(--brand); font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; color: white; cursor: pointer; transition: background 0.15s; }
+    .btn-next:hover { background: var(--hover); }
+
+    .profile-meta-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+    .profile-section { margin-bottom: 20px; }
+    .profile-section-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+    .profile-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+    .profile-tag { padding: 6px 12px; border-radius: 20px; background: var(--sel-bg); border: 1.5px solid var(--sel-border); font-size: 13px; color: var(--brand); font-weight: 500; }
+    .tag-level { font-size: 11px; color: var(--muted); font-weight: 400; margin-left: 4px; }
+    .profile-empty { font-size: 13px; color: var(--muted); font-style: italic; }
+
+    /* Lang dropdown on screen 1 (lang/loc modal) */
     .lang-dropdown-wrap { position: relative; margin-bottom: 12px; }
     .lang-search-input { padding-left: 36px !important; border-radius: 8px 8px 0 0 !important; border-bottom: none !important; }
     .lang-search-icon { position: absolute; left: 12px; top: 13px; font-size: 15px; pointer-events: none; }
@@ -62,79 +120,13 @@
     .lang-tag { display: flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 20px; background: var(--sel-bg); border: 1.5px solid var(--sel-border); font-size: 13px; color: var(--brand); font-weight: 500; }
     .lang-tag-remove { cursor: pointer; color: var(--muted); font-size: 15px; line-height: 1; }
 
-    /* Inline edit row */
-    .inline-edit-row { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--soft); flex-wrap: wrap; }
-    .btn-link { background: none; border: none; color: var(--brand); font-size: 14px; cursor: pointer; font-family: 'DM Sans', sans-serif; padding: 0; }
-    .btn-link:hover { opacity: 0.7; }
+    /* Lang/loc modal */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:500; align-items:flex-start; justify-content:center; padding:12px 0 0; }
+    .modal-overlay.open { display:flex; }
+    .modal { background:#fff; border-radius:16px; padding:32px; max-width:480px; width:100%; max-height:92vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,.2); }
+    .modal-title { font-size:18px; font-weight:700; color:var(--text); margin-bottom:16px; }
+    .modal-close { float:right; background:none; border:none; font-size:20px; cursor:pointer; color:var(--muted); }
 
-    /* Search — fixed border */
-    .search-wrap { position: relative; margin-bottom: 0; }
-    .search-wrap input { padding-left: 36px; border-radius: 8px; }
-    .search-wrap input.has-results { border-radius: 8px 8px 0 0; border-bottom-color: transparent; }
-    .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 15px; pointer-events: none; }
-    .search-results { background: white; border: 1px solid var(--border); border-top: none; border-radius: 0 0 10px 10px; max-height: 220px; overflow-y: auto; box-shadow: 0 6px 20px rgba(0,0,0,0.08); margin-bottom: 14px; }
-    .search-result-item { padding: 10px 14px; font-size: 14px; color: var(--text); cursor: pointer; border-bottom: 1px solid var(--border); transition: background 0.1s; }
-    .search-result-item:last-child { border-bottom: none; }
-    .search-result-item:hover { background: var(--sel-bg); }
-    .search-result-cat { font-size: 11px; color: var(--muted); margin-top: 2px; }
-    .search-result-breadcrumb { font-size: 11px; color: var(--muted); margin-top: 2px; }
-    .add-custom-row { padding: 10px 14px; font-size: 14px; color: var(--brand); font-weight: 600; cursor: pointer; border: 1px solid var(--border); border-top: none; border-radius: 0 0 10px 10px; background: var(--sel-bg); margin-bottom: 14px; }
-    .add-custom-row:hover { background: var(--border); }
-    .custom-add-box { background: var(--input-bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 14px; }
-    .custom-add-box label { margin-bottom: 6px; }
-    .custom-add-box select { margin-bottom: 10px; }
-    .custom-add-confirm { background: var(--brand); color: white; border: none; border-radius: 8px; padding: 10px 20px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; }
-    .custom-add-cancel { background: none; border: none; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; margin-left: 10px; }
-
-    /* Breadcrumb */
-    .breadcrumb { font-size: 12px; color: var(--muted); margin-bottom: 10px; margin-top: 6px; }
-    .breadcrumb span { color: var(--brand); font-weight: 500; }
-
-    /* Tags */
-    .tags-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 16px 0 8px; }
-    .tags-wrap { display: flex; flex-wrap: wrap; gap: 8px; min-height: 32px; }
-    .tag { display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 20px; background: var(--sel-bg); border: 1.5px solid var(--sel-border); font-size: 13px; color: var(--brand); font-weight: 500; }
-    .tag-remove { cursor: pointer; font-size: 15px; color: var(--muted); line-height: 1; }
-
-    /* Practice / role */
-    .practice-wrap { margin-top: 16px; }
-    .practice-item { background: var(--input-bg); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; }
-    .practice-item-name { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
-    .practice-item-cat { font-size: 11px; color: var(--muted); margin-bottom: 10px; }
-    .practice-options { display: flex; flex-wrap: wrap; gap: 8px; }
-    .practice-btn { padding: 6px 14px; border-radius: 16px; border: 1.5px solid var(--border); background: white; font-size: 12px; color: var(--soft); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
-    .practice-btn:hover { border-color: var(--brand); color: var(--brand); }
-    .practice-btn.selected { background: var(--brand); border-color: var(--brand); color: white; font-weight: 500; }
-    .practice-remove { margin-top: 10px; font-size: 12px; color: var(--muted); cursor: pointer; display: inline-block; }
-    .practice-remove:hover { color: var(--text); }
-
-    /* Category filter */
-    .cat-filter-wrap { margin-top: 16px; }
-
-    /* Ideas */
-    .idea-section { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
-    .idea-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
-    .idea-chips { display: flex; flex-wrap: wrap; gap: 7px; }
-    .idea-chip { padding: 6px 13px; border-radius: 18px; border: 1.5px dashed var(--border); background: var(--input-bg); font-size: 12px; color: var(--soft); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
-    .idea-chip:hover { border-color: var(--brand); color: var(--brand); border-style: solid; background: var(--sel-bg); }
-
-    /* Nav */
-    .nav-row { display: flex; gap: 12px; margin-top: 28px; }
-    .btn-back { flex: 1; padding: 14px; border-radius: 10px; border: 1.5px solid var(--border); background: white; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; color: var(--soft); cursor: pointer; transition: all 0.15s; }
-    .btn-back:hover { border-color: var(--brand); color: var(--brand); }
-    .btn-next { flex: 2; padding: 14px; border-radius: 10px; border: none; background: var(--brand); font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; color: white; cursor: pointer; transition: background 0.15s; }
-    .btn-next:hover { background: var(--hover); }
-
-    /* Profile summary */
-    .profile-meta-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
-    .profile-section { margin-bottom: 20px; }
-    .profile-section-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
-    .profile-tags { display: flex; flex-wrap: wrap; gap: 7px; }
-    .profile-tag { padding: 6px 12px; border-radius: 20px; background: var(--sel-bg); border: 1.5px solid var(--sel-border); font-size: 13px; color: var(--brand); font-weight: 500; }
-    .tag-level { font-size: 11px; color: var(--muted); font-weight: 400; margin-left: 4px; }
-    .profile-empty { font-size: 13px; color: var(--muted); font-style: italic; }
-
-    /* Toast / Loading / Empty */
     .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1a1a2e; color: white; border-radius: 10px; padding: 12px 20px; font-size: 14px; font-weight: 500; z-index: 9999; opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap; }
     .toast.show { opacity: 1; }
     .loading { text-align: center; padding: 60px 40px; color: var(--muted); font-size: 15px; }
@@ -149,6 +141,28 @@
   </div>
   <div class="footer"><a href="https://creating.works">Creating Works</a></div>
 </div>
+
+<!-- Lang/loc edit modal -->
+<div class="modal-overlay" id="lang-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeLangModal()">✕</button>
+    <div class="modal-title">Language and location</div>
+    <label>Language(s)</label>
+    <div class="lang-dropdown-wrap">
+      <span class="lang-search-icon">🔍</span>
+      <input type="text" class="lang-search-input" id="lang-modal-search" placeholder="Search languages..." oninput="filterLangs(this.value)">
+      <div class="lang-list" id="lang-list"></div>
+    </div>
+    <div class="lang-tags" id="lang-tags"></div>
+    <div style="margin-top:20px"><label>Zip code</label>
+    <input type="text" id="lang-modal-postal" placeholder="Your zip code" oninput="_postal=this.value"></div>
+    <div style="margin-top:16px">
+      <button class="custom-add-confirm" onclick="saveLangModal()">Save</button>
+      <button class="custom-add-cancel" onclick="closeLangModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -168,28 +182,26 @@ var _isAdmin = _appearId && normalizeId(_appearId) === ADMIN_ID;
 var GS_URL   = 'https://script.google.com/macros/s/AKfycbzEavMnG4tMeWemoT5FLu9f_zjlKVIJsZLueG4nhw9akK0_nZqpbkZiXrAlWu1Fyhq9/exec';
 
 // ─── State ──────────────────────────────────────────────────────────────────
-var _screen     = 1;
+var _screen     = 1;  // 1=rec, 2=skills, 3=values, 4=needs, 0=profile
 var _refData    = null;
 var _hasProfile = false;
 var _photo      = '';
 
 var _languages  = [];
 var _langFilter = '';
-var _langEdit   = false;
 var _postal     = '';
-var _postalEdit = false;
 
-var _interests  = [];
+var _interests  = [];  // rec/hobbies
 var _skills     = [];
 var _values     = [];
 var _needs      = [];
 
-var _searchQ    = { 2:'', 3:'', 4:'', 5:'' };
-var _searchRes  = { 2:[], 3:[], 4:[], 5:[] };
-var _ideaChips  = { 2:[], 3:[], 4:[], 5:[] };
-var _recType    = '';   // selected Recreation Type filter
-var _recSubCat  = '';  // selected Sub Category filter
-var _catFilter3 = '';  // skills category filter
+var _searchQ    = { 1:'', 2:'', 3:'', 4:'' };
+var _searchRes  = { 1:[], 2:[], 3:[], 4:[] };
+var _ideaChips  = { 1:[], 2:[], 3:[], 4:[] };
+var _recType    = '';
+var _recSubCat  = '';
+var _catFilter2 = '';
 var _customItem = '';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -220,10 +232,10 @@ function matchesQuery(r, ql) {
 
 function getPool(screen) {
   if (!_refData) return [];
-  if (screen === 2) return _refData.recreation || [];
-  if (screen === 3) return _refData.skills || [];
-  if (screen === 4) return (_refData.values||[]).concat(_refData.domains||[]);
-  if (screen === 5) return (_refData.skills||[]).concat(_refData.values||[]).concat(_refData.domains||[]);
+  if (screen === 1) return _refData.recreation || [];
+  if (screen === 2) return _refData.skills || [];
+  if (screen === 3) return (_refData.values||[]).concat(_refData.domains||[]);
+  if (screen === 4) return (_refData.skills||[]).concat(_refData.values||[]).concat(_refData.domains||[]);
   return [];
 }
 
@@ -231,13 +243,13 @@ function buildIdeas(screen) {
   var pool = getPool(screen);
   if (!pool.length) return;
   var filtered = pool;
-  if (screen === 2) {
+  if (screen === 1) {
     if (_recSubCat) filtered = pool.filter(function(r){ return r.category === _recSubCat; });
     else if (_recType) filtered = pool.filter(function(r){ return r.recType === _recType; });
-  } else if (screen === 3 && _catFilter3) {
-    filtered = pool.filter(function(r){ return r.category === _catFilter3; });
+  } else if (screen === 2 && _catFilter2) {
+    filtered = pool.filter(function(r){ return r.category === _catFilter2; });
   }
-  _ideaChips[screen] = shuffle(filtered.map(function(r){return r.item||r;})).slice(0,30);
+  _ideaChips[screen] = shuffle(filtered.map(function(r){ return r.item||r; }).filter(Boolean)).slice(0,30);
 }
 
 // ─── Data loading ────────────────────────────────────────────────────────────
@@ -250,7 +262,7 @@ async function loadRefData() {
 
 async function loadProfile() {
   try {
-    var res  = await fetch(GS_URL + '?action=lookupProfile&appearId=' + encodeURIComponent(_appearId));
+    var res  = await fetch(GS_URL + '?action=lookupProfile&appearId='+encodeURIComponent(_appearId));
     var data = await res.json();
     if (data.found && data.photo) _photo = data.photo;
   } catch(e) {}
@@ -258,7 +270,7 @@ async function loadProfile() {
 
 async function loadIntake() {
   try {
-    var res  = await fetch(GS_URL + '?action=getIntake&appearId=' + encodeURIComponent(_appearId));
+    var res  = await fetch(GS_URL + '?action=getIntake&appearId='+encodeURIComponent(_appearId));
     var data = await res.json();
     if (data.found && data.data) {
       _hasProfile = true;
@@ -292,8 +304,7 @@ function runSearch(screen, q) {
   }
   _searchRes[screen] = res;
   updateSearchResults(screen, q, res);
-  // Toggle border radius on input
-  var inp = document.getElementById('search-input-' + screen);
+  var inp = document.getElementById('search-input-'+screen);
   if (inp) {
     if (q && res.length) inp.classList.add('has-results');
     else inp.classList.remove('has-results');
@@ -308,90 +319,88 @@ function breadcrumbForRec(r) {
 }
 
 function updateSearchResults(screen, q, res) {
-  var container = document.getElementById('search-results-' + screen);
+  var container = document.getElementById('search-results-'+screen);
   if (!container) return;
   if (!q || q.length < 1) { container.innerHTML = ''; return; }
   if (res.length) {
     container.innerHTML = '<div class="search-results">'
       + res.map(function(r) {
           var item = esc(r.item||r);
-          var crumb = screen === 2
-            ? breadcrumbForRec(r)
-            : (r.category ? r.category : '');
+          var crumb = screen===1 ? breadcrumbForRec(r) : (r.category||'');
           return '<div class="search-result-item" onclick="addItem('+screen+',\''+item+'\',\''+esc(r.category||'')+'\')">'
             + item
-            + (crumb ? '<div class="search-result-breadcrumb">'+esc(crumb)+'</div>' : '')
+            + (crumb?'<div class="search-result-breadcrumb">'+esc(crumb)+'</div>':'')
             + '</div>';
         }).join('')
       + '</div>';
   } else {
     container.innerHTML = '<div class="add-custom-row" onclick="showCustomAdd('+screen+',\''+esc(q)+'\')">'
-      + '+ Add "'+esc(q)+'" to my list</div>';
+      +'+ Add "'+esc(q)+'" to my list</div>';
   }
 }
 
 // ─── Custom add ───────────────────────────────────────────────────────────────
 function showCustomAdd(screen, item) {
   _customItem = item;
-  var container = document.getElementById('search-results-' + screen);
+  var container = document.getElementById('search-results-'+screen);
   if (!container) return;
-  var cats = (_refData && _refData.skills)
-    ? (function(){ var s={}; _refData.skills.forEach(function(r){ if(r.category) s[r.category]=1; }); return Object.keys(s); })()
-    : [];
+  var cats = (_refData&&_refData.skills)
+    ?(function(){ var s={}; _refData.skills.forEach(function(r){if(r.category)s[r.category]=1;}); return Object.keys(s); })()
+    :[];
   var opts = '<option value="">Select a category</option>'
-    + cats.map(function(c){ return '<option value="'+esc(c)+'">'+esc(c)+'</option>'; }).join('');
+    +cats.map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join('');
   container.innerHTML = '<div class="custom-add-box">'
-    + '<label>What category does "'+esc(item)+'" belong to?</label>'
-    + '<select id="custom-cat-select">'+opts+'</select>'
-    + '<button class="custom-add-confirm" onclick="confirmCustomAdd('+screen+')">Add to my list</button>'
-    + '<button class="custom-add-cancel" onclick="cancelCustomAdd('+screen+')">Cancel</button>'
-    + '</div>';
+    +'<label>What category does "'+esc(item)+'" belong to?</label>'
+    +'<select id="custom-cat-select">'+opts+'</select>'
+    +'<button class="custom-add-confirm" onclick="confirmCustomAdd('+screen+')">Add to my list</button>'
+    +'<button class="custom-add-cancel" onclick="cancelCustomAdd('+screen+')">Cancel</button>'
+    +'</div>';
 }
 
 function confirmCustomAdd(screen) {
   var sel = document.getElementById('custom-cat-select');
   var cat = sel ? sel.value : '';
   if (!cat) { toast('Please select a category'); return; }
-  fetch(GS_URL + '?action=addCustomSkill&appearId='+encodeURIComponent(_appearId)
+  fetch(GS_URL+'?action=addCustomSkill&appearId='+encodeURIComponent(_appearId)
     +'&item='+encodeURIComponent(_customItem)+'&category='+encodeURIComponent(cat));
   addItem(screen, _customItem, cat);
   _customItem = '';
-  var container = document.getElementById('search-results-' + screen);
+  var container = document.getElementById('search-results-'+screen);
   if (container) container.innerHTML = '';
 }
 
 function cancelCustomAdd(screen) {
   _customItem = '';
-  var container = document.getElementById('search-results-' + screen);
+  var container = document.getElementById('search-results-'+screen);
   if (container) container.innerHTML = '';
-  var inp = document.getElementById('search-input-' + screen);
+  var inp = document.getElementById('search-input-'+screen);
   if (inp) { inp.value=''; inp.classList.remove('has-results'); _searchQ[screen]=''; }
 }
 
 // ─── Add / remove ─────────────────────────────────────────────────────────────
 function addItem(screen, item, category) {
-  var arr = screen===2?_interests:screen===3?_skills:screen===4?_values:_needs;
+  var arr = screen===1?_interests:screen===2?_skills:screen===3?_values:_needs;
   if (arr.some(function(r){return r.item===item;})) { toast('Already added'); return; }
-  if (screen===2) _interests.push({item:item,category:category||'',level:''});
-  else if (screen===3) _skills.push({item:item,category:category||'',level:''});
+  if (screen===1) _interests.push({item:item,category:category||'',level:''});
+  else if (screen===2) _skills.push({item:item,category:category||'',level:''});
   else arr.push({item:item,category:category||''});
   _searchQ[screen]=''; _searchRes[screen]=[];
   var inp=document.getElementById('search-input-'+screen);
-  if (inp) { inp.value=''; inp.classList.remove('has-results'); }
+  if(inp){inp.value='';inp.classList.remove('has-results');}
   var rc=document.getElementById('search-results-'+screen); if(rc) rc.innerHTML='';
   updateTagsSection(screen);
 }
 
 function removeItem(screen, idx) {
-  if(screen===2) _interests.splice(idx,1);
-  else if(screen===3) _skills.splice(idx,1);
-  else if(screen===4) _values.splice(idx,1);
+  if(screen===1) _interests.splice(idx,1);
+  else if(screen===2) _skills.splice(idx,1);
+  else if(screen===3) _values.splice(idx,1);
   else _needs.splice(idx,1);
   updateTagsSection(screen);
 }
 
 function setLevel(screen, idx, level) {
-  var arr=screen===2?_interests:_skills;
+  var arr=screen===1?_interests:_skills;
   if(arr[idx]) arr[idx].level=level;
   updateTagsSection(screen);
 }
@@ -399,9 +408,9 @@ function setLevel(screen, idx, level) {
 function updateTagsSection(screen) {
   var el=document.getElementById('tags-section-'+screen);
   if (!el) return;
-  if (screen===2) el.innerHTML=buildRoleHTML(_interests,2,['Fan','Player','Coach']);
-  else if (screen===3) el.innerHTML=buildRoleHTML(_skills,3,['Starting to practice','Practicing','Mentoring']);
-  else { var arr=screen===4?_values:_needs; el.innerHTML=buildTagsHTML(screen,arr); }
+  if (screen===1) el.innerHTML=buildRoleHTML(_interests,1,['Fan','Player','Coach']);
+  else if (screen===2) el.innerHTML=buildRoleHTML(_skills,2,['Starting to practice','Practicing','Mentoring']);
+  else { var arr=screen===3?_values:_needs; el.innerHTML=buildTagsHTML(screen,arr); }
 }
 
 function buildTagsHTML(screen, arr) {
@@ -424,14 +433,36 @@ function buildRoleHTML(arr, screen, levels) {
           +'<div class="practice-item-name">'+esc(s.item)+'</div>'
           +(s.category?'<div class="practice-item-cat">'+esc(s.category)+'</div>':'')
           +'<div style="font-size:12px;color:var(--muted);margin-bottom:8px;">'
-          +(screen===2?'How do you show up for this?':'Where are you in this role?')+'</div>'
+          +(screen===1?'How do you show up for this?':'Where are you in this role?')+'</div>'
           +'<div class="practice-options">'+btns+'</div>'
           +'<span class="practice-remove" onclick="removeItem('+screen+','+i+')">Remove</span>'
           +'</div>';
       }).join('')+'</div>';
 }
 
-// ─── Language ─────────────────────────────────────────────────────────────────
+// ─── Language modal ───────────────────────────────────────────────────────────
+function openLangModal() {
+  var modal = document.getElementById('lang-modal');
+  if (modal) modal.classList.add('open');
+  var inp = document.getElementById('lang-modal-postal');
+  if (inp) inp.value = _postal;
+  filterLangs('');
+  var si = document.getElementById('lang-modal-search');
+  if (si) si.value = '';
+}
+
+function closeLangModal() {
+  var modal = document.getElementById('lang-modal');
+  if (modal) modal.classList.remove('open');
+}
+
+function saveLangModal() {
+  var inp = document.getElementById('lang-modal-postal');
+  if (inp) _postal = inp.value.trim();
+  closeLangModal();
+  updateProfileMetaRow();
+}
+
 function filterLangs(q) {
   _langFilter = q;
   var list = document.getElementById('lang-list');
@@ -444,22 +475,20 @@ function filterLangs(q) {
     return '<div class="lang-list-item'+(sel?' selected':'')+'" onclick="toggleLang(\''+esc(lang)+'\')">'
       +'<span class="lang-check">'+(sel?'✓':'')+'</span>'+esc(lang)+'</div>';
   }).join('');
+  var tagsEl=document.getElementById('lang-tags');
+  if (tagsEl) tagsEl.innerHTML=buildLangTagsHTML();
 }
 
 function toggleLang(lang) {
   var idx=_languages.indexOf(lang);
   if(idx>-1) _languages.splice(idx,1); else _languages.push(lang);
   filterLangs(_langFilter);
-  var el=document.getElementById('lang-tags'); if(el) el.innerHTML=buildLangTagsHTML();
-  updateLangInlineRow();
 }
 
 function removeLang(lang) {
   var idx=_languages.indexOf(lang);
   if(idx>-1) _languages.splice(idx,1);
   filterLangs(_langFilter);
-  var el=document.getElementById('lang-tags'); if(el) el.innerHTML=buildLangTagsHTML();
-  updateLangInlineRow();
 }
 
 function buildLangTagsHTML() {
@@ -468,91 +497,66 @@ function buildLangTagsHTML() {
   }).join('');
 }
 
-function updateLangInlineRow() {
-  var el = document.getElementById('lang-inline-row');
-  if (el) el.innerHTML = buildLangInlineHTML();
+function updateProfileMetaRow() {
+  var el=document.getElementById('profile-meta-row');
+  if (el) el.innerHTML=buildProfileMetaHTML();
 }
 
-function buildLangInlineHTML() {
-  var text = _languages.length ? esc(_languages.join(', ')) : 'No languages set';
-  return text + ' <button class="btn-link" onclick="openLangEdit()">✏️</button>';
+function buildProfileMetaHTML() {
+  return '<div class="inline-edit-row">'
+    +'📍 '+esc(_postal||'No zip code set')
+    +' <button class="btn-link" onclick="openLangModal()">✏️</button>'
+    +'</div>'
+    +(_languages.length?'<div class="inline-edit-row">'+esc(_languages.join(', '))+'</div>':'');
 }
 
-function openLangEdit() { _langEdit = true; render(); }
-function closeLangEdit() { _langEdit = false; render(); }
-
-// ─── Postal ───────────────────────────────────────────────────────────────────
-function buildPostalHTML() {
-  return '📍 '+(_postal||'No zip code set')+' <button class="btn-link" onclick="editPostal()">✏️</button>';
-}
-
-function editPostal() {
-  var el=document.getElementById('postal-inline');
-  if (!el) return;
-  el.innerHTML='<div style="display:flex;gap:8px;align-items:center">'
-    +'<input type="text" id="postal-edit-inp" placeholder="Zip code" value="'+esc(_postal)+'" style="flex:1;padding:10px 12px">'
-    +'<button class="custom-add-confirm" onclick="savePostalInline()">Save</button>'
-    +'</div>';
-}
-
-function savePostalInline() {
-  var inp=document.getElementById('postal-edit-inp');
-  if(inp) _postal=inp.value.trim();
-  var el=document.getElementById('postal-inline');
-  if(el) el.innerHTML=buildPostalHTML();
-}
-
-// ─── Rec type / sub cat filter ────────────────────────────────────────────────
+// ─── Rec filters ──────────────────────────────────────────────────────────────
 function setRecType(val) {
-  _recType   = val;
-  _recSubCat = '';
-  // Update sub-cat dropdown
-  var subSel = document.getElementById('rec-subcat-select');
+  _recType=val; _recSubCat='';
+  var subSel=document.getElementById('rec-subcat-select');
   if (subSel) {
-    var pool = (_refData&&_refData.recreation)||[];
-    var subCats = val
-      ? (function(){ var s={}; pool.filter(function(r){return r.recType===val;}).forEach(function(r){if(r.category)s[r.category]=1;}); return Object.keys(s); })()
-      : [];
-    subSel.innerHTML = '<option value="">All '+esc(val||'recreation')+'</option>'
+    var pool=(_refData&&_refData.recreation)||[];
+    var subCats=val?(function(){var s={};pool.filter(function(r){return r.recType===val;}).forEach(function(r){if(r.category)s[r.category]=1;});return Object.keys(s);})():[];
+    subSel.innerHTML='<option value="">All '+esc(val||'recreation')+'</option>'
       +subCats.map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join('');
-    subSel.style.display = val ? '' : 'none';
+    subSel.style.display=val?'':'none';
   }
   updateBreadcrumb();
-  buildIdeas(2);
-  updateIdeasEl(2);
+  buildIdeas(1);
+  updateIdeasEl(1);
 }
 
 function setRecSubCat(val) {
-  _recSubCat = val;
+  _recSubCat=val;
   updateBreadcrumb();
-  buildIdeas(2);
-  updateIdeasEl(2);
+  buildIdeas(1);
+  updateIdeasEl(1);
 }
 
 function updateBreadcrumb() {
-  var el = document.getElementById('rec-breadcrumb');
+  var el=document.getElementById('rec-breadcrumb');
   if (!el) return;
-  var parts = ['Recreation & Hobbies'];
-  if (_recType) parts.push(_recType);
-  if (_recSubCat) parts.push(_recSubCat);
-  el.innerHTML = parts.map(function(p,i){
-    return i < parts.length-1 ? esc(p)+' › ' : '<span>'+esc(p)+'</span>';
+  var parts=['Recreation & Hobbies'];
+  if(_recType) parts.push(_recType);
+  if(_recSubCat) parts.push(_recSubCat);
+  el.innerHTML=parts.map(function(p,i){
+    return i<parts.length-1?esc(p)+' › ':'<span>'+esc(p)+'</span>';
   }).join('');
 }
 
 function updateIdeasEl(screen) {
-  var el = document.getElementById('idea-chips-'+screen);
-  if (el) el.innerHTML = _ideaChips[screen].map(function(item){
+  var el=document.getElementById('idea-chips-'+screen);
+  if (el) el.innerHTML=_ideaChips[screen].map(function(item){
     return '<div class="idea-chip" onclick="addItem('+screen+',\''+esc(item)+'\',\''+esc(_recSubCat||_recType||'')+'\')">'+esc(item)+'</div>';
   }).join('');
 }
 
-function setCatFilter3(val) {
-  _catFilter3 = val;
-  buildIdeas(3);
-  var el=document.getElementById('idea-chips-3');
-  if (el) el.innerHTML=_ideaChips[3].map(function(item){
-    return '<div class="idea-chip" onclick="addItem(3,\''+esc(item)+'\',\''+esc(_catFilter3)+'\')">'+esc(item)+'</div>';
+function setCatFilter2(val) {
+  _catFilter2=val;
+  buildIdeas(2);
+  var el=document.getElementById('idea-chips-2');
+  if (el) el.innerHTML=_ideaChips[2].map(function(item){
+    return '<div class="idea-chip" onclick="addItem(2,\''+esc(item)+'\',\''+esc(_catFilter2)+'\')">'+esc(item)+'</div>';
   }).join('');
 }
 
@@ -597,24 +601,23 @@ function render() {
     return;
   }
   if (_hasProfile && _screen===0) { renderProfile(el); return; }
-  var fn={1:renderScreen1,2:renderScreen2,3:renderScreen3,4:renderScreen4,5:renderScreen5}[_screen];
+  var fn={1:renderScreen1,2:renderScreen2,3:renderScreen3,4:renderScreen4}[_screen];
   if (fn) fn(el);
 }
 
 function progressHTML(n) {
   var s='';
-  for(var i=1;i<=5;i++) s+='<div class="progress-step'+(i<=n?' done':'')+'"></div>';
-  var labs=['','Language + location','Recreation and hobbies','Your skillset','What you care about','What you need'];
-  return '<div class="progress-wrap"><div class="progress-steps">'+s+'</div><div class="progress-label">Step '+n+' of 5 — '+labs[n]+'</div></div>';
+  for(var i=1;i<=4;i++) s+='<div class="progress-step'+(i<=n?' done':'')+'"></div>';
+  var labs=['','Recreation and hobbies','Your skillset','What you care about','What you need'];
+  return '<div class="progress-wrap"><div class="progress-steps">'+s+'</div><div class="progress-label">Step '+n+' of 4 — '+labs[n]+'</div></div>';
 }
 
 function navHTML(screen) {
   var back=screen>1?'<button class="btn-back" onclick="goBack()">Back</button>':'';
-  var next='<button class="btn-next" onclick="goNext()">'+(screen===5?'Submit':'Next')+'</button>';
+  var next='<button class="btn-next" onclick="goNext()">'+(screen===4?'Submit':'Next')+'</button>';
   return '<div class="nav-row">'+back+next+'</div>';
 }
 
-// Profile summary
 function renderProfile(el) {
   function tagSection(label, arr, hasLevel) {
     var tags=arr.length
@@ -625,60 +628,33 @@ function renderProfile(el) {
       :'<div class="profile-empty">Nothing added yet.</div>';
     return '<div class="profile-section"><div class="profile-section-label">'+label+'</div><div class="profile-tags">'+tags+'</div></div>';
   }
-
-  el.innerHTML='<h2 style="margin-bottom:4px">Here is how you show up in our community 🎉</h2>'
-    +'<div class="profile-meta-row">'
-    +'<div class="inline-edit-row"><span id="postal-inline">'+buildPostalHTML()+'</span></div>'
-    +'<div class="inline-edit-row"><span id="lang-inline-row">'+buildLangInlineHTML()+'</span></div>'
-    +'</div>'
+  el.innerHTML='<h2 style="margin-bottom:12px">Here is how you show up in our community 🎉</h2>'
+    +'<div class="profile-meta-row" id="profile-meta-row">'+buildProfileMetaHTML()+'</div>'
     +tagSection('What I enjoy', _interests, true)
     +tagSection('My skills', _skills, true)
     +tagSection('What I care about', _values, false)
     +tagSection('What I need', _needs, false);
 }
 
-// Screen 1 — Language + postal
+// Screen 1 — Recreation
 function renderScreen1(el) {
-  var langs=(_refData&&_refData.languages)?_refData.languages:[];
-  var listHTML=langs.map(function(lang){
-    var sel=_languages.indexOf(lang)>-1;
-    return '<div class="lang-list-item'+(sel?' selected':'')+'" onclick="toggleLang(\''+esc(lang)+'\')">'
-      +'<span class="lang-check">'+(sel?'✓':'')+'</span>'+esc(lang)+'</div>';
-  }).join('');
-  el.innerHTML=progressHTML(1)
-    +'<h2>What language(s) do you speak?</h2>'
-    +'<p class="subtitle">Select all that apply.</p>'
-    +'<div class="lang-dropdown-wrap"><span class="lang-search-icon">🔍</span>'
-    +'<input type="text" class="lang-search-input" placeholder="Search languages..." oninput="filterLangs(this.value)">'
-    +'<div class="lang-list" id="lang-list">'+listHTML+'</div></div>'
-    +'<div class="lang-tags" id="lang-tags">'+buildLangTagsHTML()+'</div>'
-    +'<hr>'
-    +'<h2>Where are you located?</h2>'
-    +'<div style="margin-top:8px"><label>Zip code</label>'
-    +'<input type="text" id="postal-inp" placeholder="Your zip code" value="'+esc(_postal)+'" oninput="_postal=this.value"></div>'
-    +navHTML(1);
-}
-
-// Screen 2 — Recreation
-function renderScreen2(el) {
-  buildIdeas(2);
+  buildIdeas(1);
   var recTypes=['Sports','Movement & Performance','Outdoor & Nature','Games & Strategy','Making & Collecting'];
   var typeOpts='<option value="">All recreation</option>'
     +recTypes.map(function(t){return '<option value="'+esc(t)+'"'+(_recType===t?' selected':'')+'>'+esc(t)+'</option>';}).join('');
-
-  var ideasHTML=_ideaChips[2].length
+  var ideasHTML=_ideaChips[1].length
     ?'<div class="idea-section"><div class="idea-label">Ideas to get you started</div>'
-      +'<div class="idea-chips" id="idea-chips-2">'
-      +_ideaChips[2].map(function(item){return '<div class="idea-chip" onclick="addItem(2,\''+esc(item)+'\',\'\')">'+esc(item)+'</div>';}).join('')
+      +'<div class="idea-chips" id="idea-chips-1">'
+      +_ideaChips[1].map(function(item){return '<div class="idea-chip" onclick="addItem(1,\''+esc(item)+'\',\'\')">'+esc(item)+'</div>';}).join('')
       +'</div></div>':'';
 
-  el.innerHTML=progressHTML(2)
+  el.innerHTML=progressHTML(1)
     +'<h2>What forms of recreation or hobbies do you like?</h2>'
     +'<p class="subtitle">Add as many as you like. These help us match you with groups, events, and people.</p>'
     +'<div class="search-wrap"><span class="search-icon">🔍</span>'
-    +'<input type="text" id="search-input-2" placeholder="Search..." oninput="runSearch(2,this.value)"></div>'
-    +'<div id="search-results-2"></div>'
-    +'<div id="tags-section-2">'+buildRoleHTML(_interests,2,['Fan','Player','Coach'])+'</div>'
+    +'<input type="text" id="search-input-1" placeholder="Search..." oninput="runSearch(1,this.value)"></div>'
+    +'<div id="search-results-1"></div>'
+    +'<div id="tags-section-1">'+buildRoleHTML(_interests,1,['Fan','Player','Coach'])+'</div>'
     +'<div class="cat-filter-wrap">'
     +'<label style="margin-bottom:6px;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--brand);font-weight:600;">Or browse by category</label>'
     +'<div class="breadcrumb" id="rec-breadcrumb">Recreation & Hobbies</div>'
@@ -686,39 +662,55 @@ function renderScreen2(el) {
     +'<select id="rec-subcat-select" onchange="setRecSubCat(this.value)" style="display:none"><option value="">All</option></select>'
     +'</div>'
     +ideasHTML
-    +navHTML(2);
+    +navHTML(1);
 }
 
-// Screen 3 — Skills
-function renderScreen3(el) {
-  buildIdeas(3);
+// Screen 2 — Skills
+function renderScreen2(el) {
+  buildIdeas(2);
   var cats=_refData&&_refData.skills
     ?(function(){var s={};_refData.skills.forEach(function(r){if(r.category)s[r.category]=1;});return Object.keys(s);})()
     :[];
   var catOpts='<option value="">All categories</option>'
-    +cats.map(function(c){return '<option value="'+esc(c)+'"'+(_catFilter3===c?' selected':'')+'>'+esc(c)+'</option>';}).join('');
-
-  var ideasHTML=_ideaChips[3].length
+    +cats.map(function(c){return '<option value="'+esc(c)+'"'+(_catFilter2===c?' selected':'')+'>'+esc(c)+'</option>';}).join('');
+  var ideasHTML=_ideaChips[2].length
     ?'<div class="idea-section"><div class="idea-label">Ideas to get you started</div>'
-      +'<div class="idea-chips" id="idea-chips-3">'
-      +_ideaChips[3].map(function(item){return '<div class="idea-chip" onclick="addItem(3,\''+esc(item)+'\',\''+esc(_catFilter3)+'\')">'+esc(item)+'</div>';}).join('')
+      +'<div class="idea-chips" id="idea-chips-2">'
+      +_ideaChips[2].map(function(item){return '<div class="idea-chip" onclick="addItem(2,\''+esc(item)+'\',\''+esc(_catFilter2)+'\')">'+esc(item)+'</div>';}).join('')
       +'</div></div>':'';
 
-  el.innerHTML=progressHTML(3)
-    +'<div class="inline-edit-row" style="margin-bottom:16px"><span id="lang-inline-row">'+buildLangInlineHTML()+'</span></div>'
+  el.innerHTML=progressHTML(2)
     +'<h2>What are your skills?</h2>'
     +'<p class="subtitle">Build a list of your skillset to let people know how you show up for others.</p>'
     +'<div class="search-wrap"><span class="search-icon">🔍</span>'
-    +'<input type="text" id="search-input-3" placeholder="Search skills..." oninput="runSearch(3,this.value)"></div>'
-    +'<div id="search-results-3"></div>'
-    +'<div id="tags-section-3">'+buildRoleHTML(_skills,3,['Starting to practice','Practicing','Mentoring'])+'</div>'
+    +'<input type="text" id="search-input-2" placeholder="Search skills..." oninput="runSearch(2,this.value)"></div>'
+    +'<div id="search-results-2"></div>'
+    +'<div id="tags-section-2">'+buildRoleHTML(_skills,2,['Starting to practice','Practicing','Mentoring'])+'</div>'
     +'<div class="cat-filter-wrap">'
     +'<label style="margin-bottom:6px;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--brand);font-weight:600;">Or browse by category</label>'
-    +'<select onchange="setCatFilter3(this.value)">'+catOpts+'</select></div>'
+    +'<select onchange="setCatFilter2(this.value)">'+catOpts+'</select></div>'
+    +ideasHTML+navHTML(2);
+}
+
+// Screen 3 — Values
+function renderScreen3(el) {
+  buildIdeas(3);
+  var ideasHTML=_ideaChips[3].length
+    ?'<div class="idea-section"><div class="idea-label">Ideas to get you started</div>'
+      +'<div class="idea-chips" id="idea-chips-3">'
+      +_ideaChips[3].map(function(item){return '<div class="idea-chip" onclick="addItem(3,\''+esc(item)+'\',\'\')">'+esc(item)+'</div>';}).join('')
+      +'</div></div>':'';
+  el.innerHTML=progressHTML(3)
+    +'<h2>What do you care about deeply?</h2>'
+    +'<p class="subtitle">Select the domains, causes, and values that matter most to you.</p>'
+    +'<div class="search-wrap"><span class="search-icon">🔍</span>'
+    +'<input type="text" id="search-input-3" placeholder="Search values and domains..." oninput="runSearch(3,this.value)"></div>'
+    +'<div id="search-results-3"></div>'
+    +'<div id="tags-section-3">'+buildTagsHTML(3,_values)+'</div>'
     +ideasHTML+navHTML(3);
 }
 
-// Screen 4 — Values
+// Screen 4 — Needs
 function renderScreen4(el) {
   buildIdeas(4);
   var ideasHTML=_ideaChips[4].length
@@ -727,39 +719,18 @@ function renderScreen4(el) {
       +_ideaChips[4].map(function(item){return '<div class="idea-chip" onclick="addItem(4,\''+esc(item)+'\',\'\')">'+esc(item)+'</div>';}).join('')
       +'</div></div>':'';
   el.innerHTML=progressHTML(4)
-    +'<h2>What do you care about deeply?</h2>'
-    +'<p class="subtitle">Select the domains, causes, and values that matter most to you.</p>'
-    +'<div class="search-wrap"><span class="search-icon">🔍</span>'
-    +'<input type="text" id="search-input-4" placeholder="Search values and domains..." oninput="runSearch(4,this.value)"></div>'
-    +'<div id="search-results-4"></div>'
-    +'<div id="tags-section-4">'+buildTagsHTML(4,_values)+'</div>'
-    +ideasHTML+navHTML(4);
-}
-
-// Screen 5 — Needs
-function renderScreen5(el) {
-  buildIdeas(5);
-  var ideasHTML=_ideaChips[5].length
-    ?'<div class="idea-section"><div class="idea-label">Ideas to get you started</div>'
-      +'<div class="idea-chips" id="idea-chips-5">'
-      +_ideaChips[5].map(function(item){return '<div class="idea-chip" onclick="addItem(5,\''+esc(item)+'\',\'\')">'+esc(item)+'</div>';}).join('')
-      +'</div></div>':'';
-  el.innerHTML=progressHTML(5)
     +'<h2>What do you need right now?</h2>'
     +'<p class="subtitle">What are you looking to receive or connect with? This drives matching you with the right people and their offerings at this event.</p>'
     +'<div class="search-wrap"><span class="search-icon">🔍</span>'
-    +'<input type="text" id="search-input-5" placeholder="Search..." oninput="runSearch(5,this.value)"></div>'
-    +'<div id="search-results-5"></div>'
-    +'<div id="tags-section-5">'+buildTagsHTML(5,_needs)+'</div>'
-    +ideasHTML+navHTML(5);
+    +'<input type="text" id="search-input-4" placeholder="Search..." oninput="runSearch(4,this.value)"></div>'
+    +'<div id="search-results-4"></div>'
+    +'<div id="tags-section-4">'+buildTagsHTML(4,_needs)+'</div>'
+    +ideasHTML+navHTML(4);
 }
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
 window.goNext = function() {
-  if (_screen===1) {
-    var inp=document.getElementById('postal-inp'); if(inp) _postal=inp.value.trim();
-  }
-  if (_screen===5) { submitIntake(); return; }
+  if (_screen===4) { submitIntake(); return; }
   _screen++; render();
 };
 window.goBack           = function() { _screen--; render(); };
@@ -770,17 +741,16 @@ window.setLevel         = setLevel;
 window.toggleLang       = toggleLang;
 window.removeLang       = removeLang;
 window.filterLangs      = filterLangs;
-window.setCatFilter3    = setCatFilter3;
+window.setCatFilter2    = setCatFilter2;
 window.setRecType       = setRecType;
 window.setRecSubCat     = setRecSubCat;
 window.showCustomAdd    = showCustomAdd;
 window.confirmCustomAdd = confirmCustomAdd;
 window.cancelCustomAdd  = cancelCustomAdd;
 window.openIkigai       = openIkigai;
-window.editPostal       = editPostal;
-window.savePostalInline = savePostalInline;
-window.openLangEdit     = openLangEdit;
-window.closeLangEdit    = closeLangEdit;
+window.openLangModal    = openLangModal;
+window.closeLangModal   = closeLangModal;
+window.saveLangModal    = saveLangModal;
 
 // ─── Boot ─────────────────────────────────────────────────────────────────────
 (async function init() {
@@ -792,4 +762,4 @@ window.closeLangEdit    = closeLangEdit;
 </script>
 </body>
 </html>
-<!-- Version: V1.4 | Last change: Screen 2 heading updated, admin event selector removed, Update button removed, language and zip at top of profile summary, language on skills screen, search field border fix, rec breadcrumbs, ideas from all 5 rec types, new rec-map structure | Date: 2026-06-24 -->
+<!-- Version: V1.5 | Last change: Remove language/location screen from flow, flow is now 4 screens, remove language display from non-profile screens, fix recreation search pool and idea chips | Date: 2026-06-24 -->
