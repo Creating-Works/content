@@ -1,4 +1,4 @@
-<!-- Version: V2.0 | Last change: Chip drill-down on all screens, breadcrumb collapse, search first, screen 4 two sections skill/resource, X remove, first visit Next fixed, screen 2 heading updated, share modal with QR code | Date: 2026-06-24 -->
+<!-- Version: V2.0 | Last change: Fix syntax error in navHTML ternary, chip drill-down all screens, share modal with QR code | Date: 2026-06-24 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -792,7 +792,7 @@ function progressHTML(n){
 
 function navHTML(screen){
   var back='<button class="btn-back" onclick="goBack()">Back</button>';
-  var nextLabel=(!_hasProfile&&screen===4)?'Done':(!_hasProfile?'Next'):'Done';
+  var nextLabel=(!_hasProfile&&screen===4)?'Done':(_hasProfile?'Done':'Next');
   return '<div class="nav-row">'+back+'<button class="btn-next" onclick="goNext()">'+nextLabel+'</button></div>';
 }
 
@@ -947,4 +947,4 @@ window.nativeShare      = nativeShare;
 </script>
 </body>
 </html>
-<!-- Version: V2.0 | Last change: Chip drill-down on all screens, breadcrumb collapse, search first, screen 4 two sections skill/resource, X remove, first visit Next fixed, screen 2 heading updated, share modal with QR code | Date: 2026-06-24 -->
+<!-- Version: V2.0 | Last change: Fix syntax error in navHTML ternary, chip drill-down all screens, share modal with QR code | Date: 2026-06-24 -->
