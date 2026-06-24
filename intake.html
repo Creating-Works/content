@@ -1,4 +1,4 @@
-<!-- LAST CHANGE: Fix search lag (targeted DOM updates, no full re-render on keystroke), searchable language dropdown, zip always visible, screen 2 copy updated, idea sidebar on screens 2-5. Version: V1.1 | Date: 2026-06-23 -->
+<!-- LAST CHANGE: Profile summary view on return visit, upsert ikigai, Fan/Player/Coach for recreation, category dropdown + custom add for skills, association-word-boundary fix, values/needs same search pattern, ideas below practice level. Version: V1.2 | Date: 2026-06-24 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,266 +9,176 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg:           #1F699E;
-      --card:         #FFFFFF;
-      --text:         #1A2E42;
-      --soft:         #4A6080;
-      --muted:        #6A8FAF;
-      --brand:        #1F699E;
-      --border:       #DDE4EE;
-      --input-bg:     #F7F9FC;
-      --hover:        #185885;
-      --ph:           #B8CCDE;
-      --sel-bg:       #EBF3FA;
-      --sel-border:   #1F699E;
-      --green:        #E8F5E9;
-      --green-border: #A5D6A7;
-      --green-text:   #2E7D32;
+      --bg: #1F699E; --card: #FFFFFF; --text: #1A2E42; --soft: #4A6080;
+      --muted: #6A8FAF; --brand: #1F699E; --border: #DDE4EE; --input-bg: #F7F9FC;
+      --hover: #185885; --ph: #B8CCDE; --sel-bg: #EBF3FA; --sel-border: #1F699E;
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--bg);
-      min-height: 100vh;
-      padding: 40px 20px 100px;
-      color: var(--text);
-    }
-
-    .card {
-      background: var(--card);
-      max-width: 660px;
-      margin: 0 auto;
-      border-radius: 16px;
-      padding: 52px;
-      box-shadow: 0 24px 64px rgba(0,0,0,0.25), 0 4px 16px rgba(0,0,0,0.12);
-    }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); min-height: 100vh; padding: 40px 20px 100px; color: var(--text); }
+    .card { background: var(--card); max-width: 660px; margin: 0 auto; border-radius: 16px; padding: 52px; box-shadow: 0 24px 64px rgba(0,0,0,0.25), 0 4px 16px rgba(0,0,0,0.12); }
     @media (max-width: 520px) { .card { padding: 32px 20px; } }
-
     .eyebrow { font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--brand); margin-bottom: 8px; }
     h1 { font-size: 26px; font-weight: 700; color: var(--text); line-height: 1.3; margin-bottom: 8px; }
     h2 { font-size: 20px; font-weight: 700; color: var(--text); line-height: 1.3; margin-bottom: 6px; }
     .subtitle { font-size: 15px; color: var(--soft); font-weight: 300; line-height: 1.7; margin-bottom: 20px; }
     hr { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
     label { display: block; font-size: 14px; color: var(--muted); margin-bottom: 6px; font-weight: 500; }
-
-    input[type="text"] {
-      width: 100%;
-      background: var(--input-bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 12px 14px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 15px;
-      color: var(--text);
-      outline: none;
-      transition: border-color 0.2s;
-    }
+    input[type="text"] { width: 100%; background: var(--input-bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--text); outline: none; transition: border-color 0.2s; }
     input[type="text"]:focus { border-color: var(--brand); }
     input[type="text"]::placeholder { color: var(--ph); }
-    .field { margin-bottom: 20px; }
+    select { width: 100%; background: var(--input-bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--text); outline: none; }
+    select:focus { border-color: var(--brand); }
 
-    /* Progress bar */
+    /* Progress */
     .progress-wrap { margin-bottom: 28px; }
     .progress-steps { display: flex; gap: 6px; margin-bottom: 8px; }
     .progress-step { flex: 1; height: 4px; border-radius: 2px; background: var(--border); transition: background 0.3s; }
     .progress-step.done { background: var(--brand); }
     .progress-label { font-size: 12px; color: var(--muted); }
 
-    /* Language dropdown */
+    /* Language */
     .lang-dropdown-wrap { position: relative; margin-bottom: 12px; }
-    .lang-search-input { padding-left: 36px !important; }
+    .lang-search-input { padding-left: 36px !important; border-radius: 8px 8px 0 0 !important; border-bottom: none !important; }
     .lang-search-icon { position: absolute; left: 12px; top: 13px; font-size: 15px; pointer-events: none; }
-    .lang-list {
-      background: white; border: 1px solid var(--border); border-radius: 0 0 10px 10px;
-      max-height: 240px; overflow-y: auto;
-      border-top: none;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-    }
-    .lang-list-item {
-      padding: 10px 14px; font-size: 14px; color: var(--text); cursor: pointer;
-      border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px;
-      transition: background 0.1s;
-    }
+    .lang-list { background: white; border: 1px solid var(--border); border-top: none; border-radius: 0 0 10px 10px; max-height: 200px; overflow-y: auto; box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
+    .lang-list-item { padding: 10px 14px; font-size: 14px; color: var(--text); cursor: pointer; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; transition: background 0.1s; }
     .lang-list-item:last-child { border-bottom: none; }
     .lang-list-item:hover { background: var(--sel-bg); }
     .lang-list-item.selected { background: var(--sel-bg); color: var(--brand); font-weight: 500; }
     .lang-check { color: var(--brand); font-size: 14px; min-width: 16px; }
-
-    /* Selected language tags */
     .lang-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-    .lang-tag {
-      display: flex; align-items: center; gap: 6px;
-      padding: 5px 12px; border-radius: 20px;
-      background: var(--sel-bg); border: 1.5px solid var(--sel-border);
-      font-size: 13px; color: var(--brand); font-weight: 500;
-    }
+    .lang-tag { display: flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 20px; background: var(--sel-bg); border: 1.5px solid var(--sel-border); font-size: 13px; color: var(--brand); font-weight: 500; }
     .lang-tag-remove { cursor: pointer; color: var(--muted); font-size: 15px; line-height: 1; }
-    .lang-tag-remove:hover { color: var(--text); }
-
-    /* Zip */
-    .zip-field { margin-top: 16px; }
-    .zip-field label { margin-bottom: 6px; }
 
     /* Search */
     .search-wrap { position: relative; margin-bottom: 0; }
     .search-wrap input { padding-left: 36px; border-radius: 8px 8px 0 0; border-bottom: none; }
-    .search-wrap input:focus { border-color: var(--brand); }
-    .search-wrap input.no-results-below { border-radius: 8px; border-bottom: 1px solid var(--border); }
     .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 15px; pointer-events: none; }
-    .search-results {
-      background: white; border: 1px solid var(--border); border-top: none;
-      border-radius: 0 0 10px 10px; max-height: 220px; overflow-y: auto;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.08); margin-bottom: 14px;
-    }
-    .search-result-item {
-      padding: 10px 14px; font-size: 14px; color: var(--text); cursor: pointer;
-      border-bottom: 1px solid var(--border); transition: background 0.1s;
-    }
+    .search-results { background: white; border: 1px solid var(--border); border-top: none; border-radius: 0 0 10px 10px; max-height: 220px; overflow-y: auto; box-shadow: 0 6px 20px rgba(0,0,0,0.08); margin-bottom: 14px; }
+    .search-result-item { padding: 10px 14px; font-size: 14px; color: var(--text); cursor: pointer; border-bottom: 1px solid var(--border); transition: background 0.1s; }
     .search-result-item:last-child { border-bottom: none; }
     .search-result-item:hover { background: var(--sel-bg); }
     .search-result-cat { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .no-results-msg { font-size: 13px; color: var(--muted); font-style: italic; padding: 10px 14px; border: 1px solid var(--border); border-top: none; border-radius: 0 0 8px 8px; margin-bottom: 14px; }
+    .add-custom-row { padding: 10px 14px; font-size: 14px; color: var(--brand); font-weight: 600; cursor: pointer; border: 1px solid var(--border); border-top: none; border-radius: 0 0 10px 10px; background: var(--sel-bg); margin-bottom: 14px; }
+    .add-custom-row:hover { background: var(--border); }
+
+    /* Custom add modal */
+    .custom-add-box { background: var(--input-bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 14px; }
+    .custom-add-box label { margin-bottom: 6px; }
+    .custom-add-box select { margin-bottom: 10px; }
+    .custom-add-confirm { background: var(--brand); color: white; border: none; border-radius: 8px; padding: 10px 20px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; }
+    .custom-add-cancel { background: none; border: none; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; margin-left: 10px; }
 
     /* Tags */
     .tags-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 16px 0 8px; }
     .tags-wrap { display: flex; flex-wrap: wrap; gap: 8px; min-height: 32px; }
-    .tag {
-      display: flex; align-items: center; gap: 6px;
-      padding: 6px 12px; border-radius: 20px;
-      background: var(--sel-bg); border: 1.5px solid var(--sel-border);
-      font-size: 13px; color: var(--brand); font-weight: 500;
-    }
+    .tag { display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 20px; background: var(--sel-bg); border: 1.5px solid var(--sel-border); font-size: 13px; color: var(--brand); font-weight: 500; }
     .tag-remove { cursor: pointer; font-size: 15px; color: var(--muted); line-height: 1; }
     .tag-remove:hover { color: var(--text); }
 
-    /* Idea sidebar */
-    .idea-section { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
-    .idea-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
-    .idea-chips { display: flex; flex-wrap: wrap; gap: 7px; }
-    .idea-chip {
-      padding: 6px 13px; border-radius: 18px; border: 1.5px dashed var(--border);
-      background: var(--input-bg); font-size: 12px; color: var(--soft); cursor: pointer;
-      font-family: 'DM Sans', sans-serif; transition: all 0.15s;
-    }
-    .idea-chip:hover { border-color: var(--brand); color: var(--brand); border-style: solid; background: var(--sel-bg); }
-
-    /* Practice level */
+    /* Practice / role level */
     .practice-wrap { margin-top: 16px; }
-    .practice-item {
-      background: var(--input-bg); border: 1px solid var(--border);
-      border-radius: 10px; padding: 14px 16px; margin-bottom: 10px;
-    }
-    .practice-item-name { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
-    .practice-item-cat { font-size: 11px; color: var(--muted); font-weight: 400; margin-bottom: 8px; }
+    .practice-item { background: var(--input-bg); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; }
+    .practice-item-name { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .practice-item-cat { font-size: 11px; color: var(--muted); margin-bottom: 10px; }
     .practice-options { display: flex; flex-wrap: wrap; gap: 8px; }
-    .practice-btn {
-      padding: 6px 14px; border-radius: 16px; border: 1.5px solid var(--border);
-      background: white; font-size: 12px; color: var(--soft); cursor: pointer;
-      font-family: 'DM Sans', sans-serif; transition: all 0.15s;
-    }
+    .practice-btn { padding: 6px 14px; border-radius: 16px; border: 1.5px solid var(--border); background: white; font-size: 12px; color: var(--soft); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
     .practice-btn:hover { border-color: var(--brand); color: var(--brand); }
     .practice-btn.selected { background: var(--brand); border-color: var(--brand); color: white; font-weight: 500; }
     .practice-remove { margin-top: 10px; font-size: 12px; color: var(--muted); cursor: pointer; display: inline-block; }
     .practice-remove:hover { color: var(--text); }
 
+    /* Category filter dropdown */
+    .cat-filter-wrap { margin-top: 16px; margin-bottom: 4px; }
+    .cat-filter-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--brand); margin-bottom: 6px; cursor: pointer; }
+    .cat-filter-label:hover { text-decoration: underline; }
+
+    /* Ideas */
+    .idea-section { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .idea-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+    .idea-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+    .idea-chip { padding: 6px 13px; border-radius: 18px; border: 1.5px dashed var(--border); background: var(--input-bg); font-size: 12px; color: var(--soft); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+    .idea-chip:hover { border-color: var(--brand); color: var(--brand); border-style: solid; background: var(--sel-bg); }
+
     /* Nav */
     .nav-row { display: flex; gap: 12px; margin-top: 28px; }
-    .btn-back {
-      flex: 1; padding: 14px; border-radius: 10px; border: 1.5px solid var(--border);
-      background: white; font-family: 'DM Sans', sans-serif; font-size: 15px;
-      font-weight: 600; color: var(--soft); cursor: pointer; transition: all 0.15s;
-    }
+    .btn-back { flex: 1; padding: 14px; border-radius: 10px; border: 1.5px solid var(--border); background: white; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; color: var(--soft); cursor: pointer; transition: all 0.15s; }
     .btn-back:hover { border-color: var(--brand); color: var(--brand); }
-    .btn-next {
-      flex: 2; padding: 14px; border-radius: 10px; border: none;
-      background: var(--brand); font-family: 'DM Sans', sans-serif; font-size: 15px;
-      font-weight: 600; color: white; cursor: pointer; transition: background 0.15s;
-    }
+    .btn-next { flex: 2; padding: 14px; border-radius: 10px; border: none; background: var(--brand); font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; color: white; cursor: pointer; transition: background 0.15s; }
     .btn-next:hover { background: var(--hover); }
-    .btn-next:disabled { opacity: 0.4; cursor: default; }
 
     /* Admin */
     .admin-banner { background: #FFF8E1; border: 1px solid #FFD54F; border-radius: 10px; padding: 12px 16px; margin-bottom: 24px; font-size: 13px; color: #7A5F00; }
-    select { width: 100%; background: var(--input-bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--text); outline: none; margin-bottom: 20px; }
-    select:focus { border-color: var(--brand); }
 
-    /* Toast */
+    /* Profile summary */
+    .profile-header { margin-bottom: 24px; }
+    .profile-emoji { font-size: 36px; margin-bottom: 8px; }
+    .profile-section { margin-bottom: 20px; }
+    .profile-section-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+    .profile-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+    .profile-tag { padding: 6px 12px; border-radius: 20px; background: var(--sel-bg); border: 1.5px solid var(--sel-border); font-size: 13px; color: var(--brand); font-weight: 500; }
+    .profile-tag .tag-level { font-size: 11px; color: var(--muted); font-weight: 400; margin-left: 4px; }
+    .profile-empty { font-size: 13px; color: var(--muted); font-style: italic; }
+    .profile-meta { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 13px; color: var(--muted); }
+    .btn-update { width: 100%; padding: 14px; border-radius: 10px; border: none; background: var(--brand); font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; color: white; cursor: pointer; margin-top: 24px; }
+    .btn-update:hover { background: var(--hover); }
+
+    /* Toast / Loading / Empty */
     .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1a1a2e; color: white; border-radius: 10px; padding: 12px 20px; font-size: 14px; font-weight: 500; z-index: 9999; opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap; }
     .toast.show { opacity: 1; }
-
     .loading { text-align: center; padding: 40px; color: var(--muted); font-size: 15px; }
     .empty { font-size: 13px; color: var(--muted); font-style: italic; margin-top: 8px; }
-
-    /* Success */
-    .success-wrap { text-align: center; padding: 20px 0; }
-    .success-icon { font-size: 48px; margin-bottom: 16px; }
-    .success-wrap h2 { margin-bottom: 8px; }
-    .success-wrap p { font-size: 15px; color: var(--soft); line-height: 1.6; }
-
-    /* No results inline */
-    .no-results-msg { font-size: 13px; color: var(--muted); font-style: italic; padding: 10px 14px; border: 1px solid var(--border); border-top: none; border-radius: 0 0 8px 8px; margin-bottom: 14px; }
   </style>
 </head>
 <body>
-
 <div class="card" id="main-card">
-  <div id="app-content">
-    <div class="loading">Loading...</div>
-  </div>
+  <div id="app-content"><div class="loading">Loading...</div></div>
 </div>
-
 <div class="toast" id="toast"></div>
 
 <script>
-// ─── Identity ──────────────────────────────────────────────────────────────
+// ─── Identity ───────────────────────────────────────────────────────────────
 var _appearId = null;
-
 (function() {
   var params = new URLSearchParams(window.location.search);
   var urlId  = params.get('id') || params.get('memberCard');
-  if (urlId) {
-    _appearId = urlId;
-    try { localStorage.setItem('appear-id', _appearId); } catch(e) {}
-  } else {
-    try { _appearId = localStorage.getItem('appear-id'); } catch(e) {}
-  }
+  if (urlId) { _appearId = urlId; try { localStorage.setItem('appear-id', _appearId); } catch(e) {} }
+  else { try { _appearId = localStorage.getItem('appear-id'); } catch(e) {} }
 })();
 
-function normalizeId(id) {
-  return id ? id.replace(/\./g, '').toLowerCase() : '';
-}
+function normalizeId(id) { return id ? id.replace(/\./g,'').toLowerCase() : ''; }
 
-var ADMIN_ID  = 'whss';
-var _isAdmin  = _appearId && normalizeId(_appearId) === ADMIN_ID;
-var GS_URL    = 'https://script.google.com/macros/s/AKfycbzEavMnG4tMeWemoT5FLu9f_zjlKVIJsZLueG4nhw9akK0_nZqpbkZiXrAlWu1Fyhq9/exec';
+var ADMIN_ID = 'whss';
+var _isAdmin = _appearId && normalizeId(_appearId) === ADMIN_ID;
+var GS_URL   = 'https://script.google.com/macros/s/AKfycbzEavMnG4tMeWemoT5FLu9f_zjlKVIJsZLueG4nhw9akK0_nZqpbkZiXrAlWu1Fyhq9/exec';
 
-// ─── State ─────────────────────────────────────────────────────────────────
-var _screen    = 1;
-var _eventId   = null;
-var _eventName = '';
-var _refData   = null;
-var _events    = [];
+// ─── State ──────────────────────────────────────────────────────────────────
+var _screen     = 1;
+var _eventId    = null;
+var _eventName  = '';
+var _refData    = null;
+var _events     = [];
+var _hasProfile = false;  // true = return visit, show summary first
 
-var _languages = [];
+var _languages  = [];
 var _langFilter = '';
-var _postal    = '';
+var _postal     = '';
 
-var _interests = [];
-var _skills    = [];
-var _values    = [];
-var _needs     = [];
+var _interests  = [];  // [{item, category, level}]  level = Fan|Player|Coach
+var _skills     = [];  // [{item, category, level}]  level = Starting to practice|Practicing|Mentoring
+var _values     = [];  // [{item, category}]
+var _needs      = [];  // [{item, category}]
 
-var _searchQ   = { 2:'', 3:'', 4:'', 5:'' };
-var _searchRes = { 2:[], 3:[], 4:[], 5:[] };
+var _searchQ    = { 2:'', 3:'', 4:'', 5:'' };
+var _searchRes  = { 2:[], 3:[], 4:[], 5:[] };
+var _ideaChips  = { 2:[], 3:[], 4:[], 5:[] };
+var _catFilter  = { 3: '' };   // category filter for skills screen
+var _showCustomAdd = { 3: false };
+var _customItem = '';
 
-// idea chips shown per screen (shuffled on screen load)
-var _ideaChips = { 2:[], 3:[], 4:[], 5:[] };
-
-// ─── Helpers ───────────────────────────────────────────────────────────────
-function esc(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
+// ─── Helpers ────────────────────────────────────────────────────────────────
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 function toast(msg) {
   var t = document.getElementById('toast');
@@ -279,60 +189,92 @@ function toast(msg) {
 
 function shuffle(arr) {
   var a = arr.slice();
-  for (var i = a.length - 1; i > 0; i--) {
-    var j = Math.floor(Math.random() * (i + 1));
-    var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
-  }
+  for (var i = a.length-1; i > 0; i--) { var j = Math.floor(Math.random()*(i+1)); var tmp=a[i]; a[i]=a[j]; a[j]=tmp; }
   return a;
 }
 
 function getPool(screen) {
   if (!_refData) return [];
-  if (screen === 2) return _refData.recreation || _refData.interests || _refData.skills || [];
+  if (screen === 2) return _refData.recreation || [];
   if (screen === 3) return _refData.skills || [];
-  if (screen === 4) return _refData.values || [];
-  if (screen === 5) return _refData.skills || [];
+  if (screen === 4) return (_refData.values || []).concat(_refData.domains || []);
+  if (screen === 5) return (_refData.skills || []).concat(_refData.values || []).concat(_refData.domains || []);
   return [];
 }
 
 function buildIdeas(screen) {
   var pool = getPool(screen);
   if (!pool.length) return;
-  var items = pool.map(function(r) { return r.item || r; }).filter(Boolean);
-  _ideaChips[screen] = shuffle(items).slice(0, 30);
+  var filtered = _catFilter[screen]
+    ? pool.filter(function(r) { return (r.category||'') === _catFilter[screen]; })
+    : pool;
+  _ideaChips[screen] = shuffle(filtered.map(function(r){return r.item||r;})).slice(0, 30);
 }
 
-// ─── Data loading ──────────────────────────────────────────────────────────
+// ─── Word-boundary association search fix ────────────────────────────────────
+function matchesQuery(r, ql) {
+  if ((r.item||'').toLowerCase().includes(ql)) return true;
+  if ((r.category||'').toLowerCase().includes(ql)) return true;
+  var assoc = r.associations || '';
+  if (!assoc) return false;
+  // Match whole words in associations only
+  var words = assoc.toLowerCase().split(/[\s,]+/);
+  return words.some(function(w) { return w === ql || w.startsWith(ql); });
+}
+
+// ─── Data loading ────────────────────────────────────────────────────────────
 async function loadRefData() {
   try {
     var res  = await fetch(GS_URL + '?action=getReferenceData');
-    var data = await res.json();
-    _refData = data;
-  } catch(e) {
-    _refData = { languages:[], skills:[], values:[], recreation:[] };
-  }
+    _refData = await res.json();
+  } catch(e) { _refData = { languages:[], skills:[], values:[], domains:[], recreation:[] }; }
 }
 
 async function loadEvents() {
   try {
     var res  = await fetch(GS_URL + '?action=getEvents&appearId=' + encodeURIComponent(_appearId));
     var data = await res.json();
-    _events = data.events || [];
+    _events  = data.events || [];
   } catch(e) { _events = []; }
 }
 
-// ─── Search — targeted DOM update, no full re-render ──────────────────────
+async function loadIntake() {
+  try {
+    var url  = GS_URL + '?action=getIntake&appearId=' + encodeURIComponent(_appearId) + ((_eventId) ? '&eventId=' + encodeURIComponent(_eventId) : '');
+    var res  = await fetch(url);
+    var data = await res.json();
+    if (data.found && data.data) {
+      _hasProfile = true;
+      var d = data.data;
+      _postal    = d.postal    || '';
+      _languages = d.languages ? d.languages.split('|').filter(Boolean) : [];
+      _interests = parseTagStr(d.interests, false);
+      _skills    = parseTagStr(d.skills, true);
+      _values    = parseTagStr(d.values, false);
+      _needs     = parseTagStr(d.needs, false);
+    }
+  } catch(e) {}
+}
+
+function parseTagStr(str, hasLevel) {
+  if (!str) return [];
+  return str.split('|').filter(Boolean).map(function(s) {
+    if (hasLevel) {
+      var parts = s.split(':');
+      return { item: parts[0], category: '', level: parts[1] || '' };
+    }
+    return { item: s, category: '' };
+  });
+}
+
+// ─── Search ──────────────────────────────────────────────────────────────────
 function runSearch(screen, q) {
   _searchQ[screen] = q;
   var pool = getPool(screen);
   var res  = [];
   if (q && q.length >= 1) {
     var ql = q.toLowerCase();
-    res = pool.filter(function(r) {
-      return (r.item||'').toLowerCase().includes(ql)
-          || (r.category||'').toLowerCase().includes(ql)
-          || (r.associations||'').toLowerCase().includes(ql);
-    }).slice(0, 25);
+    res = pool.filter(function(r) { return matchesQuery(r, ql); }).slice(0, 25);
   }
   _searchRes[screen] = res;
   updateSearchResults(screen, q, res);
@@ -342,252 +284,319 @@ function updateSearchResults(screen, q, res) {
   var container = document.getElementById('search-results-' + screen);
   if (!container) return;
   if (!q || q.length < 1) { container.innerHTML = ''; return; }
-  if (!res.length) {
-    container.innerHTML = '<div class="no-results-msg">No results for "' + esc(q) + '"</div>';
-    return;
+  if (res.length) {
+    container.innerHTML = '<div class="search-results">'
+      + res.map(function(r) {
+          return '<div class="search-result-item" onclick="addItem(' + screen + ',\'' + esc(r.item) + '\',\'' + esc(r.category||'') + '\')">'
+            + esc(r.item)
+            + (r.category ? '<div class="search-result-cat">' + esc(r.category) + '</div>' : '')
+            + '</div>';
+        }).join('')
+      + '</div>';
+  } else {
+    container.innerHTML = '<div class="add-custom-row" onclick="showCustomAdd(' + screen + ',\'' + esc(q) + '\')">'
+      + '+ Add "' + esc(q) + '" to my list'
+      + '</div>';
   }
-  container.innerHTML = '<div class="search-results">'
-    + res.map(function(r) {
-        var item = esc(r.item || r);
-        var cat  = esc(r.category || '');
-        return '<div class="search-result-item" onclick="addItem(' + screen + ',\'' + item + '\',\'' + cat + '\')">'
-          + item
-          + (cat ? '<div class="search-result-cat">' + cat + '</div>' : '')
-          + '</div>';
-      }).join('')
+}
+
+// ─── Custom add ──────────────────────────────────────────────────────────────
+function showCustomAdd(screen, item) {
+  _customItem = item;
+  _showCustomAdd[screen] = true;
+  var container = document.getElementById('search-results-' + screen);
+  if (!container) return;
+  var cats = (_refData && _refData.skills)
+    ? [...new Set((_refData.skills).map(function(r){return r.category;}).filter(Boolean))]
+    : [];
+  var opts = '<option value="">Select a category</option>'
+    + cats.map(function(c) { return '<option value="' + esc(c) + '">' + esc(c) + '</option>'; }).join('');
+  container.innerHTML = '<div class="custom-add-box">'
+    + '<label>What category does "' + esc(item) + '" belong to?</label>'
+    + '<select id="custom-cat-select">' + opts + '</select>'
+    + '<button class="custom-add-confirm" onclick="confirmCustomAdd(' + screen + ')">Add to my list</button>'
+    + '<button class="custom-add-cancel" onclick="cancelCustomAdd(' + screen + ')">Cancel</button>'
     + '</div>';
 }
 
-// ─── Add / remove items ────────────────────────────────────────────────────
+function confirmCustomAdd(screen) {
+  var sel = document.getElementById('custom-cat-select');
+  var cat = sel ? sel.value : '';
+  if (!cat) { toast('Please select a category'); return; }
+  var item = _customItem;
+  // Write to sheet async, don't wait
+  fetch(GS_URL + '?action=addCustomSkill&appearId=' + encodeURIComponent(_appearId)
+    + '&item=' + encodeURIComponent(item) + '&category=' + encodeURIComponent(cat));
+  addItem(screen, item, cat);
+  _showCustomAdd[screen] = false;
+  _customItem = '';
+}
+
+function cancelCustomAdd(screen) {
+  _showCustomAdd[screen] = false;
+  _customItem = '';
+  var container = document.getElementById('search-results-' + screen);
+  if (container) container.innerHTML = '';
+  var inp = document.getElementById('search-input-' + screen);
+  if (inp) { inp.value = ''; _searchQ[screen] = ''; }
+}
+
+// ─── Add / remove ────────────────────────────────────────────────────────────
 function addItem(screen, item, category) {
   var arr = screen === 2 ? _interests : screen === 3 ? _skills : screen === 4 ? _values : _needs;
-  var already = arr.some(function(r) { return r.item === item; });
-  if (already) { toast('Already added'); return; }
-  if (screen === 3) {
-    _skills.push({ item: item, category: category || '', level: '' });
-  } else {
-    arr.push({ item: item, category: category || '' });
-  }
-  // Clear search
-  _searchQ[screen] = '';
+  if (arr.some(function(r){return r.item===item;})) { toast('Already added'); return; }
+  if (screen === 2) _interests.push({ item:item, category:category||'', level:'' });
+  else if (screen === 3) _skills.push({ item:item, category:category||'', level:'' });
+  else arr.push({ item:item, category:category||'' });
+  _searchQ[screen]  = '';
   _searchRes[screen] = [];
   var inp = document.getElementById('search-input-' + screen);
   if (inp) inp.value = '';
   var rc = document.getElementById('search-results-' + screen);
   if (rc) rc.innerHTML = '';
-  // Update only tags / practice section
   updateTagsSection(screen);
 }
 
 function removeItem(screen, idx) {
-  if (screen === 2) _interests.splice(idx, 1);
-  else if (screen === 3) _skills.splice(idx, 1);
-  else if (screen === 4) _values.splice(idx, 1);
-  else _needs.splice(idx, 1);
+  if (screen===2) _interests.splice(idx,1);
+  else if (screen===3) _skills.splice(idx,1);
+  else if (screen===4) _values.splice(idx,1);
+  else _needs.splice(idx,1);
   updateTagsSection(screen);
 }
 
-function setSkillLevel(idx, level) {
-  if (_skills[idx]) _skills[idx].level = level;
-  updateTagsSection(3);
+function setLevel(screen, idx, level) {
+  var arr = screen === 2 ? _interests : _skills;
+  if (arr[idx]) arr[idx].level = level;
+  updateTagsSection(screen);
 }
 
 function updateTagsSection(screen) {
   var el = document.getElementById('tags-section-' + screen);
   if (!el) return;
-  if (screen === 3) {
-    el.innerHTML = buildPracticeHTML();
-  } else {
-    var arr = screen === 2 ? _interests : screen === 4 ? _values : _needs;
-    el.innerHTML = buildTagsHTML(screen, arr);
-  }
+  if (screen === 2) el.innerHTML = buildRoleHTML(_interests, 2, ['Fan','Player','Coach']);
+  else if (screen === 3) el.innerHTML = buildRoleHTML(_skills, 3, ['Starting to practice','Practicing','Mentoring']);
+  else { var arr = screen===4?_values:_needs; el.innerHTML = buildTagsHTML(screen,arr); }
 }
 
 function buildTagsHTML(screen, arr) {
   if (!arr.length) return '<div class="empty">Nothing added yet.</div>';
   return '<div class="tags-label">Added</div><div class="tags-wrap">'
-    + arr.map(function(r, i) {
+    + arr.map(function(r,i){
         return '<div class="tag">' + esc(r.item)
           + '<span class="tag-remove" onclick="removeItem(' + screen + ',' + i + ')">×</span></div>';
-      }).join('')
-    + '</div>';
+      }).join('') + '</div>';
 }
 
-function buildPracticeHTML() {
-  if (!_skills.length) return '<div class="empty" style="margin-top:12px">No skills added yet.</div>';
-  var levels = ['Starting to practice','Practicing','Mentoring'];
+function buildRoleHTML(arr, screen, levels) {
+  if (!arr.length) return '<div class="empty" style="margin-top:12px">Nothing added yet.</div>';
   return '<div class="practice-wrap">'
-    + _skills.map(function(s, i) {
-        var btns = levels.map(function(lv) {
-          return '<button class="practice-btn' + (s.level === lv ? ' selected' : '') + '" onclick="setSkillLevel(' + i + ',\'' + esc(lv) + '\')">' + lv + '</button>';
+    + arr.map(function(s,i){
+        var btns = levels.map(function(lv){
+          return '<button class="practice-btn' + (s.level===lv?' selected':'') + '" onclick="setLevel(' + screen + ',' + i + ',\'' + esc(lv) + '\')">' + lv + '</button>';
         }).join('');
         return '<div class="practice-item">'
           + '<div class="practice-item-name">' + esc(s.item) + '</div>'
           + (s.category ? '<div class="practice-item-cat">' + esc(s.category) + '</div>' : '')
-          + '<div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Where are you in this role?</div>'
+          + '<div style="font-size:12px;color:var(--muted);margin-bottom:8px;">'
+          + (screen===2 ? 'How do you show up for this?' : 'Where are you in this role?')
+          + '</div>'
           + '<div class="practice-options">' + btns + '</div>'
-          + '<span class="practice-remove" onclick="removeItem(3,' + i + ')">Remove</span>'
+          + '<span class="practice-remove" onclick="removeItem(' + screen + ',' + i + ')">Remove</span>'
           + '</div>';
-      }).join('')
-    + '</div>';
+      }).join('') + '</div>';
 }
 
-// ─── Language dropdown ─────────────────────────────────────────────────────
+// ─── Language ────────────────────────────────────────────────────────────────
 function filterLangs(q) {
   _langFilter = q;
   var list = document.getElementById('lang-list');
   if (!list) return;
   var langs = (_refData && _refData.languages) ? _refData.languages : [];
-  var ql    = q.toLowerCase();
-  var filtered = ql ? langs.filter(function(l) { return l.toLowerCase().includes(ql); }) : langs;
-  list.innerHTML = filtered.map(function(lang) {
+  var ql = q.toLowerCase();
+  var filtered = ql ? langs.filter(function(l){return l.toLowerCase().includes(ql);}) : langs;
+  list.innerHTML = filtered.map(function(lang){
     var sel = _languages.indexOf(lang) > -1;
-    return '<div class="lang-list-item' + (sel ? ' selected' : '') + '" onclick="toggleLang(\'' + esc(lang) + '\')">'
-      + '<span class="lang-check">' + (sel ? '✓' : '') + '</span>'
-      + esc(lang)
-      + '</div>';
+    return '<div class="lang-list-item' + (sel?' selected':'') + '" onclick="toggleLang(\'' + esc(lang) + '\')">'
+      + '<span class="lang-check">' + (sel?'✓':'') + '</span>' + esc(lang) + '</div>';
   }).join('');
 }
 
 function toggleLang(lang) {
   var idx = _languages.indexOf(lang);
-  if (idx > -1) _languages.splice(idx, 1);
-  else _languages.push(lang);
-  // Update list and tags without full re-render
+  if (idx > -1) _languages.splice(idx,1); else _languages.push(lang);
   filterLangs(_langFilter);
-  var tagsEl = document.getElementById('lang-tags');
-  if (tagsEl) tagsEl.innerHTML = buildLangTagsHTML();
+  var el = document.getElementById('lang-tags');
+  if (el) el.innerHTML = buildLangTagsHTML();
 }
 
 function removeLang(lang) {
   var idx = _languages.indexOf(lang);
-  if (idx > -1) _languages.splice(idx, 1);
+  if (idx > -1) _languages.splice(idx,1);
   filterLangs(_langFilter);
-  var tagsEl = document.getElementById('lang-tags');
-  if (tagsEl) tagsEl.innerHTML = buildLangTagsHTML();
+  var el = document.getElementById('lang-tags');
+  if (el) el.innerHTML = buildLangTagsHTML();
 }
 
 function buildLangTagsHTML() {
-  if (!_languages.length) return '';
-  return _languages.map(function(l) {
+  return _languages.map(function(l){
     return '<div class="lang-tag">' + esc(l)
       + '<span class="lang-tag-remove" onclick="removeLang(\'' + esc(l) + '\')">×</span></div>';
   }).join('');
 }
 
-// ─── Submit ────────────────────────────────────────────────────────────────
+// ─── Category filter (skills) ─────────────────────────────────────────────────
+function setCatFilter(screen, cat) {
+  _catFilter[screen] = cat;
+  buildIdeas(screen);
+  var el = document.getElementById('idea-chips-' + screen);
+  if (el) el.innerHTML = _ideaChips[screen].map(function(item){
+    return '<div class="idea-chip" onclick="addItem(' + screen + ',\'' + esc(item) + '\',\'' + esc(_catFilter[screen]) + '\')">' + esc(item) + '</div>';
+  }).join('');
+}
+
+// ─── Submit ──────────────────────────────────────────────────────────────────
 async function submitIntake() {
   if (!_appearId) return;
-  var skillsStr = _skills.map(function(s) { return s.item + (s.level ? ':' + s.level : ''); }).join('|');
+  var interestsStr = _interests.map(function(s){return s.item+(s.level?':'+s.level:'');}).join('|');
+  var skillsStr    = _skills.map(function(s){return s.item+(s.level?':'+s.level:'');}).join('|');
   var p = '?action=saveIntake'
     + '&appearId='  + encodeURIComponent(_appearId)
-    + '&eventId='   + encodeURIComponent(_eventId || '')
+    + '&eventId='   + encodeURIComponent(_eventId||'')
     + '&languages=' + encodeURIComponent(_languages.join('|'))
     + '&postal='    + encodeURIComponent(_postal)
-    + '&interests=' + encodeURIComponent(_interests.map(function(r){return r.item;}).join('|'))
+    + '&interests=' + encodeURIComponent(interestsStr)
     + '&skills='    + encodeURIComponent(skillsStr)
     + '&values='    + encodeURIComponent(_values.map(function(r){return r.item;}).join('|'))
     + '&needs='     + encodeURIComponent(_needs.map(function(r){return r.item;}).join('|'));
   try { await fetch(GS_URL + p); } catch(e) {}
-  _screen = 6;
+  _hasProfile = true;
   render();
 }
 
-// ─── Full render (screen transitions only) ─────────────────────────────────
+// ─── Render ──────────────────────────────────────────────────────────────────
 function render() {
   var el = document.getElementById('app-content');
   if (!el) return;
-
   if (!_appearId) {
     el.innerHTML = '<div style="text-align:center;padding:40px 20px"><p style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px;">Sign in to continue</p><p style="font-size:14px;color:var(--soft)"><a href="https://appear.network" style="color:var(--brand);font-weight:600;">Go to Appear Network</a> and open this page from your profile.</p></div>';
     return;
   }
-
   if (_isAdmin && !_eventId) { renderAdminSelect(el); return; }
-  if (_screen === 6)          { renderSuccess(el); return; }
-
-  var fn = { 1:renderScreen1, 2:renderScreen2, 3:renderScreen3, 4:renderScreen4, 5:renderScreen5 }[_screen];
+  if (_hasProfile && _screen === 0) { renderProfile(el); return; }
+  var fn = {1:renderScreen1,2:renderScreen2,3:renderScreen3,4:renderScreen4,5:renderScreen5}[_screen];
   if (fn) fn(el);
 }
 
 function progressHTML(n) {
   var s = '';
-  for (var i = 1; i <= 5; i++) s += '<div class="progress-step' + (i <= n ? ' done' : '') + '"></div>';
+  for (var i=1;i<=5;i++) s += '<div class="progress-step'+(i<=n?' done':'')+'"></div>';
   var labs = ['','Language + location','Recreation and hobbies','Your skillset','What you care about','What you need'];
-  return '<div class="progress-wrap"><div class="progress-steps">' + s + '</div><div class="progress-label">Step ' + n + ' of 5 — ' + labs[n] + '</div></div>';
+  return '<div class="progress-wrap"><div class="progress-steps">'+s+'</div><div class="progress-label">Step '+n+' of 5 — '+labs[n]+'</div></div>';
 }
 
 function navHTML(screen) {
   var back = screen > 1 ? '<button class="btn-back" onclick="goBack()">Back</button>' : '';
-  var next = '<button class="btn-next" onclick="goNext()">' + (screen === 5 ? 'Submit' : 'Next') + '</button>';
-  return '<div class="nav-row">' + back + next + '</div>';
+  var next = '<button class="btn-next" onclick="goNext()">'+(screen===5?'Submit':'Next')+'</button>';
+  return '<div class="nav-row">'+back+next+'</div>';
 }
 
-// Screen 0 — Admin event select
+// Profile summary
+function renderProfile(el) {
+  function tagSection(label, arr, hasLevel) {
+    var tags = arr.length
+      ? arr.map(function(r){
+          return '<div class="profile-tag">' + esc(r.item)
+            + (hasLevel && r.level ? '<span class="tag-level">'+esc(r.level)+'</span>' : '')
+            + '</div>';
+        }).join('')
+      : '<div class="profile-empty">Nothing added yet.</div>';
+    return '<div class="profile-section"><div class="profile-section-label">'+label+'</div><div class="profile-tags">'+tags+'</div></div>';
+  }
+
+  el.innerHTML = '<div class="profile-header"><div class="profile-emoji">🎉</div>'
+    + '<h2>Here is how you show up in our community</h2>'
+    + '<p class="subtitle" style="margin-bottom:0">This is your profile for the gathering. Tap Update to make changes.</p>'
+    + '</div>'
+    + '<hr>'
+    + tagSection('What I enjoy', _interests, true)
+    + tagSection('My skills', _skills, true)
+    + tagSection('What I care about', _values, false)
+    + tagSection('What I need', _needs, false)
+    + '<button class="btn-update" onclick="startEdit()">Update my profile</button>'
+    + '<div class="profile-meta">'
+    + '📍 ' + (esc(_postal) || 'No zip code set')
+    + (_languages.length ? ' &nbsp;·&nbsp; 🗣 ' + esc(_languages.join(', ')) : '')
+    + '</div>';
+}
+
+function startEdit() {
+  _screen = 1;
+  _hasProfile = false;
+  render();
+}
+
+// Admin select
 function renderAdminSelect(el) {
   var opts = _events.length
-    ? _events.map(function(e) { return '<option value="' + esc(e.id) + '">' + esc(e.title) + '</option>'; }).join('')
+    ? _events.map(function(e){return '<option value="'+esc(e.id)+'">'+esc(e.title)+'</option>';}).join('')
     : '<option value="">No events found</option>';
-  el.innerHTML = '<div class="eyebrow">Admin</div><h1>Lake Ballinger Gathering</h1><p class="subtitle">Select an event to enable the gathering sign-up.</p><div class="admin-banner">You are signed in as admin. Attendees will not see this screen.</div><label>Event</label><select id="event-select">' + opts + '</select><button class="btn-next" onclick="selectEvent()">Continue</button>';
+  el.innerHTML = '<div class="eyebrow">Admin</div><h1>Lake Ballinger Gathering</h1>'
+    + '<p class="subtitle">Select an event to enable the gathering sign-up.</p>'
+    + '<div class="admin-banner">You are signed in as admin. Attendees will not see this screen.</div>'
+    + '<label>Event</label><select id="event-select" style="margin-bottom:20px">'+opts+'</select>'
+    + '<button class="btn-next" onclick="selectEvent()">Continue</button>';
 }
 
 function selectEvent() {
   var sel = document.getElementById('event-select');
-  if (!sel || !sel.value) { toast('Select an event'); return; }
-  _eventId   = sel.value;
-  _eventName = sel.options[sel.selectedIndex].text;
-  _screen    = 1;
-  render();
+  if (!sel||!sel.value) { toast('Select an event'); return; }
+  _eventId = sel.value; _eventName = sel.options[sel.selectedIndex].text;
+  if (_hasProfile) { _screen = 0; render(); } else { _screen = 1; render(); }
 }
 
-// Screen 1 — Language + postal
+// Screen 1
 function renderScreen1(el) {
-  var langs = (_refData && _refData.languages) ? _refData.languages : [];
-  var listHTML = langs.map(function(lang) {
-    var sel = _languages.indexOf(lang) > -1;
-    return '<div class="lang-list-item' + (sel ? ' selected' : '') + '" onclick="toggleLang(\'' + esc(lang) + '\')">'
-      + '<span class="lang-check">' + (sel ? '✓' : '') + '</span>'
-      + esc(lang) + '</div>';
+  var langs = (_refData&&_refData.languages)?_refData.languages:[];
+  var listHTML = langs.map(function(lang){
+    var sel = _languages.indexOf(lang)>-1;
+    return '<div class="lang-list-item'+(sel?' selected':'')+'" onclick="toggleLang(\''+esc(lang)+'\')"><span class="lang-check">'+(sel?'✓':'')+'</span>'+esc(lang)+'</div>';
   }).join('');
-
   el.innerHTML = progressHTML(1)
-    + '<h2>What language(s) do you speak?</h2>'
-    + '<p class="subtitle">Select all that apply.</p>'
-    + '<div class="lang-dropdown-wrap">'
-    + '<span class="lang-search-icon">🔍</span>'
+    + '<h2>What language(s) do you speak?</h2><p class="subtitle">Select all that apply.</p>'
+    + '<div class="lang-dropdown-wrap"><span class="lang-search-icon">🔍</span>'
     + '<input type="text" class="lang-search-input" placeholder="Search languages..." oninput="filterLangs(this.value)">'
-    + '<div class="lang-list" id="lang-list">' + listHTML + '</div>'
-    + '</div>'
-    + '<div class="lang-tags" id="lang-tags">' + buildLangTagsHTML() + '</div>'
+    + '<div class="lang-list" id="lang-list">'+listHTML+'</div></div>'
+    + '<div class="lang-tags" id="lang-tags">'+buildLangTagsHTML()+'</div>'
     + '<hr>'
     + '<h2>Where are you located?</h2>'
-    + '<div class="zip-field">'
-    + '<label>Zip code</label>'
-    + '<input type="text" id="postal-input" placeholder="Your zip code" value="' + esc(_postal) + '" oninput="_postal=this.value">'
-    + '</div>'
+    + '<div style="margin-top:8px"><label>Zip code</label>'
+    + '<input type="text" id="postal-input" placeholder="Your zip code" value="'+esc(_postal)+'" oninput="_postal=this.value"></div>'
     + navHTML(1);
 }
 
-// Screen 2 — Recreation / interests
+// Screen 2 — Recreation
 function renderScreen2(el) {
   buildIdeas(2);
+  var catOpts = '<option value="">All recreation</option>'
+    + ['Sports','Movement & Performance','Outdoor & Nature','Games & Strategy','Making & Collecting'].map(function(c){
+        return '<option value="'+esc(c)+'"'+((_catFilter[2]||''===c)?' selected':'')+'>'+esc(c)+'</option>';
+      }).join('');
   var ideasHTML = _ideaChips[2].length
-    ? '<div class="idea-section"><div class="idea-label">Ideas to get you started</div><div class="idea-chips">'
-      + _ideaChips[2].map(function(item) {
-          return '<div class="idea-chip" onclick="addItem(2,\'' + esc(item) + '\',\'\')">' + esc(item) + '</div>';
-        }).join('')
-      + '</div></div>'
-    : '';
+    ? '<div class="idea-section"><div class="idea-label">Ideas to get you started</div>'
+      + '<div class="idea-chips" id="idea-chips-2">'
+      + _ideaChips[2].map(function(item){return '<div class="idea-chip" onclick="addItem(2,\''+esc(item)+'\',\'\')">'+esc(item)+'</div>';}).join('')
+      + '</div></div>' : '';
 
   el.innerHTML = progressHTML(2)
     + '<h2>What forms of sports and recreation do you like?</h2>'
-    + '<p class="subtitle">Add as many forms of recreation as you like. These help us match you with groups, events, and people.</p>'
-    + '<div class="search-wrap">'
-    + '<span class="search-icon">🔍</span>'
-    + '<input type="text" id="search-input-2" placeholder="Search..." oninput="runSearch(2,this.value)">'
-    + '</div>'
+    + '<p class="subtitle">Add as many as you like. These help us match you with groups, events, and people.</p>'
+    + '<div class="search-wrap"><span class="search-icon">🔍</span>'
+    + '<input type="text" id="search-input-2" placeholder="Search..." oninput="runSearch(2,this.value)"></div>'
     + '<div id="search-results-2"></div>'
-    + '<div id="tags-section-2">' + buildTagsHTML(2, _interests) + '</div>'
+    + '<div id="tags-section-2">'+buildRoleHTML(_interests,2,['Fan','Player','Coach'])+'</div>'
+    + '<div class="cat-filter-wrap" style="margin-top:16px"><label style="margin-bottom:6px;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--brand);font-weight:600;">Or browse by category</label>'
+    + '<select onchange="setCatFilter(2,this.value)">'+catOpts+'</select></div>'
     + ideasHTML
     + navHTML(2);
 }
@@ -595,23 +604,27 @@ function renderScreen2(el) {
 // Screen 3 — Skills
 function renderScreen3(el) {
   buildIdeas(3);
+  var cats = _refData && _refData.skills
+    ? [...new Set(_refData.skills.map(function(r){return r.category;}).filter(Boolean))]
+    : [];
+  var catOpts = '<option value="">All categories</option>'
+    + cats.map(function(c){return '<option value="'+esc(c)+'"'+(_catFilter[3]===c?' selected':'')+'>'+esc(c)+'</option>';}).join('');
+
   var ideasHTML = _ideaChips[3].length
-    ? '<div class="idea-section"><div class="idea-label">Ideas to get you started</div><div class="idea-chips">'
-      + _ideaChips[3].map(function(item) {
-          return '<div class="idea-chip" onclick="addItem(3,\'' + esc(item) + '\',\'\')">' + esc(item) + '</div>';
-        }).join('')
-      + '</div></div>'
-    : '';
+    ? '<div class="idea-section"><div class="idea-label">Ideas to get you started</div>'
+      + '<div class="idea-chips" id="idea-chips-3">'
+      + _ideaChips[3].map(function(item){return '<div class="idea-chip" onclick="addItem(3,\''+esc(item)+'\',\''+esc(_catFilter[3]||'')+'\')">'+esc(item)+'</div>';}).join('')
+      + '</div></div>' : '';
 
   el.innerHTML = progressHTML(3)
-    + '<h2>What is your skillset?</h2>'
-    + '<p class="subtitle">Add your skills and let people know where you are in each one.</p>'
-    + '<div class="search-wrap">'
-    + '<span class="search-icon">🔍</span>'
-    + '<input type="text" id="search-input-3" placeholder="Search skills..." oninput="runSearch(3,this.value)">'
-    + '</div>'
+    + '<h2>What are your skills?</h2>'
+    + '<p class="subtitle">Build a list of your skillset to let people know how you show up for others.</p>'
+    + '<div class="search-wrap"><span class="search-icon">🔍</span>'
+    + '<input type="text" id="search-input-3" placeholder="Search skills..." oninput="runSearch(3,this.value)"></div>'
     + '<div id="search-results-3"></div>'
-    + '<div id="tags-section-3">' + buildPracticeHTML() + '</div>'
+    + '<div id="tags-section-3">'+buildRoleHTML(_skills,3,['Starting to practice','Practicing','Mentoring'])+'</div>'
+    + '<div class="cat-filter-wrap" style="margin-top:16px"><label style="margin-bottom:6px;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--brand);font-weight:600;">Or browse by category</label>'
+    + '<select onchange="setCatFilter(3,this.value)">'+catOpts+'</select></div>'
     + ideasHTML
     + navHTML(3);
 }
@@ -620,22 +633,18 @@ function renderScreen3(el) {
 function renderScreen4(el) {
   buildIdeas(4);
   var ideasHTML = _ideaChips[4].length
-    ? '<div class="idea-section"><div class="idea-label">Ideas to get you started</div><div class="idea-chips">'
-      + _ideaChips[4].map(function(item) {
-          return '<div class="idea-chip" onclick="addItem(4,\'' + esc(item) + '\',\'\')">' + esc(item) + '</div>';
-        }).join('')
-      + '</div></div>'
-    : '';
+    ? '<div class="idea-section"><div class="idea-label">Ideas to get you started</div>'
+      + '<div class="idea-chips" id="idea-chips-4">'
+      + _ideaChips[4].map(function(item){return '<div class="idea-chip" onclick="addItem(4,\''+esc(item)+'\',\'\')">'+esc(item)+'</div>';}).join('')
+      + '</div></div>' : '';
 
   el.innerHTML = progressHTML(4)
     + '<h2>What do you care about deeply?</h2>'
     + '<p class="subtitle">Select the domains, causes, and values that matter most to you.</p>'
-    + '<div class="search-wrap">'
-    + '<span class="search-icon">🔍</span>'
-    + '<input type="text" id="search-input-4" placeholder="Search values..." oninput="runSearch(4,this.value)">'
-    + '</div>'
+    + '<div class="search-wrap"><span class="search-icon">🔍</span>'
+    + '<input type="text" id="search-input-4" placeholder="Search values and domains..." oninput="runSearch(4,this.value)"></div>'
     + '<div id="search-results-4"></div>'
-    + '<div id="tags-section-4">' + buildTagsHTML(4, _values) + '</div>'
+    + '<div id="tags-section-4">'+buildTagsHTML(4,_values)+'</div>'
     + ideasHTML
     + navHTML(4);
 }
@@ -644,63 +653,55 @@ function renderScreen4(el) {
 function renderScreen5(el) {
   buildIdeas(5);
   var ideasHTML = _ideaChips[5].length
-    ? '<div class="idea-section"><div class="idea-label">Ideas to get you started</div><div class="idea-chips">'
-      + _ideaChips[5].map(function(item) {
-          return '<div class="idea-chip" onclick="addItem(5,\'' + esc(item) + '\',\'\')">' + esc(item) + '</div>';
-        }).join('')
-      + '</div></div>'
-    : '';
+    ? '<div class="idea-section"><div class="idea-label">Ideas to get you started</div>'
+      + '<div class="idea-chips" id="idea-chips-5">'
+      + _ideaChips[5].map(function(item){return '<div class="idea-chip" onclick="addItem(5,\''+esc(item)+'\',\'\')">'+esc(item)+'</div>';}).join('')
+      + '</div></div>' : '';
 
   el.innerHTML = progressHTML(5)
     + '<h2>What do you need right now?</h2>'
-    + '<p class="subtitle">What are you looking to receive or connect with? This drives matching.</p>'
-    + '<div class="search-wrap">'
-    + '<span class="search-icon">🔍</span>'
-    + '<input type="text" id="search-input-5" placeholder="Search..." oninput="runSearch(5,this.value)">'
-    + '</div>'
+    + '<p class="subtitle">What are you looking to receive or connect with? This drives matching you with the right people and their offerings at this event.</p>'
+    + '<div class="search-wrap"><span class="search-icon">🔍</span>'
+    + '<input type="text" id="search-input-5" placeholder="Search..." oninput="runSearch(5,this.value)"></div>'
     + '<div id="search-results-5"></div>'
-    + '<div id="tags-section-5">' + buildTagsHTML(5, _needs) + '</div>'
+    + '<div id="tags-section-5">'+buildTagsHTML(5,_needs)+'</div>'
     + ideasHTML
     + navHTML(5);
 }
 
-// Success
-function renderSuccess(el) {
-  el.innerHTML = '<div class="success-wrap"><div class="success-icon">🌱</div><h2>You\'re in.</h2><p>Your profile is updated. We will match you with people and opportunities at the gathering.</p></div>';
-}
-
-// ─── Navigation ────────────────────────────────────────────────────────────
+// ─── Navigation ───────────────────────────────────────────────────────────────
 window.goNext = function() {
-  if (_screen === 1) {
-    var inp = document.getElementById('postal-input');
-    if (inp) _postal = inp.value.trim();
-  }
-  if (_screen === 5) { submitIntake(); return; }
-  _screen++;
-  render();
+  if (_screen===1) { var inp=document.getElementById('postal-input'); if(inp) _postal=inp.value.trim(); }
+  if (_screen===5) { submitIntake(); return; }
+  _screen++; render();
 };
-
 window.goBack = function() { _screen--; render(); };
 
-window.runSearch    = runSearch;
-window.addItem      = addItem;
-window.removeItem   = removeItem;
-window.setSkillLevel = setSkillLevel;
-window.toggleLang   = toggleLang;
-window.removeLang   = removeLang;
-window.filterLangs  = filterLangs;
-window.selectEvent  = selectEvent;
+window.runSearch       = runSearch;
+window.addItem         = addItem;
+window.removeItem      = removeItem;
+window.setLevel        = setLevel;
+window.toggleLang      = toggleLang;
+window.removeLang      = removeLang;
+window.filterLangs     = filterLangs;
+window.selectEvent     = selectEvent;
+window.setCatFilter    = setCatFilter;
+window.showCustomAdd   = showCustomAdd;
+window.confirmCustomAdd = confirmCustomAdd;
+window.cancelCustomAdd = cancelCustomAdd;
+window.startEdit       = startEdit;
 
-// ─── Boot ──────────────────────────────────────────────────────────────────
+// ─── Boot ─────────────────────────────────────────────────────────────────────
 (async function init() {
   if (!_appearId) { render(); return; }
   document.getElementById('app-content').innerHTML = '<div class="loading">Loading...</div>';
   await loadRefData();
   if (_isAdmin) await loadEvents();
+  await loadIntake();
+  if (_hasProfile) { _screen = 0; }
   render();
 })();
 </script>
-
 </body>
 </html>
-<!-- LAST CHANGE: Fix search lag (targeted DOM updates, no full re-render on keystroke), searchable language dropdown, zip always visible, screen 2 copy updated, idea sidebar on screens 2-5. Version: V1.1 | Date: 2026-06-23 -->
+<!-- LAST CHANGE: Profile summary view on return visit, upsert ikigai, Fan/Player/Coach for recreation, category dropdown + custom add for skills, association-word-boundary fix, values/needs same search pattern, ideas below practice level. Version: V1.2 | Date: 2026-06-24 -->
