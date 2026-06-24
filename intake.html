@@ -1,0 +1,656 @@
+<!-- LAST CHANGE: Initial build — five-screen ikigai intake, admin gate w.hss, live data from sheet, writes to ikigai tab and Main. Version: V1.0 | Date: 2026-06-23 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lake Ballinger Gathering — Sign Up</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:           #1F699E;
+      --card:         #FFFFFF;
+      --text:         #1A2E42;
+      --soft:         #4A6080;
+      --muted:        #6A8FAF;
+      --brand:        #1F699E;
+      --border:       #DDE4EE;
+      --input-bg:     #F7F9FC;
+      --hover:        #185885;
+      --ph:           #B8CCDE;
+      --sel-bg:       #EBF3FA;
+      --sel-border:   #1F699E;
+      --green:        #E8F5E9;
+      --green-border: #A5D6A7;
+      --green-text:   #2E7D32;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      padding: 40px 20px 100px;
+      color: var(--text);
+    }
+
+    .card {
+      background: var(--card);
+      max-width: 660px;
+      margin: 0 auto;
+      border-radius: 16px;
+      padding: 52px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.25), 0 4px 16px rgba(0,0,0,0.12);
+    }
+    @media (max-width: 520px) { .card { padding: 32px 20px; } }
+
+    .eyebrow { font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--brand); margin-bottom: 8px; }
+    h1 { font-size: 26px; font-weight: 700; color: var(--text); line-height: 1.3; margin-bottom: 8px; }
+    h2 { font-size: 20px; font-weight: 700; color: var(--text); line-height: 1.3; margin-bottom: 6px; }
+    .subtitle { font-size: 15px; color: var(--soft); font-weight: 300; line-height: 1.7; margin-bottom: 28px; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+    label { display: block; font-size: 14px; color: var(--muted); margin-bottom: 6px; font-weight: 500; }
+
+    input[type="text"] {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input[type="text"]:focus { border-color: var(--brand); }
+    input[type="text"]::placeholder { color: var(--ph); }
+    .field { margin-bottom: 20px; }
+
+    /* Progress bar */
+    .progress-wrap { margin-bottom: 32px; }
+    .progress-steps { display: flex; gap: 6px; margin-bottom: 8px; }
+    .progress-step {
+      flex: 1; height: 4px; border-radius: 2px;
+      background: var(--border); transition: background 0.3s;
+    }
+    .progress-step.done { background: var(--brand); }
+    .progress-label { font-size: 12px; color: var(--muted); }
+
+    /* Chips */
+    .chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+    .chip {
+      padding: 8px 16px; border-radius: 20px; border: 1.5px solid var(--border);
+      background: white; font-size: 13px; color: var(--soft); cursor: pointer;
+      font-family: 'DM Sans', sans-serif; transition: all 0.15s; user-select: none;
+    }
+    .chip:hover { border-color: var(--brand); color: var(--brand); }
+    .chip.selected { background: var(--sel-bg); border-color: var(--sel-border); color: var(--brand); font-weight: 500; }
+
+    /* Search */
+    .search-wrap { position: relative; margin-bottom: 12px; }
+    .search-wrap input { padding-left: 36px; }
+    .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 15px; pointer-events: none; }
+    .search-results {
+      background: white; border: 1px solid var(--border); border-radius: 10px;
+      max-height: 220px; overflow-y: auto; margin-bottom: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+    .search-result-item {
+      padding: 10px 14px; font-size: 14px; color: var(--text); cursor: pointer;
+      border-bottom: 1px solid var(--border); transition: background 0.12s;
+    }
+    .search-result-item:last-child { border-bottom: none; }
+    .search-result-item:hover { background: var(--sel-bg); }
+    .search-result-cat { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    /* Tags (selected items) */
+    .tags-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; min-height: 32px; }
+    .tag {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 12px; border-radius: 20px;
+      background: var(--sel-bg); border: 1.5px solid var(--sel-border);
+      font-size: 13px; color: var(--brand); font-weight: 500;
+    }
+    .tag-remove { cursor: pointer; font-size: 14px; color: var(--muted); line-height: 1; }
+    .tag-remove:hover { color: var(--text); }
+
+    /* Practice level (skills screen) */
+    .practice-wrap { margin-top: 16px; }
+    .practice-item {
+      background: var(--input-bg); border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px 16px; margin-bottom: 10px;
+    }
+    .practice-item-name { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 10px; }
+    .practice-options { display: flex; flex-wrap: wrap; gap: 8px; }
+    .practice-btn {
+      padding: 6px 14px; border-radius: 16px; border: 1.5px solid var(--border);
+      background: white; font-size: 12px; color: var(--soft); cursor: pointer;
+      font-family: 'DM Sans', sans-serif; transition: all 0.15s;
+    }
+    .practice-btn:hover { border-color: var(--brand); color: var(--brand); }
+    .practice-btn.selected { background: var(--brand); border-color: var(--brand); color: white; font-weight: 500; }
+
+    /* Postal */
+    .postal-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+    .postal-display { font-size: 14px; color: var(--soft); }
+    .btn-link { background: none; border: none; color: var(--brand); font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; padding: 0; }
+    .btn-link:hover { text-decoration: underline; }
+
+    /* Nav buttons */
+    .nav-row { display: flex; gap: 12px; margin-top: 32px; }
+    .btn-back {
+      flex: 1; padding: 14px; border-radius: 10px; border: 1.5px solid var(--border);
+      background: white; font-family: 'DM Sans', sans-serif; font-size: 15px;
+      font-weight: 600; color: var(--soft); cursor: pointer; transition: all 0.15s;
+    }
+    .btn-back:hover { border-color: var(--brand); color: var(--brand); }
+    .btn-next {
+      flex: 2; padding: 14px; border-radius: 10px; border: none;
+      background: var(--brand); font-family: 'DM Sans', sans-serif; font-size: 15px;
+      font-weight: 600; color: white; cursor: pointer; transition: background 0.15s;
+    }
+    .btn-next:hover { background: var(--hover); }
+    .btn-next:disabled { opacity: 0.4; cursor: default; }
+
+    /* Admin event selector */
+    .admin-banner {
+      background: #FFF8E1; border: 1px solid #FFD54F; border-radius: 10px;
+      padding: 12px 16px; margin-bottom: 24px; font-size: 13px; color: #7A5F00;
+    }
+    .event-select-wrap { margin-bottom: 24px; }
+    select {
+      width: 100%; background: var(--input-bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px 14px; font-family: 'DM Sans', sans-serif;
+      font-size: 15px; color: var(--text); outline: none;
+    }
+    select:focus { border-color: var(--brand); }
+
+    /* Signed out */
+    .signed-out { text-align: center; padding: 40px 20px; }
+    .signed-out p { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .signed-out a { color: var(--brand); font-weight: 600; text-decoration: none; }
+
+    /* Modal */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:500; align-items:flex-start; justify-content:center; padding:12px 0 0; }
+    .modal-overlay.open { display:flex; }
+    .modal { background:#fff; border-radius:16px; padding:32px; max-width:480px; width:100%; max-height:92vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,.2); }
+    @media(max-width:768px) {
+      .modal-overlay { align-items:flex-start; justify-content:stretch; padding:0; }
+      .modal { border-radius:20px 20px 0 0; max-width:100%; width:100%; max-height:96vh; padding:16px 20px 32px; margin:0; margin-top:4vh; }
+      .modal::before { content:""; display:block; width:40px; height:4px; background:var(--border); border-radius:2px; margin:0 auto 16px; }
+    }
+    .modal-title { font-size:18px; font-weight:700; color:var(--text); margin-bottom:10px; }
+    .modal-body { font-size:14px; color:var(--soft); line-height:1.6; margin-bottom:20px; }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: #1a1a2e; color: white; border-radius: 10px; padding: 12px 20px;
+      font-size: 14px; font-weight: 500; z-index: 9999;
+      opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap;
+    }
+    .toast.show { opacity: 1; }
+
+    /* Loading */
+    .loading { text-align: center; padding: 40px; color: var(--muted); font-size: 15px; }
+
+    /* Empty state */
+    .empty { font-size: 13px; color: var(--muted); font-style: italic; margin-top: 8px; }
+
+    /* Success */
+    .success-wrap { text-align: center; padding: 20px 0; }
+    .success-icon { font-size: 48px; margin-bottom: 16px; }
+    .success-wrap h2 { margin-bottom: 8px; }
+    .success-wrap p { font-size: 15px; color: var(--soft); line-height: 1.6; }
+  </style>
+</head>
+<body>
+
+<div class="card" id="main-card">
+  <div id="app-content">
+    <div class="loading">Loading...</div>
+  </div>
+</div>
+
+<!-- Signed out modal -->
+<div class="modal-overlay" id="signed-out-modal">
+  <div class="modal">
+    <div class="modal-title">Sign in to continue</div>
+    <div class="modal-body">
+      Open this page from your Appear Network profile so we know who you are.
+      <br><br>
+      <a href="https://appear.network" style="color:var(--brand);font-weight:600;">Go to Appear Network</a>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── Identity ──────────────────────────────────────────────────────────────
+function getMemberId() {
+  const params = new URLSearchParams(window.location.search);
+  const urlParam = params.get('id') || params.get('memberCard');
+  if (urlParam) return urlParam;
+  try { return localStorage.getItem('appear-id'); } catch(e) { return null; }
+}
+
+let _appearId = null;
+
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const urlId  = params.get('id') || params.get('memberCard');
+  if (urlId) {
+    _appearId = urlId;
+    try { localStorage.setItem('appear-id', _appearId); } catch(e) {}
+  } else {
+    try { _appearId = localStorage.getItem('appear-id'); } catch(e) {}
+  }
+})();
+
+function normalizeId(id) {
+  return id ? id.replace(/\./g, '').toLowerCase() : '';
+}
+
+var ADMIN_ID = 'whss';
+var _isAdmin = _appearId && normalizeId(_appearId) === ADMIN_ID;
+
+const GS_URL = 'https://script.google.com/macros/s/AKfycbzEavMnG4tMeWemoT5FLu9f_zjlKVIJsZLueG4nhw9akK0_nZqpbkZiXrAlWu1Fyhq9/exec';
+
+// ─── State ─────────────────────────────────────────────────────────────────
+var _screen      = 1;  // 1-5, plus 0=admin event select, 6=success
+var _eventId     = null;
+var _eventName   = '';
+var _refData     = null; // loaded from sheet
+var _events      = [];
+
+// Screen data
+var _languages   = [];   // selected language strings
+var _postal      = '';
+var _postalEdit  = false;
+var _interests   = [];   // [{item, category}]
+var _skills      = [];   // [{item, category, level}]  level = 'Starting to practice'|'Practicing'|'Mentoring'
+var _values      = [];   // [{item, category}]
+var _needs       = [];   // [{item, category}]
+
+// Search state per screen
+var _searchQ     = { 2:'', 3:'', 4:'', 5:'' };
+var _searchRes   = { 2:[], 3:[], 4:[], 5:[] };
+
+// ─── Toast ─────────────────────────────────────────────────────────────────
+function toast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 2600);
+}
+
+// ─── Escape ────────────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─── Load reference data ───────────────────────────────────────────────────
+async function loadRefData() {
+  try {
+    var res  = await fetch(GS_URL + '?action=getReferenceData');
+    var data = await res.json();
+    _refData = data;
+  } catch(e) {
+    _refData = { languages:[], skills:[], values:[], interests:[] };
+  }
+}
+
+async function loadEvents() {
+  try {
+    var res  = await fetch(GS_URL + '?action=getEvents&appearId=' + encodeURIComponent(_appearId));
+    var data = await res.json();
+    _events = data.events || [];
+  } catch(e) {
+    _events = [];
+  }
+}
+
+// ─── Search helpers ────────────────────────────────────────────────────────
+function getPool(screen) {
+  if (!_refData) return [];
+  if (screen === 2) return _refData.interests || _refData.skills || [];
+  if (screen === 3) return _refData.skills || [];
+  if (screen === 4) return _refData.values || [];
+  if (screen === 5) return _refData.skills || [];
+  return [];
+}
+
+function runSearch(screen, q) {
+  _searchQ[screen] = q;
+  if (!q || q.length < 2) { _searchRes[screen] = []; render(); return; }
+  var pool = getPool(screen);
+  var ql   = q.toLowerCase();
+  _searchRes[screen] = pool.filter(function(r) {
+    return (r.item||'').toLowerCase().includes(ql)
+        || (r.category||'').toLowerCase().includes(ql)
+        || (r.associations||'').toLowerCase().includes(ql);
+  }).slice(0, 20);
+  render();
+}
+
+function addItem(screen, item, category) {
+  var arr = screen === 2 ? _interests : screen === 3 ? _skills : screen === 4 ? _values : _needs;
+  var already = arr.some(function(r) { return r.item === item; });
+  if (already) { toast('Already added'); return; }
+  if (screen === 3) {
+    _skills.push({ item: item, category: category, level: '' });
+  } else {
+    arr.push({ item: item, category: category });
+  }
+  _searchQ[screen] = '';
+  _searchRes[screen] = [];
+  var inp = document.getElementById('search-' + screen);
+  if (inp) inp.value = '';
+  render();
+}
+
+function removeItem(screen, idx) {
+  if (screen === 2) _interests.splice(idx, 1);
+  else if (screen === 3) _skills.splice(idx, 1);
+  else if (screen === 4) _values.splice(idx, 1);
+  else _needs.splice(idx, 1);
+  render();
+}
+
+function setSkillLevel(idx, level) {
+  if (_skills[idx]) _skills[idx].level = level;
+  render();
+}
+
+// ─── Submit ────────────────────────────────────────────────────────────────
+async function submitIntake() {
+  if (!_appearId) return;
+
+  var skillsStr = _skills.map(function(s) {
+    return s.item + (s.level ? ':' + s.level : '');
+  }).join('|');
+
+  var params = '?action=saveIntake'
+    + '&appearId='   + encodeURIComponent(_appearId)
+    + '&eventId='    + encodeURIComponent(_eventId || '')
+    + '&languages='  + encodeURIComponent(_languages.join('|'))
+    + '&postal='     + encodeURIComponent(_postal)
+    + '&interests='  + encodeURIComponent(_interests.map(function(r){return r.item;}).join('|'))
+    + '&skills='     + encodeURIComponent(skillsStr)
+    + '&values='     + encodeURIComponent(_values.map(function(r){return r.item;}).join('|'))
+    + '&needs='      + encodeURIComponent(_needs.map(function(r){return r.item;}).join('|'));
+
+  try {
+    await fetch(GS_URL + params);
+  } catch(e) {}
+
+  _screen = 6;
+  render();
+}
+
+// ─── Render ────────────────────────────────────────────────────────────────
+function render() {
+  var el = document.getElementById('app-content');
+  if (!el) return;
+
+  if (!_appearId) {
+    el.innerHTML = '<div class="signed-out"><p>Sign in to continue</p><p style="font-size:14px;color:var(--soft);margin-top:8px;"><a href="https://appear.network">Go to Appear Network</a> and open this page from your profile.</p></div>';
+    return;
+  }
+
+  // Admin event selector (screen 0)
+  if (_isAdmin && !_eventId) {
+    renderAdminSelect(el);
+    return;
+  }
+
+  if (_screen === 6) { renderSuccess(el); return; }
+
+  var screens = {
+    1: renderScreen1,
+    2: renderScreen2,
+    3: renderScreen3,
+    4: renderScreen4,
+    5: renderScreen5
+  };
+  if (screens[_screen]) screens[_screen](el);
+}
+
+function progressHTML(current) {
+  var steps = '';
+  for (var i = 1; i <= 5; i++) {
+    steps += '<div class="progress-step' + (i <= current ? ' done' : '') + '"></div>';
+  }
+  var labels = ['','Language + location','What you enjoy','Your skillset','What you care about','What you need'];
+  return '<div class="progress-wrap"><div class="progress-steps">' + steps + '</div><div class="progress-label">Step ' + current + ' of 5 — ' + labels[current] + '</div></div>';
+}
+
+function navHTML(screen, nextLabel, nextDisabled) {
+  var backBtn = screen > 1
+    ? '<button class="btn-back" onclick="goBack()">Back</button>'
+    : '';
+  var nextBtn = '<button class="btn-next"' + (nextDisabled ? ' disabled' : '') + ' onclick="goNext()">' + (nextLabel || 'Next') + '</button>';
+  return '<div class="nav-row">' + backBtn + nextBtn + '</div>';
+}
+
+// Screen 0 — Admin event select
+function renderAdminSelect(el) {
+  var options = _events.length
+    ? _events.map(function(e) { return '<option value="' + esc(e.id) + '">' + esc(e.title) + '</option>'; }).join('')
+    : '<option value="">No events found</option>';
+
+  el.innerHTML = ''
+    + '<div class="eyebrow">Admin</div>'
+    + '<h1>Lake Ballinger Gathering</h1>'
+    + '<p class="subtitle">Select an event to enable the gathering sign-up.</p>'
+    + '<div class="admin-banner">You are signed in as admin. Attendees will not see this screen.</div>'
+    + '<div class="event-select-wrap">'
+    + '<label>Event</label>'
+    + '<select id="event-select">' + options + '</select>'
+    + '</div>'
+    + '<button class="btn-next" onclick="selectEvent()">Continue</button>';
+}
+
+function selectEvent() {
+  var sel = document.getElementById('event-select');
+  if (!sel || !sel.value) { toast('Select an event'); return; }
+  _eventId = sel.value;
+  _eventName = sel.options[sel.selectedIndex].text;
+  _screen = 1;
+  render();
+}
+
+// Screen 1 — Language + postal
+function renderScreen1(el) {
+  var langs = (_refData && _refData.languages) ? _refData.languages : [];
+  var chips = langs.map(function(lang) {
+    var sel = _languages.indexOf(lang) > -1;
+    return '<div class="chip' + (sel ? ' selected' : '') + '" onclick="toggleLang(\'' + esc(lang) + '\')">' + esc(lang) + '</div>';
+  }).join('');
+
+  var postalLine = _postalEdit
+    ? '<div class="field" style="margin-top:12px"><div style="display:flex;gap:8px"><input type="text" id="postal-input" placeholder="Your zip code" value="' + esc(_postal) + '" oninput="_postal=this.value"><button class="btn-next" style="flex:0 0 auto;padding:0 18px" onclick="savePostal()">Save</button></div></div>'
+    : '<div class="postal-row" style="margin-top:12px"><span class="postal-display">📍 ' + (_postal ? esc(_postal) : 'No zip code set') + '</span><button class="btn-link" onclick="editPostal()">' + (_postal ? 'Edit' : 'Add') + '</button></div>';
+
+  el.innerHTML = ''
+    + progressHTML(1)
+    + '<h2>What language(s) do you speak?</h2>'
+    + '<p class="subtitle">Select all that apply.</p>'
+    + '<div class="chip-row">' + chips + '</div>'
+    + '<hr>'
+    + '<h2>Where are you located?</h2>'
+    + postalLine
+    + navHTML(1, 'Next', false);
+}
+
+window.toggleLang = function(lang) {
+  var idx = _languages.indexOf(lang);
+  if (idx > -1) _languages.splice(idx, 1);
+  else _languages.push(lang);
+  render();
+};
+
+window.editPostal = function() { _postalEdit = true; render(); };
+window.savePostal = function() {
+  var inp = document.getElementById('postal-input');
+  if (inp) _postal = inp.value.trim();
+  _postalEdit = false;
+  render();
+};
+
+// Screen 2 — Interests
+function renderSearchScreen(el, screen, heading, subtitle, arr) {
+  var q   = _searchQ[screen] || '';
+  var res = _searchRes[screen] || [];
+
+  var resultsHTML = '';
+  if (q.length >= 2) {
+    if (res.length) {
+      resultsHTML = '<div class="search-results">'
+        + res.map(function(r, i) {
+            return '<div class="search-result-item" onclick="addItem(' + screen + ',\'' + esc(r.item) + '\',\'' + esc(r.category||'') + '\')">'
+              + esc(r.item)
+              + (r.category ? '<div class="search-result-cat">' + esc(r.category) + '</div>' : '')
+              + '</div>';
+          }).join('')
+        + '</div>';
+    } else {
+      resultsHTML = '<div class="empty">No results for "' + esc(q) + '"</div>';
+    }
+  }
+
+  var tagsHTML = arr.length
+    ? arr.map(function(r, i) {
+        return '<div class="tag">' + esc(r.item)
+          + '<span class="tag-remove" onclick="removeItem(' + screen + ',' + i + ')">×</span></div>';
+      }).join('')
+    : '<div class="empty">Nothing added yet.</div>';
+
+  el.innerHTML = ''
+    + progressHTML(screen)
+    + '<h2>' + heading + '</h2>'
+    + '<p class="subtitle">' + subtitle + '</p>'
+    + '<div class="search-wrap">'
+    + '<span class="search-icon">🔍</span>'
+    + '<input type="text" id="search-' + screen + '" placeholder="Search..." value="' + esc(q) + '" oninput="runSearch(' + screen + ',this.value)">'
+    + '</div>'
+    + resultsHTML
+    + '<div class="tags-wrap">' + tagsHTML + '</div>'
+    + navHTML(screen, screen === 5 ? 'Submit' : 'Next', false);
+}
+
+function renderScreen2(el) {
+  renderSearchScreen(el, 2, 'What do you enjoy?', 'Add as many as you like. These help us match you with events and people.', _interests);
+}
+
+// Screen 3 — Skills with practice level
+function renderScreen3(el) {
+  var q   = _searchQ[3] || '';
+  var res = _searchRes[3] || [];
+
+  var resultsHTML = '';
+  if (q.length >= 2) {
+    if (res.length) {
+      resultsHTML = '<div class="search-results">'
+        + res.map(function(r) {
+            return '<div class="search-result-item" onclick="addItem(3,\'' + esc(r.item) + '\',\'' + esc(r.category||'') + '\')">'
+              + esc(r.item)
+              + (r.category ? '<div class="search-result-cat">' + esc(r.category) + '</div>' : '')
+              + '</div>';
+          }).join('')
+        + '</div>';
+    } else {
+      resultsHTML = '<div class="empty">No results for "' + esc(q) + '"</div>';
+    }
+  }
+
+  var practiceHTML = _skills.length
+    ? '<div class="practice-wrap">'
+      + _skills.map(function(s, i) {
+          var levels = ['Starting to practice','Practicing','Mentoring'];
+          var btns = levels.map(function(lv) {
+            return '<button class="practice-btn' + (s.level === lv ? ' selected' : '') + '" onclick="setSkillLevel(' + i + ',\'' + lv + '\')">' + lv + '</button>';
+          }).join('');
+          return '<div class="practice-item">'
+            + '<div class="practice-item-name">' + esc(s.item) + ' <span style="font-size:11px;color:var(--muted);font-weight:400;">' + esc(s.category) + '</span></div>'
+            + '<div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Where are you in this role?</div>'
+            + '<div class="practice-options">' + btns + '</div>'
+            + '<span class="tag-remove" style="display:block;margin-top:10px;font-size:12px;color:var(--muted);cursor:pointer;" onclick="removeItem(3,' + i + ')">Remove</span>'
+            + '</div>';
+        }).join('')
+      + '</div>'
+    : '<div class="empty" style="margin-top:12px">No skills added yet.</div>';
+
+  el.innerHTML = ''
+    + progressHTML(3)
+    + '<h2>What is your skillset?</h2>'
+    + '<p class="subtitle">Add your skills and let people know where you are in each one.</p>'
+    + '<div class="search-wrap">'
+    + '<span class="search-icon">🔍</span>'
+    + '<input type="text" id="search-3" placeholder="Search skills..." value="' + esc(q) + '" oninput="runSearch(3,this.value)">'
+    + '</div>'
+    + resultsHTML
+    + practiceHTML
+    + navHTML(3, 'Next', false);
+}
+
+// Screen 4 — Values
+function renderScreen4(el) {
+  renderSearchScreen(el, 4, 'What do you care about deeply?', 'Select the domains, causes, and values that matter most to you.', _values);
+}
+
+// Screen 5 — Needs
+function renderScreen5(el) {
+  renderSearchScreen(el, 5, 'What do you need right now?', 'What are you looking to receive or connect with? This drives matching.', _needs);
+}
+
+// Success
+function renderSuccess(el) {
+  el.innerHTML = ''
+    + '<div class="success-wrap">'
+    + '<div class="success-icon">🌱</div>'
+    + '<h2>You\'re in.</h2>'
+    + '<p>Your profile is updated. We will match you with people and opportunities at the gathering.</p>'
+    + '</div>';
+}
+
+// ─── Navigation ────────────────────────────────────────────────────────────
+window.goNext = function() {
+  if (_screen === 5) {
+    submitIntake();
+    return;
+  }
+  _screen++;
+  render();
+};
+
+window.goBack = function() {
+  _screen--;
+  render();
+};
+
+window.runSearch   = runSearch;
+window.addItem     = addItem;
+window.removeItem  = removeItem;
+window.setSkillLevel = setSkillLevel;
+window.selectEvent = selectEvent;
+
+// ─── Boot ──────────────────────────────────────────────────────────────────
+(async function init() {
+  if (!_appearId) {
+    render();
+    return;
+  }
+  document.getElementById('app-content').innerHTML = '<div class="loading">Loading...</div>';
+  await loadRefData();
+  if (_isAdmin) await loadEvents();
+  render();
+})();
+</script>
+
+</body>
+</html>
+<!-- LAST CHANGE: Initial build — five-screen ikigai intake, admin gate w.hss, live data from sheet, writes to ikigai tab and Main. Version: V1.0 | Date: 2026-06-23 -->
