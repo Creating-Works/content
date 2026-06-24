@@ -1,4 +1,4 @@
-<!-- Version: V1.8 | Last change: Heading to "How I show up in my community", shareable view via ?show=MEMBERID with photo and name, no edit controls in viewer mode | Date: 2026-06-24 -->
+<!-- Version: V1.9 | Last change: Remove postal/language from viewer, Required not bold, no progress bar on edit mode, Done returns to profile, incomplete level nudge on profile summary | Date: 2026-06-24 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -81,7 +81,7 @@
     .practice-item { background: var(--input-bg); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; }
     .practice-item-name { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
     .practice-item-cat { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
-    .practice-required { font-size: 12px; color: var(--brand); font-weight: 600; margin-bottom: 8px; }
+    .practice-required { font-size: 12px; color: var(--brand); font-weight: 400; margin-bottom: 8px; }
     .practice-options { display: flex; flex-wrap: wrap; gap: 8px; }
     .practice-btn { padding: 6px 14px; border-radius: 16px; border: 1.5px solid var(--border); background: white; font-size: 12px; color: var(--soft); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
     .practice-btn:hover { border-color: var(--brand); color: var(--brand); }
@@ -624,6 +624,7 @@ function render() {
 }
 
 function progressHTML(n) {
+  if(_hasProfile) return '';
   var s=''; for(var i=1;i<=4;i++) s+='<div class="progress-step'+(i<=n?' done':'')+'"></div>';
   var labs=['','Recreation and hobbies','Your skillset','What you care about','What you need'];
   return '<div class="progress-wrap"><div class="progress-steps">'+s+'</div><div class="progress-label">Section '+n+' of 4 — '+labs[n]+'</div></div>';
@@ -666,14 +667,27 @@ function renderProfile(el, viewerMode) {
       +'<div class="profile-tags">'+tags+'</div></div>';
   }
   var metaEdit=!viewerMode?' <button class="btn-link" onclick="openLangModal()">✏️</button>':'';
+  var metaRow=!viewerMode
+    ?'<div class="profile-meta-row" id="profile-meta-row">'
+      +'<div class="inline-edit-row">📍 '+esc(_postal||'No zip code set')+metaEdit+'</div>'
+      +(_languages.length?'<div class="inline-edit-row">'+esc(_languages.join(', '))+'</div>':'')
+      +'</div>'
+    :'';
+  // Incomplete nudge for owner view
+  function nudge(arr, levelKey, screenNum) {
+    if(viewerMode) return '';
+    var missing=arr.filter(function(r){return !r[levelKey];});
+    if(!missing.length) return '';
+    return '<div class="reminder-msg" style="margin-top:-8px;margin-bottom:12px;font-size:12px;">A few items are missing a level. Tap ✏️ to complete.</div>';
+  }
   el.innerHTML='<h2>How I show up in my community 🌱</h2>'
-    +'<div class="profile-meta-row" id="profile-meta-row">'
-    +'<div class="inline-edit-row">📍 '+esc(_postal||'No zip code set')+metaEdit+'</div>'
-    +(_languages.length?'<div class="inline-edit-row">'+esc(_languages.join(', '))+'</div>':'')
-    +'</div>'
+    +metaRow
     +section('What I enjoy',_interests,true,'level',1)
+    +nudge(_interests,'level',1)
     +section('My skills',_skills,true,'level',2)
+    +nudge(_skills,'level',2)
     +section('What I care about',_values,true,'level',3)
+    +nudge(_values,'level',3)
     +section('What I need',_needs,false,'',4);
 }
 
@@ -745,6 +759,7 @@ window.goNext = function() {
     }
   }
   autoSave();
+  if(_hasProfile){_screen=0;render();return;}
   if(_screen===4){_hasProfile=true;_screen=0;render();return;}
   _screen++;render();
 };
@@ -789,4 +804,4 @@ window.saveLangModal    = saveLangModal;
 </script>
 </body>
 </html>
-<!-- Version: V1.8 | Last change: Heading to "How I show up in my community", shareable view via ?show=MEMBERID with photo and name, no edit controls in viewer mode | Date: 2026-06-24 -->
+<!-- Version: V1.9 | Last change: Remove postal/language from viewer, Required not bold, no progress bar on edit mode, Done returns to profile, incomplete level nudge on profile summary | Date: 2026-06-24 -->
