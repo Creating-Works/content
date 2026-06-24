@@ -1,4 +1,4 @@
-<!-- Version: V1.6 | Last change: Auto-save on Next, heading updates, back button all screens, skill level reminder, pencil icons on profile sections, Section X of 4, ideas above added list, title word warning, rec search fixed, loading spinner, parent category drill-down on screens 2-4, Pets & Animal Care added | Date: 2026-06-24 -->
+<!-- Version: V1.7 | Last change: Title update, screen order search/category/chips/added, alpha dropdowns, Required label, Fan/Participant/Coach, Curious/Engaged/Leading for values, local toggle for needs, search placeholders updated | Date: 2026-06-24 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -45,7 +45,6 @@
 
     .inline-edit-row { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--soft); flex-wrap: wrap; }
     .btn-link { background: none; border: none; color: var(--brand); font-size: 14px; cursor: pointer; font-family: 'DM Sans', sans-serif; padding: 0; }
-    .btn-link:hover { opacity: 0.7; }
 
     .search-wrap { position: relative; margin-bottom: 0; }
     .search-wrap input { padding-left: 36px; border-radius: 8px; }
@@ -66,32 +65,42 @@
     .breadcrumb { font-size: 12px; color: var(--muted); margin-bottom: 8px; margin-top: 6px; }
     .breadcrumb span { color: var(--brand); font-weight: 500; }
 
+    .cat-filter-wrap { margin-bottom: 16px; }
+    .cat-filter-wrap select { margin-bottom: 8px; }
+    .cat-filter-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--brand); margin-bottom: 6px; display: block; }
+
+    .idea-section { margin-bottom: 16px; }
+    .idea-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+    .idea-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+    .idea-chip { padding: 6px 13px; border-radius: 18px; border: 1.5px dashed var(--border); background: var(--input-bg); font-size: 12px; color: var(--soft); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+    .idea-chip:hover { border-color: var(--brand); color: var(--brand); border-style: solid; background: var(--sel-bg); }
+
     .tags-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 16px 0 8px; }
     .tags-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
     .tag { display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 20px; background: var(--sel-bg); border: 1.5px solid var(--sel-border); font-size: 13px; color: var(--brand); font-weight: 500; }
     .tag-remove { cursor: pointer; font-size: 15px; color: var(--muted); line-height: 1; }
 
-    .practice-wrap { margin-top: 16px; }
+    .practice-wrap { margin-top: 4px; }
     .practice-item { background: var(--input-bg); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; }
     .practice-item-name { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
-    .practice-item-cat { font-size: 11px; color: var(--muted); margin-bottom: 10px; }
+    .practice-item-cat { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+    .practice-required { font-size: 12px; color: var(--brand); font-weight: 600; margin-bottom: 8px; }
     .practice-options { display: flex; flex-wrap: wrap; gap: 8px; }
     .practice-btn { padding: 6px 14px; border-radius: 16px; border: 1.5px solid var(--border); background: white; font-size: 12px; color: var(--soft); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
     .practice-btn:hover { border-color: var(--brand); color: var(--brand); }
     .practice-btn.selected { background: var(--brand); border-color: var(--brand); color: white; font-weight: 500; }
     .practice-remove { margin-top: 10px; font-size: 12px; color: var(--muted); cursor: pointer; display: inline-block; }
 
-    .cat-filter-wrap { margin-top: 16px; }
-    .cat-filter-wrap select { margin-bottom: 8px; }
-
-    .idea-section { margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
-    .idea-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
-    .idea-chips { display: flex; flex-wrap: wrap; gap: 7px; }
-    .idea-chip { padding: 6px 13px; border-radius: 18px; border: 1.5px dashed var(--border); background: var(--input-bg); font-size: 12px; color: var(--soft); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
-    .idea-chip:hover { border-color: var(--brand); color: var(--brand); border-style: solid; background: var(--sel-bg); }
+    /* Local toggle for needs */
+    .need-item { background: var(--input-bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+    .need-item-name { font-size: 14px; font-weight: 600; color: var(--text); }
+    .need-item-right { display: flex; align-items: center; gap: 12px; }
+    .local-toggle { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--soft); cursor: pointer; }
+    .local-toggle input[type="checkbox"] { width: 14px; height: 14px; accent-color: var(--brand); cursor: pointer; }
+    .local-toggle.active { color: var(--brand); font-weight: 600; }
 
     .warning-msg { background: #FFF8E1; border: 1px solid #FFD54F; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #7A5F00; margin-bottom: 12px; }
-    .reminder-msg { background: #EBF3FA; border: 1px solid var(--sel-border); border-radius: 8px; padding: 10px 14px; font-size: 13px; color: var(--brand); margin-top: 12px; }
+    .reminder-msg { background: var(--sel-bg); border: 1px solid var(--sel-border); border-radius: 8px; padding: 10px 14px; font-size: 13px; color: var(--brand); margin-top: 12px; }
 
     .nav-row { display: flex; gap: 12px; margin-top: 28px; }
     .btn-back { flex: 1; padding: 14px; border-radius: 10px; border: 1.5px solid var(--border); background: white; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; color: var(--soft); cursor: pointer; transition: all 0.15s; }
@@ -185,11 +194,10 @@ var _isAdmin = _appearId && normalizeId(_appearId) === ADMIN_ID;
 var GS_URL   = 'https://script.google.com/macros/s/AKfycbzEavMnG4tMeWemoT5FLu9f_zjlKVIJsZLueG4nhw9akK0_nZqpbkZiXrAlWu1Fyhq9/exec';
 
 var PARENT_CATS = [
-  'Arts & Culture','Food & Drink','Physical Wellbeing','Mental Wellbeing',
-  'Family Wellbeing','Self-Expression & Beauty','Home & Transportation',
-  'Business & Finance','Community & Civic','Recreation & Hobbies',
-  'Technology & Communications','Nature & Outdoors','Events & Gatherings',
-  'Pets & Animal Care'
+  'Arts & Culture','Business & Finance','Community & Civic','Events & Gatherings',
+  'Family Wellbeing','Food & Drink','Home & Transportation','Mental Wellbeing',
+  'Nature & Outdoors','Pets & Animal Care','Physical Wellbeing','Recreation & Hobbies',
+  'Self-Expression & Beauty','Technology & Communications'
 ];
 
 var FLAGGED_WORDS = ['expert','leader','director','senior','advanced','junior'];
@@ -204,19 +212,17 @@ var _languages  = [];
 var _langFilter = '';
 var _postal     = '';
 
-var _interests  = [];
-var _skills     = [];
-var _values     = [];
-var _needs      = [];
+var _interests  = [];  // {item, category, level}  Fan/Participant/Coach
+var _skills     = [];  // {item, category, level}  Starting to practice/Practicing/Mentoring
+var _values     = [];  // {item, category, level}  Curious/Engaged/Leading
+var _needs      = [];  // {item, category, local}  local = true/false
 
 var _searchQ    = { 1:'', 2:'', 3:'', 4:'' };
 var _ideaChips  = { 1:[], 2:[], 3:[], 4:[] };
 var _recType    = '';
 var _recSubCat  = '';
 var _parentCat  = { 2:'', 3:'', 4:'' };
-var _subCat     = { 2:'', 3:'', 4:'' };
 var _customItem = '';
-var _titleWarning = '';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -233,6 +239,8 @@ function shuffle(arr) {
   return a;
 }
 
+function sortAlpha(arr) { return arr.slice().sort(function(a,b){return a.localeCompare(b);}); }
+
 function matchesQuery(r, ql) {
   if((r.item||'').toLowerCase().includes(ql)) return true;
   if((r.category||'').toLowerCase().includes(ql)) return true;
@@ -244,22 +252,21 @@ function matchesQuery(r, ql) {
 }
 
 function checkTitleFlag(q) {
-  var ql = q.toLowerCase();
-  for(var i=0;i<FLAGGED_WORDS.length;i++){
-    if(ql.includes(FLAGGED_WORDS[i])) return FLAGGED_WORDS[i];
-  }
+  var ql=q.toLowerCase();
+  for(var i=0;i<FLAGGED_WORDS.length;i++){if(ql.includes(FLAGGED_WORDS[i])) return FLAGGED_WORDS[i];}
   return '';
 }
 
 function getPool(screen) {
   if(!_refData) return [];
   if(screen===1) {
-    var pool = _refData.recreation||[];
+    var pool=_refData.recreation||[];
     if(_recSubCat) return pool.filter(function(r){return r.category===_recSubCat;});
     if(_recType) return pool.filter(function(r){return r.recType===_recType;});
     return pool;
   }
-  var base = screen===2?(_refData.skills||[]):screen===3?((_refData.values||[]).concat(_refData.domains||[])):
+  var base=screen===2?(_refData.skills||[]):
+    screen===3?((_refData.values||[]).concat(_refData.domains||[])):
     ((_refData.skills||[]).concat(_refData.values||[]).concat(_refData.domains||[]));
   if(_parentCat[screen]) base=base.filter(function(r){return r.category===_parentCat[screen];});
   return base;
@@ -293,19 +300,29 @@ async function loadIntake() {
       var d=data.data;
       _postal=d.postal||'';
       _languages=d.languages?d.languages.split('|').filter(Boolean):[];
-      _interests=parseTagStr(d.interests,true);
-      _skills=parseTagStr(d.skills,true);
-      _values=parseTagStr(d.values,false);
-      _needs=parseTagStr(d.needs,false);
+      _interests=parseTagStr(d.interests,'level');
+      _skills=parseTagStr(d.skills,'level');
+      _values=parseTagStr(d.values,'level');
+      _needs=parseNeedsStr(d.needs);
     }
   } catch(e){}
 }
 
-function parseTagStr(str,hasLevel) {
+function parseTagStr(str, levelKey) {
   if(!str) return [];
   return str.split('|').filter(Boolean).map(function(s){
-    if(hasLevel){var p=s.split(':');return{item:p[0],category:'',level:p[1]||''};}
-    return{item:s,category:''};
+    var p=s.split(':');
+    var obj={item:p[0],category:''};
+    obj[levelKey]=p[1]||'';
+    return obj;
+  });
+}
+
+function parseNeedsStr(str) {
+  if(!str) return [];
+  return str.split('|').filter(Boolean).map(function(s){
+    var p=s.split(':');
+    return {item:p[0],category:'',local:p[1]==='local'};
   });
 }
 
@@ -314,14 +331,16 @@ function autoSave() {
   if(!_appearId) return;
   var interestsStr=_interests.map(function(s){return s.item+(s.level?':'+s.level:'');}).join('|');
   var skillsStr=_skills.map(function(s){return s.item+(s.level?':'+s.level:'');}).join('|');
+  var valuesStr=_values.map(function(s){return s.item+(s.level?':'+s.level:'');}).join('|');
+  var needsStr=_needs.map(function(s){return s.item+(s.local?':local':'');}).join('|');
   var p='?action=saveIntake'
     +'&appearId='+encodeURIComponent(_appearId)
     +'&languages='+encodeURIComponent(_languages.join('|'))
     +'&postal='+encodeURIComponent(_postal)
     +'&interests='+encodeURIComponent(interestsStr)
     +'&skills='+encodeURIComponent(skillsStr)
-    +'&values='+encodeURIComponent(_values.map(function(r){return r.item;}).join('|'))
-    +'&needs='+encodeURIComponent(_needs.map(function(r){return r.item;}).join('|'));
+    +'&values='+encodeURIComponent(valuesStr)
+    +'&needs='+encodeURIComponent(needsStr);
   fetch(GS_URL+p).catch(function(){});
   _hasProfile=true;
 }
@@ -329,19 +348,16 @@ function autoSave() {
 // ─── Search ──────────────────────────────────────────────────────────────────
 function runSearch(screen, q) {
   _searchQ[screen]=q;
-  var flagged=screen===2?checkTitleFlag(q):'';
-  var warnEl=document.getElementById('title-warning-'+screen);
-  if(warnEl){
-    if(flagged){
-      warnEl.innerHTML='<div class="warning-msg">Gentle note: titles like "'+esc(flagged)+'" carry a level of knowledge we ask about separately. Try the role name on its own.</div>';
-    } else { warnEl.innerHTML=''; }
+  if(screen===2){
+    var flagged=checkTitleFlag(q);
+    var warnEl=document.getElementById('title-warning-2');
+    if(warnEl) warnEl.innerHTML=flagged
+      ?'<div class="warning-msg">Gentle note: titles like "'+esc(flagged)+'" carry a level of knowledge we ask about separately. Try the role name on its own.</div>'
+      :'';
   }
   var pool=getPool(screen);
   var res=[];
-  if(q&&q.length>=1){
-    var ql=q.toLowerCase();
-    res=pool.filter(function(r){return matchesQuery(r,ql);}).slice(0,25);
-  }
+  if(q&&q.length>=1){var ql=q.toLowerCase();res=pool.filter(function(r){return matchesQuery(r,ql);}).slice(0,25);}
   updateSearchResults(screen,q,res);
   var inp=document.getElementById('search-input-'+screen);
   if(inp){if(q&&res.length)inp.classList.add('has-results');else inp.classList.remove('has-results');}
@@ -376,9 +392,8 @@ function showCustomAdd(screen, item) {
   _customItem=item;
   var container=document.getElementById('search-results-'+screen);
   if(!container) return;
-  var cats=PARENT_CATS;
   var opts='<option value="">Select a category</option>'
-    +cats.map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join('');
+    +PARENT_CATS.map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join('');
   container.innerHTML='<div class="custom-add-box">'
     +'<label>What category does "'+esc(item)+'" belong to?</label>'
     +'<select id="custom-cat-select">'+opts+'</select>'
@@ -411,7 +426,8 @@ function addItem(screen, item, category) {
   if(arr.some(function(r){return r.item===item;})){toast('Already added');return;}
   if(screen===1) _interests.push({item:item,category:category||'',level:''});
   else if(screen===2) _skills.push({item:item,category:category||'',level:''});
-  else arr.push({item:item,category:category||''});
+  else if(screen===3) _values.push({item:item,category:category||'',level:''});
+  else _needs.push({item:item,category:category||'',local:false});
   _searchQ[screen]='';
   var inp=document.getElementById('search-input-'+screen);
   if(inp){inp.value='';inp.classList.remove('has-results');}
@@ -428,26 +444,23 @@ function removeItem(screen, idx) {
 }
 
 function setLevel(screen, idx, level) {
-  var arr=screen===1?_interests:_skills;
+  var arr=screen===1?_interests:screen===2?_skills:_values;
   if(arr[idx]) arr[idx].level=level;
   updateTagsSection(screen);
+}
+
+function toggleLocal(idx) {
+  if(_needs[idx]) _needs[idx].local=!_needs[idx].local;
+  updateTagsSection(4);
 }
 
 function updateTagsSection(screen) {
   var el=document.getElementById('tags-section-'+screen);
   if(!el) return;
-  if(screen===1) el.innerHTML=buildRoleHTML(_interests,1,['Fan','Player','Coach']);
+  if(screen===1) el.innerHTML=buildRoleHTML(_interests,1,['Fan','Participant','Coach']);
   else if(screen===2) el.innerHTML=buildRoleHTML(_skills,2,['Starting to practice','Practicing','Mentoring']);
-  else{var arr=screen===3?_values:_needs;el.innerHTML=buildTagsHTML(screen,arr);}
-}
-
-function buildTagsHTML(screen, arr) {
-  if(!arr.length) return '<div class="empty">Nothing added yet.</div>';
-  return '<div class="tags-label">Added</div><div class="tags-wrap">'
-    +arr.map(function(r,i){
-        return '<div class="tag">'+esc(r.item)
-          +'<span class="tag-remove" onclick="removeItem('+screen+','+i+')">×</span></div>';
-      }).join('')+'</div>';
+  else if(screen===3) el.innerHTML=buildRoleHTML(_values,3,['Curious','Engaged','Leading']);
+  else el.innerHTML=buildNeedsHTML();
 }
 
 function buildRoleHTML(arr, screen, levels) {
@@ -460,43 +473,51 @@ function buildRoleHTML(arr, screen, levels) {
         return '<div class="practice-item">'
           +'<div class="practice-item-name">'+esc(s.item)+'</div>'
           +(s.category?'<div class="practice-item-cat">'+esc(s.category)+'</div>':'')
-          +'<div style="font-size:12px;color:var(--muted);margin-bottom:8px;">'
-          +(screen===1?'How do you show up for this?':'Where are you in this role?')+'</div>'
+          +'<div class="practice-required">Required</div>'
           +'<div class="practice-options">'+btns+'</div>'
           +'<span class="practice-remove" onclick="removeItem('+screen+','+i+')">Remove</span>'
           +'</div>';
       }).join('')+'</div>';
 }
 
+function buildNeedsHTML() {
+  if(!_needs.length) return '<div class="empty" style="margin-top:12px">Nothing added yet.</div>';
+  return '<div class="practice-wrap">'
+    +_needs.map(function(n,i){
+        return '<div class="need-item">'
+          +'<div><div class="need-item-name">'+esc(n.item)+'</div>'
+          +(n.category?'<div style="font-size:11px;color:var(--muted);margin-top:2px;">'+esc(n.category)+'</div>':'')
+          +'</div>'
+          +'<div class="need-item-right">'
+          +'<label class="local-toggle'+(n.local?' active':'')+'"><input type="checkbox"'+(n.local?' checked':'')
+          +' onchange="toggleLocal('+i+')"> 📍 Local only</label>'
+          +'<span class="practice-remove" onclick="removeItem(4,'+i+')">Remove</span>'
+          +'</div></div>';
+      }).join('')+'</div>';
+}
+
 // ─── Language modal ───────────────────────────────────────────────────────────
 function openLangModal() {
-  var modal=document.getElementById('lang-modal');
-  if(modal) modal.classList.add('open');
-  var inp=document.getElementById('lang-modal-postal');
-  if(inp) inp.value=_postal;
+  var modal=document.getElementById('lang-modal'); if(modal) modal.classList.add('open');
+  var inp=document.getElementById('lang-modal-postal'); if(inp) inp.value=_postal;
   filterLangs('');
-  var si=document.getElementById('lang-modal-search');
-  if(si) si.value='';
+  var si=document.getElementById('lang-modal-search'); if(si) si.value='';
 }
 
 function closeLangModal() {
-  var modal=document.getElementById('lang-modal');
-  if(modal) modal.classList.remove('open');
+  var modal=document.getElementById('lang-modal'); if(modal) modal.classList.remove('open');
 }
 
 function saveLangModal() {
-  var inp=document.getElementById('lang-modal-postal');
-  if(inp) _postal=inp.value.trim();
+  var inp=document.getElementById('lang-modal-postal'); if(inp) _postal=inp.value.trim();
   closeLangModal();
-  var el=document.getElementById('profile-meta-row');
-  if(el) el.innerHTML=buildProfileMetaHTML();
+  var el=document.getElementById('profile-meta-row'); if(el) el.innerHTML=buildProfileMetaHTML();
   autoSave();
 }
 
 function filterLangs(q) {
   _langFilter=q;
-  var list=document.getElementById('lang-list');
-  if(!list) return;
+  var list=document.getElementById('lang-list'); if(!list) return;
   var langs=(_refData&&_refData.languages)?_refData.languages:[];
   var ql=q.toLowerCase();
   var filtered=ql?langs.filter(function(l){return l.toLowerCase().includes(ql);}):langs;
@@ -505,8 +526,7 @@ function filterLangs(q) {
     return '<div class="lang-list-item'+(sel?' selected':'')+'" onclick="toggleLang(\''+esc(lang)+'\')">'
       +'<span class="lang-check">'+(sel?'✓':'')+'</span>'+esc(lang)+'</div>';
   }).join('');
-  var tagsEl=document.getElementById('lang-tags');
-  if(tagsEl) tagsEl.innerHTML=buildLangTagsHTML();
+  var tagsEl=document.getElementById('lang-tags'); if(tagsEl) tagsEl.innerHTML=buildLangTagsHTML();
 }
 
 function toggleLang(lang) {
@@ -516,8 +536,7 @@ function toggleLang(lang) {
 }
 
 function removeLang(lang) {
-  var idx=_languages.indexOf(lang);
-  if(idx>-1) _languages.splice(idx,1);
+  var idx=_languages.indexOf(lang); if(idx>-1) _languages.splice(idx,1);
   filterLangs(_langFilter);
 }
 
@@ -528,41 +547,25 @@ function buildLangTagsHTML() {
 }
 
 function buildProfileMetaHTML() {
-  return '<div class="inline-edit-row">'
-    +'📍 '+esc(_postal||'No zip code set')
-    +' <button class="btn-link" onclick="openLangModal()">✏️</button>'
-    +'</div>'
+  return '<div class="inline-edit-row">📍 '+esc(_postal||'No zip code set')
+    +' <button class="btn-link" onclick="openLangModal()">✏️</button></div>'
     +(_languages.length?'<div class="inline-edit-row">'+esc(_languages.join(', '))+'</div>':'');
 }
 
-// ─── Parent cat filter (screens 2-4) ─────────────────────────────────────────
+// ─── Parent cat filter ────────────────────────────────────────────────────────
 function setParentCat(screen, val) {
   _parentCat[screen]=val;
-  _subCat[screen]='';
   buildIdeas(screen);
   updateIdeasEl(screen);
-  var subEl=document.getElementById('sub-cat-select-'+screen);
-  if(subEl){
-    if(val){
-      var pool=getPool(screen);
-      var subs=(function(){var s={};pool.forEach(function(r){if(r.category)s[r.category]=1;});return Object.keys(s);})();
-      subEl.innerHTML='<option value="">All in '+esc(val)+'</option>'
-        +subs.map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join('');
-      subEl.style.display='';
-    } else { subEl.style.display='none'; }
-  }
 }
 
-// ─── Rec type filter ──────────────────────────────────────────────────────────
 function setRecType(val) {
   _recType=val; _recSubCat='';
-  buildIdeas(1);
-  updateIdeasEl(1);
-  updateBreadcrumb();
+  buildIdeas(1); updateIdeasEl(1); updateBreadcrumb();
   var subSel=document.getElementById('rec-subcat-select');
   if(subSel){
     var pool=(_refData&&_refData.recreation)||[];
-    var subCats=val?(function(){var s={};pool.filter(function(r){return r.recType===val;}).forEach(function(r){if(r.category)s[r.category]=1;});return Object.keys(s);})():[];
+    var subCats=val?(function(){var s={};pool.filter(function(r){return r.recType===val;}).forEach(function(r){if(r.category)s[r.category]=1;});return sortAlpha(Object.keys(s));})():[];
     subSel.innerHTML='<option value="">All '+esc(val||'recreation')+'</option>'
       +subCats.map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join('');
     subSel.style.display=val?'':'none';
@@ -570,21 +573,15 @@ function setRecType(val) {
 }
 
 function setRecSubCat(val) {
-  _recSubCat=val;
-  buildIdeas(1);
-  updateIdeasEl(1);
-  updateBreadcrumb();
+  _recSubCat=val; buildIdeas(1); updateIdeasEl(1); updateBreadcrumb();
 }
 
 function updateBreadcrumb() {
-  var el=document.getElementById('rec-breadcrumb');
-  if(!el) return;
+  var el=document.getElementById('rec-breadcrumb'); if(!el) return;
   var parts=['Recreation & Hobbies'];
   if(_recType) parts.push(_recType);
   if(_recSubCat) parts.push(_recSubCat);
-  el.innerHTML=parts.map(function(p,i){
-    return i<parts.length-1?esc(p)+' › ':'<span>'+esc(p)+'</span>';
-  }).join('');
+  el.innerHTML=parts.map(function(p,i){return i<parts.length-1?esc(p)+' › ':'<span>'+esc(p)+'</span>';}).join('');
 }
 
 function updateIdeasEl(screen) {
@@ -596,11 +593,8 @@ function updateIdeasEl(screen) {
 
 // ─── My ikigai button ─────────────────────────────────────────────────────────
 function renderIkigaiBtn() {
-  var el=document.getElementById('ikigai-btn-wrap');
-  if(!el) return;
-  var photoHTML=_photo
-    ?'<div class="ikigai-photo"><img src="'+esc(_photo)+'" alt=""></div>'
-    :'<div class="ikigai-photo">🌱</div>';
+  var el=document.getElementById('ikigai-btn-wrap'); if(!el) return;
+  var photoHTML=_photo?'<div class="ikigai-photo"><img src="'+esc(_photo)+'" alt=""></div>':'<div class="ikigai-photo">🌱</div>';
   el.innerHTML='<button class="ikigai-btn" onclick="goToProfile()">'+photoHTML+'My ikigai 🎯</button>';
 }
 
@@ -608,12 +602,10 @@ function goToProfile() { _hasProfile=true; _screen=0; render(); }
 
 // ─── Render ───────────────────────────────────────────────────────────────────
 function render() {
-  var el=document.getElementById('app-content');
-  if(!el) return;
+  var el=document.getElementById('app-content'); if(!el) return;
   renderIkigaiBtn();
   if(!_appearId){
-    el.innerHTML='<div style="text-align:center;padding:40px 20px">'
-      +'<p style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px;">Sign in to continue</p>'
+    el.innerHTML='<div style="text-align:center;padding:40px 20px"><p style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px;">Sign in to continue</p>'
       +'<p style="font-size:14px;color:var(--soft)"><a href="https://appear.network" style="color:var(--brand);font-weight:600;">Go to Appear Network</a> and open this page from your profile.</p></div>';
     return;
   }
@@ -623,8 +615,7 @@ function render() {
 }
 
 function progressHTML(n) {
-  var s='';
-  for(var i=1;i<=4;i++) s+='<div class="progress-step'+(i<=n?' done':'')+'"></div>';
+  var s=''; for(var i=1;i<=4;i++) s+='<div class="progress-step'+(i<=n?' done':'')+'"></div>';
   var labs=['','Recreation and hobbies','Your skillset','What you care about','What you need'];
   return '<div class="progress-wrap"><div class="progress-steps">'+s+'</div><div class="progress-label">Section '+n+' of 4 — '+labs[n]+'</div></div>';
 }
@@ -634,7 +625,16 @@ function navHTML(screen) {
   return '<div class="nav-row"><button class="btn-back" onclick="goBack()">Back</button>'+next+'</div>';
 }
 
-function ideasHTML(screen) {
+function catFilterHTML(screen) {
+  var opts='<option value="">All categories</option>'
+    +PARENT_CATS.map(function(c){return '<option value="'+esc(c)+'"'+(_parentCat[screen]===c?' selected':'')+'>'+esc(c)+'</option>';}).join('');
+  return '<div class="cat-filter-wrap">'
+    +'<span class="cat-filter-label">Or browse by category</span>'
+    +'<select onchange="setParentCat('+screen+',this.value)">'+opts+'</select>'
+    +'</div>';
+}
+
+function ideasHTMLStr(screen) {
   buildIdeas(screen);
   if(!_ideaChips[screen].length) return '';
   return '<div class="idea-section"><div class="idea-label">Ideas to get you started</div>'
@@ -645,122 +645,100 @@ function ideasHTML(screen) {
 
 // Profile summary
 function renderProfile(el) {
-  function section(label, arr, hasLevel, screenNum) {
+  function section(label, arr, hasLevel, levelKey, screenNum) {
     var tags=arr.length
       ?arr.map(function(r){
-          return '<div class="profile-tag">'+esc(r.item)
-            +(hasLevel&&r.level?'<span class="tag-level">'+esc(r.level)+'</span>':'')+'</div>';
+          var lv=hasLevel?(r[levelKey]||''):'';
+          var local=r.local?' 📍':'';
+          return '<div class="profile-tag">'+esc(r.item)+(lv?'<span class="tag-level">'+esc(lv)+'</span>':'')+local+'</div>';
         }).join('')
       :'<div class="profile-empty">Nothing added yet.</div>';
     return '<div class="profile-section">'
-      +'<div class="profile-section-header">'
-      +'<div class="profile-section-label">'+label+'</div>'
-      +'<button class="btn-link" onclick="jumpTo('+screenNum+')" style="font-size:12px;">✏️</button>'
-      +'</div>'
+      +'<div class="profile-section-header"><div class="profile-section-label">'+label+'</div>'
+      +'<button class="btn-link" onclick="jumpTo('+screenNum+')" style="font-size:12px;">✏️</button></div>'
       +'<div class="profile-tags">'+tags+'</div></div>';
   }
-  el.innerHTML='<h2>Here is how I show up in my community 🌱</h2>'
+  el.innerHTML='<h2>How I show up in my community 🌱</h2>'
     +'<div class="profile-meta-row" id="profile-meta-row">'+buildProfileMetaHTML()+'</div>'
-    +section('What I enjoy',_interests,true,1)
-    +section('My skills',_skills,true,2)
-    +section('What I care about',_values,false,3)
-    +section('What I need',_needs,false,4);
+    +section('What I enjoy',_interests,true,'level',1)
+    +section('My skills',_skills,true,'level',2)
+    +section('What I care about',_values,true,'level',3)
+    +section('What I need',_needs,false,'',4);
 }
 
 function jumpTo(screen) { _screen=screen; _hasProfile=false; render(); }
 
 // Screen 1 — Recreation
 function renderScreen1(el) {
-  var recTypes=['Sports','Movement & Performance','Outdoor & Nature','Games & Strategy','Making & Collecting'];
+  var recTypes=sortAlpha(['Sports','Movement & Performance','Outdoor & Nature','Games & Strategy','Making & Collecting']);
   var typeOpts='<option value="">All recreation</option>'
     +recTypes.map(function(t){return '<option value="'+esc(t)+'"'+(_recType===t?' selected':'')+'>'+esc(t)+'</option>';}).join('');
 
   el.innerHTML=progressHTML(1)
     +'<h2>What do you enjoy doing?</h2>'
-    +ideasHTML(1)
-    +'<div class="search-wrap"><span class="search-icon">🔍</span>'
-    +'<input type="text" id="search-input-1" placeholder="Search..." oninput="runSearch(1,this.value)"></div>'
-    +'<div id="search-results-1"></div>'
-    +'<div id="tags-section-1">'+buildRoleHTML(_interests,1,['Fan','Player','Coach'])+'</div>'
     +'<div class="cat-filter-wrap">'
-    +'<label style="margin-bottom:6px;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--brand);font-weight:600;">Or browse by category</label>'
+    +'<span class="cat-filter-label">Browse by category</span>'
     +'<div class="breadcrumb" id="rec-breadcrumb">Recreation & Hobbies</div>'
     +'<select onchange="setRecType(this.value)" style="margin-bottom:8px">'+typeOpts+'</select>'
     +'<select id="rec-subcat-select" onchange="setRecSubCat(this.value)" style="display:none"><option value="">All</option></select>'
     +'</div>'
+    +ideasHTMLStr(1)
+    +'<div class="search-wrap"><span class="search-icon">🔍</span>'
+    +'<input type="text" id="search-input-1" placeholder="Search to add..." oninput="runSearch(1,this.value)"></div>'
+    +'<div id="search-results-1"></div>'
+    +'<div id="tags-section-1">'+buildRoleHTML(_interests,1,['Fan','Participant','Coach'])+'</div>'
     +navHTML(1);
 }
 
 // Screen 2 — Skills
 function renderScreen2(el) {
-  var parentOpts='<option value="">All categories</option>'
-    +PARENT_CATS.map(function(c){return '<option value="'+esc(c)+'"'+(_parentCat[2]===c?' selected':'')+'>'+esc(c)+'</option>';}).join('');
-
   el.innerHTML=progressHTML(2)
     +'<h2>Share what you know to do or create.</h2>'
     +'<div id="title-warning-2"></div>'
-    +ideasHTML(2)
+    +catFilterHTML(2)
+    +ideasHTMLStr(2)
     +'<div class="search-wrap"><span class="search-icon">🔍</span>'
-    +'<input type="text" id="search-input-2" placeholder="Search skills..." oninput="runSearch(2,this.value)"></div>'
+    +'<input type="text" id="search-input-2" placeholder="Search skills to add..." oninput="runSearch(2,this.value)"></div>'
     +'<div id="search-results-2"></div>'
     +'<div id="tags-section-2">'+buildRoleHTML(_skills,2,['Starting to practice','Practicing','Mentoring'])+'</div>'
-    +'<div class="cat-filter-wrap">'
-    +'<label style="margin-bottom:6px;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--brand);font-weight:600;">Or browse by category</label>'
-    +'<select onchange="setParentCat(2,this.value)">'+parentOpts+'</select>'
-    +'<select id="sub-cat-select-2" style="display:none" onchange="_subCat[2]=this.value;buildIdeas(2);updateIdeasEl(2)"><option value="">All</option></select>'
-    +'</div>'
     +navHTML(2);
 }
 
 // Screen 3 — Values
 function renderScreen3(el) {
-  var parentOpts='<option value="">All categories</option>'
-    +PARENT_CATS.map(function(c){return '<option value="'+esc(c)+'"'+(_parentCat[3]===c?' selected':'')+'>'+esc(c)+'</option>';}).join('');
-
   el.innerHTML=progressHTML(3)
     +'<h2>What do you care about deeply?</h2>'
-    +ideasHTML(3)
+    +catFilterHTML(3)
+    +ideasHTMLStr(3)
     +'<div class="search-wrap"><span class="search-icon">🔍</span>'
-    +'<input type="text" id="search-input-3" placeholder="Search values and domains..." oninput="runSearch(3,this.value)"></div>'
+    +'<input type="text" id="search-input-3" placeholder="Search to add..." oninput="runSearch(3,this.value)"></div>'
     +'<div id="search-results-3"></div>'
-    +'<div id="tags-section-3">'+buildTagsHTML(3,_values)+'</div>'
-    +'<div class="cat-filter-wrap">'
-    +'<label style="margin-bottom:6px;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--brand);font-weight:600;">Or browse by category</label>'
-    +'<select onchange="setParentCat(3,this.value)">'+parentOpts+'</select>'
-    +'</div>'
+    +'<div id="tags-section-3">'+buildRoleHTML(_values,3,['Curious','Engaged','Leading'])+'</div>'
     +navHTML(3);
 }
 
 // Screen 4 — Needs
 function renderScreen4(el) {
-  var parentOpts='<option value="">All categories</option>'
-    +PARENT_CATS.map(function(c){return '<option value="'+esc(c)+'"'+(_parentCat[4]===c?' selected':'')+'>'+esc(c)+'</option>';}).join('');
-
   el.innerHTML=progressHTML(4)
     +'<h2>What do you need right now?</h2>'
-    +ideasHTML(4)
+    +catFilterHTML(4)
+    +ideasHTMLStr(4)
     +'<div class="search-wrap"><span class="search-icon">🔍</span>'
-    +'<input type="text" id="search-input-4" placeholder="Search..." oninput="runSearch(4,this.value)"></div>'
+    +'<input type="text" id="search-input-4" placeholder="Search to add..." oninput="runSearch(4,this.value)"></div>'
     +'<div id="search-results-4"></div>'
-    +'<div id="tags-section-4">'+buildTagsHTML(4,_needs)+'</div>'
-    +'<div class="cat-filter-wrap">'
-    +'<label style="margin-bottom:6px;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--brand);font-weight:600;">Or browse by category</label>'
-    +'<select onchange="setParentCat(4,this.value)">'+parentOpts+'</select>'
-    +'</div>'
+    +'<div id="tags-section-4">'+buildNeedsHTML()+'</div>'
     +navHTML(4);
 }
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
 window.goNext = function() {
-  // Skill level reminder
   if(_screen===2){
     var missing=_skills.filter(function(s){return !s.level;});
     if(missing.length){
-      var rem=document.getElementById('skill-reminder');
-      if(!rem){
+      var existing=document.getElementById('skill-reminder');
+      if(!existing){
         var nr=document.createElement('div');
-        nr.id='skill-reminder';
-        nr.className='reminder-msg';
+        nr.id='skill-reminder'; nr.className='reminder-msg';
         nr.textContent='Gentle reminder: '+missing.map(function(s){return s.item;}).join(', ')+(missing.length===1?' is':' are')+' still missing a level. You can add one above or continue.';
         var nav=document.querySelector('.nav-row');
         if(nav) nav.parentNode.insertBefore(nr,nav);
@@ -778,25 +756,26 @@ window.goBack = function() {
   _screen--;render();
 };
 
-window.jumpTo         = jumpTo;
-window.goToProfile    = goToProfile;
-window.runSearch      = runSearch;
-window.addItem        = addItem;
-window.removeItem     = removeItem;
-window.setLevel       = setLevel;
-window.toggleLang     = toggleLang;
-window.removeLang     = removeLang;
-window.filterLangs    = filterLangs;
-window.setParentCat   = setParentCat;
-window.setRecType     = setRecType;
-window.setRecSubCat   = setRecSubCat;
-window.updateIdeasEl  = updateIdeasEl;
-window.showCustomAdd  = showCustomAdd;
+window.jumpTo           = jumpTo;
+window.goToProfile      = goToProfile;
+window.runSearch        = runSearch;
+window.addItem          = addItem;
+window.removeItem       = removeItem;
+window.setLevel         = setLevel;
+window.toggleLocal      = toggleLocal;
+window.toggleLang       = toggleLang;
+window.removeLang       = removeLang;
+window.filterLangs      = filterLangs;
+window.setParentCat     = setParentCat;
+window.setRecType       = setRecType;
+window.setRecSubCat     = setRecSubCat;
+window.updateIdeasEl    = updateIdeasEl;
+window.showCustomAdd    = showCustomAdd;
 window.confirmCustomAdd = confirmCustomAdd;
 window.cancelCustomAdd  = cancelCustomAdd;
-window.openLangModal  = openLangModal;
-window.closeLangModal = closeLangModal;
-window.saveLangModal  = saveLangModal;
+window.openLangModal    = openLangModal;
+window.closeLangModal   = closeLangModal;
+window.saveLangModal    = saveLangModal;
 
 // ─── Boot ─────────────────────────────────────────────────────────────────────
 (async function init() {
@@ -808,4 +787,4 @@ window.saveLangModal  = saveLangModal;
 </script>
 </body>
 </html>
-<!-- Version: V1.6 | Last change: Auto-save on Next, heading updates, back button all screens, skill level reminder, pencil icons on profile sections, Section X of 4, ideas above added list, title word warning, rec search fixed, loading spinner, parent category drill-down on screens 2-4, Pets & Animal Care added | Date: 2026-06-24 -->
+<!-- Version: V1.7 | Last change: Title update, screen order search/category/chips/added, alpha dropdowns, Required label, Fan/Participant/Coach, Curious/Engaged/Leading for values, local toggle for needs, search placeholders updated | Date: 2026-06-24 -->
