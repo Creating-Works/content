@@ -1,4 +1,4 @@
-<!-- Version: V1.7 | Last change: Title update, screen order search/category/chips/added, alpha dropdowns, Required label, Fan/Participant/Coach, Curious/Engaged/Leading for values, local toggle for needs, search placeholders updated | Date: 2026-06-24 -->
+<!-- Version: V1.8 | Last change: Heading to "How I show up in my community", shareable view via ?show=MEMBERID with photo and name, no edit controls in viewer mode | Date: 2026-06-24 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -20,10 +20,12 @@
     .card { background: var(--card); max-width: 660px; margin: 0 auto; border-radius: 16px; padding: 52px; box-shadow: 0 24px 64px rgba(0,0,0,0.25), 0 4px 16px rgba(0,0,0,0.12); position: relative; }
     @media (max-width: 520px) { .card { padding: 32px 20px; } }
 
-    .ikigai-btn { position: absolute; top: 20px; right: 20px; display: flex; align-items: center; gap: 8px; background: var(--sel-bg); border: 1.5px solid var(--sel-border); border-radius: 24px; padding: 6px 14px 6px 6px; font-size: 13px; font-weight: 600; color: var(--brand); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.15s; z-index: 10; }
-    .ikigai-btn:hover { background: #d6eaf8; }
-    .ikigai-photo { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--sel-border); background: var(--input-bg); display: flex; align-items: center; justify-content: center; font-size: 14px; overflow: hidden; flex-shrink: 0; }
-    .ikigai-photo img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .top-right-btn { position: absolute; top: 20px; right: 20px; display: flex; align-items: center; gap: 8px; background: var(--sel-bg); border: 1.5px solid var(--sel-border); border-radius: 24px; padding: 6px 14px 6px 6px; font-size: 13px; font-weight: 600; color: var(--brand); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.15s; z-index: 10; }
+    .top-right-btn:hover { background: #d6eaf8; }
+    .top-right-btn.viewer { cursor: default; }
+    .top-right-btn.viewer:hover { background: var(--sel-bg); }
+    .btn-photo { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--sel-border); background: var(--input-bg); display: flex; align-items: center; justify-content: center; font-size: 14px; overflow: hidden; flex-shrink: 0; }
+    .btn-photo img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 
     .footer { text-align: center; margin-top: 20px; }
     .footer a { color: white; font-size: 13px; text-decoration: none; opacity: 0.85; font-family: 'DM Sans', sans-serif; }
@@ -75,11 +77,6 @@
     .idea-chip { padding: 6px 13px; border-radius: 18px; border: 1.5px dashed var(--border); background: var(--input-bg); font-size: 12px; color: var(--soft); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
     .idea-chip:hover { border-color: var(--brand); color: var(--brand); border-style: solid; background: var(--sel-bg); }
 
-    .tags-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 16px 0 8px; }
-    .tags-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
-    .tag { display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 20px; background: var(--sel-bg); border: 1.5px solid var(--sel-border); font-size: 13px; color: var(--brand); font-weight: 500; }
-    .tag-remove { cursor: pointer; font-size: 15px; color: var(--muted); line-height: 1; }
-
     .practice-wrap { margin-top: 4px; }
     .practice-item { background: var(--input-bg); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; }
     .practice-item-name { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
@@ -91,7 +88,6 @@
     .practice-btn.selected { background: var(--brand); border-color: var(--brand); color: white; font-weight: 500; }
     .practice-remove { margin-top: 10px; font-size: 12px; color: var(--muted); cursor: pointer; display: inline-block; }
 
-    /* Local toggle for needs */
     .need-item { background: var(--input-bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
     .need-item-name { font-size: 14px; font-weight: 600; color: var(--text); }
     .need-item-right { display: flex; align-items: center; gap: 12px; }
@@ -144,7 +140,7 @@
 <body>
 <div style="max-width:660px;margin:0 auto;">
   <div class="card" id="main-card">
-    <div id="ikigai-btn-wrap"></div>
+    <div id="top-right-wrap"></div>
     <div id="app-content">
       <div style="text-align:center;padding:60px 40px">
         <div style="width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--brand);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px;"></div>
@@ -179,19 +175,24 @@
 
 <script>
 // ─── Identity ───────────────────────────────────────────────────────────────
-var _appearId = null;
+var _appearId   = null;
+var _showId     = null;   // viewer mode: ?show=MEMBERID
+var _viewerMode = false;
+var _viewerPhoto = '';
+var _viewerName  = '';
+
 (function() {
   var params = new URLSearchParams(window.location.search);
-  var urlId  = params.get('id') || params.get('memberCard');
+  _showId = params.get('show') || null;
+  if (_showId) { _viewerMode = true; return; }
+  var urlId = params.get('id') || params.get('memberCard');
   if (urlId) { _appearId = urlId; try { localStorage.setItem('appear-id', _appearId); } catch(e) {} }
   else { try { _appearId = localStorage.getItem('appear-id'); } catch(e) {} }
 })();
 
 function normalizeId(id) { return id ? id.replace(/\./g,'').toLowerCase() : ''; }
 
-var ADMIN_ID = 'whss';
-var _isAdmin = _appearId && normalizeId(_appearId) === ADMIN_ID;
-var GS_URL   = 'https://script.google.com/macros/s/AKfycbzEavMnG4tMeWemoT5FLu9f_zjlKVIJsZLueG4nhw9akK0_nZqpbkZiXrAlWu1Fyhq9/exec';
+var GS_URL = 'https://script.google.com/macros/s/AKfycbzEavMnG4tMeWemoT5FLu9f_zjlKVIJsZLueG4nhw9akK0_nZqpbkZiXrAlWu1Fyhq9/exec';
 
 var PARENT_CATS = [
   'Arts & Culture','Business & Finance','Community & Civic','Events & Gatherings',
@@ -207,21 +208,22 @@ var _screen     = 1;
 var _refData    = null;
 var _hasProfile = false;
 var _photo      = '';
+var _name       = '';
 
 var _languages  = [];
 var _langFilter = '';
 var _postal     = '';
 
-var _interests  = [];  // {item, category, level}  Fan/Participant/Coach
-var _skills     = [];  // {item, category, level}  Starting to practice/Practicing/Mentoring
-var _values     = [];  // {item, category, level}  Curious/Engaged/Leading
-var _needs      = [];  // {item, category, local}  local = true/false
+var _interests  = [];
+var _skills     = [];
+var _values     = [];
+var _needs      = [];
 
-var _searchQ    = { 1:'', 2:'', 3:'', 4:'' };
-var _ideaChips  = { 1:[], 2:[], 3:[], 4:[] };
-var _recType    = '';
-var _recSubCat  = '';
-var _parentCat  = { 2:'', 3:'', 4:'' };
+var _searchQ   = { 1:'', 2:'', 3:'', 4:'' };
+var _ideaChips = { 1:[], 2:[], 3:[], 4:[] };
+var _recType   = '';
+var _recSubCat = '';
+var _parentCat = { 2:'', 3:'', 4:'' };
 var _customItem = '';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -247,8 +249,7 @@ function matchesQuery(r, ql) {
   if((r.recType||'').toLowerCase().includes(ql)) return true;
   var assoc=r.associations||'';
   if(!assoc) return false;
-  var words=assoc.toLowerCase().split(/[\s,]+/);
-  return words.some(function(w){return w===ql||w.startsWith(ql);});
+  return assoc.toLowerCase().split(/[\s,]+/).some(function(w){return w===ql||w.startsWith(ql);});
 }
 
 function checkTitleFlag(q) {
@@ -259,7 +260,7 @@ function checkTitleFlag(q) {
 
 function getPool(screen) {
   if(!_refData) return [];
-  if(screen===1) {
+  if(screen===1){
     var pool=_refData.recreation||[];
     if(_recSubCat) return pool.filter(function(r){return r.category===_recSubCat;});
     if(_recType) return pool.filter(function(r){return r.recType===_recType;});
@@ -284,16 +285,23 @@ async function loadRefData() {
 }
 
 async function loadProfile() {
+  var id=_viewerMode?_showId:_appearId;
+  if(!id) return;
   try {
-    var res=await fetch(GS_URL+'?action=lookupProfile&appearId='+encodeURIComponent(_appearId));
+    var res=await fetch(GS_URL+'?action=lookupProfile&appearId='+encodeURIComponent(id));
     var data=await res.json();
-    if(data.found&&data.photo) _photo=data.photo;
+    if(data.found){
+      if(_viewerMode){ _viewerPhoto=data.photo||''; _viewerName=data.name||''; }
+      else { _photo=data.photo||''; _name=data.name||''; }
+    }
   } catch(e){}
 }
 
 async function loadIntake() {
+  var id=_viewerMode?_showId:_appearId;
+  if(!id) return;
   try {
-    var res=await fetch(GS_URL+'?action=getIntake&appearId='+encodeURIComponent(_appearId));
+    var res=await fetch(GS_URL+'?action=getIntake&appearId='+encodeURIComponent(id));
     var data=await res.json();
     if(data.found&&data.data){
       _hasProfile=true;
@@ -311,10 +319,8 @@ async function loadIntake() {
 function parseTagStr(str, levelKey) {
   if(!str) return [];
   return str.split('|').filter(Boolean).map(function(s){
-    var p=s.split(':');
-    var obj={item:p[0],category:''};
-    obj[levelKey]=p[1]||'';
-    return obj;
+    var p=s.split(':'); var obj={item:p[0],category:''};
+    obj[levelKey]=p[1]||''; return obj;
   });
 }
 
@@ -328,7 +334,7 @@ function parseNeedsStr(str) {
 
 // ─── Auto-save ────────────────────────────────────────────────────────────────
 function autoSave() {
-  if(!_appearId) return;
+  if(!_appearId||_viewerMode) return;
   var interestsStr=_interests.map(function(s){return s.item+(s.level?':'+s.level:'');}).join('|');
   var skillsStr=_skills.map(function(s){return s.item+(s.level?':'+s.level:'');}).join('|');
   var valuesStr=_values.map(function(s){return s.item+(s.level?':'+s.level:'');}).join('|');
@@ -390,8 +396,7 @@ function updateSearchResults(screen, q, res) {
 // ─── Custom add ───────────────────────────────────────────────────────────────
 function showCustomAdd(screen, item) {
   _customItem=item;
-  var container=document.getElementById('search-results-'+screen);
-  if(!container) return;
+  var container=document.getElementById('search-results-'+screen); if(!container) return;
   var opts='<option value="">Select a category</option>'
     +PARENT_CATS.map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join('');
   container.innerHTML='<div class="custom-add-box">'
@@ -403,13 +408,11 @@ function showCustomAdd(screen, item) {
 }
 
 function confirmCustomAdd(screen) {
-  var sel=document.getElementById('custom-cat-select');
-  var cat=sel?sel.value:'';
+  var sel=document.getElementById('custom-cat-select'); var cat=sel?sel.value:'';
   if(!cat){toast('Please select a category');return;}
   fetch(GS_URL+'?action=addCustomSkill&appearId='+encodeURIComponent(_appearId)
     +'&item='+encodeURIComponent(_customItem)+'&category='+encodeURIComponent(cat));
-  addItem(screen,_customItem,cat);
-  _customItem='';
+  addItem(screen,_customItem,cat); _customItem='';
   var c=document.getElementById('search-results-'+screen); if(c) c.innerHTML='';
 }
 
@@ -455,8 +458,7 @@ function toggleLocal(idx) {
 }
 
 function updateTagsSection(screen) {
-  var el=document.getElementById('tags-section-'+screen);
-  if(!el) return;
+  var el=document.getElementById('tags-section-'+screen); if(!el) return;
   if(screen===1) el.innerHTML=buildRoleHTML(_interests,1,['Fan','Participant','Coach']);
   else if(screen===2) el.innerHTML=buildRoleHTML(_skills,2,['Starting to practice','Practicing','Mentoring']);
   else if(screen===3) el.innerHTML=buildRoleHTML(_values,3,['Curious','Engaged','Leading']);
@@ -489,8 +491,7 @@ function buildNeedsHTML() {
           +(n.category?'<div style="font-size:11px;color:var(--muted);margin-top:2px;">'+esc(n.category)+'</div>':'')
           +'</div>'
           +'<div class="need-item-right">'
-          +'<label class="local-toggle'+(n.local?' active':'')+'"><input type="checkbox"'+(n.local?' checked':'')
-          +' onchange="toggleLocal('+i+')"> 📍 Local only</label>'
+          +'<label class="local-toggle'+(n.local?' active':'')+'"><input type="checkbox"'+(n.local?' checked':'')+' onchange="toggleLocal('+i+')"> 📍 Local only</label>'
           +'<span class="practice-remove" onclick="removeItem(4,'+i+')">Remove</span>'
           +'</div></div>';
       }).join('')+'</div>';
@@ -548,15 +549,14 @@ function buildLangTagsHTML() {
 
 function buildProfileMetaHTML() {
   return '<div class="inline-edit-row">📍 '+esc(_postal||'No zip code set')
-    +' <button class="btn-link" onclick="openLangModal()">✏️</button></div>'
+    +(!_viewerMode?' <button class="btn-link" onclick="openLangModal()">✏️</button>':'')
+    +'</div>'
     +(_languages.length?'<div class="inline-edit-row">'+esc(_languages.join(', '))+'</div>':'');
 }
 
-// ─── Parent cat filter ────────────────────────────────────────────────────────
+// ─── Category filter ──────────────────────────────────────────────────────────
 function setParentCat(screen, val) {
-  _parentCat[screen]=val;
-  buildIdeas(screen);
-  updateIdeasEl(screen);
+  _parentCat[screen]=val; buildIdeas(screen); updateIdeasEl(screen);
 }
 
 function setRecType(val) {
@@ -572,9 +572,7 @@ function setRecType(val) {
   }
 }
 
-function setRecSubCat(val) {
-  _recSubCat=val; buildIdeas(1); updateIdeasEl(1); updateBreadcrumb();
-}
+function setRecSubCat(val) { _recSubCat=val; buildIdeas(1); updateIdeasEl(1); updateBreadcrumb(); }
 
 function updateBreadcrumb() {
   var el=document.getElementById('rec-breadcrumb'); if(!el) return;
@@ -591,11 +589,17 @@ function updateIdeasEl(screen) {
   }).join('');
 }
 
-// ─── My ikigai button ─────────────────────────────────────────────────────────
-function renderIkigaiBtn() {
-  var el=document.getElementById('ikigai-btn-wrap'); if(!el) return;
-  var photoHTML=_photo?'<div class="ikigai-photo"><img src="'+esc(_photo)+'" alt=""></div>':'<div class="ikigai-photo">🌱</div>';
-  el.innerHTML='<button class="ikigai-btn" onclick="goToProfile()">'+photoHTML+'My ikigai 🎯</button>';
+// ─── Top right button ─────────────────────────────────────────────────────────
+function renderTopRightBtn() {
+  var el=document.getElementById('top-right-wrap'); if(!el) return;
+  if(_viewerMode){
+    var ph=_viewerPhoto?'<div class="btn-photo"><img src="'+esc(_viewerPhoto)+'" alt=""></div>':'<div class="btn-photo">🌱</div>';
+    var nm=_viewerName||'Profile';
+    el.innerHTML='<div class="top-right-btn viewer">'+ph+esc(nm)+'</div>';
+  } else {
+    var ph2=_photo?'<div class="btn-photo"><img src="'+esc(_photo)+'" alt=""></div>':'<div class="btn-photo">🌱</div>';
+    el.innerHTML='<button class="top-right-btn" onclick="goToProfile()">'+ph2+'My ikigai 🎯</button>';
+  }
 }
 
 function goToProfile() { _hasProfile=true; _screen=0; render(); }
@@ -603,13 +607,18 @@ function goToProfile() { _hasProfile=true; _screen=0; render(); }
 // ─── Render ───────────────────────────────────────────────────────────────────
 function render() {
   var el=document.getElementById('app-content'); if(!el) return;
-  renderIkigaiBtn();
+  renderTopRightBtn();
+  if(_viewerMode){
+    if(_hasProfile){ renderProfile(el, true); return; }
+    el.innerHTML='<div class="empty" style="padding:40px;text-align:center;">No profile found.</div>';
+    return;
+  }
   if(!_appearId){
     el.innerHTML='<div style="text-align:center;padding:40px 20px"><p style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px;">Sign in to continue</p>'
       +'<p style="font-size:14px;color:var(--soft)"><a href="https://appear.network" style="color:var(--brand);font-weight:600;">Go to Appear Network</a> and open this page from your profile.</p></div>';
     return;
   }
-  if(_hasProfile&&_screen===0){renderProfile(el);return;}
+  if(_hasProfile&&_screen===0){renderProfile(el,false);return;}
   var fn={1:renderScreen1,2:renderScreen2,3:renderScreen3,4:renderScreen4}[_screen];
   if(fn) fn(el);
 }
@@ -621,17 +630,15 @@ function progressHTML(n) {
 }
 
 function navHTML(screen) {
-  var next='<button class="btn-next" onclick="goNext()">'+(screen===4?'Done':'Next')+'</button>';
-  return '<div class="nav-row"><button class="btn-back" onclick="goBack()">Back</button>'+next+'</div>';
+  return '<div class="nav-row"><button class="btn-back" onclick="goBack()">Back</button>'
+    +'<button class="btn-next" onclick="goNext()">'+(screen===4?'Done':'Next')+'</button></div>';
 }
 
 function catFilterHTML(screen) {
   var opts='<option value="">All categories</option>'
     +PARENT_CATS.map(function(c){return '<option value="'+esc(c)+'"'+(_parentCat[screen]===c?' selected':'')+'>'+esc(c)+'</option>';}).join('');
-  return '<div class="cat-filter-wrap">'
-    +'<span class="cat-filter-label">Or browse by category</span>'
-    +'<select onchange="setParentCat('+screen+',this.value)">'+opts+'</select>'
-    +'</div>';
+  return '<div class="cat-filter-wrap"><span class="cat-filter-label">Or browse by category</span>'
+    +'<select onchange="setParentCat('+screen+',this.value)">'+opts+'</select></div>';
 }
 
 function ideasHTMLStr(screen) {
@@ -643,8 +650,8 @@ function ideasHTMLStr(screen) {
     +'</div></div>';
 }
 
-// Profile summary
-function renderProfile(el) {
+// Profile summary — owner and viewer modes
+function renderProfile(el, viewerMode) {
   function section(label, arr, hasLevel, levelKey, screenNum) {
     var tags=arr.length
       ?arr.map(function(r){
@@ -653,13 +660,17 @@ function renderProfile(el) {
           return '<div class="profile-tag">'+esc(r.item)+(lv?'<span class="tag-level">'+esc(lv)+'</span>':'')+local+'</div>';
         }).join('')
       :'<div class="profile-empty">Nothing added yet.</div>';
+    var pencil=(!viewerMode)?'<button class="btn-link" onclick="jumpTo('+screenNum+')" style="font-size:12px;">✏️</button>':'';
     return '<div class="profile-section">'
-      +'<div class="profile-section-header"><div class="profile-section-label">'+label+'</div>'
-      +'<button class="btn-link" onclick="jumpTo('+screenNum+')" style="font-size:12px;">✏️</button></div>'
+      +'<div class="profile-section-header"><div class="profile-section-label">'+label+'</div>'+pencil+'</div>'
       +'<div class="profile-tags">'+tags+'</div></div>';
   }
+  var metaEdit=!viewerMode?' <button class="btn-link" onclick="openLangModal()">✏️</button>':'';
   el.innerHTML='<h2>How I show up in my community 🌱</h2>'
-    +'<div class="profile-meta-row" id="profile-meta-row">'+buildProfileMetaHTML()+'</div>'
+    +'<div class="profile-meta-row" id="profile-meta-row">'
+    +'<div class="inline-edit-row">📍 '+esc(_postal||'No zip code set')+metaEdit+'</div>'
+    +(_languages.length?'<div class="inline-edit-row">'+esc(_languages.join(', '))+'</div>':'')
+    +'</div>'
     +section('What I enjoy',_interests,true,'level',1)
     +section('My skills',_skills,true,'level',2)
     +section('What I care about',_values,true,'level',3)
@@ -668,20 +679,16 @@ function renderProfile(el) {
 
 function jumpTo(screen) { _screen=screen; _hasProfile=false; render(); }
 
-// Screen 1 — Recreation
+// Screens
 function renderScreen1(el) {
   var recTypes=sortAlpha(['Sports','Movement & Performance','Outdoor & Nature','Games & Strategy','Making & Collecting']);
   var typeOpts='<option value="">All recreation</option>'
     +recTypes.map(function(t){return '<option value="'+esc(t)+'"'+(_recType===t?' selected':'')+'>'+esc(t)+'</option>';}).join('');
-
-  el.innerHTML=progressHTML(1)
-    +'<h2>What do you enjoy doing?</h2>'
-    +'<div class="cat-filter-wrap">'
-    +'<span class="cat-filter-label">Browse by category</span>'
+  el.innerHTML=progressHTML(1)+'<h2>What do you enjoy doing?</h2>'
+    +'<div class="cat-filter-wrap"><span class="cat-filter-label">Browse by category</span>'
     +'<div class="breadcrumb" id="rec-breadcrumb">Recreation & Hobbies</div>'
     +'<select onchange="setRecType(this.value)" style="margin-bottom:8px">'+typeOpts+'</select>'
-    +'<select id="rec-subcat-select" onchange="setRecSubCat(this.value)" style="display:none"><option value="">All</option></select>'
-    +'</div>'
+    +'<select id="rec-subcat-select" onchange="setRecSubCat(this.value)" style="display:none"><option value="">All</option></select></div>'
     +ideasHTMLStr(1)
     +'<div class="search-wrap"><span class="search-icon">🔍</span>'
     +'<input type="text" id="search-input-1" placeholder="Search to add..." oninput="runSearch(1,this.value)"></div>'
@@ -690,13 +697,10 @@ function renderScreen1(el) {
     +navHTML(1);
 }
 
-// Screen 2 — Skills
 function renderScreen2(el) {
-  el.innerHTML=progressHTML(2)
-    +'<h2>Share what you know to do or create.</h2>'
+  el.innerHTML=progressHTML(2)+'<h2>Share what you know to do or create.</h2>'
     +'<div id="title-warning-2"></div>'
-    +catFilterHTML(2)
-    +ideasHTMLStr(2)
+    +catFilterHTML(2)+ideasHTMLStr(2)
     +'<div class="search-wrap"><span class="search-icon">🔍</span>'
     +'<input type="text" id="search-input-2" placeholder="Search skills to add..." oninput="runSearch(2,this.value)"></div>'
     +'<div id="search-results-2"></div>'
@@ -704,12 +708,9 @@ function renderScreen2(el) {
     +navHTML(2);
 }
 
-// Screen 3 — Values
 function renderScreen3(el) {
-  el.innerHTML=progressHTML(3)
-    +'<h2>What do you care about deeply?</h2>'
-    +catFilterHTML(3)
-    +ideasHTMLStr(3)
+  el.innerHTML=progressHTML(3)+'<h2>What do you care about deeply?</h2>'
+    +catFilterHTML(3)+ideasHTMLStr(3)
     +'<div class="search-wrap"><span class="search-icon">🔍</span>'
     +'<input type="text" id="search-input-3" placeholder="Search to add..." oninput="runSearch(3,this.value)"></div>'
     +'<div id="search-results-3"></div>'
@@ -717,12 +718,9 @@ function renderScreen3(el) {
     +navHTML(3);
 }
 
-// Screen 4 — Needs
 function renderScreen4(el) {
-  el.innerHTML=progressHTML(4)
-    +'<h2>What do you need right now?</h2>'
-    +catFilterHTML(4)
-    +ideasHTMLStr(4)
+  el.innerHTML=progressHTML(4)+'<h2>What do you need right now?</h2>'
+    +catFilterHTML(4)+ideasHTMLStr(4)
     +'<div class="search-wrap"><span class="search-icon">🔍</span>'
     +'<input type="text" id="search-input-4" placeholder="Search to add..." oninput="runSearch(4,this.value)"></div>'
     +'<div id="search-results-4"></div>'
@@ -779,6 +777,10 @@ window.saveLangModal    = saveLangModal;
 
 // ─── Boot ─────────────────────────────────────────────────────────────────────
 (async function init() {
+  if(_viewerMode){
+    await Promise.all([loadRefData(), loadProfile(), loadIntake()]);
+    render(); return;
+  }
   if(!_appearId){render();return;}
   await Promise.all([loadRefData(),loadProfile(),loadIntake()]);
   if(_hasProfile) _screen=0;
@@ -787,4 +789,4 @@ window.saveLangModal    = saveLangModal;
 </script>
 </body>
 </html>
-<!-- Version: V1.7 | Last change: Title update, screen order search/category/chips/added, alpha dropdowns, Required label, Fan/Participant/Coach, Curious/Engaged/Leading for values, local toggle for needs, search placeholders updated | Date: 2026-06-24 -->
+<!-- Version: V1.8 | Last change: Heading to "How I show up in my community", shareable view via ?show=MEMBERID with photo and name, no edit controls in viewer mode | Date: 2026-06-24 -->
