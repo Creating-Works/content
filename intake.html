@@ -1,4 +1,4 @@
-<!-- Version: V2.2 | Last change: Edit button blue/white, language chips under skills, spacing under top-right, Required right-aligned below buttons, practice items wider, My ikigai replaces Cancel, giving.html UI patterns | Date: 2026-06-24 -->
+<!-- Version: V2.3 | Last change: Remove line between skills and language chips, remove Edit next to language chips, postal code not zip code, Recreation sub-chip removed from sheet | Date: 2026-06-25 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -119,7 +119,7 @@
     .profile-tag{padding:6px 12px;border-radius:20px;background:var(--sel-bg);border:1.5px solid var(--sel-border);font-size:13px;color:var(--brand);font-weight:500;}
     .tag-level{font-size:11px;color:var(--muted);font-weight:400;margin-left:4px;}
     .profile-empty{font-size:13px;color:var(--muted);font-style:italic;}
-    .profile-lang-row{margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+    .profile-lang-row{margin-top:12px;padding-top:4px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
     .profile-lang-text{font-size:13px;color:var(--soft);}
     /* Lang modal */
     .lang-dropdown-wrap{position:relative;margin-bottom:12px;}
@@ -180,8 +180,8 @@
       <div class="lang-list" id="lang-list"></div>
     </div>
     <div class="lang-tags" id="lang-tags"></div>
-    <div style="margin-top:20px"><label>Zip code</label>
-    <input type="text" id="lang-modal-postal" placeholder="Your zip code" oninput="_postal=this.value"></div>
+    <div style="margin-top:20px"><label>Postal code</label>
+    <input type="text" id="lang-modal-postal" placeholder="Your postal code" oninput="_postal=this.value"></div>
     <div style="margin-top:16px">
       <button class="custom-add-confirm" onclick="saveLangModal()">Save</button>
       <button class="custom-add-cancel" onclick="closeLangModal()">Cancel</button>
@@ -691,8 +691,7 @@ function buildLangRowHTML(){
   var chips=_languages.map(function(l){
     return '<div class="profile-tag" style="background:var(--input-bg);border-color:var(--border);color:var(--soft);">'+esc(l)+'</div>';
   }).join('');
-  var editBtn=!_viewerMode?'<button class="edit-btn" onclick="openLangModal()">✏️ Edit</button>':'';
-  return (chips||'')+'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'+editBtn+'</div>';
+  return chips||'';
 }
 
 // ─── Share modal ──────────────────────────────────────────────────────────────
@@ -894,4 +893,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.2 | Last change: Edit button blue/white, language chips under skills, spacing under top-right, Required right-aligned below buttons, practice items wider, My ikigai replaces Cancel, giving.html UI patterns | Date: 2026-06-24 -->
+<!-- Version: V2.3 | Last change: Remove line between skills and language chips, remove Edit next to language chips, postal code not zip code, Recreation sub-chip removed from sheet | Date: 2026-06-25 -->
