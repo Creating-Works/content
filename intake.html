@@ -1,4 +1,4 @@
-<!-- Version: V2.1 | Last change: Fix goNext regression, fix drill-down showing no chips when no sub-cats, fix screen type consistency, v2.1 profile UX updates, Cancel/Done in edit mode, completion gate on first visit | Date: 2026-06-24 -->
+<!-- Version: V2.2 | Last change: Edit button blue/white, language chips under skills, spacing under top-right, Required right-aligned below buttons, practice items wider, My ikigai replaces Cancel, giving.html UI patterns | Date: 2026-06-24 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -24,7 +24,7 @@
     .share-btn:hover{background:#d6eaf8;}
     .footer{text-align:center;margin-top:20px;}
     .footer a{color:white;font-size:13px;text-decoration:none;opacity:0.85;font-family:'DM Sans',sans-serif;}
-    h2{font-size:20px;font-weight:700;color:var(--text);line-height:1.3;margin-bottom:16px;}
+    h2{font-size:20px;font-weight:700;color:var(--text);line-height:1.3;margin-bottom:16px;margin-top:20px;}
     hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
     label{display:block;font-size:14px;color:var(--muted);margin-bottom:6px;font-weight:500;}
     input[type="text"]{width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--text);outline:none;transition:border-color 0.2s;}
@@ -73,9 +73,9 @@
     .custom-add-confirm{background:var(--brand);color:white;border:none;border-radius:8px;padding:10px 20px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;}
     .custom-add-cancel{background:none;border:none;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;margin-left:10px;}
     /* Added items */
-    .added-section{margin-top:16px;}
+    .added-section{margin-top:16px;} .practice-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;}
     .added-label{font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
-    .practice-item{background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:10px;}
+    .practice-item{background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:10px;min-width:0;}
     .practice-item-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
     .practice-item-name{font-size:14px;font-weight:600;color:var(--text);}
     .practice-item-x{background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:0;line-height:1;}
@@ -114,7 +114,7 @@
     .profile-section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
     .profile-section-label{font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);}
     .profile-section-actions{display:flex;align-items:center;gap:8px;}
-    .edit-btn{font-size:12px;font-weight:600;color:var(--brand);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;padding:0;}
+    .edit-btn{font-size:12px;font-weight:600;color:white;background:var(--brand);border:none;border-radius:16px;cursor:pointer;font-family:'DM Sans',sans-serif;padding:5px 12px;}
     .profile-tags{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px;}
     .profile-tag{padding:6px 12px;border-radius:20px;background:var(--sel-bg);border:1.5px solid var(--sel-border);font-size:13px;color:var(--brand);font-weight:500;}
     .tag-level{font-size:11px;color:var(--muted);font-weight:400;margin-left:4px;}
@@ -562,7 +562,7 @@ function buildAddedHTML(s){
   if(!arr.length) return '<div class="empty">Nothing added yet.</div>';
   var levels=s==='1'?['Fan','Participant','Coach']:s==='2'?['Starting to practice','Practicing','Mentoring']:s==='3'?['Curious','Engaged','Leading']:null;
   var isNeed=(s==='4s'||s==='4r');
-  return '<div class="added-section"><div class="added-label">Added</div>'
+  var useGrid=!isNeed;return '<div class="added-section"><div class="added-label">Added</div>'+(useGrid?'<div class="practice-grid">':'')
     +arr.map(function(item,i){
         if(isNeed){
           return '<div class="need-item">'
@@ -580,9 +580,9 @@ function buildAddedHTML(s){
           +'<div class="practice-item-header"><div class="practice-item-name">'+esc(item.item)+'</div>'
           +'<button class="practice-item-x" onclick="removeItem(\''+s+'\','+i+')">×</button></div>'
           +(item.category?'<div class="practice-item-cat">'+esc(item.category)+'</div>':'')
-          +(levels?'<div class="practice-required">Required</div><div class="practice-options">'+btns+'</div>':'')
+          +(levels?'<div class="practice-options">'+btns+'</div><div style="text-align:right;font-size:11px;color:var(--brand);margin-top:6px;">Required</div>':'')
           +'</div>';
-      }).join('')+'</div>';
+      }).join('')+(useGrid?'</div>':'')+'</div>';
 }
 
 // ─── Search ───────────────────────────────────────────────────────────────────
@@ -688,8 +688,11 @@ window.toggleLang = function(lang){ var idx=_languages.indexOf(lang);if(idx>-1)_
 window.removeLang = function(lang){ var idx=_languages.indexOf(lang);if(idx>-1)_languages.splice(idx,1);window.filterLangs(_langFilter); };
 function buildLangTagsHTML(){return _languages.map(function(l){return '<div class="lang-tag">'+esc(l)+'<span class="lang-tag-remove" onclick="removeLang(\''+esc(l)+'\')">×</span></div>';}).join('');}
 function buildLangRowHTML(){
-  return (_languages.length?'<span class="profile-lang-text">'+esc(_languages.join(', '))+'</span>':'')
-    +(!_viewerMode?'<button class="edit-btn" onclick="openLangModal()">✏️ Edit</button>':'');
+  var chips=_languages.map(function(l){
+    return '<div class="profile-tag" style="background:var(--input-bg);border-color:var(--border);color:var(--soft);">'+esc(l)+'</div>';
+  }).join('');
+  var editBtn=!_viewerMode?'<button class="edit-btn" onclick="openLangModal()">✏️ Edit</button>':'';
+  return (chips||'')+'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'+editBtn+'</div>';
 }
 
 // ─── Share modal ──────────────────────────────────────────────────────────────
@@ -757,7 +760,7 @@ function navHTML(screen){
   // Edit mode: Cancel + Done
   if(_editMode){
     return '<div class="nav-row">'
-      +'<button class="btn-back" onclick="cancelEdit()">Cancel</button>'
+      +'<button class="btn-back" onclick="cancelEdit()">My ikigai 🎯</button>'
       +'<button class="btn-next" onclick="doneEdit()">Done</button>'
       +'</div>';
   }
@@ -891,4 +894,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.1 | Last change: Fix goNext regression, fix drill-down showing no chips when no sub-cats, fix screen type consistency, v2.1 profile UX updates, Cancel/Done in edit mode, completion gate on first visit | Date: 2026-06-24 -->
+<!-- Version: V2.2 | Last change: Edit button blue/white, language chips under skills, spacing under top-right, Required right-aligned below buttons, practice items wider, My ikigai replaces Cancel, giving.html UI patterns | Date: 2026-06-24 -->
