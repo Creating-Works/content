@@ -1,4 +1,4 @@
-<!-- Version: V2.3 | Last change: Remove line between skills and language chips, remove Edit next to language chips, postal code not zip code, Recreation sub-chip removed from sheet | Date: 2026-06-25 -->
+<!-- Version: V2.4 | Last change: Fix drill state init bug, Some info missing no box, lang chips no space, lang edit blue btn on skills, multi-select levels, remove My ikigai from nav, map pin to pencil, share title updated | Date: 2026-06-25 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -99,7 +99,7 @@
     .local-toggle.active{color:var(--brand);font-weight:600;}
     /* Warning */
     .warning-msg{background:#FFF8E1;border:1px solid #FFD54F;border-radius:8px;padding:10px 14px;font-size:13px;color:#7A5F00;margin-bottom:12px;}
-    .reminder-msg{background:var(--sel-bg);border:1px solid var(--sel-border);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--brand);display:inline-block;}
+    .reminder-msg{font-size:12px;color:var(--brand);display:inline-block;padding:0;}
     /* Nav */
     .nav-row{display:flex;gap:12px;margin-top:28px;}
     .btn-back{flex:1;padding:14px;border-radius:10px;border:1.5px solid var(--border);background:white;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;color:var(--soft);cursor:pointer;transition:all 0.15s;}
@@ -119,7 +119,7 @@
     .profile-tag{padding:6px 12px;border-radius:20px;background:var(--sel-bg);border:1.5px solid var(--sel-border);font-size:13px;color:var(--brand);font-weight:500;}
     .tag-level{font-size:11px;color:var(--muted);font-weight:400;margin-left:4px;}
     .profile-empty{font-size:13px;color:var(--muted);font-style:italic;}
-    .profile-lang-row{margin-top:12px;padding-top:4px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+    .profile-lang-row{margin-top:4px;padding-top:0;display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
     .profile-lang-text{font-size:13px;color:var(--soft);}
     /* Lang modal */
     .lang-dropdown-wrap{position:relative;margin-bottom:12px;}
@@ -193,7 +193,7 @@
 <div class="modal-overlay" id="share-modal">
   <div class="modal">
     <button class="modal-close" onclick="closeShareModal()">✕</button>
-    <div class="modal-title">Share my ikigai profile</div>
+    <div class="modal-title">Share my community profile</div>
     <div class="share-actions">
       <button class="share-copy-btn" onclick="copyShareLink()">Copy link</button>
       <button class="share-native-btn" onclick="nativeShare()">Share ↗</button>
@@ -255,7 +255,13 @@ var _needsSkill  = [];
 var _needsRes    = [];
 
 // Drill state — all keys are strings
-var _drill = {'1':{},'2':{},'3':{},'4s':{},'4r':{}};
+var _drill = {
+  '1':  {parentCat:'',subCat:'',itemCat:''},
+  '2':  {parentCat:'',subCat:'',itemCat:''},
+  '3':  {parentCat:'',subCat:'',itemCat:''},
+  '4s': {parentCat:'',subCat:'',itemCat:''},
+  '4r': {parentCat:'',subCat:'',itemCat:''}
+};
 function getDrill(s){return _drill[String(s)]||{};}
 function setDrillKey(s,k,v){var d=_drill[String(s)];if(!d)return;d[k]=v;}
 function resetDrillTo(s,level){
@@ -542,7 +548,12 @@ window.removeItem = function(screen, idx){
 
 window.setLevel = function(screen, idx, level){
   var arr=getArr(String(screen));
-  if(arr[idx]) arr[idx].level=level;
+  if(!arr[idx]) return;
+  var current=arr[idx].level||'';
+  var parts=current?current.split(','):[];
+  var pos=parts.indexOf(level);
+  if(pos>-1) parts.splice(pos,1); else parts.push(level);
+  arr[idx].level=parts.join(',');
   updateAddedSection(String(screen));
 };
 
@@ -574,7 +585,7 @@ function buildAddedHTML(s){
             +'</div></div>';
         }
         var btns=levels?levels.map(function(lv){
-          return '<button class="practice-btn'+(item.level===lv?' selected':'')+'" onclick="setLevel(\''+s+'\','+i+',\''+esc(lv)+'\')">'+lv+'</button>';
+          return '<button class="practice-btn'+(item.level&&item.level.split(',').indexOf(lv)>-1?' selected':'')+'" onclick="setLevel(\''+s+'\','+i+',\''+esc(lv)+'\')">'+lv+'</button>';
         }).join(''):'';
         return '<div class="practice-item">'
           +'<div class="practice-item-header"><div class="practice-item-name">'+esc(item.item)+'</div>'
@@ -691,7 +702,10 @@ function buildLangRowHTML(){
   var chips=_languages.map(function(l){
     return '<div class="profile-tag" style="background:var(--input-bg);border-color:var(--border);color:var(--soft);">'+esc(l)+'</div>';
   }).join('');
-  return chips||'';
+  var editBtn=!_viewerMode
+    ?'<button class="edit-btn" onclick="openLangModal()" style="margin-left:6px;">✏️ Edit</button>'
+    :'';
+  return chips+editBtn;
 }
 
 // ─── Share modal ──────────────────────────────────────────────────────────────
@@ -759,7 +773,6 @@ function navHTML(screen){
   // Edit mode: Cancel + Done
   if(_editMode){
     return '<div class="nav-row">'
-      +'<button class="btn-back" onclick="cancelEdit()">My ikigai 🎯</button>'
       +'<button class="btn-next" onclick="doneEdit()">Done</button>'
       +'</div>';
   }
@@ -799,7 +812,7 @@ function renderProfile(el, viewerMode){
   }
   var metaRow=!viewerMode
     ?'<div class="profile-meta-row">'
-      +'<div class="meta-pill" onclick="openLangModal()">📍 '+esc(_postal||'No zip')+'</div>'
+      +'<div class="meta-pill" onclick="openLangModal()">✏️ '+esc(_postal||'No postal code')+'</div>'
       +'</div>'
     :'';
   var allNeeds=_needsSkill.concat(_needsRes);
@@ -893,4 +906,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.3 | Last change: Remove line between skills and language chips, remove Edit next to language chips, postal code not zip code, Recreation sub-chip removed from sheet | Date: 2026-06-25 -->
+<!-- Version: V2.4 | Last change: Fix drill state init bug, Some info missing no box, lang chips no space, lang edit blue btn on skills, multi-select levels, remove My ikigai from nav, map pin to pencil, share title updated | Date: 2026-06-25 -->
