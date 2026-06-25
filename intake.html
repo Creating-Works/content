@@ -719,7 +719,7 @@ window.copyShareLink = function(){
   catch(e){toast('Copy: '+getShareURL());}
 };
 window.nativeShare = function(){
-  if(navigator.share){navigator.share({title:'How I show up in my community',url:getShareURL()}).catch(function(){});}
+  if(navigator.share){navigator.share({title:'This is me 🌱',url:getShareURL()}).catch(function(){});}
   else{window.copyShareLink();}
 };
 
