@@ -1,4 +1,4 @@
-<!-- Version: V2.4 | Last change: Fix drill state init bug, Some info missing no box, lang chips no space, lang edit blue btn on skills, multi-select levels, remove My ikigai from nav, map pin to pencil, share title updated | Date: 2026-06-25 -->
+<!-- Version: V2.5 | Last change: Postal pill right-justified, My ikigai btn opens share modal on intake screens, link btn removed, lang edit btn moved to skills screen only | Date: 2026-06-25 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -107,7 +107,7 @@
     .btn-next{flex:2;padding:14px;border-radius:10px;border:none;background:var(--brand);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;color:white;cursor:pointer;transition:background 0.15s;}
     .btn-next:hover{background:var(--hover);}
     /* Profile */
-    .profile-meta-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);}
+    .profile-meta-row{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);}
     .meta-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;background:var(--brand);color:white;font-size:13px;font-weight:600;cursor:pointer;}
     .meta-pill:hover{background:var(--hover);}
     .profile-section{margin-bottom:24px;}
@@ -702,10 +702,7 @@ function buildLangRowHTML(){
   var chips=_languages.map(function(l){
     return '<div class="profile-tag" style="background:var(--input-bg);border-color:var(--border);color:var(--soft);">'+esc(l)+'</div>';
   }).join('');
-  var editBtn=!_viewerMode
-    ?'<button class="edit-btn" onclick="openLangModal()" style="margin-left:6px;">✏️ Edit</button>'
-    :'';
-  return chips+editBtn;
+  return chips||'';
 }
 
 // ─── Share modal ──────────────────────────────────────────────────────────────
@@ -729,13 +726,19 @@ window.nativeShare = function(){
 // ─── Top right ────────────────────────────────────────────────────────────────
 function renderTopRight(){
   var el=document.getElementById('top-right-area'); if(!el) return;
-  var shareBtn='<div class="share-btn" onclick="openShareModal()" title="Share">🔗</div>';
   if(_viewerMode){
     var ph=_viewerPhoto?'<div class="btn-photo"><img src="'+esc(_viewerPhoto)+'" alt=""></div>':'<div class="btn-photo">🌱</div>';
-    el.innerHTML=shareBtn+'<div class="ikigai-btn" style="cursor:default;">'+ph+esc(_viewerName||'Profile')+'</div>';
-  } else {
+    el.innerHTML='<div class="share-btn" onclick="openShareModal()" title="Share">🔗</div>'
+      +'<div class="ikigai-btn" style="cursor:default;">'+ph+esc(_viewerName||'Profile')+'</div>';
+  } else if(_screen===0){
+    // On profile summary: My ikigai goes to profile (already there), show share btn separately
     var ph2=_photo?'<div class="btn-photo"><img src="'+esc(_photo)+'" alt=""></div>':'<div class="btn-photo">🌱</div>';
-    el.innerHTML=shareBtn+'<button class="ikigai-btn" onclick="goToProfile()">'+ph2+'My ikigai 🎯</button>';
+    el.innerHTML='<div class="share-btn" onclick="openShareModal()" title="Share">🔗</div>'
+      +'<button class="ikigai-btn" onclick="goToProfile()">'+ph2+'My ikigai 🎯</button>';
+  } else {
+    // On intake screens: My ikigai opens share modal, no separate link btn
+    var ph3=_photo?'<div class="btn-photo"><img src="'+esc(_photo)+'" alt=""></div>':'<div class="btn-photo">🌱</div>';
+    el.innerHTML='<button class="ikigai-btn" onclick="openShareModal()">'+ph3+'My ikigai 🎯</button>';
   }
 }
 
@@ -846,7 +849,21 @@ function renderScreen(s, heading, searchPlaceholder, drillId, addedId){
 }
 
 function renderScreen1(el){ renderScreen(1,'What do you enjoy doing?','Search to add...','drill-1','added-1'); }
-function renderScreen2(el){ renderScreen(2,'Share what you know how to do or how to create.','Search skills to add...','drill-2','added-2'); }
+function renderScreen2(el){
+  var cont=document.getElementById('app-content'); if(!cont) return;
+  cont.innerHTML=(_editMode?'':progressHTML(2))
+    +'<h2>Share what you know how to do or how to create.</h2>'
+    +'<div id="title-warning-2"></div>'
+    +'<div style="margin-bottom:14px;">'
+    +'<button class="edit-btn" onclick="openLangModal()" style="display:inline-flex;align-items:center;gap:6px;">✏️ '
+    +(_languages.length?'Languages: '+_languages.join(', '):'Add your languages')+'</button>'
+    +'</div>'
+    +screenSearchHTML('2','Search skills to add...')
+    +'<div id="drill-2"></div>'
+    +'<div id="added-2">'+buildAddedHTML('2')+'</div>'
+    +navHTML(2);
+  window.renderDrill('2','drill-2');
+}
 function renderScreen3(el){ renderScreen(3,'What do you care about deeply?','Search to add...','drill-3','added-3'); }
 
 function renderScreen4(el){
@@ -906,4 +923,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.4 | Last change: Fix drill state init bug, Some info missing no box, lang chips no space, lang edit blue btn on skills, multi-select levels, remove My ikigai from nav, map pin to pencil, share title updated | Date: 2026-06-25 -->
+<!-- Version: V2.5 | Last change: Postal pill right-justified, My ikigai btn opens share modal on intake screens, link btn removed, lang edit btn moved to skills screen only | Date: 2026-06-25 -->
