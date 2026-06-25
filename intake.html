@@ -734,7 +734,7 @@ function renderTopRight(){
     // On profile summary: My ikigai goes to profile (already there), show share btn separately
     var ph2=_photo?'<div class="btn-photo"><img src="'+esc(_photo)+'" alt=""></div>':'<div class="btn-photo">🌱</div>';
     el.innerHTML='<div class="share-btn" onclick="openShareModal()" title="Share">🔗</div>'
-      +'<button class="ikigai-btn" onclick="goToProfile()">'+ph2+'My ikigai 🎯</button>';
+      +'<button class="ikigai-btn" onclick="goToProfile()">'+ph2+'About me 🎯</button>';
   } else {
     // On intake screens: My ikigai opens share modal, no separate link btn
     var ph3=_photo?'<div class="btn-photo"><img src="'+esc(_photo)+'" alt=""></div>':'<div class="btn-photo">🌱</div>';
@@ -819,7 +819,7 @@ function renderProfile(el, viewerMode){
       +'</div>'
     :'';
   var allNeeds=_needsSkill.concat(_needsRes);
-  el.innerHTML='<h2>How I show up in my community 🌱</h2>'
+  el.innerHTML='<h2>This is me 🌱</h2>'
     +metaRow
     +section('What I enjoy',_interests,true,'level',1)
     +section('My skills',_skills,true,'level',2)
