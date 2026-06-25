@@ -1,4 +1,4 @@
-<!-- Version: V2.31 | LAST CHANGE: User-specific localStorage key; viewer mode uses ?owner= and fetches live from sheet; generateLink produces simple owner URL | Date: 2026-06-22 -->
+<!-- Version: V2.32 | LAST CHANGE: Fix Received tab — markMovedBack called on move back to list so items no longer reappear in Received | Date: 2026-06-24 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1091,6 +1091,10 @@ function moveBackToList(itemJson) {
       + '&note='        + encodeURIComponent(newItem.note)
       + '&location='    + encodeURIComponent('')
     ).catch(() => {});
+    fetch(GS_URL + '?action=markMovedBack'
+      + '&appearId=' + encodeURIComponent(_appearId)
+      + '&item='     + encodeURIComponent(newItem.title)
+    ).catch(() => {});
   }
   drawerTab = 'list';
   historyLoaded = false;
@@ -1412,4 +1416,4 @@ window.moveBackToList      = moveBackToList;
 </script>
 </body>
 </html>
-<!-- V2.31 -->
+<!-- V2.32 -->
