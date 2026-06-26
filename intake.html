@@ -1,4 +1,4 @@
-<!-- Version: V2.8 | Last change: Skill 14 cats, Thing sub-cats, 4-segment needs, duplicate fix, Associated category missing, remove Add another, lang line fix | Date: 2026-06-25 -->
+<!-- Version: V2.9 | Last change: allAdded removed, sub-chip CSS, screen3 search re-render, ? fixed overlay, share modal mobile, top btn no-name, values/domains tabs, quick needs | Date: 2026-06-25 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -48,7 +48,7 @@
     .cat-chip.selected{background:var(--brand);border-color:var(--brand);color:white;font-weight:600;}
     /* Sub chips */
     .sub-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px;}
-    .sub-chip{padding:6px 13px;border-radius:18px;border:1.5px solid var(--border);background:white;font-size:12px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
+    /* sub-chip style defined below */
     .sub-chip:hover{border-color:var(--brand);color:var(--brand);}
     .sub-chip.selected{background:var(--brand);border-color:var(--brand);color:white;font-weight:500;}
     /* Item chips */
@@ -153,15 +153,29 @@
     .added-header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
     .level-help-btn{background:none;border:1.5px solid var(--border);border-radius:50%;width:20px;height:20px;font-size:11px;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;justify-content:center;padding:0;}
     .level-help-btn:hover{border-color:var(--brand);color:var(--brand);}
-    .level-popup{display:none;background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--soft);margin-bottom:10px;line-height:1.6;}
-    .level-popup.open{display:block;}
+    /* level-popup moved below */
+    /* level-popup.open moved below */
     .ideas-prompt{font-size:13px;color:var(--muted);font-style:italic;margin-bottom:10px;}
-    .needs-top-chips{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+    /* needs-top-chips moved below */
     .needs-top-chip{padding:10px 18px;border-radius:20px;border:1.5px solid var(--border);background:white;font-size:14px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;transition:all 0.15s;}
     .needs-top-chip:hover{border-color:var(--brand);color:var(--brand);}
+    .needs-top-chips{display:flex;gap:10px;margin-bottom:0;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid var(--border);}
     .needs-top-chip.selected{background:var(--brand);border-color:var(--brand);color:white;font-weight:600;}
     .needs-detail-box{background:var(--input-bg);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;}
+    .sub-chip{padding:8px 14px;border-radius:18px;border:1.5px solid var(--border);background:white;font-size:13px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;transition:all 0.15s;display:inline-flex;align-items:center;gap:5px;}
+    .sub-chip:hover{border-color:var(--brand);color:var(--brand);}
     .sub-chip.selected{background:var(--brand);border-color:var(--brand);color:white;font-weight:600;}
+    .sub-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border);}
+    .level-popup{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;background:white;border:1px solid var(--border);border-radius:14px;padding:18px 20px;font-size:13px;color:var(--soft);line-height:1.7;box-shadow:0 8px 30px rgba(0,0,0,0.18);max-width:320px;width:90%;}
+    /* level-popup.open moved below */
+    .level-popup-close{display:block;margin-top:14px;text-align:center;font-weight:600;color:var(--brand);cursor:pointer;font-size:14px;}
+    .values-tabs{display:flex;gap:10px;margin-bottom:16px;}
+    .values-tab{padding:8px 18px;border-radius:20px;border:1.5px solid var(--border);background:white;font-size:14px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;transition:all 0.15s;}
+    .values-tab.active{background:var(--brand);border-color:var(--brand);color:white;}
+    .quick-needs{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0;}
+    .quick-need-chip{padding:8px 14px;border-radius:18px;border:1.5px solid var(--border);background:white;font-size:13px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
+    .quick-need-chip:hover{border-color:var(--brand);color:var(--brand);}
+    .quick-need-chip.added{background:var(--brand);border-color:var(--brand);color:white;font-weight:600;}
     .values-section-label{font-size:13px;font-weight:700;color:var(--text);margin:16px 0 8px;}
     .btn-link{background:none;border:none;color:var(--brand);font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif;padding:0;}
     .inline-edit-row{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--soft);flex-wrap:wrap;}
@@ -205,7 +219,7 @@
 <!-- Share modal -->
 <div class="modal-overlay" id="share-modal">
   <div class="modal">
-    <button class="modal-close" onclick="closeShareModal()">✕</button>
+    <button class="modal-close" onclick="closeShareModal()" style="position:absolute;top:16px;right:16px;">✕</button>
     <div class="modal-title">Share my community profile</div>
     <div class="share-actions">
       <button class="share-copy-btn" onclick="copyShareLink()">Copy link</button>
@@ -215,6 +229,7 @@
     <div class="qr-wrap">
       <img id="qr-img" src="" alt="QR code">
       <p style="font-size:12px;color:var(--muted);margin-top:10px;">Scan to view</p>
+    <button onclick="closeShareModal()" style="display:block;width:100%;margin-top:16px;padding:12px;background:var(--input-bg);border:1px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:var(--soft);cursor:pointer;">Close</button>
     </div>
   </div>
 </div>
@@ -585,6 +600,7 @@ window.toggleLocal = function(screen, idx){
 };
 
 function updateAddedSection(s){
+  if(s==='3'){renderScreen3(null);return;}
   var el=document.getElementById('added-'+s); if(!el) return;
   el.innerHTML=buildAddedHTML(s);
 }
@@ -594,12 +610,24 @@ var LEVEL_HELP={
   '2':'Starting to practice: You are learning and building confidence.<br>Practicing: You do this regularly and do it well.<br>Mentoring: You help others develop this skill.',
   '3':'Curious: You are drawn to this and want to learn more.<br>Engaged: You act on this regularly in your life or work.<br>Leading: You take initiative and bring others into it.'
 };
-window.toggleLevelHelp=function(s){var p=document.getElementById('level-popup-'+s);if(p)p.classList.toggle('open');};
+window.toggleLevelHelp=function(s){
+  var p=document.getElementById('level-popup-'+s);if(!p)return;
+  var isOpen=p.classList.contains('open');
+  // close all popups first
+  document.querySelectorAll('.level-popup').forEach(function(el){el.classList.remove('open');});
+  var ob=document.getElementById('popup-overlay');
+  if(!isOpen){
+    p.classList.add('open');
+    if(!ob){ob=document.createElement('div');ob.id='popup-overlay';ob.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:9998;';ob.onclick=function(){document.querySelectorAll('.level-popup').forEach(function(el){el.classList.remove('open');});ob.remove();};document.body.appendChild(ob);}
+  } else {
+    if(ob) ob.remove();
+  }
+};
 
 function buildAddedHTML(s){
   var arr=getArr(s);
   var levels=s==='1'?['Fan','Participant','Coach']:s==='2'?['Starting to practice','Practicing','Mentoring']:s==='3'?['Curious','Engaged','Leading']:null;
-  var popup=levels?'<div class="level-popup" id="level-popup-'+s+'">'+(LEVEL_HELP[s]||'')+'</div>':'';
+  var popup=levels?'<div class="level-popup" id="level-popup-'+s+'">'+(LEVEL_HELP[s]||'')+'<span class="level-popup-close" onclick="toggleLevelHelp('+JSON.stringify(s)+')">Close</span></div>':'';
   var helpBtn=levels?'<button class="level-help-btn" onclick="toggleLevelHelp('+JSON.stringify(s)+')">?</button>':'';
   if(!arr.length) return popup+'<div class="empty">Nothing added yet.</div>';
   var isNeed=(s==='4s'||s==='4r');
@@ -765,8 +793,11 @@ function renderTopRight(){
     el.innerHTML='<button class="ikigai-btn" onclick="openShareModal()">'+ph2+lbl2+'</button>';
   } else {
     var ph3=_photo?'<div class="btn-photo"><img src="'+esc(_photo)+'" alt=""></div>':'<div class="btn-photo">🌱</div>';
-    var lbl3=_name?esc(_name):'About me 🎯';
-    el.innerHTML='<button class="ikigai-btn" onclick="openShareModal()">'+ph3+lbl3+'</button>';
+    if(_name){
+      el.innerHTML='<button class="ikigai-btn" onclick="openShareModal()">'+ph3+esc(_name)+'</button>';
+    } else {
+      el.innerHTML='<button class="ikigai-btn" onclick="openShareModal()" style="padding:4px 8px 4px 4px;">'+ph3+'🔗</button>';
+    }
   }
 }
 
@@ -891,79 +922,82 @@ function renderScreen2(el){
   window.renderDrill('2','drill-2');
 }
 function getValuesSet(){
-  // Return set of items from the Values list in refData
   if(!_refData) return {};
   var set={};
   (_refData.values||[]).forEach(function(r){set[r.item||r]=1;});
   return set;
 }
+var _valTab='values'; // 'values' | 'domains'
+window.setValTab=function(tab){
+  _valTab=tab;
+  renderScreen3(null);
+};
+
+function buildValAddedHTML(arr, label){
+  if(!arr.length) return '';
+  var h='<div class="added-section" style="margin-top:10px;">';
+  h+='<div class="added-header-row"><div class="added-label">'+label+'</div>';
+  h+='<button class="level-help-btn" onclick="toggleLevelHelp(\'3\')">?</button></div>';
+  h+='<div class="practice-grid">';
+  arr.forEach(function(item){
+    var idx=_values.indexOf(item);
+    var btns='';
+    ['Curious','Engaged','Leading'].forEach(function(lv){
+      var sel=item.level&&item.level.split(',').indexOf(lv)>-1;
+      btns+='<button class="practice-btn'+(sel?' selected':'')+'" onclick="setLevel(\'3\','+idx+',\''+lv+'\')">'+lv+'</button>';
+    });
+    h+='<div class="practice-item">';
+    h+='<div class="practice-item-header"><div class="practice-item-name">'+esc(item.item)+'</div>';
+    h+='<button class="practice-item-x" onclick="removeItem(\'3\','+idx+')">×</button></div>';
+    h+='<div class="practice-options">'+btns+'</div>';
+    h+='</div>';
+  });
+  h+='</div></div>';
+  return h;
+}
+
 function renderScreen3(el){
   var cont=document.getElementById('app-content'); if(!cont) return;
   var valSet=getValuesSet();
-  // Split added: values-added vs domains-added
   var valAdded=_values.filter(function(v){return valSet[v.item];});
   var domAdded=_values.filter(function(v){return !valSet[v.item];});
-
-  function buildValAddedHTML(arr){
-    if(!arr.length) return '';
-    var popup=buildAddedHTML('3').match(/<div class="level-popup"[^>]*>[\s\S]*?<\/div>/);
-    // just render inline without popup here — use mini render
-    return '<div class="added-section" style="margin-top:10px;">'
-      +'<div class="added-header-row"><div class="added-label">Added</div>'
-      +'<button class="level-help-btn" onclick="toggleLevelHelp(\'3\')">?</button></div>'
-      +'<div class="practice-grid">'
-      +arr.map(function(item,i){
-        var idx=_values.indexOf(item);
-        var btns=['Curious','Engaged','Leading'].map(function(lv){
-          return '<button class="practice-btn'+(item.level&&item.level.split(',').indexOf(lv)>-1?' selected':'')+'" onclick="setLevel(\'3\','+idx+',\''+lv+'\')">'+lv+'</button>';
-        }).join('');
-        return '<div class="practice-item">'
-          +'<div class="practice-item-header"><div class="practice-item-name">'+esc(item.item)+'</div>'
-          +'<button class="practice-item-x" onclick="removeItem(\'3\','+idx+')">×</button></div>'
-          +'<div class="practice-options">'+btns+'</div>'
-          +'</div>';
-      }).join('')
-      +'</div></div>';
-  }
-
-  var valueChips=''; var domainChips='';
-  var valPopup='<div class="level-popup" id="level-popup-3">'+(LEVEL_HELP['3']||'')+'</div>';
-  if(_refData){
-    var vals=(_refData.values||[]);
-    var doms=(_refData.domains||[]);
-    if(vals.length){
-      valueChips='<div class="values-section-label">Values</div>'
-        +'<div class="ideas-prompt">Here are some ideas to get you started — these aren\'t the only options.</div>'
-        +'<div class="item-chips">';
-      vals.forEach(function(r){
-        var item=r.item||r;
-        var isAdded=_values.some(function(v){return v.item===item;});
-        valueChips+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="addItemFromChip(\'3\',\''+esc(item)+'\',\'\')">'+esc(item)+'</div>';
-      });
-      valueChips+='</div>';
-      valueChips+=buildValAddedHTML(valAdded);
-    }
-    if(doms.length){
-      domainChips='<div class="values-section-label" style="margin-top:20px;">Domains</div>'
-        +'<div class="ideas-prompt">Areas where you put your energy.</div>'
-        +'<div class="item-chips">';
-      doms.forEach(function(r){
-        var item=r.item||r;
-        var isAdded=_values.some(function(v){return v.item===item;});
-        domainChips+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="addItemFromChip(\'3\',\''+esc(item)+'\',\'\')">'+esc(item)+'</div>';
-      });
-      domainChips+='</div>';
-      domainChips+=buildValAddedHTML(domAdded);
-    }
+  var valPopup='<div class="level-popup" id="level-popup-3">'+(LEVEL_HELP['3']||'')+'<span class="level-popup-close" onclick="toggleLevelHelp(\"3\")">Close</span></div>';
+  var tabs='<div class="values-tabs">'
+    +'<div class="values-tab'+(_valTab==='values'?' active':'')+'" onclick="setValTab(\"values\")">Values</div>'
+    +'<div class="values-tab'+(_valTab==='domains'?' active':'')+'" onclick="setValTab(\"domains\")">Domains</div>'
+    +'</div>';
+  var sectionHTML='';
+  if(_valTab==='values'){
+    var vals=(_refData&&_refData.values)||[];
+    sectionHTML='<div class="ideas-prompt">Here are some ideas to get you started — these aren\'t the only options.</div>'
+      +'<div class="item-chips">';
+    vals.forEach(function(r){
+      var item=r.item||r;
+      var isAdded=_values.some(function(v){return v.item===item;});
+      sectionHTML+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="addItemFromChip(\'3\',\''+esc(item)+'\',\'\')">'+esc(item)+'</div>';
+    });
+    sectionHTML+='</div>'+buildValAddedHTML(valAdded,'Added values');
+  } else {
+    var doms=(_refData&&_refData.domains)||[];
+    sectionHTML='<div class="ideas-prompt">Areas where you put your energy.</div>'
+      +'<div class="item-chips">';
+    doms.forEach(function(r){
+      var item=r.item||r;
+      var isAdded=_values.some(function(v){return v.item===item;});
+      sectionHTML+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="addItemFromChip(\'3\',\''+esc(item)+'\',\'\')">'+esc(item)+'</div>';
+    });
+    sectionHTML+='</div>'+buildValAddedHTML(domAdded,'Added domains');
   }
   cont.innerHTML=(_editMode?'':progressHTML(3))
     +'<h2>What do you care about deeply?</h2>'
     +screenSearchHTML('3','Search to add...')
     +valPopup
-    +valueChips+domainChips
+    +tabs
+    +sectionHTML
     +'<div id="added-3" style="display:none;"></div>'
     +navHTML(3);
 }
+
 
 var _needsCat='';
 
@@ -1020,7 +1054,10 @@ window.setNeedsCat=function(cat){
     resetDrillTo('4s',0);
     inner=screenSearchHTML('4s','Search for a skill or service...')
       +'<div id="drill-4s"></div>'
-      +'<div id="added-4s">'+buildAddedHTML('4s')+'</div>';
+      +'<div id="added-4s">'+buildAddedHTML('4s')+'</div>'
+      +'<div style="font-size:13px;font-weight:700;color:var(--text);margin:16px 0 4px;">Other needs</div>'
+      +'<div class="ideas-prompt" style="margin-bottom:6px;">Quick add what else you need right now.</div>'
+      +'<div id="quick-needs-area">'+buildQuickNeeds()+'</div>';
   } else if(cat==='thing'){
     _thingSub='';
     var subChips=Object.keys(THING_SUBS).map(function(k){
@@ -1057,23 +1094,31 @@ window.addSpaceItem=function(){
   toast('Added to your list.');
 };
 
+var QUICK_NEEDS=['💡 Feedback','📚 Knowledge','🔑 Access','🎯 Accountability','⏰ Collaboration','💰 Funding','🪑 A workspace','🔧 A resource'];
+function buildQuickNeeds(){
+  var h='<div class="quick-needs">';
+  QUICK_NEEDS.forEach(function(n){
+    var isAdded=_needsSkill.some(function(r){return r.item===n;});
+    h+='<div class="quick-need-chip'+(isAdded?' added':'')+'" onclick="addQuickNeed('+JSON.stringify(n)+')">'+n+'</div>';
+  });
+  h+='</div>';
+  return h;
+}
+window.addQuickNeed=function(n){
+  if(_needsSkill.some(function(r){return r.item===n;})){
+    _needsSkill=_needsSkill.filter(function(r){return r.item!==n;});
+  } else {
+    _needsSkill.push({item:n,category:'Other needs',local:false,ntype:'skill'});
+  }
+  autoSave();
+  var el=document.getElementById('quick-needs-area');
+  if(el) el.innerHTML=buildQuickNeeds();
+  var added=document.getElementById('added-4s');
+  if(added) added.innerHTML=buildAddedHTML('4s');
+};
+
 function renderScreen4(el){
   var cont=document.getElementById('app-content'); if(!cont) return;
-  var allNeeds=_needsSkill.concat(_needsRes);
-  var allAdded=allNeeds.length
-    ?'<div class="added-section"><div class="added-header-row"><div class="added-label">All added needs</div></div>'
-      +'<div>'+allNeeds.map(function(item){
-        var src=_needsSkill.indexOf(item)>-1?'4s':'4r';
-        var idx=getArr(src).indexOf(item);
-        return '<div class="need-item">'
-          +'<div class="need-item-left"><div class="need-item-name">'+esc(item.item)+'</div>'
-          +(item.category?'<div class="need-item-cat">'+esc(item.category)+'</div>':'')+'</div>'
-          +'<div class="need-item-right">'
-          +'<label class="local-toggle'+(item.local?' active':'')+'"><input type="checkbox"'+(item.local?' checked':'')+' onchange="toggleLocal(\''+src+'\','+idx+')"> 📍 Local</label>'
-          +'<button class="practice-item-x" onclick="removeItem(\''+src+'\','+idx+')">×</button>'
-          +'</div></div>';
-      }).join('')+'</div></div>'
-    :'';
   cont.innerHTML=(_editMode?'':progressHTML(4))
     +'<h2>What do you need right now?</h2>'
     +'<div class="needs-top-chips">'
@@ -1082,7 +1127,6 @@ function renderScreen4(el){
     +'<div class="needs-top-chip'+('space'===_needsCat?' selected':'')+'" id="needs-top-space" onclick="setNeedsCat(\'space\')">🏡 Space</div>'
     +'</div>'
     +'<div id="needs-cat-content"></div>'
-    +allAdded
     +navHTML(4);
   if(_needsCat) window.setNeedsCat(_needsCat);
 }
@@ -1126,4 +1170,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.8 | Last change: Skill 14 cats, Thing sub-cats, 4-segment needs, duplicate fix, Associated category missing, remove Add another, lang line fix | Date: 2026-06-25 -->
+<!-- Version: V2.9 | Last change: allAdded removed, sub-chip CSS, screen3 search re-render, ? fixed overlay, share modal mobile, top btn no-name, values/domains tabs, quick needs | Date: 2026-06-25 -->
