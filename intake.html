@@ -950,7 +950,7 @@ function renderProfile(el, viewerMode){
         +'<button class="edit-btn" onclick="jumpTo('+screenNum+')">✏️ Edit</button>'
         +'</div>'
       :'';
-    var missingMsg=(hasMissing&&!viewerMode)?'<div class="reminder-msg" style="font-size:12px;margin-bottom:6px;">Associated category missing.</div>':'';
+    var missingMsg=(hasMissing&&!viewerMode)?'<div class="reminder-msg" style="font-size:12px;margin-bottom:6px;">Associated category missing</div>':'';
     return '<div class="profile-section"'+(noBorder?' style="border-bottom:none;padding-bottom:4px;"':'')+'>'+''
       +'<div class="profile-section-header"><div class="profile-section-label">'+label+'</div>'+actions+'</div>'
       +missingMsg
