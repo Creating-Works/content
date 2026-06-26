@@ -1,4 +1,4 @@
-<!-- Version: V2.9 | Last change: allAdded removed, sub-chip CSS, screen3 search re-render, ? fixed overlay, share modal mobile, top btn no-name, values/domains tabs, quick needs | Date: 2026-06-25 -->
+<!-- Version: V2.11 | Last change: Methods question screen 2, lang modal cleanup, search toast, methods save/load | Date: 2026-06-25 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -169,7 +169,17 @@
     .level-popup{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;background:white;border:1px solid var(--border);border-radius:14px;padding:18px 20px;font-size:13px;color:var(--soft);line-height:1.7;box-shadow:0 8px 30px rgba(0,0,0,0.18);max-width:320px;width:90%;}
     /* level-popup.open moved below */
     .level-popup-close{display:block;margin-top:14px;text-align:center;font-weight:600;color:var(--brand);cursor:pointer;font-size:14px;}
-    .values-tabs{display:flex;gap:10px;margin-bottom:16px;}
+    .methods-list{margin:12px 0 20px;}
+    .method-item{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:10px;cursor:pointer;transition:background 0.1s;border:1.5px solid transparent;margin-bottom:8px;}
+    .method-item:hover{background:var(--sel-bg);}
+    .method-item.selected{background:var(--sel-bg);border-color:var(--brand);}
+    .method-check{width:22px;height:22px;border-radius:5px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;transition:all 0.15s;}
+    .method-check.checked{background:var(--brand);border-color:var(--brand);color:white;font-size:13px;}
+    .method-text{font-size:14px;color:var(--text);line-height:1.4;}
+    .methods-selected-row{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 12px;}
+    .methods-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:9000;align-items:flex-start;padding-top:4vh;}
+    .methods-modal-overlay.open{display:flex;}
+    .methods-modal{background:white;border-radius:18px;padding:20px;width:92%;max-width:400px;margin:0 auto;max-height:85vh;overflow-y:auto;}
     .values-tab{padding:8px 18px;border-radius:20px;border:1.5px solid var(--border);background:white;font-size:14px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;transition:all 0.15s;}
     .values-tab.active{background:var(--brand);border-color:var(--brand);color:white;}
     .quick-needs{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0;}
@@ -199,19 +209,29 @@
 <div class="modal-overlay" id="lang-modal">
   <div class="modal">
     <button class="modal-close" onclick="closeLangModal()">✕</button>
-    <div class="modal-title">Language and location</div>
-    <label>Language(s)</label>
+    <div class="modal-title">Languages</div>
     <div class="lang-dropdown-wrap">
       <span class="lang-search-icon">🔍</span>
       <input type="text" class="lang-search-input" id="lang-modal-search" placeholder="Search languages..." oninput="filterLangs(this.value)">
       <div class="lang-list" id="lang-list"></div>
     </div>
     <div class="lang-tags" id="lang-tags"></div>
-    <div style="margin-top:20px"><label>Postal code</label>
-    <input type="text" id="lang-modal-postal" placeholder="Your postal code" oninput="_postal=this.value"></div>
     <div style="margin-top:16px">
-      <button class="custom-add-confirm" onclick="saveLangModal()">Save</button>
+      <button class="custom-add-confirm" onclick="saveLangModal()">Done</button>
       <button class="custom-add-cancel" onclick="closeLangModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Methods modal (edit mode) -->
+<div class="methods-modal-overlay" id="methods-modal">
+  <div class="methods-modal">
+    <h3 style="margin:0 0 4px;font-size:17px;font-weight:700;">What comes most naturally to you?</h3>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:14px;">Select up to 3.</div>
+    <div class="methods-list" id="methods-modal-list"></div>
+    <div style="margin-top:8px;display:flex;gap:10px;">
+      <button class="custom-add-confirm" onclick="saveMethodsModal()">Done</button>
+      <button class="custom-add-cancel" onclick="closeMethodsModal()">Cancel</button>
     </div>
   </div>
 </div>
@@ -262,7 +282,7 @@ var PARENT_CATS=[
   'Self-Expression & Beauty','Technology & Communications'
 ];
 var FLAGGED_WORDS=['expert','leader','director','senior','advanced','junior'];
-var REC_TYPES=['Games & Strategy','Making & Collecting','Movement & Performance','Outdoor & Nature','Sports'];
+var REC_TYPES=['Movement & Performance','Sports','Outdoor & Nature','Games & Strategy','Making & Collecting'];
 
 // ─── State ───────────────────────────────────────────────────────────────────
 var _screen      = 1;
@@ -281,6 +301,7 @@ var _skills      = [];
 var _values      = [];
 var _needsSkill  = [];
 var _needsRes    = [];
+var _methods     = [];
 
 // Drill state — all keys are strings
 var _drill = {
@@ -331,7 +352,7 @@ function getRecPool(d){
   if(!_refData) return [];
   var base=_refData.recreation||[];
   if(d&&d.itemCat) return base.filter(function(r){return r.category===d.itemCat;});
-  if(d&&d.subCat) return base.filter(function(r){return r.recType===d.subCat;});
+  if(d&&d.subCat) return base.filter(function(r){return r.category===d.subCat;});
   if(d&&d.parentCat) return base.filter(function(r){return r.recType===d.parentCat;});
   return base;
 }
@@ -397,6 +418,7 @@ async function loadIntake(){
       _hasProfile=true;
       var d=data.data;
       _postal=d.postal||'';
+      _methods=(d.methods||'').split('|').filter(Boolean);
       _languages=d.languages?d.languages.split('|').filter(Boolean):[];
       _interests=parseTagStr(d.interests,'level');
       _skills=parseTagStr(d.skills,'level');
@@ -431,9 +453,10 @@ function autoSave(){
   var sStr=_skills.map(function(s){return s.item+(s.level?':'+s.level:'');}).join('|');
   var vStr=_values.map(function(s){return s.item+(s.level?':'+s.level:'');}).join('|');
   var nStr=[].concat(
-    _needsSkill.map(function(s){return s.item+(s.local?':local':'')+':skill';}),
+    _needsSkill.map(function(s){return s.item+(s.local?':local':'')+':skill'+(s.category?':'+s.category:'');}),
     _needsRes.map(function(s){return s.item+(s.local?':local':'')+':thing'+(s.category?':'+s.category:'');})
   ).join('|');
+  var mStr=_methods.join('|');
   fetch(GS_URL+'?action=saveIntake'
     +'&appearId='+encodeURIComponent(_appearId)
     +'&languages='+encodeURIComponent(_languages.join('|'))
@@ -442,6 +465,7 @@ function autoSave(){
     +'&skills='+encodeURIComponent(sStr)
     +'&values='+encodeURIComponent(vStr)
     +'&needs='+encodeURIComponent(nStr)
+    +'&methods='+encodeURIComponent(mStr)
   ).catch(function(){});
   _hasProfile=true;
 }
@@ -490,9 +514,9 @@ window.renderDrill = function(screen, containerId){
         html+='</div>';
       }
     }
-    // Always show item chips once parentCat is set
+    // Show item chips only when inside a sub-cat (not at parent level where sub-cats show)
     var chips=getItemChips(s);
-    if(chips.length){
+    if(chips.length && d.subCat){
       var addedArr=_interests;
       html+='<div class="ideas-prompt">Here are some ideas to get you started — these aren\'t the only options.</div>';
       html+='<div class="item-chips">';
@@ -557,6 +581,8 @@ function addItem(screen, item, category){
   var s=String(screen);
   var arr=getArr(s);
   if(arr.some(function(r){return r.item===item;})){toast('Already added');return;}
+  // Will toast "Added below" after push — set flag
+  var _doToast=true;
   if(s==='1') _interests.push({item:item,category:category||'',level:''});
   else if(s==='2') _skills.push({item:item,category:category||'',level:''});
   else if(s==='3') _values.push({item:item,category:category||'',level:''});
@@ -726,16 +752,74 @@ window.cancelCustomAdd = function(){
   clearSearch(cs||'2');
 };
 
-// ─── Language ─────────────────────────────────────────────────────────────────
+// ─── Methods ──────────────────────────────────────────────────────────────────
+var _methodsDraft = [];
+window.openMethodsModal = function(){
+  _methodsDraft = _methods.slice();
+  var m=document.getElementById('methods-modal'); if(m) m.classList.add('open');
+  renderMethodsModalList();
+};
+window.closeMethodsModal = function(){
+  var m=document.getElementById('methods-modal'); if(m) m.classList.remove('open');
+};
+window.saveMethodsModal = function(){
+  _methods = _methodsDraft.slice();
+  window.closeMethodsModal();
+  autoSave();
+  render();
+};
+function renderMethodsModalList(){
+  var el=document.getElementById('methods-modal-list'); if(!el) return;
+  var opts=(_refData&&_refData.methodsDisplay)||[];
+  if(!opts.length){el.innerHTML='<div class="empty">Loading...</div>';return;}
+  el.innerHTML=opts.map(function(m){
+    var checked=_methodsDraft.indexOf(m)>-1;
+    return '<div class="method-item'+(checked?' selected':'')+'" onclick="toggleMethodDraft('+JSON.stringify(m)+')">'
+      +'<div class="method-check'+(checked?' checked':'')+'">'+( checked?'✓':'')+'</div>'
+      +'<div class="method-text">'+esc(m)+'</div>'
+      +'</div>';
+  }).join('');
+}
+window.toggleMethodDraft = function(m){
+  var idx=_methodsDraft.indexOf(m);
+  if(idx>-1){ _methodsDraft.splice(idx,1); }
+  else if(_methodsDraft.length<3){ _methodsDraft.push(m); }
+  else { toast('Select up to 3.'); return; }
+  renderMethodsModalList();
+};
+function buildMethodsChecklistHTML(draftArr, opts, maxLabel){
+  // inline checklist for first-visit screen 2
+  if(!opts||!opts.length) return '<div class="empty">Loading...</div>';
+  var h='<div class="methods-list">';
+  opts.forEach(function(m){
+    var checked=draftArr.indexOf(m)>-1;
+    h+='<div class="method-item'+(checked?' selected':'')+'" onclick="toggleMethodInline('+JSON.stringify(m)+')">'
+      +'<div class="method-check'+(checked?' checked':'')+'">'+( checked?'✓':'')+'</div>'
+      +'<div class="method-text">'+esc(m)+'</div>'
+      +'</div>';
+  });
+  h+='</div>';
+  return h;
+}
+window.toggleMethodInline = function(m){
+  var idx=_methods.indexOf(m);
+  if(idx>-1){ _methods.splice(idx,1); }
+  else if(_methods.length<3){ _methods.push(m); }
+  else { toast('Select up to 3.'); return; }
+  // re-render just the checklist area
+  var el=document.getElementById('methods-inline-list'); if(!el) return;
+  var opts=(_refData&&_refData.methodsDisplay)||[];
+  el.innerHTML=buildMethodsChecklistHTML(_methods, opts);
+};
+
+
 window.openLangModal = function(){
   var m=document.getElementById('lang-modal'); if(m) m.classList.add('open');
-  var inp=document.getElementById('lang-modal-postal'); if(inp) inp.value=_postal;
   filterLangs('');
   var si=document.getElementById('lang-modal-search'); if(si) si.value='';
 };
 window.closeLangModal = function(){ var m=document.getElementById('lang-modal'); if(m) m.classList.remove('open'); };
 window.saveLangModal = function(){
-  var inp=document.getElementById('lang-modal-postal'); if(inp) _postal=inp.value.trim();
   window.closeLangModal();
   var el=document.getElementById('profile-lang-row'); if(el) el.innerHTML=buildLangRowHTML();
   autoSave();
@@ -789,8 +873,11 @@ function renderTopRight(){
     el.innerHTML='<div class="ikigai-btn" style="cursor:default;">'+ph+esc(_viewerName||'Profile')+'</div>';
   } else if(_screen===0){
     var ph2=_photo?'<div class="btn-photo"><img src="'+esc(_photo)+'" alt=""></div>':'<div class="btn-photo">🌱</div>';
-    var lbl2=_name?esc(_name):'About me 🎯';
-    el.innerHTML='<button class="ikigai-btn" onclick="openShareModal()">'+ph2+lbl2+'</button>';
+    if(_name){
+      el.innerHTML='<button class="ikigai-btn" onclick="openShareModal()">'+ph2+esc(_name)+'</button>';
+    } else {
+      el.innerHTML='<button class="ikigai-btn" onclick="openShareModal()" style="padding:4px 8px 4px 4px;">'+ph2+'🔗</button>';
+    }
   } else {
     var ph3=_photo?'<div class="btn-photo"><img src="'+esc(_photo)+'" alt=""></div>':'<div class="btn-photo">🌱</div>';
     if(_name){
@@ -878,11 +965,20 @@ function renderProfile(el, viewerMode){
   var allNeeds=_needsSkill.concat(_needsRes);
   el.innerHTML='<h2>This is me 🌱</h2>'
     +metaRow
+    +section('My needs',allNeeds,false,'',4)
     +section('What I enjoy',_interests,true,'level',1)
     +section('My skills',_skills,true,'level',2,true)
     +'<div class="profile-lang-row" id="profile-lang-row">'+buildLangRowHTML()+'</div>'
-    +section('What I care about',_values,true,'level',3)
-    +section('What I need',allNeeds,false,'',4);
+    +(_methods.length&&!viewerMode
+      ?'<div style="margin:8px 0 16px;display:flex;align-items:center;justify-content:space-between;">'
+        +'<div class="methods-selected-row" style="margin:0;flex:1;">'+_methods.map(function(m){return '<div class="profile-tag" style="font-size:12px;">'+esc(m)+'</div>';}).join('')+'</div>'
+        +'<button class="edit-btn" onclick="openMethodsModal()" style="margin-left:8px;">✏️</button>'
+        +'</div>'
+      :(_methods.length&&viewerMode
+        ?'<div class="methods-selected-row">'+_methods.map(function(m){return '<div class="profile-tag" style="font-size:12px;">'+esc(m)+'</div>';}).join('')+'</div>'
+        :'')
+    )
+    +section('What I care about',_values,true,'level',3);
 }
 
 window.jumpTo = function(screen){
@@ -908,17 +1004,61 @@ function renderScreen(s, heading, searchPlaceholder, drillId, addedId){
 function renderScreen1(el){ renderScreen(1,'What do you enjoy doing?','Search to add...','drill-1','added-1'); }
 function renderScreen2(el){
   var cont=document.getElementById('app-content'); if(!cont) return;
-  cont.innerHTML=(_editMode?'':progressHTML(2))
-    +'<h2>Share what you know how to do or how to create.</h2>'
-    +'<div id="title-warning-2"></div>'
-    +'<div style="margin-bottom:14px;">'
-    +'<button id="lang-edit-btn" class="edit-btn" onclick="openLangModal()" style="display:inline-flex;align-items:center;gap:6px;">✏️ '
-    +(_languages.length?'Languages: '+_languages.join(', '):'Add your languages')+'</button>'
-    +'</div>'
-    +screenSearchHTML('2','Search skills to add...')
-    +'<div id="drill-2"></div>'
-    +'<div id="added-2">'+buildAddedHTML('2')+'</div>'
-    +navHTML(2);
+  var opts=(_refData&&_refData.methodsDisplay)||[];
+  var methodsFull=(_refData&&_refData.methods)||[];
+
+  if(_editMode){
+    // Edit mode: skills drill first, methods below with edit button
+    var methodsDisplay='';
+    if(_methods.length){
+      methodsDisplay='<div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">'
+        +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
+        +'<div style="font-size:14px;font-weight:700;color:var(--text);">What comes most naturally to you?</div>'
+        +'<button class="edit-btn" onclick="openMethodsModal()">✏️ Edit</button>'
+        +'</div>'
+        +'<div class="methods-selected-row">'
+        +_methods.map(function(m){return '<div class="profile-tag">'+esc(m)+'</div>';}).join('')
+        +'</div></div>';
+    } else {
+      methodsDisplay='<div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">'
+        +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
+        +'<div style="font-size:14px;font-weight:700;color:var(--text);">What comes most naturally to you?</div>'
+        +'<button class="edit-btn" onclick="openMethodsModal()">✏️ Add</button>'
+        +'</div>'
+        +'<div class="empty">Nothing added yet.</div>'
+        +'</div>';
+    }
+    cont.innerHTML=''
+      +'<h2>Share what you know how to do or how to create.</h2>'
+      +'<div id="title-warning-2"></div>'
+      +'<div style="margin-bottom:14px;">'
+      +'<button id="lang-edit-btn" class="edit-btn" onclick="openLangModal()" style="display:inline-flex;align-items:center;gap:6px;">✏️ '
+      +(_languages.length?'Languages: '+_languages.join(', '):'Add your languages')+'</button>'
+      +'</div>'
+      +screenSearchHTML('2','Search skills to add...')
+      +'<div id="drill-2"></div>'
+      +'<div id="added-2">'+buildAddedHTML('2')+'</div>'
+      +methodsDisplay
+      +navHTML(2);
+  } else {
+    // First visit: methods question first, then skills
+    cont.innerHTML=progressHTML(2)
+      +'<h2>What comes most naturally to you?</h2>'
+      +'<div style="font-size:13px;color:var(--muted);margin-bottom:4px;">Select up to 3.</div>'
+      +'<div id="methods-inline-list">'+buildMethodsChecklistHTML(_methods, opts)+'</div>'
+      +'<div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--border);">'
+      +'<h2 style="font-size:20px;margin-bottom:12px;">Share what you know how to do or how to create.</h2>'
+      +'<div id="title-warning-2"></div>'
+      +'<div style="margin-bottom:14px;">'
+      +'<button id="lang-edit-btn" class="edit-btn" onclick="openLangModal()" style="display:inline-flex;align-items:center;gap:6px;">✏️ '
+      +(_languages.length?'Languages: '+_languages.join(', '):'Add your languages')+'</button>'
+      +'</div>'
+      +screenSearchHTML('2','Search skills to add...')
+      +'<div id="drill-2"></div>'
+      +'<div id="added-2">'+buildAddedHTML('2')+'</div>'
+      +'</div>'
+      +navHTML(2);
+  }
   window.renderDrill('2','drill-2');
 }
 function getValuesSet(){
@@ -932,6 +1072,11 @@ window.setValTab=function(tab){
   _valTab=tab;
   renderScreen3(null);
 };
+window.toggleMethodInline  = window.toggleMethodInline;
+window.toggleMethodDraft   = window.toggleMethodDraft;
+window.openMethodsModal    = window.openMethodsModal;
+window.closeMethodsModal   = window.closeMethodsModal;
+window.saveMethodsModal    = window.saveMethodsModal;
 
 function buildValAddedHTML(arr, label){
   if(!arr.length) return '';
@@ -1170,4 +1315,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.9 | Last change: allAdded removed, sub-chip CSS, screen3 search re-render, ? fixed overlay, share modal mobile, top btn no-name, values/domains tabs, quick needs | Date: 2026-06-25 -->
+<!-- Version: V2.11 | Last change: Methods question screen 2, lang modal cleanup, search toast, methods save/load | Date: 2026-06-25 -->
