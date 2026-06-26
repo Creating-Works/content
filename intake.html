@@ -1,4 +1,4 @@
-<!-- Version: V2.11 | Last change: Methods question screen 2, lang modal cleanup, search toast, methods save/load | Date: 2026-06-25 -->
+<!-- Version: V2.12 | Last change: Glide scope fix, thing sub-chip wrap, hide quick needs, needs summary, postal nudge, added toast, space outlined button | Date: 2026-06-26 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -106,6 +106,8 @@
     .btn-back:hover{border-color:var(--brand);color:var(--brand);}
     .btn-next{flex:2;padding:14px;border-radius:10px;border:none;background:var(--brand);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;color:white;cursor:pointer;transition:background 0.15s;}
     .btn-next:hover{background:var(--hover);}
+    .btn-outlined{flex:2;padding:14px;border-radius:10px;border:2px solid var(--brand);background:white;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;color:var(--brand);cursor:pointer;transition:all 0.15s;}
+    .btn-outlined:hover{background:var(--brand);color:white;}
     /* Profile */
     .profile-meta-row{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);}
     .meta-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;background:var(--brand);color:white;font-size:13px;font-weight:600;cursor:pointer;}
@@ -160,6 +162,10 @@
     .needs-top-chip{padding:10px 18px;border-radius:20px;border:1.5px solid var(--border);background:white;font-size:14px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;transition:all 0.15s;}
     .needs-top-chip:hover{border-color:var(--brand);color:var(--brand);}
     .needs-top-chips{display:flex;gap:10px;margin-bottom:0;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid var(--border);}
+    .needs-summary{background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:14px;}
+    .needs-summary-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-size:14px;font-weight:600;color:var(--text);}
+    .needs-summary-body{margin-top:10px;display:flex;flex-wrap:wrap;gap:7px;}
+    .needs-summary-tag{background:white;border:1.5px solid var(--border);border-radius:18px;padding:5px 12px;font-size:13px;color:var(--text);}
     .needs-top-chip.selected{background:var(--brand);border-color:var(--brand);color:white;font-weight:600;}
     .needs-detail-box{background:var(--input-bg);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;}
     .sub-chip{padding:8px 14px;border-radius:18px;border:1.5px solid var(--border);background:white;font-size:13px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;transition:all 0.15s;display:inline-flex;align-items:center;gap:5px;}
@@ -581,13 +587,12 @@ function addItem(screen, item, category){
   var s=String(screen);
   var arr=getArr(s);
   if(arr.some(function(r){return r.item===item;})){toast('Already added');return;}
-  // Will toast "Added below" after push — set flag
-  var _doToast=true;
   if(s==='1') _interests.push({item:item,category:category||'',level:''});
   else if(s==='2') _skills.push({item:item,category:category||'',level:''});
   else if(s==='3') _values.push({item:item,category:category||'',level:''});
   else if(s==='4s') _needsSkill.push({item:item,category:category||'',local:false,ntype:'skill'});
   else if(s==='4r') _needsRes.push({item:item,category:category||'',local:false,ntype:'resource'});
+  toast('Added below \u2193');
   clearSearch(s);
   updateAddedSection(s);
 }
@@ -918,6 +923,27 @@ function progressHTML(n){
   return '<div class="progress-wrap"><div class="progress-steps">'+s+'</div><div class="progress-label">Section '+n+' of 4 — '+labs[n]+'</div></div>';
 }
 
+
+function buildNeedsSummary(){
+  var all=[];
+  _needsSkill.forEach(function(r){all.push(r.item+(r.local?' 📍':''));});
+  _needsRes.forEach(function(r){all.push(r.item+(r.local?' 📍':''));});
+  if(!all.length) return '';
+  var tags=all.map(function(t){return '<span class="needs-summary-tag">'+esc(t)+'</span>';}).join('');
+  return '<div class="needs-summary" id="needs-summary-block">'
+    +'<div class="needs-summary-header" onclick="toggleNeedsSummary()">'
+    +'<span>My needs so far ('+all.length+')</span><span id="needs-summary-arrow">▼</span>'
+    +'</div>'
+    +'<div class="needs-summary-body" id="needs-summary-body" style="display:none;">'+tags+'</div>'
+    +'</div>';
+}
+window.toggleNeedsSummary=function(){
+  var body=document.getElementById('needs-summary-body');
+  var arrow=document.getElementById('needs-summary-arrow');
+  if(!body) return;
+  if(body.style.display==='none'){body.style.display='flex';if(arrow)arrow.textContent='▲';}
+  else{body.style.display='none';if(arrow)arrow.textContent='▼';}
+};
 function navHTML(screen){
   if(_editMode){
     return '<div class="nav-row"><button class="btn-next" onclick="doneEdit()">Done</button></div>';
@@ -925,7 +951,8 @@ function navHTML(screen){
   var isFirst=(screen===1);
   var back=isFirst?'':'<button class="btn-back" onclick="goBack()">Back</button>';
   var next='<button class="btn-next" onclick="goNext()">'+(screen===4?'Done':'Next')+'</button>';
-  return '<div class="nav-row">'+back+next+'</div>';
+  var summary=screen===4?buildNeedsSummary():'';
+  return summary+'<div class="nav-row">'+back+next+'</div>';
 }
 
 function screenSearchHTML(s, placeholder){
@@ -1154,6 +1181,14 @@ var THING_SUBS={
 };
 var _thingSub='';
 
+
+window.postalNudge=function(checkboxId){
+  if(!_postal){
+    toast('Add your postal code first — tap ✏️ Languages above.');
+    var el=document.getElementById(checkboxId);
+    if(el) el.checked=false;
+  }
+};
 window.setThingSubCat=function(sub){
   _thingSub=sub;
   Object.keys(THING_SUBS).forEach(function(k){
@@ -1166,7 +1201,7 @@ window.setThingSubCat=function(sub){
     +'<div class="ideas-prompt" style="margin-bottom:10px;">'+esc(info.prompt)+'</div>'
     +'<input type="text" id="thing-detail-input" placeholder="Please share some details">'
     +'<label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;color:var(--soft);cursor:pointer;">'
-    +'<input type="checkbox" id="thing-local-check"> 📍 This is a local request</label>'
+    +'<input type="checkbox" id="thing-local-check" onchange="if(this.checked)postalNudge(\'thing-local-check\')"> 📍 This is a local request</label>'
     +'<button class="btn-next" style="width:100%;margin-top:14px;" onclick="addThingItem()">Add to list</button>'
     +'</div>'
     +'<div id="added-4r">'+buildAddedHTML('4r')+'</div>';
@@ -1200,9 +1235,7 @@ window.setNeedsCat=function(cat){
     inner=screenSearchHTML('4s','Search for a skill or service...')
       +'<div id="drill-4s"></div>'
       +'<div id="added-4s">'+buildAddedHTML('4s')+'</div>'
-      +'<div style="font-size:13px;font-weight:700;color:var(--text);margin:16px 0 4px;">Other needs</div>'
-      +'<div class="ideas-prompt" style="margin-bottom:6px;">Quick add what else you need right now.</div>'
-      +'<div id="quick-needs-area">'+buildQuickNeeds()+'</div>';
+      ;/* quick needs hidden */;
   } else if(cat==='thing'){
     _thingSub='';
     var subChips=Object.keys(THING_SUBS).map(function(k){
@@ -1215,8 +1248,8 @@ window.setNeedsCat=function(cat){
     inner='<div class="ideas-prompt">A home, a meeting room, a venue, studio, workshop, or desk.</div>'
       +'<input type="text" id="space-detail-input" placeholder="Please share some details" style="margin-top:8px;">'
       +'<label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;color:var(--soft);cursor:pointer;">'
-      +'<input type="checkbox" id="space-local-check"> 📍 This is a local request</label>'
-      +'<button class="btn-next" style="width:100%;margin-top:14px;" onclick="addSpaceItem()">Add to list</button>'
+      +'<input type="checkbox" id="space-local-check" onchange="if(this.checked)postalNudge(\'space-local-check\')"> 📍 This is a local request</label>'
+      +'<button class="btn-outlined" style="width:100%;margin-top:14px;" onclick="addSpaceItem()">Add to list</button>'
       +'<div id="added-4r">'+buildAddedHTML('4r')+'</div>';
   }
   var cont=document.getElementById('needs-cat-content'); if(!cont) return;
@@ -1315,4 +1348,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.11 | Last change: Methods question screen 2, lang modal cleanup, search toast, methods save/load | Date: 2026-06-25 -->
+<!-- Version: V2.12 | Last change: Glide scope fix, thing sub-chip wrap, hide quick needs, needs summary, postal nudge, added toast, space outlined button | Date: 2026-06-26 -->
