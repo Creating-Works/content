@@ -1,4 +1,4 @@
-<!-- Version: V2.6 | Last change: Community profile, values/domains split, chip persist, Add another, breadcrumb underline, profile styling, level help, name in btn, needs redesign, ideas prompt | Date: 2026-06-25 -->
+<!-- Version: V2.7 | Last change: Missing msg below header, lang lag fix, Add another gated, ? popup fix, values split-added, needs labels, category blue, remove Required, lang line below | Date: 2026-06-25 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -80,7 +80,7 @@
     .practice-item-name{font-size:14px;font-weight:600;color:var(--text);}
     .practice-item-x{background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:0;line-height:1;}
     .practice-item-x:hover{color:var(--text);}
-    .practice-item-cat{font-size:11px;color:var(--muted);margin-bottom:8px;}
+    .practice-item-cat{font-size:11px;color:var(--brand);margin-bottom:8px;}
     .practice-required{font-size:12px;color:var(--brand);font-weight:400;margin-bottom:8px;}
     .practice-options{display:flex;flex-wrap:wrap;gap:8px;}
     .practice-btn{padding:6px 14px;border-radius:16px;border:1.5px solid var(--border);background:white;font-size:12px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
@@ -119,7 +119,7 @@
     .profile-tag{padding:6px 12px;border-radius:20px;background:var(--sel-bg);border:1.5px solid var(--sel-border);font-size:13px;color:var(--brand);font-weight:500;}
     .tag-level{font-size:11px;color:var(--muted);font-weight:400;margin-left:4px;}
     .profile-empty{font-size:13px;color:var(--muted);font-style:italic;}
-    .profile-lang-row{margin-top:4px;padding-top:0;margin-bottom:16px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+    .profile-lang-row{margin-top:4px;padding-bottom:16px;border-bottom:1px solid var(--border);margin-bottom:0;display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
     .profile-lang-text{font-size:13px;color:var(--soft);}
     /* Lang modal */
     .lang-dropdown-wrap{position:relative;margin-bottom:12px;}
@@ -389,6 +389,8 @@ async function loadIntake(){
       _needsRes=np.filter(function(n){return n.ntype==='resource';});
     }
   }catch(e){}
+  // If skills screen already rendered, update lang button immediately
+  if(_screen===2){var lb=document.getElementById('lang-edit-btn');if(lb)lb.textContent='✏️ '+(_languages.length?'Languages: '+_languages.join(', '):'Add your languages');}
 }
 
 function parseTagStr(str,lk){
@@ -527,7 +529,11 @@ window.doResetDrill = function(screen, level){
 // ─── Add items ────────────────────────────────────────────────────────────────
 window.addItemFromChip = function(screen, item, category){
   addItem(screen, item, category);
-  window.renderDrill(String(screen),'drill-'+String(screen));
+  if(String(screen)==='3'){
+    renderScreen3(null);
+  } else {
+    window.renderDrill(String(screen),'drill-'+String(screen));
+  }
 };
 
 function addItem(screen, item, category){
@@ -590,11 +596,11 @@ window.toggleLevelHelp=function(s){var p=document.getElementById('level-popup-'+
 
 function buildAddedHTML(s){
   var arr=getArr(s);
-  if(!arr.length) return '<div class="empty">Nothing added yet.</div>';
   var levels=s==='1'?['Fan','Participant','Coach']:s==='2'?['Starting to practice','Practicing','Mentoring']:s==='3'?['Curious','Engaged','Leading']:null;
-  var isNeed=(s==='4s'||s==='4r');
   var popup=levels?'<div class="level-popup" id="level-popup-'+s+'">'+(LEVEL_HELP[s]||'')+'</div>':'';
   var helpBtn=levels?'<button class="level-help-btn" onclick="toggleLevelHelp('+JSON.stringify(s)+')">?</button>':'';
+  if(!arr.length) return popup+'<div class="empty">Nothing added yet.</div>';
+  var isNeed=(s==='4s'||s==='4r');
   var useGrid=!isNeed;return popup+'<div class="added-section"><div class="added-header-row"><div class="added-label">Added</div>'+helpBtn+'</div>'+(useGrid?'<div class="practice-grid">':'')
     +arr.map(function(item,i){
         if(isNeed){
@@ -613,7 +619,7 @@ function buildAddedHTML(s){
           +'<div class="practice-item-header"><div class="practice-item-name">'+esc(item.item)+'</div>'
           +'<button class="practice-item-x" onclick="removeItem(\''+s+'\','+i+')">×</button></div>'
           +(item.category?'<div class="practice-item-cat">'+esc(item.category)+'</div>':'')
-          +(levels?'<div class="practice-options">'+btns+'</div><div style="text-align:right;font-size:11px;color:var(--brand);margin-top:6px;">Required</div>':'')
+          +(levels?'<div class="practice-options">'+btns+'</div>':'')
           +'</div>';
       }).join('')+(useGrid?'</div>':'')+'</div>';
 }
@@ -799,7 +805,8 @@ window.addAnother=function(s){
 
 function navHTML(screen){
   var s=String(screen);
-  var addBtn='<button class="btn-back" style="flex:1.2;" onclick="addAnother('+JSON.stringify(s)+')">Add another</button>';
+  var hasItems=getArr(s).length>0||((s==='4'||s===4)&&(_needsSkill.length>0||_needsRes.length>0));
+  var addBtn=hasItems?'<button class="btn-back" style="flex:1.2;" onclick="addAnother('+JSON.stringify(s)+')">Add another</button>':'';
   if(_editMode){
     return '<div class="nav-row">'+addBtn+'<button class="btn-next" onclick="doneEdit()">Done</button></div>';
   }
@@ -828,12 +835,13 @@ function renderProfile(el, viewerMode){
     var hasMissing=hasLevel&&arr.some(function(r){return !r[levelKey];});
     var actions=!viewerMode
       ?'<div class="profile-section-actions">'
-        +(hasMissing?'<span class="reminder-msg">Some info is missing.</span>':'')
         +'<button class="edit-btn" onclick="jumpTo('+screenNum+')">✏️ Edit</button>'
         +'</div>'
       :'';
+    var missingMsg=(hasMissing&&!viewerMode)?'<div class="reminder-msg" style="font-size:12px;margin-bottom:6px;">Some info is missing.</div>':'';
     return '<div class="profile-section">'
       +'<div class="profile-section-header"><div class="profile-section-label">'+label+'</div>'+actions+'</div>'
+      +missingMsg
       +'<div class="profile-tags">'+tags+'</div>'
       +'</div>';
   }
@@ -879,7 +887,7 @@ function renderScreen2(el){
     +'<h2>Share what you know how to do or how to create.</h2>'
     +'<div id="title-warning-2"></div>'
     +'<div style="margin-bottom:14px;">'
-    +'<button class="edit-btn" onclick="openLangModal()" style="display:inline-flex;align-items:center;gap:6px;">✏️ '
+    +'<button id="lang-edit-btn" class="edit-btn" onclick="openLangModal()" style="display:inline-flex;align-items:center;gap:6px;">✏️ '
     +(_languages.length?'Languages: '+_languages.join(', '):'Add your languages')+'</button>'
     +'</div>'
     +screenSearchHTML('2','Search skills to add...')
@@ -888,9 +896,44 @@ function renderScreen2(el){
     +navHTML(2);
   window.renderDrill('2','drill-2');
 }
+function getValuesSet(){
+  // Return set of items from the Values list in refData
+  if(!_refData) return {};
+  var set={};
+  (_refData.values||[]).forEach(function(r){set[r.item||r]=1;});
+  return set;
+}
 function renderScreen3(el){
   var cont=document.getElementById('app-content'); if(!cont) return;
+  var valSet=getValuesSet();
+  // Split added: values-added vs domains-added
+  var valAdded=_values.filter(function(v){return valSet[v.item];});
+  var domAdded=_values.filter(function(v){return !valSet[v.item];});
+
+  function buildValAddedHTML(arr){
+    if(!arr.length) return '';
+    var popup=buildAddedHTML('3').match(/<div class="level-popup"[^>]*>[\s\S]*?<\/div>/);
+    // just render inline without popup here — use mini render
+    return '<div class="added-section" style="margin-top:10px;">'
+      +'<div class="added-header-row"><div class="added-label">Added</div>'
+      +'<button class="level-help-btn" onclick="toggleLevelHelp(\'3\')">?</button></div>'
+      +'<div class="practice-grid">'
+      +arr.map(function(item,i){
+        var idx=_values.indexOf(item);
+        var btns=['Curious','Engaged','Leading'].map(function(lv){
+          return '<button class="practice-btn'+(item.level&&item.level.split(',').indexOf(lv)>-1?' selected':'')+'" onclick="setLevel(\'3\','+idx+',\''+lv+'\')">'+lv+'</button>';
+        }).join('');
+        return '<div class="practice-item">'
+          +'<div class="practice-item-header"><div class="practice-item-name">'+esc(item.item)+'</div>'
+          +'<button class="practice-item-x" onclick="removeItem(\'3\','+idx+')">×</button></div>'
+          +'<div class="practice-options">'+btns+'</div>'
+          +'</div>';
+      }).join('')
+      +'</div></div>';
+  }
+
   var valueChips=''; var domainChips='';
+  var valPopup='<div class="level-popup" id="level-popup-3">'+(LEVEL_HELP['3']||'')+'</div>';
   if(_refData){
     var vals=(_refData.values||[]);
     var doms=(_refData.domains||[]);
@@ -904,9 +947,10 @@ function renderScreen3(el){
         valueChips+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="addItemFromChip(\'3\',\''+esc(item)+'\',\'\')">'+esc(item)+'</div>';
       });
       valueChips+='</div>';
+      valueChips+=buildValAddedHTML(valAdded);
     }
     if(doms.length){
-      domainChips='<div class="values-section-label">Domains</div>'
+      domainChips='<div class="values-section-label" style="margin-top:20px;">Domains</div>'
         +'<div class="ideas-prompt">Areas where you put your energy.</div>'
         +'<div class="item-chips">';
       doms.forEach(function(r){
@@ -915,13 +959,15 @@ function renderScreen3(el){
         domainChips+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="addItemFromChip(\'3\',\''+esc(item)+'\',\'\')">'+esc(item)+'</div>';
       });
       domainChips+='</div>';
+      domainChips+=buildValAddedHTML(domAdded);
     }
   }
   cont.innerHTML=(_editMode?'':progressHTML(3))
     +'<h2>What do you care about deeply?</h2>'
     +screenSearchHTML('3','Search to add...')
+    +valPopup
     +valueChips+domainChips
-    +'<div id="added-3">'+buildAddedHTML('3')+'</div>'
+    +'<div id="added-3" style="display:none;"></div>'
     +navHTML(3);
 }
 
@@ -935,17 +981,17 @@ window.setNeedsCat=function(cat){
   });
   var inner='';
   if(cat==='skill'){
-    inner='<div class="needs-section-label">🙋 A skill or person</div>'
-      +screenSearchHTML('4s','Search for a skill or person...')
+    inner='<div class="needs-section-label">✨ Skill or service</div>'
+      +screenSearchHTML('4s','Search for a skill or service...')
       +'<div id="drill-4s"></div>'
       +'<div id="added-4s">'+buildAddedHTML('4s')+'</div>';
   } else if(cat==='thing'){
-    inner='<div class="needs-section-label">📦 A thing or resource</div>'
+    inner='<div class="needs-section-label">📦 Thing</div>'
       +screenSearchHTML('4r','Search for a thing or resource...')
       +'<div id="drill-4r"></div>'
       +'<div id="added-4r">'+buildAddedHTML('4r')+'</div>';
   } else if(cat==='space'){
-    inner='<div class="needs-section-label">🏡 A space</div>'
+    inner='<div class="needs-section-label">🏡 Space</div>'
       +'<div class="ideas-prompt">A home, a meeting room, a venue, studio, workshop, or desk.</div>'
       +screenSearchHTML('4r','Search for a space...')
       +'<div id="drill-4r"></div>'
@@ -977,9 +1023,9 @@ function renderScreen4(el){
   cont.innerHTML=(_editMode?'':progressHTML(4))
     +'<h2>What do you need right now?</h2>'
     +'<div class="needs-top-chips">'
-    +'<div class="needs-top-chip'+('skill'===_needsCat?' selected':'')+'" id="needs-top-skill" onclick="setNeedsCat(\'skill\')">🙋 Skills or people</div>'
-    +'<div class="needs-top-chip'+('thing'===_needsCat?' selected':'')+'" id="needs-top-thing" onclick="setNeedsCat(\'thing\')">📦 Things</div>'
-    +'<div class="needs-top-chip'+('space'===_needsCat?' selected':'')+'" id="needs-top-space" onclick="setNeedsCat(\'space\')">🏡 Spaces</div>'
+    +'<div class="needs-top-chip'+('skill'===_needsCat?' selected':'')+'" id="needs-top-skill" onclick="setNeedsCat(\'skill\')">✨ Skill or service</div>'
+    +'<div class="needs-top-chip'+('thing'===_needsCat?' selected':'')+'" id="needs-top-thing" onclick="setNeedsCat(\'thing\')">📦 Thing</div>'
+    +'<div class="needs-top-chip'+('space'===_needsCat?' selected':'')+'" id="needs-top-space" onclick="setNeedsCat(\'space\')">🏡 Space</div>'
     +'</div>'
     +'<div id="needs-cat-content"></div>'
     +allAdded
@@ -1026,4 +1072,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.6 | Last change: Community profile, values/domains split, chip persist, Add another, breadcrumb underline, profile styling, level help, name in btn, needs redesign, ideas prompt | Date: 2026-06-25 -->
+<!-- Version: V2.7 | Last change: Missing msg below header, lang lag fix, Add another gated, ? popup fix, values split-added, needs labels, category blue, remove Required, lang line below | Date: 2026-06-25 -->
