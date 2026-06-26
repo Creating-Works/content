@@ -1,4 +1,4 @@
-<!-- Version: V2.7 | Last change: Missing msg below header, lang lag fix, Add another gated, ? popup fix, values split-added, needs labels, category blue, remove Required, lang line below | Date: 2026-06-25 -->
+<!-- Version: V2.8 | Last change: Skill 14 cats, Thing sub-cats, 4-segment needs, duplicate fix, Associated category missing, remove Add another, lang line fix | Date: 2026-06-25 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -160,6 +160,8 @@
     .needs-top-chip{padding:10px 18px;border-radius:20px;border:1.5px solid var(--border);background:white;font-size:14px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;transition:all 0.15s;}
     .needs-top-chip:hover{border-color:var(--brand);color:var(--brand);}
     .needs-top-chip.selected{background:var(--brand);border-color:var(--brand);color:white;font-weight:600;}
+    .needs-detail-box{background:var(--input-bg);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;}
+    .sub-chip.selected{background:var(--brand);border-color:var(--brand);color:white;font-weight:600;}
     .values-section-label{font-size:13px;font-weight:700;color:var(--text);margin:16px 0 8px;}
     .btn-link{background:none;border:none;color:var(--brand);font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif;padding:0;}
     .inline-edit-row{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--soft);flex-wrap:wrap;}
@@ -403,7 +405,7 @@ function parseNeedsStr(str){
   if(!str) return [];
   return str.split('|').filter(Boolean).map(function(s){
     var p=s.split(':');
-    return{item:p[0],category:'',local:p[1]==='local',ntype:p[2]||'skill'};
+    return{item:p[0],category:p[3]||'',local:p[1]==='local',ntype:p[2]||'skill'};
   });
 }
 
@@ -415,7 +417,7 @@ function autoSave(){
   var vStr=_values.map(function(s){return s.item+(s.level?':'+s.level:'');}).join('|');
   var nStr=[].concat(
     _needsSkill.map(function(s){return s.item+(s.local?':local':'')+':skill';}),
-    _needsRes.map(function(s){return s.item+(s.local?':local':'')+':resource';})
+    _needsRes.map(function(s){return s.item+(s.local?':local':'')+':thing'+(s.category?':'+s.category:'');})
   ).join('|');
   fetch(GS_URL+'?action=saveIntake'
     +'&appearId='+encodeURIComponent(_appearId)
@@ -798,22 +800,14 @@ function progressHTML(n){
   return '<div class="progress-wrap"><div class="progress-steps">'+s+'</div><div class="progress-label">Section '+n+' of 4 — '+labs[n]+'</div></div>';
 }
 
-window.addAnother=function(s){
-  resetDrillTo(String(s),0);
-  window.renderDrill(String(s),'drill-'+String(s));
-};
-
 function navHTML(screen){
-  var s=String(screen);
-  var hasItems=getArr(s).length>0||((s==='4'||s===4)&&(_needsSkill.length>0||_needsRes.length>0));
-  var addBtn=hasItems?'<button class="btn-back" style="flex:1.2;" onclick="addAnother('+JSON.stringify(s)+')">Add another</button>':'';
   if(_editMode){
-    return '<div class="nav-row">'+addBtn+'<button class="btn-next" onclick="doneEdit()">Done</button></div>';
+    return '<div class="nav-row"><button class="btn-next" onclick="doneEdit()">Done</button></div>';
   }
   var isFirst=(screen===1);
   var back=isFirst?'':'<button class="btn-back" onclick="goBack()">Back</button>';
   var next='<button class="btn-next" onclick="goNext()">'+(screen===4?'Done':'Next')+'</button>';
-  return '<div class="nav-row">'+back+addBtn+next+'</div>';
+  return '<div class="nav-row">'+back+next+'</div>';
 }
 
 function screenSearchHTML(s, placeholder){
@@ -824,7 +818,7 @@ function screenSearchHTML(s, placeholder){
 
 // Profile
 function renderProfile(el, viewerMode){
-  function section(label, arr, hasLevel, levelKey, screenNum){
+  function section(label, arr, hasLevel, levelKey, screenNum, noBorder){
     var tags=arr.length
       ?arr.map(function(r){
           var lv=hasLevel?(r[levelKey]||''):'';
@@ -838,8 +832,8 @@ function renderProfile(el, viewerMode){
         +'<button class="edit-btn" onclick="jumpTo('+screenNum+')">✏️ Edit</button>'
         +'</div>'
       :'';
-    var missingMsg=(hasMissing&&!viewerMode)?'<div class="reminder-msg" style="font-size:12px;margin-bottom:6px;">Some info is missing.</div>':'';
-    return '<div class="profile-section">'
+    var missingMsg=(hasMissing&&!viewerMode)?'<div class="reminder-msg" style="font-size:12px;margin-bottom:6px;">Associated category missing.</div>':'';
+    return '<div class="profile-section"'+(noBorder?' style="border-bottom:none;padding-bottom:4px;"':'')+'>'+''
       +'<div class="profile-section-header"><div class="profile-section-label">'+label+'</div>'+actions+'</div>'
       +missingMsg
       +'<div class="profile-tags">'+tags+'</div>'
@@ -854,7 +848,7 @@ function renderProfile(el, viewerMode){
   el.innerHTML='<h2>This is me 🌱</h2>'
     +metaRow
     +section('What I enjoy',_interests,true,'level',1)
-    +section('My skills',_skills,true,'level',2)
+    +section('My skills',_skills,true,'level',2,true)
     +'<div class="profile-lang-row" id="profile-lang-row">'+buildLangRowHTML()+'</div>'
     +section('What I care about',_values,true,'level',3)
     +section('What I need',allNeeds,false,'',4);
@@ -973,6 +967,48 @@ function renderScreen3(el){
 
 var _needsCat='';
 
+var THING_SUBS={
+  'Physical goods':{emoji:'📦',prompt:'Share details below. Examples: a book, gear or equipment, art supplies, a tool I need'},
+  'Consumables':{emoji:'🍲',prompt:'Share details below. Examples: coffee, a homemade meal, local ingredients, food for the week'},
+  'Money':{emoji:'💙',prompt:'Helping with medical, rent, household bills, or funding a business or passion project.'},
+  'Living things':{emoji:'🪴',prompt:'Share details below. Examples: a Persian cucumber plant, a bouquet of flowers, eggplant seeds, a clipping from your garden, ladybugs for my garden'}
+};
+var _thingSub='';
+
+window.setThingSubCat=function(sub){
+  _thingSub=sub;
+  Object.keys(THING_SUBS).forEach(function(k){
+    var el=document.getElementById('thing-sub-'+k.replace(/ /g,'-'));
+    if(el) el.className='sub-chip'+(sub===k?' selected':'');
+  });
+  var info=THING_SUBS[sub];
+  var cont=document.getElementById('thing-detail-area'); if(!cont) return;
+  cont.innerHTML='<div class="needs-detail-box">'
+    +'<div class="ideas-prompt" style="margin-bottom:10px;">'+esc(info.prompt)+'</div>'
+    +'<input type="text" id="thing-detail-input" placeholder="Please share some details">'
+    +'<label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;color:var(--soft);cursor:pointer;">'
+    +'<input type="checkbox" id="thing-local-check"> 📍 This is a local request</label>'
+    +'<button class="btn-next" style="width:100%;margin-top:14px;" onclick="addThingItem()">Add to list</button>'
+    +'</div>'
+    +'<div id="added-4r">'+buildAddedHTML('4r')+'</div>';
+};
+window.addThingItem=function(){
+  var inp=document.getElementById('thing-detail-input');
+  var item=inp?inp.value.trim():'';
+  if(!item){toast('Please share some details first.');return;}
+  var local=document.getElementById('thing-local-check');
+  var isLocal=local?local.checked:false;
+  if(_needsRes.some(function(r){return r.item===item;})){toast('Already added');return;}
+  _needsRes.push({item:item,category:_thingSub,local:isLocal,ntype:'thing'});
+  autoSave();
+  // reset
+  if(inp) inp.value='';
+  if(local) local.checked=false;
+  var added=document.getElementById('added-4r');
+  if(added) added.innerHTML=buildAddedHTML('4r');
+  toast('Added to your list.');
+};
+
 window.setNeedsCat=function(cat){
   _needsCat=cat;
   ['skill','thing','space'].forEach(function(c){
@@ -981,26 +1017,44 @@ window.setNeedsCat=function(cat){
   });
   var inner='';
   if(cat==='skill'){
-    inner='<div class="needs-section-label">✨ Skill or service</div>'
-      +screenSearchHTML('4s','Search for a skill or service...')
+    resetDrillTo('4s',0);
+    inner=screenSearchHTML('4s','Search for a skill or service...')
       +'<div id="drill-4s"></div>'
       +'<div id="added-4s">'+buildAddedHTML('4s')+'</div>';
   } else if(cat==='thing'){
-    inner='<div class="needs-section-label">📦 Thing</div>'
-      +screenSearchHTML('4r','Search for a thing or resource...')
-      +'<div id="drill-4r"></div>'
-      +'<div id="added-4r">'+buildAddedHTML('4r')+'</div>';
+    _thingSub='';
+    var subChips=Object.keys(THING_SUBS).map(function(k){
+      var info=THING_SUBS[k];
+      return '<div class="sub-chip" id="thing-sub-'+k.replace(/ /g,'-')+'" onclick="setThingSubCat('+JSON.stringify(k)+')">'+info.emoji+' '+k+'</div>';
+    }).join('');
+    inner='<div class="sub-chips" style="margin-bottom:14px;">'+subChips+'</div>'
+      +'<div id="thing-detail-area"></div>';
   } else if(cat==='space'){
-    inner='<div class="needs-section-label">🏡 Space</div>'
-      +'<div class="ideas-prompt">A home, a meeting room, a venue, studio, workshop, or desk.</div>'
-      +screenSearchHTML('4r','Search for a space...')
-      +'<div id="drill-4r"></div>'
+    inner='<div class="ideas-prompt">A home, a meeting room, a venue, studio, workshop, or desk.</div>'
+      +'<input type="text" id="space-detail-input" placeholder="Please share some details" style="margin-top:8px;">'
+      +'<label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;color:var(--soft);cursor:pointer;">'
+      +'<input type="checkbox" id="space-local-check"> 📍 This is a local request</label>'
+      +'<button class="btn-next" style="width:100%;margin-top:14px;" onclick="addSpaceItem()">Add to list</button>'
       +'<div id="added-4r">'+buildAddedHTML('4r')+'</div>';
   }
   var cont=document.getElementById('needs-cat-content'); if(!cont) return;
   cont.innerHTML=inner;
   if(cat==='skill') window.renderDrill('4s','drill-4s');
-  else window.renderDrill('4r','drill-4r');
+};
+window.addSpaceItem=function(){
+  var inp=document.getElementById('space-detail-input');
+  var item=inp?inp.value.trim():'';
+  if(!item){toast('Please share some details first.');return;}
+  var local=document.getElementById('space-local-check');
+  var isLocal=local?local.checked:false;
+  if(_needsRes.some(function(r){return r.item===item;})){toast('Already added');return;}
+  _needsRes.push({item:item,category:'Space',local:isLocal,ntype:'space'});
+  autoSave();
+  if(inp) inp.value='';
+  if(local) local.checked=false;
+  var added=document.getElementById('added-4r');
+  if(added) added.innerHTML=buildAddedHTML('4r');
+  toast('Added to your list.');
 };
 
 function renderScreen4(el){
@@ -1072,4 +1126,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.7 | Last change: Missing msg below header, lang lag fix, Add another gated, ? popup fix, values split-added, needs labels, category blue, remove Required, lang line below | Date: 2026-06-25 -->
+<!-- Version: V2.8 | Last change: Skill 14 cats, Thing sub-cats, 4-segment needs, duplicate fix, Associated category missing, remove Add another, lang line fix | Date: 2026-06-25 -->
