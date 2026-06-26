@@ -1,10 +1,10 @@
-<!-- Version: V2.5 | Last change: Postal pill right-justified, My ikigai btn opens share modal on intake screens, link btn removed, lang edit btn moved to skills screen only | Date: 2026-06-25 -->
+<!-- Version: V2.6 | Last change: Community profile, values/domains split, chip persist, Add another, breadcrumb underline, profile styling, level help, name in btn, needs redesign, ideas prompt | Date: 2026-06-25 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gathering Intake</title>
+  <title>Community profile</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&display=swap" rel="stylesheet">
   <style>
@@ -39,7 +39,7 @@
     .progress-label{font-size:12px;color:var(--muted);}
     /* Breadcrumb */
     .breadcrumb-nav{font-size:12px;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;flex-wrap:wrap;gap:4px;}
-    .breadcrumb-link{color:var(--brand);cursor:pointer;font-weight:500;}
+    .breadcrumb-link{color:var(--brand);cursor:pointer;font-weight:500;text-decoration:underline;}
     .breadcrumb-link:hover{text-decoration:underline;}
     /* Category chips grid */
     .cat-chips-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
@@ -53,9 +53,9 @@
     .sub-chip.selected{background:var(--brand);border-color:var(--brand);color:white;font-weight:500;}
     /* Item chips */
     .item-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px;}
-    .item-chip{padding:6px 13px;border-radius:18px;border:1.5px dashed var(--border);background:var(--input-bg);font-size:12px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
+    .item-chip{padding:6px 13px;border-radius:18px;border:1.5px dashed var(--border);background:white;font-size:12px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
     .item-chip:hover{border-color:var(--brand);color:var(--brand);border-style:solid;background:var(--sel-bg);}
-    .item-chip.added{background:var(--sel-bg);border-color:var(--sel-border);border-style:solid;color:var(--brand);font-weight:500;}
+    .item-chip.added{background:var(--brand);border-color:var(--brand);border-style:solid;color:white;font-weight:600;}
     /* Search */
     .search-wrap{position:relative;margin-bottom:14px;}
     .search-wrap input{padding-left:36px;border-radius:8px;}
@@ -110,16 +110,16 @@
     .profile-meta-row{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);}
     .meta-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;background:var(--brand);color:white;font-size:13px;font-weight:600;cursor:pointer;}
     .meta-pill:hover{background:var(--hover);}
-    .profile-section{margin-bottom:24px;}
+    .profile-section{margin-bottom:0;padding-bottom:20px;border-bottom:1px solid var(--border);margin-top:20px;}
     .profile-section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
-    .profile-section-label{font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);}
+    .profile-section-label{font-size:16px;font-weight:700;color:var(--text);letter-spacing:0;text-transform:none;}
     .profile-section-actions{display:flex;align-items:center;gap:8px;}
     .edit-btn{font-size:12px;font-weight:600;color:white;background:var(--brand);border:none;border-radius:16px;cursor:pointer;font-family:'DM Sans',sans-serif;padding:5px 12px;}
     .profile-tags{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px;}
     .profile-tag{padding:6px 12px;border-radius:20px;background:var(--sel-bg);border:1.5px solid var(--sel-border);font-size:13px;color:var(--brand);font-weight:500;}
     .tag-level{font-size:11px;color:var(--muted);font-weight:400;margin-left:4px;}
     .profile-empty{font-size:13px;color:var(--muted);font-style:italic;}
-    .profile-lang-row{margin-top:4px;padding-top:0;display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+    .profile-lang-row{margin-top:4px;padding-top:0;margin-bottom:16px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
     .profile-lang-text{font-size:13px;color:var(--soft);}
     /* Lang modal */
     .lang-dropdown-wrap{position:relative;margin-bottom:12px;}
@@ -150,6 +150,17 @@
     .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:white;border-radius:10px;padding:12px 20px;font-size:14px;font-weight:500;z-index:9999;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap;}
     .toast.show{opacity:1;}
     .empty{font-size:13px;color:var(--muted);font-style:italic;margin-top:8px;}
+    .added-header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+    .level-help-btn{background:none;border:1.5px solid var(--border);border-radius:50%;width:20px;height:20px;font-size:11px;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;justify-content:center;padding:0;}
+    .level-help-btn:hover{border-color:var(--brand);color:var(--brand);}
+    .level-popup{display:none;background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--soft);margin-bottom:10px;line-height:1.6;}
+    .level-popup.open{display:block;}
+    .ideas-prompt{font-size:13px;color:var(--muted);font-style:italic;margin-bottom:10px;}
+    .needs-top-chips{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+    .needs-top-chip{padding:10px 18px;border-radius:20px;border:1.5px solid var(--border);background:white;font-size:14px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;transition:all 0.15s;}
+    .needs-top-chip:hover{border-color:var(--brand);color:var(--brand);}
+    .needs-top-chip.selected{background:var(--brand);border-color:var(--brand);color:white;font-weight:600;}
+    .values-section-label{font-size:13px;font-weight:700;color:var(--text);margin:16px 0 8px;}
     .btn-link{background:none;border:none;color:var(--brand);font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif;padding:0;}
     .inline-edit-row{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--soft);flex-wrap:wrap;}
   </style>
@@ -464,6 +475,7 @@ window.renderDrill = function(screen, containerId){
     var chips=getItemChips(s);
     if(chips.length){
       var addedArr=_interests;
+      html+='<div class="ideas-prompt">Here are some ideas to get you started — these aren\'t the only options.</div>';
       html+='<div class="item-chips">';
       chips.forEach(function(item){
         var isAdded=addedArr.some(function(r){return r.item===item;});
@@ -485,6 +497,7 @@ window.renderDrill = function(screen, containerId){
     var chips2=getItemChips(s);
     if(chips2.length){
       var arr2=s==='2'?_skills:s==='3'?_values:s==='4s'?_needsSkill:_needsRes;
+      html+='<div class="ideas-prompt">Here are some ideas to get you started — these aren\'t the only options.</div>';
       html+='<div class="item-chips">';
       chips2.forEach(function(item){
         var isAdded=arr2.some(function(r){return r.item===item;});
@@ -568,12 +581,21 @@ function updateAddedSection(s){
   el.innerHTML=buildAddedHTML(s);
 }
 
+var LEVEL_HELP={
+  '1':'Fan: You follow it, watch it, or love it from the sideline.<br>Participant: You do it yourself, with some regularity.<br>Coach: You guide others in it.',
+  '2':'Starting to practice: You are learning and building confidence.<br>Practicing: You do this regularly and do it well.<br>Mentoring: You help others develop this skill.',
+  '3':'Curious: You are drawn to this and want to learn more.<br>Engaged: You act on this regularly in your life or work.<br>Leading: You take initiative and bring others into it.'
+};
+window.toggleLevelHelp=function(s){var p=document.getElementById('level-popup-'+s);if(p)p.classList.toggle('open');};
+
 function buildAddedHTML(s){
   var arr=getArr(s);
   if(!arr.length) return '<div class="empty">Nothing added yet.</div>';
   var levels=s==='1'?['Fan','Participant','Coach']:s==='2'?['Starting to practice','Practicing','Mentoring']:s==='3'?['Curious','Engaged','Leading']:null;
   var isNeed=(s==='4s'||s==='4r');
-  var useGrid=!isNeed;return '<div class="added-section"><div class="added-label">Added</div>'+(useGrid?'<div class="practice-grid">':'')
+  var popup=levels?'<div class="level-popup" id="level-popup-'+s+'">'+(LEVEL_HELP[s]||'')+'</div>':'';
+  var helpBtn=levels?'<button class="level-help-btn" onclick="toggleLevelHelp('+JSON.stringify(s)+')">?</button>':'';
+  var useGrid=!isNeed;return popup+'<div class="added-section"><div class="added-header-row"><div class="added-label">Added</div>'+helpBtn+'</div>'+(useGrid?'<div class="practice-grid">':'')
     +arr.map(function(item,i){
         if(isNeed){
           return '<div class="need-item">'
@@ -719,7 +741,7 @@ window.copyShareLink = function(){
   catch(e){toast('Copy: '+getShareURL());}
 };
 window.nativeShare = function(){
-  if(navigator.share){navigator.share({title:'This is me 🌱',url:getShareURL()}).catch(function(){});}
+  if(navigator.share){navigator.share({title:'Community profile',url:getShareURL()}).catch(function(){});}
   else{window.copyShareLink();}
 };
 
@@ -728,17 +750,15 @@ function renderTopRight(){
   var el=document.getElementById('top-right-area'); if(!el) return;
   if(_viewerMode){
     var ph=_viewerPhoto?'<div class="btn-photo"><img src="'+esc(_viewerPhoto)+'" alt=""></div>':'<div class="btn-photo">🌱</div>';
-    el.innerHTML='<div class="share-btn" onclick="openShareModal()" title="Share">🔗</div>'
-      +'<div class="ikigai-btn" style="cursor:default;">'+ph+esc(_viewerName||'Profile')+'</div>';
+    el.innerHTML='<div class="ikigai-btn" style="cursor:default;">'+ph+esc(_viewerName||'Profile')+'</div>';
   } else if(_screen===0){
-    // On profile summary: My ikigai goes to profile (already there), show share btn separately
     var ph2=_photo?'<div class="btn-photo"><img src="'+esc(_photo)+'" alt=""></div>':'<div class="btn-photo">🌱</div>';
-    el.innerHTML='<div class="share-btn" onclick="openShareModal()" title="Share">🔗</div>'
-      +'<button class="ikigai-btn" onclick="goToProfile()">'+ph2+'About me 🎯</button>';
+    var lbl2=_name?esc(_name):'About me 🎯';
+    el.innerHTML='<button class="ikigai-btn" onclick="openShareModal()">'+ph2+lbl2+'</button>';
   } else {
-    // On intake screens: My ikigai opens share modal, no separate link btn
     var ph3=_photo?'<div class="btn-photo"><img src="'+esc(_photo)+'" alt=""></div>':'<div class="btn-photo">🌱</div>';
-    el.innerHTML='<button class="ikigai-btn" onclick="openShareModal()">'+ph3+'My ikigai 🎯</button>';
+    var lbl3=_name?esc(_name):'About me 🎯';
+    el.innerHTML='<button class="ikigai-btn" onclick="openShareModal()">'+ph3+lbl3+'</button>';
   }
 }
 
@@ -772,17 +792,21 @@ function progressHTML(n){
   return '<div class="progress-wrap"><div class="progress-steps">'+s+'</div><div class="progress-label">Section '+n+' of 4 — '+labs[n]+'</div></div>';
 }
 
+window.addAnother=function(s){
+  resetDrillTo(String(s),0);
+  window.renderDrill(String(s),'drill-'+String(s));
+};
+
 function navHTML(screen){
-  // Edit mode: Cancel + Done
+  var s=String(screen);
+  var addBtn='<button class="btn-back" style="flex:1.2;" onclick="addAnother('+JSON.stringify(s)+')">Add another</button>';
   if(_editMode){
-    return '<div class="nav-row">'
-      +'<button class="btn-next" onclick="doneEdit()">Done</button>'
-      +'</div>';
+    return '<div class="nav-row">'+addBtn+'<button class="btn-next" onclick="doneEdit()">Done</button></div>';
   }
   var isFirst=(screen===1);
   var back=isFirst?'':'<button class="btn-back" onclick="goBack()">Back</button>';
   var next='<button class="btn-next" onclick="goNext()">'+(screen===4?'Done':'Next')+'</button>';
-  return '<div class="nav-row">'+back+next+'</div>';
+  return '<div class="nav-row">'+back+addBtn+next+'</div>';
 }
 
 function screenSearchHTML(s, placeholder){
@@ -864,24 +888,103 @@ function renderScreen2(el){
     +navHTML(2);
   window.renderDrill('2','drill-2');
 }
-function renderScreen3(el){ renderScreen(3,'What do you care about deeply?','Search to add...','drill-3','added-3'); }
+function renderScreen3(el){
+  var cont=document.getElementById('app-content'); if(!cont) return;
+  var valueChips=''; var domainChips='';
+  if(_refData){
+    var vals=(_refData.values||[]);
+    var doms=(_refData.domains||[]);
+    if(vals.length){
+      valueChips='<div class="values-section-label">Values</div>'
+        +'<div class="ideas-prompt">Here are some ideas to get you started — these aren\'t the only options.</div>'
+        +'<div class="item-chips">';
+      vals.forEach(function(r){
+        var item=r.item||r;
+        var isAdded=_values.some(function(v){return v.item===item;});
+        valueChips+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="addItemFromChip(\'3\',\''+esc(item)+'\',\'\')">'+esc(item)+'</div>';
+      });
+      valueChips+='</div>';
+    }
+    if(doms.length){
+      domainChips='<div class="values-section-label">Domains</div>'
+        +'<div class="ideas-prompt">Areas where you put your energy.</div>'
+        +'<div class="item-chips">';
+      doms.forEach(function(r){
+        var item=r.item||r;
+        var isAdded=_values.some(function(v){return v.item===item;});
+        domainChips+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="addItemFromChip(\'3\',\''+esc(item)+'\',\'\')">'+esc(item)+'</div>';
+      });
+      domainChips+='</div>';
+    }
+  }
+  cont.innerHTML=(_editMode?'':progressHTML(3))
+    +'<h2>What do you care about deeply?</h2>'
+    +screenSearchHTML('3','Search to add...')
+    +valueChips+domainChips
+    +'<div id="added-3">'+buildAddedHTML('3')+'</div>'
+    +navHTML(3);
+}
+
+var _needsCat='';
+
+window.setNeedsCat=function(cat){
+  _needsCat=cat;
+  ['skill','thing','space'].forEach(function(c){
+    var el=document.getElementById('needs-top-'+c);
+    if(el) el.className='needs-top-chip'+(cat===c?' selected':'');
+  });
+  var inner='';
+  if(cat==='skill'){
+    inner='<div class="needs-section-label">🙋 A skill or person</div>'
+      +screenSearchHTML('4s','Search for a skill or person...')
+      +'<div id="drill-4s"></div>'
+      +'<div id="added-4s">'+buildAddedHTML('4s')+'</div>';
+  } else if(cat==='thing'){
+    inner='<div class="needs-section-label">📦 A thing or resource</div>'
+      +screenSearchHTML('4r','Search for a thing or resource...')
+      +'<div id="drill-4r"></div>'
+      +'<div id="added-4r">'+buildAddedHTML('4r')+'</div>';
+  } else if(cat==='space'){
+    inner='<div class="needs-section-label">🏡 A space</div>'
+      +'<div class="ideas-prompt">A home, a meeting room, a venue, studio, workshop, or desk.</div>'
+      +screenSearchHTML('4r','Search for a space...')
+      +'<div id="drill-4r"></div>'
+      +'<div id="added-4r">'+buildAddedHTML('4r')+'</div>';
+  }
+  var cont=document.getElementById('needs-cat-content'); if(!cont) return;
+  cont.innerHTML=inner;
+  if(cat==='skill') window.renderDrill('4s','drill-4s');
+  else window.renderDrill('4r','drill-4r');
+};
 
 function renderScreen4(el){
   var cont=document.getElementById('app-content'); if(!cont) return;
+  var allNeeds=_needsSkill.concat(_needsRes);
+  var allAdded=allNeeds.length
+    ?'<div class="added-section"><div class="added-header-row"><div class="added-label">All added needs</div></div>'
+      +'<div>'+allNeeds.map(function(item){
+        var src=_needsSkill.indexOf(item)>-1?'4s':'4r';
+        var idx=getArr(src).indexOf(item);
+        return '<div class="need-item">'
+          +'<div class="need-item-left"><div class="need-item-name">'+esc(item.item)+'</div>'
+          +(item.category?'<div class="need-item-cat">'+esc(item.category)+'</div>':'')+'</div>'
+          +'<div class="need-item-right">'
+          +'<label class="local-toggle'+(item.local?' active':'')+'"><input type="checkbox"'+(item.local?' checked':'')+' onchange="toggleLocal(\''+src+'\','+idx+')"> 📍 Local</label>'
+          +'<button class="practice-item-x" onclick="removeItem(\''+src+'\','+idx+')">×</button>'
+          +'</div></div>';
+      }).join('')+'</div></div>'
+    :'';
   cont.innerHTML=(_editMode?'':progressHTML(4))
     +'<h2>What do you need right now?</h2>'
-    +'<div class="needs-section-label">🙋 A skill or person</div>'
-    +screenSearchHTML('4s','Search for a skill or person...')
-    +'<div id="drill-4s"></div>'
-    +'<div id="added-4s">'+buildAddedHTML('4s')+'</div>'
-    +'<hr style="border:none;border-top:1px solid var(--border);margin:20px 0;">'
-    +'<div class="needs-section-label">📦 A thing or resource</div>'
-    +screenSearchHTML('4r','Search for a thing or resource...')
-    +'<div id="drill-4r"></div>'
-    +'<div id="added-4r">'+buildAddedHTML('4r')+'</div>'
+    +'<div class="needs-top-chips">'
+    +'<div class="needs-top-chip'+('skill'===_needsCat?' selected':'')+'" id="needs-top-skill" onclick="setNeedsCat(\'skill\')">🙋 Skills or people</div>'
+    +'<div class="needs-top-chip'+('thing'===_needsCat?' selected':'')+'" id="needs-top-thing" onclick="setNeedsCat(\'thing\')">📦 Things</div>'
+    +'<div class="needs-top-chip'+('space'===_needsCat?' selected':'')+'" id="needs-top-space" onclick="setNeedsCat(\'space\')">🏡 Spaces</div>'
+    +'</div>'
+    +'<div id="needs-cat-content"></div>'
+    +allAdded
     +navHTML(4);
-  window.renderDrill('4s','drill-4s');
-  window.renderDrill('4r','drill-4r');
+  if(_needsCat) window.setNeedsCat(_needsCat);
 }
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
@@ -923,4 +1026,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.5 | Last change: Postal pill right-justified, My ikigai btn opens share modal on intake screens, link btn removed, lang edit btn moved to skills screen only | Date: 2026-06-25 -->
+<!-- Version: V2.6 | Last change: Community profile, values/domains split, chip persist, Add another, breadcrumb underline, profile styling, level help, name in btn, needs redesign, ideas prompt | Date: 2026-06-25 -->
