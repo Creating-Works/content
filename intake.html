@@ -1,4 +1,4 @@
-<!-- Version: V2.12 | Last change: Glide scope fix, thing sub-chip wrap, hide quick needs, needs summary, postal nudge, added toast, space outlined button | Date: 2026-06-26 -->
+<!-- Version: V2.13 | Last change: Toast top, space button copy, remove methods max-3, needs summary refresh, postal modal, category missing in chip | Date: 2026-06-26 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -149,7 +149,7 @@
     .qr-wrap{background:white;border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;}
     .qr-wrap img{max-width:200px;width:100%;border-radius:8px;}
     .copy-confirm{font-size:12px;color:var(--brand);margin-top:6px;display:none;}
-    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:white;border-radius:10px;padding:12px 20px;font-size:14px;font-weight:500;z-index:9999;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap;}
+    .toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:white;border-radius:10px;padding:12px 20px;font-size:14px;font-weight:500;z-index:9999;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap;}
     .toast.show{opacity:1;}
     .empty{font-size:13px;color:var(--muted);font-style:italic;margin-top:8px;}
     .added-header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
@@ -229,11 +229,25 @@
   </div>
 </div>
 
+
+<!-- Postal modal -->
+<div class="modal-overlay" id="postal-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closePostalModal()">✕</button>
+    <div class="modal-title">Postal code</div>
+    <p style="font-size:14px;color:var(--soft);margin:0 0 14px;">Used to show local requests and offers near you.</p>
+    <input type="text" id="postal-modal-input" placeholder="Enter your postal code" style="width:100%;padding:12px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;font-family:'DM Sans',sans-serif;box-sizing:border-box;">
+    <div style="margin-top:16px">
+      <button class="custom-add-confirm" onclick="savePostalModal()">Done</button>
+      <button class="custom-add-cancel" onclick="closePostalModal()">Cancel</button>
+    </div>
+  </div>
+</div>
 <!-- Methods modal (edit mode) -->
 <div class="methods-modal-overlay" id="methods-modal">
   <div class="methods-modal">
     <h3 style="margin:0 0 4px;font-size:17px;font-weight:700;">What comes most naturally to you?</h3>
-    <div style="font-size:13px;color:var(--muted);margin-bottom:14px;">Select up to 3.</div>
+    
     <div class="methods-list" id="methods-modal-list"></div>
     <div style="margin-top:8px;display:flex;gap:10px;">
       <button class="custom-add-confirm" onclick="saveMethodsModal()">Done</button>
@@ -574,6 +588,26 @@ window.doResetDrill = function(screen, level){
 };
 
 // ─── Add items ────────────────────────────────────────────────────────────────
+function refreshNeedsSummary(){
+  var el=document.getElementById('needs-summary-block');
+  if(!el) return;
+  var expanded=document.getElementById('needs-summary-body')&&document.getElementById('needs-summary-body').style.display!=='none';
+  var html=buildNeedsSummary();
+  var nav=document.querySelector('.nav-row');
+  if(nav&&nav.parentNode){
+    var old=document.getElementById('needs-summary-block');
+    if(old) old.parentNode.removeChild(old);
+    var tmp=document.createElement('div');
+    tmp.innerHTML=html;
+    if(tmp.firstChild) nav.parentNode.insertBefore(tmp.firstChild,nav);
+    if(expanded){
+      var body=document.getElementById('needs-summary-body');
+      var arrow=document.getElementById('needs-summary-arrow');
+      if(body) body.style.display='flex';
+      if(arrow) arrow.textContent='▲';
+    }
+  }
+}
 window.addItemFromChip = function(screen, item, category){
   addItem(screen, item, category);
   if(String(screen)==='3'){
@@ -581,6 +615,7 @@ window.addItemFromChip = function(screen, item, category){
   } else {
     window.renderDrill(String(screen),'drill-'+String(screen));
   }
+  if(String(screen)==='4s'||String(screen)==='4r') refreshNeedsSummary();
 };
 
 function addItem(screen, item, category){
@@ -788,8 +823,7 @@ function renderMethodsModalList(){
 window.toggleMethodDraft = function(m){
   var idx=_methodsDraft.indexOf(m);
   if(idx>-1){ _methodsDraft.splice(idx,1); }
-  else if(_methodsDraft.length<3){ _methodsDraft.push(m); }
-  else { toast('Select up to 3.'); return; }
+  else { _methodsDraft.push(m); }
   renderMethodsModalList();
 };
 function buildMethodsChecklistHTML(draftArr, opts, maxLabel){
@@ -809,8 +843,7 @@ function buildMethodsChecklistHTML(draftArr, opts, maxLabel){
 window.toggleMethodInline = function(m){
   var idx=_methods.indexOf(m);
   if(idx>-1){ _methods.splice(idx,1); }
-  else if(_methods.length<3){ _methods.push(m); }
-  else { toast('Select up to 3.'); return; }
+  else { _methods.push(m); }
   // re-render just the checklist area
   var el=document.getElementById('methods-inline-list'); if(!el) return;
   var opts=(_refData&&_refData.methodsDisplay)||[];
@@ -818,6 +851,19 @@ window.toggleMethodInline = function(m){
 };
 
 
+window.openPostalModal=function(){
+  var m=document.getElementById('postal-modal'); if(m) m.classList.add('open');
+  var inp=document.getElementById('postal-modal-input'); if(inp) inp.value=_postal||'';
+  setTimeout(function(){if(inp) inp.focus();},100);
+};
+window.closePostalModal=function(){ var m=document.getElementById('postal-modal'); if(m) m.classList.remove('open'); };
+window.savePostalModal=function(){
+  var inp=document.getElementById('postal-modal-input');
+  _postal=(inp?inp.value.trim():'');
+  autoSave();
+  window.closePostalModal();
+  render();
+};
 window.openLangModal = function(){
   var m=document.getElementById('lang-modal'); if(m) m.classList.add('open');
   filterLangs('');
@@ -968,25 +1014,24 @@ function renderProfile(el, viewerMode){
       ?arr.map(function(r){
           var lv=hasLevel?(r[levelKey]||''):'';
           var local=r.local?' 📍':'';
-          return '<div class="profile-tag">'+esc(r.item)+(lv?'<span class="tag-level">'+esc(lv)+'</span>':'')+local+'</div>';
+          var missingLevel=hasLevel&&!lv&&!viewerMode;
+          var missingTag=missingLevel?'<span style="font-size:11px;color:#d32f2f;font-weight:500;margin-left:4px;">Category missing</span>':'';
+          return '<div class="profile-tag"'+(missingLevel?' style="border-color:#d32f2f;"':'')+'>'+esc(r.item)+(lv?'<span class="tag-level">'+esc(lv)+'</span>':'')+missingTag+local+'</div>';
         }).join('')
       :'<div class="profile-empty">Nothing added yet.</div>';
-    var hasMissing=hasLevel&&arr.some(function(r){return !r[levelKey];});
     var actions=!viewerMode
       ?'<div class="profile-section-actions">'
         +'<button class="edit-btn" onclick="jumpTo('+screenNum+')">✏️ Edit</button>'
         +'</div>'
       :'';
-    var missingMsg=(hasMissing&&!viewerMode)?'<div class="reminder-msg" style="font-size:12px;margin-bottom:6px;">Associated category missing</div>':'';
     return '<div class="profile-section"'+(noBorder?' style="border-bottom:none;padding-bottom:4px;"':'')+'>'+''
       +'<div class="profile-section-header"><div class="profile-section-label">'+label+'</div>'+actions+'</div>'
-      +missingMsg
       +'<div class="profile-tags">'+tags+'</div>'
       +'</div>';
   }
   var metaRow=!viewerMode
     ?'<div class="profile-meta-row">'
-      +'<div class="meta-pill" onclick="openLangModal()">✏️ '+esc(_postal||'No postal code')+'</div>'
+      +'<div class="meta-pill" onclick="openPostalModal()">✏️ '+esc(_postal||'No postal code')+'</div>'
       +'</div>'
     :'';
   var allNeeds=_needsSkill.concat(_needsRes);
@@ -1071,7 +1116,7 @@ function renderScreen2(el){
     // First visit: methods question first, then skills
     cont.innerHTML=progressHTML(2)
       +'<h2>What comes most naturally to you?</h2>'
-      +'<div style="font-size:13px;color:var(--muted);margin-bottom:4px;">Select up to 3.</div>'
+      +''
       +'<div id="methods-inline-list">'+buildMethodsChecklistHTML(_methods, opts)+'</div>'
       +'<div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--border);">'
       +'<h2 style="font-size:20px;margin-bottom:12px;">Share what you know how to do or how to create.</h2>'
@@ -1184,7 +1229,7 @@ var _thingSub='';
 
 window.postalNudge=function(checkboxId){
   if(!_postal){
-    toast('Add your postal code first — tap ✏️ Languages above.');
+    toast('Add your postal code first — tap ✏️ Postal code above.');
     var el=document.getElementById(checkboxId);
     if(el) el.checked=false;
   }
@@ -1221,6 +1266,7 @@ window.addThingItem=function(){
   var added=document.getElementById('added-4r');
   if(added) added.innerHTML=buildAddedHTML('4r');
   toast('Added to your list.');
+  refreshNeedsSummary();
 };
 
 window.setNeedsCat=function(cat){
@@ -1249,7 +1295,7 @@ window.setNeedsCat=function(cat){
       +'<input type="text" id="space-detail-input" placeholder="Please share some details" style="margin-top:8px;">'
       +'<label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;color:var(--soft);cursor:pointer;">'
       +'<input type="checkbox" id="space-local-check" onchange="if(this.checked)postalNudge(\'space-local-check\')"> 📍 This is a local request</label>'
-      +'<button class="btn-outlined" style="width:100%;margin-top:14px;" onclick="addSpaceItem()">Add to list</button>'
+      +'<button class="btn-outlined" style="width:100%;margin-top:14px;" onclick="addSpaceItem()">Add space to my list</button>'
       +'<div id="added-4r">'+buildAddedHTML('4r')+'</div>';
   }
   var cont=document.getElementById('needs-cat-content'); if(!cont) return;
@@ -1270,6 +1316,7 @@ window.addSpaceItem=function(){
   var added=document.getElementById('added-4r');
   if(added) added.innerHTML=buildAddedHTML('4r');
   toast('Added to your list.');
+  refreshNeedsSummary();
 };
 
 var QUICK_NEEDS=['💡 Feedback','📚 Knowledge','🔑 Access','🎯 Accountability','⏰ Collaboration','💰 Funding','🪑 A workspace','🔧 A resource'];
@@ -1348,4 +1395,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.12 | Last change: Glide scope fix, thing sub-chip wrap, hide quick needs, needs summary, postal nudge, added toast, space outlined button | Date: 2026-06-26 -->
+<!-- Version: V2.13 | Last change: Toast top, space button copy, remove methods max-3, needs summary refresh, postal modal, category missing in chip | Date: 2026-06-26 -->
