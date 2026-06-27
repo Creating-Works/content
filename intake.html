@@ -1,4 +1,4 @@
-<!-- Version: V2.15 | Last change: Rec chips no-subcat fix, deselect chip, helper text, single-select level, collapsed added, needs category, title case custom, cat picker on edit screens | Date: 2026-06-26 -->
+<!-- Version: V2.16 | Last change: Exploring label, copy trims, What I'm seeking, collapse styling, values/domains side by side | Date: 2026-06-26 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -191,7 +191,8 @@
     .methods-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:9000;align-items:flex-start;padding-top:4vh;}
     .methods-modal-overlay.open{display:flex;}
     .methods-modal{background:white;border-radius:18px;padding:20px;width:92%;max-width:400px;margin:0 auto;max-height:85vh;overflow-y:auto;}
-    .values-tab{padding:8px 18px;border-radius:20px;border:1.5px solid var(--border);background:white;font-size:14px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;transition:all 0.15s;}
+    .values-tabs{display:flex;flex-direction:row;gap:8px;margin-bottom:14px;}
+    .values-tab{flex:1;text-align:center;padding:10px 8px;border-radius:10px;border:1.5px solid var(--border);background:white;font-size:14px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;transition:all 0.15s;}
     .values-tab.active{background:var(--brand);border-color:var(--brand);color:white;}
     .quick-needs{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0;}
     .quick-need-chip{padding:8px 14px;border-radius:18px;border:1.5px solid var(--border);background:white;font-size:13px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
@@ -544,7 +545,7 @@ window.renderDrill = function(screen, containerId){
     var hasSubCats=(function(){var sc={};pool.filter(function(r){return r.recType===d.parentCat;}).forEach(function(r){if(r.category)sc[r.category]=1;});return Object.keys(sc).length>0;})();
     if(chips.length && (d.subCat || !hasSubCats)){
       var addedArr=_interests;
-      html+='<div class="ideas-prompt">Here are some ideas to get you started — these aren\'t the only options.</div>';
+      html+='<div class="ideas-prompt">Here are some ideas to get you started.</div>';
       html+='<div class="item-chips">';
       chips.forEach(function(item){
         var isAdded=addedArr.some(function(r){return r.item===item;});
@@ -566,7 +567,7 @@ window.renderDrill = function(screen, containerId){
     var chips2=getItemChips(s);
     if(chips2.length){
       var arr2=s==='2'?_skills:s==='3'?_values:s==='4s'?_needsSkill:_needsRes;
-      html+='<div class="ideas-prompt">Here are some ideas to get you started — these aren\'t the only options.</div>';
+      html+='<div class="ideas-prompt">Here are some ideas to get you started.</div>';
       html+='<div class="item-chips">';
       chips2.forEach(function(item){
         var isAdded=arr2.some(function(r){return r.item===item;});
@@ -710,7 +711,7 @@ function updateAddedSection(s){
 var LEVEL_HELP={
   '1':'Fan: You follow it, watch it, or love it from the sideline.<br>Participant: You do it yourself, with some regularity.<br>Coach: You guide others in it.',
   '2':'Starting to practice: You are learning and building confidence.<br>Practicing: You do this regularly and do it well.<br>Mentoring: You help others develop this skill.',
-  '3':'Curious: You are drawn to this and want to learn more.<br>Engaged: You act on this regularly in your life or work.<br>Leading: You take initiative and bring others into it.'
+  '3':'Exploring: You are drawn to this and want to learn more.<br>Engaged: You act on this regularly in your life or work.<br>Leading: You take initiative and bring others into it.'
 };
 window.toggleLevelHelp=function(s){
   var p=document.getElementById('level-popup-'+s);if(!p)return;
@@ -728,7 +729,7 @@ window.toggleLevelHelp=function(s){
 
 function buildAddedHTML(s){
   var arr=getArr(s);
-  var levels=s==='1'?['Fan','Participant','Coach']:s==='2'?['Starting to practice','Practicing','Mentoring']:s==='3'?['Curious','Engaged','Leading']:null;
+  var levels=s==='1'?['Fan','Participant','Coach']:s==='2'?['Starting to practice','Practicing','Mentoring']:s==='3'?['Exploring','Engaged','Leading']:null;
   var popup=levels?'<div class="level-popup" id="level-popup-'+s+'">'+(LEVEL_HELP[s]||'')+'<span class="level-popup-close" onclick="toggleLevelHelp('+JSON.stringify(s)+')">Close</span></div>':'';
   var helpBtn=levels?'<button class="level-help-btn" onclick="toggleLevelHelp('+JSON.stringify(s)+')">?</button>':'';
   if(!arr.length) return popup+'<div class="empty">Nothing added yet.</div>';
@@ -1091,7 +1092,7 @@ function screenSearchHTML(s, placeholder){
 
 // Profile
 function renderProfile(el, viewerMode){
-  var SCREEN_LEVELS={'1':['Fan','Participant','Coach'],'2':['Starting to practice','Practicing','Mentoring'],'3':['Curious','Engaged','Leading']};
+  var SCREEN_LEVELS={'1':['Fan','Participant','Coach'],'2':['Starting to practice','Practicing','Mentoring'],'3':['Exploring','Engaged','Leading']};
   function section(label, arr, hasLevel, levelKey, screenNum, noBorder){
     var screenKey=String(screenNum);
     var lvOpts=SCREEN_LEVELS[screenKey]||[];
@@ -1127,7 +1128,7 @@ function renderProfile(el, viewerMode){
   var allNeeds=_needsSkill.concat(_needsRes);
   el.innerHTML='<h2>This is me 🌱</h2>'
     +metaRow
-    +section('My needs',allNeeds,false,'',4)
+    +section("What I'm seeking",allNeeds,false,'',4)
     +section('What I enjoy',_interests,true,'level',1)
     +section('My skills',_skills,true,'level',2,true)
     +'<div class="profile-lang-row" id="profile-lang-row">'+buildLangRowHTML()+'</div>'
@@ -1231,7 +1232,7 @@ function getValuesSet(){
   (_refData.values||[]).forEach(function(r){set[r.item||r]=1;});
   return set;
 }
-var _valTab='values'; // 'values' | 'domains'
+var _valTab=''; // '' | 'values' | 'domains'
 window.setValTab=function(tab){
   _valTab=tab;
   renderScreen3(null);
@@ -1248,17 +1249,17 @@ function buildValAddedHTML(arr, label){
   var bodyId='val-body-'+safeId;
   var arrowId='val-arrow-'+safeId;
   var h='<div class="added-section" style="margin-top:10px;">';
-  h+='<div class="added-header-row" style="cursor:pointer;" onclick="toggleValSection(\''+bodyId+'\',\''+arrowId+'\')">';
-  h+='<div class="added-label">'+label+' ('+arr.length+')</div>';
-  h+='<div style="display:flex;align-items:center;gap:6px;">';
-  h+='<button class="level-help-btn" onclick="event.stopPropagation();toggleLevelHelp(\'3\')">?</button>';
-  h+='<span id="'+arrowId+'" style="font-size:12px;color:var(--muted);">▼</span>';
+  h+='<div class="added-header-row" style="cursor:pointer;background:var(--brand);border-radius:8px;padding:8px 12px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;" onclick="toggleValSection(\''+bodyId+'\',\''+arrowId+'\')">';
+  h+='<div class="added-label" style="color:white;font-size:13px;font-weight:700;">'+label+' ('+arr.length+')</div>';
+  h+='<div style="display:flex;align-items:center;gap:8px;">';
+  h+='<button class="level-help-btn" style="border-color:rgba(255,255,255,0.5);color:white;" onclick="event.stopPropagation();toggleLevelHelp(\'3\')">?</button>';
+  h+='<span id="'+arrowId+'" style="font-size:20px;color:white;">&#9660;</span>';
   h+='</div></div>';
   h+='<div id="'+bodyId+'" style="display:none;"><div class="practice-grid">';
   arr.forEach(function(item){
     var idx=_values.indexOf(item);
     var btns='';
-    ['Curious','Engaged','Leading'].forEach(function(lv){
+    ['Exploring','Engaged','Leading'].forEach(function(lv){
       var sel=item.level===lv;
       btns+='<button class="practice-btn'+(sel?' selected':'')+'" onclick="setLevel(\'3\','+idx+',\''+lv+'\')">'+lv+'</button>';
     });
@@ -1283,9 +1284,11 @@ function renderScreen3(el){
     +'<div class="values-tab'+(_valTab==='domains'?' active':'')+'" onclick="setValTab(\'domains\')">Domains</div>'
     +'</div>';
   var chipsHTML='';
-  if(_valTab==='values'){
+  if(!_valTab){
+    chipsHTML='<div class="ideas-prompt" style="color:var(--muted);">Select Values or Domains above to see ideas.</div>';
+  } else if(_valTab==='values'){
     var vals=(_refData&&_refData.values)||[];
-    chipsHTML='<div class="ideas-prompt">Here are some ideas to get you started — these aren\'t the only options.</div>'
+    chipsHTML='<div class="ideas-prompt">Here are some ideas to get you started.</div>'
       +'<div class="item-chips">';
     vals.forEach(function(r){
       var item=r.item||r;
@@ -1498,4 +1501,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.15 | Last change: Rec chips no-subcat fix, deselect chip, helper text, single-select level, collapsed added, needs category, title case custom, cat picker on edit screens | Date: 2026-06-26 -->
+<!-- Version: V2.16 | Last change: Exploring label, copy trims, What I'm seeking, collapse styling, values/domains side by side | Date: 2026-06-26 -->
