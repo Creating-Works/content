@@ -1,4 +1,4 @@
-<!-- Version: V2.23d | Last change: Helper text above search input, ? popup fix | Date: 2026-06-27 -->
+<!-- Version: V2.23f | Last change: ? popup bold labels, arrow threshold fix, edit button fix | Date: 2026-06-27 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -720,9 +720,9 @@ function updateAddedSection(s){
 }
 
 var LEVEL_HELP={
-  '1':'Fan: You follow it, watch it, or love it from the sideline.<br>Participant: You do it yourself, with some regularity.<br>Coach: You guide others in it.',
-  '2':'Starting to practice: You are learning and building confidence.<br>Practicing: You do this regularly and do it well.<br>Mentoring: You help others develop this skill.',
-  '3':'Exploring: You are drawn to this and want to learn more.<br>Engaged: You act on this regularly in your life or work.<br>Leading: You take initiative and bring others into it.'
+  '1':'<b>Fan:</b> You follow it, watch it, or love it from the sideline.<br><b>Participant:</b> You do it yourself, with some regularity.<br><b>Coach:</b> You guide others in it.',
+  '2':'<b>Entry Level:</b> You are learning and building confidence.<br><b>Mid Level:</b> You do this regularly and do it well.<br><b>Expert Level:</b> You help others develop this skill.',
+  '3':'<b>Exploring:</b> You are drawn to this and want to learn more.<br><b>Engaged:</b> You act on this regularly in your life or work.<br><b>Leading:</b> You take initiative and bring others into it.'
 };
 window.toggleLevelHelp=function(s){
   var p=document.getElementById('level-popup-'+s);if(!p)return;
@@ -740,7 +740,7 @@ window.toggleLevelHelp=function(s){
 
 function buildAddedHTML(s){
   var arr=getArr(s);
-  var levels=s==='1'?['Fan','Participant','Coach']:s==='2'?['Starting to practice','Practicing','Mentoring']:s==='3'?['Exploring','Engaged','Leading']:null;
+  var levels=s==='1'?['Fan','Participant','Coach']:s==='2'?['Entry Level','Mid Level','Expert Level']:s==='3'?['Exploring','Engaged','Leading']:null;
   var helpBtn=levels?'<button class="level-help-btn" style="border-color:rgba(255,255,255,0.5);color:white;" onclick="toggleLevelHelp('+JSON.stringify(s)+')">?</button>':'';
   if(!arr.length) return '<div class="empty">Nothing added yet.</div>';
   var isNeed=(s==='4s'||s==='4r');
@@ -1153,7 +1153,7 @@ function screenSearchHTML(s, placeholder, hideHelper){
 
 // Profile
 function renderProfile(el, viewerMode){
-  var SCREEN_LEVELS={'1':['Fan','Participant','Coach'],'2':['Starting to practice','Practicing','Mentoring'],'3':['Exploring','Engaged','Leading']};
+  var SCREEN_LEVELS={'1':['Fan','Participant','Coach'],'2':['Entry Level','Mid Level','Expert Level'],'3':['Exploring','Engaged','Leading']};
   function section(label, arr, hasLevel, levelKey, screenNum, noBorder){
     var screenKey=String(screenNum);
     var lvOpts=SCREEN_LEVELS[screenKey]||[];
@@ -1206,7 +1206,7 @@ function renderProfile(el, viewerMode){
           var lv=r.level||'';
           var missingLevel=!lv&&!viewerMode;
           var pickerId='cat-picker-2-'+i;
-          var lvOpts=['Starting to practice','Practicing','Mentoring'];
+          var lvOpts=['Entry Level','Mid Level','Expert Level'];
           var pickerBtns=missingLevel?lvOpts.map(function(opt){return '<button class="cat-pick-btn" onclick="setCatLevel(\'2\','+i+',\''+opt+'\')">' +opt+'</button>';}).join(''):'';
           var picker=missingLevel?'<div class="cat-picker-inline" id="'+pickerId+'">'+pickerBtns+'</div>':'';
           var missingTag=missingLevel?'<span style="font-size:11px;color:#d32f2f;font-weight:500;margin-left:4px;cursor:pointer;" onclick="openCatPicker(\'2\','+i+')">Category missing ▾</span>':'';
@@ -1250,6 +1250,8 @@ window.jumpTo = function(screen){
 
 window.cancelEdit = function(){ _editMode=false; _screen=0; render(); };
 window.doneEdit = function(){ autoSave(); _editMode=false; _screen=0; render(); };
+// Glide scope safety
+if(typeof jumpTo==='undefined') var jumpTo=window.jumpTo;
 
 // Screen renders
 function renderScreen(s, heading, searchPlaceholder, drillId, addedId){
@@ -1331,11 +1333,15 @@ function buildValAddedHTML(arr, label){
   var bodyId='val-body-'+safeId;
   var arrowId='val-arrow-'+safeId;
   var h='<div class="added-section" style="margin-top:10px;">';
-  h+='<div class="added-header-row" style="cursor:pointer;background:var(--brand);border-radius:8px;padding:8px 12px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;" onclick="toggleValSection(\''+bodyId+'\',\''+arrowId+'\')">';
+  var valShowArrow=arr.length>7;
+  var valArrowSpan=valShowArrow?'<span id="'+arrowId+'" style="font-size:12px;color:white;">▼</span>':'';
+  var valHdrClick=valShowArrow?' onclick="toggleValSection(\''+bodyId+'\',\''+arrowId+'\')"':'';
+  var valHdrCursor=valShowArrow?'cursor:pointer;':'';
+  h+='<div class="added-header-row" style="'+valHdrCursor+'background:var(--brand);border-radius:8px;padding:8px 12px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;"'+valHdrClick+'>';
   h+='<div class="added-label" style="color:white;font-size:13px;font-weight:700;">'+label+' ('+arr.length+')</div>';
   h+='<div style="display:flex;align-items:center;gap:8px;">';
   h+='<button class="level-help-btn" style="border-color:rgba(255,255,255,0.5);color:white;" onclick="event.stopPropagation();toggleLevelHelp(\'3\')">?</button>';
-  h+='<span id="'+arrowId+'" style="font-size:12px;color:white;">▼</span>';
+  h+=valArrowSpan;
   h+='</div></div>';
   h+='<div id="'+bodyId+'" style="display:none;"><div class="practice-grid">';
   arr.forEach(function(item){
@@ -1584,4 +1590,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.23d | Last change: Helper text above search input, ? popup fix | Date: 2026-06-27 -->
+<!-- Version: V2.23f | Last change: ? popup bold labels, arrow threshold fix, edit button fix | Date: 2026-06-27 -->
