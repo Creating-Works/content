@@ -1,4 +1,4 @@
-<!-- Version: V2.23 | Last change: Solid chip borders, search dropdown attached, share icon, this is me alignment, collapse threshold 7, what I care about merged, add to list button | Date: 2026-06-27 -->
+<!-- Version: V2.23c | Last change: Share SVG icon, This is me emoji left-aligned, collapse arrow hidden until 8+ items | Date: 2026-06-27 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -746,9 +746,13 @@ function buildAddedHTML(s){
   var bodyId='added-body-'+s;
   var arrowId='added-arrow-'+s;
   var label=s==='1'?'Joy added ('+arr.length+')':s==='2'?'Skills added ('+arr.length+')':s==='4s'?'Services added ('+arr.length+')':s==='4r'?'Resources added ('+arr.length+')':'Added ('+arr.length+')';
-  var header='<div class="added-header-row" style="cursor:pointer;background:var(--brand);border-radius:8px;padding:8px 12px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;" onclick="toggleAddedSection(\''+bodyId+'\',\''+arrowId+'\')">'
+  var showArrow=arr.length>7;
+  var arrowSpan=showArrow?'<span id="'+arrowId+'" style="font-size:12px;color:white;">&#9660;</span>':'';
+  var hdrClick=showArrow?' onclick="toggleAddedSection(\''+bodyId+'\',\''+arrowId+'\')"':'';
+  var hdrCursor=showArrow?'cursor:pointer;':'';
+  var header='<div class="added-header-row" style="'+hdrCursor+'background:var(--brand);border-radius:8px;padding:8px 12px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;"'+hdrClick+'>'
     +'<div class="added-label" style="color:white;font-size:13px;font-weight:700;">'+label+'</div>'
-    +'<div style="display:flex;align-items:center;gap:8px;">'+helpBtn+'<span id="'+arrowId+'" style="font-size:12px;color:white;">&#9660;</span></div></div>';
+    +'<div style="display:flex;align-items:center;gap:8px;">'+helpBtn+arrowSpan+'</div></div>';
   var bodyItems=arr.map(function(item,i){
     if(isNeed){
       var catMissing=!item.category;
@@ -774,8 +778,7 @@ function buildAddedHTML(s){
       +(levels?'<div class="practice-options">'+btns+'</div>':'')
       +'</div>';
   }).join('');
-  var startCollapsed=arr.length>7;
-  return popup+'<div class="added-section">'+header+'<div id="'+bodyId+'" style="display:'+(startCollapsed?'none':'block')+';">'+(useGrid?'<div class="practice-grid">':'')+bodyItems+(useGrid?'</div>':'')+'</div></div>';
+  return popup+'<div class="added-section">'+header+'<div id="'+bodyId+'" style="display:block;">'+(useGrid?'<div class="practice-grid">':'')+bodyItems+(useGrid?'</div>':'')+'</div></div>';
 }
 
 // ─── Search ───────────────────────────────────────────────────────────────────
@@ -1064,14 +1067,14 @@ function renderTopRight(){
     if(_name){
       el.innerHTML='<button class="ikigai-btn" onclick="openShareModal()">'+ph2+esc(_name)+'</button>';
     } else {
-      el.innerHTML='<button class="ikigai-btn" onclick="openShareModal()" style="padding:4px 8px 4px 4px;">'+ph2+'🔗</button>';
+      el.innerHTML='<button class="ikigai-btn" onclick="openShareModal()" style="padding:4px 8px 4px 4px;">'+ph2+'<span style="display:flex;align-items:center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></span></button>';
     }
   } else {
     var ph3=_photo?'<div class="btn-photo"><img src="'+esc(_photo)+'" alt=""></div>':'<div class="btn-photo">🌱</div>';
     if(_name){
       el.innerHTML='<button class="ikigai-btn" onclick="openShareModal()">'+ph3+esc(_name)+'</button>';
     } else {
-      el.innerHTML='<button class="ikigai-btn" onclick="openShareModal()" style="padding:4px 8px 4px 4px;">'+ph3+'🔗</button>';
+      el.innerHTML='<button class="ikigai-btn" onclick="openShareModal()" style="padding:4px 8px 4px 4px;">'+ph3+'<span style="display:flex;align-items:center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></span></button>';
     }
   }
 }
@@ -1180,7 +1183,7 @@ function renderProfile(el, viewerMode){
       +'</div>'
     :'';
   var allNeeds=_needsSkill.concat(_needsRes);
-  el.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><h2 style="margin:0;">This is me</h2></div>'
+  el.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><h2 style="margin:0;">This is me 🌱</h2></div>'
     +metaRow
     +section("What I'm seeking",allNeeds,false,'',4)
     +section('What I enjoy',_interests,true,'level',1)
@@ -1577,4 +1580,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.23 | Last change: Solid chip borders, search dropdown attached, share icon, this is me alignment, collapse threshold 7, what I care about merged, add to list button | Date: 2026-06-27 -->
+<!-- Version: V2.23c | Last change: Share SVG icon, This is me emoji left-aligned, collapse arrow hidden until 8+ items | Date: 2026-06-27 -->
