@@ -1,4 +1,4 @@
-<!-- Version: V2.23h | Last change: Fix popup undefined in buildAddedHTML | Date: 2026-06-27 -->
+<!-- Version: V2.24 | Last change: Intake gate, languages-first Skills, all languages shown, methods modal fixes | Date: 2026-06-27 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -182,7 +182,7 @@
     /* level-popup.open moved below */
     .level-popup-close{display:block;margin-top:14px;text-align:center;font-weight:600;color:var(--brand);cursor:pointer;font-size:14px;}
     .methods-list{margin:12px 0 20px;}
-    .method-item{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:10px;cursor:pointer;transition:background 0.1s;border:1.5px solid transparent;margin-bottom:8px;}
+    .method-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;cursor:pointer;transition:background 0.1s;border:1.5px solid transparent;margin-bottom:4px;}
     .method-item:hover{background:var(--sel-bg);}
     .method-item.selected{background:var(--sel-bg);border-color:var(--brand);}
     .method-check{width:22px;height:22px;border-radius:5px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;transition:all 0.15s;}
@@ -191,7 +191,7 @@
     .methods-selected-row{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 12px;}
     .methods-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:9000;align-items:flex-start;padding-top:4vh;}
     .methods-modal-overlay.open{display:flex;}
-    .methods-modal{background:white;border-radius:18px;padding:20px;width:92%;max-width:400px;margin:0 auto;max-height:85vh;overflow-y:auto;}
+    .methods-modal{background:white;border-radius:16px;padding:18px 16px;width:88%;max-width:400px;margin:0 auto;max-height:82vh;overflow-y:auto;box-sizing:border-box;}
     .values-tabs{display:flex;flex-direction:row;gap:8px;margin-bottom:14px;}
     .values-tab{flex:1;text-align:center;padding:10px 8px;border-radius:10px;border:1.5px solid var(--border);background:white;font-size:14px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;transition:all 0.15s;}
     .values-tab.active{background:var(--brand);border-color:var(--brand);color:white;}
@@ -1272,6 +1272,20 @@ function renderScreen2(el){
   var cont=document.getElementById('app-content'); if(!cont) return;
   var opts=(_refData&&_refData.methodsDisplay)||[];
 
+  // Intake only: show language question first
+  if(!_editMode&&_screen2step==='lang'){
+    var langDisplay=_languages.length?_languages.join(', '):'Not set yet';
+    cont.innerHTML=progressHTML(2)
+      +'<h2>What language(s) do you offer your skills in?</h2>'
+      +'<p style="font-size:14px;color:var(--soft);margin:0 0 16px;">This helps us match you with people who speak your language.</p>'
+      +'<div style="margin-bottom:14px;">'
+      +'<button class="edit-btn" onclick="openLangModal()" style="display:inline-flex;align-items:center;gap:6px;font-size:14px;padding:10px 16px;border-radius:10px;border:1.5px solid var(--border);">✏️ '
+      +(_languages.length?'Languages: '+_languages.join(', '):'Add your languages')+'</button>'
+      +'</div>'
+      +navHTML(2);
+    return;
+  }
+
   var methodsRow='<div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:14px;">'
     +(_methods.length
       ?_methods.map(function(m){return '<div class="profile-tag" style="font-size:12px;">'+esc(m)+'</div>';}).join('')
@@ -1553,6 +1567,9 @@ function renderScreen4(el){
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
 window.goNext = function(){
+  if(_screen===2&&!_editMode&&_screen2step==='lang'){
+    _screen2step='skills'; render(); return;
+  }
   if(_screen===2){
     var missing=_skills.filter(function(s){return !s.level;});
     if(missing.length){
@@ -1569,12 +1586,25 @@ window.goNext = function(){
   }
   autoSave();
   if(_screen===4){
+    // Intake gate: Joy, Skills, Care must each have at least 1 item
+    var missing=[];
+    if(!_interests.length) missing.push('What I enjoy');
+    if(!_skills.length) missing.push('My skills');
+    if(!_values.length) missing.push('What I care about');
+    if(missing.length){
+      toast('Please add at least one item to: '+missing.join(', '));
+      return;
+    }
     _completed=true; _hasProfile=true; _screen=0; render(); return;
   }
+  if(_screen===1) _screen2step='lang';
   _screen++; render();
 };
 
 window.goBack = function(){
+  if(_screen===2&&!_editMode&&_screen2step==='skills'){
+    _screen2step='lang'; render(); return;
+  }
   if(_screen<=1){ return; }
   _screen--; render();
 };
@@ -1590,4 +1620,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.23h | Last change: Fix popup undefined in buildAddedHTML | Date: 2026-06-27 -->
+<!-- Version: V2.24 | Last change: Intake gate, languages-first Skills, all languages shown, methods modal fixes | Date: 2026-06-27 -->
