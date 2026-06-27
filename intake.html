@@ -1,4 +1,4 @@
-<!-- Version: V2.16 | Last change: Exploring label, copy trims, What I'm seeking, collapse styling, values/domains side by side | Date: 2026-06-26 -->
+<!-- Version: V2.17 | Last change: Items to top, auto-expand added, cat picker bug fix, ? popup fix, values tab deselect | Date: 2026-06-26 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -163,7 +163,7 @@
     .needs-top-chip{padding:10px 18px;border-radius:20px;border:1.5px solid var(--border);background:white;font-size:14px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;transition:all 0.15s;}
     .needs-top-chip:hover{border-color:var(--brand);color:var(--brand);}
     .needs-top-chips{display:flex;gap:10px;margin-bottom:0;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid var(--border);}
-    .cat-picker-inline{background:white;border:1.5px solid var(--brand);border-radius:10px;padding:10px 12px;margin-top:4px;display:none;flex-wrap:wrap;gap:6px;}
+    .cat-picker-inline{background:white;border:1.5px solid var(--brand);border-radius:10px;padding:10px 12px;display:none;flex-wrap:wrap;gap:6px;position:absolute;left:0;top:100%;z-index:200;min-width:220px;box-shadow:0 4px 16px rgba(0,0,0,0.12);}
     .cat-picker-inline.open{display:flex;}
     .cat-pick-btn{padding:5px 12px;border-radius:18px;border:1.5px solid var(--border);background:white;font-size:12px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;}
     .cat-pick-btn:hover{border-color:var(--brand);color:var(--brand);}
@@ -178,6 +178,7 @@
     .sub-chip.selected{background:var(--brand);border-color:var(--brand);color:white;font-weight:600;}
     .sub-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border);}
     .level-popup{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;background:white;border:1px solid var(--border);border-radius:14px;padding:18px 20px;font-size:13px;color:var(--soft);line-height:1.7;box-shadow:0 8px 30px rgba(0,0,0,0.18);max-width:320px;width:90%;}
+    .level-popup.open{display:block;}
     /* level-popup.open moved below */
     .level-popup-close{display:block;margin-top:14px;text-align:center;font-weight:600;color:var(--brand);cursor:pointer;font-size:14px;}
     .methods-list{margin:12px 0 20px;}
@@ -646,6 +647,9 @@ window.addItemFromChip = function(screen, item, category){
     var addedElD=document.getElementById('added-3-domains');
     if(addedEl) addedEl.innerHTML=buildValAddedHTML(_values.filter(function(v){return valSet[v.item];}), 'Added values');
     if(addedElD) addedElD.innerHTML=buildValAddedHTML(_values.filter(function(v){return !valSet[v.item];}), 'Added domains');
+    // Auto-expand the section that got a new item
+    if(valSet[item]) expandValSection('val-body-Added-values','val-arrow-Added-values');
+    else expandValSection('val-body-Added-domains','val-arrow-Added-domains');
   } else { updateAddedSection(s); }
   if(s==='4s'||s==='4r') refreshNeedsSummary();
 };
@@ -654,11 +658,11 @@ function addItem(screen, item, category){
   var s=String(screen);
   var arr=getArr(s);
   if(arr.some(function(r){return r.item===item;})){toast('Already added');return;}
-  if(s==='1') _interests.push({item:item,category:category||'',level:''});
-  else if(s==='2') _skills.push({item:item,category:category||'',level:''});
-  else if(s==='3') _values.push({item:item,category:category||'',level:''});
-  else if(s==='4s') _needsSkill.push({item:item,category:category||(_drill['4s']&&_drill['4s'].parentCat)||'',local:false,ntype:'skill'});
-  else if(s==='4r') _needsRes.push({item:item,category:category||(_drill['4r']&&_drill['4r'].parentCat)||'',local:false,ntype:'resource'});
+  if(s==='1') _interests.unshift({item:item,category:category||'',level:''});
+  else if(s==='2') _skills.unshift({item:item,category:category||'',level:''});
+  else if(s==='3') _values.unshift({item:item,category:category||'',level:''});
+  else if(s==='4s') _needsSkill.unshift({item:item,category:category||(_drill['4s']&&_drill['4s'].parentCat)||'',local:false,ntype:'skill'});
+  else if(s==='4r') _needsRes.unshift({item:item,category:category||(_drill['4r']&&_drill['4r'].parentCat)||'',local:false,ntype:'resource'});
   toast('Added below \u2193');
   clearSearch(s);
   updateAddedSection(s);
@@ -901,6 +905,12 @@ function toTitleCase(str){
     return w.charAt(0).toUpperCase()+w.slice(1).toLowerCase();
   });
 }
+window.expandValSection=function(bodyId,arrowId){
+  var body=document.getElementById(bodyId);
+  var arrow=document.getElementById(arrowId);
+  if(body){body.style.display='block';}
+  if(arrow){arrow.innerHTML='&#9650;';}
+};
 window.toggleValSection=function(bodyId,arrowId){
   var body=document.getElementById(bodyId);
   var arrow=document.getElementById(arrowId);
@@ -1107,7 +1117,7 @@ function renderProfile(el, viewerMode){
           }).join(''):'';
           var picker=missingLevel?'<div class="cat-picker-inline" id="'+pickerId+'">'+pickerBtns+'</div>':'';
           var missingTag=missingLevel?'<span style="font-size:11px;color:#d32f2f;font-weight:500;margin-left:4px;cursor:pointer;" onclick="openCatPicker(\''+screenKey+'\','+i+')">Category missing ▾</span>':'';
-          return '<div class="profile-tag"'+(missingLevel?' style="border-color:#d32f2f;"':'')+'>'+esc(r.item)+(lv?'<span class="tag-level">'+esc(lv)+'</span>':'')+missingTag+local+'</div>'+picker;
+          return '<div style="position:relative;display:inline-block;">'+'<div class="profile-tag"'+(missingLevel?' style="border-color:#d32f2f;"':'')+'>'+esc(r.item)+(lv?'<span class="tag-level">'+esc(lv)+'</span>':'')+missingTag+local+'</div>'+picker+'</div>';
         }).join('')
       :'<div class="profile-empty">Nothing added yet.</div>';
     var actions=!viewerMode
@@ -1234,7 +1244,7 @@ function getValuesSet(){
 }
 var _valTab=''; // '' | 'values' | 'domains'
 window.setValTab=function(tab){
-  _valTab=tab;
+  _valTab=(_valTab===tab?'':tab);
   renderScreen3(null);
 };
 window.toggleMethodInline  = window.toggleMethodInline;
@@ -1501,4 +1511,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.16 | Last change: Exploring label, copy trims, What I'm seeking, collapse styling, values/domains side by side | Date: 2026-06-26 -->
+<!-- Version: V2.17 | Last change: Items to top, auto-expand added, cat picker bug fix, ? popup fix, values tab deselect | Date: 2026-06-26 -->
