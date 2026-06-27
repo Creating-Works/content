@@ -1,4 +1,4 @@
-<!-- Version: V2.14 | Last change: Chip color fix, skills spacing, values/domains order, added labels, chip order fixed, methods modal state, inline category picker | Date: 2026-06-26 -->
+<!-- Version: V2.15 | Last change: Rec chips no-subcat fix, deselect chip, helper text, single-select level, collapsed added, needs category, title case custom, cat picker on edit screens | Date: 2026-06-26 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -539,9 +539,10 @@ window.renderDrill = function(screen, containerId){
         html+='</div>';
       }
     }
-    // Show item chips only when inside a sub-cat (not at parent level where sub-cats show)
+    // Show chips: always when rec type has no sub-cats, or when subCat is selected
     var chips=getItemChips(s);
-    if(chips.length && d.subCat){
+    var hasSubCats=(function(){var sc={};pool.filter(function(r){return r.recType===d.parentCat;}).forEach(function(r){if(r.category)sc[r.category]=1;});return Object.keys(sc).length>0;})();
+    if(chips.length && (d.subCat || !hasSubCats)){
       var addedArr=_interests;
       html+='<div class="ideas-prompt">Here are some ideas to get you started — these aren\'t the only options.</div>';
       html+='<div class="item-chips">';
@@ -616,26 +617,35 @@ function refreshNeedsSummary(){
 window.addItemFromChip = function(screen, item, category){
   var s=String(screen);
   var arr=getArr(s);
-  // If already added, do nothing
-  if(arr.some(function(r){return r.item===item;})){toast('Already added');return;}
+  // Already added — deselect and remove
+  if(arr.some(function(r){return r.item===item;})){
+    var idx=arr.findIndex(function(r){return r.item===item;});
+    if(idx>-1) arr.splice(idx,1);
+    document.querySelectorAll('.item-chips .item-chip').forEach(function(el){
+      if(el.textContent.trim()===item) el.classList.remove('added');
+    });
+    if(s==='3'){
+      var valSet0=getValuesSet();
+      var el0v=document.getElementById('added-3-values');
+      var el0d=document.getElementById('added-3-domains');
+      if(el0v) el0v.innerHTML=buildValAddedHTML(_values.filter(function(v){return valSet0[v.item];}), 'Added values');
+      if(el0d) el0d.innerHTML=buildValAddedHTML(_values.filter(function(v){return !valSet0[v.item];}), 'Added domains');
+    } else { updateAddedSection(s); }
+    if(s==='4s'||s==='4r') refreshNeedsSummary();
+    autoSave();
+    return;
+  }
   addItem(screen, item, category);
-  // Toggle chip class in place — don't re-render the whole list
-  var chips=document.querySelectorAll('.item-chips .item-chip');
-  chips.forEach(function(el){
+  document.querySelectorAll('.item-chips .item-chip').forEach(function(el){
     if(el.textContent.trim()===item) el.classList.add('added');
   });
-  // Update added section only
   if(s==='3'){
     var valSet=getValuesSet();
-    var valAdded=_values.filter(function(v){return valSet[v.item];});
-    var domAdded=_values.filter(function(v){return !valSet[v.item];});
     var addedEl=document.getElementById('added-3-values');
     var addedElD=document.getElementById('added-3-domains');
-    if(addedEl) addedEl.innerHTML=buildValAddedHTML(valAdded,'Added values');
-    if(addedElD) addedElD.innerHTML=buildValAddedHTML(domAdded,'Added domains');
-  } else {
-    updateAddedSection(s);
-  }
+    if(addedEl) addedEl.innerHTML=buildValAddedHTML(_values.filter(function(v){return valSet[v.item];}), 'Added values');
+    if(addedElD) addedElD.innerHTML=buildValAddedHTML(_values.filter(function(v){return !valSet[v.item];}), 'Added domains');
+  } else { updateAddedSection(s); }
   if(s==='4s'||s==='4r') refreshNeedsSummary();
 };
 
@@ -646,8 +656,8 @@ function addItem(screen, item, category){
   if(s==='1') _interests.push({item:item,category:category||'',level:''});
   else if(s==='2') _skills.push({item:item,category:category||'',level:''});
   else if(s==='3') _values.push({item:item,category:category||'',level:''});
-  else if(s==='4s') _needsSkill.push({item:item,category:category||'',local:false,ntype:'skill'});
-  else if(s==='4r') _needsRes.push({item:item,category:category||'',local:false,ntype:'resource'});
+  else if(s==='4s') _needsSkill.push({item:item,category:category||(_drill['4s']&&_drill['4s'].parentCat)||'',local:false,ntype:'skill'});
+  else if(s==='4r') _needsRes.push({item:item,category:category||(_drill['4r']&&_drill['4r'].parentCat)||'',local:false,ntype:'resource'});
   toast('Added below \u2193');
   clearSearch(s);
   updateAddedSection(s);
@@ -672,6 +682,11 @@ window.removeItem = function(screen, idx){
 window.setLevel = function(screen, idx, level){
   var arr=getArr(String(screen));
   if(!arr[idx]) return;
+  if(String(screen)==='3'){
+    arr[idx].level=(arr[idx].level===level?'':level);
+    updateAddedSection('3');
+    return;
+  }
   var current=arr[idx].level||'';
   var parts=current?current.split(','):[];
   var pos=parts.indexOf(level);
@@ -721,9 +736,15 @@ function buildAddedHTML(s){
   var useGrid=!isNeed;return popup+'<div class="added-section"><div class="added-header-row"><div class="added-label">Added</div>'+helpBtn+'</div>'+(useGrid?'<div class="practice-grid">':'')
     +arr.map(function(item,i){
         if(isNeed){
+          var catMissing=!item.category;
+          var pickerId='need-cat-picker-'+s+'-'+i;
+          var catLabel=catMissing
+            ?'<div style="font-size:11px;color:#d32f2f;cursor:pointer;" onclick="openNeedCatPicker(\''+s+'\','+i+')">Category missing ▾</div>'
+             +'<div class="cat-picker-inline" id="'+pickerId+'">'+PARENT_CATS.map(function(c){return '<button class="cat-pick-btn" onclick="setNeedCat(\''+s+'\','+i+',\''+c+'\')">'+c+'</button>';}).join('')+'</div>'
+            :'<div class="need-item-cat">'+esc(item.category)+'</div>';
           return '<div class="need-item">'
             +'<div class="need-item-left"><div class="need-item-name">'+esc(item.item)+'</div>'
-            +(item.category?'<div class="need-item-cat">'+esc(item.category)+'</div>':'')+'</div>'
+            +catLabel+'</div>'
             +'<div class="need-item-right">'
             +'<label class="local-toggle'+(item.local?' active':'')+'"><input type="checkbox"'+(item.local?' checked':'')+' onchange="toggleLocal(\''+s+'\','+i+')"> 📍 Local</label>'
             +'<button class="practice-item-x" onclick="removeItem(\''+s+'\','+i+')">×</button>'
@@ -786,7 +807,7 @@ function clearSearch(s){
 
 // ─── Custom add ───────────────────────────────────────────────────────────────
 window.showCustomAdd = function(screen, item){
-  _customItem=item; _customScreen=String(screen);
+  _customItem=toTitleCase(item); _customScreen=String(screen);
   var container=document.getElementById('search-results-'+_customScreen); if(!container) return;
   var opts='<option value="">Select a category</option>'
     +PARENT_CATS.map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join('');
@@ -873,6 +894,31 @@ window.toggleMethodInline = function(m){
 
 
 
+function toTitleCase(str){
+  return str.replace(/[^\s]+/g,function(w){
+    if(w.length<=5&&w===w.toUpperCase()&&/^[A-Z]+$/.test(w)) return w;
+    return w.charAt(0).toUpperCase()+w.slice(1).toLowerCase();
+  });
+}
+window.toggleValSection=function(bodyId,arrowId){
+  var body=document.getElementById(bodyId);
+  var arrow=document.getElementById(arrowId);
+  if(!body) return;
+  if(body.style.display==='none'){body.style.display='block';if(arrow)arrow.textContent='\u25b2';}
+  else{body.style.display='none';if(arrow)arrow.textContent='\u25bc';}
+};
+window.openNeedCatPicker=function(s,idx){
+  document.querySelectorAll('.cat-picker-inline').forEach(function(el){el.classList.remove('open');});
+  var el=document.getElementById('need-cat-picker-'+s+'-'+idx);
+  if(el) el.classList.toggle('open');
+};
+window.setNeedCat=function(s,idx,cat){
+  var arr=getArr(s);
+  if(arr&&arr[idx]) arr[idx].category=cat;
+  autoSave();
+  document.querySelectorAll('.cat-picker-inline').forEach(function(el){el.classList.remove('open');});
+  var el=document.getElementById('added-'+s); if(el) el.innerHTML=buildAddedHTML(s);
+};
 window.openCatPicker=function(screenKey, itemIdx){
   // Close any open pickers first
   document.querySelectorAll('.cat-picker-inline').forEach(function(el){el.classList.remove('open');});
@@ -1109,6 +1155,7 @@ function renderScreen(s, heading, searchPlaceholder, drillId, addedId){
   var el=document.getElementById('app-content'); if(!el) return;
   el.innerHTML=(_editMode?'':progressHTML(s))
     +'<h2>'+heading+'</h2>'
+    +'<div style="font-size:13px;color:var(--brand);margin:-4px 0 12px;">Search by keywords or select chips to add — or add your own.</div>'
     +(s===2?'<div id="title-warning-2"></div>':'')
     +screenSearchHTML(String(s),searchPlaceholder)
     +'<div id="'+drillId+'"></div>'
@@ -1146,6 +1193,7 @@ function renderScreen2(el){
     }
     cont.innerHTML=''
       +'<h2>Share what you know how to do or how to create.</h2>'
+      +'<div style="font-size:13px;color:var(--brand);margin:-4px 0 12px;">Search by keywords or select chips to add — or add your own.</div>'
       +'<div id="title-warning-2"></div>'
       +'<div style="margin-bottom:14px;">'
       +'<button id="lang-edit-btn" class="edit-btn" onclick="openLangModal()" style="display:inline-flex;align-items:center;gap:6px;">✏️ '
@@ -1196,15 +1244,22 @@ window.saveMethodsModal    = window.saveMethodsModal;
 
 function buildValAddedHTML(arr, label){
   if(!arr.length) return '';
+  var safeId=label.replace(/[^a-zA-Z]/g,'-');
+  var bodyId='val-body-'+safeId;
+  var arrowId='val-arrow-'+safeId;
   var h='<div class="added-section" style="margin-top:10px;">';
-  h+='<div class="added-header-row"><div class="added-label">'+label+'</div>';
-  h+='<button class="level-help-btn" onclick="toggleLevelHelp(\'3\')">?</button></div>';
-  h+='<div class="practice-grid">';
+  h+='<div class="added-header-row" style="cursor:pointer;" onclick="toggleValSection(\''+bodyId+'\',\''+arrowId+'\')">';
+  h+='<div class="added-label">'+label+' ('+arr.length+')</div>';
+  h+='<div style="display:flex;align-items:center;gap:6px;">';
+  h+='<button class="level-help-btn" onclick="event.stopPropagation();toggleLevelHelp(\'3\')">?</button>';
+  h+='<span id="'+arrowId+'" style="font-size:12px;color:var(--muted);">▼</span>';
+  h+='</div></div>';
+  h+='<div id="'+bodyId+'" style="display:none;"><div class="practice-grid">';
   arr.forEach(function(item){
     var idx=_values.indexOf(item);
     var btns='';
     ['Curious','Engaged','Leading'].forEach(function(lv){
-      var sel=item.level&&item.level.split(',').indexOf(lv)>-1;
+      var sel=item.level===lv;
       btns+='<button class="practice-btn'+(sel?' selected':'')+'" onclick="setLevel(\'3\','+idx+',\''+lv+'\')">'+lv+'</button>';
     });
     h+='<div class="practice-item">';
@@ -1213,7 +1268,7 @@ function buildValAddedHTML(arr, label){
     h+='<div class="practice-options">'+btns+'</div>';
     h+='</div>';
   });
-  h+='</div></div>';
+  h+='</div></div></div>';
   return h;
 }
 
@@ -1251,6 +1306,7 @@ function renderScreen3(el){
   }
   cont.innerHTML=(_editMode?'':progressHTML(3))
     +'<h2>What do you care about deeply?</h2>'
+    +'<div style="font-size:13px;color:var(--brand);margin:-4px 0 12px;">Search by keywords or select chips to add — or add your own.</div>'
     +screenSearchHTML('3','Search to add...')
     +valPopup
     +tabs
@@ -1392,6 +1448,7 @@ function renderScreen4(el){
   var cont=document.getElementById('app-content'); if(!cont) return;
   cont.innerHTML=(_editMode?'':progressHTML(4))
     +'<h2>What do you need right now?</h2>'
+    +'<div style="font-size:13px;color:var(--brand);margin:-4px 0 12px;">Search by keywords or select chips to add — or add your own.</div>'
     +'<div class="needs-top-chips">'
     +'<div class="needs-top-chip'+('skill'===_needsCat?' selected':'')+'" id="needs-top-skill" onclick="setNeedsCat(\'skill\')">✨ Skill or service</div>'
     +'<div class="needs-top-chip'+('thing'===_needsCat?' selected':'')+'" id="needs-top-thing" onclick="setNeedsCat(\'thing\')">📦 Thing</div>'
@@ -1441,4 +1498,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.14 | Last change: Chip color fix, skills spacing, values/domains order, added labels, chip order fixed, methods modal state, inline category picker | Date: 2026-06-26 -->
+<!-- Version: V2.15 | Last change: Rec chips no-subcat fix, deselect chip, helper text, single-select level, collapsed added, needs category, title case custom, cat picker on edit screens | Date: 2026-06-26 -->
