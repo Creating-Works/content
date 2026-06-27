@@ -1,4 +1,4 @@
-<!-- Version: V2.13 | Last change: Toast top, space button copy, remove methods max-3, needs summary refresh, postal modal, category missing in chip | Date: 2026-06-26 -->
+<!-- Version: V2.14 | Last change: Chip color fix, skills spacing, values/domains order, added labels, chip order fixed, methods modal state, inline category picker | Date: 2026-06-26 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -56,6 +56,7 @@
     .item-chip{padding:6px 13px;border-radius:18px;border:1.5px dashed var(--border);background:white;font-size:12px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
     .item-chip:hover{border-color:var(--brand);color:var(--brand);border-style:solid;background:var(--sel-bg);}
     .item-chip.added{background:var(--brand);border-color:var(--brand);border-style:solid;color:white;font-weight:600;}
+    .item-chip.added:hover{background:var(--brand);border-color:var(--brand);color:white;}
     /* Search */
     .search-wrap{position:relative;margin-bottom:14px;}
     .search-wrap input{padding-left:36px;border-radius:8px;}
@@ -162,6 +163,10 @@
     .needs-top-chip{padding:10px 18px;border-radius:20px;border:1.5px solid var(--border);background:white;font-size:14px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;transition:all 0.15s;}
     .needs-top-chip:hover{border-color:var(--brand);color:var(--brand);}
     .needs-top-chips{display:flex;gap:10px;margin-bottom:0;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid var(--border);}
+    .cat-picker-inline{background:white;border:1.5px solid var(--brand);border-radius:10px;padding:10px 12px;margin-top:4px;display:none;flex-wrap:wrap;gap:6px;}
+    .cat-picker-inline.open{display:flex;}
+    .cat-pick-btn{padding:5px 12px;border-radius:18px;border:1.5px solid var(--border);background:white;font-size:12px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;}
+    .cat-pick-btn:hover{border-color:var(--brand);color:var(--brand);}
     .needs-summary{background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:14px;}
     .needs-summary-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-size:14px;font-weight:600;color:var(--text);}
     .needs-summary-body{margin-top:10px;display:flex;flex-wrap:wrap;gap:7px;}
@@ -609,13 +614,29 @@ function refreshNeedsSummary(){
   }
 }
 window.addItemFromChip = function(screen, item, category){
+  var s=String(screen);
+  var arr=getArr(s);
+  // If already added, do nothing
+  if(arr.some(function(r){return r.item===item;})){toast('Already added');return;}
   addItem(screen, item, category);
-  if(String(screen)==='3'){
-    renderScreen3(null);
+  // Toggle chip class in place — don't re-render the whole list
+  var chips=document.querySelectorAll('.item-chips .item-chip');
+  chips.forEach(function(el){
+    if(el.textContent.trim()===item) el.classList.add('added');
+  });
+  // Update added section only
+  if(s==='3'){
+    var valSet=getValuesSet();
+    var valAdded=_values.filter(function(v){return valSet[v.item];});
+    var domAdded=_values.filter(function(v){return !valSet[v.item];});
+    var addedEl=document.getElementById('added-3-values');
+    var addedElD=document.getElementById('added-3-domains');
+    if(addedEl) addedEl.innerHTML=buildValAddedHTML(valAdded,'Added values');
+    if(addedElD) addedElD.innerHTML=buildValAddedHTML(domAdded,'Added domains');
   } else {
-    window.renderDrill(String(screen),'drill-'+String(screen));
+    updateAddedSection(s);
   }
-  if(String(screen)==='4s'||String(screen)==='4r') refreshNeedsSummary();
+  if(s==='4s'||s==='4r') refreshNeedsSummary();
 };
 
 function addItem(screen, item, category){
@@ -851,6 +872,21 @@ window.toggleMethodInline = function(m){
 };
 
 
+
+window.openCatPicker=function(screenKey, itemIdx){
+  // Close any open pickers first
+  document.querySelectorAll('.cat-picker-inline').forEach(function(el){el.classList.remove('open');});
+  var el=document.getElementById('cat-picker-'+screenKey+'-'+itemIdx);
+  if(el) el.classList.toggle('open');
+};
+window.setCatLevel=function(screenKey, itemIdx, level){
+  var arr=getArr(screenKey);
+  if(arr&&arr[itemIdx]) arr[itemIdx].level=level;
+  autoSave();
+  // Close picker and re-render profile
+  document.querySelectorAll('.cat-picker-inline').forEach(function(el){el.classList.remove('open');});
+  render();
+};
 window.openPostalModal=function(){
   var m=document.getElementById('postal-modal'); if(m) m.classList.add('open');
   var inp=document.getElementById('postal-modal-input'); if(inp) inp.value=_postal||'';
@@ -1009,14 +1045,22 @@ function screenSearchHTML(s, placeholder){
 
 // Profile
 function renderProfile(el, viewerMode){
+  var SCREEN_LEVELS={'1':['Fan','Participant','Coach'],'2':['Starting to practice','Practicing','Mentoring'],'3':['Curious','Engaged','Leading']};
   function section(label, arr, hasLevel, levelKey, screenNum, noBorder){
+    var screenKey=String(screenNum);
+    var lvOpts=SCREEN_LEVELS[screenKey]||[];
     var tags=arr.length
-      ?arr.map(function(r){
+      ?arr.map(function(r,i){
           var lv=hasLevel?(r[levelKey]||''):'';
           var local=r.local?' 📍':'';
           var missingLevel=hasLevel&&!lv&&!viewerMode;
-          var missingTag=missingLevel?'<span style="font-size:11px;color:#d32f2f;font-weight:500;margin-left:4px;">Category missing</span>':'';
-          return '<div class="profile-tag"'+(missingLevel?' style="border-color:#d32f2f;"':'')+'>'+esc(r.item)+(lv?'<span class="tag-level">'+esc(lv)+'</span>':'')+missingTag+local+'</div>';
+          var pickerId='cat-picker-'+screenKey+'-'+i;
+          var pickerBtns=missingLevel?lvOpts.map(function(opt){
+            return '<button class="cat-pick-btn" onclick="setCatLevel(\''+screenKey+'\','+i+',\''+opt+'\')">'+opt+'</button>';
+          }).join(''):'';
+          var picker=missingLevel?'<div class="cat-picker-inline" id="'+pickerId+'">'+pickerBtns+'</div>':'';
+          var missingTag=missingLevel?'<span style="font-size:11px;color:#d32f2f;font-weight:500;margin-left:4px;cursor:pointer;" onclick="openCatPicker(\''+screenKey+'\','+i+')">Category missing ▾</span>':'';
+          return '<div class="profile-tag"'+(missingLevel?' style="border-color:#d32f2f;"':'')+'>'+esc(r.item)+(lv?'<span class="tag-level">'+esc(lv)+'</span>':'')+missingTag+local+'</div>'+picker;
         }).join('')
       :'<div class="profile-empty">Nothing added yet.</div>';
     var actions=!viewerMode
@@ -1115,7 +1159,7 @@ function renderScreen2(el){
   } else {
     // First visit: methods question first, then skills
     cont.innerHTML=progressHTML(2)
-      +'<h2>What comes most naturally to you?</h2>'
+      +'<h2 style="padding-top:8px;">What comes most naturally to you?</h2>'
       +''
       +'<div id="methods-inline-list">'+buildMethodsChecklistHTML(_methods, opts)+'</div>'
       +'<div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--border);">'
@@ -1180,37 +1224,39 @@ function renderScreen3(el){
   var domAdded=_values.filter(function(v){return !valSet[v.item];});
   var valPopup='<div class="level-popup" id="level-popup-3">'+(LEVEL_HELP['3']||'')+'<span class="level-popup-close" onclick="toggleLevelHelp(\"3\")">Close</span></div>';
   var tabs='<div class="values-tabs">'
-    +'<div class="values-tab'+(_valTab==='values'?' active':'')+'" onclick="setValTab(\"values\")">Values</div>'
-    +'<div class="values-tab'+(_valTab==='domains'?' active':'')+'" onclick="setValTab(\"domains\")">Domains</div>'
+    +'<div class="values-tab'+(_valTab==='values'?' active':'')+'" onclick="setValTab(\'values\')">Values</div>'
+    +'<div class="values-tab'+(_valTab==='domains'?' active':'')+'" onclick="setValTab(\'domains\')">Domains</div>'
     +'</div>';
-  var sectionHTML='';
+  var chipsHTML='';
   if(_valTab==='values'){
     var vals=(_refData&&_refData.values)||[];
-    sectionHTML='<div class="ideas-prompt">Here are some ideas to get you started — these aren\'t the only options.</div>'
+    chipsHTML='<div class="ideas-prompt">Here are some ideas to get you started — these aren\'t the only options.</div>'
       +'<div class="item-chips">';
     vals.forEach(function(r){
       var item=r.item||r;
       var isAdded=_values.some(function(v){return v.item===item;});
-      sectionHTML+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="addItemFromChip(\'3\',\''+esc(item)+'\',\'\')">'+esc(item)+'</div>';
+      chipsHTML+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="addItemFromChip(\'3\',\''+esc(item)+'\',\'\')">' +esc(item)+'</div>';
     });
-    sectionHTML+='</div>'+buildValAddedHTML(valAdded,'Added values');
+    chipsHTML+='</div>';
   } else {
     var doms=(_refData&&_refData.domains)||[];
-    sectionHTML='<div class="ideas-prompt">Areas where you put your energy.</div>'
+    chipsHTML='<div class="ideas-prompt">Areas where you put your energy.</div>'
       +'<div class="item-chips">';
     doms.forEach(function(r){
       var item=r.item||r;
       var isAdded=_values.some(function(v){return v.item===item;});
-      sectionHTML+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="addItemFromChip(\'3\',\''+esc(item)+'\',\'\')">'+esc(item)+'</div>';
+      chipsHTML+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="addItemFromChip(\'3\',\''+esc(item)+'\',\'\')">' +esc(item)+'</div>';
     });
-    sectionHTML+='</div>'+buildValAddedHTML(domAdded,'Added domains');
+    chipsHTML+='</div>';
   }
   cont.innerHTML=(_editMode?'':progressHTML(3))
     +'<h2>What do you care about deeply?</h2>'
     +screenSearchHTML('3','Search to add...')
     +valPopup
     +tabs
-    +sectionHTML
+    +chipsHTML
+    +'<div id="added-3-values">'+buildValAddedHTML(valAdded,'Added values')+'</div>'
+    +'<div id="added-3-domains">'+buildValAddedHTML(domAdded,'Added domains')+'</div>'
     +'<div id="added-3" style="display:none;"></div>'
     +navHTML(3);
 }
@@ -1395,4 +1441,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.13 | Last change: Toast top, space button copy, remove methods max-3, needs summary refresh, postal modal, category missing in chip | Date: 2026-06-26 -->
+<!-- Version: V2.14 | Last change: Chip color fix, skills spacing, values/domains order, added labels, chip order fixed, methods modal state, inline category picker | Date: 2026-06-26 -->
