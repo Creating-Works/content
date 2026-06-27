@@ -1,4 +1,4 @@
-<!-- Version: V2.23f | Last change: ? popup bold labels, arrow threshold fix, edit button fix | Date: 2026-06-27 -->
+<!-- Version: V2.23h | Last change: Fix popup undefined in buildAddedHTML | Date: 2026-06-27 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -780,7 +780,7 @@ function buildAddedHTML(s){
       +(levels?'<div class="practice-options">'+btns+'</div>':'')
       +'</div>';
   }).join('');
-  return popup+'<div class="added-section">'+header+'<div id="'+bodyId+'" style="display:block;">'+(useGrid?'<div class="practice-grid">':'')+bodyItems+(useGrid?'</div>':'')+'</div></div>';
+  return '<div class="added-section">'+header+'<div id="'+bodyId+'" style="display:block;">'+(useGrid?'<div class="practice-grid">':'')+bodyItems+(useGrid?'</div>':'')+'</div></div>';
 }
 
 // ─── Search ───────────────────────────────────────────────────────────────────
@@ -1173,7 +1173,7 @@ function renderProfile(el, viewerMode){
       :'<div class="profile-empty">Nothing added yet.</div>';
     var actions=!viewerMode
       ?'<div class="profile-section-actions">'
-        +'<button class="edit-btn" onclick="jumpTo('+screenNum+')">✏️ Edit</button>'
+        +'<button class="edit-btn" onclick="window.jumpTo('+screenNum+')">✏️ Edit</button>'
         +'</div>'
       :'';
     return '<div class="profile-section"'+(noBorder?' style="border-bottom:none;padding-bottom:4px;"':'')+'>'+''
@@ -1232,13 +1232,13 @@ function renderProfile(el, viewerMode){
         var missingTag=missingLevel?'<span style="font-size:11px;color:#d32f2f;font-weight:500;margin-left:4px;cursor:pointer;" onclick="openCatPicker(\'3\','+allIdx+')">Category missing ▾</span>':'';
         return '<div style="position:relative;display:inline-block;"><div class="profile-tag"'+(missingLevel?' style="border-color:#d32f2f;"':'')+'>'+esc(r.item)+(lv?'<span class="tag-level">'+esc(lv)+'</span>':'')+missingTag+'</div>'+picker+'</div>';
       }).join('');
-      var actions=!viewerMode?'<div class="profile-section-actions"><button class="edit-btn" onclick="jumpTo(3)">✏️ Edit</button></div>':'';
+      var actions=!viewerMode?'<div class="profile-section-actions"><button class="edit-btn" onclick="window.jumpTo(3)">✏️ Edit</button></div>':'';
       if(showHeader){
         return '<div class="profile-section"><div class="profile-section-header"><div class="profile-section-label">'+label+'</div>'+actions+'</div><div class="profile-tags">'+tags+'</div></div>';
       }
       return tags.length?'<div style="margin-bottom:6px;"><div class="added-label" style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">'+label+'</div><div class="profile-tags">'+tags+'</div></div>':'';
     }
-    var careActions=!viewerMode?'<div class="profile-section-actions"><button class="edit-btn" onclick="jumpTo(3)">✏️ Edit</button></div>':'';
+    var careActions=!viewerMode?'<div class="profile-section-actions"><button class="edit-btn" onclick="window.jumpTo(3)">✏️ Edit</button></div>':'';
     var careContent=valProfileSection('Values',valAdded,false)+valProfileSection('Domains',domAdded,false);
     return careContent.length?'<div class="profile-section"><div class="profile-section-header"><div class="profile-section-label">What I care about</div>'+careActions+'</div>'+careContent+'</div>':'';
   })()
@@ -1343,7 +1343,7 @@ function buildValAddedHTML(arr, label){
   h+='<button class="level-help-btn" style="border-color:rgba(255,255,255,0.5);color:white;" onclick="event.stopPropagation();toggleLevelHelp(\'3\')">?</button>';
   h+=valArrowSpan;
   h+='</div></div>';
-  h+='<div id="'+bodyId+'" style="display:none;"><div class="practice-grid">';
+  h+='<div id="'+bodyId+'" style="display:block;"><div class="practice-grid">';
   arr.forEach(function(item){
     var idx=_values.indexOf(item);
     var btns='';
@@ -1590,4 +1590,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.23f | Last change: ? popup bold labels, arrow threshold fix, edit button fix | Date: 2026-06-27 -->
+<!-- Version: V2.23h | Last change: Fix popup undefined in buildAddedHTML | Date: 2026-06-27 -->
