@@ -1,4 +1,4 @@
-<!-- Version: V2.19 | Last change: Items to top, auto-expand added, cat picker bug fix, ? popup fix, values tab deselect | Date: 2026-06-26 -->
+<!-- Version: V2.20 | Last change: Methods row first on Skills screen, no divider, pencil edit only | Date: 2026-06-27 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1196,32 +1196,19 @@ function renderScreen1(el){ renderScreen(1,'What do you enjoy doing?','Search to
 function renderScreen2(el){
   var cont=document.getElementById('app-content'); if(!cont) return;
   var opts=(_refData&&_refData.methodsDisplay)||[];
-  var methodsFull=(_refData&&_refData.methods)||[];
+
+  var methodsRow='<div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:14px;">'
+    +(_methods.length
+      ?_methods.map(function(m){return '<div class="profile-tag" style="font-size:12px;">'+esc(m)+'</div>';}).join('')
+      :'<span style="font-size:13px;color:var(--muted);">What comes most naturally to you?</span>')
+    +'<button class="edit-btn" style="margin-left:auto;" onclick="openMethodsModal()">✏️</button>'
+    +'</div>';
 
   if(_editMode){
-    // Edit mode: skills drill first, methods below with edit button
-    var methodsDisplay='';
-    if(_methods.length){
-      methodsDisplay='<div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">'
-        +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
-        +'<div style="font-size:14px;font-weight:700;color:var(--text);">What comes most naturally to you?</div>'
-        +'<button class="edit-btn" onclick="openMethodsModal()">✏️ Edit</button>'
-        +'</div>'
-        +'<div class="methods-selected-row">'
-        +_methods.map(function(m){return '<div class="profile-tag">'+esc(m)+'</div>';}).join('')
-        +'</div></div>';
-    } else {
-      methodsDisplay='<div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">'
-        +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
-        +'<div style="font-size:14px;font-weight:700;color:var(--text);">What comes most naturally to you?</div>'
-        +'<button class="edit-btn" onclick="openMethodsModal()">✏️ Add</button>'
-        +'</div>'
-        +'<div class="empty">Nothing added yet.</div>'
-        +'</div>';
-    }
     cont.innerHTML=''
       +'<h2>Share what you know how to do or how to create.</h2>'
       +'<div style="font-size:13px;color:var(--brand);margin:-4px 0 12px;">Search by keywords or select chips to add — or add your own.</div>'
+      +methodsRow
       +'<div id="title-warning-2"></div>'
       +'<div style="margin-bottom:14px;">'
       +'<button id="lang-edit-btn" class="edit-btn" onclick="openLangModal()" style="display:inline-flex;align-items:center;gap:6px;">✏️ '
@@ -1230,16 +1217,12 @@ function renderScreen2(el){
       +screenSearchHTML('2','Search skills to add...')
       +'<div id="drill-2"></div>'
       +'<div id="added-2">'+buildAddedHTML('2')+'</div>'
-      +methodsDisplay
       +navHTML(2);
   } else {
-    // First visit: methods question first, then skills
     cont.innerHTML=progressHTML(2)
-      +'<h2 style="padding-top:8px;">What comes most naturally to you?</h2>'
-      +''
-      +'<div id="methods-inline-list">'+buildMethodsChecklistHTML(_methods, opts)+'</div>'
-      +'<div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--border);">'
-      +'<h2 style="font-size:20px;margin-bottom:12px;">Share what you know how to do or how to create.</h2>'
+      +'<h2 style="padding-top:8px;">Share what you know how to do or how to create.</h2>'
+      +'<div style="font-size:13px;color:var(--brand);margin:-4px 0 12px;">Search by keywords or select chips to add — or add your own.</div>'
+      +methodsRow
       +'<div id="title-warning-2"></div>'
       +'<div style="margin-bottom:14px;">'
       +'<button id="lang-edit-btn" class="edit-btn" onclick="openLangModal()" style="display:inline-flex;align-items:center;gap:6px;">✏️ '
@@ -1248,7 +1231,6 @@ function renderScreen2(el){
       +screenSearchHTML('2','Search skills to add...')
       +'<div id="drill-2"></div>'
       +'<div id="added-2">'+buildAddedHTML('2')+'</div>'
-      +'</div>'
       +navHTML(2);
   }
   window.renderDrill('2','drill-2');
@@ -1528,4 +1510,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.19 | Last change: Items to top, auto-expand added, cat picker bug fix, ? popup fix, values tab deselect | Date: 2026-06-26 -->
+<!-- Version: V2.20 | Last change: Methods row first on Skills screen, no divider, pencil edit only | Date: 2026-06-27 -->
