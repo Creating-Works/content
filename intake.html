@@ -1,4 +1,4 @@
-<!-- Version: V2.17 | Last change: Items to top, auto-expand added, cat picker bug fix, ? popup fix, values tab deselect | Date: 2026-06-26 -->
+<!-- Version: V2.18 | Last change: Items to top, auto-expand added, cat picker bug fix, ? popup fix, values tab deselect | Date: 2026-06-26 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -842,7 +842,11 @@ window.cancelCustomAdd = function(){
 // ─── Methods ──────────────────────────────────────────────────────────────────
 var _methodsDraft = [];
 window.openMethodsModal = function(){
-  _methodsDraft = _methods.slice();
+  var disp=(_refData&&_refData.methodsDisplay)||[];
+  _methodsDraft=_methods.map(function(m){
+    var match=disp.find(function(d){return methodsMatch(d,m);});
+    return match||m;
+  });
   var m=document.getElementById('methods-modal'); if(m) m.classList.add('open');
   renderMethodsModalList();
 };
@@ -855,12 +859,19 @@ window.saveMethodsModal = function(){
   autoSave();
   render();
 };
+function stripMethodEmoji(s){
+  // Remove leading emoji + space (emoji are typically 2 chars via surrogate pairs or single codepoints)
+  return s.replace(/^[\uD800-\uDBFF][\uDC00-\uDFFF]\s*/,'').replace(/^\p{Emoji}\s*/u,'').trim();
+}
+function methodsMatch(a, b){
+  return stripMethodEmoji(a)===stripMethodEmoji(b);
+}
 function renderMethodsModalList(){
   var el=document.getElementById('methods-modal-list'); if(!el) return;
   var opts=(_refData&&_refData.methodsDisplay)||[];
   if(!opts.length){el.innerHTML='<div class="empty">Loading...</div>';return;}
   el.innerHTML=opts.map(function(m){
-    var checked=_methodsDraft.indexOf(m)>-1;
+    var checked=_methodsDraft.some(function(d){return methodsMatch(d,m);});
     return '<div class="method-item'+(checked?' selected':'')+'" onclick="toggleMethodDraft('+JSON.stringify(m)+')">'
       +'<div class="method-check'+(checked?' checked':'')+'">'+( checked?'✓':'')+'</div>'
       +'<div class="method-text">'+esc(m)+'</div>'
@@ -868,7 +879,8 @@ function renderMethodsModalList(){
   }).join('');
 }
 window.toggleMethodDraft = function(m){
-  var idx=_methodsDraft.indexOf(m);
+  var idx=-1;
+  _methodsDraft.forEach(function(d,i){if(methodsMatch(d,m))idx=i;});
   if(idx>-1){ _methodsDraft.splice(idx,1); }
   else { _methodsDraft.push(m); }
   renderMethodsModalList();
@@ -878,7 +890,7 @@ function buildMethodsChecklistHTML(draftArr, opts, maxLabel){
   if(!opts||!opts.length) return '<div class="empty">Loading...</div>';
   var h='<div class="methods-list">';
   opts.forEach(function(m){
-    var checked=draftArr.indexOf(m)>-1;
+    var checked=draftArr.some(function(d){return methodsMatch(d,m);});
     h+='<div class="method-item'+(checked?' selected':'')+'" onclick="toggleMethodInline('+JSON.stringify(m)+')">'
       +'<div class="method-check'+(checked?' checked':'')+'">'+( checked?'✓':'')+'</div>'
       +'<div class="method-text">'+esc(m)+'</div>'
@@ -888,7 +900,8 @@ function buildMethodsChecklistHTML(draftArr, opts, maxLabel){
   return h;
 }
 window.toggleMethodInline = function(m){
-  var idx=_methods.indexOf(m);
+  var idx=-1;
+  _methods.forEach(function(d,i){if(methodsMatch(d,m))idx=i;});
   if(idx>-1){ _methods.splice(idx,1); }
   else { _methods.push(m); }
   // re-render just the checklist area
