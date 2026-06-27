@@ -1,3 +1,4 @@
+<!-- Version: V2.23 | Last change: Solid chip borders, search dropdown attached, share icon, this is me alignment, collapse threshold 7, what I care about merged, add to list button | Date: 2026-06-27 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -52,7 +53,7 @@
     .sub-chip.selected{background:var(--brand);border-color:var(--brand);color:white;font-weight:500;}
     /* Item chips */
     .item-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px;}
-    .item-chip{padding:6px 13px;border-radius:18px;border:1.5px dashed var(--border);background:white;font-size:12px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
+    .item-chip{padding:6px 13px;border-radius:18px;border:1.5px solid var(--border);background:white;font-size:12px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
     .item-chip:hover{border-color:var(--brand);color:var(--brand);border-style:solid;background:var(--sel-bg);}
     .item-chip.added{background:var(--brand);border-color:var(--brand);border-style:solid;color:white;font-weight:600;}
     .item-chip.added:hover{background:var(--brand);border-color:var(--brand);color:white;}
@@ -66,7 +67,7 @@
     .search-result-item:last-child{border-bottom:none;}
     .search-result-item:hover{background:var(--sel-bg);}
     .search-result-breadcrumb{font-size:11px;color:var(--muted);margin-top:2px;}
-    .add-custom-row{padding:10px 14px;font-size:14px;color:var(--brand);font-weight:600;cursor:pointer;border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;background:var(--sel-bg);margin-bottom:14px;}
+    .add-custom-row{padding:12px 16px;font-size:14px;color:white;font-weight:600;cursor:pointer;border:none;border-radius:0 0 10px 10px;background:var(--brand);margin-bottom:14px;display:block;text-align:center;transition:background 0.15s;}
     .custom-add-box{background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px;}
     .custom-add-box label{margin-bottom:6px;}
     .custom-add-box select{margin-bottom:10px;}
@@ -773,7 +774,8 @@ function buildAddedHTML(s){
       +(levels?'<div class="practice-options">'+btns+'</div>':'')
       +'</div>';
   }).join('');
-  return popup+'<div class="added-section">'+header+'<div id="'+bodyId+'" style="display:none;">'+(useGrid?'<div class="practice-grid">':'')+bodyItems+(useGrid?'</div>':'')+'</div></div>';
+  var startCollapsed=arr.length>7;
+  return popup+'<div class="added-section">'+header+'<div id="'+bodyId+'" style="display:'+(startCollapsed?'none':'block')+';">'+(useGrid?'<div class="practice-grid">':'')+bodyItems+(useGrid?'</div>':'')+'</div></div>';
 }
 
 // ─── Search ───────────────────────────────────────────────────────────────────
@@ -1178,7 +1180,7 @@ function renderProfile(el, viewerMode){
       +'</div>'
     :'';
   var allNeeds=_needsSkill.concat(_needsRes);
-  el.innerHTML='<h2>This is me 🌱</h2>'
+  el.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><h2 style="margin:0;">This is me</h2></div>'
     +metaRow
     +section("What I'm seeking",allNeeds,false,'',4)
     +section('What I enjoy',_interests,true,'level',1)
@@ -1210,7 +1212,7 @@ function renderProfile(el, viewerMode){
     var valSet=getValuesSet();
     var valAdded=_values.filter(function(v){return valSet[v.item];});
     var domAdded=_values.filter(function(v){return !valSet[v.item];});
-    function valProfileSection(label,arr){
+    function valProfileSection(label,arr,showHeader){
       if(!arr.length) return '';
       var tags=arr.map(function(r){
         var lv=r.level||'';
@@ -1224,9 +1226,14 @@ function renderProfile(el, viewerMode){
         return '<div style="position:relative;display:inline-block;"><div class="profile-tag"'+(missingLevel?' style="border-color:#d32f2f;"':'')+'>'+esc(r.item)+(lv?'<span class="tag-level">'+esc(lv)+'</span>':'')+missingTag+'</div>'+picker+'</div>';
       }).join('');
       var actions=!viewerMode?'<div class="profile-section-actions"><button class="edit-btn" onclick="jumpTo(3)">✏️ Edit</button></div>':'';
-      return '<div class="profile-section"><div class="profile-section-header"><div class="profile-section-label">'+label+'</div>'+actions+'</div><div class="profile-tags">'+tags+'</div></div>';
+      if(showHeader){
+        return '<div class="profile-section"><div class="profile-section-header"><div class="profile-section-label">'+label+'</div>'+actions+'</div><div class="profile-tags">'+tags+'</div></div>';
+      }
+      return tags.length?'<div style="margin-bottom:6px;"><div class="added-label" style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">'+label+'</div><div class="profile-tags">'+tags+'</div></div>':'';
     }
-    return valProfileSection('My values',valAdded)+valProfileSection('My domains',domAdded);
+    var careActions=!viewerMode?'<div class="profile-section-actions"><button class="edit-btn" onclick="jumpTo(3)">✏️ Edit</button></div>':'';
+    var careContent=valProfileSection('Values',valAdded,false)+valProfileSection('Domains',domAdded,false);
+    return careContent.length?'<div class="profile-section"><div class="profile-section-header"><div class="profile-section-label">What I care about</div>'+careActions+'</div>'+careContent+'</div>':'';
   })()
 }
 
@@ -1570,4 +1577,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.22 | Last change: Collapse Joy/Skills/Needs, deselect top chip, separate Values/Domains main, methods grey | Date: 2026-06-27 -->
+<!-- Version: V2.23 | Last change: Solid chip borders, search dropdown attached, share icon, this is me alignment, collapse threshold 7, what I care about merged, add to list button | Date: 2026-06-27 -->
