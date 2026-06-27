@@ -1,4 +1,4 @@
-<!-- Version: V2.23c | Last change: Share SVG icon, This is me emoji left-aligned, collapse arrow hidden until 8+ items | Date: 2026-06-27 -->
+<!-- Version: V2.23d | Last change: Helper text above search input, ? popup fix | Date: 2026-06-27 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -283,6 +283,9 @@
 </div>
 
 <div class="toast" id="toast"></div>
+<div class="level-popup" id="level-popup-1"></div>
+<div class="level-popup" id="level-popup-2"></div>
+<div class="level-popup" id="level-popup-3"></div>
 
 <script>
 // ─── Identity ────────────────────────────────────────────────────────────────
@@ -724,10 +727,10 @@ var LEVEL_HELP={
 window.toggleLevelHelp=function(s){
   var p=document.getElementById('level-popup-'+s);if(!p)return;
   var isOpen=p.classList.contains('open');
-  // close all popups first
   document.querySelectorAll('.level-popup').forEach(function(el){el.classList.remove('open');});
   var ob=document.getElementById('popup-overlay');
   if(!isOpen){
+    p.innerHTML=(LEVEL_HELP[s]||'')+'<span class="level-popup-close" onclick="document.querySelectorAll(\'.level-popup\').forEach(function(p){p.classList.remove(\'open\');});var ob=document.getElementById(\'popup-overlay\');if(ob)ob.remove();">Close</span>';
     p.classList.add('open');
     if(!ob){ob=document.createElement('div');ob.id='popup-overlay';ob.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:9998;';ob.onclick=function(){document.querySelectorAll('.level-popup').forEach(function(el){el.classList.remove('open');});ob.remove();};document.body.appendChild(ob);}
   } else {
@@ -738,9 +741,8 @@ window.toggleLevelHelp=function(s){
 function buildAddedHTML(s){
   var arr=getArr(s);
   var levels=s==='1'?['Fan','Participant','Coach']:s==='2'?['Starting to practice','Practicing','Mentoring']:s==='3'?['Exploring','Engaged','Leading']:null;
-  var popup=levels?'<div class="level-popup" id="level-popup-'+s+'">'+(LEVEL_HELP[s]||'')+'<span class="level-popup-close" onclick="document.querySelectorAll(\'\.level-popup\').forEach(function(p){p.classList.remove(\'open\');});var ob=document.getElementById(\'popup-overlay\');if(ob)ob.remove();">Close</span></div>':'';
   var helpBtn=levels?'<button class="level-help-btn" style="border-color:rgba(255,255,255,0.5);color:white;" onclick="toggleLevelHelp('+JSON.stringify(s)+')">?</button>':'';
-  if(!arr.length) return popup+'<div class="empty">Nothing added yet.</div>';
+  if(!arr.length) return '<div class="empty">Nothing added yet.</div>';
   var isNeed=(s==='4s'||s==='4r');
   var useGrid=!isNeed;
   var bodyId='added-body-'+s;
@@ -1141,8 +1143,10 @@ function navHTML(screen){
   return summary+'<div class="nav-row">'+back+next+'</div>';
 }
 
-function screenSearchHTML(s, placeholder){
-  return '<div class="search-wrap"><span class="search-icon">🔍</span>'
+function screenSearchHTML(s, placeholder, hideHelper){
+  var helper=hideHelper?'':'<div style="font-size:13px;color:var(--brand);margin:0 0 6px;">Search by keywords or select chips to add — or add your own.</div>';
+  return helper
+    +'<div class="search-wrap"><span class="search-icon">🔍</span>'
     +'<input type="text" id="search-input-'+s+'" placeholder="'+esc(placeholder)+'" oninput="runSearch(\''+s+'\',this.value)"></div>'
     +'<div id="search-results-'+s+'"></div>';
 }
@@ -1252,8 +1256,8 @@ function renderScreen(s, heading, searchPlaceholder, drillId, addedId){
   var el=document.getElementById('app-content'); if(!el) return;
   el.innerHTML=(_editMode?'':progressHTML(s))
     +'<h2>'+heading+'</h2>'
-    +'<div style="font-size:13px;color:var(--brand);margin:-4px 0 12px;">Search by keywords or select chips to add — or add your own.</div>'
     +(s===2?'<div id="title-warning-2"></div>':'')
+    
     +screenSearchHTML(String(s),searchPlaceholder)
     +'<div id="'+drillId+'"></div>'
     +'<div id="'+addedId+'">'+buildAddedHTML(String(s))+'</div>'
@@ -1276,7 +1280,7 @@ function renderScreen2(el){
   if(_editMode){
     cont.innerHTML=''
       +'<h2>Share what you know how to do or how to create.</h2>'
-      +'<div style="font-size:13px;color:var(--brand);margin:-4px 0 12px;">Search by keywords or select chips to add — or add your own.</div>'
+      
       +methodsRow
       +'<div id="title-warning-2"></div>'
       +'<div style="margin-bottom:14px;">'
@@ -1290,7 +1294,7 @@ function renderScreen2(el){
   } else {
     cont.innerHTML=progressHTML(2)
       +'<h2 style="padding-top:8px;">Share what you know how to do or how to create.</h2>'
-      +'<div style="font-size:13px;color:var(--brand);margin:-4px 0 12px;">Search by keywords or select chips to add — or add your own.</div>'
+      
       +methodsRow
       +'<div id="title-warning-2"></div>'
       +'<div style="margin-bottom:14px;">'
@@ -1387,7 +1391,7 @@ function renderScreen3(el){
   }
   cont.innerHTML=(_editMode?'':progressHTML(3))
     +'<h2>What do you care about deeply?</h2>'
-    +'<div style="font-size:13px;color:var(--brand);margin:-4px 0 12px;">Search by keywords or select chips to add — or add your own.</div>'
+    
     +screenSearchHTML('3','Search to add...')
     +valPopup
     +tabs
@@ -1530,7 +1534,7 @@ function renderScreen4(el){
   var cont=document.getElementById('app-content'); if(!cont) return;
   cont.innerHTML=(_editMode?'':progressHTML(4))
     +'<h2>What do you need right now?</h2>'
-    +'<div style="font-size:13px;color:var(--brand);margin:-4px 0 12px;">Search by keywords or select chips to add — or add your own.</div>'
+    
     +'<div class="needs-top-chips">'
     +'<div class="needs-top-chip'+('skill'===_needsCat?' selected':'')+'" id="needs-top-skill" onclick="setNeedsCat(\'skill\')">✨ Skill or service</div>'
     +'<div class="needs-top-chip'+('thing'===_needsCat?' selected':'')+'" id="needs-top-thing" onclick="setNeedsCat(\'thing\')">📦 Thing</div>'
@@ -1580,4 +1584,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.23c | Last change: Share SVG icon, This is me emoji left-aligned, collapse arrow hidden until 8+ items | Date: 2026-06-27 -->
+<!-- Version: V2.23d | Last change: Helper text above search input, ? popup fix | Date: 2026-06-27 -->
