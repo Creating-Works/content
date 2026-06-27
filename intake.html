@@ -1,4 +1,4 @@
-<!-- Version: V2.25 | Last change: Care 6-cat intake, Needs search-first, What I care about merged, What I seeking fix | Date: 2026-06-27 -->
+<!-- Version: V2.25a | Last change: Fix redirect loop when GAS returns empty arrays | Date: 2026-06-27 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1716,10 +1716,14 @@ window.goBack = function(){
   await Promise.all([loadRefData(),loadProfile(),loadIntake()]);
   if(_hasProfile){
     _completed=true;
-    // Check if any required section is empty — redirect to first incomplete
-    if(!_interests.length){ _screen=1; render(); return; }
-    if(!_skills.length){ _screen=2; _screen2step='skills'; render(); return; }
-    if(!_values.length){ _screen=3; render(); return; }
+    // Only redirect if data actually loaded from sheet (at least one section has data)
+    // Prevents redirect loop when GAS fetch fails or returns empty
+    var _dataLoaded=(_interests.length||_skills.length||_values.length||_methods.length||_languages.length);
+    if(_dataLoaded){
+      if(!_interests.length){ _screen=1; render(); return; }
+      if(!_skills.length){ _screen=2; _screen2step='skills'; render(); return; }
+      if(!_values.length){ _screen=3; render(); return; }
+    }
     _screen=0;
   }
   render();
@@ -1727,4 +1731,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.25 | Last change: Care 6-cat intake, Needs search-first, What I care about merged, What I seeking fix | Date: 2026-06-27 -->
+<!-- Version: V2.25a | Last change: Fix redirect loop when GAS returns empty arrays | Date: 2026-06-27 -->
