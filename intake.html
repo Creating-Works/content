@@ -1,4 +1,4 @@
-<!-- Version: V2.25a | Last change: Fix redirect loop when GAS returns empty arrays | Date: 2026-06-27 -->
+<!-- Version: V2.25b | Last change: Consumables quote fix, inline checkboxes, domains data fix, needs add fix, all languages shown | Date: 2026-06-27 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1016,6 +1016,8 @@ window.saveLangModal = function(){
   window.closeLangModal();
   var el=document.getElementById('profile-lang-row'); if(el) el.innerHTML=buildLangRowHTML();
   autoSave();
+  // Re-render lang step so tags show updated selections
+  if(!_editMode && _screen===2 && _screen2step==='lang') renderScreen2(null);
 };
 window.filterLangs = function(q){
   _langFilter=q;
@@ -1300,13 +1302,12 @@ function renderScreen2(el){
         +'</div>';
     });
     methodsHTML+='</div>';
+    _methodInlineOpts=methodOpts.slice();
     cont.innerHTML=progressHTML(2)
       +'<h2>What skills pays the bills?</h2>'
       +'<p style="font-size:15px;font-weight:600;color:var(--text);margin:0 0 12px;">What comes most naturally to you?</p>'
       +methodsHTML
       +navHTML(2);
-    // Make sure methodsDisplay is synced to inline opts
-    if(typeof _methodInlineOpts!=='undefined') _methodInlineOpts=methodOpts.slice();
     return;
   }
 
@@ -1413,11 +1414,16 @@ function buildValAddedHTML(arr, label){
   return h;
 }
 
+
+function domainChipHTML(item){
+  var isAdded=_values.some(function(v){return v.item===item;});
+  return '<div class="item-chip'+(isAdded?' added':'')+'" onclick="addItemFromChip(\'3\',\''+esc(item)+'\',\'domain\')">' +esc(item)+'</div>';
+}
 function renderScreen3(el){
   var cont=document.getElementById('app-content'); if(!cont) return;
   var valSet=getValuesSet();
-  var valAdded=_values.filter(function(v){return valSet[v.item];});
-  var domAdded=_values.filter(function(v){return !valSet[v.item];});
+  var valAdded=_values.filter(function(v){return v.category!=='domain';});
+  var domAdded=_values.filter(function(v){return v.category==='domain';});
 
   // Build 6-category Values UI (used in both intake and edit Values tab)
   function buildCareCatHTML(){
@@ -1468,7 +1474,7 @@ function renderScreen3(el){
       doms.forEach(function(r){
         var item=r.item||r;
         var isAdded=_values.some(function(v){return v.item===item;});
-        domChips+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="addItemFromChip(\'3\',\''+esc(item)+'\',\'\')">'+esc(item)+'</div>';
+        domChips+=domainChipHTML(item);
       });
       domChips+='</div>';
       cont.innerHTML=progressHTML(3)
@@ -1496,7 +1502,7 @@ function renderScreen3(el){
     doms2.forEach(function(r){
       var item=r.item||r;
       var isAdded=_values.some(function(v){return v.item===item;});
-      chipsHTML+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="addItemFromChip(\'3\',\''+esc(item)+'\',\'\')">'+esc(item)+'</div>';
+      chipsHTML+=domainChipHTML(item);
     });
     chipsHTML+='</div>';
   }
@@ -1583,7 +1589,7 @@ window.setNeedsCat=function(cat){
     _thingSub='';
     var subChips=Object.keys(THING_SUBS).map(function(k){
       var info=THING_SUBS[k];
-      return '<div class="sub-chip" id="thing-sub-'+k.replace(/ /g,'-')+'" onclick="setThingSubCat('+JSON.stringify(k)+')">'+info.emoji+' '+k+'</div>';
+      return '<div class="sub-chip" id="thing-sub-'+k.replace(/ /g,'-')+'" onclick="setThingSubCat(\''+k+'\')">' +info.emoji+' '+k+'</div>';
     }).join('');
     inner='<div class="sub-chips" style="margin-bottom:14px;">'+subChips+'</div>'
       +'<div id="thing-detail-area"></div>';
@@ -1652,6 +1658,11 @@ function renderScreen4(el){
     +'<div id="needs-cat-content"></div>'
     +navHTML(4);
   if(_needsCat) window.setNeedsCat(_needsCat);
+  // Hidden divs needed for updateAddedSection to find elements
+  var existing4s=document.getElementById('added-4s');
+  var existing4r=document.getElementById('added-4r');
+  if(!existing4s){var d=document.createElement('div');d.id='added-4s';d.style.display='none';document.getElementById('app-content').appendChild(d);}
+  if(!existing4r){var d2=document.createElement('div');d2.id='added-4r';d2.style.display='none';document.getElementById('app-content').appendChild(d2);}
 }
 // ─── Navigation ───────────────────────────────────────────────────────────────
 window.goNext = function(){
@@ -1731,4 +1742,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.25a | Last change: Fix redirect loop when GAS returns empty arrays | Date: 2026-06-27 -->
+<!-- Version: V2.25b | Last change: Consumables quote fix, inline checkboxes, domains data fix, needs add fix, all languages shown | Date: 2026-06-27 -->
