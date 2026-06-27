@@ -1,4 +1,4 @@
-<!-- Version: V2.18 | Last change: Items to top, auto-expand added, cat picker bug fix, ? popup fix, values tab deselect | Date: 2026-06-26 -->
+<!-- Version: V2.19 | Last change: Items to top, auto-expand added, cat picker bug fix, ? popup fix, values tab deselect | Date: 2026-06-26 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -734,7 +734,7 @@ window.toggleLevelHelp=function(s){
 function buildAddedHTML(s){
   var arr=getArr(s);
   var levels=s==='1'?['Fan','Participant','Coach']:s==='2'?['Starting to practice','Practicing','Mentoring']:s==='3'?['Exploring','Engaged','Leading']:null;
-  var popup=levels?'<div class="level-popup" id="level-popup-'+s+'">'+(LEVEL_HELP[s]||'')+'<span class="level-popup-close" onclick="toggleLevelHelp('+JSON.stringify(s)+')">Close</span></div>':'';
+  var popup=levels?'<div class="level-popup" id="level-popup-'+s+'">'+(LEVEL_HELP[s]||'')+'<span class="level-popup-close" onclick="document.querySelectorAll(\'.level-popup\').forEach(function(p){p.classList.remove(\'open\');});var ob=document.getElementById(\'popup-overlay\');if(ob)ob.remove();">Close</span></div>':'';
   var helpBtn=levels?'<button class="level-help-btn" onclick="toggleLevelHelp('+JSON.stringify(s)+')">?</button>':'';
   if(!arr.length) return popup+'<div class="empty">Nothing added yet.</div>';
   var isNeed=(s==='4s'||s==='4r');
@@ -866,32 +866,36 @@ function stripMethodEmoji(s){
 function methodsMatch(a, b){
   return stripMethodEmoji(a)===stripMethodEmoji(b);
 }
+var _methodOpts=[];
 function renderMethodsModalList(){
   var el=document.getElementById('methods-modal-list'); if(!el) return;
   var opts=(_refData&&_refData.methodsDisplay)||[];
   if(!opts.length){el.innerHTML='<div class="empty">Loading...</div>';return;}
-  el.innerHTML=opts.map(function(m){
+  _methodOpts=opts.slice();
+  el.innerHTML=opts.map(function(m,i){
     var checked=_methodsDraft.some(function(d){return methodsMatch(d,m);});
-    return '<div class="method-item'+(checked?' selected':'')+'" onclick="toggleMethodDraft('+JSON.stringify(m)+')">'
+    return '<div class="method-item'+(checked?' selected':'')+'" onclick="toggleMethodDraft('+i+')">'
       +'<div class="method-check'+(checked?' checked':'')+'">'+( checked?'✓':'')+'</div>'
       +'<div class="method-text">'+esc(m)+'</div>'
       +'</div>';
   }).join('');
 }
-window.toggleMethodDraft = function(m){
+window.toggleMethodDraft = function(i){
+  var m=_methodOpts[i]; if(m===undefined) return;
   var idx=-1;
-  _methodsDraft.forEach(function(d,i){if(methodsMatch(d,m))idx=i;});
+  _methodsDraft.forEach(function(d,j){if(methodsMatch(d,m))idx=j;});
   if(idx>-1){ _methodsDraft.splice(idx,1); }
   else { _methodsDraft.push(m); }
   renderMethodsModalList();
 };
+var _methodInlineOpts=[];
 function buildMethodsChecklistHTML(draftArr, opts, maxLabel){
-  // inline checklist for first-visit screen 2
   if(!opts||!opts.length) return '<div class="empty">Loading...</div>';
+  _methodInlineOpts=opts.slice();
   var h='<div class="methods-list">';
-  opts.forEach(function(m){
+  opts.forEach(function(m,i){
     var checked=draftArr.some(function(d){return methodsMatch(d,m);});
-    h+='<div class="method-item'+(checked?' selected':'')+'" onclick="toggleMethodInline('+JSON.stringify(m)+')">'
+    h+='<div class="method-item'+(checked?' selected':'')+'" onclick="toggleMethodInline('+i+')">'
       +'<div class="method-check'+(checked?' checked':'')+'">'+( checked?'✓':'')+'</div>'
       +'<div class="method-text">'+esc(m)+'</div>'
       +'</div>';
@@ -899,12 +903,12 @@ function buildMethodsChecklistHTML(draftArr, opts, maxLabel){
   h+='</div>';
   return h;
 }
-window.toggleMethodInline = function(m){
+window.toggleMethodInline = function(i){
+  var m=_methodInlineOpts[i]; if(m===undefined) return;
   var idx=-1;
-  _methods.forEach(function(d,i){if(methodsMatch(d,m))idx=i;});
+  _methods.forEach(function(d,j){if(methodsMatch(d,m))idx=j;});
   if(idx>-1){ _methods.splice(idx,1); }
   else { _methods.push(m); }
-  // re-render just the checklist area
   var el=document.getElementById('methods-inline-list'); if(!el) return;
   var opts=(_refData&&_refData.methodsDisplay)||[];
   el.innerHTML=buildMethodsChecklistHTML(_methods, opts);
@@ -1276,7 +1280,7 @@ function buildValAddedHTML(arr, label){
   h+='<div class="added-label" style="color:white;font-size:13px;font-weight:700;">'+label+' ('+arr.length+')</div>';
   h+='<div style="display:flex;align-items:center;gap:8px;">';
   h+='<button class="level-help-btn" style="border-color:rgba(255,255,255,0.5);color:white;" onclick="event.stopPropagation();toggleLevelHelp(\'3\')">?</button>';
-  h+='<span id="'+arrowId+'" style="font-size:20px;color:white;">&#9660;</span>';
+  h+='<span id="'+arrowId+'" style="font-size:12px;color:white;">▼</span>';
   h+='</div></div>';
   h+='<div id="'+bodyId+'" style="display:none;"><div class="practice-grid">';
   arr.forEach(function(item){
@@ -1301,7 +1305,7 @@ function renderScreen3(el){
   var valSet=getValuesSet();
   var valAdded=_values.filter(function(v){return valSet[v.item];});
   var domAdded=_values.filter(function(v){return !valSet[v.item];});
-  var valPopup='<div class="level-popup" id="level-popup-3">'+(LEVEL_HELP['3']||'')+'<span class="level-popup-close" onclick="toggleLevelHelp(\"3\")">Close</span></div>';
+  var valPopup='<div class="level-popup" id="level-popup-3">'+(LEVEL_HELP['3']||'')+'<span class="level-popup-close" onclick="document.querySelectorAll(\'.level-popup\').forEach(function(p){p.classList.remove(\'open\');});var ob=document.getElementById(\'popup-overlay\');if(ob)ob.remove();">Close</span></div>';
   var tabs='<div class="values-tabs">'
     +'<div class="values-tab'+(_valTab==='values'?' active':'')+'" onclick="setValTab(\'values\')">Values</div>'
     +'<div class="values-tab'+(_valTab==='domains'?' active':'')+'" onclick="setValTab(\'domains\')">Domains</div>'
@@ -1524,4 +1528,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.17 | Last change: Items to top, auto-expand added, cat picker bug fix, ? popup fix, values tab deselect | Date: 2026-06-26 -->
+<!-- Version: V2.19 | Last change: Items to top, auto-expand added, cat picker bug fix, ? popup fix, values tab deselect | Date: 2026-06-26 -->
