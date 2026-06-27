@@ -1,4 +1,4 @@
-<!-- Version: V2.24 | Last change: Intake gate, languages-first Skills, all languages shown, methods modal fixes | Date: 2026-06-27 -->
+<!-- Version: V2.25 | Last change: Care 6-cat intake, Needs search-first, What I care about merged, What I seeking fix | Date: 2026-06-27 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1272,17 +1272,41 @@ function renderScreen2(el){
   var cont=document.getElementById('app-content'); if(!cont) return;
   var opts=(_refData&&_refData.methodsDisplay)||[];
 
-  // Intake only: show language question first
+  // Intake only: step 1 — languages
   if(!_editMode&&_screen2step==='lang'){
-    var langDisplay=_languages.length?_languages.join(', '):'Not set yet';
+    var langTags=_languages.length
+      ?'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;">'+_languages.map(function(l){return '<div style="background:var(--sel-bg);border:1.5px solid var(--brand);border-radius:18px;padding:5px 12px;font-size:13px;color:var(--brand);font-weight:500;">'+esc(l)+'</div>';}).join('')+'</div>'
+      :'';
     cont.innerHTML=progressHTML(2)
-      +'<h2>What language(s) do you offer your skills in?</h2>'
-      +'<p style="font-size:14px;color:var(--soft);margin:0 0 16px;">This helps us match you with people who speak your language.</p>'
-      +'<div style="margin-bottom:14px;">'
-      +'<button class="edit-btn" onclick="openLangModal()" style="display:inline-flex;align-items:center;gap:6px;font-size:14px;padding:10px 16px;border-radius:10px;border:1.5px solid var(--border);">✏️ '
-      +(_languages.length?'Languages: '+_languages.join(', '):'Add your languages')+'</button>'
-      +'</div>'
+      +'<h2>What skills pays the bills?</h2>'
+      +'<p style="font-size:15px;font-weight:600;color:var(--text);margin:0 0 6px;">What language(s) do you speak?</p>'
+      +'<p style="font-size:13px;color:var(--soft);margin:0 0 16px;">This helps us match you with people who speak your language.</p>'
+      +'<button class="btn-next" style="width:auto;padding:10px 20px;" onclick="openLangModal()">+ Add languages</button>'
+      +langTags
       +navHTML(2);
+    return;
+  }
+  // Intake only: step 2 — naturally
+  if(!_editMode&&_screen2step==='naturally'){
+    var methodOpts=(_refData&&_refData.methodsDisplay)||[];
+    var methodsHTML='<div style="margin:12px 0;">';
+    methodOpts.forEach(function(m,i){
+      var checked=_methods.some(function(d){return methodsMatch(d,m);});
+      methodsHTML+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer;" onclick="window.toggleMethodInline('+i+')">'
+        +'<div style="width:20px;height:20px;border-radius:4px;border:1.5px solid '+(checked?'var(--brand)':'var(--border)')+';background:'+(checked?'var(--brand)':'white')+';display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+        +(checked?'<svg width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>':'')
+        +'</div>'
+        +'<span style="font-size:15px;color:var(--text);">'+esc(m)+'</span>'
+        +'</div>';
+    });
+    methodsHTML+='</div>';
+    cont.innerHTML=progressHTML(2)
+      +'<h2>What skills pays the bills?</h2>'
+      +'<p style="font-size:15px;font-weight:600;color:var(--text);margin:0 0 12px;">What comes most naturally to you?</p>'
+      +methodsHTML
+      +navHTML(2);
+    // Make sure methodsDisplay is synced to inline opts
+    if(typeof _methodInlineOpts!=='undefined') _methodInlineOpts=methodOpts.slice();
     return;
   }
 
@@ -1331,6 +1355,20 @@ function getValuesSet(){
   return set;
 }
 var _valTab=''; // '' | 'values' | 'domains'
+var CARE_CATS=[
+  {label:'Basic needs and security',items:['Water security','Food security','Safety and peace','Housing and shelter','Urgent medical care','Clothing and supplies'],type:'social'},
+  {label:'Human development',items:['Knowledge and skills','Physical and mental wellbeing','Empowerment and resilience','Freedom and autonomy','Personal expression'],type:'social'},
+  {label:'Economy and innovation',items:['Economic opportunity','Local economic vitality','Economic resilience','Wealth equity','Quality goods and services'],type:'social'},
+  {label:'Community and culture',items:['Information access and sharing','Social and civic engagement','Community health','Cultural vitality','Shared community resources'],type:'social'},
+  {label:'Systems and infrastructure',items:['Transportation access','Reliable utilities','Digital connectivity','Land security'],type:'social'},
+  {label:'Environmental values',items:['Clean air','Clean water','Clean soil','Clean food','Clean energy','Biodiversity','Climate stability','Animal welfare'],type:'environmental'}
+];
+
+var _careValCat=''; // selected care value category in intake/edit values tab
+window.setCareValCat=function(cat){
+  _careValCat=(_careValCat===cat?'':cat);
+  renderScreen3(null);
+};
 window.setValTab=function(tab){
   _valTab=(_valTab===tab?'':tab);
   renderScreen3(null);
@@ -1380,40 +1418,91 @@ function renderScreen3(el){
   var valSet=getValuesSet();
   var valAdded=_values.filter(function(v){return valSet[v.item];});
   var domAdded=_values.filter(function(v){return !valSet[v.item];});
-  var valPopup='<div class="level-popup" id="level-popup-3">'+(LEVEL_HELP['3']||'')+'<span class="level-popup-close" onclick="document.querySelectorAll(\'.level-popup\').forEach(function(p){p.classList.remove(\'open\');});var ob=document.getElementById(\'popup-overlay\');if(ob)ob.remove();">Close</span></div>';
+
+  // Build 6-category Values UI (used in both intake and edit Values tab)
+  function buildCareCatHTML(){
+    var catBtns='<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">';
+    CARE_CATS.forEach(function(c){
+      var active=_careValCat===c.label;
+      catBtns+='<div style="padding:10px 16px;border-radius:10px;border:1.5px solid '+(active?'var(--brand)':'var(--border)')+';background:'+(active?'var(--brand)':'white')+';font-size:14px;font-weight:600;color:'+(active?'white':'var(--soft)')+';cursor:pointer;" onclick="window.setCareValCat(\''+c.label+'\')">'+c.label+'</div>';
+    });
+    catBtns+='</div>';
+    if(!_careValCat) return catBtns;
+    // Show sub-chips for selected category
+    var cat=CARE_CATS.find(function(c){return c.label===_careValCat;});
+    if(!cat) return catBtns;
+    var chips='<div class="item-chips">';
+    cat.items.forEach(function(item){
+      var isAdded=_values.some(function(v){return v.item===item;});
+      chips+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="addItemFromChip(\'3\',\''+esc(item)+'\',\''+esc(_careValCat)+'\')">'+esc(item)+'</div>';
+    });
+    chips+='</div>';
+    return catBtns+chips;
+  }
+
   var tabs='<div class="values-tabs">'
     +'<div class="values-tab'+(_valTab==='values'?' active':'')+'" onclick="setValTab(\'values\')">Values</div>'
     +'<div class="values-tab'+(_valTab==='domains'?' active':'')+'" onclick="setValTab(\'domains\')">Domains</div>'
     +'</div>';
+
+  // INTAKE: split into 3a (values) and 3b (domains)
+  if(!_editMode){
+    if(_valTab!=='domains'){
+      // 3a — Values with 6 categories
+      var careHTML=buildCareCatHTML();
+      cont.innerHTML=progressHTML(3)
+        +'<h2>What do you care about deeply?</h2>'
+        +'<p style="font-size:14px;color:var(--soft);margin:0 0 14px;">Where do you (or would you) like to volunteer your time or energy on a project or cause?</p>'
+        +screenSearchHTML('3','Search to add...')
+        +careHTML
+        +'<div id="added-3-values">'+buildValAddedHTML(valAdded,'Added values')+'</div>'
+        +'<div id="added-3-domains" style="display:none;"></div>'
+        +'<div id="added-3" style="display:none;"></div>'
+        +'<div style="margin-top:14px;"><button class="btn-next" onclick="window.setValTab(\'domains\');renderScreen3(null);" style="background:white;color:var(--brand);border:1.5px solid var(--brand);width:100%;padding:12px;">Next: Domains \u2192</button></div>'
+        +navHTML(3);
+      return;
+    } else {
+      // 3b — Domains
+      var doms=(_refData&&_refData.domains)||[];
+      var domChips='<div class="item-chips">';
+      doms.forEach(function(r){
+        var item=r.item||r;
+        var isAdded=_values.some(function(v){return v.item===item;});
+        domChips+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="addItemFromChip(\'3\',\''+esc(item)+'\',\'\')">'+esc(item)+'</div>';
+      });
+      domChips+='</div>';
+      cont.innerHTML=progressHTML(3)
+        +'<h2>What do you care about deeply?</h2>'
+        +'<p style="font-size:14px;color:var(--soft);margin:0 0 14px;">Areas where you put your energy.</p>'
+        +screenSearchHTML('3','Search domains...')
+        +domChips
+        +'<div id="added-3-domains">'+buildValAddedHTML(domAdded,'Added domains')+'</div>'
+        +'<div id="added-3-values" style="display:none;"></div>'
+        +'<div id="added-3" style="display:none;"></div>'
+        +navHTML(3);
+      return;
+    }
+  }
+
+  // EDIT MODE: Values | Domains tabs side by side
   var chipsHTML='';
   if(!_valTab){
     chipsHTML='<div class="ideas-prompt" style="color:var(--muted);">Select Values or Domains above to see ideas.</div>';
   } else if(_valTab==='values'){
-    var vals=(_refData&&_refData.values)||[];
-    chipsHTML='<div class="ideas-prompt">Here are some ideas to get you started.</div>'
-      +'<div class="item-chips">';
-    vals.forEach(function(r){
-      var item=r.item||r;
-      var isAdded=_values.some(function(v){return v.item===item;});
-      chipsHTML+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="addItemFromChip(\'3\',\''+esc(item)+'\',\'\')">' +esc(item)+'</div>';
-    });
-    chipsHTML+='</div>';
+    chipsHTML=buildCareCatHTML();
   } else {
-    var doms=(_refData&&_refData.domains)||[];
-    chipsHTML='<div class="ideas-prompt">Areas where you put your energy.</div>'
-      +'<div class="item-chips">';
-    doms.forEach(function(r){
+    var doms2=(_refData&&_refData.domains)||[];
+    chipsHTML='<div class="ideas-prompt">Areas where you put your energy.</div><div class="item-chips">';
+    doms2.forEach(function(r){
       var item=r.item||r;
       var isAdded=_values.some(function(v){return v.item===item;});
-      chipsHTML+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="addItemFromChip(\'3\',\''+esc(item)+'\',\'\')">' +esc(item)+'</div>';
+      chipsHTML+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="addItemFromChip(\'3\',\''+esc(item)+'\',\'\')">'+esc(item)+'</div>';
     });
     chipsHTML+='</div>';
   }
-  cont.innerHTML=(_editMode?'':progressHTML(3))
+  cont.innerHTML=progressHTML(3)
     +'<h2>What do you care about deeply?</h2>'
-    
     +screenSearchHTML('3','Search to add...')
-    +valPopup
     +tabs
     +chipsHTML
     +'<div id="added-3-values">'+buildValAddedHTML(valAdded,'Added values')+'</div>'
@@ -1553,9 +1642,9 @@ window.addQuickNeed=function(n){
 function renderScreen4(el){
   var cont=document.getElementById('app-content'); if(!cont) return;
   cont.innerHTML=(_editMode?'':progressHTML(4))
-    +'<h2>What do you need right now?</h2>'
-    
-    +'<div class="needs-top-chips">'
+    +'<h2>What I&#39;m seeking</h2>'
+    +screenSearchHTML('4s','Search for anything you need...')
+    +'<div class="needs-top-chips" style="margin-top:14px;">'
     +'<div class="needs-top-chip'+('skill'===_needsCat?' selected':'')+'" id="needs-top-skill" onclick="setNeedsCat(\'skill\')">✨ Skill or service</div>'
     +'<div class="needs-top-chip'+('thing'===_needsCat?' selected':'')+'" id="needs-top-thing" onclick="setNeedsCat(\'thing\')">📦 Thing</div>'
     +'<div class="needs-top-chip'+('space'===_needsCat?' selected':'')+'" id="needs-top-space" onclick="setNeedsCat(\'space\')">🏡 Space</div>'
@@ -1564,10 +1653,12 @@ function renderScreen4(el){
     +navHTML(4);
   if(_needsCat) window.setNeedsCat(_needsCat);
 }
-
 // ─── Navigation ───────────────────────────────────────────────────────────────
 window.goNext = function(){
   if(_screen===2&&!_editMode&&_screen2step==='lang'){
+    _screen2step='naturally'; render(); return;
+  }
+  if(_screen===2&&!_editMode&&_screen2step==='naturally'){
     _screen2step='skills'; render(); return;
   }
   if(_screen===2){
@@ -1597,13 +1688,22 @@ window.goNext = function(){
     }
     _completed=true; _hasProfile=true; _screen=0; render(); return;
   }
+  if(_screen===3&&!_editMode&&_valTab!=='domains'){
+    _valTab='domains'; renderScreen3(null); return;
+  }
   if(_screen===1) _screen2step='lang';
   _screen++; render();
 };
 
 window.goBack = function(){
   if(_screen===2&&!_editMode&&_screen2step==='skills'){
+    _screen2step='naturally'; render(); return;
+  }
+  if(_screen===2&&!_editMode&&_screen2step==='naturally'){
     _screen2step='lang'; render(); return;
+  }
+  if(_screen===3&&!_editMode&&_valTab==='domains'){
+    _valTab=''; renderScreen3(null); return;
   }
   if(_screen<=1){ return; }
   _screen--; render();
@@ -1614,10 +1714,17 @@ window.goBack = function(){
   if(_viewerMode){ await Promise.all([loadRefData(),loadProfile(),loadIntake()]); render(); return; }
   if(!_appearId){ render(); return; }
   await Promise.all([loadRefData(),loadProfile(),loadIntake()]);
-  if(_hasProfile){ _completed=true; _screen=0; }
+  if(_hasProfile){
+    _completed=true;
+    // Check if any required section is empty — redirect to first incomplete
+    if(!_interests.length){ _screen=1; render(); return; }
+    if(!_skills.length){ _screen=2; _screen2step='skills'; render(); return; }
+    if(!_values.length){ _screen=3; render(); return; }
+    _screen=0;
+  }
   render();
 })();
 </script>
 </body>
 </html>
-<!-- Version: V2.24 | Last change: Intake gate, languages-first Skills, all languages shown, methods modal fixes | Date: 2026-06-27 -->
+<!-- Version: V2.25 | Last change: Care 6-cat intake, Needs search-first, What I care about merged, What I seeking fix | Date: 2026-06-27 -->
