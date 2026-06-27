@@ -1,4 +1,4 @@
-<!-- Version: V2.20 | Last change: Methods row first on Skills screen, no divider, pencil edit only | Date: 2026-06-27 -->
+<!-- Version: V2.21 | Last change: Methods row before skills on Main page | Date: 2026-06-27 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1157,17 +1157,31 @@ function renderProfile(el, viewerMode){
     +metaRow
     +section("What I'm seeking",allNeeds,false,'',4)
     +section('What I enjoy',_interests,true,'level',1)
-    +section('My skills',_skills,true,'level',2,true)
+    +'<div class="profile-section" style="border-bottom:none;padding-bottom:4px;">'
+    +'<div class="profile-section-header"><div class="profile-section-label">My skills</div>'
+    +(!viewerMode?'<div class="profile-section-actions"><button class="edit-btn" onclick="jumpTo(2)">✏️ Edit</button></div>':'')
+    +'</div>'
+    +'<div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:10px;">'
+    +(_methods.length
+      ?_methods.map(function(m){return '<div class="profile-tag" style="font-size:12px;">'+esc(m)+'</div>';}).join('')
+      :'<span style="font-size:13px;color:var(--muted);">What comes most naturally to you?</span>')
+    +(!viewerMode?'<button class="edit-btn" style="margin-left:auto;" onclick="openMethodsModal()">✏️</button>':'')
+    +'</div>'
+    +'<div class="profile-tags">'
+    +(_skills.length
+      ?_skills.map(function(r,i){
+          var lv=r.level||'';
+          var missingLevel=!lv&&!viewerMode;
+          var pickerId='cat-picker-2-'+i;
+          var lvOpts=['Starting to practice','Practicing','Mentoring'];
+          var pickerBtns=missingLevel?lvOpts.map(function(opt){return '<button class="cat-pick-btn" onclick="setCatLevel(\'2\','+i+',\''+opt+'\')">' +opt+'</button>';}).join(''):'';
+          var picker=missingLevel?'<div class="cat-picker-inline" id="'+pickerId+'">'+pickerBtns+'</div>':'';
+          var missingTag=missingLevel?'<span style="font-size:11px;color:#d32f2f;font-weight:500;margin-left:4px;cursor:pointer;" onclick="openCatPicker(\'2\','+i+')">Category missing ▾</span>':'';
+          return '<div style="position:relative;display:inline-block;"><div class="profile-tag"'+(missingLevel?' style="border-color:#d32f2f;"':'')+'>'+esc(r.item)+(lv?'<span class="tag-level">'+esc(lv)+'</span>':'')+missingTag+'</div>'+picker+'</div>';
+        }).join('')
+      :'<div class="profile-empty">Nothing added yet.</div>')
+    +'</div></div>'
     +'<div class="profile-lang-row" id="profile-lang-row">'+buildLangRowHTML()+'</div>'
-    +(_methods.length&&!viewerMode
-      ?'<div style="margin:8px 0 16px;display:flex;align-items:center;justify-content:space-between;">'
-        +'<div class="methods-selected-row" style="margin:0;flex:1;">'+_methods.map(function(m){return '<div class="profile-tag" style="font-size:12px;">'+esc(m)+'</div>';}).join('')+'</div>'
-        +'<button class="edit-btn" onclick="openMethodsModal()" style="margin-left:8px;">✏️</button>'
-        +'</div>'
-      :(_methods.length&&viewerMode
-        ?'<div class="methods-selected-row">'+_methods.map(function(m){return '<div class="profile-tag" style="font-size:12px;">'+esc(m)+'</div>';}).join('')+'</div>'
-        :'')
-    )
     +section('What I care about',_values,true,'level',3);
 }
 
@@ -1510,4 +1524,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.20 | Last change: Methods row first on Skills screen, no divider, pencil edit only | Date: 2026-06-27 -->
+<!-- Version: V2.21 | Last change: Methods row before skills on Main page | Date: 2026-06-27 -->
