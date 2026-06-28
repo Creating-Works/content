@@ -1,4 +1,4 @@
-<!-- Version: V2.26c | Last change: Remove 3rd button, share modal rounded | Date: 2026-06-27 -->
+<!-- Version: V2.27 | Last change: Postal display, emoji fix, space button timing, +Other chip, type chips on load, skill hides others, thing lines, share modal radius | Date: 2026-06-27 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -578,6 +578,7 @@ window.renderDrill = function(screen, containerId){
         var isAdded=arr2.some(function(r){return r.item===item;});
         html+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="addItemFromChip(\''+s+'\',\''+esc(item)+'\',\''+esc(d.parentCat)+'\')">'+esc(item)+'</div>';
       });
+      html+='<div class="item-chip" style="border-style:dashed;color:var(--brand);font-weight:700;" onclick="showCustomAdd(\''+s+'\',\'\')" >+ Other</div>';
       html+='</div>';
     }
   }
@@ -776,7 +777,7 @@ function buildAddedHTML(s){
       return '<div class="need-item">'
         +'<div class="need-item-left"><div class="need-item-name">'+esc(item.item)+'</div>'+catLabel+'</div>'
         +'<div class="need-item-right">'
-        +'<label class="local-toggle'+(item.local?' active':'')+'" ><input type="checkbox"'+(item.local?' checked':'')+' onchange="toggleLocal(\''+s+'\','+i+')"> \U0001f4cd Local</label>'
+        +'<label class="local-toggle'+(item.local?' active':'')+'" ><input type="checkbox"'+(item.local?' checked':'')+' onchange="toggleLocal(\''+s+'\','+i+')"> 📍 Local</label>'
         +'<button class="practice-item-x" onclick="removeItem(\''+s+'\','+i+')">\u00d7</button>'
         +'</div></div>';
     }
@@ -1193,7 +1194,7 @@ function renderProfile(el, viewerMode){
       +'<div class="profile-tags">'+tags+'</div>'
       +'</div>';
   }
-  var metaRow='';
+  var metaRow=!viewerMode?'<div style="font-size:12px;color:var(--muted);margin-bottom:8px;cursor:pointer;" onclick="openPostalModal()">📍 '+esc(_postal||'Add postal code')+' ✏️</div>':'';
   var allNeeds=_needsSkill.concat(_needsRes);
   el.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><h2 style="margin:0;">This is me 🌱</h2></div>'
     +metaRow
@@ -1441,6 +1442,7 @@ function renderScreen3(el){
           var isAdded=_values.some(function(v){return v.item===item;});
           html+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="addItemFromChip(\'3\',\''+esc(item)+'\',\''+esc(c.label)+'\')">'+esc(item)+'</div>';
         });
+        html+='<div class="item-chip" style="border-style:dashed;color:var(--brand);font-weight:700;" onclick="showCustomAdd(\'3\',\''+c.label+'\')" >+ Other</div>';
         html+='</div>';
       }
     });
@@ -1477,6 +1479,7 @@ function renderScreen3(el){
         var isAdded=_values.some(function(v){return v.item===item;});
         domChips+=domainChipHTML(item);
       });
+      domChips+='<div class="item-chip" style="border-style:dashed;color:var(--brand);font-weight:700;" onclick="showCustomAdd(\'3\',\'domain\')">+ Other</div>';
       domChips+='</div>';
       cont.innerHTML=progressHTML(3)
         +'<h2>What do you care about deeply?</h2>'
@@ -1575,9 +1578,17 @@ window.addThingItem=function(){
 window.setNeedsCat=function(cat){
   if(_needsCat===cat){_needsCat='';renderScreen4(null);return;}
   _needsCat=cat;
-  // Hide top search when a type is selected
-  var topSearch=document.querySelector('.search-wrap');
-  if(topSearch) topSearch.style.display='none';
+  // Hide top search and other type chips when skill selected
+  var topSearch=document.querySelector('#app-content .search-wrap');
+  if(cat==='skill'){
+    if(topSearch) topSearch.style.display='none';
+    var tThing=document.getElementById('needs-top-thing');if(tThing)tThing.style.display='none';
+    var tSpace=document.getElementById('needs-top-space');if(tSpace)tSpace.style.display='none';
+  } else {
+    if(topSearch) topSearch.style.display='';
+    var tThing2=document.getElementById('needs-top-thing');if(tThing2)tThing2.style.display='';
+    var tSpace2=document.getElementById('needs-top-space');if(tSpace2)tSpace2.style.display='';
+  }
   ['skill','thing','space'].forEach(function(c){
     var el=document.getElementById('needs-top-'+c);
     if(el) el.className='needs-top-chip'+(cat===c?' selected':'');
@@ -1598,11 +1609,11 @@ window.setNeedsCat=function(cat){
     inner='<div class="sub-chips" style="margin-bottom:14px;border:none;">'+subChips+'</div>'
       +'<div id="thing-detail-area"></div>';
   } else if(cat==='space'){
-    inner='<div class="ideas-prompt">A home, a meeting room, a venue, studio, workshop, or desk.</div>'
-      +'<input type="text" id="space-detail-input" placeholder="Please share some details" style="margin-top:8px;">'
+    inner='<div class="ideas-prompt" style="border:none;">A home, a meeting room, a venue, studio, workshop, or desk.</div>'
+      +'<input type="text" id="space-detail-input" placeholder="Please share some details" style="margin-top:8px;" oninput="var b=document.getElementById(\'add-space-btn\');if(b)b.style.display=this.value.trim()?\'\': \'none\';" >'
       +'<label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;color:var(--soft);cursor:pointer;">'
       +'<input type="checkbox" id="space-local-check" onchange="if(this.checked)postalNudge(\'space-local-check\')"> 📍 This is a local request</label>'
-      +'<button class="btn-outlined" style="width:100%;margin-top:14px;" onclick="addSpaceItem()">Add space to my list</button>'
+      +'<button class="btn-outlined" id="add-space-btn" style="width:100%;margin-top:14px;display:none;" onclick="addSpaceItem()">Add space to my list</button>'
       +'<div id="added-4r">'+buildAddedHTML('4r')+'</div>';
   }
   var cont=document.getElementById('needs-cat-content'); if(!cont) return;
@@ -1746,4 +1757,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.26c | Last change: Remove 3rd button, share modal rounded | Date: 2026-06-27 -->
+<!-- Version: V2.27 | Last change: Postal display, emoji fix, space button timing, +Other chip, type chips on load, skill hides others, thing lines, share modal radius | Date: 2026-06-27 -->
