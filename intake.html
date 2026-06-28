@@ -1,4 +1,4 @@
-<!-- Version: V2.26a | Last change: Added values in-place fix, methods row, helper text, volunteer q position, needs chips, photo right of share | Date: 2026-06-27 -->
+<!-- Version: V2.26b | Last change: Top-right buttons fixed — share left, photo right | Date: 2026-06-27 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1079,16 +1079,16 @@ function renderTopRight(){
   } else if(_screen===0){
     var ph2=_photo?'<div class="btn-photo"><img src="'+esc(_photo)+'" alt=""></div>':'<div class="btn-photo">🌱</div>';
     if(_name){
-      el.innerHTML='<button class="ikigai-btn" onclick="openShareModal()">'+ph2+esc(_name)+'</button>';
+      el.innerHTML='<div style="display:flex;align-items:center;gap:6px;"><button class="share-btn" onclick="openShareModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button><div class="btn-photo" onclick="openPostalModal()" style="cursor:pointer;">'+ph2+'</div></div>';
     } else {
       el.innerHTML='<div style="display:flex;align-items:center;gap:6px;"><button class="share-btn" onclick="openShareModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button><div class="btn-photo" onclick="openPostalModal()" style="cursor:pointer;">'+ph2+'</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></span></button>';
     }
   } else {
     var ph3=_photo?'<div class="btn-photo"><img src="'+esc(_photo)+'" alt=""></div>':'<div class="btn-photo">🌱</div>';
     if(_name){
-      el.innerHTML='<button class="ikigai-btn" onclick="openShareModal()">'+ph3+esc(_name)+'</button>';
+      el.innerHTML='<div style="display:flex;align-items:center;gap:6px;"><button class="share-btn" onclick="openShareModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button><div class="btn-photo" onclick="openPostalModal()" style="cursor:pointer;">'+ph3+'</div></div>';
     } else {
-      el.innerHTML='<button class="ikigai-btn" onclick="openShareModal()" style="padding:4px 8px 4px 4px;">'+ph3+'<span style="display:flex;align-items:center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></span></button>';
+      el.innerHTML='<div style="display:flex;align-items:center;gap:6px;"><button class="share-btn" onclick="openShareModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button><div class="btn-photo" onclick="openPostalModal()" style="cursor:pointer;">'+ph3+'</div></div>';
     }
   }
 }
@@ -1746,4 +1746,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.26a | Last change: Added values in-place fix, methods row, helper text, volunteer q position, needs chips, photo right of share | Date: 2026-06-27 -->
+<!-- Version: V2.26b | Last change: Top-right buttons fixed — share left, photo right | Date: 2026-06-27 -->
