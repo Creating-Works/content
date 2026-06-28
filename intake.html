@@ -1,4 +1,4 @@
-<!-- Version: V2.30 | Last change: Fix viewerMode scoping, remove duplicate search bar, needs confirm button, +Other care placement | Date: 2026-06-28 -->
+<!-- Version: V2.30a | Last change: Fix duplicate added, chip selected style, care breadcrumb, both added on load, domains filter | Date: 2026-06-28 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -57,6 +57,9 @@
     .item-chip:hover{border-color:var(--brand);color:var(--brand);border-style:solid;background:var(--sel-bg);}
     .item-chip.added{background:var(--brand);border-color:var(--brand);border-style:solid;color:white;font-weight:600;}
     .item-chip.added:hover{background:var(--brand);border-color:var(--brand);color:white;}
+    .item-chip.selected{background:var(--brand);border-color:var(--brand);border-style:solid;color:white;font-weight:600;}
+    .btn-primary{background:var(--brand);color:white;border:none;border-radius:10px;padding:8px 18px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;}
+    .btn-primary:hover{opacity:0.9;}
     /* Search */
     .search-wrap{position:relative;margin-bottom:14px;}
     .search-wrap input{padding-left:36px;border-radius:8px;}
@@ -1502,20 +1505,28 @@ function renderScreen3(el){
   // Build 6-category Values UI (used in both intake and edit Values tab)
   function buildCareCatHTML(){
     window._careCats=CARE_CATS;
+    // If a category is active, show breadcrumb + sub-chips only (hide other categories)
+    if(_careValCat){
+      var activeCat=CARE_CATS.find(function(c){return c.label===_careValCat;});
+      var ci=CARE_CATS.findIndex(function(c){return c.label===_careValCat;});
+      if(!activeCat) return '';
+      var html='<div style="margin-bottom:8px;"><span class="breadcrumb-link" onclick="window.setCareValCat(\'\')" style="font-size:12px;">Values</span>'
+        +' <span style="color:var(--muted);font-size:12px;">›</span>'
+        +' <span style="font-size:12px;color:var(--soft);">'+esc(activeCat.label)+'</span></div>';
+      html+='<div class="item-chips" style="margin-bottom:8px;padding:8px;background:var(--input-bg);border-radius:10px;">';
+      activeCat.items.forEach(function(item){
+        var isAdded=_values.some(function(v){return v.item===item;});
+        html+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="addItemFromChip(\'3\',\''+esc(item)+'\',\''+esc(activeCat.label)+'\')">'+esc(item)+'</div>';
+      });
+      html+='<div class="item-chip" style="border-style:dashed;color:var(--brand);font-weight:700;" onclick="showCustomAdd(\'3\',\''+activeCat.label+'\')" >+ Other</div>';
+      html+='</div>';
+      html+='<div id="custom-add-care-'+ci+'"></div>';
+      return html;
+    }
+    // No active category: show all 6 buttons
     var html='<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">';
     CARE_CATS.forEach(function(c,ci){
-      var active=_careValCat===c.label;
-      html+='<div style="padding:10px 16px;border-radius:10px;border:1.5px solid '+(active?'var(--brand)':'var(--border)')+';background:'+(active?'var(--brand)':'white')+';font-size:14px;font-weight:600;color:'+(active?'white':'var(--soft)')+';cursor:pointer;" onclick="window.setCareValCatByIdx('+ci+')">'+c.label+'</div>';
-      if(active){
-        html+='<div class="item-chips" style="margin:-4px 0 4px;padding:8px;background:var(--input-bg);border-radius:0 0 10px 10px;">';
-        c.items.forEach(function(item){
-          var isAdded=_values.some(function(v){return v.item===item;});
-          html+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="addItemFromChip(\'3\',\''+esc(item)+'\',\''+esc(c.label)+'\')">'+esc(item)+'</div>';
-        });
-        html+='<div class="item-chip" style="border-style:dashed;color:var(--brand);font-weight:700;" onclick="showCustomAdd(\'3\',\''+c.label+'\')" >+ Other</div>';
-        html+='</div>';
-        html+='<div id="custom-add-care-'+ci+'"></div>';
-      }
+      html+='<div style="padding:10px 16px;border-radius:10px;border:1.5px solid var(--border);background:white;font-size:14px;font-weight:600;color:var(--soft);cursor:pointer;" onclick="window.setCareValCatByIdx('+ci+')">'+c.label+'</div>';
     });
     html+='</div>';
     return html;
@@ -1586,8 +1597,8 @@ function renderScreen3(el){
     +screenSearchHTML('3','Search to add...')
     +tabs
     +chipsHTML
-    +'<div id="added-3-values"'+((!_valTab||_valTab==="values")?'':' style="display:none;"')+'>'+buildValAddedHTML(valAdded,'Added values')+'</div>'
-    +'<div id="added-3-domains"'+((!_valTab||_valTab==="domains")?'':' style="display:none;"')+'>'+buildValAddedHTML(domAdded,'Added domains')+'</div>'
+    +'<div id="added-3-values"'+(_valTab==="domains"?' style="display:none;"':'')+'>'+buildValAddedHTML(valAdded,'Added values')+'</div>'
+    +'<div id="added-3-domains"'+(_valTab==="values"?' style="display:none;"':'')+'>'+buildValAddedHTML(domAdded,'Added domains')+'</div>'
     +'<div id="added-3" style="display:none;"></div>'
     +navHTML(3);
 }
@@ -1668,8 +1679,7 @@ window.setNeedsCat=function(cat){
     resetDrillTo('4s',0);
     inner=screenSearchHTML('4s','Search for a skill or service...')
       +'<div id="drill-4s"></div>'
-      +'<div id="added-4s">'+buildAddedHTML('4s')+'</div>'
-      ;/* quick needs hidden */;
+      ;/* added items shown in needs-added-visible below */;
   } else if(cat==='thing'){
     _thingSub='';
     var subChips=Object.keys(THING_SUBS).map(function(k){
@@ -1831,4 +1841,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.30 | Last change: Fix viewerMode scoping, remove duplicate search bar, needs confirm button, +Other care placement | Date: 2026-06-28 -->
+<!-- Version: V2.30a | Last change: Fix duplicate added, chip selected style, care breadcrumb, both added on load, domains filter | Date: 2026-06-28 -->
