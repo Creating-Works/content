@@ -1,4 +1,4 @@
-<!-- Version: V2.26 | Last change: 10 fixes: methods row, domains button, sub-chips position, added values, needs chips, skill/space buttons, thing lines, main page buttons, domains text, volunteer question | Date: 2026-06-27 -->
+<!-- Version: V2.26a | Last change: Added values in-place fix, methods row, helper text, volunteer q position, needs chips, photo right of share | Date: 2026-06-27 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -713,7 +713,17 @@ window.toggleLocal = function(screen, idx){
 };
 
 function updateAddedSection(s){
-  if(s==='3'){renderScreen3(null);return;}
+  if(s==='3'){
+    // Update in place instead of full re-render to avoid wiping added sections
+    var valSet=getValuesSet();
+    var valAdded=_values.filter(function(v){return v.category!=='domain';});
+    var domAdded=_values.filter(function(v){return v.category==='domain';});
+    var elV=document.getElementById('added-3-values');
+    var elD=document.getElementById('added-3-domains');
+    if(elV) elV.innerHTML=buildValAddedHTML(valAdded,'Added values');
+    if(elD) elD.innerHTML=buildValAddedHTML(domAdded,'Added domains');
+    return;
+  }
   var el=document.getElementById('added-'+s); if(!el) return;
   el.innerHTML=buildAddedHTML(s);
   expandAddedSection('added-body-'+s,'added-arrow-'+s);
@@ -1071,7 +1081,7 @@ function renderTopRight(){
     if(_name){
       el.innerHTML='<button class="ikigai-btn" onclick="openShareModal()">'+ph2+esc(_name)+'</button>';
     } else {
-      el.innerHTML='<div style="display:flex;align-items:center;gap:6px;"><div class="btn-photo" onclick="openPostalModal()" style="cursor:pointer;">'+ph2+'</div><button class="share-btn" onclick="openShareModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></span></button>';
+      el.innerHTML='<div style="display:flex;align-items:center;gap:6px;"><button class="share-btn" onclick="openShareModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button><div class="btn-photo" onclick="openPostalModal()" style="cursor:pointer;">'+ph2+'</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></span></button>';
     }
   } else {
     var ph3=_photo?'<div class="btn-photo"><img src="'+esc(_photo)+'" alt=""></div>':'<div class="btn-photo">🌱</div>';
@@ -1146,7 +1156,7 @@ function navHTML(screen){
 }
 
 function screenSearchHTML(s, placeholder, hideHelper){
-  var helper=hideHelper?'':'<div style="font-size:13px;color:var(--brand);margin:0 0 6px;">Search by keywords or select chips to add — or add your own.</div>';
+  var helper=hideHelper?'':'<div style="font-size:13px;color:var(--brand);margin:0 0 6px;">Search by keywords, select chips to add, or add your own.</div>';
   return helper
     +'<div class="search-wrap"><span class="search-icon">🔍</span>'
     +'<input type="text" id="search-input-'+s+'" placeholder="'+esc(placeholder)+'" oninput="runSearch(\''+s+'\',this.value)"></div>'
@@ -1329,8 +1339,7 @@ function renderScreen2(el){
     cont.innerHTML=progressHTML(2)
       +'<h2 style="padding-top:8px;">'+((!_editMode&&_screen2step==='skills')?'What skills pays the bills?':'Share what you know how to do or how to create.')+'</h2>'
       
-      +methodsRow
-      +'<div id="title-warning-2"></div>'
+            +'<div id="title-warning-2"></div>'
       +screenSearchHTML('2','Search skills to add...')
       +'<div id="drill-2"></div>'
       +'<div id="added-2">'+buildAddedHTML('2')+'</div>'
@@ -1451,8 +1460,8 @@ function renderScreen3(el){
       var careHTML=buildCareCatHTML();
       cont.innerHTML=progressHTML(3)
         +'<h2>What do you care about deeply?</h2>'
-          +screenSearchHTML('3','Search to add...')
-        +'<p style="font-size:14px;color:var(--soft);margin:0 0 14px;">Where do you (or would you) like to volunteer your time or energy on a project or cause?</p>'
+          +'<p style="font-size:14px;color:var(--soft);margin:0 0 14px;">Where do you (or would you) like to volunteer your time or energy on a project or cause?</p>'
+        +screenSearchHTML('3','Search to add...')
         +careHTML
         +'<div id="added-3-values">'+buildValAddedHTML(valAdded,'Added values')+'</div>'
         +'<div id="added-3-domains" style="display:none;"></div>'
@@ -1642,12 +1651,10 @@ window.addQuickNeed=function(n){
 
 function renderScreen4(el){
   var cont=document.getElementById('app-content'); if(!cont) return;
-    var allNeeds4=_needsSkill.concat(_needsRes);
-  var showTypeChips=allNeeds4.length>0||_needsCat!=='';
-  cont.innerHTML=(_editMode?'':progressHTML(4))
+    cont.innerHTML=(_editMode?'':progressHTML(4))
     +'<h2>What I\'m seeking</h2>'
     +screenSearchHTML('4s','Search for anything you need...')
-    +'<div class="needs-top-chips" style="margin-top:14px;'+(showTypeChips?'':'display:none;')+'" id="needs-type-chips">'
+    +'<div class="needs-top-chips" style="margin-top:14px;" id="needs-type-chips">'
     +'<div class="needs-top-chip'+('skill'===_needsCat?' selected':'')+'" id="needs-top-skill" onclick="setNeedsCat(\'skill\')">✨ Skill or service</div>'
     +'<div class="needs-top-chip'+('thing'===_needsCat?' selected':'')+'" id="needs-top-thing" onclick="setNeedsCat(\'thing\')">📦 Thing</div>'
     +'<div class="needs-top-chip'+('space'===_needsCat?' selected':'')+'" id="needs-top-space" onclick="setNeedsCat(\'space\')">🏡 Space</div>'
@@ -1739,4 +1746,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.26 | Last change: 10 fixes: methods row, domains button, sub-chips position, added values, needs chips, skill/space buttons, thing lines, main page buttons, domains text, volunteer question | Date: 2026-06-27 -->
+<!-- Version: V2.26a | Last change: Added values in-place fix, methods row, helper text, volunteer q position, needs chips, photo right of share | Date: 2026-06-27 -->
