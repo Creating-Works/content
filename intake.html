@@ -1,4 +1,4 @@
-<!-- Version: V2.25d | Last change: Skills screen intake: bills header, pencil first, no lang button, methods only if selected | Date: 2026-06-27 -->
+<!-- Version: V2.26 | Last change: 10 fixes: methods row, domains button, sub-chips position, added values, needs chips, skill/space buttons, thing lines, main page buttons, domains text, volunteer question | Date: 2026-06-27 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -162,7 +162,7 @@
     /* needs-top-chips moved below */
     .needs-top-chip{padding:10px 18px;border-radius:20px;border:1.5px solid var(--border);background:white;font-size:14px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;transition:all 0.15s;}
     .needs-top-chip:hover{border-color:var(--brand);color:var(--brand);}
-    .needs-top-chips{display:flex;gap:10px;margin-bottom:0;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid var(--border);}
+    .needs-top-chips{display:flex;gap:10px;margin-bottom:0;flex-wrap:wrap;padding-bottom:14px;}
     .cat-picker-inline{background:white;border:1.5px solid var(--brand);border-radius:10px;padding:10px 12px;display:none;flex-wrap:wrap;gap:6px;position:absolute;left:0;top:100%;z-index:200;min-width:220px;box-shadow:0 4px 16px rgba(0,0,0,0.12);}
     .cat-picker-inline.open{display:flex;}
     .cat-pick-btn{padding:5px 12px;border-radius:18px;border:1.5px solid var(--border);background:white;font-size:12px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;}
@@ -536,8 +536,8 @@ window.renderDrill = function(screen, containerId){
     }
   } else if(s==='1'){
     // Rec drill: level 1 = sub sport cats, level 2 = items
+    var pool=(_refData&&_refData.recreation)||[];
     if(!d.subCat){
-      var pool=(_refData&&_refData.recreation)||[];
       var subCats=(function(){var sc={};pool.filter(function(r){return r.recType===d.parentCat;}).forEach(function(r){if(r.category)sc[r.category]=1;});return sortAlpha(Object.keys(sc));})();
       if(subCats.length){
         html+='<div class="sub-chips">';
@@ -667,8 +667,8 @@ function addItem(screen, item, category){
   if(s==='1') _interests.unshift({item:item,category:category||'',level:''});
   else if(s==='2') _skills.unshift({item:item,category:category||'',level:''});
   else if(s==='3') _values.unshift({item:item,category:category||'',level:''});
-  else if(s==='4s') _needsSkill.unshift({item:item,category:category||(_drill['4s']&&_drill['4s'].parentCat)||'',local:false,ntype:'skill'});
-  else if(s==='4r') _needsRes.unshift({item:item,category:category||(_drill['4r']&&_drill['4r'].parentCat)||'',local:false,ntype:'resource'});
+  else if(s==='4s'){_needsSkill.unshift({item:item,category:category||(_drill['4s']&&_drill['4s'].parentCat)||'',local:false,ntype:'skill'});var tc=document.getElementById('needs-type-chips');if(tc)tc.style.display='';}
+  else if(s==='4r'){_needsRes.unshift({item:item,category:category||(_drill['4r']&&_drill['4r'].parentCat)||'',local:false,ntype:'resource'});var tc2=document.getElementById('needs-type-chips');if(tc2)tc2.style.display='';}
   toast('Added below \u2193');
   clearSearch(s);
   updateAddedSection(s);
@@ -1071,7 +1071,7 @@ function renderTopRight(){
     if(_name){
       el.innerHTML='<button class="ikigai-btn" onclick="openShareModal()">'+ph2+esc(_name)+'</button>';
     } else {
-      el.innerHTML='<button class="ikigai-btn" onclick="openShareModal()" style="padding:4px 8px 4px 4px;">'+ph2+'<span style="display:flex;align-items:center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></span></button>';
+      el.innerHTML='<div style="display:flex;align-items:center;gap:6px;"><div class="btn-photo" onclick="openPostalModal()" style="cursor:pointer;">'+ph2+'</div><button class="share-btn" onclick="openShareModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></span></button>';
     }
   } else {
     var ph3=_photo?'<div class="btn-photo"><img src="'+esc(_photo)+'" alt=""></div>':'<div class="btn-photo">🌱</div>';
@@ -1183,11 +1183,7 @@ function renderProfile(el, viewerMode){
       +'<div class="profile-tags">'+tags+'</div>'
       +'</div>';
   }
-  var metaRow=!viewerMode
-    ?'<div class="profile-meta-row">'
-      +'<div class="meta-pill" onclick="openPostalModal()">✏️ '+esc(_postal||'No postal code')+'</div>'
-      +'</div>'
-    :'';
+  var metaRow='';
   var allNeeds=_needsSkill.concat(_needsRes);
   el.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><h2 style="margin:0;">This is me 🌱</h2></div>'
     +metaRow
@@ -1320,8 +1316,7 @@ function renderScreen2(el){
     cont.innerHTML=''
       +'<h2>Share what you know how to do or how to create.</h2>'
       
-      +methodsRow
-      +'<div id="title-warning-2"></div>'
+            +'<div id="title-warning-2"></div>'
       +'<div style="margin-bottom:14px;">'
       +'<button id="lang-edit-btn" class="edit-btn" onclick="openLangModal()" style="display:inline-flex;align-items:center;gap:6px;">✏️ '
       +(_languages.length?'Languages: '+_languages.join(', '):'Add your languages')+'</button>'
@@ -1360,6 +1355,7 @@ var CARE_CATS=[
 ];
 
 var _careValCat=''; // selected care value category in intake/edit values tab
+window.setCareValCatByIdx=function(i){var c=CARE_CATS[i];if(c)window.setCareValCat(c.label);};
 window.setCareValCat=function(cat){
   _careValCat=(_careValCat===cat?'':cat);
   renderScreen3(null);
@@ -1399,7 +1395,11 @@ function buildValAddedHTML(arr, label){
       btns+='<button class="practice-btn'+(sel?' selected':'')+'" onclick="setLevel(\'3\','+idx+',\''+lv+'\')">'+lv+'</button>';
     });
     h+='<div class="practice-item">';
-    h+='<div class="practice-item-header"><div class="practice-item-name">'+esc(item.item)+'</div>';
+    h+='<div class="practice-item-header">';
+    h+='<div>';
+    h+='<div class="practice-item-name">'+esc(item.item)+'</div>';
+    if(item.category&&item.category!=='domain') h+='<div style="font-size:11px;color:var(--muted);margin-top:2px;">'+esc(item.category)+'</div>';
+    h+='</div>';
     h+='<button class="practice-item-x" onclick="removeItem(\'3\','+idx+')">×</button></div>';
     h+='<div class="practice-options">'+btns+'</div>';
     h+='</div>';
@@ -1421,23 +1421,22 @@ function renderScreen3(el){
 
   // Build 6-category Values UI (used in both intake and edit Values tab)
   function buildCareCatHTML(){
-    var catBtns='<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">';
-    CARE_CATS.forEach(function(c){
+    window._careCats=CARE_CATS;
+    var html='<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">';
+    CARE_CATS.forEach(function(c,ci){
       var active=_careValCat===c.label;
-      catBtns+='<div style="padding:10px 16px;border-radius:10px;border:1.5px solid '+(active?'var(--brand)':'var(--border)')+';background:'+(active?'var(--brand)':'white')+';font-size:14px;font-weight:600;color:'+(active?'white':'var(--soft)')+';cursor:pointer;" onclick="window.setCareValCat(\''+c.label+'\')">'+c.label+'</div>';
+      html+='<div style="padding:10px 16px;border-radius:10px;border:1.5px solid '+(active?'var(--brand)':'var(--border)')+';background:'+(active?'var(--brand)':'white')+';font-size:14px;font-weight:600;color:'+(active?'white':'var(--soft)')+';cursor:pointer;" onclick="window.setCareValCatByIdx('+ci+')">'+c.label+'</div>';
+      if(active){
+        html+='<div class="item-chips" style="margin:-4px 0 4px;padding:8px;background:var(--input-bg);border-radius:0 0 10px 10px;">';
+        c.items.forEach(function(item){
+          var isAdded=_values.some(function(v){return v.item===item;});
+          html+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="addItemFromChip(\'3\',\''+esc(item)+'\',\''+esc(c.label)+'\')">'+esc(item)+'</div>';
+        });
+        html+='</div>';
+      }
     });
-    catBtns+='</div>';
-    if(!_careValCat) return catBtns;
-    // Show sub-chips for selected category
-    var cat=CARE_CATS.find(function(c){return c.label===_careValCat;});
-    if(!cat) return catBtns;
-    var chips='<div class="item-chips">';
-    cat.items.forEach(function(item){
-      var isAdded=_values.some(function(v){return v.item===item;});
-      chips+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="addItemFromChip(\'3\',\''+esc(item)+'\',\''+esc(_careValCat)+'\')">'+esc(item)+'</div>';
-    });
-    chips+='</div>';
-    return catBtns+chips;
+    html+='</div>';
+    return html;
   }
 
   var tabs='<div class="values-tabs">'
@@ -1452,13 +1451,12 @@ function renderScreen3(el){
       var careHTML=buildCareCatHTML();
       cont.innerHTML=progressHTML(3)
         +'<h2>What do you care about deeply?</h2>'
+          +screenSearchHTML('3','Search to add...')
         +'<p style="font-size:14px;color:var(--soft);margin:0 0 14px;">Where do you (or would you) like to volunteer your time or energy on a project or cause?</p>'
-        +screenSearchHTML('3','Search to add...')
         +careHTML
         +'<div id="added-3-values">'+buildValAddedHTML(valAdded,'Added values')+'</div>'
         +'<div id="added-3-domains" style="display:none;"></div>'
         +'<div id="added-3" style="display:none;"></div>'
-        +'<div style="margin-top:14px;"><button class="btn-next" onclick="window.setValTab(\'domains\');renderScreen3(null);" style="background:white;color:var(--brand);border:1.5px solid var(--brand);width:100%;padding:12px;">Next: Domains \u2192</button></div>'
         +navHTML(3);
       return;
     } else {
@@ -1473,7 +1471,7 @@ function renderScreen3(el){
       domChips+='</div>';
       cont.innerHTML=progressHTML(3)
         +'<h2>What do you care about deeply?</h2>'
-        +'<p style="font-size:14px;color:var(--soft);margin:0 0 14px;">Areas where you put your energy.</p>'
+        +'<p style="font-size:14px;color:var(--soft);margin:0 0 14px;">Which domains do you care about deeply? These are areas where you want to put your energy.</p>'
         +screenSearchHTML('3','Search domains...')
         +domChips
         +'<div id="added-3-domains">'+buildValAddedHTML(domAdded,'Added domains')+'</div>'
@@ -1568,6 +1566,9 @@ window.addThingItem=function(){
 window.setNeedsCat=function(cat){
   if(_needsCat===cat){_needsCat='';renderScreen4(null);return;}
   _needsCat=cat;
+  // Hide top search when a type is selected
+  var topSearch=document.querySelector('.search-wrap');
+  if(topSearch) topSearch.style.display='none';
   ['skill','thing','space'].forEach(function(c){
     var el=document.getElementById('needs-top-'+c);
     if(el) el.className='needs-top-chip'+(cat===c?' selected':'');
@@ -1585,7 +1586,7 @@ window.setNeedsCat=function(cat){
       var info=THING_SUBS[k];
       return '<div class="sub-chip" id="thing-sub-'+k.replace(/ /g,'-')+'" onclick="setThingSubCat(\''+k+'\')">' +info.emoji+' '+k+'</div>';
     }).join('');
-    inner='<div class="sub-chips" style="margin-bottom:14px;">'+subChips+'</div>'
+    inner='<div class="sub-chips" style="margin-bottom:14px;border:none;">'+subChips+'</div>'
       +'<div id="thing-detail-area"></div>';
   } else if(cat==='space'){
     inner='<div class="ideas-prompt">A home, a meeting room, a venue, studio, workshop, or desk.</div>'
@@ -1641,10 +1642,12 @@ window.addQuickNeed=function(n){
 
 function renderScreen4(el){
   var cont=document.getElementById('app-content'); if(!cont) return;
+    var allNeeds4=_needsSkill.concat(_needsRes);
+  var showTypeChips=allNeeds4.length>0||_needsCat!=='';
   cont.innerHTML=(_editMode?'':progressHTML(4))
-    +'<h2>What I&#39;m seeking</h2>'
+    +'<h2>What I\'m seeking</h2>'
     +screenSearchHTML('4s','Search for anything you need...')
-    +'<div class="needs-top-chips" style="margin-top:14px;">'
+    +'<div class="needs-top-chips" style="margin-top:14px;'+(showTypeChips?'':'display:none;')+'" id="needs-type-chips">'
     +'<div class="needs-top-chip'+('skill'===_needsCat?' selected':'')+'" id="needs-top-skill" onclick="setNeedsCat(\'skill\')">✨ Skill or service</div>'
     +'<div class="needs-top-chip'+('thing'===_needsCat?' selected':'')+'" id="needs-top-thing" onclick="setNeedsCat(\'thing\')">📦 Thing</div>'
     +'<div class="needs-top-chip'+('space'===_needsCat?' selected':'')+'" id="needs-top-space" onclick="setNeedsCat(\'space\')">🏡 Space</div>'
@@ -1736,4 +1739,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.25d | Last change: Skills screen intake: bills header, pencil first, no lang button, methods only if selected | Date: 2026-06-27 -->
+<!-- Version: V2.26 | Last change: 10 fixes: methods row, domains button, sub-chips position, added values, needs chips, skill/space buttons, thing lines, main page buttons, domains text, volunteer question | Date: 2026-06-27 -->
