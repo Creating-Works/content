@@ -1,4 +1,4 @@
-<!-- Version: V2.25b | Last change: Consumables quote fix, inline checkboxes, domains data fix, needs add fix, all languages shown | Date: 2026-06-27 -->
+<!-- Version: V2.25d | Last change: Skills screen intake: bills header, pencil first, no lang button, methods only if selected | Date: 2026-06-27 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1280,8 +1280,7 @@ function renderScreen2(el){
       ?'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;">'+_languages.map(function(l){return '<div style="background:var(--sel-bg);border:1.5px solid var(--brand);border-radius:18px;padding:5px 12px;font-size:13px;color:var(--brand);font-weight:500;">'+esc(l)+'</div>';}).join('')+'</div>'
       :'';
     cont.innerHTML=progressHTML(2)
-      +'<h2>What skills pays the bills?</h2>'
-      +'<p style="font-size:15px;font-weight:600;color:var(--text);margin:0 0 6px;">What language(s) do you speak?</p>'
+      +'<h2>What language(s) do you speak?</h2>'
       +'<p style="font-size:13px;color:var(--soft);margin:0 0 16px;">This helps us match you with people who speak your language.</p>'
       +'<button class="btn-next" style="width:auto;padding:10px 20px;" onclick="openLangModal()">+ Add languages</button>'
       +langTags
@@ -1291,7 +1290,7 @@ function renderScreen2(el){
   // Intake only: step 2 — naturally
   if(!_editMode&&_screen2step==='naturally'){
     var methodOpts=(_refData&&_refData.methodsDisplay)||[];
-    var methodsHTML='<div style="margin:12px 0;">';
+    var methodsHTML='<div id="methods-inline-list" style="margin:12px 0;">';
     methodOpts.forEach(function(m,i){
       var checked=_methods.some(function(d){return methodsMatch(d,m);});
       methodsHTML+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer;" onclick="window.toggleMethodInline('+i+')">'
@@ -1304,19 +1303,18 @@ function renderScreen2(el){
     methodsHTML+='</div>';
     _methodInlineOpts=methodOpts.slice();
     cont.innerHTML=progressHTML(2)
-      +'<h2>What skills pays the bills?</h2>'
-      +'<p style="font-size:15px;font-weight:600;color:var(--text);margin:0 0 12px;">What comes most naturally to you?</p>'
+      +'<h2>What comes most naturally to you?</h2>'
       +methodsHTML
       +navHTML(2);
     return;
   }
 
-  var methodsRow='<div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:14px;">'
-    +(_methods.length
-      ?_methods.map(function(m){return '<div class="profile-tag" style="font-size:12px;">'+esc(m)+'</div>';}).join('')
-      :'<span style="font-size:13px;color:var(--muted);">What comes most naturally to you?</span>')
-    +'<button class="edit-btn" style="margin-left:auto;" onclick="openMethodsModal()">✏️</button>'
-    +'</div>';
+  var methodsRow=_methods.length
+    ?'<div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:14px;">'
+      +'<button class="edit-btn" style="margin-right:6px;" onclick="openMethodsModal()">✏️</button>'
+      +_methods.map(function(m){return '<div class="profile-tag" style="font-size:12px;">'+esc(m)+'</div>';}).join('')
+      +'</div>'
+    :'';
 
   if(_editMode){
     cont.innerHTML=''
@@ -1334,14 +1332,10 @@ function renderScreen2(el){
       +navHTML(2);
   } else {
     cont.innerHTML=progressHTML(2)
-      +'<h2 style="padding-top:8px;">Share what you know how to do or how to create.</h2>'
+      +'<h2 style="padding-top:8px;">'+((!_editMode&&_screen2step==='skills')?'What skills pays the bills?':'Share what you know how to do or how to create.')+'</h2>'
       
       +methodsRow
       +'<div id="title-warning-2"></div>'
-      +'<div style="margin-bottom:14px;">'
-      +'<button id="lang-edit-btn" class="edit-btn" onclick="openLangModal()" style="display:inline-flex;align-items:center;gap:6px;">✏️ '
-      +(_languages.length?'Languages: '+_languages.join(', '):'Add your languages')+'</button>'
-      +'</div>'
       +screenSearchHTML('2','Search skills to add...')
       +'<div id="drill-2"></div>'
       +'<div id="added-2">'+buildAddedHTML('2')+'</div>'
@@ -1742,4 +1736,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.25b | Last change: Consumables quote fix, inline checkboxes, domains data fix, needs add fix, all languages shown | Date: 2026-06-27 -->
+<!-- Version: V2.25d | Last change: Skills screen intake: bills header, pencil first, no lang button, methods only if selected | Date: 2026-06-27 -->
