@@ -1,4 +1,4 @@
-<!-- Version: V2.28c | Last change: Needs double search fix, care tab added sections, main page values+domains, +Other care category | Date: 2026-06-28 -->
+<!-- Version: V2.29 | Last change: Fix parseTagStr and vStr to read/write item:category:level for values | Date: 2026-06-28 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -466,7 +466,7 @@ async function loadIntake(){
 function parseTagStr(str,lk){
   if(!str) return [];
   return str.split('|').filter(Boolean).map(function(s){
-    var p=s.split(':');var o={item:p[0],category:''};o[lk]=p[1]||'';return o;
+    var p=s.split(':');var o={item:p[0],category:p.length>=3?p[1]:''};o[lk]=p.length>=3?p[2]||'':p[1]||'';return o;
   });
 }
 function parseNeedsStr(str){
@@ -482,7 +482,7 @@ function autoSave(){
   if(!_appearId||_viewerMode) return;
   var iStr=_interests.map(function(s){return s.item+(s.level?':'+s.level:'');}).join('|');
   var sStr=_skills.map(function(s){return s.item+(s.level?':'+s.level:'');}).join('|');
-  var vStr=_values.map(function(s){return s.item+(s.level?':'+s.level:'');}).join('|');
+  var vStr=_values.map(function(s){return s.item+':'+(s.category||'')+':'+(s.level||'');}).join('|');
   var nStr=[].concat(
     _needsSkill.map(function(s){return s.item+(s.local?':local':'')+':skill'+(s.category?':'+s.category:'');}),
     _needsRes.map(function(s){return s.item+(s.local?':local':'')+':thing'+(s.category?':'+s.category:'');})
@@ -1813,4 +1813,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.28c | Last change: Needs double search fix, care tab added sections, main page values+domains, +Other care category | Date: 2026-06-28 -->
+<!-- Version: V2.29 | Last change: Fix parseTagStr and vStr to read/write item:category:level for values | Date: 2026-06-28 -->
