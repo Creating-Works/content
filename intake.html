@@ -1,4 +1,4 @@
-<!-- Version: V2.27b | Last change: Postal display, needs added always visible, cat picker inline select | Date: 2026-06-27 -->
+<!-- Version: V2.28 | Last change: X button fix, category missing clears, postal removed, show page buttons, needs breadcrumb, +Other fix | Date: 2026-06-28 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -685,10 +685,17 @@ function getArr(s){
   return [];
 }
 
+function refreshNeedsVisible(){
+  var vis=document.getElementById('needs-added-visible');
+  if(vis){
+    vis.innerHTML=(_needsSkill.length?buildAddedHTML('4s'):'')+(_needsRes.length?buildAddedHTML('4r'):'');
+  }
+}
 window.removeItem = function(screen, idx){
   getArr(String(screen)).splice(idx,1);
   updateAddedSection(String(screen));
-  window.renderDrill(String(screen),'drill-'+String(screen));
+  if(String(screen)==='4s'||String(screen)==='4r') refreshNeedsVisible();
+  else window.renderDrill(String(screen),'drill-'+String(screen));
 };
 
 window.setLevel = function(screen, idx, level){
@@ -725,16 +732,9 @@ function updateAddedSection(s){
     if(elD) elD.innerHTML=buildValAddedHTML(domAdded,'Added domains');
     return;
   }
-  var el=document.getElementById('added-'+s); if(!el){
-    // Update the always-visible needs section
-    var vis=document.getElementById('needs-added-visible');
-    if(vis){
-      vis.innerHTML=(_needsSkill.length?buildAddedHTML('4s'):'')+(_needsRes.length?buildAddedHTML('4r'):'');
-    }
-    return;
-  }
-  el.innerHTML=buildAddedHTML(s);
-  expandAddedSection('added-body-'+s,'added-arrow-'+s);
+  var el=document.getElementById('added-'+s);
+  if(el){ el.innerHTML=buildAddedHTML(s); expandAddedSection('added-body-'+s,'added-arrow-'+s); }
+  if(s==='4s'||s==='4r') refreshNeedsVisible();
 }
 
 var LEVEL_HELP={
@@ -849,10 +849,8 @@ window.showCustomAdd = function(screen, item){
   _customItem=toTitleCase(item); _customScreen=String(screen);
   // Try search-results container first, fall back to a modal approach
   var container=document.getElementById('search-results-'+_customScreen);
-  if(!container){
-    // For needs screen where search may be hidden, use needs-cat-content
-    container=document.getElementById('needs-cat-content');
-  }
+  if(!container) container=document.getElementById('needs-cat-content');
+  if(!container) container=document.getElementById('drill-'+_customScreen);
   if(!container) return;
   var opts='<option value="">Select a category</option>'
     +PARENT_CATS.map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join('');
@@ -1021,8 +1019,7 @@ window.setNeedCat=function(s,idx,cat){
   var arr=getArr(s);
   if(arr&&arr[idx]) arr[idx].category=cat;
   autoSave();
-  document.querySelectorAll('.cat-picker-inline').forEach(function(el){el.classList.remove('open');});
-  var el=document.getElementById('added-'+s); if(el) el.innerHTML=buildAddedHTML(s);
+  refreshNeedsVisible();
 };
 window.openCatPicker=function(screenKey, itemIdx){
   // Close any open pickers first
@@ -1121,9 +1118,9 @@ function renderTopRight(){
   } else {
     var ph3=_photo?'<div class="btn-photo"><img src="'+esc(_photo)+'" alt=""></div>':'<div class="btn-photo">🌱</div>';
     if(_name){
-      el.innerHTML='<div style="display:flex;align-items:center;gap:6px;"><button class="share-btn" onclick="openShareModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button><div class="btn-photo" onclick="openPostalModal()" style="cursor:pointer;">'+ph3+'</div></div>';
+      el.innerHTML='<div style="display:flex;align-items:center;gap:6px;"><button class="share-btn" onclick="openShareModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button><div class="btn-photo">'+ph3+'</div></div>';
     } else {
-      el.innerHTML='<div style="display:flex;align-items:center;gap:6px;"><button class="share-btn" onclick="openShareModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button><div class="btn-photo" onclick="openPostalModal()" style="cursor:pointer;">'+ph3+'</div></div>';
+      el.innerHTML='<div style="display:flex;align-items:center;gap:6px;"><button class="share-btn" onclick="openShareModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button><div class="btn-photo">'+ph3+'</div></div>';
     }
   }
 }
@@ -1228,7 +1225,7 @@ function renderProfile(el, viewerMode){
       +'<div class="profile-tags">'+tags+'</div>'
       +'</div>';
   }
-  var metaRow=!viewerMode?'<div style="font-size:13px;color:var(--soft);margin-bottom:10px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;" onclick="window.openPostalModal()">📍 <span>'+esc(_postal||'Add postal code')+'</span> ✏️</div>':'';
+  var metaRow='';
   var allNeeds=_needsSkill.concat(_needsRes);
   el.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><h2 style="margin:0;">This is me 🌱</h2></div>'
     +metaRow
@@ -1612,6 +1609,10 @@ window.addThingItem=function(){
 window.setNeedsCat=function(cat){
   if(_needsCat===cat){_needsCat='';renderScreen4(null);return;}
   _needsCat=cat;
+  // Add breadcrumb
+  var breadcrumbArea=document.getElementById('needs-breadcrumb');
+  var labels={'skill':'✨ Skill or service','thing':'📦 Thing','space':'🏡 Space'};
+  if(breadcrumbArea) breadcrumbArea.innerHTML='<div style="font-size:13px;color:var(--brand);margin-bottom:8px;"><span style="cursor:pointer;" onclick="window.setNeedsCat(\''+cat+'\')">&larr; What I\'m seeking</span> <span style="color:var(--muted);">›</span> '+(labels[cat]||cat)+'</div>';
   // Hide top search and other type chips when skill selected
   var topSearch=document.querySelector('#app-content .search-wrap');
   if(cat==='skill'){
@@ -1704,6 +1705,7 @@ function renderScreen4(el){
     +'<div class="needs-top-chip'+('thing'===_needsCat?' selected':'')+'" id="needs-top-thing" onclick="setNeedsCat(\'thing\')">📦 Thing</div>'
     +'<div class="needs-top-chip'+('space'===_needsCat?' selected':'')+'" id="needs-top-space" onclick="setNeedsCat(\'space\')">🏡 Space</div>'
     +'</div>'
+    +'<div id="needs-breadcrumb"></div>'
     +'<div id="needs-cat-content"></div>'
     +'<div id="needs-added-visible" style="margin-top:14px;">'
     +(_needsSkill.length?buildAddedHTML('4s'):'')
@@ -1795,4 +1797,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.27b | Last change: Postal display, needs added always visible, cat picker inline select | Date: 2026-06-27 -->
+<!-- Version: V2.28 | Last change: X button fix, category missing clears, postal removed, show page buttons, needs breadcrumb, +Other fix | Date: 2026-06-28 -->
