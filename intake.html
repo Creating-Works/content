@@ -1,4 +1,4 @@
-<!-- Version: V2.27a | Last change: Postal click fix, +Other item input, needs refresh, cat picker position | Date: 2026-06-27 -->
+<!-- Version: V2.27b | Last change: Postal display, needs added always visible, cat picker inline select | Date: 2026-06-27 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -725,7 +725,14 @@ function updateAddedSection(s){
     if(elD) elD.innerHTML=buildValAddedHTML(domAdded,'Added domains');
     return;
   }
-  var el=document.getElementById('added-'+s); if(!el) return;
+  var el=document.getElementById('added-'+s); if(!el){
+    // Update the always-visible needs section
+    var vis=document.getElementById('needs-added-visible');
+    if(vis){
+      vis.innerHTML=(_needsSkill.length?buildAddedHTML('4s'):'')+(_needsRes.length?buildAddedHTML('4r'):'');
+    }
+    return;
+  }
   el.innerHTML=buildAddedHTML(s);
   expandAddedSection('added-body-'+s,'added-arrow-'+s);
 }
@@ -771,11 +778,11 @@ function buildAddedHTML(s){
       var catMissing=!item.category;
       var pickerId='need-cat-picker-'+s+'-'+i;
       var catLabel=catMissing
-        ?'<div style="font-size:11px;color:#d32f2f;cursor:pointer;" onclick="openNeedCatPicker(\''+s+'\','+i+')">Category missing \u25be</div>'
+        ?'<div class="need-missing-cat" style="font-size:11px;color:#d32f2f;cursor:pointer;" onclick="window.openNeedCatPicker(\''+s+'\','+i+')">Category missing \u25be</div>'
          +'<div class="cat-picker-inline" id="'+pickerId+'">'+PARENT_CATS.map(function(c){return '<button class="cat-pick-btn" onclick="setNeedCat(\''+s+'\','+i+',\''+c+'\')">'+c+'</button>';}).join('')+'</div>'
         :'<div class="need-item-cat">'+esc(item.category)+'</div>';
       return '<div class="need-item">'
-        +'<div class="need-item-left" style="position:relative;"><div class="need-item-name">'+esc(item.item)+'</div>'+catLabel+'</div>'
+        +'<div class="need-item-left" id="need-item-wrap-'+s+'-'+i+'" style="position:relative;"><div class="need-item-name">'+esc(item.item)+'</div>'+catLabel+'</div>'
         +'<div class="need-item-right">'
         +'<label class="local-toggle'+(item.local?' active':'')+'" ><input type="checkbox"'+(item.local?' checked':'')+' onchange="toggleLocal(\''+s+'\','+i+')"> 📍 Local</label>'
         +'<button class="practice-item-x" onclick="removeItem(\''+s+'\','+i+')">\u00d7</button>'
@@ -994,9 +1001,21 @@ window.toggleValSection=function(bodyId,arrowId){
   else{body.style.display='none';if(arrow)arrow.textContent='\u25bc';}
 };
 window.openNeedCatPicker=function(s,idx){
-  document.querySelectorAll('.cat-picker-inline').forEach(function(el){el.classList.remove('open');});
-  var el=document.getElementById('need-cat-picker-'+s+'-'+idx);
-  if(el) el.classList.toggle('open');
+  var arr=getArr(s);
+  if(!arr||!arr[idx]) return;
+  var pickerId='need-cat-picker-'+s+'-'+idx;
+  var existing=document.getElementById(pickerId);
+  if(existing){existing.classList.toggle('open');return;}
+  // Rebuild the need item with inline select showing
+  var item=arr[idx];
+  var containerId='need-item-wrap-'+s+'-'+idx;
+  var wrap=document.getElementById(containerId);
+  if(wrap){
+    var opts='<option value="">Select category</option>'+PARENT_CATS.map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join('');
+    var sel='<div style="margin-top:4px;"><select style="font-size:12px;padding:4px 8px;border-radius:6px;border:1.5px solid var(--brand);width:100%;" onchange="window.setNeedCat(\''+s+'\','+idx+',this.value)"><option value="">Select category</option>'+PARENT_CATS.map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join('')+'</select></div>';
+    var catDiv=wrap.querySelector('.need-missing-cat');
+    if(catDiv) catDiv.innerHTML='<span style="font-size:11px;color:#d32f2f;">Category missing ▾</span>'+sel;
+  }
 };
 window.setNeedCat=function(s,idx,cat){
   var arr=getArr(s);
@@ -1209,7 +1228,7 @@ function renderProfile(el, viewerMode){
       +'<div class="profile-tags">'+tags+'</div>'
       +'</div>';
   }
-  var metaRow=!viewerMode?'<div style="font-size:12px;color:var(--muted);margin-bottom:8px;cursor:pointer;" onclick="window.openPostalModal()">📍 '+esc(_postal||'Add postal code')+' ✏️</div>':'';
+  var metaRow=!viewerMode?'<div style="font-size:13px;color:var(--soft);margin-bottom:10px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;" onclick="window.openPostalModal()">📍 <span>'+esc(_postal||'Add postal code')+'</span> ✏️</div>':'';
   var allNeeds=_needsSkill.concat(_needsRes);
   el.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><h2 style="margin:0;">This is me 🌱</h2></div>'
     +metaRow
@@ -1686,6 +1705,10 @@ function renderScreen4(el){
     +'<div class="needs-top-chip'+('space'===_needsCat?' selected':'')+'" id="needs-top-space" onclick="setNeedsCat(\'space\')">🏡 Space</div>'
     +'</div>'
     +'<div id="needs-cat-content"></div>'
+    +'<div id="needs-added-visible" style="margin-top:14px;">'
+    +(_needsSkill.length?buildAddedHTML('4s'):'')
+    +(_needsRes.length?buildAddedHTML('4r'):'')
+    +'</div>'
     +navHTML(4);
   if(_needsCat) window.setNeedsCat(_needsCat);
   // Hidden divs needed for updateAddedSection to find elements
@@ -1772,4 +1795,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.27a | Last change: Postal click fix, +Other item input, needs refresh, cat picker position | Date: 2026-06-27 -->
+<!-- Version: V2.27b | Last change: Postal display, needs added always visible, cat picker inline select | Date: 2026-06-27 -->
