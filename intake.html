@@ -1,4 +1,4 @@
-<!-- Version: V2.30a | Last change: Fix duplicate added, chip selected style, care breadcrumb, both added on load, domains filter | Date: 2026-06-28 -->
+<!-- Version: V2.30b | Last change: Hide helper text in needs search bar after type chip selected | Date: 2026-06-28 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1677,7 +1677,7 @@ window.setNeedsCat=function(cat){
   var inner='';
   if(cat==='skill'){
     resetDrillTo('4s',0);
-    inner=screenSearchHTML('4s','Search for a skill or service...')
+    inner=screenSearchHTML('4s','Search for a skill or service...',true)
       +'<div id="drill-4s"></div>'
       ;/* added items shown in needs-added-visible below */;
   } else if(cat==='thing'){
@@ -1841,4 +1841,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.30a | Last change: Fix duplicate added, chip selected style, care breadcrumb, both added on load, domains filter | Date: 2026-06-28 -->
+<!-- Version: V2.30b | Last change: Hide helper text in needs search bar after type chip selected | Date: 2026-06-28 -->
