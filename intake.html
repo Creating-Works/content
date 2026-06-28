@@ -1,4 +1,4 @@
-<!-- Version: V2.28 | Last change: X button fix, category missing clears, postal removed, show page buttons, needs breadcrumb, +Other fix | Date: 2026-06-28 -->
+<!-- Version: V2.28b | Last change: Type chips hide on select, breadcrumb style, care domains fix, main page domains, +Other syntax fix, Joy +Other | Date: 2026-06-28 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -578,7 +578,7 @@ window.renderDrill = function(screen, containerId){
         var isAdded=arr2.some(function(r){return r.item===item;});
         html+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="addItemFromChip(\''+s+'\',\''+esc(item)+'\',\''+esc(d.parentCat)+'\')">'+esc(item)+'</div>';
       });
-      html+='<div class="item-chip" style="border-style:dashed;color:var(--brand);font-weight:700;" onclick="showCustomAdd(\''+s+'\',' + JSON.stringify('') + ')" >+ Other</div>';
+      html+='<div class="item-chip" style="border-style:dashed;color:var(--brand);font-weight:700;" onclick="showCustomAdd(\\\''+s+'\\\',\\\'\\\')" >+ Other</div>';
       html+='</div>';
     }
   }
@@ -1258,7 +1258,7 @@ function renderProfile(el, viewerMode){
     +(function(){
     var valSet=getValuesSet();
     var valAdded=_values.filter(function(v){return valSet[v.item];});
-    var domAdded=_values.filter(function(v){return !valSet[v.item];});
+    var domAdded=_values.filter(function(v){return !v.category||v.category==='domain';});
     function valProfileSection(label,arr,showHeader){
       if(!arr.length) return '';
       var tags=arr.map(function(r){
@@ -1457,8 +1457,8 @@ function domainChipHTML(item){
 function renderScreen3(el){
   var cont=document.getElementById('app-content'); if(!cont) return;
   var valSet=getValuesSet();
-  var valAdded=_values.filter(function(v){return v.category!=='domain';});
-  var domAdded=_values.filter(function(v){return v.category==='domain';});
+  var valAdded=_values.filter(function(v){return v.category&&v.category!=='domain';});
+  var domAdded=_values.filter(function(v){return !v.category||v.category==='domain';});
 
   // Build 6-category Values UI (used in both intake and edit Values tab)
   function buildCareCatHTML(){
@@ -1608,22 +1608,16 @@ window.addThingItem=function(){
 
 window.setNeedsCat=function(cat){
   if(_needsCat===cat){_needsCat='';renderScreen4(null);return;}
+  // Reset breadcrumb on new selection
   _needsCat=cat;
-  // Add breadcrumb
-  var breadcrumbArea=document.getElementById('needs-breadcrumb');
-  var labels={'skill':'✨ Skill or service','thing':'📦 Thing','space':'🏡 Space'};
-  if(breadcrumbArea) breadcrumbArea.innerHTML='<div style="font-size:13px;color:var(--brand);margin-bottom:8px;"><span style="cursor:pointer;" onclick="window.setNeedsCat(\''+cat+'\')">&larr; What I\'m seeking</span> <span style="color:var(--muted);">›</span> '+(labels[cat]||cat)+'</div>';
-  // Hide top search and other type chips when skill selected
+  // Hide all type chips, show breadcrumb
+  var typeChips=document.getElementById('needs-type-chips');
+  if(typeChips) typeChips.style.display='none';
   var topSearch=document.querySelector('#app-content .search-wrap');
-  if(cat==='skill'){
-    if(topSearch) topSearch.style.display='none';
-    var tThing=document.getElementById('needs-top-thing');if(tThing)tThing.style.display='none';
-    var tSpace=document.getElementById('needs-top-space');if(tSpace)tSpace.style.display='none';
-  } else {
-    if(topSearch) topSearch.style.display='';
-    var tThing2=document.getElementById('needs-top-thing');if(tThing2)tThing2.style.display='';
-    var tSpace2=document.getElementById('needs-top-space');if(tSpace2)tSpace2.style.display='';
-  }
+  if(topSearch) topSearch.style.display='none';
+  var breadcrumbArea=document.getElementById('needs-breadcrumb');
+  var labels={'skill':'Skill or service','thing':'Thing','space':'Space'};
+  if(breadcrumbArea) breadcrumbArea.innerHTML='<div style="font-size:13px;color:var(--brand);margin-bottom:8px;"><span style="cursor:pointer;text-decoration:underline;" onclick="_needsCat=\'\';renderScreen4(null);">What I\'m seeking</span> <span style="color:var(--muted);margin:0 4px;">›</span>'+(labels[cat]||cat)+'</div>';
   ['skill','thing','space'].forEach(function(c){
     var el=document.getElementById('needs-top-'+c);
     if(el) el.className='needs-top-chip'+(cat===c?' selected':'');
@@ -1797,4 +1791,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.28 | Last change: X button fix, category missing clears, postal removed, show page buttons, needs breadcrumb, +Other fix | Date: 2026-06-28 -->
+<!-- Version: V2.28b | Last change: Type chips hide on select, breadcrumb style, care domains fix, main page domains, +Other syntax fix, Joy +Other | Date: 2026-06-28 -->
