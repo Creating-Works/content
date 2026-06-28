@@ -1,4 +1,4 @@
-<!-- Version: V2.27 | Last change: Postal display, emoji fix, space button timing, +Other chip, type chips on load, skill hides others, thing lines, share modal radius | Date: 2026-06-27 -->
+<!-- Version: V2.27a | Last change: Postal click fix, +Other item input, needs refresh, cat picker position | Date: 2026-06-27 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -578,7 +578,7 @@ window.renderDrill = function(screen, containerId){
         var isAdded=arr2.some(function(r){return r.item===item;});
         html+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="addItemFromChip(\''+s+'\',\''+esc(item)+'\',\''+esc(d.parentCat)+'\')">'+esc(item)+'</div>';
       });
-      html+='<div class="item-chip" style="border-style:dashed;color:var(--brand);font-weight:700;" onclick="showCustomAdd(\''+s+'\',\'\')" >+ Other</div>';
+      html+='<div class="item-chip" style="border-style:dashed;color:var(--brand);font-weight:700;" onclick="showCustomAdd(\''+s+'\',' + JSON.stringify('') + ')" >+ Other</div>';
       html+='</div>';
     }
   }
@@ -668,8 +668,8 @@ function addItem(screen, item, category){
   if(s==='1') _interests.unshift({item:item,category:category||'',level:''});
   else if(s==='2') _skills.unshift({item:item,category:category||'',level:''});
   else if(s==='3') _values.unshift({item:item,category:category||'',level:''});
-  else if(s==='4s'){_needsSkill.unshift({item:item,category:category||(_drill['4s']&&_drill['4s'].parentCat)||'',local:false,ntype:'skill'});var tc=document.getElementById('needs-type-chips');if(tc)tc.style.display='';}
-  else if(s==='4r'){_needsRes.unshift({item:item,category:category||(_drill['4r']&&_drill['4r'].parentCat)||'',local:false,ntype:'resource'});var tc2=document.getElementById('needs-type-chips');if(tc2)tc2.style.display='';}
+  else if(s==='4s'){_needsSkill.unshift({item:item,category:category||(_drill['4s']&&_drill['4s'].parentCat)||'',local:false,ntype:'skill'});var tc=document.getElementById('needs-type-chips');if(tc)tc.style.display='';setTimeout(function(){if(_needsCat)window.setNeedsCat(_needsCat);},50);}
+  else if(s==='4r'){_needsRes.unshift({item:item,category:category||(_drill['4r']&&_drill['4r'].parentCat)||'',local:false,ntype:'resource'});var tc2=document.getElementById('needs-type-chips');if(tc2)tc2.style.display='';setTimeout(function(){if(_needsCat)window.setNeedsCat(_needsCat);},50);}
   toast('Added below \u2193');
   clearSearch(s);
   updateAddedSection(s);
@@ -775,7 +775,7 @@ function buildAddedHTML(s){
          +'<div class="cat-picker-inline" id="'+pickerId+'">'+PARENT_CATS.map(function(c){return '<button class="cat-pick-btn" onclick="setNeedCat(\''+s+'\','+i+',\''+c+'\')">'+c+'</button>';}).join('')+'</div>'
         :'<div class="need-item-cat">'+esc(item.category)+'</div>';
       return '<div class="need-item">'
-        +'<div class="need-item-left"><div class="need-item-name">'+esc(item.item)+'</div>'+catLabel+'</div>'
+        +'<div class="need-item-left" style="position:relative;"><div class="need-item-name">'+esc(item.item)+'</div>'+catLabel+'</div>'
         +'<div class="need-item-right">'
         +'<label class="local-toggle'+(item.local?' active':'')+'" ><input type="checkbox"'+(item.local?' checked':'')+' onchange="toggleLocal(\''+s+'\','+i+')"> 📍 Local</label>'
         +'<button class="practice-item-x" onclick="removeItem(\''+s+'\','+i+')">\u00d7</button>'
@@ -840,18 +840,32 @@ function clearSearch(s){
 // ─── Custom add ───────────────────────────────────────────────────────────────
 window.showCustomAdd = function(screen, item){
   _customItem=toTitleCase(item); _customScreen=String(screen);
-  var container=document.getElementById('search-results-'+_customScreen); if(!container) return;
+  // Try search-results container first, fall back to a modal approach
+  var container=document.getElementById('search-results-'+_customScreen);
+  if(!container){
+    // For needs screen where search may be hidden, use needs-cat-content
+    container=document.getElementById('needs-cat-content');
+  }
+  if(!container) return;
   var opts='<option value="">Select a category</option>'
     +PARENT_CATS.map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join('');
+  // If item is empty, show text input first
+  var itemField=item?'':'<input type="text" id="custom-item-input" placeholder="What would you like to add?" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;margin-bottom:8px;">';
+  var labelText=item?'What category does "'+esc(item)+'" belong to?':'Add your own:';
   container.innerHTML='<div class="custom-add-box">'
-    +'<label>What category does "'+esc(item)+'" belong to?</label>'
-    +'<select id="custom-cat-select">'+opts+'</select>'
+    +itemField
+    +'<label style="font-size:13px;color:var(--soft);display:block;margin-bottom:6px;">'+labelText+'</label>'
+    +'<select id="custom-cat-select" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;margin-bottom:8px;">'+opts+'</select>'
     +'<button class="custom-add-confirm" onclick="confirmCustomAdd()">Add to my list</button>'
     +'<button class="custom-add-cancel" onclick="cancelCustomAdd()">Cancel</button>'
     +'</div>';
 };
 
 window.confirmCustomAdd = function(){
+  // If there was a text input for item name, read it
+  var itemInp=document.getElementById('custom-item-input');
+  if(itemInp&&itemInp.value.trim()) _customItem=toTitleCase(itemInp.value.trim());
+  if(!_customItem){toast('Please enter an item name');return;}
   var sel=document.getElementById('custom-cat-select'); var cat=sel?sel.value:'';
   if(!cat){toast('Please select a category');return;}
   fetch(GS_URL+'?action=addCustomSkill&appearId='+encodeURIComponent(_appearId)
@@ -859,6 +873,7 @@ window.confirmCustomAdd = function(){
   addItem(_customScreen,_customItem,cat);
   var cs=_customScreen; _customItem=''; _customScreen='';
   var c=document.getElementById('search-results-'+cs); if(c) c.innerHTML='';
+  var c2=document.getElementById('needs-cat-content'); if(c2&&!c) c2.innerHTML='';
 };
 
 window.cancelCustomAdd = function(){
@@ -1194,7 +1209,7 @@ function renderProfile(el, viewerMode){
       +'<div class="profile-tags">'+tags+'</div>'
       +'</div>';
   }
-  var metaRow=!viewerMode?'<div style="font-size:12px;color:var(--muted);margin-bottom:8px;cursor:pointer;" onclick="openPostalModal()">📍 '+esc(_postal||'Add postal code')+' ✏️</div>':'';
+  var metaRow=!viewerMode?'<div style="font-size:12px;color:var(--muted);margin-bottom:8px;cursor:pointer;" onclick="window.openPostalModal()">📍 '+esc(_postal||'Add postal code')+' ✏️</div>':'';
   var allNeeds=_needsSkill.concat(_needsRes);
   el.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><h2 style="margin:0;">This is me 🌱</h2></div>'
     +metaRow
@@ -1757,4 +1772,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.27 | Last change: Postal display, emoji fix, space button timing, +Other chip, type chips on load, skill hides others, thing lines, share modal radius | Date: 2026-06-27 -->
+<!-- Version: V2.27a | Last change: Postal click fix, +Other item input, needs refresh, cat picker position | Date: 2026-06-27 -->
