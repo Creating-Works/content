@@ -1,4 +1,4 @@
-<!-- Version: V2.29a | Last change: Fix main page valAdded filter to use category field instead of valSet | Date: 2026-06-28 -->
+<!-- Version: V2.30 | Last change: Fix viewerMode scoping, remove duplicate search bar, needs confirm button, +Other care placement | Date: 2026-06-28 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -576,10 +576,15 @@ window.renderDrill = function(screen, containerId){
       html+='<div class="item-chips">';
       chips2.forEach(function(item){
         var isAdded=arr2.some(function(r){return r.item===item;});
-        html+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="addItemFromChip(\''+s+'\',\''+esc(item)+'\',\''+esc(d.parentCat)+'\')">'+esc(item)+'</div>';
+        var isPending=s==='4s'&&_pendingNeedsItem.item===item;
+        var chipOnclick=s==='4s'?'selectNeedsItem(\''+esc(item)+'\',\''+esc(d.parentCat)+'\')':'addItemFromChip(\''+s+'\',\''+esc(item)+'\',\''+esc(d.parentCat)+'\')';
+        html+='<div class="item-chip'+(isAdded?' added':isPending?' selected':'')+'\" onclick="'+chipOnclick+'">'+esc(item)+'</div>';
       });
       html+='<div class="item-chip" style="border-style:dashed;color:var(--brand);font-weight:700;" onclick="showCustomAdd(\\\''+s+'\\\',\\\'\\\')" >+ Other</div>';
       html+='</div>';
+      if(s==='4s'&&_pendingNeedsItem.item){
+        html+='<div id="needs-confirm-bar" style="margin-top:12px;padding:12px;background:var(--input-bg);border-radius:10px;display:flex;align-items:center;justify-content:space-between;">'          +'<span style="font-size:14px;color:var(--soft);">'+esc(_pendingNeedsItem.item)+'</span>'          +'<div style="display:flex;gap:8px;">'          +'<button class="btn-outlined" style="padding:6px 14px;font-size:13px;" onclick="_pendingNeedsItem={item:\'\',category:\'\'};renderDrill(\'4s\',\'drill-4s\')">Cancel</button>'          +'<button class="btn-primary" style="padding:6px 14px;font-size:13px;" onclick="confirmNeedsItem()">Add '+esc(_pendingNeedsItem.item)+'</button>'          +'</div></div>';
+      }
     }
   }
 
@@ -623,6 +628,15 @@ function refreshNeedsSummary(){
     }
   }
 }
+window.selectNeedsItem = function(item, category){
+  _pendingNeedsItem={item:item,category:category};
+  window.renderDrill('4s','drill-4s');
+};
+window.confirmNeedsItem = function(){
+  if(!_pendingNeedsItem.item) return;
+  window.addItemFromChip('4s',_pendingNeedsItem.item,_pendingNeedsItem.category);
+  _pendingNeedsItem={item:'',category:''};
+};
 window.addItemFromChip = function(screen, item, category){
   var s=String(screen);
   var arr=getArr(s);
@@ -863,13 +877,17 @@ window.showCustomAdd = function(screen, item){
     +PARENT_CATS.map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join('');
   // If item is empty, show text input first
   if(isCareParent){
-    // Care category +Other: just ask for item name, category already known
-    container.innerHTML='<div class="custom-add-box">'
-      +'<label style="font-size:13px;color:var(--soft);display:block;margin-bottom:6px;">What would you like to add under '+esc(item)+'?</label>'
-      +'<input type="text" id="custom-item-input" placeholder="Type your item..." style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;margin-bottom:8px;">'
-      +'<button class="custom-add-confirm" onclick="confirmCustomAdd()">Add to my list</button>'
-      +'<button class="custom-add-cancel" onclick="cancelCustomAdd()">Cancel</button>'
-      +'</div>';
+    // Care category +Other: render below chips using placeholder div
+    var ci=CARE_CATS?CARE_CATS.findIndex(function(c){return c.label===item;}):-1;
+    var careContainer=ci>-1?document.getElementById('custom-add-care-'+ci):null;
+    if(careContainer){
+      careContainer.innerHTML='<div class="custom-add-box" style="margin-top:8px;">'
+        +'<label style="font-size:13px;color:var(--soft);display:block;margin-bottom:6px;">What would you like to add under '+esc(item)+'?</label>'
+        +'<input type="text" id="custom-item-input" placeholder="Type your item..." style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;margin-bottom:8px;">'
+        +'<button class="custom-add-confirm" onclick="confirmCustomAdd()">Add to my list</button>'
+        +'<button class="custom-add-cancel" onclick="cancelCustomAdd()">Cancel</button>'
+        +'</div>';
+    }
     return;
   }
   var itemField=item?'':'<input type="text" id="custom-item-input" placeholder="What would you like to add?" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;margin-bottom:8px;">';
@@ -1275,7 +1293,7 @@ function renderProfile(el, viewerMode){
       :'<div class="profile-empty">Nothing added yet.</div>')
     +'</div></div>'
     +'<div class="profile-lang-row" id="profile-lang-row">'+buildLangRowHTML()+'</div>'
-    +(function(){
+    +(function(viewerMode){
     var valAdded=_values.filter(function(v){return v.category&&v.category!=='domain';});
     var domAdded=_values.filter(function(v){return !v.category||v.category==='domain';});
     function valProfileSection(label,arr,showHeader){
@@ -1302,7 +1320,7 @@ function renderProfile(el, viewerMode){
     var domSection=domAdded.length?'<div><div style="font-size:10px;font-weight:700;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">DOMAINS</div><div class="profile-tags">'+domAdded.map(function(v){var lvl=v.level?'<span class="tag-level">'+esc(v.level)+'</span>':'';return '<div class="profile-tag">'+esc(v.item)+lvl+'</div>';}).join('')+'</div></div>':'';
     var careContent=valSection+domSection;
     return careContent?'<div class="profile-section"><div class="profile-section-header"><div class="profile-section-label">What I care about</div>'+careActions+'</div>'+careContent+'</div>':'';
-  })()
+  })(viewerMode)
 }
 
 window.jumpTo = function(screen){
@@ -1496,6 +1514,7 @@ function renderScreen3(el){
         });
         html+='<div class="item-chip" style="border-style:dashed;color:var(--brand);font-weight:700;" onclick="showCustomAdd(\'3\',\''+c.label+'\')" >+ Other</div>';
         html+='</div>';
+        html+='<div id="custom-add-care-'+ci+'"></div>';
       }
     });
     html+='</div>';
@@ -1575,6 +1594,7 @@ function renderScreen3(el){
 
 
 var _needsCat='';
+var _pendingNeedsItem={item:'',category:''};
 
 var THING_SUBS={
   'Physical goods':{emoji:'📦',prompt:'Share details below. Examples: a book, gear or equipment, art supplies, a tool I need'},
@@ -1715,7 +1735,6 @@ function renderScreen4(el){
     cont.innerHTML=(_editMode?'':progressHTML(4))
     +'<h2>What I\'m seeking</h2>'
     +'<div id="needs-breadcrumb"></div>'
-    +screenSearchHTML('4s','Search for anything you need...',true)
     +'<div class="needs-top-chips" style="margin-top:14px;" id="needs-type-chips">'
     +'<div class="needs-top-chip'+('skill'===_needsCat?' selected':'')+'" id="needs-top-skill" onclick="setNeedsCat(\'skill\')">✨ Skill or service</div>'
     +'<div class="needs-top-chip'+('thing'===_needsCat?' selected':'')+'" id="needs-top-thing" onclick="setNeedsCat(\'thing\')">📦 Thing</div>'
@@ -1812,4 +1831,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.29a | Last change: Fix main page valAdded filter to use category field instead of valSet | Date: 2026-06-28 -->
+<!-- Version: V2.30 | Last change: Fix viewerMode scoping, remove duplicate search bar, needs confirm button, +Other care placement | Date: 2026-06-28 -->
