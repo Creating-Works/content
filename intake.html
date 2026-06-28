@@ -1,4 +1,4 @@
-<!-- Version: V2.28b | Last change: Type chips hide on select, breadcrumb style, care domains fix, main page domains, +Other syntax fix, Joy +Other | Date: 2026-06-28 -->
+<!-- Version: V2.28c | Last change: Needs double search fix, care tab added sections, main page values+domains, +Other care category | Date: 2026-06-28 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -846,7 +846,14 @@ function clearSearch(s){
 
 // ─── Custom add ───────────────────────────────────────────────────────────────
 window.showCustomAdd = function(screen, item){
-  _customItem=toTitleCase(item); _customScreen=String(screen);
+  _customScreen=String(screen);
+  // Detect if item is a care category label (parent cat, not an item name)
+  var isCareParent=CARE_CATS&&CARE_CATS.some(function(c){return c.label===item;});
+  if(isCareParent){
+    _customItem=''; _customCareParent=item;
+  } else {
+    _customItem=toTitleCase(item); _customCareParent='';
+  }
   // Try search-results container first, fall back to a modal approach
   var container=document.getElementById('search-results-'+_customScreen);
   if(!container) container=document.getElementById('needs-cat-content');
@@ -855,6 +862,16 @@ window.showCustomAdd = function(screen, item){
   var opts='<option value="">Select a category</option>'
     +PARENT_CATS.map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join('');
   // If item is empty, show text input first
+  if(isCareParent){
+    // Care category +Other: just ask for item name, category already known
+    container.innerHTML='<div class="custom-add-box">'
+      +'<label style="font-size:13px;color:var(--soft);display:block;margin-bottom:6px;">What would you like to add under '+esc(item)+'?</label>'
+      +'<input type="text" id="custom-item-input" placeholder="Type your item..." style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;margin-bottom:8px;">'
+      +'<button class="custom-add-confirm" onclick="confirmCustomAdd()">Add to my list</button>'
+      +'<button class="custom-add-cancel" onclick="cancelCustomAdd()">Cancel</button>'
+      +'</div>';
+    return;
+  }
   var itemField=item?'':'<input type="text" id="custom-item-input" placeholder="What would you like to add?" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;margin-bottom:8px;">';
   var labelText=item?'What category does "'+esc(item)+'" belong to?':'Add your own:';
   container.innerHTML='<div class="custom-add-box">'
@@ -871,8 +888,11 @@ window.confirmCustomAdd = function(){
   var itemInp=document.getElementById('custom-item-input');
   if(itemInp&&itemInp.value.trim()) _customItem=toTitleCase(itemInp.value.trim());
   if(!_customItem){toast('Please enter an item name');return;}
-  var sel=document.getElementById('custom-cat-select'); var cat=sel?sel.value:'';
-  if(!cat){toast('Please select a category');return;}
+  var cat=_customCareParent||'';
+  if(!cat){
+    var sel=document.getElementById('custom-cat-select'); cat=sel?sel.value:'';
+    if(!cat){toast('Please select a category');return;}
+  }
   fetch(GS_URL+'?action=addCustomSkill&appearId='+encodeURIComponent(_appearId)
     +'&item='+encodeURIComponent(_customItem)+'&category='+encodeURIComponent(cat));
   addItem(_customScreen,_customItem,cat);
@@ -1279,8 +1299,10 @@ function renderProfile(el, viewerMode){
       return tags.length?'<div style="margin-bottom:6px;"><div class="added-label" style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">'+label+'</div><div class="profile-tags">'+tags+'</div></div>':'';
     }
     var careActions=!viewerMode?'<div class="profile-section-actions"><button class="edit-btn" onclick="window.jumpTo(3)">✏️ Edit</button></div>':'';
-    var careContent=valProfileSection('Values',valAdded,false)+valProfileSection('Domains',domAdded,false);
-    return careContent.length?'<div class="profile-section"><div class="profile-section-header"><div class="profile-section-label">What I care about</div>'+careActions+'</div>'+careContent+'</div>':'';
+    var valSection=valAdded.length?'<div style="margin-bottom:8px;"><div style="font-size:10px;font-weight:700;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">VALUES</div><div class="profile-tags">'+valAdded.map(function(v){var lvl=v.level?'<span class="tag-level">'+esc(v.level)+'</span>':'';return '<div class="profile-tag">'+esc(v.item)+lvl+'</div>';}).join('')+'</div></div>':'';
+    var domSection=domAdded.length?'<div><div style="font-size:10px;font-weight:700;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">DOMAINS</div><div class="profile-tags">'+domAdded.map(function(v){var lvl=v.level?'<span class="tag-level">'+esc(v.level)+'</span>':'';return '<div class="profile-tag">'+esc(v.item)+lvl+'</div>';}).join('')+'</div></div>':'';
+    var careContent=valSection+domSection;
+    return careContent?'<div class="profile-section"><div class="profile-section-header"><div class="profile-section-label">What I care about</div>'+careActions+'</div>'+careContent+'</div>':'';
   })()
 }
 
@@ -1546,8 +1568,8 @@ function renderScreen3(el){
     +screenSearchHTML('3','Search to add...')
     +tabs
     +chipsHTML
-    +'<div id="added-3-values">'+buildValAddedHTML(valAdded,'Added values')+'</div>'
-    +'<div id="added-3-domains">'+buildValAddedHTML(domAdded,'Added domains')+'</div>'
+    +'<div id="added-3-values"'+((!_valTab||_valTab==="values")?'':' style="display:none;"')+'>'+buildValAddedHTML(valAdded,'Added values')+'</div>'
+    +'<div id="added-3-domains"'+((!_valTab||_valTab==="domains")?'':' style="display:none;"')+'>'+buildValAddedHTML(domAdded,'Added domains')+'</div>'
     +'<div id="added-3" style="display:none;"></div>'
     +navHTML(3);
 }
@@ -1693,13 +1715,13 @@ function renderScreen4(el){
   var cont=document.getElementById('app-content'); if(!cont) return;
     cont.innerHTML=(_editMode?'':progressHTML(4))
     +'<h2>What I\'m seeking</h2>'
-    +screenSearchHTML('4s','Search for anything you need...')
+    +'<div id="needs-breadcrumb"></div>'
+    +screenSearchHTML('4s','Search for anything you need...',true)
     +'<div class="needs-top-chips" style="margin-top:14px;" id="needs-type-chips">'
     +'<div class="needs-top-chip'+('skill'===_needsCat?' selected':'')+'" id="needs-top-skill" onclick="setNeedsCat(\'skill\')">✨ Skill or service</div>'
     +'<div class="needs-top-chip'+('thing'===_needsCat?' selected':'')+'" id="needs-top-thing" onclick="setNeedsCat(\'thing\')">📦 Thing</div>'
     +'<div class="needs-top-chip'+('space'===_needsCat?' selected':'')+'" id="needs-top-space" onclick="setNeedsCat(\'space\')">🏡 Space</div>'
     +'</div>'
-    +'<div id="needs-breadcrumb"></div>'
     +'<div id="needs-cat-content"></div>'
     +'<div id="needs-added-visible" style="margin-top:14px;">'
     +(_needsSkill.length?buildAddedHTML('4s'):'')
@@ -1791,4 +1813,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.28b | Last change: Type chips hide on select, breadcrumb style, care domains fix, main page domains, +Other syntax fix, Joy +Other | Date: 2026-06-28 -->
+<!-- Version: V2.28c | Last change: Needs double search fix, care tab added sections, main page values+domains, +Other care category | Date: 2026-06-28 -->
