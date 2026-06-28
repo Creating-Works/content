@@ -1,4 +1,4 @@
-<!-- Version: V2.29 | Last change: Fix parseTagStr and vStr to read/write item:category:level for values | Date: 2026-06-28 -->
+<!-- Version: V2.29a | Last change: Fix main page valAdded filter to use category field instead of valSet | Date: 2026-06-28 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -724,8 +724,8 @@ function updateAddedSection(s){
   if(s==='3'){
     // Update in place instead of full re-render to avoid wiping added sections
     var valSet=getValuesSet();
-    var valAdded=_values.filter(function(v){return v.category!=='domain';});
-    var domAdded=_values.filter(function(v){return v.category==='domain';});
+    var valAdded=_values.filter(function(v){return v.category&&v.category!=='domain';});
+    var domAdded=_values.filter(function(v){return !v.category||v.category==='domain';});
     var elV=document.getElementById('added-3-values');
     var elD=document.getElementById('added-3-domains');
     if(elV) elV.innerHTML=buildValAddedHTML(valAdded,'Added values');
@@ -1276,8 +1276,7 @@ function renderProfile(el, viewerMode){
     +'</div></div>'
     +'<div class="profile-lang-row" id="profile-lang-row">'+buildLangRowHTML()+'</div>'
     +(function(){
-    var valSet=getValuesSet();
-    var valAdded=_values.filter(function(v){return valSet[v.item];});
+    var valAdded=_values.filter(function(v){return v.category&&v.category!=='domain';});
     var domAdded=_values.filter(function(v){return !v.category||v.category==='domain';});
     function valProfileSection(label,arr,showHeader){
       if(!arr.length) return '';
@@ -1813,4 +1812,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.29 | Last change: Fix parseTagStr and vStr to read/write item:category:level for values | Date: 2026-06-28 -->
+<!-- Version: V2.29a | Last change: Fix main page valAdded filter to use category field instead of valSet | Date: 2026-06-28 -->
