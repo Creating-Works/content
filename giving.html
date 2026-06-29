@@ -1,4 +1,4 @@
-<!-- Version: V2.35 | LAST CHANGE: Gifted status from sheet, viewer hides gifted items, remove View my Appear profile button | Date: 2026-06-29 -->
+<!-- Version: V2.36 | LAST CHANGE: Viewer page shows owner photo and name, simplified viewer layout | Date: 2026-06-29 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -388,6 +388,8 @@ function getMemberId() {
 let _appearId = getMemberId();
 let _pendingId = null;
 let _ownerAppearId = null; // owner of the list being viewed
+let _ownerPhoto    = '';
+let _ownerName     = '';
 
 (function() {
   const params = new URLSearchParams(window.location.search);
@@ -691,11 +693,18 @@ async function loadSupportList() {
 async function loadViewerList() {
   if (!_ownerAppearId) return;
   try {
+    // Fetch owner profile for photo and name
+    var profileRes = await fetch(GS_URL + '?action=lookupProfile&appearId=' + encodeURIComponent(_ownerAppearId));
+    var profileData = await profileRes.json();
+    if (profileData.found) {
+      _ownerPhoto = profileData.photo || '';
+      _ownerName  = profileData.name  || _ownerAppearId;
+    }
     const res  = await fetch(GS_URL + '?action=getSupportList&appearId=' + encodeURIComponent(_ownerAppearId));
     const data = await res.json();
     if (data.status === 'ok' && data.items) {
       viewerData = {
-        name: _ownerAppearId,
+        name: _ownerName || _ownerAppearId,
         items: data.items.filter(function(r) { return r.gifted !== true; }).map(function(r) {
           return {
             id: r.item + '_' + (r.timestamp||''),
@@ -1371,15 +1380,14 @@ function reviewHTML() {
 function viewerHTML() {
   const vItems = viewerData.items || [];
   const name   = viewerData.name  || 'Someone';
-  const active = vItems.filter(i=>!viewFulfilled.has(String(i.id)));
-  const done   = vItems.filter(i=> viewFulfilled.has(String(i.id)));
-  const pct    = vItems.length ? Math.round((done.length/vItems.length)*100) : 0;
+  const photoHTML = _ownerPhoto
+    ? '<img src="' + esc(_ownerPhoto) + '" alt="" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:1.5px solid var(--border);">'
+    : '<div style="width:48px;height:48px;border-radius:50%;background:var(--input-bg);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;">🌱</div>';
   return `
+    <div style="display:flex;justify-content:flex-end;margin-bottom:-32px;">${photoHTML}</div>
     <h1 style="text-align:center;margin-bottom:6px">Ways to give to me</h1>
     <p class="subtitle" style="text-align:center">If you're curious how to give to me, here are some possibilities.</p>
-    ${vItems.length ? `<div class="progress-wrap"><div class="progress-labels"><span>${done.length} gifted</span><span>${active.length} still open</span></div><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div></div>` : ''}
-    ${active.length ? `<div class="eyebrow" style="margin-bottom:12px">Still open</div>${active.map(it=>wishItemHTML(it,'viewer')).join('')}` : `<div class="empty">${esc(name)} is well supported right now - everything has been offered.</div>`}
-    ${done.length ? `<div class="eyebrow" style="margin:24px 0 12px">Already gifted</div>${done.map(it=>wishItemHTML(it,'viewer')).join('')}` : ''}
+    ${vItems.length ? `<div class="eyebrow" style="margin-bottom:12px">Still open</div>${vItems.map(it=>wishItemHTML(it,'viewer')).join('')}` : `<div class="empty">${esc(name)} is well supported right now, everything has been offered.</div>`}
     <hr>
     <a href="https://creating.works/giving.html" class="btn-outline">Create my gift list</a>`;
 }
@@ -1439,4 +1447,4 @@ window.moveBackToList      = moveBackToList;
 </script>
 </body>
 </html>
-<!-- V2.35 -->
+<!-- V2.36 -->
