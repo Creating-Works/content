@@ -1,4 +1,4 @@
-<!-- Version: V2.32 | LAST CHANGE: Fix Received tab — markMovedBack called on move back to list so items no longer reappear in Received | Date: 2026-06-24 -->
+<!-- Version: V2.33 | LAST CHANGE: Fix viewer mode - owner link without ?id= now always shows viewer mode instead of falling back to localStorage | Date: 2026-06-29 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -640,8 +640,9 @@ try { shareURL = localStorage.getItem('giving_shareURL') || ''; } catch(e) {}
   const params    = new URLSearchParams(window.location.search);
   const ownerParam = params.get('owner');
 
-  // Viewer mode: ?owner= present and different from signed-in user
-  if (ownerParam && ownerParam !== _appearId) {
+  // Viewer mode: ?owner= present and no explicit ?id= matching owner
+  const explicitId = params.get('id') || params.get('memberCard');
+  if (ownerParam && (!explicitId || ownerParam !== explicitId)) {
     _ownerAppearId = ownerParam;
     mode = 'viewer';
   }
@@ -1416,4 +1417,4 @@ window.moveBackToList      = moveBackToList;
 </script>
 </body>
 </html>
-<!-- V2.32 -->
+<!-- V2.33 -->
