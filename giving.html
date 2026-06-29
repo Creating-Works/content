@@ -1,4 +1,4 @@
-<!-- Version: V2.33 | LAST CHANGE: Fix viewer mode - owner link without ?id= now always shows viewer mode instead of falling back to localStorage | Date: 2026-06-29 -->
+<!-- Version: V2.34 | LAST CHANGE: Fix gift button using registry pattern, fix label display parsing subCat into type and context | Date: 2026-06-29 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -539,6 +539,13 @@ function giftItem(itemTitle) {
     return;
   }
   document.getElementById('anon-modal').classList.add('open');
+}
+
+function giftItemByIdx(idx) {
+  var id = window._items[idx];
+  if (id === undefined) return;
+  var it = (viewerData && viewerData.items || []).find(function(i) { return i.id === id; });
+  if (it) giftItem(it.title);
 }
 
 function closeAnonModal() {
@@ -1134,12 +1141,27 @@ function normCatLabel(raw) {
   return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
 }
 
+function parseSubCat(subCat) {
+  // Splits "for-myself_labor" into { type: "labor", context: "For myself" }
+  // Splits "physical" into { type: "physical", context: "" }
+  var sc = subCat || '';
+  var uIdx = sc.lastIndexOf('_');
+  if (uIdx > 0) {
+    var context = sc.substring(0, uIdx).replace(/-/g, ' ').replace(/_/g, ' ').trim();
+    context = context.charAt(0).toUpperCase() + context.slice(1).toLowerCase();
+    var type = sc.substring(uIdx + 1).replace(/-/g, ' ').replace(/_/g, ' ').trim();
+    type = type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
+    return { type: type, context: context };
+  }
+  return { type: normCatLabel(sc), context: '' };
+}
+
 function wishItemHTML(it, ctx) {
   const isDone = ctx === 'builder' ? it.done : viewFulfilled.has(String(it.id));
   const idx = regItem(it.id);
-  const rawLabel = (it.subLabel && !it.subLabel.includes('_') && !it.subLabel.includes('-'))
-    ? it.subLabel : it.subCat || '';
-  const catDisplay = normCatLabel(rawLabel);
+  const parsed = parseSubCat(it.subCat || '');
+  const catDisplay = parsed.type;
+  const noteDisplay = (it.note && it.note !== it.title) ? it.note : parsed.context;
   const isEditing = ctx === 'builder' && _editingItemId === it.id;
 
   const editForm = isEditing ? `
@@ -1159,7 +1181,7 @@ function wishItemHTML(it, ctx) {
     ${isDone
       ? `<button class="btn-sm" onclick="toggleDoneByIdx(${idx})">Undo</button>`
       : ctx==='viewer'
-        ? `<button class="btn-sm receive" onclick="giftItem(${JSON.stringify(it.title)})">I'll give this 🎁</button>`
+        ? `<button class="btn-sm receive" onclick="giftItemByIdx(${idx})">I'll give this 🎁</button>`
         : `<button class="btn-sm receive" onclick="toggleDoneByIdx(${idx})">Mark as gifted</button>`}
     ${ctx==='builder' ? `<button class="btn-sm" onclick="editItemByIdx(${idx})" style="font-size:16px;padding:4px 10px;">✏️</button>` : ''}
     ${ctx==='builder' ? `<button class="btn-sm remove" onclick="removeItemByIdx(${idx})" style="font-size:16px;padding:4px 10px;">🗑️</button>` : ''}`;
@@ -1170,7 +1192,7 @@ function wishItemHTML(it, ctx) {
       <div class="wish-body" style="min-width:0;flex:1;">
         <div class="wish-cat">${esc(catDisplay)}</div>
         <div class="wish-title" style="${isDone?'color:var(--muted);':''}">${esc(it.title)}</div>
-        ${it.note && !isEditing ? `<div class="wish-note">${esc(it.note)}</div>` : ''}
+        ${noteDisplay && !isEditing ? `<div class="wish-note">${esc(noteDisplay)}</div>` : ''}
         ${isDone ? `<div class="wish-badge">Gifted</div>` : ''}
         ${editForm}
       </div>
@@ -1386,6 +1408,7 @@ window.closeDrawer         = closeDrawer;
 window.copyURL             = copyURL;
 window.generateLink        = generateLink;
 window.giftItem            = giftItem;
+window.giftItemByIdx       = giftItemByIdx;
 window.confirmGift         = confirmGift;
 window.giveWithName        = giveWithName;
 window.closeGiftSigninModal = closeGiftSigninModal;
@@ -1417,4 +1440,4 @@ window.moveBackToList      = moveBackToList;
 </script>
 </body>
 </html>
-<!-- V2.33 -->
+<!-- V2.34 -->
