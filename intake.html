@@ -1,4 +1,4 @@
-<!-- Version: V2.31 | Last change: Add expression screen 1b, state var, autoSave, edit mode in screen 1 | Date: 2026-06-28 -->
+<!-- Version: V2.31b | Last change: Fix goNext 1b routing, single-line input, autoSave on input | Date: 2026-06-28 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1243,7 +1243,7 @@ function screenSearchHTML(s, placeholder, hideHelper){
 // Profile
 function renderProfile(el, viewerMode){
   var SCREEN_LEVELS={'1':['Fan','Participant','Coach'],'2':['Entry Level','Mid Level','Expert Level'],'3':['Exploring','Engaged','Leading']};
-  function section(label, arr, hasLevel, levelKey, screenNum, noBorder){
+  function section(label, arr, hasLevel, levelKey, screenNum, noBorder, extra){
     var screenKey=String(screenNum);
     var lvOpts=SCREEN_LEVELS[screenKey]||[];
     var tags=arr.length
@@ -1268,6 +1268,7 @@ function renderProfile(el, viewerMode){
     return '<div class="profile-section"'+(noBorder?' style="border-bottom:none;padding-bottom:4px;"':'')+'>'+''
       +'<div class="profile-section-header"><div class="profile-section-label">'+label+'</div>'+actions+'</div>'
       +'<div class="profile-tags">'+tags+'</div>'
+      +(extra||'')
       +'</div>';
   }
   var metaRow='';
@@ -1275,7 +1276,7 @@ function renderProfile(el, viewerMode){
   el.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><h2 style="margin:0;">This is me 🌱</h2></div>'
     +metaRow
     +section("What I'm seeking",allNeeds,false,'',4)
-    +section('What I enjoy',_interests,true,'level',1)
+    +section('What I enjoy',_interests,true,'level',1,false,_expression?'<div style="margin-top:8px;font-size:13px;color:var(--soft);"><span style="font-weight:600;color:var(--brand);">This is so me:</span> '+esc(_expression)+'</div>':'')
     +'<div class="profile-section" style="border-bottom:none;padding-bottom:4px;">'
     +'<div class="profile-section-header"><div class="profile-section-label">My skills</div>'
     +(!viewerMode?'<div class="profile-section-actions"><button class="edit-btn" onclick="jumpTo(2)">✏️ Edit</button></div>':'')
@@ -1369,7 +1370,7 @@ function renderScreen1(el){
       exprDiv.style.cssText='margin-top:20px;padding-top:16px;border-top:1px solid var(--border);';
       exprDiv.innerHTML='<h3 style="font-size:15px;font-weight:700;color:var(--soft);margin:0 0 6px;">What thing in your life expresses you the most?</h3>'
         +chipsHTML
-        +'<textarea id="expression-input" rows="3" placeholder="Type your answer..." style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;resize:none;">'+esc(_expression)+'</textarea>';
+        +'<input type="text" id="expression-input" placeholder="Type your answer..." value="'+esc(_expression)+'" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;">';
       var nav=cont.querySelector('.nav-row');
       if(nav) cont.insertBefore(exprDiv,nav);
       else cont.appendChild(exprDiv);
@@ -1390,10 +1391,10 @@ function renderScreen1b(el){
     +'<h2>What thing in your life expresses you the most?</h2>'
     +'<p style="font-size:13px;color:var(--soft);margin:0 0 14px;">Here are some ideas to get you started.</p>'
     +chipsHTML
-    +'<textarea id="expression-input" rows="3" placeholder="Type your answer..." style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;resize:none;">'+esc(_expression)+'</textarea>'
+    +'<input type="text" id="expression-input" placeholder="Type your answer..." value="'+esc(_expression)+'" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;">'
     +navHTML('1b');
   var ta=document.getElementById('expression-input');
-  if(ta) ta.addEventListener('input',function(){_expression=ta.value;});
+  if(ta) ta.addEventListener('input',function(){_expression=ta.value; autoSave();});
 }
 window.fillExpression=function(val){
   _expression=val;
@@ -1816,10 +1817,7 @@ function renderScreen4(el){
 }
 // ─── Navigation ───────────────────────────────────────────────────────────────
 window.goNext = function(){
-  if(_screen===2&&!_editMode&&_screen2step==='lang'){
-    _screen='1b'; render(); return;
-  }
-  if(_screen==='1b'){ _screen=1; render(); return; }
+  if(_screen==='1b'){ autoSave(); _screen=2; _screen2step='lang'; render(); return; }
   if(_screen===2&&!_editMode&&_screen2step==='naturally'){
     _screen2step='skills'; render(); return;
   }
@@ -1853,9 +1851,7 @@ window.goNext = function(){
   if(_screen===3&&!_editMode&&_valTab!=='domains'){
     _valTab='domains'; renderScreen3(null); return;
   }
-  if(_screen===1) _screen2step='lang';
-  if(_screen===1){ _screen='1b'; render(); return; }
-  if(_screen==='1b'){ _screen=2; _screen2step='lang'; render(); return; }
+  if(_screen===1){ _screen2step='lang'; _screen='1b'; render(); return; }
   _screen++; render();
 };
 
@@ -1899,4 +1895,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.31 | Last change: Add expression screen 1b, state var, autoSave, edit mode in screen 1 | Date: 2026-06-28 -->
+<!-- Version: V2.31b | Last change: Fix goNext 1b routing, single-line input, autoSave on input | Date: 2026-06-28 -->
