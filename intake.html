@@ -1,4 +1,4 @@
-<!-- Version: V2.30b | Last change: Hide helper text in needs search bar after type chip selected | Date: 2026-06-28 -->
+<!-- Version: V2.31 | Last change: Add expression screen 1b, state var, autoSave, edit mode in screen 1 | Date: 2026-06-28 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -336,6 +336,7 @@ var _values      = [];
 var _needsSkill  = [];
 var _needsRes    = [];
 var _methods     = [];
+var _expression  = '';
 
 // Drill state — all keys are strings
 var _drill = {
@@ -453,6 +454,7 @@ async function loadIntake(){
       var d=data.data;
       _postal=d.postal||'';
       _methods=(d.methods||'').split('|').filter(Boolean);
+      _expression=d.expression||'';
       _languages=d.languages?d.languages.split('|').filter(Boolean):[];
       _interests=parseTagStr(d.interests,'level');
       _skills=parseTagStr(d.skills,'level');
@@ -500,6 +502,7 @@ function autoSave(){
     +'&values='+encodeURIComponent(vStr)
     +'&needs='+encodeURIComponent(nStr)
     +'&methods='+encodeURIComponent(mStr)
+    +'&expression='+encodeURIComponent(_expression)
   ).catch(function(){});
   _hasProfile=true;
 }
@@ -1186,6 +1189,7 @@ function render(){
     return;
   }
   if(_screen===0){ renderProfile(el,false); return; }
+  if(_screen==='1b'){ renderScreen1b(el); return; }
   var fn={1:renderScreen1,2:renderScreen2,3:renderScreen3,4:renderScreen4}[_screen];
   if(fn) fn(el);
 }
@@ -1349,7 +1353,54 @@ function renderScreen(s, heading, searchPlaceholder, drillId, addedId){
   window.renderDrill(String(s),drillId);
 }
 
-function renderScreen1(el){ renderScreen(1,'What do you enjoy doing?','Search to add...','drill-1','added-1'); }
+function renderScreen1(el){
+  renderScreen(1,'What do you enjoy doing?','Search to add...','drill-1','added-1');
+  if(_editMode){
+    // Append expression field after the added section
+    var cont=document.getElementById('app-content');
+    if(cont){
+      var chips=['My kitchen','My car','My bike','My garden','My wardrobe','My friends'];
+      var chipsHTML='<div class="item-chips" style="margin:4px 0 10px;">';
+      chips.forEach(function(c){
+        chipsHTML+='<div class="item-chip" onclick="window.fillExpression(\''+c+'\')" style="font-size:13px;">'+c+'</div>';
+      });
+      chipsHTML+='</div>';
+      var exprDiv=document.createElement('div');
+      exprDiv.style.cssText='margin-top:20px;padding-top:16px;border-top:1px solid var(--border);';
+      exprDiv.innerHTML='<h3 style="font-size:15px;font-weight:700;color:var(--soft);margin:0 0 6px;">What thing in your life expresses you the most?</h3>'
+        +chipsHTML
+        +'<textarea id="expression-input" rows="3" placeholder="Type your answer..." style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;resize:none;">'+esc(_expression)+'</textarea>';
+      var nav=cont.querySelector('.nav-row');
+      if(nav) cont.insertBefore(exprDiv,nav);
+      else cont.appendChild(exprDiv);
+      var ta=document.getElementById('expression-input');
+      if(ta) ta.addEventListener('input',function(){_expression=ta.value;});
+    }
+  }
+}
+function renderScreen1b(el){
+  var cont=document.getElementById('app-content'); if(!cont) return;
+  var chips=['My kitchen','My car','My bike','My garden','My wardrobe','My friends'];
+  var chipsHTML='<div class="item-chips" style="margin-bottom:16px;">';
+  chips.forEach(function(c){
+    chipsHTML+='<div class="item-chip" onclick="window.fillExpression(\''+c+'\')" style="font-size:13px;">'+c+'</div>';
+  });
+  chipsHTML+='</div>';
+  cont.innerHTML=(_editMode?'':progressHTML(1))
+    +'<h2>What thing in your life expresses you the most?</h2>'
+    +'<p style="font-size:13px;color:var(--soft);margin:0 0 14px;">Here are some ideas to get you started.</p>'
+    +chipsHTML
+    +'<textarea id="expression-input" rows="3" placeholder="Type your answer..." style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;resize:none;">'+esc(_expression)+'</textarea>'
+    +navHTML('1b');
+  var ta=document.getElementById('expression-input');
+  if(ta) ta.addEventListener('input',function(){_expression=ta.value;});
+}
+window.fillExpression=function(val){
+  _expression=val;
+  var ta=document.getElementById('expression-input');
+  if(ta){ta.value=val;ta.focus();}
+};
+
 function renderScreen2(el){
   var cont=document.getElementById('app-content'); if(!cont) return;
   var opts=(_refData&&_refData.methodsDisplay)||[];
@@ -1766,8 +1817,9 @@ function renderScreen4(el){
 // ─── Navigation ───────────────────────────────────────────────────────────────
 window.goNext = function(){
   if(_screen===2&&!_editMode&&_screen2step==='lang'){
-    _screen2step='naturally'; render(); return;
+    _screen='1b'; render(); return;
   }
+  if(_screen==='1b'){ _screen=1; render(); return; }
   if(_screen===2&&!_editMode&&_screen2step==='naturally'){
     _screen2step='skills'; render(); return;
   }
@@ -1802,6 +1854,8 @@ window.goNext = function(){
     _valTab='domains'; renderScreen3(null); return;
   }
   if(_screen===1) _screen2step='lang';
+  if(_screen===1){ _screen='1b'; render(); return; }
+  if(_screen==='1b'){ _screen=2; _screen2step='lang'; render(); return; }
   _screen++; render();
 };
 
@@ -1812,6 +1866,10 @@ window.goBack = function(){
   if(_screen===2&&!_editMode&&_screen2step==='naturally'){
     _screen2step='lang'; render(); return;
   }
+  if(_screen===2&&!_editMode&&_screen2step==='lang'){
+    _screen='1b'; render(); return;
+  }
+  if(_screen==='1b'){ _screen=1; render(); return; }
   if(_screen===3&&!_editMode&&_valTab==='domains'){
     _valTab=''; renderScreen3(null); return;
   }
@@ -1841,4 +1899,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.30b | Last change: Hide helper text in needs search bar after type chip selected | Date: 2026-06-28 -->
+<!-- Version: V2.31 | Last change: Add expression screen 1b, state var, autoSave, edit mode in screen 1 | Date: 2026-06-28 -->
