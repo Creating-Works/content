@@ -1,4 +1,4 @@
-<!-- Version: V2.34 | LAST CHANGE: Fix gift button using registry pattern, fix label display parsing subCat into type and context | Date: 2026-06-29 -->
+<!-- Version: V2.35 | LAST CHANGE: Gifted status from sheet, viewer hides gifted items, remove View my Appear profile button | Date: 2026-06-29 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -680,7 +680,7 @@ async function loadSupportList() {
         return {
           id: uid(), topCat: r.category, subCat: r.subCategory,
           subLabel: r.subCategory, subIcon: '🌱', title: r.item,
-          note: r.note || '', done: false
+          note: r.note || '', done: r.gifted === true
         };
       });
       save(); render();
@@ -696,7 +696,7 @@ async function loadViewerList() {
     if (data.status === 'ok' && data.items) {
       viewerData = {
         name: _ownerAppearId,
-        items: data.items.map(function(r) {
+        items: data.items.filter(function(r) { return r.gifted !== true; }).map(function(r) {
           return {
             id: r.item + '_' + (r.timestamp||''),
             topCat: r.category, subCat: r.subCategory,
@@ -1381,7 +1381,6 @@ function viewerHTML() {
     ${active.length ? `<div class="eyebrow" style="margin-bottom:12px">Still open</div>${active.map(it=>wishItemHTML(it,'viewer')).join('')}` : `<div class="empty">${esc(name)} is well supported right now - everything has been offered.</div>`}
     ${done.length ? `<div class="eyebrow" style="margin:24px 0 12px">Already gifted</div>${done.map(it=>wishItemHTML(it,'viewer')).join('')}` : ''}
     <hr>
-    <a href="https://appear.network/dl/giving" class="btn-outline" style="margin-bottom:10px">View my Appear profile</a>
     <a href="https://creating.works/giving.html" class="btn-outline">Create my gift list</a>`;
 }
 
@@ -1440,4 +1439,4 @@ window.moveBackToList      = moveBackToList;
 </script>
 </body>
 </html>
-<!-- V2.34 -->
+<!-- V2.35 -->
