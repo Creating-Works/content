@@ -1,4 +1,4 @@
-<!-- Version: V2.31c | Last change: Fix expression oninput, THIS IS SO ME style, skills edit header | Date: 2026-06-28 -->
+<!-- Version: V2.31d | Last change: Expression chips like other screens, THIS IS SO ME inline right, skills header | Date: 2026-06-28 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -455,6 +455,7 @@ async function loadIntake(){
       _postal=d.postal||'';
       _methods=(d.methods||'').split('|').filter(Boolean);
       _expression=d.expression||'';
+      _expressionItems=_expression?_expression.split('|').filter(Boolean):[];
       _languages=d.languages?d.languages.split('|').filter(Boolean):[];
       _interests=parseTagStr(d.interests,'level');
       _skills=parseTagStr(d.skills,'level');
@@ -1276,7 +1277,7 @@ function renderProfile(el, viewerMode){
   el.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><h2 style="margin:0;">This is me 🌱</h2></div>'
     +metaRow
     +section("What I'm seeking",allNeeds,false,'',4)
-    +section('What I enjoy',_interests,true,'level',1,false,_expression?'<div style="margin-top:8px;"><div style="font-size:10px;font-weight:700;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">This is so me</div><div style="font-size:13px;color:var(--soft);">'+esc(_expression)+'</div></div>':'')
+    +section('What I enjoy',_interests,true,'level',1,false,_expression?'<div style="margin-top:6px;display:flex;justify-content:flex-end;"><span style="font-size:13px;color:var(--soft);"><span style="font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:0.08em;color:var(--muted);">This is so me:</span> '+esc(_expressionItems.join(', '))+'</span></div>':'')
     +'<div class="profile-section" style="border-bottom:none;padding-bottom:4px;">'
     +'<div class="profile-section-header"><div class="profile-section-label">My skills</div>'
     +(!viewerMode?'<div class="profile-section-actions"><button class="edit-btn" onclick="jumpTo(2)">✏️ Edit</button></div>':'')
@@ -1357,46 +1358,104 @@ function renderScreen(s, heading, searchPlaceholder, drillId, addedId){
 function renderScreen1(el){
   renderScreen(1,'What do you enjoy doing?','Search to add...','drill-1','added-1');
   if(_editMode){
-    // Append expression field after the added section
     var cont=document.getElementById('app-content');
     if(cont){
       var chips=['My kitchen','My car','My bike','My garden','My wardrobe','My friends'];
       var chipsHTML='<div class="item-chips" style="margin:4px 0 10px;">';
       chips.forEach(function(c){
-        chipsHTML+='<div class="item-chip" onclick="window.fillExpression(\''+c+'\')" style="font-size:13px;">'+c+'</div>';
+        var isAdded=_expressionItems.indexOf(c)>-1;
+        chipsHTML+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="window.toggleExpressionChip(\''+esc(c)+'\')">'+c+'</div>';
       });
+      chipsHTML+='<div class="item-chip" style="border-style:dashed;color:var(--brand);font-weight:700;" onclick="window.showExpressionCustom()">+ Other</div>';
       chipsHTML+='</div>';
+      var addedHTML='';
+      if(_expressionItems.length){
+        addedHTML='<div class="added-section" style="margin-top:8px;">'
+          +'<div class="added-label">This is so me ('+_expressionItems.length+')</div>';
+        _expressionItems.forEach(function(item,i){
+          addedHTML+='<div class="added-item-row" style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--input-bg);border-radius:8px;margin-bottom:6px;">'
+            +'<span style="font-size:14px;color:var(--soft);">'+esc(item)+'</span>'
+            +'<span style="cursor:pointer;color:var(--muted);font-size:16px;" onclick="window.removeExpressionItem('+i+')">\u00d7</span>'
+            +'</div>';
+        });
+        addedHTML+='</div>';
+      }
       var exprDiv=document.createElement('div');
       exprDiv.style.cssText='margin-top:20px;padding-top:16px;border-top:1px solid var(--border);';
       exprDiv.innerHTML='<h3 style="font-size:15px;font-weight:700;color:var(--soft);margin:0 0 6px;">What thing in your life expresses you the most?</h3>'
-        +chipsHTML
-        +'<input type="text" id="expression-input" placeholder="Type your answer..." value="'+esc(_expression)+'" oninput="_expression=this.value;autoSave();" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;">';
+        +chipsHTML+addedHTML+'<div id="expression-custom"></div>';
       var nav=cont.querySelector('.nav-row');
       if(nav) cont.insertBefore(exprDiv,nav);
       else cont.appendChild(exprDiv);
     }
   }
 }
+var _expressionItems=[];
 function renderScreen1b(el){
   var cont=document.getElementById('app-content'); if(!cont) return;
   var chips=['My kitchen','My car','My bike','My garden','My wardrobe','My friends'];
-  var chipsHTML='<div class="item-chips" style="margin-bottom:16px;">';
+  var chipsHTML='<div class="ideas-prompt">Here are some ideas to get you started.</div><div class="item-chips">';
   chips.forEach(function(c){
-    chipsHTML+='<div class="item-chip" onclick="window.fillExpression(\''+c+'\')" style="font-size:13px;">'+c+'</div>';
+    var isAdded=_expressionItems.indexOf(c)>-1;
+    chipsHTML+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="window.toggleExpressionChip(\''+esc(c)+'\')">'+c+'</div>';
   });
+  chipsHTML+='<div class="item-chip" style="border-style:dashed;color:var(--brand);font-weight:700;" onclick="window.showExpressionCustom()">+ Other</div>';
   chipsHTML+='</div>';
+  var addedHTML='';
+  if(_expressionItems.length){
+    addedHTML='<div class="added-section" style="margin-top:12px;">'
+      +'<div class="added-label">Added ('+_expressionItems.length+')</div>';
+    _expressionItems.forEach(function(item,i){
+      addedHTML+='<div class="added-item-row" style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--input-bg);border-radius:8px;margin-bottom:6px;">'
+        +'<span style="font-size:14px;color:var(--soft);">'+esc(item)+'</span>'
+        +'<span style="cursor:pointer;color:var(--muted);font-size:16px;" onclick="window.removeExpressionItem('+i+')">×</span>'
+        +'</div>';
+    });
+    addedHTML+='</div>';
+  }
+  var customHTML='<div id="expression-custom"></div>';
   cont.innerHTML=(_editMode?'':progressHTML(1))
     +'<h2>What thing in your life expresses you the most?</h2>'
-    +'<p style="font-size:13px;color:var(--soft);margin:0 0 14px;">Here are some ideas to get you started.</p>'
     +chipsHTML
-    +'<input type="text" id="expression-input" placeholder="Type your answer..." value="'+esc(_expression)+'" oninput="_expression=this.value;autoSave();" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;">'
+    +addedHTML
+    +customHTML
     +navHTML('1b');
 }
-window.fillExpression=function(val){
-  _expression=val;
-  var ta=document.getElementById('expression-input');
-  if(ta){ta.value=val;ta.focus();}
+window.toggleExpressionChip=function(item){
+  var idx=_expressionItems.indexOf(item);
+  if(idx>-1) _expressionItems.splice(idx,1);
+  else _expressionItems.push(item);
+  _expression=_expressionItems.join('|');
+  autoSave();
+  if(_editMode) renderScreen1(null);
+  else renderScreen1b(null);
 };
+window.removeExpressionItem=function(i){
+  _expressionItems.splice(i,1);
+  _expression=_expressionItems.join('|');
+  autoSave();
+  if(_editMode) renderScreen1(null);
+  else renderScreen1b(null);
+};
+window.showExpressionCustom=function(){
+  var cont=document.getElementById('expression-custom');
+  if(!cont) return;
+  cont.innerHTML='<div class="custom-add-box" style="margin-top:8px;">'
+    +'<input type="text" id="expression-custom-input" placeholder="Type your item..." style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;margin-bottom:8px;">'
+    +'<button class="custom-add-confirm" onclick="window.confirmExpressionCustom()">Add to my list</button>'
+    +'<button class="custom-add-cancel" onclick="document.getElementById(\'expression-custom\').innerHTML=\'\' ">Cancel</button>'
+    +'</div>';
+};
+window.confirmExpressionCustom=function(){
+  var inp=document.getElementById('expression-custom-input');
+  if(!inp||!inp.value.trim()) return;
+  _expressionItems.push(inp.value.trim());
+  _expression=_expressionItems.join('|');
+  autoSave();
+  if(_editMode) renderScreen1(null);
+  else renderScreen1b(null);
+};
+
 
 function renderScreen2(el){
   var cont=document.getElementById('app-content'); if(!cont) return;
@@ -1446,7 +1505,7 @@ function renderScreen2(el){
 
   if(_editMode){
     cont.innerHTML=''
-      +'<h2>Share what you know how to do or how to create.</h2>'
+      +'<h2>What skills pays the bills?</h2>'
       
             +'<div id="title-warning-2"></div>'
       +'<div style="margin-bottom:14px;">'
@@ -1891,4 +1950,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.31c | Last change: Fix expression oninput, THIS IS SO ME style, skills edit header | Date: 2026-06-28 -->
+<!-- Version: V2.31d | Last change: Expression chips like other screens, THIS IS SO ME inline right, skills header | Date: 2026-06-28 -->
