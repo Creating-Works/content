@@ -1,4 +1,4 @@
-<!-- Version: V2.31d | Last change: Expression chips like other screens, THIS IS SO ME inline right, skills header | Date: 2026-06-28 -->
+<!-- Version: V2.31d | Last change: Fix lang routing, care valSet filter, breadcrumb link, domains header, needs header | Date: 2026-06-29 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -655,11 +655,10 @@ window.addItemFromChip = function(screen, item, category){
       if(el.textContent.trim()===item) el.classList.remove('added');
     });
     if(s==='3'){
-      var valSet0=getValuesSet();
       var el0v=document.getElementById('added-3-values');
       var el0d=document.getElementById('added-3-domains');
-      if(el0v) el0v.innerHTML=buildValAddedHTML(_values.filter(function(v){return valSet0[v.item];}), 'Added values');
-      if(el0d) el0d.innerHTML=buildValAddedHTML(_values.filter(function(v){return !valSet0[v.item];}), 'Added domains');
+      if(el0v) el0v.innerHTML=buildValAddedHTML(_values.filter(function(v){return v.category&&v.category!=='domain';}), 'Added values');
+      if(el0d) el0d.innerHTML=buildValAddedHTML(_values.filter(function(v){return !v.category||v.category==='domain';}), 'Added domains');
     } else { updateAddedSection(s); }
     if(s==='4s'||s==='4r') refreshNeedsSummary();
     autoSave();
@@ -670,13 +669,12 @@ window.addItemFromChip = function(screen, item, category){
     if(el.textContent.trim()===item) el.classList.add('added');
   });
   if(s==='3'){
-    var valSet=getValuesSet();
     var addedEl=document.getElementById('added-3-values');
     var addedElD=document.getElementById('added-3-domains');
-    if(addedEl) addedEl.innerHTML=buildValAddedHTML(_values.filter(function(v){return valSet[v.item];}), 'Added values');
-    if(addedElD) addedElD.innerHTML=buildValAddedHTML(_values.filter(function(v){return !valSet[v.item];}), 'Added domains');
+    if(addedEl) addedEl.innerHTML=buildValAddedHTML(_values.filter(function(v){return v.category&&v.category!=='domain';}), 'Added values');
+    if(addedElD) addedElD.innerHTML=buildValAddedHTML(_values.filter(function(v){return !v.category||v.category==='domain';}), 'Added domains');
     // Auto-expand the section that got a new item
-    if(valSet[item]) expandValSection('val-body-Added-values','val-arrow-Added-values');
+    if(category&&category!=='domain') expandValSection('val-body-Added-values','val-arrow-Added-values');
     else expandValSection('val-body-Added-domains','val-arrow-Added-domains');
   } else { updateAddedSection(s); }
   if(s==='4s'||s==='4r') refreshNeedsSummary();
@@ -744,7 +742,6 @@ window.toggleLocal = function(screen, idx){
 function updateAddedSection(s){
   if(s==='3'){
     // Update in place instead of full re-render to avoid wiping added sections
-    var valSet=getValuesSet();
     var valAdded=_values.filter(function(v){return v.category&&v.category!=='domain';});
     var domAdded=_values.filter(function(v){return !v.category||v.category==='domain';});
     var elV=document.getElementById('added-3-values');
@@ -1518,7 +1515,7 @@ function renderScreen2(el){
       +navHTML(2);
   } else {
     cont.innerHTML=progressHTML(2)
-      +'<h2 style="padding-top:8px;">'+((!_editMode&&_screen2step==='skills')?'What skills pays the bills?':'What pays the bills?')+'</h2>'
+      +'<h2 style="padding-top:8px;">What skills pays the bills?</h2>'
       
             +'<div id="title-warning-2"></div>'
       +screenSearchHTML('2','Search skills to add...')
@@ -1605,7 +1602,6 @@ function domainChipHTML(item){
 }
 function renderScreen3(el){
   var cont=document.getElementById('app-content'); if(!cont) return;
-  var valSet=getValuesSet();
   var valAdded=_values.filter(function(v){return v.category&&v.category!=='domain';});
   var domAdded=_values.filter(function(v){return !v.category||v.category==='domain';});
 
@@ -1619,7 +1615,7 @@ function renderScreen3(el){
       if(!activeCat) return '';
       var html='<div style="margin-bottom:8px;"><span class="breadcrumb-link" onclick="window.setCareValCat(\'\')" style="font-size:12px;">Values</span>'
         +' <span style="color:var(--muted);font-size:12px;">›</span>'
-        +' <span style="font-size:12px;color:var(--soft);">'+esc(activeCat.label)+'</span></div>';
+        +' <span class="breadcrumb-link" onclick="window.setCareValCat(\'\')" style="font-size:12px;">'+esc(activeCat.label)+'</span></div>';
       html+='<div class="item-chips" style="margin-bottom:8px;padding:8px;background:var(--input-bg);border-radius:10px;">';
       activeCat.items.forEach(function(item){
         var isAdded=_values.some(function(v){return v.item===item;});
@@ -1671,8 +1667,7 @@ function renderScreen3(el){
       domChips+='<div class="item-chip" style="border-style:dashed;color:var(--brand);font-weight:700;" onclick="showCustomAdd(\'3\',\'domain\')">+ Other</div>';
       domChips+='</div>';
       cont.innerHTML=progressHTML(3)
-        +'<h2>What do you care about deeply?</h2>'
-        +'<p style="font-size:14px;color:var(--soft);margin:0 0 14px;">Which domains do you care about deeply? These are areas where you want to put your energy.</p>'
+        +'<h2>Which domains do you most like to apply your skills?</h2>'
         +screenSearchHTML('3','Search domains...')
         +domChips
         +'<div id="added-3-domains">'+buildValAddedHTML(domAdded,'Added domains')+'</div>'
@@ -1850,7 +1845,7 @@ window.addQuickNeed=function(n){
 function renderScreen4(el){
   var cont=document.getElementById('app-content'); if(!cont) return;
     cont.innerHTML=(_editMode?'':progressHTML(4))
-    +'<h2>What I\'m seeking</h2>'
+    +'<h2>What are you seeking right now?</h2>'
     +'<div id="needs-breadcrumb"></div>'
     +'<div class="needs-top-chips" style="margin-top:14px;" id="needs-type-chips">'
     +'<div class="needs-top-chip'+('skill'===_needsCat?' selected':'')+'" id="needs-top-skill" onclick="setNeedsCat(\'skill\')">✨ Skill or service</div>'
@@ -1873,6 +1868,9 @@ function renderScreen4(el){
 // ─── Navigation ───────────────────────────────────────────────────────────────
 window.goNext = function(){
   if(_screen==='1b'){ autoSave(); _screen=2; _screen2step='lang'; render(); return; }
+  if(_screen===2&&!_editMode&&_screen2step==='lang'){
+    _screen2step='naturally'; render(); return;
+  }
   if(_screen===2&&!_editMode&&_screen2step==='naturally'){
     _screen2step='skills'; render(); return;
   }
@@ -1950,4 +1948,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.31d | Last change: Expression chips like other screens, THIS IS SO ME inline right, skills header | Date: 2026-06-28 -->
+<!-- Version: V2.31d | Last change: Fix lang routing, care valSet filter, breadcrumb link, domains header, needs header | Date: 2026-06-29 -->
