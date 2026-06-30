@@ -1,4 +1,4 @@
-<!-- Version: V2.31d | Last change: Fix lang routing, care valSet filter, breadcrumb link, domains header, needs header | Date: 2026-06-29 -->
+<!-- Version: V2.32 | LAST CHANGE: Dead code cleanup + fix +Other escaping + add +Other to rec + remove share btn + giving link on viewer photo + owner title | Date: 2026-06-29 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -91,7 +91,6 @@
     .practice-btn:hover{border-color:var(--brand);color:var(--brand);}
     .practice-btn.selected{background:var(--brand);border-color:var(--brand);color:white;font-weight:500;}
     /* Needs two-section */
-    .needs-section-label{font-size:13px;font-weight:700;color:var(--text);margin:16px 0 10px;}
     /* Need items */
     .need-item{background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
     .need-item-left{flex:1;}
@@ -113,9 +112,6 @@
     .btn-outlined{flex:2;padding:14px;border-radius:10px;border:2px solid var(--brand);background:white;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;color:var(--brand);cursor:pointer;transition:all 0.15s;}
     .btn-outlined:hover{background:var(--brand);color:white;}
     /* Profile */
-    .profile-meta-row{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);}
-    .meta-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;background:var(--brand);color:white;font-size:13px;font-weight:600;cursor:pointer;}
-    .meta-pill:hover{background:var(--hover);}
     .profile-section{margin-bottom:0;padding-bottom:20px;border-bottom:1px solid var(--border);margin-top:20px;}
     .profile-section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
     .profile-section-label{font-size:16px;font-weight:700;color:var(--text);letter-spacing:0;text-transform:none;}
@@ -159,8 +155,6 @@
     .added-header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
     .level-help-btn{background:none;border:1.5px solid var(--border);border-radius:50%;width:20px;height:20px;font-size:11px;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;justify-content:center;padding:0;}
     .level-help-btn:hover{border-color:var(--brand);color:var(--brand);}
-    /* level-popup moved below */
-    /* level-popup.open moved below */
     .ideas-prompt{font-size:13px;color:var(--muted);font-style:italic;margin-bottom:10px;}
     /* needs-top-chips moved below */
     .needs-top-chip{padding:10px 18px;border-radius:20px;border:1.5px solid var(--border);background:white;font-size:14px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;transition:all 0.15s;}
@@ -182,7 +176,6 @@
     .sub-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border);}
     .level-popup{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;background:white;border:1px solid var(--border);border-radius:14px;padding:18px 20px;font-size:13px;color:var(--soft);line-height:1.7;box-shadow:0 8px 30px rgba(0,0,0,0.18);max-width:320px;width:90%;}
     .level-popup.open{display:block;}
-    /* level-popup.open moved below */
     .level-popup-close{display:block;margin-top:14px;text-align:center;font-weight:600;color:var(--brand);cursor:pointer;font-size:14px;}
     .methods-list{margin:12px 0 20px;}
     .method-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;cursor:pointer;transition:background 0.1s;border:1.5px solid transparent;margin-bottom:4px;}
@@ -198,10 +191,6 @@
     .values-tabs{display:flex;flex-direction:row;gap:8px;margin-bottom:14px;}
     .values-tab{flex:1;text-align:center;padding:10px 8px;border-radius:10px;border:1.5px solid var(--border);background:white;font-size:14px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;transition:all 0.15s;}
     .values-tab.active{background:var(--brand);border-color:var(--brand);color:white;}
-    .quick-needs{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0;}
-    .quick-need-chip{padding:8px 14px;border-radius:18px;border:1.5px solid var(--border);background:white;font-size:13px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
-    .quick-need-chip:hover{border-color:var(--brand);color:var(--brand);}
-    .quick-need-chip.added{background:var(--brand);border-color:var(--brand);color:white;font-weight:600;}
     .values-section-label{font-size:13px;font-weight:700;color:var(--text);margin:16px 0 8px;}
     .btn-link{background:none;border:none;color:var(--brand);font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif;padding:0;}
     .inline-edit-row{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--soft);flex-wrap:wrap;}
@@ -337,6 +326,8 @@ var _needsSkill  = [];
 var _needsRes    = [];
 var _methods     = [];
 var _expression  = '';
+var _screen2step = 'lang';
+var _customCareParent = '';
 
 // Drill state — all keys are strings
 var _drill = {
@@ -347,7 +338,6 @@ var _drill = {
   '4r': {parentCat:'',subCat:'',itemCat:''}
 };
 function getDrill(s){return _drill[String(s)]||{};}
-function setDrillKey(s,k,v){var d=_drill[String(s)];if(!d)return;d[k]=v;}
 function resetDrillTo(s,level){
   var d=_drill[String(s)]; if(!d) return;
   if(level<=0){d.parentCat='';d.subCat='';d.itemCat='';}
@@ -563,6 +553,7 @@ window.renderDrill = function(screen, containerId){
         var isAdded=addedArr.some(function(r){return r.item===item;});
         html+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="addItemFromChip(\''+s+'\',\''+esc(item)+'\',\''+esc(d.parentCat)+'\')">'+esc(item)+'</div>';
       });
+      html+='<div class="item-chip" style="border-style:dashed;color:var(--brand);font-weight:700;" onclick="showCustomAdd(\'1\',\'\')" >+ Other</div>';
       html+='</div>';
     }
   } else {
@@ -587,7 +578,7 @@ window.renderDrill = function(screen, containerId){
         var chipOnclick=s==='4s'?'selectNeedsItem(\''+esc(item)+'\',\''+esc(d.parentCat)+'\')':'addItemFromChip(\''+s+'\',\''+esc(item)+'\',\''+esc(d.parentCat)+'\')';
         html+='<div class="item-chip'+(isAdded?' added':isPending?' selected':'')+'\" onclick="'+chipOnclick+'">'+esc(item)+'</div>';
       });
-      html+='<div class="item-chip" style="border-style:dashed;color:var(--brand);font-weight:700;" onclick="showCustomAdd(\\\''+s+'\\\',\\\'\\\')" >+ Other</div>';
+      html+='<div class="item-chip" style="border-style:dashed;color:var(--brand);font-weight:700;" onclick="showCustomAdd(\''+s+'\',\'\')" >+ Other</div>';
       html+='</div>';
       if(s==='4s'&&_pendingNeedsItem.item){
         html+='<div id="needs-confirm-bar" style="margin-top:12px;padding:12px;background:var(--input-bg);border-radius:10px;display:flex;align-items:center;justify-content:space-between;">'          +'<span style="font-size:14px;color:var(--soft);">'+esc(_pendingNeedsItem.item)+'</span>'          +'<div style="display:flex;gap:8px;">'          +'<button class="btn-outlined" style="padding:6px 14px;font-size:13px;" onclick="_pendingNeedsItem={item:\'\',category:\'\'};renderDrill(\'4s\',\'drill-4s\')">Cancel</button>'          +'<button class="btn-primary" style="padding:6px 14px;font-size:13px;" onclick="confirmNeedsItem()">Add '+esc(_pendingNeedsItem.item)+'</button>'          +'</div></div>';
@@ -669,14 +660,10 @@ window.addItemFromChip = function(screen, item, category){
     if(el.textContent.trim()===item) el.classList.add('added');
   });
   if(s==='3'){
-    var addedEl=document.getElementById('added-3-values');
-    var addedElD=document.getElementById('added-3-domains');
-    if(addedEl) addedEl.innerHTML=buildValAddedHTML(_values.filter(function(v){return v.category&&v.category!=='domain';}), 'Added values');
-    if(addedElD) addedElD.innerHTML=buildValAddedHTML(_values.filter(function(v){return !v.category||v.category==='domain';}), 'Added domains');
     // Auto-expand the section that got a new item
     if(category&&category!=='domain') expandValSection('val-body-Added-values','val-arrow-Added-values');
     else expandValSection('val-body-Added-domains','val-arrow-Added-domains');
-  } else { updateAddedSection(s); }
+  }
   if(s==='4s'||s==='4r') refreshNeedsSummary();
 };
 
@@ -1149,21 +1136,12 @@ function renderTopRight(){
   var el=document.getElementById('top-right-area'); if(!el) return;
   if(_viewerMode){
     var ph=_viewerPhoto?'<div class="btn-photo"><img src="'+esc(_viewerPhoto)+'" alt=""></div>':'<div class="btn-photo">🌱</div>';
-    el.innerHTML='<div class="ikigai-btn" style="cursor:default;">'+ph+esc(_viewerName||'Profile')+'</div>';
-  } else if(_screen===0){
-    var ph2=_photo?'<div class="btn-photo"><img src="'+esc(_photo)+'" alt=""></div>':'<div class="btn-photo">🌱</div>';
-    if(_name){
-      el.innerHTML='<div style="display:flex;align-items:center;gap:6px;"><button class="share-btn" onclick="openShareModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button><div class="btn-photo" onclick="openPostalModal()" style="cursor:pointer;">'+ph2+'</div></div>';
-    } else {
-      el.innerHTML='<div style="display:flex;align-items:center;gap:6px;"><button class="share-btn" onclick="openShareModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button><div class="btn-photo" onclick="openPostalModal()" style="cursor:pointer;">'+ph2+'</div></div>';
-    }
+    var givingLink='https://creating.works/giving.html?owner='+encodeURIComponent(_showId);
+    el.innerHTML='<a href="'+givingLink+'" target="_blank" style="text-decoration:none;color:inherit;"><div class="ikigai-btn" style="cursor:pointer;">'+ph+esc(_viewerName||'Profile')+'</div></a>';
   } else {
-    var ph3=_photo?'<div class="btn-photo"><img src="'+esc(_photo)+'" alt=""></div>':'<div class="btn-photo">🌱</div>';
-    if(_name){
-      el.innerHTML='<div style="display:flex;align-items:center;gap:6px;"><button class="share-btn" onclick="openShareModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button><div class="btn-photo">'+ph3+'</div></div>';
-    } else {
-      el.innerHTML='<div style="display:flex;align-items:center;gap:6px;"><button class="share-btn" onclick="openShareModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button><div class="btn-photo">'+ph3+'</div></div>';
-    }
+    var phImg=_photo?'<div class="btn-photo"><img src="'+esc(_photo)+'" alt=""></div>':'<div class="btn-photo">🌱</div>';
+    var photoClick=_screen===0?' onclick="openPostalModal()" style="cursor:pointer;"':'';
+    el.innerHTML='<div class="btn-photo"'+photoClick+'>'+phImg+'</div>';
   }
 }
 
@@ -1269,10 +1247,8 @@ function renderProfile(el, viewerMode){
       +(extra||'')
       +'</div>';
   }
-  var metaRow='';
   var allNeeds=_needsSkill.concat(_needsRes);
-  el.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><h2 style="margin:0;">This is me 🌱</h2></div>'
-    +metaRow
+  el.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><h2 style="margin:0;">'+(viewerMode?'This is me 🌱':'Edit my event profile')+'</h2></div>'
     +section("What I'm seeking",allNeeds,false,'',4)
     +section('What I enjoy',_interests,true,'level',1,false,_expression?'<div style="margin-top:6px;display:flex;justify-content:flex-end;"><span style="font-size:13px;color:var(--soft);"><span style="font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:0.08em;color:var(--muted);">This is so me:</span> '+esc(_expressionItems.join(', '))+'</span></div>':'')
     +'<div class="profile-section" style="border-bottom:none;padding-bottom:4px;">'
@@ -1302,25 +1278,6 @@ function renderProfile(el, viewerMode){
     +(function(viewerMode){
     var valAdded=_values.filter(function(v){return v.category&&v.category!=='domain';});
     var domAdded=_values.filter(function(v){return !v.category||v.category==='domain';});
-    function valProfileSection(label,arr,showHeader){
-      if(!arr.length) return '';
-      var tags=arr.map(function(r){
-        var lv=r.level||'';
-        var missingLevel=!lv&&!viewerMode;
-        var allIdx=_values.indexOf(r);
-        var pickerId='cat-picker-3-'+allIdx;
-        var lvOpts=['Exploring','Engaged','Leading'];
-        var pickerBtns=missingLevel?lvOpts.map(function(opt){return '<button class="cat-pick-btn" onclick="setCatLevel(\'3\','+allIdx+',\''+opt+'\')">'+opt+'</button>';}).join(''):'';
-        var picker=missingLevel?'<div class="cat-picker-inline" id="'+pickerId+'">'+pickerBtns+'</div>':'';
-        var missingTag=missingLevel?'<span style="font-size:11px;color:#d32f2f;font-weight:500;margin-left:4px;cursor:pointer;" onclick="openCatPicker(\'3\','+allIdx+')">Category missing ▾</span>':'';
-        return '<div style="position:relative;display:inline-block;"><div class="profile-tag"'+(missingLevel?' style="border-color:#d32f2f;"':'')+'>'+esc(r.item)+(lv?'<span class="tag-level">'+esc(lv)+'</span>':'')+missingTag+'</div>'+picker+'</div>';
-      }).join('');
-      var actions=!viewerMode?'<div class="profile-section-actions"><button class="edit-btn" onclick="window.jumpTo(3)">✏️ Edit</button></div>':'';
-      if(showHeader){
-        return '<div class="profile-section"><div class="profile-section-header"><div class="profile-section-label">'+label+'</div>'+actions+'</div><div class="profile-tags">'+tags+'</div></div>';
-      }
-      return tags.length?'<div style="margin-bottom:6px;"><div class="added-label" style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">'+label+'</div><div class="profile-tags">'+tags+'</div></div>':'';
-    }
     var careActions=!viewerMode?'<div class="profile-section-actions"><button class="edit-btn" onclick="window.jumpTo(3)">✏️ Edit</button></div>':'';
     var valSection=valAdded.length?'<div style="margin-bottom:8px;"><div style="font-size:10px;font-weight:700;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">VALUES</div><div class="profile-tags">'+valAdded.map(function(v){var lvl=v.level?'<span class="tag-level">'+esc(v.level)+'</span>':'';return '<div class="profile-tag">'+esc(v.item)+lvl+'</div>';}).join('')+'</div></div>':'';
     var domSection=domAdded.length?'<div><div style="font-size:10px;font-weight:700;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">DOMAINS</div><div class="profile-tags">'+domAdded.map(function(v){var lvl=v.level?'<span class="tag-level">'+esc(v.level)+'</span>':'';return '<div class="profile-tag">'+esc(v.item)+lvl+'</div>';}).join('')+'</div></div>':'';
@@ -1333,7 +1290,6 @@ window.jumpTo = function(screen){
   _editMode=true; _screen=screen; render();
 };
 
-window.cancelEdit = function(){ _editMode=false; _screen=0; render(); };
 window.doneEdit = function(){ autoSave(); _editMode=false; _screen=0; render(); };
 // Glide scope safety
 if(typeof jumpTo==='undefined') var jumpTo=window.jumpTo;
@@ -1525,12 +1481,6 @@ function renderScreen2(el){
   }
   window.renderDrill('2','drill-2');
 }
-function getValuesSet(){
-  if(!_refData) return {};
-  var set={};
-  (_refData.values||[]).forEach(function(r){set[r.item||r]=1;});
-  return set;
-}
 var _valTab=''; // '' | 'values' | 'domains'
 var CARE_CATS=[
   {label:'Basic needs and security',items:['Water security','Food security','Safety and peace','Housing and shelter','Urgent medical care','Clothing and supplies'],type:'social'},
@@ -1551,11 +1501,6 @@ window.setValTab=function(tab){
   _valTab=(_valTab===tab?'':tab);
   renderScreen3(null);
 };
-window.toggleMethodInline  = window.toggleMethodInline;
-window.toggleMethodDraft   = window.toggleMethodDraft;
-window.openMethodsModal    = window.openMethodsModal;
-window.closeMethodsModal   = window.closeMethodsModal;
-window.saveMethodsModal    = window.saveMethodsModal;
 
 function buildValAddedHTML(arr, label){
   if(!arr.length) return '';
@@ -1607,7 +1552,6 @@ function renderScreen3(el){
 
   // Build 6-category Values UI (used in both intake and edit Values tab)
   function buildCareCatHTML(){
-    window._careCats=CARE_CATS;
     // If a category is active, show breadcrumb + sub-chips only (hide other categories)
     if(_careValCat){
       var activeCat=CARE_CATS.find(function(c){return c.label===_careValCat;});
@@ -1819,29 +1763,6 @@ window.addSpaceItem=function(){
   refreshNeedsSummary();
 };
 
-var QUICK_NEEDS=['💡 Feedback','📚 Knowledge','🔑 Access','🎯 Accountability','⏰ Collaboration','💰 Funding','🪑 A workspace','🔧 A resource'];
-function buildQuickNeeds(){
-  var h='<div class="quick-needs">';
-  QUICK_NEEDS.forEach(function(n){
-    var isAdded=_needsSkill.some(function(r){return r.item===n;});
-    h+='<div class="quick-need-chip'+(isAdded?' added':'')+'" onclick="addQuickNeed('+JSON.stringify(n)+')">'+n+'</div>';
-  });
-  h+='</div>';
-  return h;
-}
-window.addQuickNeed=function(n){
-  if(_needsSkill.some(function(r){return r.item===n;})){
-    _needsSkill=_needsSkill.filter(function(r){return r.item!==n;});
-  } else {
-    _needsSkill.push({item:n,category:'Other needs',local:false,ntype:'skill'});
-  }
-  autoSave();
-  var el=document.getElementById('quick-needs-area');
-  if(el) el.innerHTML=buildQuickNeeds();
-  var added=document.getElementById('added-4s');
-  if(added) added.innerHTML=buildAddedHTML('4s');
-};
-
 function renderScreen4(el){
   var cont=document.getElementById('app-content'); if(!cont) return;
     cont.innerHTML=(_editMode?'':progressHTML(4))
@@ -1948,4 +1869,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.31d | Last change: Fix lang routing, care valSet filter, breadcrumb link, domains header, needs header | Date: 2026-06-29 -->
+<!-- Version: V2.32 | LAST CHANGE: Dead code cleanup + fix +Other escaping + add +Other to rec + remove share btn + giving link on viewer photo + owner title | Date: 2026-06-29 -->
