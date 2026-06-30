@@ -1,4 +1,4 @@
-<!-- Version: V2.36 | LAST CHANGE: Viewer page shows owner photo and name, simplified viewer layout | Date: 2026-06-29 -->
+<!-- Version: V2.37 | LAST CHANGE: Builder header text, remove name from well-supported message, parallel fetches for faster viewer load | Date: 2026-06-29 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -693,15 +693,16 @@ async function loadSupportList() {
 async function loadViewerList() {
   if (!_ownerAppearId) return;
   try {
-    // Fetch owner profile for photo and name
-    var profileRes = await fetch(GS_URL + '?action=lookupProfile&appearId=' + encodeURIComponent(_ownerAppearId));
-    var profileData = await profileRes.json();
+    // Fetch profile and list in parallel
+    var profilePromise = fetch(GS_URL + '?action=lookupProfile&appearId=' + encodeURIComponent(_ownerAppearId)).then(function(r) { return r.json(); });
+    var listPromise = fetch(GS_URL + '?action=getSupportList&appearId=' + encodeURIComponent(_ownerAppearId)).then(function(r) { return r.json(); });
+    var results = await Promise.all([profilePromise, listPromise]);
+    var profileData = results[0];
+    var data = results[1];
     if (profileData.found) {
       _ownerPhoto = profileData.photo || '';
       _ownerName  = profileData.name  || _ownerAppearId;
     }
-    const res  = await fetch(GS_URL + '?action=getSupportList&appearId=' + encodeURIComponent(_ownerAppearId));
-    const data = await res.json();
     if (data.status === 'ok' && data.items) {
       viewerData = {
         name: _ownerName || _ownerAppearId,
@@ -1228,7 +1229,7 @@ function builderHTML() {
     : '';
   return `
     ${fabHTML}
-    <h1>Ways to give to me</h1>
+    <h1>Ways people can give to you 🎁</h1>
     <p class="subtitle">When someone wants to share appreciation for you, share ways for them to give to you.</p>
     <hr>
     <div class="eyebrow" style="margin-bottom:12px">How can people give to you?</div>
@@ -1387,7 +1388,7 @@ function viewerHTML() {
     <div style="display:flex;justify-content:flex-end;margin-bottom:-32px;">${photoHTML}</div>
     <h1 style="text-align:center;margin-bottom:6px">Ways to give to me</h1>
     <p class="subtitle" style="text-align:center">If you're curious how to give to me, here are some possibilities.</p>
-    ${vItems.length ? `<div class="eyebrow" style="margin-bottom:12px">Still open</div>${vItems.map(it=>wishItemHTML(it,'viewer')).join('')}` : `<div class="empty">${esc(name)} is well supported right now, everything has been offered.</div>`}
+    ${vItems.length ? `<div class="eyebrow" style="margin-bottom:12px">Still open</div>${vItems.map(it=>wishItemHTML(it,'viewer')).join('')}` : `<div class="empty">Well supported right now, everything has been offered.</div>`}
     <hr>
     <a href="https://creating.works/giving.html" class="btn-outline">Create my gift list</a>`;
 }
@@ -1447,4 +1448,4 @@ window.moveBackToList      = moveBackToList;
 </script>
 </body>
 </html>
-<!-- V2.36 -->
+<!-- V2.37 -->
