@@ -1,4 +1,4 @@
-<!-- Version: V2.32 | LAST CHANGE: Dead code cleanup + fix +Other escaping + add +Other to rec + remove share btn + giving link on viewer photo + owner title | Date: 2026-06-29 -->
+<!-- Version: V2.332 | LAST CHANGE: Dead code cleanup + fix +Other escaping + add +Other to rec + remove share btn + giving link on viewer photo + owner title | Date: 2026-06-29 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -882,14 +882,26 @@ window.showCustomAdd = function(screen, item){
     return;
   }
   var itemField=item?'':'<input type="text" id="custom-item-input" placeholder="What would you like to add?" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;margin-bottom:8px;">';
-  var labelText=item?'What category does "'+esc(item)+'" belong to?':'Add your own:';
-  container.innerHTML='<div class="custom-add-box">'
-    +itemField
-    +'<label style="font-size:13px;color:var(--soft);display:block;margin-bottom:6px;">'+labelText+'</label>'
-    +'<select id="custom-cat-select" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;margin-bottom:8px;">'+opts+'</select>'
-    +'<button class="custom-add-confirm" onclick="confirmCustomAdd()">Add to my list</button>'
-    +'<button class="custom-add-cancel" onclick="cancelCustomAdd()">Cancel</button>'
-    +'</div>';
+  var drillCat=getDrill(_customScreen).parentCat||'';
+  if(drillCat){
+    // Drilled into a category - auto-assign, no dropdown
+    container.innerHTML='<div class="custom-add-box">'
+      +itemField
+      +'<label style="font-size:13px;color:var(--soft);display:block;margin-bottom:6px;">Add your own to '+esc(drillCat)+':</label>'
+      +'<button class="custom-add-confirm" onclick="confirmCustomAdd()">Add to my list</button>'
+      +'<button class="custom-add-cancel" onclick="cancelCustomAdd()">Cancel</button>'
+      +'</div>';
+  } else {
+    // Top level - show category dropdown
+    var labelText=item?'What category does "'+esc(item)+'" belong to?':'Add your own:';
+    container.innerHTML='<div class="custom-add-box">'
+      +itemField
+      +'<label style="font-size:13px;color:var(--soft);display:block;margin-bottom:6px;">'+labelText+'</label>'
+      +'<select id="custom-cat-select" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;margin-bottom:8px;">'+opts+'</select>'
+      +'<button class="custom-add-confirm" onclick="confirmCustomAdd()">Add to my list</button>'
+      +'<button class="custom-add-cancel" onclick="cancelCustomAdd()">Cancel</button>'
+      +'</div>';
+  }
 };
 
 window.confirmCustomAdd = function(){
@@ -899,8 +911,13 @@ window.confirmCustomAdd = function(){
   if(!_customItem){toast('Please enter an item name');return;}
   var cat=_customCareParent||'';
   if(!cat){
-    var sel=document.getElementById('custom-cat-select'); cat=sel?sel.value:'';
-    if(!cat){toast('Please select a category');return;}
+    // Check drill state first (auto-categorized from +Other in drill)
+    var drillCat=getDrill(_customScreen).parentCat||'';
+    if(drillCat){ cat=drillCat; }
+    else {
+      var sel=document.getElementById('custom-cat-select'); cat=sel?sel.value:'';
+      if(!cat){toast('Please select a category');return;}
+    }
   }
   fetch(GS_URL+'?action=addCustomSkill&appearId='+encodeURIComponent(_appearId)
     +'&item='+encodeURIComponent(_customItem)+'&category='+encodeURIComponent(cat));
@@ -1869,4 +1886,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.32 | LAST CHANGE: Dead code cleanup + fix +Other escaping + add +Other to rec + remove share btn + giving link on viewer photo + owner title | Date: 2026-06-29 -->
+<!-- Version: V2.33 | LAST CHANGE: Dead code cleanup + fix +Other escaping + add +Other to rec + remove share btn + giving link on viewer photo + owner title | Date: 2026-06-29 -->
