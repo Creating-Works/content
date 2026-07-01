@@ -1,4 +1,4 @@
-<!-- Version: V2.332 | LAST CHANGE: Dead code cleanup + fix +Other escaping + add +Other to rec + remove share btn + giving link on viewer photo + owner title | Date: 2026-06-29 -->
+<!-- Version: V2.34 | LAST CHANGE: Fix esc() bug on drill onclick values - ampersands in category names now pass through correctly | Date: 2026-06-30 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -351,6 +351,7 @@ var _customScreen='';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function rawVal(s){return String(s||'').replace(/'/g,"\\'");}
 function toast(msg){var t=document.getElementById('toast');if(!t)return;t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2600);}
 function shuffle(arr){var a=arr.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=a[i];a[i]=a[j];a[j]=tmp;}return a;}
 function sortAlpha(arr){return arr.slice().sort(function(a,b){return a.localeCompare(b);});}
@@ -521,13 +522,13 @@ window.renderDrill = function(screen, containerId){
       // Recreation: show rec types as sub chips
       html+='<div class="sub-chips">';
       REC_TYPES.forEach(function(t){
-        html+='<div class="sub-chip" onclick="doSetDrill(\'1\',\'parentCat\',\''+esc(t)+'\')">'+esc(t)+'</div>';
+        html+='<div class="sub-chip" onclick="doSetDrill(\'1\',\'parentCat\',\''+rawVal(t)+'\')">'+esc(t)+'</div>';
       });
       html+='</div>';
     } else {
       html+='<div class="cat-chips-grid">';
       PARENT_CATS.forEach(function(c){
-        html+='<div class="cat-chip" onclick="doSetDrill(\''+s+'\',\'parentCat\',\''+esc(c)+'\')">'+esc(c)+'</div>';
+        html+='<div class="cat-chip" onclick="doSetDrill(\''+s+'\',\'parentCat\',\''+rawVal(c)+'\')">'+esc(c)+'</div>';
       });
       html+='</div>';
     }
@@ -538,7 +539,7 @@ window.renderDrill = function(screen, containerId){
       var subCats=(function(){var sc={};pool.filter(function(r){return r.recType===d.parentCat;}).forEach(function(r){if(r.category)sc[r.category]=1;});return sortAlpha(Object.keys(sc));})();
       if(subCats.length){
         html+='<div class="sub-chips">';
-        subCats.forEach(function(c){html+='<div class="sub-chip" onclick="doSetDrill(\'1\',\'subCat\',\''+esc(c)+'\')">'+esc(c)+'</div>';});
+        subCats.forEach(function(c){html+='<div class="sub-chip" onclick="doSetDrill(\'1\',\'subCat\',\''+rawVal(c)+'\')">'+esc(c)+'</div>';});
         html+='</div>';
       }
     }
@@ -562,7 +563,7 @@ window.renderDrill = function(screen, containerId){
       var subs=getSkillSubCats(d.parentCat);
       if(subs.length&&!d.subCat){
         html+='<div class="sub-chips">';
-        subs.forEach(function(c){html+='<div class="sub-chip" onclick="doSetDrill(\''+s+'\',\'subCat\',\''+esc(c)+'\')">'+esc(c)+'</div>';});
+        subs.forEach(function(c){html+='<div class="sub-chip" onclick="doSetDrill(\''+s+'\',\'subCat\',\''+rawVal(c)+'\')">'+esc(c)+'</div>';});
         html+='</div>';
       }
     }
@@ -1886,4 +1887,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.33 | LAST CHANGE: Dead code cleanup + fix +Other escaping + add +Other to rec + remove share btn + giving link on viewer photo + owner title | Date: 2026-06-29 -->
+<!-- Version: V2.34 | LAST CHANGE: Fix esc() bug on drill onclick values - ampersands in category names now pass through correctly | Date: 2026-06-30 -->
