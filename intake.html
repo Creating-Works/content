@@ -1,4 +1,4 @@
-<!-- Version: V2.34 | LAST CHANGE: Fix esc() bug on drill onclick values - ampersands in category names now pass through correctly | Date: 2026-06-30 -->
+<!-- Version: V2.35 | LAST CHANGE: Search covers all items across all categories regardless of drill state | Date: 2026-06-30 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -808,6 +808,14 @@ function buildAddedHTML(s){
 }
 
 // ─── Search ───────────────────────────────────────────────────────────────────
+function getFullPool(s){
+  if(!_refData) return [];
+  if(s==='1') return _refData.recreation||[];
+  if(s==='2'||s==='4s') return _refData.skills||[];
+  if(s==='3') return (_refData.values||[]).concat(_refData.domains||[]);
+  if(s==='4r') return _refData.resources||[];
+  return [];
+}
 window.runSearch = function(screen, q){
   var s=String(screen);
   _searchQ[s]=q;
@@ -816,7 +824,7 @@ window.runSearch = function(screen, q){
     var warnEl=document.getElementById('title-warning-2');
     if(warnEl) warnEl.innerHTML=flagged?'<div class="warning-msg">Gentle note: titles like "'+esc(flagged)+'" carry a level of knowledge we ask about separately. Try the role name on its own.</div>':'';
   }
-  var pool=getPool(s);
+  var pool=q&&q.length>=1?getFullPool(s):getPool(s);
   var res=[];
   if(q&&q.length>=1){var ql=q.toLowerCase();res=pool.filter(function(r){return matchesQuery(r,ql);}).slice(0,25);}
   var container=document.getElementById('search-results-'+s); if(!container) return;
@@ -1887,4 +1895,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.34 | LAST CHANGE: Fix esc() bug on drill onclick values - ampersands in category names now pass through correctly | Date: 2026-06-30 -->
+<!-- Version: V2.35 | LAST CHANGE: Search covers all items across all categories regardless of drill state | Date: 2026-06-30 -->
