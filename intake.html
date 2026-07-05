@@ -1,4 +1,4 @@
-<!-- Version: V2.35 | LAST CHANGE: Search covers all items across all categories regardless of drill state | Date: 2026-06-30 -->
+<!-- Version: V2.36 | LAST CHANGE: Pass 1 - copy fixes, domains split, postal code step, expression moved to end, share button | Date: 2026-07-05 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -322,6 +322,7 @@ var _postal      = '';
 var _interests   = [];
 var _skills      = [];
 var _values      = [];
+var _domains     = [];
 var _needsSkill  = [];
 var _needsRes    = [];
 var _methods     = [];
@@ -451,6 +452,7 @@ async function loadIntake(){
       _interests=parseTagStr(d.interests,'level');
       _skills=parseTagStr(d.skills,'level');
       _values=parseTagStr(d.values,'level');
+      _domains=parseTagStr(d.domains,'level');
       var np=parseNeedsStr(d.needs);
       _needsSkill=np.filter(function(n){return n.ntype!=='resource';});
       _needsRes=np.filter(function(n){return n.ntype==='resource';});
@@ -480,6 +482,7 @@ function autoSave(){
   var iStr=_interests.map(function(s){return s.item+(s.level?':'+s.level:'');}).join('|');
   var sStr=_skills.map(function(s){return s.item+(s.level?':'+s.level:'');}).join('|');
   var vStr=_values.map(function(s){return s.item+':'+(s.category||'')+':'+(s.level||'');}).join('|');
+  var dStr=_domains.map(function(s){return s.item+(s.level?':'+s.level:'');}).join('|');
   var nStr=[].concat(
     _needsSkill.map(function(s){return s.item+(s.local?':local':'')+':skill'+(s.category?':'+s.category:'');}),
     _needsRes.map(function(s){return s.item+(s.local?':local':'')+':thing'+(s.category?':'+s.category:'');})
@@ -492,6 +495,7 @@ function autoSave(){
     +'&interests='+encodeURIComponent(iStr)
     +'&skills='+encodeURIComponent(sStr)
     +'&values='+encodeURIComponent(vStr)
+    +'&domains='+encodeURIComponent(dStr)
     +'&needs='+encodeURIComponent(nStr)
     +'&methods='+encodeURIComponent(mStr)
     +'&expression='+encodeURIComponent(_expression)
@@ -674,10 +678,13 @@ function addItem(screen, item, category){
   if(arr.some(function(r){return r.item===item;})){toast('Already added');return;}
   if(s==='1') _interests.unshift({item:item,category:category||'',level:''});
   else if(s==='2') _skills.unshift({item:item,category:category||'',level:''});
-  else if(s==='3') _values.unshift({item:item,category:category||'',level:''});
+  else if(s==='3'){
+    if(_valTab==='domains'||(!_editMode&&_screen2step==='domains')) _domains.unshift({item:item,category:category||'',level:''});
+    else _values.unshift({item:item,category:category||'',level:''});
+  }
   else if(s==='4s'){_needsSkill.unshift({item:item,category:category||(_drill['4s']&&_drill['4s'].parentCat)||'',local:false,ntype:'skill'});var tc=document.getElementById('needs-type-chips');if(tc)tc.style.display='';setTimeout(function(){if(_needsCat)window.setNeedsCat(_needsCat);},50);}
   else if(s==='4r'){_needsRes.unshift({item:item,category:category||(_drill['4r']&&_drill['4r'].parentCat)||'',local:false,ntype:'resource'});var tc2=document.getElementById('needs-type-chips');if(tc2)tc2.style.display='';setTimeout(function(){if(_needsCat)window.setNeedsCat(_needsCat);},50);}
-  toast('Added below \u2193');
+  toast('Added below ↓');
   clearSearch(s);
   updateAddedSection(s);
 }
@@ -686,7 +693,7 @@ function getArr(s){
   s=String(s);
   if(s==='1') return _interests;
   if(s==='2') return _skills;
-  if(s==='3') return _values;
+  if(s==='3') return _values.concat(_domains);
   if(s==='4s') return _needsSkill;
   if(s==='4r') return _needsRes;
   return [];
@@ -699,16 +706,39 @@ function refreshNeedsVisible(){
   }
 }
 window.removeItem = function(screen, idx){
-  getArr(String(screen)).splice(idx,1);
-  updateAddedSection(String(screen));
-  if(String(screen)==='4s'||String(screen)==='4r') refreshNeedsVisible();
-  else window.renderDrill(String(screen),'drill-'+String(screen));
+  var s=String(screen);
+  if(s==='3'){
+    // For screen 3, need to determine if item is from _values or _domains
+    // Combined array is _values.concat(_domains)
+    if(idx<_values.length){
+      _values.splice(idx,1);
+    } else {
+      _domains.splice(idx-_values.length,1);
+    }
+  } else {
+    getArr(s).splice(idx,1);
+  }
+  updateAddedSection(s);
+  if(s==='4s'||s==='4r') refreshNeedsVisible();
+  else window.renderDrill(s,'drill-'+s);
 };
 
 window.setLevel = function(screen, idx, level){
-  var arr=getArr(String(screen));
+  var s=String(screen);
+  var arr;
+  if(s==='3'){
+    // For screen 3, determine which array and adjust index
+    if(idx<_values.length){
+      arr=_values;
+    } else {
+      arr=_domains;
+      idx=idx-_values.length;
+    }
+  } else {
+    arr=getArr(s);
+  }
   if(!arr[idx]) return;
-  if(String(screen)==='3'){
+  if(s==='3'){
     arr[idx].level=(arr[idx].level===level?'':level);
     updateAddedSection('3');
     return;
@@ -718,7 +748,7 @@ window.setLevel = function(screen, idx, level){
   var pos=parts.indexOf(level);
   if(pos>-1) parts.splice(pos,1); else parts.push(level);
   arr[idx].level=parts.join(',');
-  updateAddedSection(String(screen));
+  updateAddedSection(s);
 };
 
 window.toggleLocal = function(screen, idx){
@@ -1192,6 +1222,7 @@ function render(){
   }
   if(_screen===0){ renderProfile(el,false); return; }
   if(_screen==='1b'){ renderScreen1b(el); return; }
+  if(_screen==='share'){ renderScreenShare(el); return; }
   var fn={1:renderScreen1,2:renderScreen2,3:renderScreen3,4:renderScreen4}[_screen];
   if(fn) fn(el);
 }
@@ -1435,6 +1466,20 @@ window.confirmExpressionCustom=function(){
   else renderScreen1b(null);
 };
 
+function renderScreenShare(el){
+  var cont=document.getElementById('app-content'); if(!cont) return;
+  var pageUrl=_appearId?'https://appear.network/dl/page/s/e13594/r/'+encodeURIComponent(_appearId):'';
+  cont.innerHTML='<div style="padding:20px 0;">'
+    +'<h2 style="margin-bottom:20px;">Share your page</h2>'
+    +'<p style="font-size:14px;color:var(--soft);margin-bottom:16px;">Your profile is now live. Share this link with your network.</p>'
+    +'<div style="background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:16px;display:flex;align-items:center;gap:10px;">'
+    +'<input type="text" value="'+esc(pageUrl)+'" readonly style="border:none;background:transparent;flex:1;font-size:13px;color:var(--text);font-family:monospace;outline:none;">'
+    +'<button onclick="navigator.clipboard.writeText(\''+esc(pageUrl)+'\').then(function(){toast(\'Link copied!\');},function(){})" style="background:var(--brand);color:white;border:none;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;">Copy link</button>'
+    +'</div>'
+    +'<button onclick="window.location.href=\'https://appear.network/dl/page/s/e13594/\'" style="width:100%;background:var(--brand);color:white;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;">View your profile</button>'
+    +'</div>'
+    +'<div class="nav-row"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" onclick="goNext()">Done</button></div>';
+}
 
 function renderScreen2(el){
   var cont=document.getElementById('app-content'); if(!cont) return;
@@ -1475,6 +1520,22 @@ function renderScreen2(el){
     return;
   }
 
+  // Intake only: step 3 — postal code
+  if(!_editMode&&_screen2step==='postal'){
+    cont.innerHTML=progressHTML(2)
+      +'<h2>Where are you located?</h2>'
+      +'<p style="font-size:13px;color:var(--soft);margin:0 0 16px;">City, postal code, or region.</p>'
+      +'<input type="text" id="postal-input" placeholder="Your location" value="'+esc(_postal)+'" style="margin-bottom:14px;">'
+      +'<div style="display:flex;gap:10px;font-size:12px;color:var(--muted);margin-bottom:14px;">'
+      +'<span>✓</span>'
+      +'<span>Optional — you can add this anytime.</span>'
+      +'</div>'
+      +navHTML(2);
+    var inp=document.getElementById('postal-input');
+    if(inp){inp.focus();inp.addEventListener('keypress',function(e){if(e.key==='Enter'){goNext();}});}
+    return;
+  }
+
   var methodsRow=_methods.length
     ?'<div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:14px;">'
       +'<button class="edit-btn" style="margin-right:6px;" onclick="openMethodsModal()">✏️</button>'
@@ -1484,7 +1545,7 @@ function renderScreen2(el){
 
   if(_editMode){
     cont.innerHTML=''
-      +'<h2>What skills pays the bills?</h2>'
+      +'<h2>What skill pays the bills?</h2>'
       
             +'<div id="title-warning-2"></div>'
       +'<div style="margin-bottom:14px;">'
@@ -1497,7 +1558,7 @@ function renderScreen2(el){
       +navHTML(2);
   } else {
     cont.innerHTML=progressHTML(2)
-      +'<h2 style="padding-top:8px;">What skills pays the bills?</h2>'
+      +'<h2 style="padding-top:8px;">What skill pays the bills?</h2>'
       
             +'<div id="title-warning-2"></div>'
       +screenSearchHTML('2','Search skills to add...')
@@ -1545,8 +1606,10 @@ function buildValAddedHTML(arr, label){
   h+=valArrowSpan;
   h+='</div></div>';
   h+='<div id="'+bodyId+'" style="display:block;"><div class="practice-grid">';
-  arr.forEach(function(item){
-    var idx=_values.indexOf(item);
+  arr.forEach(function(item,i){
+    // Calculate combined index: if this item is in _domains, add _values.length
+    var idx=i;
+    if(arr===_domains) idx=_values.length+i;
     var btns='';
     ['Exploring','Engaged','Leading'].forEach(function(lv){
       var sel=item.level===lv;
@@ -1556,7 +1619,7 @@ function buildValAddedHTML(arr, label){
     h+='<div class="practice-item-header">';
     h+='<div>';
     h+='<div class="practice-item-name">'+esc(item.item)+'</div>';
-    if(item.category&&item.category!=='domain') h+='<div style="font-size:11px;color:var(--muted);margin-top:2px;">'+esc(item.category)+'</div>';
+    if(item.category) h+='<div style="font-size:11px;color:var(--muted);margin-top:2px;">'+esc(item.category)+'</div>';
     h+='</div>';
     h+='<button class="practice-item-x" onclick="removeItem(\'3\','+idx+')">×</button></div>';
     h+='<div class="practice-options">'+btns+'</div>';
@@ -1567,14 +1630,11 @@ function buildValAddedHTML(arr, label){
 }
 
 
-function domainChipHTML(item){
-  var isAdded=_values.some(function(v){return v.item===item;});
-  return '<div class="item-chip'+(isAdded?' added':'')+'" onclick="addItemFromChip(\'3\',\''+esc(item)+'\',\'domain\')">' +esc(item)+'</div>';
-}
+
 function renderScreen3(el){
   var cont=document.getElementById('app-content'); if(!cont) return;
-  var valAdded=_values.filter(function(v){return v.category&&v.category!=='domain';});
-  var domAdded=_values.filter(function(v){return !v.category||v.category==='domain';});
+  var valAdded=_values;
+  var domAdded=_domains;
 
   // Build 6-category Values UI (used in both intake and edit Values tab)
   function buildCareCatHTML(){
@@ -1631,13 +1691,13 @@ function renderScreen3(el){
       var domChips='<div class="item-chips">';
       doms.forEach(function(r){
         var item=r.item||r;
-        var isAdded=_values.some(function(v){return v.item===item;});
-        domChips+=domainChipHTML(item);
+        var isAdded=_domains.some(function(v){return v.item===item;});
+        domChips+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="addItemFromChip(\'3\',\''+esc(item)+'\',\'domain\')">' +esc(item)+'</div>';
       });
       domChips+='<div class="item-chip" style="border-style:dashed;color:var(--brand);font-weight:700;" onclick="showCustomAdd(\'3\',\'domain\')">+ Other</div>';
       domChips+='</div>';
       cont.innerHTML=progressHTML(3)
-        +'<h2>Which domains do you most like to apply your skills?</h2>'
+        +'<h2>Which domains are you most interested in?</h2>'
         +screenSearchHTML('3','Search domains...')
         +domChips
         +'<div id="added-3-domains">'+buildValAddedHTML(domAdded,'Added domains')+'</div>'
@@ -1659,8 +1719,8 @@ function renderScreen3(el){
     chipsHTML='<div class="ideas-prompt">Areas where you put your energy.</div><div class="item-chips">';
     doms2.forEach(function(r){
       var item=r.item||r;
-      var isAdded=_values.some(function(v){return v.item===item;});
-      chipsHTML+=domainChipHTML(item);
+      var isAdded=_domains.some(function(v){return v.item===item;});
+      chipsHTML+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="addItemFromChip(\'3\',\''+esc(item)+'\',\'domain\')">' +esc(item)+'</div>';
     });
     chipsHTML+='</div>';
   }
@@ -1719,7 +1779,7 @@ window.addThingItem=function(){
   var local=document.getElementById('thing-local-check');
   var isLocal=local?local.checked:false;
   if(_needsRes.some(function(r){return r.item===item;})){toast('Already added');return;}
-  _needsRes.push({item:item,category:_thingSub,local:isLocal,ntype:'thing'});
+  _needsRes.unshift({item:item,category:_thingSub,local:isLocal,ntype:'thing'});
   autoSave();
   // reset
   if(inp) inp.value='';
@@ -1779,7 +1839,7 @@ window.addSpaceItem=function(){
   var local=document.getElementById('space-local-check');
   var isLocal=local?local.checked:false;
   if(_needsRes.some(function(r){return r.item===item;})){toast('Already added');return;}
-  _needsRes.push({item:item,category:'Space',local:isLocal,ntype:'space'});
+  _needsRes.unshift({item:item,category:'Space',local:isLocal,ntype:'space'});
   autoSave();
   if(inp) inp.value='';
   if(local) local.checked=false;
@@ -1814,11 +1874,15 @@ function renderScreen4(el){
 }
 // ─── Navigation ───────────────────────────────────────────────────────────────
 window.goNext = function(){
-  if(_screen==='1b'){ autoSave(); _screen=2; _screen2step='lang'; render(); return; }
   if(_screen===2&&!_editMode&&_screen2step==='lang'){
     _screen2step='naturally'; render(); return;
   }
   if(_screen===2&&!_editMode&&_screen2step==='naturally'){
+    _screen2step='postal'; render(); return;
+  }
+  if(_screen===2&&!_editMode&&_screen2step==='postal'){
+    var inp=document.getElementById('postal-input');
+    if(inp) _postal=inp.value.trim();
     _screen2step='skills'; render(); return;
   }
   if(_screen===2){
@@ -1837,35 +1901,36 @@ window.goNext = function(){
   }
   autoSave();
   if(_screen===4){
-    // Intake gate: Joy, Skills, Care must each have at least 1 item
-    var missing=[];
-    if(!_interests.length) missing.push('What I enjoy');
-    if(!_skills.length) missing.push('My skills');
-    if(!_values.length) missing.push('What I care about');
-    if(missing.length){
-      toast('Please add at least one item to: '+missing.join(', '));
-      return;
-    }
-    _completed=true; _hasProfile=true; _screen=0; render(); return;
+    // After needs, move to expression screen
+    _screen='1b'; render(); return;
+  }
+  if(_screen==='1b'){
+    // After expression, move to share/completion
+    _completed=true; _hasProfile=true; _screen='share'; render(); return;
+  }
+  if(_screen==='share'){
+    // Complete intake
+    _screen=0; render(); return;
   }
   if(_screen===3&&!_editMode&&_valTab!=='domains'){
     _valTab='domains'; renderScreen3(null); return;
   }
-  if(_screen===1){ _screen2step='lang'; _screen='1b'; render(); return; }
+  if(_screen===1){ _screen++; render(); return; }
   _screen++; render();
 };
 
 window.goBack = function(){
-  if(_screen===2&&!_editMode&&_screen2step==='skills'){
+  if(_screen===2&&!_editMode&&_screen2step==='postal'){
     _screen2step='naturally'; render(); return;
   }
   if(_screen===2&&!_editMode&&_screen2step==='naturally'){
     _screen2step='lang'; render(); return;
   }
   if(_screen===2&&!_editMode&&_screen2step==='lang'){
-    _screen='1b'; render(); return;
+    _screen=1; render(); return;
   }
-  if(_screen==='1b'){ _screen=1; render(); return; }
+  if(_screen==='1b'){ _screen=4; render(); return; }
+  if(_screen==='share'){ _screen='1b'; render(); return; }
   if(_screen===3&&!_editMode&&_valTab==='domains'){
     _valTab=''; renderScreen3(null); return;
   }
@@ -1895,4 +1960,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.35 | LAST CHANGE: Search covers all items across all categories regardless of drill state | Date: 2026-06-30 -->
+<!-- Version: V2.36 | LAST CHANGE: Pass 1 - copy fixes, domains split, postal code step, expression moved to end, share button | Date: 2026-07-05 -->
