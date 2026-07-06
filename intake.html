@@ -1,5 +1,5 @@
-<!-- Version: V2.42 | Date: 2026-07-05 | LAST CHANGE: Person fixes - single breadcrumb, re-tap deselect, Recreation buddy pulls recreation pool, profile shows sub-type, three sections (Person/Space/Thing), dupe fix -->
-<!DOCTYPE html> 
+<!-- Version: V2.43 | Date: 2026-07-05 | LAST CHANGE: Recreation buddy uses flat recreation chips + search (Option B), saves as Recreation buddy / recType / item, fixes category-missing cascade -->
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -405,15 +405,7 @@ function getPool(screen){
   if(s==='1') return getRecPool(d);
   if(s==='2') return getSkillPool(d);
   if(s==='3') return getValuePool(d);
-  if(s==='4s'){
-    // Recreation buddy pulls the recreation pool; all other person types pull skills
-    if(_personSubType==='Recreation buddy'){
-      var recBase=(_refData&&_refData.recreation)||[];
-      if(d&&d.parentCat) return recBase.filter(function(r){return r.category===d.parentCat;});
-      return recBase;
-    }
-    return getSkillPool(d);
-  }
+  if(s==='4s') return getSkillPool(d);
   if(s==='4r') return getResPool(d);
   return [];
 }
@@ -684,10 +676,61 @@ window.setPersonSubType=function(sub){
     +'<span style="cursor:pointer;text-decoration:underline;" onclick="window.setPersonSubType(\''+esc(sub)+'\')">Person</span>'
     +' <span style="color:var(--muted);margin:0 4px;">›</span>'+esc(sub)+'</div>';
   resetDrillTo('4s',0);
-  var inner=screenSearchHTML('4s','Search to add...',true)+'<div id="drill-4s"></div>';
   var cont=document.getElementById('needs-cat-content'); if(!cont) return;
-  cont.innerHTML=inner;
-  window.renderDrill('4s','drill-4s');
+  if(sub==='Recreation buddy'){
+    // Flat recreation chips + search — no parent-cat drill
+    cont.innerHTML=screenSearchHTML('4s','Search to add...',true)+'<div id="rec-buddy-chips"></div>';
+    renderRecBuddyChips();
+  } else {
+    // Skill drill for Skills/services, Accountability buddy, Other
+    cont.innerHTML=screenSearchHTML('4s','Search to add...',true)+'<div id="drill-4s"></div>';
+    window.renderDrill('4s','drill-4s');
+  }
+};
+function renderRecBuddyChips(){
+  var el=document.getElementById('rec-buddy-chips'); if(!el) return;
+  var pool=(_refData&&_refData.recreation)||[];
+  var chips=shuffle(pool.slice()).slice(0,30);
+  var html='<div class="ideas-prompt">Here are some ideas to get you started.</div><div class="item-chips">';
+  chips.forEach(function(r){
+    var item=r.item||r;
+    var isPending=_pendingNeedsItem.item===item;
+    var isAdded=_needsSkill.some(function(x){return x.item===item;});
+    html+='<div class="item-chip'+(isAdded?' added':isPending?' selected':'')+'" onclick="selectRecBuddyItem(\''+esc(item)+'\')">'+esc(item)+'</div>';
+  });
+  html+='<div class="item-chip" style="border-style:dashed;color:var(--brand);font-weight:700;" onclick="showCustomAdd(\'4s\',\'\')">+ Other</div>';
+  html+='</div>';
+  if(_pendingNeedsItem.item){
+    html+='<div id="needs-confirm-bar" style="margin-top:12px;padding:12px;background:var(--input-bg);border-radius:10px;display:flex;align-items:center;justify-content:space-between;">'
+      +'<span style="font-size:14px;color:var(--soft);">'+esc(_pendingNeedsItem.item)+'</span>'
+      +'<div style="display:flex;gap:8px;">'
+      +'<button class="btn-outlined" style="padding:6px 14px;font-size:13px;" onclick="_pendingNeedsItem={item:\'\',category:\'\'};renderRecBuddyChips()">Cancel</button>'
+      +'<button class="btn-primary" style="padding:6px 14px;font-size:13px;" onclick="confirmRecBuddyItem()">Add '+esc(_pendingNeedsItem.item)+'</button>'
+      +'</div></div>';
+  }
+  el.innerHTML=html;
+}
+window.selectRecBuddyItem=function(item){
+  _pendingNeedsItem={item:item,category:''};
+  renderRecBuddyChips();
+};
+window.confirmRecBuddyItem=function(){
+  if(!_pendingNeedsItem.item) return;
+  var item=_pendingNeedsItem.item;
+  // Look up the recType for this recreation item to build the middle segment
+  var pool=(_refData&&_refData.recreation)||[];
+  var match=pool.find(function(r){return (r.item||r)===item;});
+  var recType=match&&match.recType?match.recType:'';
+  var cat='Recreation buddy'+(recType?' / '+recType:'')+' / '+item;
+  // Category format: Recreation buddy / [recType] / [item]
+  var catNoItem='Recreation buddy'+(recType?' / '+recType:'');
+  if(_needsSkill.some(function(r){return r.item===item&&r.category===catNoItem;})){toast('Already added');return;}
+  _needsSkill.unshift({item:item,category:catNoItem,local:false,ntype:'skill'});
+  _pendingNeedsItem={item:'',category:''};
+  autoSave();
+  refreshNeedsVisible();
+  refreshNeedsSummary();
+  renderRecBuddyChips();
 };
 window.confirmNeedsItem = function(){
   if(!_pendingNeedsItem.item) return;
@@ -767,7 +810,22 @@ function addItem(screen, item, category){
   if(arr.some(function(r){return r.item===item;})){toast('Already added');return;}
   if(s==='1') _interests.unshift({item:item,category:category||'',level:''});
   else if(s==='2') _skills.unshift({item:item,category:category||'',level:''});
-  else if(s==='4s'){var pcat4s=category||(_drill['4s']&&_drill['4s'].parentCat)||'';if(_needsCat==='skill'&&_personSubType&&pcat4s.indexOf(_personSubType)!==0){pcat4s=_personSubType+(pcat4s?' / '+pcat4s:'');}_needsSkill.unshift({item:item,category:pcat4s,local:false,ntype:'skill'});var tc=document.getElementById('needs-type-chips');if(tc)tc.style.display='';setTimeout(function(){if(_needsCat)window.setNeedsCat(_needsCat);},50);}
+  else if(s==='4s'){
+    var pcat4s;
+    if(_needsCat==='skill'&&_personSubType==='Recreation buddy'){
+      // Recreation buddy: build Recreation buddy / [recType] from the recreation item's own data
+      var recPool=(_refData&&_refData.recreation)||[];
+      var recMatch=recPool.find(function(r){return (r.item||r)===item;});
+      var rt=recMatch&&recMatch.recType?recMatch.recType:'';
+      pcat4s='Recreation buddy'+(rt?' / '+rt:'');
+    } else {
+      pcat4s=category||(_drill['4s']&&_drill['4s'].parentCat)||'';
+      if(_needsCat==='skill'&&_personSubType&&pcat4s.indexOf(_personSubType)!==0){pcat4s=_personSubType+(pcat4s?' / '+pcat4s:'');}
+    }
+    _needsSkill.unshift({item:item,category:pcat4s,local:false,ntype:'skill'});
+    var tc=document.getElementById('needs-type-chips');if(tc)tc.style.display='';
+    setTimeout(function(){if(_needsCat)window.setNeedsCat(_needsCat);},50);
+  }
   else if(s==='4r'){_needsRes.unshift({item:item,category:category||(_drill['4r']&&_drill['4r'].parentCat)||'',local:false,ntype:'resource'});var tc2=document.getElementById('needs-type-chips');if(tc2)tc2.style.display='';setTimeout(function(){if(_needsCat)window.setNeedsCat(_needsCat);},50);}
   toast('Added below ↓');
   clearSearch(s);
@@ -970,6 +1028,7 @@ function buildAddedHTML(s){
 function getFullPool(s){
   if(!_refData) return [];
   if(s==='1') return _refData.recreation||[];
+  if(s==='4s'&&_personSubType==='Recreation buddy') return _refData.recreation||[];
   if(s==='2'||s==='4s') return _refData.skills||[];
   if(s==='3') return (_refData.values||[]).concat(_refData.domains||[]);
   if(s==='4r') return _refData.resources||[];
@@ -2163,4 +2222,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.42 | Date: 2026-07-05 | LAST CHANGE: Person fixes - single breadcrumb, re-tap deselect, Recreation buddy pulls recreation pool, profile shows sub-type, three sections (Person/Space/Thing), dupe fix -->
+<!-- Version: V2.43 | Date: 2026-07-05 | LAST CHANGE: Recreation buddy uses flat recreation chips + search (Option B), saves as Recreation buddy / recType / item, fixes category-missing cascade -->
