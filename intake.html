@@ -1,5 +1,5 @@
-<!-- Version: V2.36 | LAST CHANGE: Pass 1 - copy fixes, domains split, postal code step, expression moved to end, share button | Date: 2026-07-05 -->
-<!DOCTYPE html> 
+<!-- Version: V2.37 | LAST CHANGE: Pass 1 - copy fixes, domains split, postal code step, expression moved to end, share button | Date: 2026-07-05 -->
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -349,6 +349,7 @@ function resetDrillTo(s,level){
 var _searchQ={};
 var _customItem='';
 var _customScreen='';
+var _customIsDomain=false;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -452,7 +453,7 @@ async function loadIntake(){
       _interests=parseTagStr(d.interests,'level');
       _skills=parseTagStr(d.skills,'level');
       _values=parseTagStr(d.values,'level');
-      _domains=parseTagStr(d.domains,'level');
+      _domains=parseTagStr(d.domains,'level').map(function(dm){dm.category='domain';return dm;});
       var np=parseNeedsStr(d.needs);
       _needsSkill=np.filter(function(n){return n.ntype!=='resource';});
       _needsRes=np.filter(function(n){return n.ntype==='resource';});
@@ -642,19 +643,23 @@ window.confirmNeedsItem = function(){
 };
 window.addItemFromChip = function(screen, item, category){
   var s=String(screen);
-  var arr=getArr(s);
+  // Determine target array for screen 3 based on whether this is a domain
+  var isDomain=(String(category||'').toLowerCase()==='domain');
+  var targetArr;
+  if(s==='3') targetArr=isDomain?_domains:_values;
+  else targetArr=getArr(s);
   // Already added — deselect and remove
-  if(arr.some(function(r){return r.item===item;})){
-    var idx=arr.findIndex(function(r){return r.item===item;});
-    if(idx>-1) arr.splice(idx,1);
+  var existingIdx=targetArr.findIndex(function(r){return r.item===item;});
+  if(existingIdx>-1){
+    targetArr.splice(existingIdx,1);
     document.querySelectorAll('.item-chips .item-chip').forEach(function(el){
       if(el.textContent.trim()===item) el.classList.remove('added');
     });
     if(s==='3'){
       var el0v=document.getElementById('added-3-values');
       var el0d=document.getElementById('added-3-domains');
-      if(el0v) el0v.innerHTML=buildValAddedHTML(_values.filter(function(v){return v.category&&v.category!=='domain';}), 'Added values');
-      if(el0d) el0d.innerHTML=buildValAddedHTML(_values.filter(function(v){return !v.category||v.category==='domain';}), 'Added domains');
+      if(el0v) el0v.innerHTML=buildValAddedHTML(_values, 'Added values');
+      if(el0d) el0d.innerHTML=buildValAddedHTML(_domains, 'Added domains');
     } else { updateAddedSection(s); }
     if(s==='4s'||s==='4r') refreshNeedsSummary();
     autoSave();
@@ -665,23 +670,39 @@ window.addItemFromChip = function(screen, item, category){
     if(el.textContent.trim()===item) el.classList.add('added');
   });
   if(s==='3'){
+    // Refresh both added sections
+    var elv=document.getElementById('added-3-values');
+    var eld=document.getElementById('added-3-domains');
+    if(elv) elv.innerHTML=buildValAddedHTML(_values, 'Added values');
+    if(eld) eld.innerHTML=buildValAddedHTML(_domains, 'Added domains');
     // Auto-expand the section that got a new item
-    if(category&&category!=='domain') expandValSection('val-body-Added-values','val-arrow-Added-values');
-    else expandValSection('val-body-Added-domains','val-arrow-Added-domains');
+    if(isDomain) expandValSection('val-body-Added-domains','val-arrow-Added-domains');
+    else expandValSection('val-body-Added-values','val-arrow-Added-values');
   }
   if(s==='4s'||s==='4r') refreshNeedsSummary();
 };
 
 function addItem(screen, item, category){
   var s=String(screen);
+  if(s==='3'){
+    // Route by category: domain (any case) goes to _domains, everything else to _values
+    var isDomainCat=String(category||'').toLowerCase()==='domain';
+    if(isDomainCat){
+      if(_domains.some(function(r){return r.item===item;})){toast('Already added');return;}
+      _domains.unshift({item:item,category:'domain',level:''});
+    } else {
+      if(_values.some(function(r){return r.item===item;})){toast('Already added');return;}
+      _values.unshift({item:item,category:category||'',level:''});
+    }
+    toast('Added below ↓');
+    clearSearch(s);
+    updateAddedSection(s);
+    return;
+  }
   var arr=getArr(s);
   if(arr.some(function(r){return r.item===item;})){toast('Already added');return;}
   if(s==='1') _interests.unshift({item:item,category:category||'',level:''});
   else if(s==='2') _skills.unshift({item:item,category:category||'',level:''});
-  else if(s==='3'){
-    if(_valTab==='domains'||(!_editMode&&_screen2step==='domains')) _domains.unshift({item:item,category:category||'',level:''});
-    else _values.unshift({item:item,category:category||'',level:''});
-  }
   else if(s==='4s'){_needsSkill.unshift({item:item,category:category||(_drill['4s']&&_drill['4s'].parentCat)||'',local:false,ntype:'skill'});var tc=document.getElementById('needs-type-chips');if(tc)tc.style.display='';setTimeout(function(){if(_needsCat)window.setNeedsCat(_needsCat);},50);}
   else if(s==='4r'){_needsRes.unshift({item:item,category:category||(_drill['4r']&&_drill['4r'].parentCat)||'',local:false,ntype:'resource'});var tc2=document.getElementById('needs-type-chips');if(tc2)tc2.style.display='';setTimeout(function(){if(_needsCat)window.setNeedsCat(_needsCat);},50);}
   toast('Added below ↓');
@@ -760,12 +781,10 @@ window.toggleLocal = function(screen, idx){
 function updateAddedSection(s){
   if(s==='3'){
     // Update in place instead of full re-render to avoid wiping added sections
-    var valAdded=_values.filter(function(v){return v.category&&v.category!=='domain';});
-    var domAdded=_values.filter(function(v){return !v.category||v.category==='domain';});
     var elV=document.getElementById('added-3-values');
     var elD=document.getElementById('added-3-domains');
-    if(elV) elV.innerHTML=buildValAddedHTML(valAdded,'Added values');
-    if(elD) elD.innerHTML=buildValAddedHTML(domAdded,'Added domains');
+    if(elV) elV.innerHTML=buildValAddedHTML(_values,'Added values');
+    if(elD) elD.innerHTML=buildValAddedHTML(_domains,'Added domains');
     return;
   }
   var el=document.getElementById('added-'+s);
@@ -891,6 +910,20 @@ function clearSearch(s){
 // ─── Custom add ───────────────────────────────────────────────────────────────
 window.showCustomAdd = function(screen, item){
   _customScreen=String(screen);
+  // Domain custom-add: item param is the literal 'domain' signal, not an item name
+  var isDomainAdd=(String(item||'').toLowerCase()==='domain'&&String(screen)==='3');
+  if(isDomainAdd){
+    _customItem=''; _customCareParent=''; _customIsDomain=true;
+    var dcont=document.getElementById('search-results-3');
+    if(!dcont) return;
+    dcont.innerHTML='<div class="custom-add-box">'
+      +'<input type="text" id="custom-item-input" placeholder="Add your own domain..." style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;margin-bottom:8px;">'
+      +'<button class="custom-add-confirm" onclick="confirmCustomAdd()">Add to my list</button>'
+      +'<button class="custom-add-cancel" onclick="cancelCustomAdd()">Cancel</button>'
+      +'</div>';
+    return;
+  }
+  _customIsDomain=false;
   // Detect if item is a care category label (parent cat, not an item name)
   var isCareParent=CARE_CATS&&CARE_CATS.some(function(c){return c.label===item;});
   if(isCareParent){
@@ -948,6 +981,13 @@ window.confirmCustomAdd = function(){
   var itemInp=document.getElementById('custom-item-input');
   if(itemInp&&itemInp.value.trim()) _customItem=toTitleCase(itemInp.value.trim());
   if(!_customItem){toast('Please enter an item name');return;}
+  // Domain custom-add: route straight to _domains, no category dropdown
+  if(_customIsDomain){
+    addItem('3',_customItem,'domain');
+    var dc=document.getElementById('search-results-3'); if(dc) dc.innerHTML='';
+    _customItem=''; _customScreen=''; _customIsDomain=false;
+    return;
+  }
   var cat=_customCareParent||'';
   if(!cat){
     // Check drill state first (auto-categorized from +Other in drill)
@@ -1333,8 +1373,8 @@ function renderProfile(el, viewerMode){
     +'</div></div>'
     +'<div class="profile-lang-row" id="profile-lang-row">'+buildLangRowHTML()+'</div>'
     +(function(viewerMode){
-    var valAdded=_values.filter(function(v){return v.category&&v.category!=='domain';});
-    var domAdded=_values.filter(function(v){return !v.category||v.category==='domain';});
+    var valAdded=_values;
+    var domAdded=_domains;
     var careActions=!viewerMode?'<div class="profile-section-actions"><button class="edit-btn" onclick="window.jumpTo(3)">✏️ Edit</button></div>':'';
     var valSection=valAdded.length?'<div style="margin-bottom:8px;"><div style="font-size:10px;font-weight:700;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">VALUES</div><div class="profile-tags">'+valAdded.map(function(v){var lvl=v.level?'<span class="tag-level">'+esc(v.level)+'</span>':'';return '<div class="profile-tag">'+esc(v.item)+lvl+'</div>';}).join('')+'</div></div>':'';
     var domSection=domAdded.length?'<div><div style="font-size:10px;font-weight:700;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">DOMAINS</div><div class="profile-tags">'+domAdded.map(function(v){var lvl=v.level?'<span class="tag-level">'+esc(v.level)+'</span>':'';return '<div class="profile-tag">'+esc(v.item)+lvl+'</div>';}).join('')+'</div></div>':'';
@@ -1425,7 +1465,7 @@ function renderScreen1b(el){
   }
   var customHTML='<div id="expression-custom"></div>';
   cont.innerHTML=(_editMode?'':progressHTML(1))
-    +'<h2>What thing in your life expresses you the most?</h2>'
+    +'<h2>What expresses you the most?</h2>'
     +chipsHTML
     +addedHTML
     +customHTML
@@ -1468,15 +1508,15 @@ window.confirmExpressionCustom=function(){
 
 function renderScreenShare(el){
   var cont=document.getElementById('app-content'); if(!cont) return;
-  var pageUrl=_appearId?'https://appear.network/dl/page/s/e13594/r/'+encodeURIComponent(_appearId):'';
+  var pageUrl=_appearId?'https://creating.works/intake.html?show='+encodeURIComponent(_appearId):'';
   cont.innerHTML='<div style="padding:20px 0;">'
     +'<h2 style="margin-bottom:20px;">Share your page</h2>'
-    +'<p style="font-size:14px;color:var(--soft);margin-bottom:16px;">Your profile is now live. Share this link with your network.</p>'
+    +'<p style="font-size:14px;color:var(--soft);margin-bottom:16px;">Share this link with your network. People who align with what you bring find you from there.</p>'
     +'<div style="background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:16px;display:flex;align-items:center;gap:10px;">'
     +'<input type="text" value="'+esc(pageUrl)+'" readonly style="border:none;background:transparent;flex:1;font-size:13px;color:var(--text);font-family:monospace;outline:none;">'
-    +'<button onclick="navigator.clipboard.writeText(\''+esc(pageUrl)+'\').then(function(){toast(\'Link copied!\');},function(){})" style="background:var(--brand);color:white;border:none;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;">Copy link</button>'
+    +'<button onclick="navigator.clipboard.writeText(\''+esc(pageUrl)+'\').then(function(){toast(\'Link copied\');},function(){})" style="background:var(--brand);color:white;border:none;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;">Copy link</button>'
     +'</div>'
-    +'<button onclick="window.location.href=\'https://appear.network/dl/page/s/e13594/\'" style="width:100%;background:var(--brand);color:white;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;">View your profile</button>'
+    +'<button onclick="window.location.href=\''+esc(pageUrl)+'\'" style="width:100%;background:var(--brand);color:white;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;">View your profile</button>'
     +'</div>'
     +'<div class="nav-row"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" onclick="goNext()">Done</button></div>';
 }
@@ -1523,13 +1563,8 @@ function renderScreen2(el){
   // Intake only: step 3 — postal code
   if(!_editMode&&_screen2step==='postal'){
     cont.innerHTML=progressHTML(2)
-      +'<h2>Where are you located?</h2>'
-      +'<p style="font-size:13px;color:var(--soft);margin:0 0 16px;">City, postal code, or region.</p>'
-      +'<input type="text" id="postal-input" placeholder="Your location" value="'+esc(_postal)+'" style="margin-bottom:14px;">'
-      +'<div style="display:flex;gap:10px;font-size:12px;color:var(--muted);margin-bottom:14px;">'
-      +'<span>✓</span>'
-      +'<span>Optional — you can add this anytime.</span>'
-      +'</div>'
+      +'<h2>Postal code</h2>'
+      +'<input type="text" id="postal-input" placeholder="Your postal code" value="'+esc(_postal)+'" style="margin-bottom:14px;">'
       +navHTML(2);
     var inp=document.getElementById('postal-input');
     if(inp){inp.focus();inp.addEventListener('keypress',function(e){if(e.key==='Enter'){goNext();}});}
@@ -1619,7 +1654,12 @@ function buildValAddedHTML(arr, label){
     h+='<div class="practice-item-header">';
     h+='<div>';
     h+='<div class="practice-item-name">'+esc(item.item)+'</div>';
-    if(item.category) h+='<div style="font-size:11px;color:var(--muted);margin-top:2px;">'+esc(item.category)+'</div>';
+    if(item.category){
+      var isDom=String(item.category).toLowerCase()==='domain';
+      var catColor=isDom?'var(--brand)':'var(--muted)';
+      var catLabel=isDom?'Domain':item.category;
+      h+='<div style="font-size:11px;color:'+catColor+';margin-top:2px;">'+esc(catLabel)+'</div>';
+    }
     h+='</div>';
     h+='<button class="practice-item-x" onclick="removeItem(\'3\','+idx+')">×</button></div>';
     h+='<div class="practice-options">'+btns+'</div>';
