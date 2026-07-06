@@ -1,5 +1,5 @@
-<!-- Version: V2.39 | Date: 2026-07-05 | LAST CHANGE: Path A - Retired toggle, postal after skills, Person/Space/Thing seeking reframe, multi-select confirmed -->
-<!DOCTYPE html> 
+<!-- Version: V2.40 | Date: 2026-07-05 | LAST CHANGE: Retired right-justify, Person sub-chips (Skills/services, Recreation buddy, Accountability buddy, Other) with parent-cat drilldown and sub-type category prefix -->
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -352,6 +352,7 @@ var _customItem='';
 var _customScreen='';
 var _customIsDomain=false;
 var _retired=false;
+var _personSubType='';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -427,7 +428,10 @@ function getSkillSubCats(parentCat){
 async function loadRefData(){
   try{var res=await fetch(GS_URL+'?action=getReferenceData');_refData=await res.json();}
   catch(e){_refData={languages:[],skills:[],values:[],domains:[],recreation:[],resources:[]};}
-  // Load parent categories from the reference-data sheet so the list never drifts from the sheet
+  // Ensure personTypes always exists — falls back to sheet Person column values
+  if(!_refData.personTypes||!_refData.personTypes.length){
+    _refData.personTypes=['Skills/services','Recreation buddy','Accountability buddy'];
+  }  // Load parent categories from the reference-data sheet so the list never drifts from the sheet
   try{
     var cres=await fetch(GS_URL+'?action=getCategories');
     var cdata=await cres.json();
@@ -648,10 +652,32 @@ window.selectNeedsItem = function(item, category){
   _pendingNeedsItem={item:item,category:category};
   window.renderDrill('4s','drill-4s');
 };
+window.setPersonSubType=function(sub){
+  _personSubType=sub;
+  var breadcrumbArea=document.getElementById('needs-breadcrumb');
+  if(breadcrumbArea) breadcrumbArea.innerHTML='<div style="font-size:13px;color:var(--brand);margin-bottom:8px;"><span style="cursor:pointer;text-decoration:underline;" onclick="_needsCat=\'\';_personSubType=\'\';renderScreen4(null);">What I\'m seeking</span> <span style="color:var(--muted);margin:0 4px;">›</span>Person</div>';
+  resetDrillTo('4s',0);
+  var inner='<div style="font-size:13px;color:var(--brand);margin-bottom:10px;"><span style="cursor:pointer;text-decoration:underline;" onclick="window.setPersonSubType(\'\')">Person</span> <span style="color:var(--muted);margin:0 4px;">›</span>'+esc(_personSubType)+'</div>'
+    +screenSearchHTML('4s','Search to add...',true)
+    +'<div id="drill-4s"></div>';
+  var cont=document.getElementById('needs-cat-content'); if(!cont) return;
+  cont.innerHTML=inner;
+  window.renderDrill('4s','drill-4s');
+};
 window.confirmNeedsItem = function(){
   if(!_pendingNeedsItem.item) return;
-  window.addItemFromChip('4s',_pendingNeedsItem.item,_pendingNeedsItem.category);
+  var cat=_pendingNeedsItem.category;
+  if(_needsCat==='skill'&&_personSubType){
+    cat=_personSubType+(cat?' / '+cat:'');
+  }
+  var item=_pendingNeedsItem.item;
+  if(_needsSkill.some(function(r){return r.item===item&&r.category===cat;})){toast('Already added');return;}
+  _needsSkill.unshift({item:item,category:cat,local:false,ntype:'skill'});
+  var tc=document.getElementById('needs-type-chips');if(tc)tc.style.display='';
   _pendingNeedsItem={item:'',category:''};
+  autoSave();
+  refreshNeedsSummary();
+  setTimeout(function(){if(_needsCat)window.setNeedsCat(_needsCat);},50);
 };
 window.addItemFromChip = function(screen, item, category){
   var s=String(screen);
@@ -842,14 +868,20 @@ function buildAddedHTML(s){
     +'<div style="display:flex;align-items:center;gap:8px;">'+helpBtn+arrowSpan+'</div></div>';
   var bodyItems=arr.map(function(item,i){
     if(isNeed){
+      var catParts=item.category?item.category.split(' / '):[];
+      var isPersonItem=catParts.length>=1&&(_refData&&_refData.personTypes||[]).concat(['Other']).indexOf(catParts[0])>-1&&_needsCat==='skill'||catParts.length>=1&&['Skills/services','Recreation buddy','Accountability buddy','Other'].indexOf(catParts[0])>-1;
+      var personSubLabel=isPersonItem?catParts[0]:'';
       var catMissing=!item.category;
       var pickerId='need-cat-picker-'+s+'-'+i;
       var catLabel=catMissing
         ?'<div class="need-missing-cat" style="font-size:11px;color:#d32f2f;cursor:pointer;" onclick="window.openNeedCatPicker(\''+s+'\','+i+')">Category missing \u25be</div>'
          +'<div class="cat-picker-inline" id="'+pickerId+'">'+PARENT_CATS.map(function(c){return '<button class="cat-pick-btn" onclick="setNeedCat(\''+s+'\','+i+',\''+c+'\')">'+c+'</button>';}).join('')+'</div>'
-        :'<div class="need-item-cat">'+esc(item.category)+'</div>';
+        :personSubLabel
+          ?'<div style="font-size:11px;color:var(--soft);margin-top:2px;">'+esc(personSubLabel)+'</div>'
+          :'<div class="need-item-cat">'+esc(item.category)+'</div>';
+      var displayName=personSubLabel?item.item:item.item;
       return '<div class="need-item">'
-        +'<div class="need-item-left" id="need-item-wrap-'+s+'-'+i+'" style="position:relative;"><div class="need-item-name">'+esc(item.item)+'</div>'+catLabel+'</div>'
+        +'<div class="need-item-left" id="need-item-wrap-'+s+'-'+i+'" style="position:relative;"><div class="need-item-name">'+esc(displayName)+'</div>'+catLabel+'</div>'
         +'<div class="need-item-right">'
         +'<label class="local-toggle'+(item.local?' active':'')+'" ><input type="checkbox"'+(item.local?' checked':'')+' onchange="toggleLocal(\''+s+'\','+i+')"> 📍 Local</label>'
         +'<button class="practice-item-x" onclick="removeItem(\''+s+'\','+i+')">\u00d7</button>'
@@ -1610,11 +1642,11 @@ function renderScreen2(el){
             +'<div id="title-warning-2"></div>'
       +screenSearchHTML('2','Search skills to add...')
       +'<div id="drill-2"></div>'
-      +'<div id="retired-toggle-row" style="margin:12px 0;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;display:flex;align-items:center;gap:10px;cursor:pointer;" onclick="window.toggleRetired()">'
+      +'<div id="retired-toggle-row" style="margin:12px 0;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:flex-end;gap:10px;cursor:pointer;text-align:right;" onclick="window.toggleRetired()">'
+      +'<span style="font-size:14px;color:var(--text);">Retired / not applicable</span>'
       +'<div id="retired-check" style="width:20px;height:20px;border-radius:4px;border:1.5px solid '+(_retired?'var(--brand)':'var(--border)')+';background:'+(_retired?'var(--brand)':'white')+';display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
       +(_retired?'<svg width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>':'')
       +'</div>'
-      +'<span style="font-size:14px;color:var(--text);">Retired / not applicable</span>'
       +'</div>'
       +'<div id="added-2">'+buildAddedHTML('2')+'</div>'
       +navHTML(2);
@@ -1849,9 +1881,9 @@ window.addThingItem=function(){
 };
 
 window.setNeedsCat=function(cat){
-  if(_needsCat===cat){_needsCat='';renderScreen4(null);return;}
-  // Reset breadcrumb on new selection
+  if(_needsCat===cat){_needsCat='';_personSubType='';renderScreen4(null);return;}
   _needsCat=cat;
+  _personSubType='';
   // Hide all type chips, show breadcrumb
   var typeChips=document.getElementById('needs-type-chips');
   if(typeChips) typeChips.style.display='none';
@@ -1866,10 +1898,23 @@ window.setNeedsCat=function(cat){
   });
   var inner='';
   if(cat==='skill'){
-    resetDrillTo('4s',0);
-    inner=screenSearchHTML('4s','Search for a skill or service...',true)
-      +'<div id="drill-4s"></div>'
-      ;/* added items shown in needs-added-visible below */;
+    if(!_personSubType){
+      // Show Person sub-chips loaded from reference-data Person column
+      var personOpts=(_refData&&_refData.personTypes)||[];
+      var personChips='<div class="sub-chips" style="margin-bottom:14px;border:none;">';
+      personOpts.forEach(function(p){
+        personChips+='<div class="sub-chip" onclick="window.setPersonSubType(\''+esc(p)+'\')">'+esc(p)+'</div>';
+      });
+      personChips+='<div class="sub-chip" onclick="window.setPersonSubType(\'Other\')">+ Other</div>';
+      personChips+='</div>';
+      inner=personChips;
+    } else {
+      // Person sub-type selected — show parent-cat drilldown
+      resetDrillTo('4s',0);
+      inner='<div style="font-size:13px;color:var(--brand);margin-bottom:10px;"><span style="cursor:pointer;text-decoration:underline;" onclick="window.setPersonSubType(\'\')">Person</span> <span style="color:var(--muted);margin:0 4px;">›</span>'+esc(_personSubType)+'</div>'
+        +screenSearchHTML('4s','Search for a skill or service...',true)
+        +'<div id="drill-4s"></div>';
+    }
   } else if(cat==='thing'){
     _thingSub='';
     var subChips=Object.keys(THING_SUBS).map(function(k){
@@ -1888,7 +1933,7 @@ window.setNeedsCat=function(cat){
   }
   var cont=document.getElementById('needs-cat-content'); if(!cont) return;
   cont.innerHTML=inner;
-  if(cat==='skill') window.renderDrill('4s','drill-4s');
+  if(cat==='skill'&&_personSubType) window.renderDrill('4s','drill-4s');
 };
 window.addSpaceItem=function(){
   var inp=document.getElementById('space-detail-input');
@@ -2049,4 +2094,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.39 | Date: 2026-07-05 | LAST CHANGE: Path A - Retired toggle, postal after skills, Person/Space/Thing seeking reframe, multi-select confirmed -->
+<!-- Version: V2.40 | Date: 2026-07-05 | LAST CHANGE: Retired right-justify, Person sub-chips (Skills/services, Recreation buddy, Accountability buddy, Other) with parent-cat drilldown and sub-type category prefix -->
