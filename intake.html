@@ -1,4 +1,4 @@
-<!-- Version: V2.37 | LAST CHANGE: Pass 1 - copy fixes, domains split, postal code step, expression moved to end, share button | Date: 2026-07-05 -->
+<!-- Version: V2.38 | Date: 2026-07-05 | LAST CHANGE: PARENT_CATS loads from reference-data sheet via getCategories -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -298,11 +298,12 @@ var _viewerName  = '';
 
 var GS_URL='https://script.google.com/macros/s/AKfycbzEavMnG4tMeWemoT5FLu9f_zjlKVIJsZLueG4nhw9akK0_nZqpbkZiXrAlWu1Fyhq9/exec';
 
+// PARENT_CATS loads from reference-data sheet via getCategories; this is the fallback if that load fails
 var PARENT_CATS=[
-  'Arts & Culture','Business & Finance','Community & Civic','Events & Gatherings',
-  'Family Wellbeing','Food & Drink','Home & Transportation','Mental Wellbeing',
-  'Nature & Outdoors','Pets & Animal Care','Physical Wellbeing','Recreation & Hobbies',
-  'Self-Expression & Beauty','Technology & Communications'
+  'Arts & Culture','Food & Drink','Physical Wellbeing','Mental Wellbeing',
+  'Family Wellbeing','Self-Expression & Beauty','Home & Construction','Transportation',
+  'Mechanical & Manufacturing','Business & Finance','Community & Civic','Recreation & Hobbies',
+  'Technology & Communications','Nature & Outdoors','Social Events & Gatherings','Pets & Animal Care'
 ];
 var FLAGGED_WORDS=['expert','leader','director','senior','advanced','junior'];
 var REC_TYPES=['Movement & Performance','Sports','Outdoor & Nature','Games & Strategy','Making & Collecting'];
@@ -425,6 +426,14 @@ function getSkillSubCats(parentCat){
 async function loadRefData(){
   try{var res=await fetch(GS_URL+'?action=getReferenceData');_refData=await res.json();}
   catch(e){_refData={languages:[],skills:[],values:[],domains:[],recreation:[],resources:[]};}
+  // Load parent categories from the reference-data sheet so the list never drifts from the sheet
+  try{
+    var cres=await fetch(GS_URL+'?action=getCategories');
+    var cdata=await cres.json();
+    if(cdata&&cdata.categories&&cdata.categories.length){
+      PARENT_CATS=cdata.categories.map(function(c){return c.label;}).filter(Boolean);
+    }
+  }catch(e){}
 }
 async function loadProfile(){
   var id=_viewerMode?_showId:_appearId; if(!id) return;
@@ -2000,4 +2009,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.36 | LAST CHANGE: Pass 1 - copy fixes, domains split, postal code step, expression moved to end, share button | Date: 2026-07-05 -->
+<!-- Version: V2.37 | Date: 2026-07-05 | LAST CHANGE: PARENT_CATS loads from reference-data sheet via getCategories -->
