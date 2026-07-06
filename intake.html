@@ -1,6 +1,6 @@
-<!-- Version: V2.43a | Date: 2026-07-05 | LAST CHANGE: Fixed needs save/parse round-trip - category persists on reload, ntype (skill/space/thing) preserved, position-aware parse handles optional local segment -->
+<!-- Version: V2.44 | Date: 2026-07-06 | LAST CHANGE: Capture eventId from URL, show event title on share screen, change View your profile to View my event profile, change Done to See the group, route to attendees page -->
 <!DOCTYPE html>
-<html lang="en"> 
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -284,12 +284,14 @@
 var _appearId   = null;
 var _showId     = null;
 var _viewerMode = false;
+var _eventId    = '';
 var _viewerPhoto = '';
 var _viewerName  = '';
 
 (function(){
   var params=new URLSearchParams(window.location.search);
   _showId=params.get('show')||null;
+  _eventId=params.get('eventId')||'';
   if(_showId){_viewerMode=true;return;}
   var urlId=params.get('id')||params.get('memberCard');
   if(urlId){_appearId=urlId;try{localStorage.setItem('appear-id',_appearId);}catch(e){}}
@@ -1699,16 +1701,19 @@ window.confirmExpressionCustom=function(){
 function renderScreenShare(el){
   var cont=document.getElementById('app-content'); if(!cont) return;
   var pageUrl=_appearId?'https://creating.works/intake.html?show='+encodeURIComponent(_appearId):'';
-  cont.innerHTML='<div style="padding:20px 0;">'
-    +'<h2 style="margin-bottom:20px;">Share your page</h2>'
+  var eventShareUrl=_eventId&&_appearId?'https://gather.2gather.network/event.html?id='+encodeURIComponent(_eventId)+'&memberCard='+encodeURIComponent(_appearId):'';
+  var eventTitle=_eventId?'Event community':'';
+  var html='<div style="padding:20px 0;">'
+    +(_eventId?'<h2 style="margin-bottom:20px;">'+esc(eventTitle)+'</h2>':'<h2 style="margin-bottom:20px;">Share your page</h2>')
     +'<p style="font-size:14px;color:var(--soft);margin-bottom:16px;">Share this link with your network. People who align with what you bring find you from there.</p>'
     +'<div style="background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:16px;display:flex;align-items:center;gap:10px;">'
     +'<input type="text" value="'+esc(pageUrl)+'" readonly style="border:none;background:transparent;flex:1;font-size:13px;color:var(--text);font-family:monospace;outline:none;">'
     +'<button onclick="navigator.clipboard.writeText(\''+esc(pageUrl)+'\').then(function(){toast(\'Link copied\');},function(){})" style="background:var(--brand);color:white;border:none;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;">Copy link</button>'
     +'</div>'
-    +'<button onclick="window.location.href=\''+esc(pageUrl)+'\'" style="width:100%;background:var(--brand);color:white;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;">View your profile</button>'
+    +'<button onclick="window.location.href=\''+esc(_eventId?eventShareUrl:pageUrl)+'\'" style="width:100%;background:var(--brand);color:white;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;">View my event profile</button>'
     +'</div>'
-    +'<div class="nav-row"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" onclick="goNext()">Done</button></div>';
+    +'<div class="nav-row"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" onclick="goNext()">'+(_eventId?'See the group':'Done')+'</button></div>';
+  cont.innerHTML=html;
 }
 
 function renderScreen2(el){
@@ -2206,7 +2211,14 @@ window.goBack = function(){
     _screen=1; render(); return;
   }
   if(_screen==='1b'){ _screen=4; render(); return; }
-  if(_screen==='share'){ _screen='1b'; render(); return; }
+  if(_screen==='share'){ 
+    if(_eventId&&_appearId){
+      window.location.href='https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+'&memberCard='+encodeURIComponent(_appearId);
+    } else {
+      _screen='1b'; render();
+    }
+    return;
+  }
   if(_screen===3&&!_editMode&&_valTab==='domains'){
     _valTab=''; renderScreen3(null); return;
   }
@@ -2236,4 +2248,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.43 | Date: 2026-07-05 | LAST CHANGE: Fixed needs save/parse round-trip - category persists on reload, ntype (skill/space/thing) preserved, position-aware parse handles optional local segment -->
+<!-- Version: V2.44 | Date: 2026-07-06 | LAST CHANGE: Capture eventId from URL, show event title on share screen, change View your profile to View my event profile, change Done to See the group, route to attendees page -->
