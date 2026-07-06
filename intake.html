@@ -1,6 +1,6 @@
-<!-- Version: V2.45 | Date: 2026-07-06 | LAST CHANGE: Moved postal code screen to right after languages (new order: lang, postal, naturally, skills) -->
+<!-- Version: V2.46a | Date: 2026-07-06 | LAST CHANGE: Event contribution/potluck screen - host builds signup list, attendees claim or add own, time spec + caps, claims modal with photos -->
 <!DOCTYPE html>
-<html lang="en"> 
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -339,7 +339,8 @@ var _drill = {
   '2':  {parentCat:'',subCat:'',itemCat:''},
   '3':  {parentCat:'',subCat:'',itemCat:''},
   '4s': {parentCat:'',subCat:'',itemCat:''},
-  '4r': {parentCat:'',subCat:'',itemCat:''}
+  '4r': {parentCat:'',subCat:'',itemCat:''},
+  'pl': {parentCat:'',subCat:'',itemCat:''}
 };
 function getDrill(s){return _drill[String(s)]||{};}
 function resetDrillTo(s,level){
@@ -409,6 +410,7 @@ function getPool(screen){
   if(s==='3') return getValuePool(d);
   if(s==='4s') return getSkillPool(d);
   if(s==='4r') return getResPool(d);
+  if(s==='pl') return getSkillPool(d);
   return [];
 }
 
@@ -433,6 +435,10 @@ async function loadRefData(){
   // Ensure personTypes always exists — falls back to sheet Person column values
   if(!_refData.personTypes||!_refData.personTypes.length){
     _refData.personTypes=['Skills/services','Recreation buddy','Accountability buddy'];
+  }
+  // Ensure potluckTypes always exists — falls back to Skill / Experience / Thing
+  if(!_refData.potluckTypes||!_refData.potluckTypes.length){
+    _refData.potluckTypes=['Skill','Experience','Thing'];
   }  // Load parent categories from the reference-data sheet so the list never drifts from the sheet
   try{
     var cres=await fetch(GS_URL+'?action=getCategories');
@@ -766,6 +772,16 @@ window.confirmNeedsItem = function(){
 };
 window.addItemFromChip = function(screen, item, category){
   var s=String(screen);
+  // Potluck: selection in category drilldown provides context; keep the user's typed item
+  if(s==='pl'){
+    var plCat=category||(_drill['pl']&&_drill['pl'].parentCat)||'';
+    // Category path: potluckType / parentCat / drilledItem — item stays as user typed
+    _pl.parentCat=plCat;
+    _pl.category=(_pl.potluckType?_pl.potluckType:'')+(plCat?' / '+plCat:'')+(item?' / '+item:'');
+    _pl.step='timed';
+    renderScreenPotluck(null);
+    return;
+  }
   // Determine target array for screen 3 based on whether this is a domain
   var isDomain=(String(category||'').toLowerCase()==='domain');
   var targetArr;
@@ -1046,6 +1062,7 @@ function getFullPool(s){
   if(s==='1') return _refData.recreation||[];
   if(s==='4s'&&_personSubType==='Recreation buddy') return _refData.recreation||[];
   if(s==='2'||s==='4s') return _refData.skills||[];
+  if(s==='pl') return _refData.skills||[];
   if(s==='3') return (_refData.values||[]).concat(_refData.domains||[]);
   if(s==='4r') return _refData.resources||[];
   return [];
@@ -1447,6 +1464,7 @@ function render(){
   }
   if(_screen===0){ renderProfile(el,false); return; }
   if(_screen==='1b'){ renderScreen1b(el); return; }
+  if(_screen==='potluck'){ renderScreenPotluck(el); return; }
   if(_screen==='share'){ renderScreenShare(el); return; }
   var fn={1:renderScreen1,2:renderScreen2,3:renderScreen3,4:renderScreen4}[_screen];
   if(fn) fn(el);
@@ -1709,6 +1727,346 @@ function fetchEventTitle(cb){
     })
     .catch(function(){cb();});
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// EVENT CONTRIBUTION / POTLUCK
+// ═══════════════════════════════════════════════════════════════════════════
+var _hostMemberCard='';        // set from getEventById
+var _signupList=[];            // host-built list: [{item,category,potluckType,timeSpec,maxClaims}]
+var _potluckClaims=[];         // claims from potluck-claims: [{item,appearId,name,photo,elaboration,...}]
+var _potluckLoaded=false;
+// Wizard state for adding a new potluck item
+var _pl={step:'',item:'',potluckType:'',parentCat:'',category:'',timed:'',timeNum:'',timeUnit:'',maxClaims:''};
+
+function isHost(){
+  if(!_hostMemberCard||!_appearId) return false;
+  return _hostMemberCard.split('.').join('').toLowerCase()===_appearId.split('.').join('').toLowerCase();
+}
+
+function loadPotluck(cb){
+  if(!_eventId){cb&&cb();return;}
+  fetch(GS_URL+'?action=getPotluckList&eventId='+encodeURIComponent(_eventId))
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d&&d.signupPotluck){
+        try{_signupList=JSON.parse(d.signupPotluck)||[];}catch(e){_signupList=[];}
+      }
+      _potluckClaims=(d&&d.claims)||[];
+      _potluckLoaded=true;
+      cb&&cb();
+    })
+    .catch(function(){_potluckLoaded=true;cb&&cb();});
+}
+
+function renderScreenPotluck(el){
+  var cont=document.getElementById('app-content'); if(!cont) return;
+  if(!_potluckLoaded){
+    cont.innerHTML='<div style="padding:40px 0;text-align:center;color:var(--muted);">Loading…</div>';
+    loadPotluck(function(){renderScreenPotluck(null);});
+    return;
+  }
+  var html='<div style="padding:20px 0;">'
+    +'<h2 style="margin-bottom:6px;">Event contribution 🎁</h2>'
+    +'<p style="font-size:14px;color:var(--soft);margin-bottom:20px;">This event is all about contribution. Think of it as a potluck of skills and offerings. What are you going to bring to the event that you want to be known for in our community?</p>';
+
+  if(isHost()){
+    html+=renderPotluckHostMode();
+  } else {
+    html+=renderPotluckAttendeeMode();
+  }
+  html+='</div>'
+    +'<div class="nav-row"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" onclick="goNext()">Continue</button></div>';
+  cont.innerHTML=html;
+  if(_pl.step==='category') window.renderDrill('pl','drill-pl');
+}
+
+// ─── Host mode: build the signup list ───────────────────────────────────────
+function renderPotluckHostMode(){
+  var h='<div style="background:var(--sel-bg);border:1px solid var(--sel-border);border-radius:10px;padding:12px 14px;margin-bottom:16px;">'
+    +'<div style="font-size:13px;font-weight:600;color:var(--brand);">You\'re the host of this event</div>'
+    +'<div style="font-size:13px;color:var(--soft);margin-top:2px;">Build the sign up list below. People at your event can claim what they\'ll bring.</div>'
+    +'</div>';
+  // Existing signup items
+  if(_signupList.length){
+    h+='<div style="margin-bottom:16px;">';
+    _signupList.forEach(function(it,i){
+      var claimCount=_potluckClaims.filter(function(c){return c.item===it.item;}).length;
+      var capLabel=it.maxClaims?(' · '+claimCount+'/'+it.maxClaims+' claimed'):(claimCount?(' · '+claimCount+' claimed'):'');
+      h+='<div class="need-item"><div class="need-item-left">'
+        +'<div class="need-item-name">'+esc(it.item)+'</div>'
+        +'<div style="font-size:11px;color:var(--soft);margin-top:2px;">'+esc(it.potluckType||'')+(it.category?' · '+esc(it.category):'')+(it.timeSpec?' · '+esc(it.timeSpec):'')+esc(capLabel)+'</div>'
+        +'</div><div class="need-item-right">'
+        +'<button class="practice-item-x" onclick="removePotluckItem('+i+')">\u00d7</button>'
+        +'</div></div>';
+    });
+    h+='</div>';
+  }
+  // Add-item wizard or the add button
+  h+=renderPotluckWizard('host');
+  return h;
+}
+
+// ─── Attendee mode: view list + claim, or add own ───────────────────────────
+function renderPotluckAttendeeMode(){
+  var h='';
+  if(_pl.step){
+    // Mid-wizard for adding own item
+    h+=renderPotluckWizard('attendee');
+    return h;
+  }
+  // Buttons: view sign up page + add your own
+  h+='<button onclick="openSignupModal()" style="width:100%;background:var(--brand);color:white;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;margin-bottom:12px;">View sign up page</button>';
+  h+='<div style="text-align:center;font-size:13px;color:var(--muted);margin-bottom:12px;">— or add your own below —</div>';
+  h+=renderPotluckWizard('attendee');
+  return h;
+}
+
+// ─── The shared add-item wizard ─────────────────────────────────────────────
+function renderPotluckWizard(mode){
+  var h='';
+  if(!_pl.step){
+    // Step 0: open text field
+    h+='<div style="background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:14px;">'
+      +'<input type="text" id="pl-item-input" placeholder="Enter your offering" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;" value="'+esc(_pl.item)+'">'
+      +'<button onclick="plStartType()" style="width:100%;background:var(--brand);color:white;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;margin-top:10px;">Next</button>'
+      +'</div>';
+    return h;
+  }
+  if(_pl.step==='type'){
+    // Step 1: tag as Skill/Experience/Thing
+    var types=(_refData&&_refData.potluckTypes)||['Skill','Experience','Thing'];
+    h+='<div style="background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:14px;">'
+      +'<div style="font-size:14px;font-weight:600;margin-bottom:4px;">'+esc(_pl.item)+'</div>'
+      +'<div style="font-size:13px;color:var(--soft);margin-bottom:10px;">This is a:</div>'
+      +'<div class="sub-chips" style="border:none;">';
+    types.forEach(function(t){
+      h+='<div class="sub-chip'+(_pl.potluckType===t?' selected':'')+'" onclick="plSetType(\''+esc(t)+'\')">'+esc(t)+'</div>';
+    });
+    h+='</div></div>';
+    return h;
+  }
+  if(_pl.step==='category'){
+    // Step 2: parent-category drilldown (reuses skill drill via screen key 'pl')
+    h+='<div style="background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:14px;">'
+      +'<div style="font-size:14px;font-weight:600;margin-bottom:4px;">'+esc(_pl.item)+' <span style="font-weight:400;color:var(--soft);">· '+esc(_pl.potluckType)+'</span></div>'
+      +'<div style="font-size:13px;color:var(--soft);margin-bottom:10px;">Pick a category for context:</div>'
+      +'<div id="drill-pl"></div>'
+      +'</div>';
+    return h;
+  }
+  if(_pl.step==='timed'){
+    // Step 3: is this for a specific time?
+    h+='<div style="background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:14px;">'
+      +'<div style="font-size:14px;font-weight:600;margin-bottom:4px;">'+esc(_pl.item)+'</div>'
+      +'<div style="font-size:13px;color:var(--soft);margin-bottom:10px;">Is this offering for a specific time? For example, 1 hour or for the duration of the event?</div>'
+      +'<div class="sub-chips" style="border:none;">'
+      +'<div class="sub-chip'+(_pl.timed==='yes'?' selected':'')+'" onclick="plSetTimed(\'yes\')">Yes</div>'
+      +'<div class="sub-chip'+(_pl.timed==='no'?' selected':'')+'" onclick="plSetTimed(\'no\')">No</div>'
+      +'</div>';
+    if(_pl.timed==='yes'){
+      h+='<div style="display:flex;gap:8px;margin-top:12px;">'
+        +'<input type="number" id="pl-time-num" min="1" placeholder="#" value="'+esc(_pl.timeNum)+'" style="width:70px;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;" oninput="_pl.timeNum=this.value;">'
+        +'<select id="pl-time-unit" onchange="plSetUnit(this.value)" style="flex:1;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;">'
+        +'<option value="">Select…</option>'
+        +'<option value="minutes"'+(_pl.timeUnit==='minutes'?' selected':'')+'>minutes</option>'
+        +'<option value="hours"'+(_pl.timeUnit==='hours'?' selected':'')+'>hours</option>'
+        +'<option value="entire event"'+(_pl.timeUnit==='entire event'?' selected':'')+'>entire event</option>'
+        +'</select>'
+        +'</div>';
+    }
+    h+='<button onclick="plStepAfterTimed()" style="width:100%;background:var(--brand);color:white;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;margin-top:12px;">Next</button>';
+    h+='</div>';
+    return h;
+  }
+  if(_pl.step==='cap'){
+    // Step 4 (host only): optional signup cap
+    h+='<div style="background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:14px;">'
+      +'<div style="font-size:14px;font-weight:600;margin-bottom:4px;">'+esc(_pl.item)+'</div>'
+      +'<div style="font-size:13px;color:var(--soft);margin-bottom:10px;">Limit how many can sign up? Leave blank for no limit.</div>'
+      +'<input type="number" id="pl-cap-input" min="1" placeholder="No limit" value="'+esc(_pl.maxClaims)+'" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;" oninput="_pl.maxClaims=this.value;">'
+      +'<button onclick="plFinishHost()" style="width:100%;background:var(--brand);color:white;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;margin-top:12px;">Add to sign up list</button>'
+      +'</div>';
+    return h;
+  }
+  if(_pl.step==='elaborate'){
+    // Attendee adding own: elaboration before it joins the list
+    h+='<div style="background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:14px;">'
+      +'<div style="font-size:14px;font-weight:600;margin-bottom:4px;">'+esc(_pl.item)+'</div>'
+      +'<div style="font-size:13px;color:var(--soft);margin-bottom:10px;">Please elaborate on what this is:</div>'
+      +'<textarea id="pl-elaborate-input" placeholder="Share some details…" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;min-height:70px;resize:vertical;"></textarea>'
+      +'<button onclick="plFinishAttendee()" style="width:100%;background:var(--brand);color:white;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;margin-top:12px;">Add to sign up list</button>'
+      +'</div>';
+    return h;
+  }
+  return h;
+}
+
+// ─── Wizard step transitions ────────────────────────────────────────────────
+window.plStartType=function(){
+  var inp=document.getElementById('pl-item-input');
+  if(!inp||!inp.value.trim()){toast('Please enter your offering');return;}
+  _pl.item=inp.value.trim();
+  _pl.step='type';
+  renderScreenPotluck(null);
+};
+window.plSetType=function(t){
+  _pl.potluckType=t;
+  _pl.step='category';
+  resetDrillTo('pl',0);
+  renderScreenPotluck(null);
+};
+window.plSetTimed=function(v){
+  _pl.timed=v;
+  if(v==='no'){_pl.timeNum='';_pl.timeUnit='';}
+  renderScreenPotluck(null);
+};
+window.plSetUnit=function(v){
+  _pl.timeUnit=v;
+  if(v==='entire event'){_pl.timeNum='';}
+};
+window.plStepAfterTimed=function(){
+  if(_pl.timed==='yes'){
+    if(_pl.timeUnit==='entire event'){ _pl.timeSpec='Entire event'; }
+    else if(_pl.timeNum&&_pl.timeUnit){ _pl.timeSpec=_pl.timeNum+' '+_pl.timeUnit; }
+    else { toast('Please set a time'); return; }
+  } else if(_pl.timed==='no'){
+    _pl.timeSpec='';
+  } else {
+    toast('Please choose Yes or No'); return;
+  }
+  // Host goes to cap step; attendee goes to elaborate
+  if(isHost()){ _pl.step='cap'; }
+  else { _pl.step='elaborate'; }
+  renderScreenPotluck(null);
+};
+window.plFinishHost=function(){
+  var capInp=document.getElementById('pl-cap-input');
+  var cap=capInp&&capInp.value.trim()?parseInt(capInp.value.trim()):'';
+  var newItem={
+    item:_pl.item,
+    potluckType:_pl.potluckType,
+    category:_pl.category,
+    timeSpec:_pl.timeSpec||'',
+    maxClaims:cap||''
+  };
+  _signupList.push(newItem);
+  savePotluckList();
+  resetPlWizard();
+  renderScreenPotluck(null);
+  toast('Added to sign up list');
+};
+window.plFinishAttendee=function(){
+  var elabInp=document.getElementById('pl-elaborate-input');
+  var elaboration=elabInp?elabInp.value.trim():'';
+  // Attendee's own item joins the shared signup list AND is claimed by them
+  var exists=_signupList.some(function(it){return it.item===_pl.item;});
+  if(!exists){
+    _signupList.push({item:_pl.item,potluckType:_pl.potluckType,category:_pl.category,timeSpec:_pl.timeSpec||'',maxClaims:''});
+    savePotluckList();
+  }
+  // Record the claim
+  claimItem(_pl.item,_pl.category,_pl.potluckType,elaboration,_pl.timeSpec||'',0,function(){
+    resetPlWizard();
+    loadPotluck(function(){renderScreenPotluck(null);});
+    toast('Added! 🎁');
+  });
+};
+function resetPlWizard(){
+  _pl={step:'',item:'',potluckType:'',parentCat:'',category:'',timed:'',timeNum:'',timeUnit:'',maxClaims:''};
+}
+
+function savePotluckList(){
+  fetch(GS_URL+'?action=savePotluckItem&eventId='+encodeURIComponent(_eventId)
+    +'&potluckJson='+encodeURIComponent(JSON.stringify(_signupList))).catch(function(){});
+}
+window.removePotluckItem=function(i){
+  _signupList.splice(i,1);
+  savePotluckList();
+  renderScreenPotluck(null);
+};
+
+function claimItem(item,category,potluckType,elaboration,timeSpec,maxClaims,cb){
+  fetch(GS_URL+'?action=claimPotluckItem&eventId='+encodeURIComponent(_eventId)
+    +'&item='+encodeURIComponent(item)
+    +'&category='+encodeURIComponent(category||'')
+    +'&potluckType='+encodeURIComponent(potluckType||'')
+    +'&appearId='+encodeURIComponent(_appearId)
+    +'&elaboration='+encodeURIComponent(elaboration||'')
+    +'&timeSpec='+encodeURIComponent(timeSpec||'')
+    +'&maxClaims='+encodeURIComponent(maxClaims||0))
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d&&d.status==='full'){toast('This one\'s full');}
+      else if(d&&d.status==='already'){toast('You already signed up for this');}
+      cb&&cb(d);
+    })
+    .catch(function(){cb&&cb();});
+}
+
+// ─── Claim from the host's sign up list (modal) ─────────────────────────────
+window.openSignupModal=function(){
+  var overlay=document.createElement('div');
+  overlay.id='signup-modal';
+  overlay.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto;';
+  overlay.innerHTML='<div style="background:white;border-radius:14px;max-width:520px;width:100%;padding:20px;box-shadow:0 10px 40px rgba(0,0,0,0.2);">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">'
+    +'<h3 style="margin:0;font-size:18px;">Sign up list 🎁</h3>'
+    +'<button onclick="closeSignupModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1;">×</button>'
+    +'</div>'
+    +'<div id="signup-modal-body"></div>'
+    +'</div>';
+  document.body.appendChild(overlay);
+  renderSignupModalBody();
+};
+window.closeSignupModal=function(){
+  var m=document.getElementById('signup-modal'); if(m) m.remove();
+};
+function renderSignupModalBody(){
+  var body=document.getElementById('signup-modal-body'); if(!body) return;
+  if(!_signupList.length){
+    body.innerHTML='<div style="color:var(--muted);font-size:14px;padding:10px 0;">Nothing on the list yet.</div>';
+    return;
+  }
+  var h='';
+  _signupList.forEach(function(it,i){
+    var claims=_potluckClaims.filter(function(c){return c.item===it.item;});
+    var isFull=it.maxClaims&&claims.length>=parseInt(it.maxClaims);
+    var iClaimed=claims.some(function(c){return String(c.appearId).split('.').join('').toLowerCase()===String(_appearId).split('.').join('').toLowerCase();});
+    h+='<div style="border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">'
+      +'<div><div style="font-size:14px;font-weight:600;">'+esc(it.item)+'</div>'
+      +'<div style="font-size:11px;color:var(--soft);margin-top:1px;">'+esc(it.potluckType||'')+(it.category?' · '+esc(it.category):'')+(it.timeSpec?' · '+esc(it.timeSpec):'')+'</div></div>';
+    if(iClaimed){
+      h+='<span style="font-size:12px;color:#1a7f4b;font-weight:600;white-space:nowrap;">✓ You\'re in</span>';
+    } else if(isFull){
+      h+='<span style="font-size:12px;color:var(--muted);white-space:nowrap;">Full</span>';
+    } else {
+      h+='<button onclick="claimFromModal('+i+')" style="background:var(--brand);color:white;border:none;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap;">I\'ll bring this! 🎁</button>';
+    }
+    h+='</div>';
+    // Show who's claimed with photos
+    if(claims.length){
+      h+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">';
+      claims.forEach(function(c){
+        var ph=c.photo?'<img src="'+esc(c.photo)+'" style="width:22px;height:22px;border-radius:50%;object-fit:cover;" onerror="this.style.display=\'none\'">':'<div style="width:22px;height:22px;border-radius:50%;background:var(--brand);color:white;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;">'+esc((c.name||c.appearId||'?').charAt(0).toUpperCase())+'</div>';
+        h+='<div style="display:inline-flex;align-items:center;gap:4px;background:var(--input-bg);border-radius:20px;padding:2px 8px 2px 2px;" title="'+esc(c.elaboration||'')+'">'+ph+'<span style="font-size:11px;color:var(--soft);">'+esc(c.name||c.appearId)+'</span></div>';
+      });
+      h+='</div>';
+    }
+    h+='</div>';
+  });
+  body.innerHTML=h;
+}
+window.claimFromModal=function(i){
+  var it=_signupList[i]; if(!it) return;
+  // Ask for elaboration inline
+  var elaboration=prompt('Please elaborate on what this is:');
+  if(elaboration===null) return; // cancelled
+  claimItem(it.item,it.category,it.potluckType,elaboration,it.timeSpec||'',it.maxClaims?parseInt(it.maxClaims):0,function(d){
+    loadPotluck(function(){renderSignupModalBody();});
+  });
+};
+
 function renderScreenShare(el){
   var cont=document.getElementById('app-content'); if(!cont) return;
   var pageUrl=_appearId?'https://creating.works/intake.html?show='+encodeURIComponent(_appearId):'';
@@ -2200,8 +2558,13 @@ window.goNext = function(){
     _screen='1b'; render(); return;
   }
   if(_screen==='1b'){
-    // After expression, move to share/completion
-    _completed=true; _hasProfile=true; _screen='share'; render(); return;
+    // After expression: event visitors get the potluck screen, others go to share
+    _completed=true; _hasProfile=true;
+    if(_eventId){ _screen='potluck'; render(); return; }
+    _screen='share'; render(); return;
+  }
+  if(_screen==='potluck'){
+    _screen='share'; render(); return;
   }
   if(_screen==='share'){
     // Complete intake
@@ -2228,12 +2591,10 @@ window.goBack = function(){
     _screen=1; render(); return;
   }
   if(_screen==='1b'){ _screen=4; render(); return; }
+  if(_screen==='potluck'){ _screen='1b'; render(); return; }
   if(_screen==='share'){ 
-    if(_eventId&&_appearId){
-      window.location.href='https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+'&memberCard='+encodeURIComponent(_appearId);
-    } else {
-      _screen='1b'; render();
-    }
+    if(_eventId){ _screen='potluck'; render(); }
+    else { _screen='1b'; render(); }
     return;
   }
   if(_screen===3&&!_editMode&&_valTab==='domains'){
@@ -2265,4 +2626,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.45 | Date: 2026-07-06 | LAST CHANGE: Moved postal code screen to right after languages (new order: lang, postal, naturally, skills) -->
+<!-- Version: V2.46 | Date: 2026-07-06 | LAST CHANGE: Event contribution/potluck screen - host builds signup list, attendees claim or add own, time spec + caps, claims modal with photos -->
