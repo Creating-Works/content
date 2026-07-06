@@ -1,4 +1,4 @@
-<!-- Version: V2.48 | Date: 2026-07-06 | LAST CHANGE: Coach-level enjoy items mirror to skills with a category-missing picker; language modal asks for primary language when more than 2 selected, encoded as list order (no GAS change) -->
+<!-- Version: V2.49 | Date: 2026-07-06 | LAST CHANGE: Added live search dropdown to potluck Enter your offering field, matching the skill search pattern used elsewhere in intake -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1873,7 +1873,8 @@ function renderPotluckWizard(mode){
   if(!_pl.step){
     // Step 0: open text field
     h+='<div style="background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:14px;">'
-      +'<input type="text" id="pl-item-input" placeholder="Enter your offering" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;" value="'+esc(_pl.item)+'">'
+      +'<input type="text" id="pl-item-input" placeholder="Enter your offering" oninput="plFilterOfferings(this.value)" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;" value="'+esc(_pl.item)+'">'
+      +'<div id="pl-search-results" style="margin-top:4px;"></div>'
       +'<button onclick="plStartType()" style="width:100%;background:var(--brand);color:white;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;margin-top:10px;">Add</button>'
       +'</div>';
     return h;
@@ -1938,6 +1939,24 @@ function renderPotluckWizard(mode){
 }
 
 // ─── Wizard step transitions ────────────────────────────────────────────────
+window.plFilterOfferings=function(q){
+  var container=document.getElementById('pl-search-results');
+  if(!container) return;
+  if(!q||!q.trim()){ container.innerHTML=''; return; }
+  var pool=(_refData&&_refData.skills)||[];
+  var ql=q.toLowerCase();
+  var res=pool.filter(function(r){return (r.item||'').toLowerCase().indexOf(ql)>-1;}).slice(0,15);
+  if(!res.length){ container.innerHTML=''; return; }
+  container.innerHTML='<div style="border:1.5px solid var(--border);border-radius:8px;overflow:hidden;">'
+    +res.map(function(r){
+      return '<div onclick="plPickOffering(\''+esc(r.item)+'\')" style="padding:8px 12px;font-size:13px;cursor:pointer;border-bottom:1px solid var(--border);">'+esc(r.item)+(r.category?'<div style="font-size:11px;color:var(--soft);margin-top:1px;">'+esc(r.category)+'</div>':'')+'</div>';
+    }).join('')+'</div>';
+};
+window.plPickOffering=function(item){
+  _pl.item=item;
+  _pl.step='type';
+  renderScreenPotluck(null);
+};
 window.plStartType=function(){
   var inp=document.getElementById('pl-item-input');
   if(!inp||!inp.value.trim()){toast('Please enter your offering');return;}
@@ -2666,4 +2685,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.48 | Date: 2026-07-06 | LAST CHANGE: Coach-level enjoy items mirror to skills with a category-missing picker; language modal asks for primary language when more than 2 selected, encoded as list order (no GAS change) -->
+<!-- Version: V2.49 | Date: 2026-07-06 | LAST CHANGE: Added live search dropdown to potluck Enter your offering field, matching the skill search pattern used elsewhere in intake -->
