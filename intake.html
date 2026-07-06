@@ -1,4 +1,4 @@
-<!-- Version: V2.49a | Date: 2026-07-06 | LAST CHANGE: Attendee potluck flow simplified to immediate add - type an offering, tap Add, it joins the list right away; type/category tagging is now optional and deferred via an inline Add details picker per item -->
+<!-- Version: V2.50 | Date: 2026-07-06 | LAST CHANGE: Added Event contribution section to profile summary screen (edit mode) with jumpTo(potluck) edit button - closes the gap where potluck was unreachable after initial intake completion -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1661,6 +1661,28 @@ function renderProfile(el, viewerMode){
     var careContent=valSection+domSection;
     return careContent?'<div class="profile-section"><div class="profile-section-header"><div class="profile-section-label">What I care about</div>'+careActions+'</div>'+careContent+'</div>':'';
   })(viewerMode)
+    +(_eventId?'<div id="profile-potluck-section">'+buildProfilePotluckSectionInner(viewerMode)+'</div>':'');
+  if(_eventId&&!_potluckLoaded){
+    loadPotluck(function(){
+      var c=document.getElementById('profile-potluck-section');
+      if(c) c.innerHTML=buildProfilePotluckSectionInner(viewerMode);
+    });
+  }
+}
+function buildProfilePotluckSectionInner(viewerMode){
+  if(!_appearId) return '';
+  var normalId=String(_appearId).split('.').join('').toLowerCase();
+  var mine=(_potluckClaims||[]).filter(function(c){return String(c.appearId).split('.').join('').toLowerCase()===normalId;});
+  var seen={};
+  var actions=!viewerMode?'<div class="profile-section-actions"><button class="edit-btn" onclick="window.jumpTo(\'potluck\')">✏️ Edit</button></div>':'';
+  var tags=mine.length
+    ?mine.filter(function(c){if(seen[c.item])return false;seen[c.item]=true;return true;}).map(function(c){
+        var listItem=(_signupList.find(function(it){return it.item===c.item;}))||{};
+        var tagLabel=listItem.potluckType?'<span class="tag-level">'+esc(listItem.potluckType)+'</span>':'';
+        return '<div class="profile-tag">'+esc(c.item)+tagLabel+'</div>';
+      }).join('')
+    :'<div class="profile-empty">Nothing added yet.</div>';
+  return '<div class="profile-section" style="border-bottom:none;"><div class="profile-section-header"><div class="profile-section-label">Event contribution 🎁</div>'+actions+'</div><div class="profile-tags">'+tags+'</div></div>';
 }
 
 window.jumpTo = function(screen){
@@ -1837,7 +1859,7 @@ function renderScreenPotluck(el){
     +'<p style="font-size:14px;color:var(--soft);margin-bottom:20px;">This event is all about contribution. Think of it as a potluck of skills and offerings. What are you going to bring to the event that you want to be known for in our community?</p>'
     +renderPotluckAttendeeMode()
     +'</div>'
-    +'<div class="nav-row"><button class="btn-back" onclick="goBack()">← Back</button></div>';
+    +(_editMode?'<div class="nav-row"><button class="btn-next" onclick="doneEdit()">Done</button></div>':'<div class="nav-row"><button class="btn-back" onclick="goBack()">← Back</button></div>');
   cont.innerHTML=html;
 }
 
@@ -2620,4 +2642,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.49 | Date: 2026-07-06 | LAST CHANGE: Attendee potluck flow simplified to immediate add - type an offering, tap Add, it joins the list right away; type/category tagging is now optional and deferred via an inline Add details picker per item -->
+<!-- Version: V2.50 | Date: 2026-07-06 | LAST CHANGE: Added Event contribution section to profile summary screen (edit mode) with jumpTo(potluck) edit button - closes the gap where potluck was unreachable after initial intake completion -->
