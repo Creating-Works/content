@@ -1,6 +1,6 @@
-<!-- Version: V2.43 | Date: 2026-07-05 | LAST CHANGE: Recreation buddy uses flat recreation chips + search (Option B), saves as Recreation buddy / recType / item, fixes category-missing cascade -->
+<!-- Version: V2.43a | Date: 2026-07-05 | LAST CHANGE: Fixed needs save/parse round-trip - category persists on reload, ntype (skill/space/thing) preserved, position-aware parse handles optional local segment -->
 <!DOCTYPE html>
-<html lang="en"> 
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -470,8 +470,8 @@ async function loadIntake(){
       _values=parseTagStr(d.values,'level');
       _domains=parseTagStr(d.domains,'level').map(function(dm){dm.category='domain';return dm;});
       var np=parseNeedsStr(d.needs);
-      _needsSkill=np.filter(function(n){return n.ntype!=='resource';});
-      _needsRes=np.filter(function(n){return n.ntype==='resource';});
+      _needsSkill=np.filter(function(n){return n.ntype==='skill';});
+      _needsRes=np.filter(function(n){return n.ntype!=='skill';});
     }
   }catch(e){}
   // If skills screen already rendered, update lang button immediately
@@ -488,7 +488,21 @@ function parseNeedsStr(str){
   if(!str) return [];
   return str.split('|').filter(Boolean).map(function(s){
     var p=s.split(':');
-    return{item:p[0],category:p[3]||'',local:p[1]==='local',ntype:p[2]||'skill'};
+    // Save format: item[:local]:ntype[:category]
+    // p[0]=item. If p[1]==='local', local=true and ntype=p[2], category=p.slice(3).join(':')
+    // else local=false, ntype=p[1], category=p.slice(2).join(':')
+    var item=p[0];
+    var local=false, ntype='skill', category='';
+    if(p[1]==='local'){
+      local=true;
+      ntype=p[2]||'skill';
+      category=p.slice(3).join(':');
+    } else {
+      local=false;
+      ntype=p[1]||'skill';
+      category=p.slice(2).join(':');
+    }
+    return {item:item, category:category, local:local, ntype:ntype};
   });
 }
 
@@ -500,8 +514,8 @@ function autoSave(){
   var vStr=_values.map(function(s){return s.item+':'+(s.category||'')+':'+(s.level||'');}).join('|');
   var dStr=_domains.map(function(s){return s.item+(s.level?':'+s.level:'');}).join('|');
   var nStr=[].concat(
-    _needsSkill.map(function(s){return s.item+(s.local?':local':'')+':skill'+(s.category?':'+s.category:'');}),
-    _needsRes.map(function(s){return s.item+(s.local?':local':'')+':thing'+(s.category?':'+s.category:'');})
+    _needsSkill.map(function(s){return s.item+(s.local?':local':'')+':'+(s.ntype||'skill')+(s.category?':'+s.category:'');}),
+    _needsRes.map(function(s){return s.item+(s.local?':local':'')+':'+(s.ntype||'thing')+(s.category?':'+s.category:'');})
   ).join('|');
   var mStr=_methods.join('|');
   fetch(GS_URL+'?action=saveIntake'
@@ -2222,4 +2236,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.43 | Date: 2026-07-05 | LAST CHANGE: Recreation buddy uses flat recreation chips + search (Option B), saves as Recreation buddy / recType / item, fixes category-missing cascade -->
+<!-- Version: V2.43 | Date: 2026-07-05 | LAST CHANGE: Fixed needs save/parse round-trip - category persists on reload, ntype (skill/space/thing) preserved, position-aware parse handles optional local segment -->
