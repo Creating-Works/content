@@ -1,6 +1,6 @@
-<!-- Version: V2.44 | Date: 2026-07-06 | LAST CHANGE: Capture eventId from URL, show event title on share screen, change View your profile to View my event profile, change Done to See the group, route to attendees page -->
+<!-- Version: V2.45 | Date: 2026-07-06 | LAST CHANGE: Moved postal code screen to right after languages (new order: lang, postal, naturally, skills) -->
 <!DOCTYPE html>
-<html lang="en"> 
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1698,13 +1698,24 @@ window.confirmExpressionCustom=function(){
   else renderScreen1b(null);
 };
 
+var _eventTitle='';
+function fetchEventTitle(cb){
+  if(!_eventId){cb();return;}
+  fetch(GS_URL+'?action=getEventById&id='+encodeURIComponent(_eventId))
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d&&d.found&&d.event&&d.event.title) _eventTitle=d.event.title;
+      cb();
+    })
+    .catch(function(){cb();});
+}
 function renderScreenShare(el){
   var cont=document.getElementById('app-content'); if(!cont) return;
   var pageUrl=_appearId?'https://creating.works/intake.html?show='+encodeURIComponent(_appearId):'';
   var eventShareUrl=_eventId&&_appearId?'https://gather.2gather.network/event.html?id='+encodeURIComponent(_eventId)+'&memberCard='+encodeURIComponent(_appearId):'';
-  var eventTitle=_eventId?'Event community':'';
+  var eventTitle=_eventId?(_eventTitle||'Event community'):'';
   var html='<div style="padding:20px 0;">'
-    +(_eventId?'<h2 style="margin-bottom:20px;">'+esc(eventTitle)+'</h2>':'<h2 style="margin-bottom:20px;">Share your page</h2>')
+    +(_eventId?'<h2 style="margin-bottom:20px;" id="event-share-title">'+esc(eventTitle)+'</h2>':'<h2 style="margin-bottom:20px;">Share your page</h2>')
     +'<p style="font-size:14px;color:var(--soft);margin-bottom:16px;">Share this link with your network. People who align with what you bring find you from there.</p>'
     +'<div style="background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:16px;display:flex;align-items:center;gap:10px;">'
     +'<input type="text" value="'+esc(pageUrl)+'" readonly style="border:none;background:transparent;flex:1;font-size:13px;color:var(--text);font-family:monospace;outline:none;">'
@@ -1714,6 +1725,12 @@ function renderScreenShare(el){
     +'</div>'
     +'<div class="nav-row"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" onclick="goNext()">'+(_eventId?'See the group':'Done')+'</button></div>';
   cont.innerHTML=html;
+  if(_eventId&&!_eventTitle){
+    fetchEventTitle(function(){
+      var titleEl=document.getElementById('event-share-title');
+      if(titleEl&&_eventTitle) titleEl.textContent=_eventTitle;
+    });
+  }
 }
 
 function renderScreen2(el){
@@ -2135,6 +2152,12 @@ window.toggleRetired = function(){
 };
 window.goNext = function(){
   if(_screen===2&&!_editMode&&_screen2step==='lang'){
+    _screen2step='postal'; render(); return;
+  }
+  if(_screen===2&&!_editMode&&_screen2step==='postal'){
+    var inp=document.getElementById('postal-input');
+    if(inp) _postal=inp.value.trim();
+    autoSave();
     _screen2step='naturally'; render(); return;
   }
   if(_screen===2&&!_editMode&&_screen2step==='naturally'){
@@ -2153,12 +2176,6 @@ window.goNext = function(){
         return;
       }
     }
-    autoSave();
-    _screen2step='postal'; render(); return;
-  }
-  if(_screen===2&&!_editMode&&_screen2step==='postal'){
-    var inp=document.getElementById('postal-input');
-    if(inp) _postal=inp.value.trim();
     autoSave();
     _screen++; render(); return;
   }
@@ -2198,13 +2215,13 @@ window.goNext = function(){
 };
 
 window.goBack = function(){
-  if(_screen===2&&!_editMode&&_screen2step==='postal'){
-    _screen2step='skills'; render(); return;
-  }
   if(_screen===2&&!_editMode&&_screen2step==='skills'){
     _screen2step='naturally'; render(); return;
   }
   if(_screen===2&&!_editMode&&_screen2step==='naturally'){
+    _screen2step='postal'; render(); return;
+  }
+  if(_screen===2&&!_editMode&&_screen2step==='postal'){
     _screen2step='lang'; render(); return;
   }
   if(_screen===2&&!_editMode&&_screen2step==='lang'){
@@ -2248,4 +2265,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.44 | Date: 2026-07-06 | LAST CHANGE: Capture eventId from URL, show event title on share screen, change View your profile to View my event profile, change Done to See the group, route to attendees page -->
+<!-- Version: V2.45 | Date: 2026-07-06 | LAST CHANGE: Moved postal code screen to right after languages (new order: lang, postal, naturally, skills) -->
