@@ -1,5 +1,5 @@
-<!-- Version: V2.46a | Date: 2026-07-06 | LAST CHANGE: Event contribution/potluck screen - host builds signup list, attendees claim or add own, time spec + caps, claims modal with photos -->
-<!DOCTYPE html> 
+<!-- Version: V2.46b | Date: 2026-07-06 | LAST CHANGE: Replaced modal prompt() with styled inline elaboration field (start/cancel/submit) for claiming potluck items -->
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -1735,6 +1735,7 @@ var _hostMemberCard='';        // set from getEventById
 var _signupList=[];            // host-built list: [{item,category,potluckType,timeSpec,maxClaims}]
 var _potluckClaims=[];         // claims from potluck-claims: [{item,appearId,name,photo,elaboration,...}]
 var _potluckLoaded=false;
+var _claimingIdx=-1;  // which signup item is currently showing the inline elaboration field
 // Wizard state for adding a new potluck item
 var _pl={step:'',item:'',potluckType:'',parentCat:'',category:'',timed:'',timeNum:'',timeUnit:'',maxClaims:''};
 
@@ -2005,6 +2006,7 @@ function claimItem(item,category,potluckType,elaboration,timeSpec,maxClaims,cb){
 
 // ─── Claim from the host's sign up list (modal) ─────────────────────────────
 window.openSignupModal=function(){
+  _claimingIdx=-1;
   var overlay=document.createElement('div');
   overlay.id='signup-modal';
   overlay.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto;';
@@ -2040,10 +2042,22 @@ function renderSignupModalBody(){
       h+='<span style="font-size:12px;color:#1a7f4b;font-weight:600;white-space:nowrap;">✓ You\'re in</span>';
     } else if(isFull){
       h+='<span style="font-size:12px;color:var(--muted);white-space:nowrap;">Full</span>';
+    } else if(_claimingIdx===i){
+      h+='';  // button hidden while the inline field is open (field renders below)
     } else {
-      h+='<button onclick="claimFromModal('+i+')" style="background:var(--brand);color:white;border:none;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap;">I\'ll bring this! 🎁</button>';
+      h+='<button onclick="startClaim('+i+')" style="background:var(--brand);color:white;border:none;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap;">I\'ll bring this! 🎁</button>';
     }
     h+='</div>';
+    // Inline elaboration field for the item being claimed
+    if(_claimingIdx===i){
+      h+='<div style="margin-top:10px;">'
+        +'<div style="font-size:12px;color:var(--soft);margin-bottom:6px;">Please elaborate on what this is:</div>'
+        +'<textarea id="claim-elaborate-input" placeholder="Share some details…" style="width:100%;padding:9px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;min-height:56px;resize:vertical;"></textarea>'
+        +'<div style="display:flex;gap:8px;margin-top:8px;">'
+        +'<button onclick="cancelClaim()" style="flex:1;background:white;color:var(--brand);border:1.5px solid var(--border);padding:8px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;">Cancel</button>'
+        +'<button onclick="submitClaim('+i+')" style="flex:1;background:var(--brand);color:white;border:none;padding:8px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;">I\'ll bring this! 🎁</button>'
+        +'</div></div>';
+    }
     // Show who's claimed with photos
     if(claims.length){
       h+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">';
@@ -2057,12 +2071,21 @@ function renderSignupModalBody(){
   });
   body.innerHTML=h;
 }
-window.claimFromModal=function(i){
+window.startClaim=function(i){
+  _claimingIdx=i;
+  renderSignupModalBody();
+  var f=document.getElementById('claim-elaborate-input'); if(f) f.focus();
+};
+window.cancelClaim=function(){
+  _claimingIdx=-1;
+  renderSignupModalBody();
+};
+window.submitClaim=function(i){
   var it=_signupList[i]; if(!it) return;
-  // Ask for elaboration inline
-  var elaboration=prompt('Please elaborate on what this is:');
-  if(elaboration===null) return; // cancelled
+  var f=document.getElementById('claim-elaborate-input');
+  var elaboration=f?f.value.trim():'';
   claimItem(it.item,it.category,it.potluckType,elaboration,it.timeSpec||'',it.maxClaims?parseInt(it.maxClaims):0,function(d){
+    _claimingIdx=-1;
     loadPotluck(function(){renderSignupModalBody();});
   });
 };
@@ -2626,4 +2649,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.46 | Date: 2026-07-06 | LAST CHANGE: Event contribution/potluck screen - host builds signup list, attendees claim or add own, time spec + caps, claims modal with photos -->
+<!-- Version: V2.46b | Date: 2026-07-06 | LAST CHANGE: Replaced modal prompt() with styled inline elaboration field (start/cancel/submit) for claiming potluck items -->
