@@ -1,4 +1,4 @@
-<!-- Version: V2.49 | Date: 2026-07-06 | LAST CHANGE: Added live search dropdown to potluck Enter your offering field, matching the skill search pattern used elsewhere in intake -->
+<!-- Version: V2.49a | Date: 2026-07-06 | LAST CHANGE: Attendee potluck flow simplified to immediate add - type an offering, tap Add, it joins the list right away; type/category tagging is now optional and deferred via an inline Add details picker per item -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -778,16 +778,6 @@ window.confirmNeedsItem = function(){
 };
 window.addItemFromChip = function(screen, item, category){
   var s=String(screen);
-  // Potluck: selection in category drilldown provides context; keep the user's typed item
-  if(s==='pl'){
-    var plCat=category||(_drill['pl']&&_drill['pl'].parentCat)||'';
-    // Category path: potluckType / parentCat / drilledItem — item stays as user typed
-    _pl.parentCat=plCat;
-    _pl.category=(_pl.potluckType?_pl.potluckType:'')+(plCat?' / '+plCat:'')+(item?' / '+item:'');
-    _pl.step='timed';
-    renderScreenPotluck(null);
-    return;
-  }
   // Determine target array for screen 3 based on whether this is a domain
   var isDomain=(String(category||'').toLowerCase()==='domain');
   var targetArr;
@@ -1849,94 +1839,93 @@ function renderScreenPotluck(el){
     +'</div>'
     +'<div class="nav-row"><button class="btn-back" onclick="goBack()">← Back</button></div>';
   cont.innerHTML=html;
-  if(_pl.step==='category') window.renderDrill('pl','drill-pl');
 }
 
 // ─── Attendee mode: view list + claim, or add own ───────────────────────────
 function renderPotluckAttendeeMode(){
   var h='';
-  if(_pl.step){
-    // Mid-wizard for adding own item
-    h+=renderPotluckWizard('attendee');
-    return h;
-  }
-  // Buttons: view sign up page + add your own
   h+='<button onclick="openSignupModal()" style="width:100%;background:var(--brand);color:white;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;margin-bottom:12px;">View sign up page</button>';
   h+='<div style="text-align:center;font-size:13px;color:var(--muted);margin-bottom:12px;">— or add your own below —</div>';
-  h+=renderPotluckWizard('attendee');
+  h+='<div style="background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:14px;">'
+    +'<input type="text" id="pl-item-input" placeholder="Enter your offering" oninput="plFilterOfferings(this.value)" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;">'
+    +'<div id="pl-search-results" style="margin-top:4px;"></div>'
+    +'<button onclick="plQuickAdd()" style="width:100%;background:var(--brand);color:white;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;margin-top:10px;">Add</button>'
+    +'</div>';
+  h+=buildMyPotluckContributionsHTML();
   return h;
 }
 
-// ─── The shared add-item wizard ─────────────────────────────────────────────
-function renderPotluckWizard(mode){
-  var h='';
-  if(!_pl.step){
-    // Step 0: open text field
-    h+='<div style="background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:14px;">'
-      +'<input type="text" id="pl-item-input" placeholder="Enter your offering" oninput="plFilterOfferings(this.value)" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;" value="'+esc(_pl.item)+'">'
-      +'<div id="pl-search-results" style="margin-top:4px;"></div>'
-      +'<button onclick="plStartType()" style="width:100%;background:var(--brand);color:white;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;margin-top:10px;">Add</button>'
-      +'</div>';
-    return h;
-  }
-  if(_pl.step==='type'){
-    // Step 1: tag as Skill/Experience/Thing
-    var types=(_refData&&_refData.potluckTypes)||['Skill','Experience','Thing'];
-    h+='<div style="background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:14px;">'
-      +'<div style="font-size:14px;font-weight:600;margin-bottom:4px;">'+esc(_pl.item)+'</div>'
-      +'<div style="font-size:13px;color:var(--soft);margin-bottom:10px;">This is a:</div>'
-      +'<div class="sub-chips" style="border:none;">';
-    types.forEach(function(t){
-      h+='<div class="sub-chip'+(_pl.potluckType===t?' selected':'')+'" onclick="plSetType(\''+esc(t)+'\')">'+esc(t)+'</div>';
-    });
-    h+='</div></div>';
-    return h;
-  }
-  if(_pl.step==='category'){
-    // Step 2: parent-category drilldown (reuses skill drill via screen key 'pl')
-    h+='<div style="background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:14px;">'
-      +'<div style="font-size:14px;font-weight:600;margin-bottom:4px;">'+esc(_pl.item)+' <span style="font-weight:400;color:var(--soft);">· '+esc(_pl.potluckType)+'</span></div>'
-      +'<div style="font-size:13px;color:var(--soft);margin-bottom:10px;">Pick a category for context:</div>'
-      +'<div id="drill-pl"></div>'
-      +'</div>';
-    return h;
-  }
-  if(_pl.step==='timed'){
-    // Step 3: is this for a specific time?
-    h+='<div style="background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:14px;">'
-      +'<div style="font-size:14px;font-weight:600;margin-bottom:4px;">'+esc(_pl.item)+'</div>'
-      +'<div style="font-size:13px;color:var(--soft);margin-bottom:10px;">Is this offering for a specific time? For example, 1 hour or for the duration of the event?</div>'
-      +'<div class="sub-chips" style="border:none;">'
-      +'<div class="sub-chip'+(_pl.timed==='yes'?' selected':'')+'" onclick="plSetTimed(\'yes\')">Yes</div>'
-      +'<div class="sub-chip'+(_pl.timed==='no'?' selected':'')+'" onclick="plSetTimed(\'no\')">No</div>'
-      +'</div>';
-    if(_pl.timed==='yes'){
-      h+='<div style="display:flex;gap:8px;margin-top:12px;">'
-        +'<input type="number" id="pl-time-num" min="1" placeholder="#" value="'+esc(_pl.timeNum)+'" style="width:70px;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;" oninput="_pl.timeNum=this.value;">'
-        +'<select id="pl-time-unit" onchange="plSetUnit(this.value)" style="flex:1;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;">'
-        +'<option value="">Select…</option>'
-        +'<option value="minutes"'+(_pl.timeUnit==='minutes'?' selected':'')+'>minutes</option>'
-        +'<option value="hours"'+(_pl.timeUnit==='hours'?' selected':'')+'>hours</option>'
-        +'<option value="entire event"'+(_pl.timeUnit==='entire event'?' selected':'')+'>entire event</option>'
-        +'</select>'
-        +'</div>';
-    }
-    h+='<button onclick="plStepAfterTimed()" style="width:100%;background:var(--brand);color:white;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;margin-top:12px;">Next</button>';
-    h+='</div>';
-    return h;
-  }
-  if(_pl.step==='elaborate'){
-    // Attendee adding own: elaboration before it joins the list
-    h+='<div style="background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:14px;">'
-      +'<div style="font-size:14px;font-weight:600;margin-bottom:4px;">'+esc(_pl.item)+'</div>'
-      +'<div style="font-size:13px;color:var(--soft);margin-bottom:10px;">Please elaborate on what this is:</div>'
-      +'<textarea id="pl-elaborate-input" placeholder="Share some details…" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;min-height:70px;resize:vertical;"></textarea>'
-      +'<button onclick="plFinishAttendee()" style="width:100%;background:var(--brand);color:white;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;margin-top:12px;">Add</button>'
-      +'</div>';
-    return h;
-  }
-  return h;
+function buildMyPotluckContributionsHTML(){
+  if(!_potluckClaims||!_appearId) return '';
+  var normalId=String(_appearId).split('.').join('').toLowerCase();
+  var mine=_potluckClaims.filter(function(c){return String(c.appearId).split('.').join('').toLowerCase()===normalId;});
+  if(!mine.length) return '';
+  var seen={};
+  var html='<div id="my-potluck-list" style="margin-top:16px;">'+buildMyPotluckItemsHTML(mine,seen)+'</div>';
+  return html;
 }
+function buildMyPotluckItemsHTML(mine,seen){
+  seen=seen||{};
+  var html='<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--soft);margin-bottom:8px;">Your contributions</div>';
+  mine.forEach(function(c){
+    if(seen[c.item]) return; seen[c.item]=true;
+    var listItem=(_signupList.find(function(it){return it.item===c.item;}))||{};
+    var hasDetails=listItem.potluckType||listItem.category;
+    var safeId=c.item.replace(/[^a-zA-Z0-9]/g,'');
+    html+='<div style="border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px;">'
+      +'<div style="font-size:14px;font-weight:600;">'+esc(c.item)+'</div>';
+    if(hasDetails){
+      html+='<div style="font-size:11px;color:var(--soft);margin-top:2px;">'+esc(listItem.potluckType||'')+(listItem.category?' · '+esc(listItem.category):'')+'</div>';
+    } else {
+      html+='<div id="pl-tag-label-'+safeId+'" style="font-size:11px;color:#d32f2f;cursor:pointer;margin-top:4px;" onclick="window.plOpenTagPicker(\''+esc(c.item)+'\')">+ Add details \u25be</div>'
+        +'<div id="pl-tag-picker-'+safeId+'"></div>';
+    }
+    html+='</div>';
+  });
+  return html;
+}
+window.plOpenTagPicker=function(item){
+  var safeId=item.replace(/[^a-zA-Z0-9]/g,'');
+  var picker=document.getElementById('pl-tag-picker-'+safeId);
+  var label=document.getElementById('pl-tag-label-'+safeId);
+  if(!picker) return;
+  if(label) label.style.display='none';
+  var types=(_refData&&_refData.potluckTypes)||['Skill','Experience','Thing'];
+  picker.innerHTML='<div style="margin-top:8px;padding:10px;background:var(--input-bg);border-radius:8px;">'
+    +'<select id="pl-type-select-'+safeId+'" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:\'DM Sans\',sans-serif;margin-bottom:8px;"><option value="">This is a…</option>'+types.map(function(t){return '<option value="'+esc(t)+'">'+esc(t)+'</option>';}).join('')+'</select>'
+    +'<select id="pl-cat-select-'+safeId+'" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:\'DM Sans\',sans-serif;margin-bottom:8px;"><option value="">Category…</option>'+PARENT_CATS.map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join('')+'</select>'
+    +'<button onclick="window.plSaveTag(\''+esc(item)+'\')" style="width:100%;background:var(--brand);color:white;border:none;padding:8px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;">Save</button>'
+    +'</div>';
+};
+window.plSaveTag=function(item){
+  var safeId=item.replace(/[^a-zA-Z0-9]/g,'');
+  var typeSel=document.getElementById('pl-type-select-'+safeId);
+  var catSel=document.getElementById('pl-cat-select-'+safeId);
+  var entry=_signupList.find(function(it){return it.item===item;});
+  if(entry){
+    if(typeSel&&typeSel.value) entry.potluckType=typeSel.value;
+    if(catSel&&catSel.value) entry.category=catSel.value;
+    savePotluckList();
+  }
+  renderScreenPotluck(null);
+  toast('Saved');
+};
+window.plQuickAdd=function(){
+  var inp=document.getElementById('pl-item-input');
+  if(!inp||!inp.value.trim()){toast('Please enter your offering');return;}
+  var item=inp.value.trim();
+  var exists=_signupList.some(function(it){return it.item===item;});
+  if(!exists){
+    _signupList.push({item:item,potluckType:'',category:'',timeSpec:'',maxClaims:''});
+    savePotluckList();
+  }
+  claimItem(item,'','','','',0,function(){
+    loadPotluck(function(){
+      renderScreenPotluck(null);
+      toast('Added! 🎁');
+    });
+  });
+};
 
 // ─── Wizard step transitions ────────────────────────────────────────────────
 window.plFilterOfferings=function(q){
@@ -1953,65 +1942,11 @@ window.plFilterOfferings=function(q){
     }).join('')+'</div>';
 };
 window.plPickOffering=function(item){
-  _pl.item=item;
-  _pl.step='type';
-  renderScreenPotluck(null);
-};
-window.plStartType=function(){
   var inp=document.getElementById('pl-item-input');
-  if(!inp||!inp.value.trim()){toast('Please enter your offering');return;}
-  _pl.item=inp.value.trim();
-  _pl.step='type';
-  renderScreenPotluck(null);
+  if(inp) inp.value=item;
+  var rc=document.getElementById('pl-search-results'); if(rc) rc.innerHTML='';
+  window.plQuickAdd();
 };
-window.plSetType=function(t){
-  _pl.potluckType=t;
-  _pl.step='category';
-  resetDrillTo('pl',0);
-  renderScreenPotluck(null);
-};
-window.plSetTimed=function(v){
-  _pl.timed=v;
-  if(v==='no'){_pl.timeNum='';_pl.timeUnit='';}
-  renderScreenPotluck(null);
-};
-window.plSetUnit=function(v){
-  _pl.timeUnit=v;
-  if(v==='entire event'){_pl.timeNum='';}
-};
-window.plStepAfterTimed=function(){
-  if(_pl.timed==='yes'){
-    if(_pl.timeUnit==='entire event'){ _pl.timeSpec='Entire event'; }
-    else if(_pl.timeNum&&_pl.timeUnit){ _pl.timeSpec=_pl.timeNum+' '+_pl.timeUnit; }
-    else { toast('Please set a time'); return; }
-  } else if(_pl.timed==='no'){
-    _pl.timeSpec='';
-  } else {
-    toast('Please choose Yes or No'); return;
-  }
-  _pl.step='elaborate';
-  renderScreenPotluck(null);
-};
-window.plFinishAttendee=function(){
-  var elabInp=document.getElementById('pl-elaborate-input');
-  var elaboration=elabInp?elabInp.value.trim():'';
-  // Attendee's own item joins the shared signup list AND is claimed by them
-  var exists=_signupList.some(function(it){return it.item===_pl.item;});
-  if(!exists){
-    _signupList.push({item:_pl.item,potluckType:_pl.potluckType,category:_pl.category,timeSpec:_pl.timeSpec||'',maxClaims:''});
-    savePotluckList();
-  }
-  // Record the claim
-  claimItem(_pl.item,_pl.category,_pl.potluckType,elaboration,_pl.timeSpec||'',0,function(){
-    resetPlWizard();
-    loadPotluck(function(){renderScreenPotluck(null);});
-    toast('Added! 🎁');
-  });
-};
-function resetPlWizard(){
-  _pl={step:'',item:'',potluckType:'',parentCat:'',category:'',timed:'',timeNum:'',timeUnit:'',maxClaims:''};
-}
-
 function savePotluckList(){
   fetch(GS_URL+'?action=savePotluckItem&eventId='+encodeURIComponent(_eventId)
     +'&potluckJson='+encodeURIComponent(JSON.stringify(_signupList))).catch(function(){});
@@ -2685,4 +2620,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.49 | Date: 2026-07-06 | LAST CHANGE: Added live search dropdown to potluck Enter your offering field, matching the skill search pattern used elsewhere in intake -->
+<!-- Version: V2.49 | Date: 2026-07-06 | LAST CHANGE: Attendee potluck flow simplified to immediate add - type an offering, tap Add, it joins the list right away; type/category tagging is now optional and deferred via an inline Add details picker per item -->
