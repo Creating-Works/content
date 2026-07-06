@@ -1,4 +1,4 @@
-<!-- Version: V2.41 | Date: 2026-07-05 | LAST CHANGE: Fixed Person item detection (path-based, no runtime state) and search-path Person sub-type prefix -->
+<!-- Version: V2.42 | Date: 2026-07-05 | LAST CHANGE: Person fixes - single breadcrumb, re-tap deselect, Recreation buddy pulls recreation pool, profile shows sub-type, three sections (Person/Space/Thing), dupe fix -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -405,7 +405,15 @@ function getPool(screen){
   if(s==='1') return getRecPool(d);
   if(s==='2') return getSkillPool(d);
   if(s==='3') return getValuePool(d);
-  if(s==='4s') return getSkillPool(d);
+  if(s==='4s'){
+    // Recreation buddy pulls the recreation pool; all other person types pull skills
+    if(_personSubType==='Recreation buddy'){
+      var recBase=(_refData&&_refData.recreation)||[];
+      if(d&&d.parentCat) return recBase.filter(function(r){return r.category===d.parentCat;});
+      return recBase;
+    }
+    return getSkillPool(d);
+  }
   if(s==='4r') return getResPool(d);
   return [];
 }
@@ -653,13 +661,30 @@ window.selectNeedsItem = function(item, category){
   window.renderDrill('4s','drill-4s');
 };
 window.setPersonSubType=function(sub){
+  // Re-tap deselects and returns to sub-chip list
+  if(_personSubType===sub){
+    _personSubType='';
+    var bc=document.getElementById('needs-breadcrumb');
+    if(bc) bc.innerHTML='<div style="font-size:13px;color:var(--brand);margin-bottom:8px;"><span style="cursor:pointer;text-decoration:underline;" onclick="_needsCat=\'\';_personSubType=\'\';renderScreen4(null);">What I\'m seeking</span> <span style="color:var(--muted);margin:0 4px;">›</span>Person</div>';
+    // Re-render sub-chips
+    var personOpts=(_refData&&_refData.personTypes)||[];
+    var personChips='<div class="sub-chips" style="margin-bottom:14px;border:none;">';
+    personOpts.forEach(function(p){personChips+='<div class="sub-chip" onclick="window.setPersonSubType(\''+esc(p)+'\')">'+esc(p)+'</div>';});
+    personChips+='<div class="sub-chip" onclick="window.setPersonSubType(\'Other\')">+ Other</div>';
+    personChips+='</div>';
+    var cont0=document.getElementById('needs-cat-content'); if(cont0) cont0.innerHTML=personChips;
+    return;
+  }
   _personSubType=sub;
+  // Single breadcrumb in top area: What I'm seeking › Person › [sub-type]
   var breadcrumbArea=document.getElementById('needs-breadcrumb');
-  if(breadcrumbArea) breadcrumbArea.innerHTML='<div style="font-size:13px;color:var(--brand);margin-bottom:8px;"><span style="cursor:pointer;text-decoration:underline;" onclick="_needsCat=\'\';_personSubType=\'\';renderScreen4(null);">What I\'m seeking</span> <span style="color:var(--muted);margin:0 4px;">›</span>Person</div>';
+  if(breadcrumbArea) breadcrumbArea.innerHTML='<div style="font-size:13px;color:var(--brand);margin-bottom:8px;">'
+    +'<span style="cursor:pointer;text-decoration:underline;" onclick="_needsCat=\'\';_personSubType=\'\';renderScreen4(null);">What I\'m seeking</span>'
+    +' <span style="color:var(--muted);margin:0 4px;">›</span>'
+    +'<span style="cursor:pointer;text-decoration:underline;" onclick="window.setPersonSubType(\''+esc(sub)+'\')">Person</span>'
+    +' <span style="color:var(--muted);margin:0 4px;">›</span>'+esc(sub)+'</div>';
   resetDrillTo('4s',0);
-  var inner='<div style="font-size:13px;color:var(--brand);margin-bottom:10px;"><span style="cursor:pointer;text-decoration:underline;" onclick="window.setPersonSubType(\'\')">Person</span> <span style="color:var(--muted);margin:0 4px;">›</span>'+esc(_personSubType)+'</div>'
-    +screenSearchHTML('4s','Search to add...',true)
-    +'<div id="drill-4s"></div>';
+  var inner=screenSearchHTML('4s','Search to add...',true)+'<div id="drill-4s"></div>';
   var cont=document.getElementById('needs-cat-content'); if(!cont) return;
   cont.innerHTML=inner;
   window.renderDrill('4s','drill-4s');
@@ -676,6 +701,7 @@ window.confirmNeedsItem = function(){
   var tc=document.getElementById('needs-type-chips');if(tc)tc.style.display='';
   _pendingNeedsItem={item:'',category:''};
   autoSave();
+  refreshNeedsVisible();
   refreshNeedsSummary();
   setTimeout(function(){if(_needsCat)window.setNeedsCat(_needsCat);},50);
 };
@@ -761,7 +787,7 @@ function getArr(s){
 function refreshNeedsVisible(){
   var vis=document.getElementById('needs-added-visible');
   if(vis){
-    vis.innerHTML=(_needsSkill.length?buildAddedHTML('4s'):'')+(_needsRes.length?buildAddedHTML('4r'):'');
+    vis.innerHTML=buildNeedsSectionsHTML();
   }
 }
 window.removeItem = function(screen, idx){
@@ -849,6 +875,46 @@ window.toggleLevelHelp=function(s){
   }
 };
 
+function buildNeedsSectionsHTML(){
+  // Three sections by type: Person (skill ntype), Space (space ntype), Thing (thing/resource ntype)
+  var personItems=_needsSkill.slice();
+  var spaceItems=_needsRes.filter(function(r){return r.ntype==='space';});
+  var thingItems=_needsRes.filter(function(r){return r.ntype!=='space';});
+  var html='';
+  html+=buildOneNeedsSection('👤 Person', personItems, '4s');
+  html+=buildOneNeedsSection('🏡 Space', spaceItems, '4r');
+  html+=buildOneNeedsSection('📦 Thing', thingItems, '4r');
+  return html;
+}
+function buildOneNeedsSection(label, items, s){
+  if(!items.length) return '';
+  var personTypeList=(_refData&&_refData.personTypes||['Skills/services','Recreation buddy','Accountability buddy']).concat(['Other']);
+  var header='<div class="added-header-row" style="background:var(--brand);border-radius:8px;padding:8px 12px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;">'
+    +'<div class="added-label" style="color:white;font-size:13px;font-weight:700;">'+label+' ('+items.length+')</div></div>';
+  var body=items.map(function(item){
+    // Find the true index in the underlying array for remove/toggle
+    var arr=s==='4s'?_needsSkill:_needsRes;
+    var realIdx=arr.findIndex(function(r){return r.item===item.item&&r.category===item.category&&r.ntype===item.ntype;});
+    var catParts=item.category?item.category.split(' / '):[];
+    var isPersonItem=catParts.length>=1&&personTypeList.indexOf(catParts[0])>-1;
+    var personSubLabel=isPersonItem?catParts[0]:'';
+    var catMissing=!item.category;
+    var pickerId='need-cat-picker-'+s+'-'+realIdx;
+    var catLabel=catMissing
+      ?'<div class="need-missing-cat" style="font-size:11px;color:#d32f2f;cursor:pointer;" onclick="window.openNeedCatPicker(\''+s+'\','+realIdx+')">Category missing \u25be</div>'
+       +'<div class="cat-picker-inline" id="'+pickerId+'">'+PARENT_CATS.map(function(c){return '<button class="cat-pick-btn" onclick="setNeedCat(\''+s+'\','+realIdx+',\''+c+'\')">'+c+'</button>';}).join('')+'</div>'
+      :personSubLabel
+        ?'<div style="font-size:11px;color:var(--soft);margin-top:2px;">'+esc(personSubLabel)+'</div>'
+        :'<div class="need-item-cat">'+esc(item.category)+'</div>';
+    return '<div class="need-item">'
+      +'<div class="need-item-left" style="position:relative;"><div class="need-item-name">'+esc(item.item)+'</div>'+catLabel+'</div>'
+      +'<div class="need-item-right">'
+      +'<label class="local-toggle'+(item.local?' active':'')+'" ><input type="checkbox"'+(item.local?' checked':'')+' onchange="toggleLocal(\''+s+'\','+realIdx+')"> 📍 Local</label>'
+      +'<button class="practice-item-x" onclick="removeItem(\''+s+'\','+realIdx+')">\u00d7</button>'
+      +'</div></div>';
+  }).join('');
+  return '<div class="added-section" style="margin-bottom:12px;">'+header+body+'</div>';
+}
 function buildAddedHTML(s){
   var arr=getArr(s);
   var levels=s==='1'?['Fan','Participant','Coach']:s==='2'?['Entry Level','Mid Level','Expert Level']:s==='3'?['Exploring','Engaged','Leading']:null;
@@ -1374,7 +1440,14 @@ function renderProfile(el, viewerMode){
           }).join(''):'';
           var picker=missingLevel?'<div class="cat-picker-inline" id="'+pickerId+'">'+pickerBtns+'</div>':'';
           var missingTag=missingLevel?'<span style="font-size:11px;color:#d32f2f;font-weight:500;margin-left:4px;cursor:pointer;" onclick="openCatPicker(\''+screenKey+'\','+i+')">Category missing ▾</span>':'';
-          return '<div style="position:relative;display:inline-block;">'+'<div class="profile-tag"'+(missingLevel?' style="border-color:#d32f2f;"':'')+'>'+esc(r.item)+(lv?'<span class="tag-level">'+esc(lv)+'</span>':'')+missingTag+local+'</div>'+picker+'</div>';
+          // For seeking items (screen 4), show Person sub-type under the item name
+          var subLabel='';
+          if(screenKey==='4'&&r.category){
+            var personTypeList=(_refData&&_refData.personTypes||['Skills/services','Recreation buddy','Accountability buddy']).concat(['Other']);
+            var cp=r.category.split(' / ');
+            if(personTypeList.indexOf(cp[0])>-1) subLabel='<span style="display:block;font-size:10px;color:var(--soft);margin-top:1px;">'+esc(cp[0])+'</span>';
+          }
+          return '<div style="position:relative;display:inline-block;">'+'<div class="profile-tag"'+(missingLevel?' style="border-color:#d32f2f;"':'')+'>'+esc(r.item)+(lv?'<span class="tag-level">'+esc(lv)+'</span>':'')+missingTag+local+subLabel+'</div>'+picker+'</div>';
         }).join('')
       :'<div class="profile-empty">Nothing added yet.</div>';
     var actions=!viewerMode
@@ -1874,8 +1947,7 @@ window.addThingItem=function(){
   // reset
   if(inp) inp.value='';
   if(local) local.checked=false;
-  var added=document.getElementById('added-4r');
-  if(added) added.innerHTML=buildAddedHTML('4r');
+  refreshNeedsVisible();
   toast('Added to your list.');
   refreshNeedsSummary();
 };
@@ -1903,16 +1975,16 @@ window.setNeedsCat=function(cat){
       var personOpts=(_refData&&_refData.personTypes)||[];
       var personChips='<div class="sub-chips" style="margin-bottom:14px;border:none;">';
       personOpts.forEach(function(p){
-        personChips+='<div class="sub-chip" onclick="window.setPersonSubType(\''+esc(p)+'\')">'+esc(p)+'</div>';
+        var selCls=(_personSubType===p)?' selected':'';
+        personChips+='<div class="sub-chip'+selCls+'" onclick="window.setPersonSubType(\''+esc(p)+'\')">'+esc(p)+'</div>';
       });
       personChips+='<div class="sub-chip" onclick="window.setPersonSubType(\'Other\')">+ Other</div>';
       personChips+='</div>';
       inner=personChips;
     } else {
-      // Person sub-type selected — show parent-cat drilldown
+      // Person sub-type selected — show drilldown (breadcrumb handled in top area, not duplicated here)
       resetDrillTo('4s',0);
-      inner='<div style="font-size:13px;color:var(--brand);margin-bottom:10px;"><span style="cursor:pointer;text-decoration:underline;" onclick="window.setPersonSubType(\'\')">Person</span> <span style="color:var(--muted);margin:0 4px;">›</span>'+esc(_personSubType)+'</div>'
-        +screenSearchHTML('4s','Search for a skill or service...',true)
+      inner=screenSearchHTML('4s','Search to add...',true)
         +'<div id="drill-4s"></div>';
     }
   } else if(cat==='thing'){
@@ -1928,8 +2000,7 @@ window.setNeedsCat=function(cat){
       +'<input type="text" id="space-detail-input" placeholder="Please share some details" style="margin-top:8px;" oninput="var b=document.getElementById(\'add-space-btn\');if(b)b.style.display=this.value.trim()?\'\': \'none\';" >'
       +'<label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;color:var(--soft);cursor:pointer;">'
       +'<input type="checkbox" id="space-local-check" onchange="if(this.checked)postalNudge(\'space-local-check\')"> 📍 This is a local request</label>'
-      +'<button class="btn-outlined" id="add-space-btn" style="width:100%;margin-top:14px;display:none;" onclick="addSpaceItem()">Add space to my list</button>'
-      +'<div id="added-4r">'+buildAddedHTML('4r')+'</div>';
+      +'<button class="btn-outlined" id="add-space-btn" style="width:100%;margin-top:14px;display:none;" onclick="addSpaceItem()">Add space to my list</button>';
   }
   var cont=document.getElementById('needs-cat-content'); if(!cont) return;
   cont.innerHTML=inner;
@@ -1946,8 +2017,7 @@ window.addSpaceItem=function(){
   autoSave();
   if(inp) inp.value='';
   if(local) local.checked=false;
-  var added=document.getElementById('added-4r');
-  if(added) added.innerHTML=buildAddedHTML('4r');
+  refreshNeedsVisible();
   toast('Added to your list.');
   refreshNeedsSummary();
 };
@@ -1964,8 +2034,7 @@ function renderScreen4(el){
     +'</div>'
     +'<div id="needs-cat-content"></div>'
     +'<div id="needs-added-visible" style="margin-top:14px;">'
-    +(_needsSkill.length?buildAddedHTML('4s'):'')
-    +(_needsRes.length?buildAddedHTML('4r'):'')
+    +buildNeedsSectionsHTML()
     +'</div>'
     +navHTML(4);
   if(_needsCat) window.setNeedsCat(_needsCat);
@@ -2094,4 +2163,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.41 | Date: 2026-07-05 | LAST CHANGE: Fixed Person item detection (path-based, no runtime state) and search-path Person sub-type prefix -->
+<!-- Version: V2.42 | Date: 2026-07-05 | LAST CHANGE: Person fixes - single breadcrumb, re-tap deselect, Recreation buddy pulls recreation pool, profile shows sub-type, three sections (Person/Space/Thing), dupe fix -->
