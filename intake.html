@@ -1,4 +1,4 @@
-<!-- Version: V2.40 | Date: 2026-07-05 | LAST CHANGE: Retired right-justify, Person sub-chips (Skills/services, Recreation buddy, Accountability buddy, Other) with parent-cat drilldown and sub-type category prefix -->
+<!-- Version: V2.41 | Date: 2026-07-05 | LAST CHANGE: Fixed Person item detection (path-based, no runtime state) and search-path Person sub-type prefix -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -741,7 +741,7 @@ function addItem(screen, item, category){
   if(arr.some(function(r){return r.item===item;})){toast('Already added');return;}
   if(s==='1') _interests.unshift({item:item,category:category||'',level:''});
   else if(s==='2') _skills.unshift({item:item,category:category||'',level:''});
-  else if(s==='4s'){_needsSkill.unshift({item:item,category:category||(_drill['4s']&&_drill['4s'].parentCat)||'',local:false,ntype:'skill'});var tc=document.getElementById('needs-type-chips');if(tc)tc.style.display='';setTimeout(function(){if(_needsCat)window.setNeedsCat(_needsCat);},50);}
+  else if(s==='4s'){var pcat4s=category||(_drill['4s']&&_drill['4s'].parentCat)||'';if(_needsCat==='skill'&&_personSubType&&pcat4s.indexOf(_personSubType)!==0){pcat4s=_personSubType+(pcat4s?' / '+pcat4s:'');}_needsSkill.unshift({item:item,category:pcat4s,local:false,ntype:'skill'});var tc=document.getElementById('needs-type-chips');if(tc)tc.style.display='';setTimeout(function(){if(_needsCat)window.setNeedsCat(_needsCat);},50);}
   else if(s==='4r'){_needsRes.unshift({item:item,category:category||(_drill['4r']&&_drill['4r'].parentCat)||'',local:false,ntype:'resource'});var tc2=document.getElementById('needs-type-chips');if(tc2)tc2.style.display='';setTimeout(function(){if(_needsCat)window.setNeedsCat(_needsCat);},50);}
   toast('Added below ↓');
   clearSearch(s);
@@ -869,7 +869,8 @@ function buildAddedHTML(s){
   var bodyItems=arr.map(function(item,i){
     if(isNeed){
       var catParts=item.category?item.category.split(' / '):[];
-      var isPersonItem=catParts.length>=1&&(_refData&&_refData.personTypes||[]).concat(['Other']).indexOf(catParts[0])>-1&&_needsCat==='skill'||catParts.length>=1&&['Skills/services','Recreation buddy','Accountability buddy','Other'].indexOf(catParts[0])>-1;
+      var personTypeList=(_refData&&_refData.personTypes||['Skills/services','Recreation buddy','Accountability buddy']).concat(['Other']);
+      var isPersonItem=catParts.length>=1&&personTypeList.indexOf(catParts[0])>-1;
       var personSubLabel=isPersonItem?catParts[0]:'';
       var catMissing=!item.category;
       var pickerId='need-cat-picker-'+s+'-'+i;
@@ -879,9 +880,8 @@ function buildAddedHTML(s){
         :personSubLabel
           ?'<div style="font-size:11px;color:var(--soft);margin-top:2px;">'+esc(personSubLabel)+'</div>'
           :'<div class="need-item-cat">'+esc(item.category)+'</div>';
-      var displayName=personSubLabel?item.item:item.item;
       return '<div class="need-item">'
-        +'<div class="need-item-left" id="need-item-wrap-'+s+'-'+i+'" style="position:relative;"><div class="need-item-name">'+esc(displayName)+'</div>'+catLabel+'</div>'
+        +'<div class="need-item-left" id="need-item-wrap-'+s+'-'+i+'" style="position:relative;"><div class="need-item-name">'+esc(item.item)+'</div>'+catLabel+'</div>'
         +'<div class="need-item-right">'
         +'<label class="local-toggle'+(item.local?' active':'')+'" ><input type="checkbox"'+(item.local?' checked':'')+' onchange="toggleLocal(\''+s+'\','+i+')"> 📍 Local</label>'
         +'<button class="practice-item-x" onclick="removeItem(\''+s+'\','+i+')">\u00d7</button>'
@@ -2094,4 +2094,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.40 | Date: 2026-07-05 | LAST CHANGE: Retired right-justify, Person sub-chips (Skills/services, Recreation buddy, Accountability buddy, Other) with parent-cat drilldown and sub-type category prefix -->
+<!-- Version: V2.41 | Date: 2026-07-05 | LAST CHANGE: Fixed Person item detection (path-based, no runtime state) and search-path Person sub-type prefix -->
