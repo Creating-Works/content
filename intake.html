@@ -1,5 +1,5 @@
-<!-- Version: V2.46b | Date: 2026-07-06 | LAST CHANGE: Replaced modal prompt() with styled inline elaboration field (start/cancel/submit) for claiming potluck items -->
-<!DOCTYPE html> 
+<!-- Version: V2.48 | Date: 2026-07-06 | LAST CHANGE: Coach-level enjoy items mirror to skills with a category-missing picker; language modal asks for primary language when more than 2 selected, encoded as list order (no GAS change) -->
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -215,13 +215,14 @@
 <div class="modal-overlay" id="lang-modal">
   <div class="modal">
     <button class="modal-close" onclick="closeLangModal()">✕</button>
-    <div class="modal-title">Languages</div>
-    <div class="lang-dropdown-wrap">
+    <div class="modal-title" id="lang-modal-title">Languages</div>
+    <div class="lang-dropdown-wrap" id="lang-dropdown-wrap">
       <span class="lang-search-icon">🔍</span>
       <input type="text" class="lang-search-input" id="lang-modal-search" placeholder="Search languages..." oninput="filterLangs(this.value)">
       <div class="lang-list" id="lang-list"></div>
     </div>
     <div class="lang-tags" id="lang-tags"></div>
+    <div id="lang-primary-step" style="display:none;"></div>
     <div style="margin-top:16px">
       <button class="custom-add-confirm" onclick="saveLangModal()">Done</button>
       <button class="custom-add-cancel" onclick="closeLangModal()">Cancel</button>
@@ -319,6 +320,8 @@ var _refData     = null;
 var _photo       = '';
 var _name        = '';
 var _languages   = [];
+var _primaryLanguage='';
+var _choosingPrimaryLang=false;
 var _langFilter  = '';
 var _postal      = '';
 
@@ -473,6 +476,7 @@ async function loadIntake(){
       _expression=d.expression||'';
       _expressionItems=_expression?_expression.split('|').filter(Boolean):[];
       _languages=d.languages?d.languages.split('|').filter(Boolean):[];
+      _primaryLanguage=_languages.length>2?_languages[0]:'';
       _interests=parseTagStr(d.interests,'level');
       _skills=parseTagStr(d.skills,'level');
       _values=parseTagStr(d.values,'level');
@@ -583,6 +587,7 @@ window.renderDrill = function(screen, containerId){
       if(subCats.length){
         html+='<div class="sub-chips">';
         subCats.forEach(function(c){html+='<div class="sub-chip" onclick="doSetDrill(\'1\',\'subCat\',\''+rawVal(c)+'\')">'+esc(c)+'</div>';});
+        html+='<div class="sub-chip" style="border-style:dashed;color:var(--brand);font-weight:700;" onclick="showCustomAdd(\'1\',\'\')">+ Other</div>';
         html+='</div>';
       }
     }
@@ -607,6 +612,7 @@ window.renderDrill = function(screen, containerId){
       if(subs.length&&!d.subCat){
         html+='<div class="sub-chips">';
         subs.forEach(function(c){html+='<div class="sub-chip" onclick="doSetDrill(\''+s+'\',\'subCat\',\''+rawVal(c)+'\')">'+esc(c)+'</div>';});
+        html+='<div class="sub-chip" style="border-style:dashed;color:var(--brand);font-weight:700;" onclick="showCustomAdd(\''+s+'\',\'\')">+ Other</div>';
         html+='</div>';
       }
     }
@@ -921,9 +927,21 @@ window.setLevel = function(screen, idx, level){
   var current=arr[idx].level||'';
   var parts=current?current.split(','):[];
   var pos=parts.indexOf(level);
+  var wasPresent=pos>-1;
   if(pos>-1) parts.splice(pos,1); else parts.push(level);
   arr[idx].level=parts.join(',');
   updateAddedSection(s);
+  // Coach-level enjoy items also become a skill, needing a category later
+  if(s==='1'&&level==='Coach'&&!wasPresent){
+    var enjoyItem=arr[idx].item;
+    var alreadySkill=_skills.some(function(sk){return sk.item===enjoyItem;});
+    if(!alreadySkill){
+      _skills.unshift({item:enjoyItem,category:'',level:''});
+      toast('Added "'+enjoyItem+'" to your skills - pick a category on the skills screen');
+      autoSave();
+      updateAddedSection('2');
+    }
+  }
 };
 
 window.toggleLocal = function(screen, idx){
@@ -1046,10 +1064,16 @@ function buildAddedHTML(s){
     var btns=levels?levels.map(function(lv){
       return '<button class="practice-btn'+(item.level&&item.level.split(',').indexOf(lv)>-1?' selected':'')+'" onclick="setLevel(\''+s+'\','+i+',\''+esc(lv)+'\')">'+lv+'</button>';
     }).join(''):'';
-    return '<div class="practice-item">'
+    var catMissingHTML='';
+    if(s==='2'&&!item.category){
+      var skPickerId='skill-cat-picker-'+i;
+      catMissingHTML='<div class="need-missing-cat" id="skill-cat-label-'+i+'" style="font-size:11px;color:#d32f2f;cursor:pointer;" onclick="window.openSkillCatPicker('+i+')">Category missing \u25be</div>'
+        +'<div class="cat-picker-inline" id="'+skPickerId+'"><select style="font-size:12px;padding:4px 8px;border-radius:6px;border:1.5px solid var(--brand);width:100%;" onchange="window.setSkillCat('+i+',this.value)"><option value="">Select category</option>'+PARENT_CATS.map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join('')+'</select></div>';
+    }
+    return '<div class="practice-item"'+(catMissingHTML?' style="position:relative;"':'')+'>'
       +'<div class="practice-item-header"><div class="practice-item-name">'+esc(item.item)+'</div>'
       +'<button class="practice-item-x" onclick="removeItem(\''+s+'\','+i+')">\u00d7</button></div>'
-      +(item.category?'<div class="practice-item-cat">'+esc(item.category)+'</div>':'')
+      +(item.category?'<div class="practice-item-cat">'+esc(item.category)+'</div>':catMissingHTML)
       +(levels?'<div class="practice-options">'+btns+'</div>':'')
       +'</div>';
   }).join('');
@@ -1110,6 +1134,17 @@ function clearSearch(s){
 }
 
 // ─── Custom add ───────────────────────────────────────────────────────────────
+window.checkOneAtATime=function(inputId,warnId){
+  var inp=document.getElementById(inputId);
+  var warn=document.getElementById(warnId);
+  if(!inp||!warn) return;
+  if(/[,\/]/.test(inp.value)){
+    warn.textContent='Please add one topic at a time.';
+    warn.style.display='block';
+  } else {
+    warn.style.display='none';
+  }
+};
 window.showCustomAdd = function(screen, item){
   _customScreen=String(screen);
   // Domain custom-add: item param is the literal 'domain' signal, not an item name
@@ -1119,7 +1154,8 @@ window.showCustomAdd = function(screen, item){
     var dcont=document.getElementById('search-results-3');
     if(!dcont) return;
     dcont.innerHTML='<div class="custom-add-box">'
-      +'<input type="text" id="custom-item-input" placeholder="Add your own domain..." style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;margin-bottom:8px;">'
+      +'<input type="text" id="custom-item-input" placeholder="Add your own domain..." oninput="checkOneAtATime(\'custom-item-input\',\'custom-item-warn\')" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;margin-bottom:6px;">'
+      +'<div id="custom-item-warn" style="display:none;color:#c0392b;font-size:12px;margin-bottom:8px;"></div>'
       +'<button class="custom-add-confirm" onclick="confirmCustomAdd()">Add to my list</button>'
       +'<button class="custom-add-cancel" onclick="cancelCustomAdd()">Cancel</button>'
       +'</div>';
@@ -1148,14 +1184,16 @@ window.showCustomAdd = function(screen, item){
     if(careContainer){
       careContainer.innerHTML='<div class="custom-add-box" style="margin-top:8px;">'
         +'<label style="font-size:13px;color:var(--soft);display:block;margin-bottom:6px;">What would you like to add under '+esc(item)+'?</label>'
-        +'<input type="text" id="custom-item-input" placeholder="Type your item..." style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;margin-bottom:8px;">'
+        +'<input type="text" id="custom-item-input" placeholder="Type your item..." oninput="checkOneAtATime(\'custom-item-input\',\'custom-item-warn\')" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;margin-bottom:6px;">'
+        +'<div id="custom-item-warn" style="display:none;color:#c0392b;font-size:12px;margin-bottom:8px;"></div>'
         +'<button class="custom-add-confirm" onclick="confirmCustomAdd()">Add to my list</button>'
         +'<button class="custom-add-cancel" onclick="cancelCustomAdd()">Cancel</button>'
         +'</div>';
     }
     return;
   }
-  var itemField=item?'':'<input type="text" id="custom-item-input" placeholder="What would you like to add?" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;margin-bottom:8px;">';
+  var itemField=item?'':'<input type="text" id="custom-item-input" placeholder="What would you like to add?" oninput="checkOneAtATime(\'custom-item-input\',\'custom-item-warn\')" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;margin-bottom:6px;">'
+    +(item?'':'<div id="custom-item-warn" style="display:none;color:#c0392b;font-size:12px;margin-bottom:8px;"></div>');
   var drillCat=getDrill(_customScreen).parentCat||'';
   if(drillCat){
     // Drilled into a category - auto-assign, no dropdown
@@ -1348,6 +1386,15 @@ window.setNeedCat=function(s,idx,cat){
   autoSave();
   refreshNeedsVisible();
 };
+window.openSkillCatPicker=function(idx){
+  var el=document.getElementById('skill-cat-picker-'+idx);
+  if(el) el.classList.toggle('open');
+};
+window.setSkillCat=function(idx,cat){
+  if(_skills[idx]&&cat){ _skills[idx].category=cat; }
+  autoSave();
+  updateAddedSection('2');
+};
 window.openCatPicker=function(screenKey, itemIdx){
   // Close any open pickers first
   document.querySelectorAll('.cat-picker-inline').forEach(function(el){el.classList.remove('open');});
@@ -1379,13 +1426,46 @@ window.openLangModal = function(){
   var m=document.getElementById('lang-modal'); if(m) m.classList.add('open');
   filterLangs('');
   var si=document.getElementById('lang-modal-search'); if(si) si.value='';
+  _choosingPrimaryLang=false;
+  var wrap=document.getElementById('lang-dropdown-wrap'); if(wrap) wrap.style.display='';
+  var tagsRow=document.getElementById('lang-tags'); if(tagsRow) tagsRow.style.display='';
+  var title=document.getElementById('lang-modal-title'); if(title) title.textContent='Languages';
+  var step=document.getElementById('lang-primary-step'); if(step) step.style.display='none';
 };
 window.closeLangModal = function(){ var m=document.getElementById('lang-modal'); if(m) m.classList.remove('open'); };
 window.saveLangModal = function(){
+  if(_languages.length>2&&!_choosingPrimaryLang){
+    _choosingPrimaryLang=true;
+    var wrap=document.getElementById('lang-dropdown-wrap'); if(wrap) wrap.style.display='none';
+    var tagsRow=document.getElementById('lang-tags'); if(tagsRow) tagsRow.style.display='none';
+    var title=document.getElementById('lang-modal-title'); if(title) title.textContent='Which is your primary language?';
+    var step=document.getElementById('lang-primary-step');
+    if(step){
+      step.style.display='block';
+      step.innerHTML='<p style="font-size:13px;color:var(--soft);margin-bottom:12px;">You added a few - which one do you use most?</p>'
+        +'<div class="sub-chips" style="border:none;">'+_languages.map(function(l){return '<div class="sub-chip'+(l===_primaryLanguage?' selected':'')+'" onclick="window.setPrimaryLang(\''+esc(l)+'\')">'+esc(l)+'</div>';}).join('')+'</div>';
+    }
+    return;
+  }
+  _choosingPrimaryLang=false;
   window.closeLangModal();
   var el=document.getElementById('profile-lang-row'); if(el) el.innerHTML=buildLangRowHTML();
   autoSave();
   // Re-render lang step so tags show updated selections
+  if(!_editMode && _screen===2 && _screen2step==='lang') renderScreen2(null);
+};
+window.setPrimaryLang=function(lang){
+  _primaryLanguage=lang;
+  var idx=_languages.indexOf(lang);
+  if(idx>-1){ _languages.splice(idx,1); _languages.unshift(lang); }
+  _choosingPrimaryLang=false;
+  window.closeLangModal();
+  var wrap=document.getElementById('lang-dropdown-wrap'); if(wrap) wrap.style.display='';
+  var tagsRow=document.getElementById('lang-tags'); if(tagsRow) tagsRow.style.display='';
+  var title=document.getElementById('lang-modal-title'); if(title) title.textContent='Languages';
+  var step=document.getElementById('lang-primary-step'); if(step) step.style.display='none';
+  var el=document.getElementById('profile-lang-row'); if(el) el.innerHTML=buildLangRowHTML();
+  autoSave();
   if(!_editMode && _screen===2 && _screen2step==='lang') renderScreen2(null);
 };
 window.filterLangs = function(q){
@@ -1403,10 +1483,10 @@ window.filterLangs = function(q){
 };
 window.toggleLang = function(lang){ var idx=_languages.indexOf(lang);if(idx>-1)_languages.splice(idx,1);else _languages.push(lang);window.filterLangs(_langFilter); };
 window.removeLang = function(lang){ var idx=_languages.indexOf(lang);if(idx>-1)_languages.splice(idx,1);window.filterLangs(_langFilter); };
-function buildLangTagsHTML(){return _languages.map(function(l){return '<div class="lang-tag">'+esc(l)+'<span class="lang-tag-remove" onclick="removeLang(\''+esc(l)+'\')">×</span></div>';}).join('');}
+function buildLangTagsHTML(){return _languages.map(function(l){return '<div class="lang-tag">'+esc(l)+(l===_primaryLanguage?' <span style="opacity:0.7;font-size:11px;">(primary)</span>':'')+'<span class="lang-tag-remove" onclick="removeLang(\''+esc(l)+'\')">×</span></div>';}).join('');}
 function buildLangRowHTML(){
   var chips=_languages.map(function(l){
-    return '<div class="profile-tag" style="background:var(--input-bg);border-color:var(--border);color:var(--soft);">'+esc(l)+'</div>';
+    return '<div class="profile-tag" style="background:var(--input-bg);border-color:var(--border);color:var(--soft);">'+esc(l)+(l===_primaryLanguage?' <span style="opacity:0.7;">★</span>':'')+'</div>';
   }).join('');
   return chips||'';
 }
@@ -1701,7 +1781,8 @@ window.showExpressionCustom=function(){
   var cont=document.getElementById('expression-custom');
   if(!cont) return;
   cont.innerHTML='<div class="custom-add-box" style="margin-top:8px;">'
-    +'<input type="text" id="expression-custom-input" placeholder="Type your item..." style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;margin-bottom:8px;">'
+    +'<input type="text" id="expression-custom-input" placeholder="Type your item..." oninput="checkOneAtATime(\'expression-custom-input\',\'expression-custom-warn\')" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;margin-bottom:6px;">'
+    +'<div id="expression-custom-warn" style="display:none;color:#c0392b;font-size:12px;margin-bottom:8px;"></div>'
     +'<button class="custom-add-confirm" onclick="window.confirmExpressionCustom()">Add to my list</button>'
     +'<button class="custom-add-cancel" onclick="document.getElementById(\'expression-custom\').innerHTML=\'\' ">Cancel</button>'
     +'</div>';
@@ -1739,11 +1820,6 @@ var _claimingIdx=-1;  // which signup item is currently showing the inline elabo
 // Wizard state for adding a new potluck item
 var _pl={step:'',item:'',potluckType:'',parentCat:'',category:'',timed:'',timeNum:'',timeUnit:'',maxClaims:''};
 
-function isHost(){
-  if(!_hostMemberCard||!_appearId) return false;
-  return _hostMemberCard.split('.').join('').toLowerCase()===_appearId.split('.').join('').toLowerCase();
-}
-
 function loadPotluck(cb){
   if(!_eventId){cb&&cb();return;}
   fetch(GS_URL+'?action=getPotluckList&eventId='+encodeURIComponent(_eventId))
@@ -1768,43 +1844,12 @@ function renderScreenPotluck(el){
   }
   var html='<div style="padding:20px 0;">'
     +'<h2 style="margin-bottom:6px;">Event contribution 🎁</h2>'
-    +'<p style="font-size:14px;color:var(--soft);margin-bottom:20px;">This event is all about contribution. Think of it as a potluck of skills and offerings. What are you going to bring to the event that you want to be known for in our community?</p>';
-
-  if(isHost()){
-    html+=renderPotluckHostMode();
-  } else {
-    html+=renderPotluckAttendeeMode();
-  }
-  html+='</div>'
-    +'<div class="nav-row"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" onclick="goNext()">Continue</button></div>';
+    +'<p style="font-size:14px;color:var(--soft);margin-bottom:20px;">This event is all about contribution. Think of it as a potluck of skills and offerings. What are you going to bring to the event that you want to be known for in our community?</p>'
+    +renderPotluckAttendeeMode()
+    +'</div>'
+    +'<div class="nav-row"><button class="btn-back" onclick="goBack()">← Back</button></div>';
   cont.innerHTML=html;
   if(_pl.step==='category') window.renderDrill('pl','drill-pl');
-}
-
-// ─── Host mode: build the signup list ───────────────────────────────────────
-function renderPotluckHostMode(){
-  var h='<div style="background:var(--sel-bg);border:1px solid var(--sel-border);border-radius:10px;padding:12px 14px;margin-bottom:16px;">'
-    +'<div style="font-size:13px;font-weight:600;color:var(--brand);">You\'re the host of this event</div>'
-    +'<div style="font-size:13px;color:var(--soft);margin-top:2px;">Build the sign up list below. People at your event can claim what they\'ll bring.</div>'
-    +'</div>';
-  // Existing signup items
-  if(_signupList.length){
-    h+='<div style="margin-bottom:16px;">';
-    _signupList.forEach(function(it,i){
-      var claimCount=_potluckClaims.filter(function(c){return c.item===it.item;}).length;
-      var capLabel=it.maxClaims?(' · '+claimCount+'/'+it.maxClaims+' claimed'):(claimCount?(' · '+claimCount+' claimed'):'');
-      h+='<div class="need-item"><div class="need-item-left">'
-        +'<div class="need-item-name">'+esc(it.item)+'</div>'
-        +'<div style="font-size:11px;color:var(--soft);margin-top:2px;">'+esc(it.potluckType||'')+(it.category?' · '+esc(it.category):'')+(it.timeSpec?' · '+esc(it.timeSpec):'')+esc(capLabel)+'</div>'
-        +'</div><div class="need-item-right">'
-        +'<button class="practice-item-x" onclick="removePotluckItem('+i+')">\u00d7</button>'
-        +'</div></div>';
-    });
-    h+='</div>';
-  }
-  // Add-item wizard or the add button
-  h+=renderPotluckWizard('host');
-  return h;
 }
 
 // ─── Attendee mode: view list + claim, or add own ───────────────────────────
@@ -1829,7 +1874,7 @@ function renderPotluckWizard(mode){
     // Step 0: open text field
     h+='<div style="background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:14px;">'
       +'<input type="text" id="pl-item-input" placeholder="Enter your offering" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;" value="'+esc(_pl.item)+'">'
-      +'<button onclick="plStartType()" style="width:100%;background:var(--brand);color:white;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;margin-top:10px;">Next</button>'
+      +'<button onclick="plStartType()" style="width:100%;background:var(--brand);color:white;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;margin-top:10px;">Add</button>'
       +'</div>';
     return h;
   }
@@ -1879,23 +1924,13 @@ function renderPotluckWizard(mode){
     h+='</div>';
     return h;
   }
-  if(_pl.step==='cap'){
-    // Step 4 (host only): optional signup cap
-    h+='<div style="background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:14px;">'
-      +'<div style="font-size:14px;font-weight:600;margin-bottom:4px;">'+esc(_pl.item)+'</div>'
-      +'<div style="font-size:13px;color:var(--soft);margin-bottom:10px;">Limit how many can sign up? Leave blank for no limit.</div>'
-      +'<input type="number" id="pl-cap-input" min="1" placeholder="No limit" value="'+esc(_pl.maxClaims)+'" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;" oninput="_pl.maxClaims=this.value;">'
-      +'<button onclick="plFinishHost()" style="width:100%;background:var(--brand);color:white;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;margin-top:12px;">Add to sign up list</button>'
-      +'</div>';
-    return h;
-  }
   if(_pl.step==='elaborate'){
     // Attendee adding own: elaboration before it joins the list
     h+='<div style="background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:14px;">'
       +'<div style="font-size:14px;font-weight:600;margin-bottom:4px;">'+esc(_pl.item)+'</div>'
       +'<div style="font-size:13px;color:var(--soft);margin-bottom:10px;">Please elaborate on what this is:</div>'
       +'<textarea id="pl-elaborate-input" placeholder="Share some details…" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;min-height:70px;resize:vertical;"></textarea>'
-      +'<button onclick="plFinishAttendee()" style="width:100%;background:var(--brand);color:white;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;margin-top:12px;">Add to sign up list</button>'
+      +'<button onclick="plFinishAttendee()" style="width:100%;background:var(--brand);color:white;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;margin-top:12px;">Add</button>'
       +'</div>';
     return h;
   }
@@ -1935,26 +1970,8 @@ window.plStepAfterTimed=function(){
   } else {
     toast('Please choose Yes or No'); return;
   }
-  // Host goes to cap step; attendee goes to elaborate
-  if(isHost()){ _pl.step='cap'; }
-  else { _pl.step='elaborate'; }
+  _pl.step='elaborate';
   renderScreenPotluck(null);
-};
-window.plFinishHost=function(){
-  var capInp=document.getElementById('pl-cap-input');
-  var cap=capInp&&capInp.value.trim()?parseInt(capInp.value.trim()):'';
-  var newItem={
-    item:_pl.item,
-    potluckType:_pl.potluckType,
-    category:_pl.category,
-    timeSpec:_pl.timeSpec||'',
-    maxClaims:cap||''
-  };
-  _signupList.push(newItem);
-  savePotluckList();
-  resetPlWizard();
-  renderScreenPotluck(null);
-  toast('Added to sign up list');
 };
 window.plFinishAttendee=function(){
   var elabInp=document.getElementById('pl-elaborate-input');
@@ -1980,11 +1997,6 @@ function savePotluckList(){
   fetch(GS_URL+'?action=savePotluckItem&eventId='+encodeURIComponent(_eventId)
     +'&potluckJson='+encodeURIComponent(JSON.stringify(_signupList))).catch(function(){});
 }
-window.removePotluckItem=function(i){
-  _signupList.splice(i,1);
-  savePotluckList();
-  renderScreenPotluck(null);
-};
 
 function claimItem(item,category,potluckType,elaboration,timeSpec,maxClaims,cb){
   fetch(GS_URL+'?action=claimPotluckItem&eventId='+encodeURIComponent(_eventId)
@@ -2121,7 +2133,7 @@ function renderScreen2(el){
   // Intake only: step 1 — languages
   if(!_editMode&&_screen2step==='lang'){
     var langTags=_languages.length
-      ?'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;">'+_languages.map(function(l){return '<div style="background:var(--sel-bg);border:1.5px solid var(--brand);border-radius:18px;padding:5px 12px;font-size:13px;color:var(--brand);font-weight:500;">'+esc(l)+'</div>';}).join('')+'</div>'
+      ?'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;">'+_languages.map(function(l){return '<div style="background:var(--sel-bg);border:1.5px solid var(--brand);border-radius:18px;padding:5px 12px;font-size:13px;color:var(--brand);font-weight:500;">'+esc(l)+(l===_primaryLanguage?' <span style="opacity:0.7;">★</span>':'')+'</div>';}).join('')+'</div>'
       :'';
     cont.innerHTML=progressHTML(2)
       +'<h2>What language(s) do you speak?</h2>'
@@ -2590,8 +2602,13 @@ window.goNext = function(){
     _screen='share'; render(); return;
   }
   if(_screen==='share'){
-    // Complete intake
-    _screen=0; render(); return;
+    // Complete intake — event visitors go to attendees page, others go home
+    if(_eventId&&_appearId){
+      window.location.href='https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+'&memberCard='+encodeURIComponent(_appearId);
+    } else {
+      _screen=0; render();
+    }
+    return;
   }
   if(_screen===3&&!_editMode&&_valTab!=='domains'){
     _valTab='domains'; renderScreen3(null); return;
@@ -2649,4 +2666,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.46b | Date: 2026-07-06 | LAST CHANGE: Replaced modal prompt() with styled inline elaboration field (start/cancel/submit) for claiming potluck items -->
+<!-- Version: V2.48 | Date: 2026-07-06 | LAST CHANGE: Coach-level enjoy items mirror to skills with a category-missing picker; language modal asks for primary language when more than 2 selected, encoded as list order (no GAS change) -->
