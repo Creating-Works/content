@@ -1,4 +1,4 @@
-<!-- Version: V2.38 | Date: 2026-07-05 | LAST CHANGE: PARENT_CATS loads from reference-data sheet via getCategories -->
+<!-- Version: V2.39 | Date: 2026-07-05 | LAST CHANGE: Path A - Retired toggle, postal after skills, Person/Space/Thing seeking reframe, multi-select confirmed -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -351,6 +351,7 @@ var _searchQ={};
 var _customItem='';
 var _customScreen='';
 var _customIsDomain=false;
+var _retired=false;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -455,6 +456,7 @@ async function loadIntake(){
       _hasProfile=true;
       var d=data.data;
       _postal=d.postal||'';
+      _retired=String(d.retired||'').trim().toLowerCase()==='true';
       _methods=(d.methods||'').split('|').filter(Boolean);
       _expression=d.expression||'';
       _expressionItems=_expression?_expression.split('|').filter(Boolean):[];
@@ -509,6 +511,7 @@ function autoSave(){
     +'&needs='+encodeURIComponent(nStr)
     +'&methods='+encodeURIComponent(mStr)
     +'&expression='+encodeURIComponent(_expression)
+    +'&retired='+encodeURIComponent(_retired?'true':'')
   ).catch(function(){});
   _hasProfile=true;
 }
@@ -1607,6 +1610,12 @@ function renderScreen2(el){
             +'<div id="title-warning-2"></div>'
       +screenSearchHTML('2','Search skills to add...')
       +'<div id="drill-2"></div>'
+      +'<div id="retired-toggle-row" style="margin:12px 0;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;display:flex;align-items:center;gap:10px;cursor:pointer;" onclick="window.toggleRetired()">'
+      +'<div id="retired-check" style="width:20px;height:20px;border-radius:4px;border:1.5px solid '+(_retired?'var(--brand)':'var(--border)')+';background:'+(_retired?'var(--brand)':'white')+';display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+      +(_retired?'<svg width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>':'')
+      +'</div>'
+      +'<span style="font-size:14px;color:var(--text);">Retired / not applicable</span>'
+      +'</div>'
       +'<div id="added-2">'+buildAddedHTML('2')+'</div>'
       +navHTML(2);
   }
@@ -1849,7 +1858,7 @@ window.setNeedsCat=function(cat){
   var topSearch=document.querySelector('#app-content .search-wrap');
   if(topSearch) topSearch.style.display='none';
   var breadcrumbArea=document.getElementById('needs-breadcrumb');
-  var labels={'skill':'Skill or service','thing':'Thing','space':'Space'};
+  var labels={'skill':'Person','thing':'Thing','space':'Space'};
   if(breadcrumbArea) breadcrumbArea.innerHTML='<div style="font-size:13px;color:var(--brand);margin-bottom:8px;"><span style="cursor:pointer;text-decoration:underline;" onclick="_needsCat=\'\';renderScreen4(null);">What I\'m seeking</span> <span style="color:var(--muted);margin:0 4px;">›</span>'+(labels[cat]||cat)+'</div>';
   ['skill','thing','space'].forEach(function(c){
     var el=document.getElementById('needs-top-'+c);
@@ -1904,9 +1913,9 @@ function renderScreen4(el){
     +'<h2>What are you seeking right now?</h2>'
     +'<div id="needs-breadcrumb"></div>'
     +'<div class="needs-top-chips" style="margin-top:14px;" id="needs-type-chips">'
-    +'<div class="needs-top-chip'+('skill'===_needsCat?' selected':'')+'" id="needs-top-skill" onclick="setNeedsCat(\'skill\')">✨ Skill or service</div>'
-    +'<div class="needs-top-chip'+('thing'===_needsCat?' selected':'')+'" id="needs-top-thing" onclick="setNeedsCat(\'thing\')">📦 Thing</div>'
+    +'<div class="needs-top-chip'+('skill'===_needsCat?' selected':'')+'" id="needs-top-skill" onclick="setNeedsCat(\'skill\')">👤 Person</div>'
     +'<div class="needs-top-chip'+('space'===_needsCat?' selected':'')+'" id="needs-top-space" onclick="setNeedsCat(\'space\')">🏡 Space</div>'
+    +'<div class="needs-top-chip'+('thing'===_needsCat?' selected':'')+'" id="needs-top-thing" onclick="setNeedsCat(\'thing\')">📦 Thing</div>'
     +'</div>'
     +'<div id="needs-cat-content"></div>'
     +'<div id="needs-added-visible" style="margin-top:14px;">'
@@ -1922,19 +1931,24 @@ function renderScreen4(el){
   if(!existing4r){var d2=document.createElement('div');d2.id='added-4r';d2.style.display='none';document.getElementById('app-content').appendChild(d2);}
 }
 // ─── Navigation ───────────────────────────────────────────────────────────────
+window.toggleRetired = function(){
+  _retired=!_retired;
+  var check=document.getElementById('retired-check');
+  if(check){
+    check.style.borderColor=_retired?'var(--brand)':'var(--border)';
+    check.style.background=_retired?'var(--brand)':'white';
+    check.innerHTML=_retired?'<svg width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>':'';
+  }
+  autoSave();
+};
 window.goNext = function(){
   if(_screen===2&&!_editMode&&_screen2step==='lang'){
     _screen2step='naturally'; render(); return;
   }
   if(_screen===2&&!_editMode&&_screen2step==='naturally'){
-    _screen2step='postal'; render(); return;
-  }
-  if(_screen===2&&!_editMode&&_screen2step==='postal'){
-    var inp=document.getElementById('postal-input');
-    if(inp) _postal=inp.value.trim();
     _screen2step='skills'; render(); return;
   }
-  if(_screen===2){
+  if(_screen===2&&!_editMode&&_screen2step==='skills'){
     var missing=_skills.filter(function(s){return !s.level;});
     if(missing.length){
       var ex=document.getElementById('skill-reminder');
@@ -1944,6 +1958,29 @@ window.goNext = function(){
         nr.textContent='Gentle reminder: '+missing.map(function(s){return s.item;}).join(', ')+(missing.length===1?' is':' are')+' still missing a level.';
         var nav=document.querySelector('.nav-row');
         if(nav) nav.parentNode.insertBefore(nr,nav);
+        return;
+      }
+    }
+    autoSave();
+    _screen2step='postal'; render(); return;
+  }
+  if(_screen===2&&!_editMode&&_screen2step==='postal'){
+    var inp=document.getElementById('postal-input');
+    if(inp) _postal=inp.value.trim();
+    autoSave();
+    _screen++; render(); return;
+  }
+  if(_screen===2){
+    // edit mode or fallback: check skill levels then advance
+    var missing2=_skills.filter(function(s){return !s.level;});
+    if(missing2.length){
+      var ex2=document.getElementById('skill-reminder');
+      if(!ex2){
+        var nr2=document.createElement('div');
+        nr2.id='skill-reminder';nr2.className='reminder-msg';
+        nr2.textContent='Gentle reminder: '+missing2.map(function(s){return s.item;}).join(', ')+(missing2.length===1?' is':' are')+' still missing a level.';
+        var nav2=document.querySelector('.nav-row');
+        if(nav2) nav2.parentNode.insertBefore(nr2,nav2);
         return;
       }
     }
@@ -1970,6 +2007,9 @@ window.goNext = function(){
 
 window.goBack = function(){
   if(_screen===2&&!_editMode&&_screen2step==='postal'){
+    _screen2step='skills'; render(); return;
+  }
+  if(_screen===2&&!_editMode&&_screen2step==='skills'){
     _screen2step='naturally'; render(); return;
   }
   if(_screen===2&&!_editMode&&_screen2step==='naturally'){
@@ -2009,4 +2049,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.37 | Date: 2026-07-05 | LAST CHANGE: PARENT_CATS loads from reference-data sheet via getCategories -->
+<!-- Version: V2.39 | Date: 2026-07-05 | LAST CHANGE: Path A - Retired toggle, postal after skills, Person/Space/Thing seeking reframe, multi-select confirmed -->
