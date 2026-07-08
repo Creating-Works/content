@@ -1,4 +1,4 @@
-<!-- Version: V2.54 | Date: 2026-07-08 | LAST CHANGE: (D2) On your OWN event profile (?show= id matches your stored appear-id), added a top-right photo + QR badge + "Tap to match" that opens your 1:1 match page (match.html?me={id}). Hidden when viewing someone else's profile. -->
+<!-- Version: V2.55 | Date: 2026-07-08 | LAST CHANGE: "This is me" top-right (own profile only) now shows "👥 Visit hub" (uses eventId threaded via ?eventId=, fixes the old empty attendees link) + the QR "Tap to match", side by side; removed the old photo "Profile" chip and the duplicate header QR badge. -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1533,9 +1533,23 @@ window.nativeShare = function(){
 function renderTopRight(){
   var el=document.getElementById('top-right-area'); if(!el) return;
   if(_viewerMode){
-    var ph=_viewerPhoto?'<div class="btn-photo"><img src="'+esc(_viewerPhoto)+'" alt=""></div>':'<div class="btn-photo">🌱</div>';
-    var attendeesLink='https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId||'')+'&memberCard='+encodeURIComponent(_showId);
-    el.innerHTML='<a href="'+attendeesLink+'" target="_blank" style="text-decoration:none;color:inherit;"><div class="ikigai-btn" style="cursor:pointer;">'+ph+esc(_viewerName||'Profile')+'</div></a>';
+    // Only on your OWN profile: "Visit hub" (uses the threaded eventId) + a QR "Tap to match", side by side.
+    var _own=false;
+    try{ var _s=String(localStorage.getItem('appear-id')||'').replace(/\./g,'').toLowerCase(); var _i=String(_showId||'').replace(/\./g,'').toLowerCase(); _own=!!(_i&&_s===_i); }catch(e){}
+    if(!_own){ el.innerHTML=''; return; }
+    var parts='';
+    if(_eventId){
+      parts+='<a href="https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+'&memberCard='+encodeURIComponent(_showId)+'" style="text-decoration:none;color:inherit;"><div class="ikigai-btn" style="cursor:pointer;">👥 Visit hub</div></a>';
+    }
+    parts+='<a href="https://gather.2gather.network/match.html?me='+encodeURIComponent(_showId)+'" title="Show your 1:1 match code" style="text-decoration:none;text-align:center;">'
+      +'<span style="position:relative;display:inline-block;width:44px;height:44px;">'
+      +'<img src="'+esc(_viewerPhoto||('https://ui-avatars.com/api/?name='+encodeURIComponent(_showId)+'&size=44&background=1F699E&color=fff'))+'" alt="" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid #fff;box-shadow:0 0 0 1px var(--border);">'
+      +'<span style="position:absolute;bottom:-2px;right:-2px;width:19px;height:19px;border-radius:6px;background:#fff;border:1.5px solid #1F699E;display:flex;align-items:center;justify-content:center;">'
+      +'<svg width="11" height="11" viewBox="0 0 100 100" aria-hidden="true"><rect x="8" y="8" width="30" height="30" fill="none" stroke="#1F699E" stroke-width="9"/><rect x="62" y="8" width="30" height="30" fill="none" stroke="#1F699E" stroke-width="9"/><rect x="8" y="62" width="30" height="30" fill="none" stroke="#1F699E" stroke-width="9"/><rect x="62" y="62" width="14" height="14" fill="#1F699E"/><rect x="82" y="82" width="10" height="10" fill="#1F699E"/></svg>'
+      +'</span></span>'
+      +'<span style="display:block;font-size:10px;color:#1F699E;font-weight:700;margin-top:2px;">Tap to match</span>'
+      +'</a>';
+    el.innerHTML=parts;
   } else {
     var phImg=_photo?'<div class="btn-photo"><img src="'+esc(_photo)+'" alt=""></div>':'<div class="btn-photo">🌱</div>';
     var photoClick=_screen===0?' onclick="openPostalModal()" style="cursor:pointer;"':'';
@@ -1655,20 +1669,7 @@ function renderProfile(el, viewerMode){
       +'</div>';
   }
   var allNeeds=_needsSkill.concat(_needsRes);
-  // D2: on your OWN event profile (?show= id matches your stored id), a photo + QR badge that opens your 1:1 match page.
-  var _ownProfile=false;
-  try{ var _st=String(localStorage.getItem('appear-id')||'').replace(/\./g,'').toLowerCase(); var _sid=String(_showId||'').replace(/\./g,'').toLowerCase(); _ownProfile=!!(viewerMode&&_sid&&_st===_sid); }catch(e){}
-  var _matchBadge=_ownProfile?(
-    '<a href="https://gather.2gather.network/match.html?me='+encodeURIComponent(_showId)+'" title="Show your 1:1 match code" style="text-decoration:none;text-align:center;flex-shrink:0;">'
-    +'<span style="position:relative;display:inline-block;width:48px;height:48px;">'
-    +'<img src="'+esc(_viewerPhoto||('https://ui-avatars.com/api/?name='+encodeURIComponent(_showId)+'&size=48&background=1F699E&color=fff'))+'" alt="" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid #fff;box-shadow:0 0 0 1px var(--border);">'
-    +'<span style="position:absolute;bottom:-3px;right:-3px;width:22px;height:22px;border-radius:7px;background:#fff;border:1.5px solid #1F699E;display:flex;align-items:center;justify-content:center;">'
-    +'<svg width="13" height="13" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="8" y="8" width="30" height="30" fill="none" stroke="#1F699E" stroke-width="9"/><rect x="62" y="8" width="30" height="30" fill="none" stroke="#1F699E" stroke-width="9"/><rect x="8" y="62" width="30" height="30" fill="none" stroke="#1F699E" stroke-width="9"/><rect x="62" y="62" width="14" height="14" fill="#1F699E"/><rect x="82" y="62" width="10" height="10" fill="#1F699E"/><rect x="62" y="82" width="10" height="10" fill="#1F699E"/><rect x="82" y="82" width="10" height="10" fill="#1F699E"/></svg>'
-    +'</span></span>'
-    +'<span style="display:block;font-size:10px;color:#1F699E;font-weight:700;margin-top:3px;">Tap to match</span>'
-    +'</a>'
-  ):'';
-  el.innerHTML='<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;gap:12px;"><h2 style="margin:0;">'+(viewerMode?'This is me 🌱':'Edit my event profile')+'</h2>'+_matchBadge+'</div>'
+  el.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><h2 style="margin:0;">'+(viewerMode?'This is me 🌱':'Edit my event profile')+'</h2></div>'
     +section("What I'm seeking",allNeeds,false,'',4)
     +section('What I enjoy',_interests,true,'level',1,false,_expression?'<div style="margin-top:6px;display:flex;justify-content:flex-end;"><span style="font-size:13px;color:var(--soft);"><span style="font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:0.08em;color:var(--muted);">This is so me:</span> '+esc(_expressionItems.join(', '))+'</span></div>':'')
     +'<div class="profile-section" style="border-bottom:none;padding-bottom:4px;">'
@@ -2693,4 +2694,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.54 | Date: 2026-07-08 | LAST CHANGE: (D2) On your OWN event profile (?show= id matches your stored appear-id), added a top-right photo + QR badge + "Tap to match" that opens your 1:1 match page (match.html?me={id}). Hidden when viewing someone else's profile. -->
+<!-- Version: V2.55 | Date: 2026-07-08 | LAST CHANGE: "This is me" top-right (own profile only) now shows "👥 Visit hub" (uses eventId threaded via ?eventId=, fixes the old empty attendees link) + the QR "Tap to match", side by side; removed the old photo "Profile" chip and the duplicate header QR badge. -->
