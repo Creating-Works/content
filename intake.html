@@ -1,4 +1,4 @@
-<!-- Version: V2.52 | Date: 2026-07-07 | LAST CHANGE: Boot no longer fires concurrent GAS calls (backend 404s under concurrency) - viewer/editor load serially, viewer paints profile first then lazy-loads reference data -->
+<!-- Version: V2.53 | Date: 2026-07-07 | LAST CHANGE: Boot uses ONE getProfile call (getIntake+lookupProfile combined) and renders the flow from cached reference data FIRST, loading the profile in the background - avoids the ~70s serial hang during GAS spikes -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -450,6 +450,36 @@ async function loadRefData(){
       PARENT_CATS=cdata.categories.map(function(c){return c.label;}).filter(Boolean);
     }
   }catch(e){}
+}
+// ONE combined call (getProfile) = getIntake + lookupProfile in a single round-trip.
+// Fewer calls = less exposure to the GAS concurrency 404s, and half the serial wait.
+async function loadProfileAndIntake(){
+  var id=_viewerMode?_showId:_appearId; if(!id) return;
+  try{
+    var res=await fetch(GS_URL+'?action=getProfile&appearId='+encodeURIComponent(id));
+    var resp=await res.json();
+    if(_viewerMode){_viewerPhoto=resp.photo||'';_viewerName=resp.name||'';}
+    else{_photo=resp.photo||'';_name=resp.name||'';}
+    if(resp.found&&resp.data){
+      _hasProfile=true;
+      var d=resp.data;
+      _postal=d.postal||'';
+      _retired=String(d.retired||'').trim().toLowerCase()==='true';
+      _methods=(d.methods||'').split('|').filter(Boolean);
+      _expression=d.expression||'';
+      _expressionItems=_expression?_expression.split('|').filter(Boolean):[];
+      _languages=d.languages?d.languages.split('|').filter(Boolean):[];
+      _primaryLanguage=_languages.length>2?_languages[0]:'';
+      _interests=parseTagStr(d.interests,'level');
+      _skills=parseTagStr(d.skills,'level');
+      _values=parseTagStr(d.values,'level');
+      _domains=parseTagStr(d.domains,'level').map(function(dm){dm.category='domain';return dm;});
+      var np=parseNeedsStr(d.needs);
+      _needsSkill=np.filter(function(n){return n.ntype==='skill';});
+      _needsRes=np.filter(function(n){return n.ntype!=='skill';});
+    }
+  }catch(e){}
+  if(_screen===2){var lb=document.getElementById('lang-edit-btn');if(lb)lb.textContent='✏️ '+(_languages.length?'Languages: '+_languages.join(', '):'Add your languages');}
 }
 async function loadProfile(){
   var id=_viewerMode?_showId:_appearId; if(!id) return;
@@ -2624,16 +2654,15 @@ window.goBack = function(){
 // ─── Boot ─────────────────────────────────────────────────────────────────────
 (async function init(){
   if(_viewerMode){
-    await loadIntake();                          // serial — this GAS backend 404s under concurrent calls
-    await loadProfile();
-    render();                                    // paint the profile immediately (2 fast calls)
-    loadRefData().then(function(){ render(); }); // lazy: category data, then repaint
+    await loadProfileAndIntake();                // ONE combined call (getIntake + lookupProfile)
+    render();                                    // paint the profile immediately
+    loadRefData().then(function(){ render(); }); // lazy: category labels, then repaint
     return;
   }
   if(!_appearId){ render(); return; }
-  await loadIntake();                            // serial, never concurrent (GAS 404s under load)
-  await loadProfile();
-  await loadRefData();
+  await loadRefData();                           // cached + fast — needed to render the flow options
+  render();                                      // render-first: show the flow now, don't block on the profile
+  await loadProfileAndIntake();                  // one profile call, in the background of the first paint
   if(_hasProfile){
     _completed=true;
     // Only redirect if data actually loaded from sheet (at least one section has data)
@@ -2651,4 +2680,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.52 | Date: 2026-07-07 | LAST CHANGE: Boot no longer fires concurrent GAS calls (backend 404s under concurrency) - viewer/editor load serially, viewer paints profile first then lazy-loads reference data -->
+<!-- Version: V2.53 | Date: 2026-07-07 | LAST CHANGE: Boot uses ONE getProfile call (getIntake+lookupProfile combined) and renders the flow from cached reference data FIRST, loading the profile in the background - avoids the ~70s serial hang during GAS spikes -->
