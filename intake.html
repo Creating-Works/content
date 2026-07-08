@@ -1,4 +1,4 @@
-<!-- Version: V2.55 | Date: 2026-07-08 | LAST CHANGE: "This is me" top-right (own profile only) now shows "👥 Visit hub" (uses eventId threaded via ?eventId=, fixes the old empty attendees link) + the QR "Tap to match", side by side; removed the old photo "Profile" chip and the duplicate header QR badge. -->
+<!-- Version: V2.56 | Date: 2026-07-08 | LAST CHANGE: "Visit hub" fallback - if the profile is opened without ?eventId=, look up the person's most recent active registration to fill the hub link. (Prev V2.55: Visit hub + QR side by side, removed photo Profile chip.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1550,6 +1550,7 @@ function renderTopRight(){
       +'<span style="display:block;font-size:10px;color:#1F699E;font-weight:700;margin-top:2px;">Tap to match</span>'
       +'</a>';
     el.innerHTML=parts;
+    if(!_eventId) _fillHubFromReg();
   } else {
     var phImg=_photo?'<div class="btn-photo"><img src="'+esc(_photo)+'" alt=""></div>':'<div class="btn-photo">🌱</div>';
     var photoClick=_screen===0?' onclick="openPostalModal()" style="cursor:pointer;"':'';
@@ -1557,6 +1558,16 @@ function renderTopRight(){
   }
 }
 
+// Fallback when the profile is opened without ?eventId=: find an event this person is registered for.
+async function _fillHubFromReg(){
+  try{
+    var res=await fetch(GS_URL+'?action=getRegistrations&appearId='+encodeURIComponent(_showId));
+    var d=await res.json();
+    var regs=(d.registrations||[]).filter(function(r){return String(r.cancelled||'').trim().toLowerCase()!=='true';});
+    // Approximation: use the most recent active registration. (Multi-event select prompt is a future enhancement.)
+    if(regs.length){ _eventId=regs[regs.length-1].eventId||''; if(_eventId) renderTopRight(); }
+  }catch(e){}
+}
 window.goToProfile = function(){
   // Only go to profile if completed all 4 sections on first visit, or if returning edit
   if(!_completed&&!_hasProfile){toast('Complete all 4 sections first.');return;}
@@ -2694,4 +2705,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.55 | Date: 2026-07-08 | LAST CHANGE: "This is me" top-right (own profile only) now shows "👥 Visit hub" (uses eventId threaded via ?eventId=, fixes the old empty attendees link) + the QR "Tap to match", side by side; removed the old photo "Profile" chip and the duplicate header QR badge. -->
+<!-- Version: V2.56 | Date: 2026-07-08 | LAST CHANGE: "Visit hub" fallback - if the profile is opened without ?eventId=, look up the person's most recent active registration to fill the hub link. (Prev V2.55: Visit hub + QR side by side, removed photo Profile chip.) -->
