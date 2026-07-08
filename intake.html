@@ -1,4 +1,4 @@
-<!-- Version: V2.51 | Date: 2026-07-06 | LAST CHANGE: Added See the group link to the Edit my event profile summary screen, linking to attendees.html - previously no path existed from that screen back to attendees -->
+<!-- Version: V2.52 | Date: 2026-07-07 | LAST CHANGE: Boot no longer fires concurrent GAS calls (backend 404s under concurrency) - viewer/editor load serially, viewer paints profile first then lazy-loads reference data -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2623,9 +2623,17 @@ window.goBack = function(){
 
 // ─── Boot ─────────────────────────────────────────────────────────────────────
 (async function init(){
-  if(_viewerMode){ await Promise.all([loadRefData(),loadProfile(),loadIntake()]); render(); return; }
+  if(_viewerMode){
+    await loadIntake();                          // serial — this GAS backend 404s under concurrent calls
+    await loadProfile();
+    render();                                    // paint the profile immediately (2 fast calls)
+    loadRefData().then(function(){ render(); }); // lazy: category data, then repaint
+    return;
+  }
   if(!_appearId){ render(); return; }
-  await Promise.all([loadRefData(),loadProfile(),loadIntake()]);
+  await loadIntake();                            // serial, never concurrent (GAS 404s under load)
+  await loadProfile();
+  await loadRefData();
   if(_hasProfile){
     _completed=true;
     // Only redirect if data actually loaded from sheet (at least one section has data)
@@ -2643,4 +2651,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.51 | Date: 2026-07-06 | LAST CHANGE: Added See the group link to the Edit my event profile summary screen, linking to attendees.html - previously no path existed from that screen back to attendees -->
+<!-- Version: V2.52 | Date: 2026-07-07 | LAST CHANGE: Boot no longer fires concurrent GAS calls (backend 404s under concurrency) - viewer/editor load serially, viewer paints profile first then lazy-loads reference data -->
