@@ -1,4 +1,4 @@
-<!-- Version: V2.57 | Date: 2026-07-13 | LAST CHANGE: In-app "📅 Events" back-link in profile header (view + edit, owner-only) -> events.html?memberCard=. (Prev V2.56: Visit hub fallback via getRegistrations.) -->
+<!-- Version: V2.58 | Date: 2026-07-13 | LAST CHANGE: Blue nav bar, left-justified white buttons (no icons) in profile header - view: All events/Visit hub/Edit profile; edit: All events/Event profile. Tap-to-match moved into header row (in flow); absolute top-right emptied in viewer mode. (Prev V2.57: 📅 Events back-link.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1533,24 +1533,9 @@ window.nativeShare = function(){
 function renderTopRight(){
   var el=document.getElementById('top-right-area'); if(!el) return;
   if(_viewerMode){
-    // Only on your OWN profile: "Visit hub" (uses the threaded eventId) + a QR "Tap to match", side by side.
-    var _own=false;
-    try{ var _s=String(localStorage.getItem('appear-id')||'').replace(/\./g,'').toLowerCase(); var _i=String(_showId||'').replace(/\./g,'').toLowerCase(); _own=!!(_i&&_s===_i); }catch(e){}
-    if(!_own){ el.innerHTML=''; return; }
-    var parts='';
-    if(_eventId){
-      parts+='<a href="https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+'&memberCard='+encodeURIComponent(_showId)+'" style="text-decoration:none;color:inherit;"><div class="ikigai-btn" style="cursor:pointer;">👥 Visit hub</div></a>';
-    }
-    parts+='<a href="https://gather.2gather.network/match.html?me='+encodeURIComponent(_showId)+'" title="Show your 1:1 match code" style="text-decoration:none;text-align:center;">'
-      +'<span style="position:relative;display:inline-block;width:44px;height:44px;">'
-      +'<img src="'+esc(_viewerPhoto||('https://ui-avatars.com/api/?name='+encodeURIComponent(_showId)+'&size=44&background=1F699E&color=fff'))+'" alt="" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid #fff;box-shadow:0 0 0 1px var(--border);">'
-      +'<span style="position:absolute;bottom:-2px;right:-2px;width:19px;height:19px;border-radius:6px;background:#fff;border:1.5px solid #1F699E;display:flex;align-items:center;justify-content:center;">'
-      +'<svg width="11" height="11" viewBox="0 0 100 100" aria-hidden="true"><rect x="8" y="8" width="30" height="30" fill="none" stroke="#1F699E" stroke-width="9"/><rect x="62" y="8" width="30" height="30" fill="none" stroke="#1F699E" stroke-width="9"/><rect x="8" y="62" width="30" height="30" fill="none" stroke="#1F699E" stroke-width="9"/><rect x="62" y="62" width="14" height="14" fill="#1F699E"/><rect x="82" y="82" width="10" height="10" fill="#1F699E"/></svg>'
-      +'</span></span>'
-      +'<span style="display:block;font-size:10px;color:#1F699E;font-weight:700;margin-top:2px;">Tap to match</span>'
-      +'</a>';
-    el.innerHTML=parts;
-    if(!_eventId) _fillHubFromReg();
+    // Nav bar + "Tap to match" now render in normal flow inside renderProfile; keep the absolute corner empty.
+    el.innerHTML='';
+    return;
   } else {
     var phImg=_photo?'<div class="btn-photo"><img src="'+esc(_photo)+'" alt=""></div>':'<div class="btn-photo">🌱</div>';
     var photoClick=_screen===0?' onclick="openPostalModal()" style="cursor:pointer;"':'';
@@ -1682,8 +1667,28 @@ function renderProfile(el, viewerMode){
   var allNeeds=_needsSkill.concat(_needsRes);
   var _navOwn=!viewerMode; if(viewerMode){try{var _s=String(localStorage.getItem('appear-id')||'').replace(/\./g,'').toLowerCase();var _i=String(_showId||'').replace(/\./g,'').toLowerCase();_navOwn=!!(_i&&_s===_i);}catch(e){}}
   var _navId=viewerMode?_showId:_appearId;
-  var _navBar=(_navOwn&&_navId)?'<div style="margin-bottom:10px;"><a href="https://gather.2gather.network/events.html?memberCard='+encodeURIComponent(_navId)+'" style="text-decoration:none;color:var(--muted);font-size:14px;font-weight:600;">📅 Events</a></div>':'';
-  el.innerHTML=_navBar+'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><h2 style="margin:0;">'+(viewerMode?'This is me 🌱':'Edit my event profile')+'</h2></div>'
+  var _WB='text-decoration:none;color:#185FA5;background:#fff;font-size:14px;font-weight:600;padding:8px 15px;border-radius:20px;white-space:nowrap;';
+  var _navBar='';
+  if(_navOwn&&_navId){
+    var _b='<a href="https://gather.2gather.network/events.html?memberCard='+encodeURIComponent(_navId)+'" style="'+_WB+'">All events</a>';
+    if(viewerMode){
+      if(_eventId) _b+='<a href="https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+'&memberCard='+encodeURIComponent(_navId)+'" style="'+_WB+'">Visit hub</a>';
+      _b+='<a href="https://creating.works/intake.html?id='+encodeURIComponent(_navId)+'" style="'+_WB+'">Edit profile</a>';
+    } else {
+      _b+='<a href="https://creating.works/intake.html?show='+encodeURIComponent(_navId)+'" style="'+_WB+'">Event profile</a>';
+    }
+    _navBar='<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:#1F699E;padding:12px 14px;border-radius:12px;margin-bottom:18px;">'+_b+'</div>';
+    if(viewerMode&&!_eventId) _fillHubFromReg();
+  }
+  var _photoHTML=(viewerMode&&_navOwn)?'<a href="https://gather.2gather.network/match.html?me='+encodeURIComponent(_navId)+'" title="Show your 1:1 match code" style="text-decoration:none;text-align:center;flex-shrink:0;">'
+      +'<span style="position:relative;display:inline-block;width:44px;height:44px;">'
+      +'<img src="'+esc(_viewerPhoto||('https://ui-avatars.com/api/?name='+encodeURIComponent(_navId)+'&size=44&background=1F699E&color=fff'))+'" alt="" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid #fff;box-shadow:0 0 0 1px var(--border);">'
+      +'<span style="position:absolute;bottom:-2px;right:-2px;width:19px;height:19px;border-radius:6px;background:#fff;border:1.5px solid #1F699E;display:flex;align-items:center;justify-content:center;">'
+      +'<svg width="11" height="11" viewBox="0 0 100 100" aria-hidden="true"><rect x="8" y="8" width="30" height="30" fill="none" stroke="#1F699E" stroke-width="9"/><rect x="62" y="8" width="30" height="30" fill="none" stroke="#1F699E" stroke-width="9"/><rect x="8" y="62" width="30" height="30" fill="none" stroke="#1F699E" stroke-width="9"/><rect x="62" y="62" width="14" height="14" fill="#1F699E"/><rect x="82" y="82" width="10" height="10" fill="#1F699E"/></svg>'
+      +'</span></span>'
+      +'<span style="display:block;font-size:10px;color:#1F699E;font-weight:700;margin-top:2px;">Tap to match</span>'
+      +'</a>':'';
+  el.innerHTML=_navBar+'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;"><h2 style="margin:0;">'+(viewerMode?'This is me 🌱':'Edit my event profile')+'</h2>'+_photoHTML+'</div>'
     +section("What I'm seeking",allNeeds,false,'',4)
     +section('What I enjoy',_interests,true,'level',1,false,_expression?'<div style="margin-top:6px;display:flex;justify-content:flex-end;"><span style="font-size:13px;color:var(--soft);"><span style="font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:0.08em;color:var(--muted);">This is so me:</span> '+esc(_expressionItems.join(', '))+'</span></div>':'')
     +'<div class="profile-section" style="border-bottom:none;padding-bottom:4px;">'
@@ -2708,4 +2713,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.57 | Date: 2026-07-13 | LAST CHANGE: In-app "📅 Events" back-link in profile header (view + edit, owner-only) -> events.html?memberCard=. (Prev V2.56: Visit hub fallback via getRegistrations.) -->
+<!-- Version: V2.58 | Date: 2026-07-13 | LAST CHANGE: Blue nav bar, left-justified white buttons (no icons) in profile header - view: All events/Visit hub/Edit profile; edit: All events/Event profile. Tap-to-match moved into header row (in flow); absolute top-right emptied in viewer mode. (Prev V2.57: 📅 Events back-link.) -->
