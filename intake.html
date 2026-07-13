@@ -1,4 +1,4 @@
-<!-- Version: V2.58 | Date: 2026-07-13 | LAST CHANGE: Blue nav bar, left-justified white buttons (no icons) in profile header - view: All events/Visit hub/Edit profile; edit: All events/Event profile. Tap-to-match moved into header row (in flow); absolute top-right emptied in viewer mode. (Prev V2.57: 📅 Events back-link.) -->
+<!-- Version: V2.59 | Date: 2026-07-13 | LAST CHANGE: Nav buttons moved ABOVE the white card (into #app-topnav, on the blue page bg) instead of inside it - white pills, left-justified, no icons. Owner-only. View: All events/Visit hub/Edit profile; edit: All events/Event profile. Tap-to-match stays in card header row. (Prev V2.58: blue nav bar inside card.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -199,6 +199,7 @@
 
 <body>
 <div style="max-width:660px;margin:0 auto;">
+  <div id="app-topnav"></div>
   <div class="card" id="main-card">
     <div class="top-right-area" id="top-right-area"></div>
     <div id="app-content">
@@ -1550,7 +1551,7 @@ async function _fillHubFromReg(){
     var d=await res.json();
     var regs=(d.registrations||[]).filter(function(r){return String(r.cancelled||'').trim().toLowerCase()!=='true';});
     // Approximation: use the most recent active registration. (Multi-event select prompt is a future enhancement.)
-    if(regs.length){ _eventId=regs[regs.length-1].eventId||''; if(_eventId) renderTopRight(); }
+    if(regs.length){ _eventId=regs[regs.length-1].eventId||''; if(_eventId) render(); }
   }catch(e){}
 }
 window.goToProfile = function(){
@@ -1563,6 +1564,7 @@ window.goToProfile = function(){
 function render(){
   var el=document.getElementById('app-content'); if(!el) return;
   renderTopRight();
+  var _tn0=document.getElementById('app-topnav'); if(_tn0) _tn0.innerHTML='';
   if(_viewerMode){
     if(_hasProfile) renderProfile(el,true);
     else el.innerHTML='<div class="empty" style="padding:40px;text-align:center;">No profile found.</div>';
@@ -1668,7 +1670,7 @@ function renderProfile(el, viewerMode){
   var _navOwn=!viewerMode; if(viewerMode){try{var _s=String(localStorage.getItem('appear-id')||'').replace(/\./g,'').toLowerCase();var _i=String(_showId||'').replace(/\./g,'').toLowerCase();_navOwn=!!(_i&&_s===_i);}catch(e){}}
   var _navId=viewerMode?_showId:_appearId;
   var _WB='text-decoration:none;color:#185FA5;background:#fff;font-size:14px;font-weight:600;padding:8px 15px;border-radius:20px;white-space:nowrap;';
-  var _navBar='';
+  var _navButtons='';
   if(_navOwn&&_navId){
     var _b='<a href="https://gather.2gather.network/events.html?memberCard='+encodeURIComponent(_navId)+'" style="'+_WB+'">All events</a>';
     if(viewerMode){
@@ -1677,9 +1679,10 @@ function renderProfile(el, viewerMode){
     } else {
       _b+='<a href="https://creating.works/intake.html?show='+encodeURIComponent(_navId)+'" style="'+_WB+'">Event profile</a>';
     }
-    _navBar='<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:#1F699E;padding:12px 14px;border-radius:12px;margin-bottom:18px;">'+_b+'</div>';
+    _navButtons='<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:0 2px 4px;">'+_b+'</div>';
     if(viewerMode&&!_eventId) _fillHubFromReg();
   }
+  var _tnEl=document.getElementById('app-topnav'); if(_tnEl) _tnEl.innerHTML=_navButtons;
   var _photoHTML=(viewerMode&&_navOwn)?'<a href="https://gather.2gather.network/match.html?me='+encodeURIComponent(_navId)+'" title="Show your 1:1 match code" style="text-decoration:none;text-align:center;flex-shrink:0;">'
       +'<span style="position:relative;display:inline-block;width:44px;height:44px;">'
       +'<img src="'+esc(_viewerPhoto||('https://ui-avatars.com/api/?name='+encodeURIComponent(_navId)+'&size=44&background=1F699E&color=fff'))+'" alt="" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid #fff;box-shadow:0 0 0 1px var(--border);">'
@@ -1688,7 +1691,7 @@ function renderProfile(el, viewerMode){
       +'</span></span>'
       +'<span style="display:block;font-size:10px;color:#1F699E;font-weight:700;margin-top:2px;">Tap to match</span>'
       +'</a>':'';
-  el.innerHTML=_navBar+'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;"><h2 style="margin:0;">'+(viewerMode?'This is me 🌱':'Edit my event profile')+'</h2>'+_photoHTML+'</div>'
+  el.innerHTML='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;"><h2 style="margin:0;">'+(viewerMode?'This is me 🌱':'Edit my event profile')+'</h2>'+_photoHTML+'</div>'
     +section("What I'm seeking",allNeeds,false,'',4)
     +section('What I enjoy',_interests,true,'level',1,false,_expression?'<div style="margin-top:6px;display:flex;justify-content:flex-end;"><span style="font-size:13px;color:var(--soft);"><span style="font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:0.08em;color:var(--muted);">This is so me:</span> '+esc(_expressionItems.join(', '))+'</span></div>':'')
     +'<div class="profile-section" style="border-bottom:none;padding-bottom:4px;">'
@@ -2713,4 +2716,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.58 | Date: 2026-07-13 | LAST CHANGE: Blue nav bar, left-justified white buttons (no icons) in profile header - view: All events/Visit hub/Edit profile; edit: All events/Event profile. Tap-to-match moved into header row (in flow); absolute top-right emptied in viewer mode. (Prev V2.57: 📅 Events back-link.) -->
+<!-- Version: V2.59 | Date: 2026-07-13 | LAST CHANGE: Nav buttons moved ABOVE the white card (into #app-topnav, on the blue page bg) instead of inside it - white pills, left-justified, no icons. Owner-only. View: All events/Visit hub/Edit profile; edit: All events/Event profile. Tap-to-match stays in card header row. (Prev V2.58: blue nav bar inside card.) -->
