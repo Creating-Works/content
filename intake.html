@@ -1,4 +1,4 @@
-<!-- Version: V2.59 | Date: 2026-07-13 | LAST CHANGE: Nav buttons moved ABOVE the white card (into #app-topnav, on the blue page bg) instead of inside it - white pills, left-justified, no icons. Owner-only. View: All events/Visit hub/Edit profile; edit: All events/Event profile. Tap-to-match stays in card header row. (Prev V2.58: blue nav bar inside card.) -->
+<!-- Version: V2.60 | Date: 2026-07-13 | LAST CHANGE: Edit-mode photo now on same line as heading (moved out of absolute corner into header row); tighter top padding (18px) + more space below nav buttons (margin 20px) to center them in the blue band. Intake only for now. (Prev V2.59: nav buttons above the card.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,7 +10,7 @@
   <style>
     :root{--bg:#1F699E;--card:#FFFFFF;--text:#1A2E42;--soft:#4A6080;--muted:#6A8FAF;--brand:#1F699E;--border:#DDE4EE;--input-bg:#F7F9FC;--hover:#185885;--ph:#B8CCDE;--sel-bg:#EBF3FA;--sel-border:#1F699E;}
     *{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padding:40px 20px 60px;color:var(--text);}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padding:18px 20px 60px;color:var(--text);}
     @keyframes spin{to{transform:rotate(360deg);}}
     .card{background:var(--card);max-width:660px;margin:0 auto;border-radius:16px;padding:52px;box-shadow:0 24px 64px rgba(0,0,0,0.25),0 4px 16px rgba(0,0,0,0.12);position:relative;}
     @media(max-width:520px){.card{padding:32px 20px;}}
@@ -1679,18 +1679,25 @@ function renderProfile(el, viewerMode){
     } else {
       _b+='<a href="https://creating.works/intake.html?show='+encodeURIComponent(_navId)+'" style="'+_WB+'">Event profile</a>';
     }
-    _navButtons='<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:0 2px 4px;">'+_b+'</div>';
+    _navButtons='<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:0 2px;margin:0 0 20px;">'+_b+'</div>';
     if(viewerMode&&!_eventId) _fillHubFromReg();
   }
   var _tnEl=document.getElementById('app-topnav'); if(_tnEl) _tnEl.innerHTML=_navButtons;
-  var _photoHTML=(viewerMode&&_navOwn)?'<a href="https://gather.2gather.network/match.html?me='+encodeURIComponent(_navId)+'" title="Show your 1:1 match code" style="text-decoration:none;text-align:center;flex-shrink:0;">'
+  var _photoHTML='';
+  if(viewerMode&&_navOwn){
+    _photoHTML='<a href="https://gather.2gather.network/match.html?me='+encodeURIComponent(_navId)+'" title="Show your 1:1 match code" style="text-decoration:none;text-align:center;flex-shrink:0;">'
       +'<span style="position:relative;display:inline-block;width:44px;height:44px;">'
       +'<img src="'+esc(_viewerPhoto||('https://ui-avatars.com/api/?name='+encodeURIComponent(_navId)+'&size=44&background=1F699E&color=fff'))+'" alt="" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid #fff;box-shadow:0 0 0 1px var(--border);">'
       +'<span style="position:absolute;bottom:-2px;right:-2px;width:19px;height:19px;border-radius:6px;background:#fff;border:1.5px solid #1F699E;display:flex;align-items:center;justify-content:center;">'
       +'<svg width="11" height="11" viewBox="0 0 100 100" aria-hidden="true"><rect x="8" y="8" width="30" height="30" fill="none" stroke="#1F699E" stroke-width="9"/><rect x="62" y="8" width="30" height="30" fill="none" stroke="#1F699E" stroke-width="9"/><rect x="8" y="62" width="30" height="30" fill="none" stroke="#1F699E" stroke-width="9"/><rect x="62" y="62" width="14" height="14" fill="#1F699E"/><rect x="82" y="82" width="10" height="10" fill="#1F699E"/></svg>'
       +'</span></span>'
       +'<span style="display:block;font-size:10px;color:#1F699E;font-weight:700;margin-top:2px;">Tap to match</span>'
-      +'</a>':'';
+      +'</a>';
+  } else if(!viewerMode){
+    var _phInner=_photo?'<div class="btn-photo"><img src="'+esc(_photo)+'" alt=""></div>':'<div class="btn-photo">🌱</div>';
+    _photoHTML='<div class="btn-photo" onclick="openPostalModal()" style="cursor:pointer;flex-shrink:0;">'+_phInner+'</div>';
+    var _tra=document.getElementById('top-right-area'); if(_tra) _tra.innerHTML='';
+  }
   el.innerHTML='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;"><h2 style="margin:0;">'+(viewerMode?'This is me 🌱':'Edit my event profile')+'</h2>'+_photoHTML+'</div>'
     +section("What I'm seeking",allNeeds,false,'',4)
     +section('What I enjoy',_interests,true,'level',1,false,_expression?'<div style="margin-top:6px;display:flex;justify-content:flex-end;"><span style="font-size:13px;color:var(--soft);"><span style="font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:0.08em;color:var(--muted);">This is so me:</span> '+esc(_expressionItems.join(', '))+'</span></div>':'')
@@ -2716,4 +2723,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.59 | Date: 2026-07-13 | LAST CHANGE: Nav buttons moved ABOVE the white card (into #app-topnav, on the blue page bg) instead of inside it - white pills, left-justified, no icons. Owner-only. View: All events/Visit hub/Edit profile; edit: All events/Event profile. Tap-to-match stays in card header row. (Prev V2.58: blue nav bar inside card.) -->
+<!-- Version: V2.60 | Date: 2026-07-13 | LAST CHANGE: Edit-mode photo now on same line as heading (moved out of absolute corner into header row); tighter top padding (18px) + more space below nav buttons (margin 20px) to center them in the blue band. Intake only for now. (Prev V2.59: nav buttons above the card.) -->
