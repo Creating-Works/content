@@ -1,4 +1,4 @@
-<!-- Version: V2.60 | Date: 2026-07-13 | LAST CHANGE: Edit-mode photo now on same line as heading (moved out of absolute corner into header row); tighter top padding (18px) + more space below nav buttons (margin 20px) to center them in the blue band. Intake only for now. (Prev V2.59: nav buttons above the card.) -->
+<!-- Version: V2.61 | Date: 2026-07-13 | LAST CHANGE: Edit-line photo bumped to 44px (matches viewer Tap-to-match). (Prev V2.60: edit photo on heading line + centered nav spacing 18/20.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1694,8 +1694,8 @@ function renderProfile(el, viewerMode){
       +'<span style="display:block;font-size:10px;color:#1F699E;font-weight:700;margin-top:2px;">Tap to match</span>'
       +'</a>';
   } else if(!viewerMode){
-    var _phInner=_photo?'<div class="btn-photo"><img src="'+esc(_photo)+'" alt=""></div>':'<div class="btn-photo">🌱</div>';
-    _photoHTML='<div class="btn-photo" onclick="openPostalModal()" style="cursor:pointer;flex-shrink:0;">'+_phInner+'</div>';
+    var _phInner=_photo?'<img src="'+esc(_photo)+'" alt="" style="width:44px;height:44px;border-radius:50%;object-fit:cover;">':'<span style="font-size:20px;">🌱</span>';
+    _photoHTML='<div onclick="openPostalModal()" style="width:44px;height:44px;border-radius:50%;border:1.5px solid var(--sel-border);background:var(--input-bg);display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;flex-shrink:0;">'+_phInner+'</div>';
     var _tra=document.getElementById('top-right-area'); if(_tra) _tra.innerHTML='';
   }
   el.innerHTML='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;"><h2 style="margin:0;">'+(viewerMode?'This is me 🌱':'Edit my event profile')+'</h2>'+_photoHTML+'</div>'
@@ -2723,4 +2723,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.60 | Date: 2026-07-13 | LAST CHANGE: Edit-mode photo now on same line as heading (moved out of absolute corner into header row); tighter top padding (18px) + more space below nav buttons (margin 20px) to center them in the blue band. Intake only for now. (Prev V2.59: nav buttons above the card.) -->
+<!-- Version: V2.61 | Date: 2026-07-13 | LAST CHANGE: Edit-line photo bumped to 44px (matches viewer Tap-to-match). (Prev V2.60: edit photo on heading line + centered nav spacing 18/20.) -->
