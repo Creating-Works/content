@@ -1,4 +1,4 @@
-<!-- Version: V2.65 | Date: 2026-07-14 | LAST CHANGE: Bookmark button is white, no emoji, "Bookmark to meet" (active: "✓ Bookmarked"); "People I want to meet" list now also shows on the edit view (?id=) so it's reliably findable. (Prev V2.64: I-want-to-meet MVP.) -->
+<!-- Version: V2.66 | Date: 2026-07-14 | LAST CHANGE: Edit-page (?id=) nav gains "Manage event" (when eventId present); removed handshake emoji from "People I want to meet" (no skin-based emojis). (Prev V2.65: white Bookmark button + list on edit view.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1654,7 +1654,7 @@ function _wtmListHTML(){
       +'<button onclick="wtmRemove(\''+esc(String(p.id).replace(/\\/g,"\\\\").replace(/'/g,"\\'"))+'\')" aria-label="Remove" style="background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;">✕</button>'
       +'</div>';
   }).join('') : '<div style="font-size:13px;color:var(--muted);padding:6px 0;">No one yet. Open someone\'s profile and tap "I want to meet!"</div>';
-  return '<div style="margin-top:22px;padding-top:14px;border-top:1.5px solid var(--border);"><div style="font-size:16px;font-weight:700;margin-bottom:6px;">🤝 People I want to meet</div>'+inner+'</div>';
+  return '<div style="margin-top:22px;padding-top:14px;border-top:1.5px solid var(--border);"><div style="font-size:16px;font-weight:700;margin-bottom:6px;">People I want to meet</div>'+inner+'</div>';
 }
 function _wtmDecorate(){
   var el=document.getElementById('app-content'); if(!el) return;
@@ -1717,6 +1717,7 @@ function renderProfile(el, viewerMode){
       if(_eventId) _b+='<a href="https://gather.2gather.network/myevents.html?id='+encodeURIComponent(_navId)+'&event='+encodeURIComponent(_eventId)+'" style="'+_WB+'">Manage event</a>';
     } else {
       _b+='<a href="https://creating.works/intake.html?show='+encodeURIComponent(_navId)+'" style="'+_WB+'">Event profile</a>';
+      if(_eventId) _b+='<a href="https://gather.2gather.network/myevents.html?id='+encodeURIComponent(_navId)+'&event='+encodeURIComponent(_eventId)+'" style="'+_WB+'">Manage event</a>';
     }
     _navButtons='<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:0 2px;margin:0 0 20px;">'+_b+'</div>';
   }
@@ -2761,4 +2762,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.65 | Date: 2026-07-14 | LAST CHANGE: Bookmark button is white, no emoji, "Bookmark to meet" (active: "✓ Bookmarked"); "People I want to meet" list now also shows on the edit view (?id=) so it's reliably findable. (Prev V2.64: I-want-to-meet MVP.) -->
+<!-- Version: V2.66 | Date: 2026-07-14 | LAST CHANGE: Edit-page (?id=) nav gains "Manage event" (when eventId present); removed handshake emoji from "People I want to meet" (no skin-based emojis). (Prev V2.65: white Bookmark button + list on edit view.) -->
