@@ -1,4 +1,4 @@
-<!-- Version: V2.61 | Date: 2026-07-13 | LAST CHANGE: Edit-line photo bumped to 44px (matches viewer Tap-to-match). (Prev V2.60: edit photo on heading line + centered nav spacing 18/20.) -->
+<!-- Version: V2.62 | Date: 2026-07-13 | LAST CHANGE: "← Manage" back link (first button) in the ?show= profile nav when eventId is known -> myevents?id=&event=. (Prev V2.61: 44px edit-line photo.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1674,7 +1674,9 @@ function renderProfile(el, viewerMode){
   if(_navOwn&&_navId){
     var _b='<a href="https://gather.2gather.network/events.html?memberCard='+encodeURIComponent(_navId)+'" style="'+_WB+'">All events</a>';
     if(viewerMode){
-      if(_eventId) _b+='<a href="https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+'&memberCard='+encodeURIComponent(_navId)+'" style="'+_WB+'">Visit hub</a>';
+      if(_eventId){
+        _b='<a href="https://gather.2gather.network/myevents.html?id='+encodeURIComponent(_navId)+'&event='+encodeURIComponent(_eventId)+'" style="'+_WB+'">← Manage</a>'+_b+'<a href="https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+'&memberCard='+encodeURIComponent(_navId)+'" style="'+_WB+'">Visit hub</a>';
+      }
       _b+='<a href="https://creating.works/intake.html?id='+encodeURIComponent(_navId)+'" style="'+_WB+'">Edit profile</a>';
     } else {
       _b+='<a href="https://creating.works/intake.html?show='+encodeURIComponent(_navId)+'" style="'+_WB+'">Event profile</a>';
@@ -2723,4 +2725,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.61 | Date: 2026-07-13 | LAST CHANGE: Edit-line photo bumped to 44px (matches viewer Tap-to-match). (Prev V2.60: edit photo on heading line + centered nav spacing 18/20.) -->
+<!-- Version: V2.62 | Date: 2026-07-13 | LAST CHANGE: "← Manage" back link (first button) in the ?show= profile nav when eventId is known -> myevents?id=&event=. (Prev V2.61: 44px edit-line photo.) -->
