@@ -1,4 +1,4 @@
-<!-- Version: V2.64 | Date: 2026-07-14 | LAST CHANGE: "I want to meet!" bookmarks (localStorage MVP): toggle button on others' profiles (?show= non-owner); "🤝 People I want to meet" list on your own profile. No GAS yet - per-device. (Prev V2.63: Manage-event nav gating.) -->
+<!-- Version: V2.65 | Date: 2026-07-14 | LAST CHANGE: Bookmark button is white, no emoji, "Bookmark to meet" (active: "✓ Bookmarked"); "People I want to meet" list now also shows on the edit view (?id=) so it's reliably findable. (Prev V2.64: I-want-to-meet MVP.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1575,7 +1575,7 @@ function render(){
     el.innerHTML='<div style="text-align:center;padding:40px 20px"><p style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px;">Sign in to continue</p><p style="font-size:14px;color:var(--soft)"><a href="https://appear.network" style="color:var(--brand);font-weight:600;">Go to Appear Network</a> and open this page from your profile.</p></div>';
     return;
   }
-  if(_screen===0){ renderProfile(el,false); return; }
+  if(_screen===0){ renderProfile(el,false); _wtmDecorate(); return; }
   if(_screen==='1b'){ renderScreen1b(el); return; }
   if(_screen==='potluck'){ renderScreenPotluck(el); return; }
   if(_screen==='share'){ renderScreenShare(el); return; }
@@ -1642,7 +1642,7 @@ window.wtmToggle=function(){
   else a.push({id:_showId, name:_viewerName||'', photo:_viewerPhoto||'', eventId:_eventId||''});
   _wtmSet(a);
   var btn=document.getElementById('wtm-btn'); var has=_wtmHas(_showId);
-  if(btn){ btn.textContent=has?'✓ On your meet list':'🤝 I want to meet!'; btn.style.background=has?'#EBF5FB':'#185FA5'; btn.style.color=has?'#185FA5':'#fff'; }
+  if(btn){ btn.textContent=has?'✓ Bookmarked':'Bookmark to meet'; }
 };
 window.wtmRemove=function(id){ var n=_wtmNorm(id); _wtmSet(_wtmGet().filter(function(p){return _wtmNorm(p.id)!==n;})); render(); };
 function _wtmListHTML(){
@@ -1657,12 +1657,14 @@ function _wtmListHTML(){
   return '<div style="margin-top:22px;padding-top:14px;border-top:1.5px solid var(--border);"><div style="font-size:16px;font-weight:700;margin-bottom:6px;">🤝 People I want to meet</div>'+inner+'</div>';
 }
 function _wtmDecorate(){
-  if(!_viewerMode || !_showId) return;
-  var own=false; try{ var _s=String(localStorage.getItem('appear-id')||'').replace(/\./g,'').toLowerCase(); var _i=_wtmNorm(_showId); own=!!(_i&&_s===_i); }catch(e){}
   var el=document.getElementById('app-content'); if(!el) return;
+  if(!_viewerMode){ el.insertAdjacentHTML('beforeend', _wtmListHTML()); return; }   // edit view (?id=) = you -> show your list
+  if(!_showId) return;
+  var own=false; try{ var _s=String(localStorage.getItem('appear-id')||'').replace(/\./g,'').toLowerCase(); var _i=_wtmNorm(_showId); own=!!(_i&&_s===_i); }catch(e){}
   if(own){ el.insertAdjacentHTML('beforeend', _wtmListHTML()); return; }
   var has=_wtmHas(_showId);
-  var btn='<div style="padding:0 2px 14px;"><button id="wtm-btn" onclick="wtmToggle()" style="font-size:14px;font-weight:600;padding:9px 18px;border-radius:20px;cursor:pointer;font-family:inherit;border:1.5px solid #185FA5;'+(has?'background:#EBF5FB;color:#185FA5;':'background:#185FA5;color:#fff;')+'">'+(has?'✓ On your meet list':'🤝 I want to meet!')+'</button></div>';
+  var _bs='font-size:14px;font-weight:600;padding:9px 18px;border-radius:20px;cursor:pointer;font-family:inherit;border:1.5px solid #185FA5;background:#fff;color:#185FA5;';
+  var btn='<div style="padding:0 2px 14px;"><button id="wtm-btn" onclick="wtmToggle()" style="'+_bs+'">'+(has?'✓ Bookmarked':'Bookmark to meet')+'</button></div>';
   var host=document.getElementById('app-topnav'); if(host) host.innerHTML=btn;
 }
 function renderProfile(el, viewerMode){
@@ -2759,4 +2761,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.64 | Date: 2026-07-14 | LAST CHANGE: "I want to meet!" bookmarks (localStorage MVP): toggle button on others' profiles (?show= non-owner); "🤝 People I want to meet" list on your own profile. No GAS yet - per-device. (Prev V2.63: Manage-event nav gating.) -->
+<!-- Version: V2.65 | Date: 2026-07-14 | LAST CHANGE: Bookmark button is white, no emoji, "Bookmark to meet" (active: "✓ Bookmarked"); "People I want to meet" list now also shows on the edit view (?id=) so it's reliably findable. (Prev V2.64: I-want-to-meet MVP.) -->
