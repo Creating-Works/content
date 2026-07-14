@@ -1,4 +1,4 @@
-<!-- Version: V2.62 | Date: 2026-07-13 | LAST CHANGE: "← Manage" back link (first button) in the ?show= profile nav when eventId is known -> myevents?id=&event=. (Prev V2.61: 44px edit-line photo.) -->
+<!-- Version: V2.63 | Date: 2026-07-13 | LAST CHANGE: "Manage event" nav button (last, no arrow) + Visit hub now show ONLY when eventId is in the URL (removed the getRegistrations fallback that quietly filled one - also a latency win). No eventId -> just All events + Edit profile. (Prev V2.62: ← Manage first.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1674,15 +1674,13 @@ function renderProfile(el, viewerMode){
   if(_navOwn&&_navId){
     var _b='<a href="https://gather.2gather.network/events.html?memberCard='+encodeURIComponent(_navId)+'" style="'+_WB+'">All events</a>';
     if(viewerMode){
-      if(_eventId){
-        _b='<a href="https://gather.2gather.network/myevents.html?id='+encodeURIComponent(_navId)+'&event='+encodeURIComponent(_eventId)+'" style="'+_WB+'">← Manage</a>'+_b+'<a href="https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+'&memberCard='+encodeURIComponent(_navId)+'" style="'+_WB+'">Visit hub</a>';
-      }
+      if(_eventId) _b+='<a href="https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+'&memberCard='+encodeURIComponent(_navId)+'" style="'+_WB+'">Visit hub</a>';
       _b+='<a href="https://creating.works/intake.html?id='+encodeURIComponent(_navId)+'" style="'+_WB+'">Edit profile</a>';
+      if(_eventId) _b+='<a href="https://gather.2gather.network/myevents.html?id='+encodeURIComponent(_navId)+'&event='+encodeURIComponent(_eventId)+'" style="'+_WB+'">Manage event</a>';
     } else {
       _b+='<a href="https://creating.works/intake.html?show='+encodeURIComponent(_navId)+'" style="'+_WB+'">Event profile</a>';
     }
     _navButtons='<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:0 2px;margin:0 0 20px;">'+_b+'</div>';
-    if(viewerMode&&!_eventId) _fillHubFromReg();
   }
   var _tnEl=document.getElementById('app-topnav'); if(_tnEl) _tnEl.innerHTML=_navButtons;
   var _photoHTML='';
@@ -2725,4 +2723,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.62 | Date: 2026-07-13 | LAST CHANGE: "← Manage" back link (first button) in the ?show= profile nav when eventId is known -> myevents?id=&event=. (Prev V2.61: 44px edit-line photo.) -->
+<!-- Version: V2.63 | Date: 2026-07-13 | LAST CHANGE: "Manage event" nav button (last, no arrow) + Visit hub now show ONLY when eventId is in the URL (removed the getRegistrations fallback that quietly filled one - also a latency win). No eventId -> just All events + Edit profile. (Prev V2.62: ← Manage first.) -->
