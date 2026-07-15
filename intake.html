@@ -1,4 +1,4 @@
-<!-- Version: V2.66 | Date: 2026-07-14 | LAST CHANGE: Edit-page (?id=) nav gains "Manage event" (when eventId present); removed handshake emoji from "People I want to meet" (no skin-based emojis). (Prev V2.65: white Bookmark button + list on edit view.) -->
+<!-- Version: V2.67 | Date: 2026-07-15 | LAST CHANGE: Intro/welcome screen before section 1 for new registrants (hub CTA passes &intro=1): context text + "Create my event profile" button -> "What do you enjoy doing?". (Prev V2.66: edit-page "Manage event" nav; no skin emojis.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -286,6 +286,7 @@
 var _appearId   = null;
 var _showId     = null;
 var _viewerMode = false;
+var _introMode  = false;
 var _eventId    = '';
 var _viewerPhoto = '';
 var _viewerName  = '';
@@ -294,6 +295,7 @@ var _viewerName  = '';
   var params=new URLSearchParams(window.location.search);
   _showId=params.get('show')||null;
   _eventId=params.get('eventId')||'';
+  _introMode=(params.get('intro')==='1');
   if(_showId){_viewerMode=true;return;}
   var urlId=params.get('id')||params.get('memberCard');
   if(urlId){_appearId=urlId;try{localStorage.setItem('appear-id',_appearId);}catch(e){}}
@@ -1575,12 +1577,21 @@ function render(){
     el.innerHTML='<div style="text-align:center;padding:40px 20px"><p style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px;">Sign in to continue</p><p style="font-size:14px;color:var(--soft)"><a href="https://appear.network" style="color:var(--brand);font-weight:600;">Go to Appear Network</a> and open this page from your profile.</p></div>';
     return;
   }
+  if(_screen==='intro'){ renderScreenIntro(el); return; }
   if(_screen===0){ renderProfile(el,false); _wtmDecorate(); return; }
   if(_screen==='1b'){ renderScreen1b(el); return; }
   if(_screen==='potluck'){ renderScreenPotluck(el); return; }
   if(_screen==='share'){ renderScreenShare(el); return; }
   var fn={1:renderScreen1,2:renderScreen2,3:renderScreen3,4:renderScreen4}[_screen];
   if(fn) fn(el);
+}
+
+// Intro/welcome shown before section 1 — only when the hub CTA passes &intro=1 (new registrants).
+function renderScreenIntro(el){
+  el.innerHTML='<div style="padding:8px 2px 6px;">'
+    +'<p style="font-size:15.5px;line-height:1.55;color:var(--text);margin-bottom:22px;">We\'d like to know who you are and what you\'d like to bring to this event! When you share your interests, needs, and skills, we can match you to other compatible event attendees during AND after the event ends. This way, the event lives on...</p>'
+    +'<button class="btn-next" onclick="_screen=1;render();">Create my event profile</button>'
+    +'</div>';
 }
 
 function progressHTML(n){
@@ -2742,6 +2753,7 @@ window.goBack = function(){
     return;
   }
   if(!_appearId){ render(); return; }
+  if(_introMode) _screen='intro';                // new registrant from the hub CTA -> welcome screen before section 1
   await loadRefData();                           // cached + fast — needed to render the flow options
   render();                                      // render-first: show the flow now, don't block on the profile
   await loadProfileAndIntake();                  // one profile call, in the background of the first paint
@@ -2762,4 +2774,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.66 | Date: 2026-07-14 | LAST CHANGE: Edit-page (?id=) nav gains "Manage event" (when eventId present); removed handshake emoji from "People I want to meet" (no skin-based emojis). (Prev V2.65: white Bookmark button + list on edit view.) -->
+<!-- Version: V2.67 | Date: 2026-07-15 | LAST CHANGE: Intro/welcome screen before section 1 for new registrants (hub CTA passes &intro=1): context text + "Create my event profile" button -> "What do you enjoy doing?". (Prev V2.66: edit-page "Manage event" nav; no skin emojis.) -->
