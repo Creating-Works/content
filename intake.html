@@ -1,4 +1,4 @@
-<!-- Version: V2.69 | Date: 2026-07-15 | LAST CHANGE: "This is so me:" answer now same font size as the label (10px) and bold. (Prev V2.68: removed add-your-own block from Event contribution screen.) -->
+<!-- Version: V2.70 | Date: 2026-07-15 | LAST CHANGE: Potluck ending: "View sign up page" modal replaced with an INLINE sign-up list (no modal) on the Event contribution screen; "I have another idea" adds your own offering to the shared list (others can sign up too). (Prev V2.69: "This is so me" answer styling.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1985,16 +1985,29 @@ function renderScreenPotluck(el){
     +'</div>'
     +(_editMode?'<div class="nav-row"><button class="btn-next" onclick="doneEdit()">Done</button></div>':'<div class="nav-row"><button class="btn-back" onclick="goBack()">← Back</button></div>');
   cont.innerHTML=html;
+  renderSignupModalBody();   // fill the inline #signup-inline list
 }
 
 // ─── Attendee mode: view list + claim, or add own ───────────────────────────
 function renderPotluckAttendeeMode(){
   var h='';
-  h+='<button onclick="openSignupModal()" style="width:100%;background:var(--brand);color:white;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;margin-bottom:12px;">View sign up page</button>';
-  // "Add your own" (divider + input + Add) removed here for now — it will move onto the View sign up page later. plQuickAdd/plFilterOfferings/etc. kept for reuse.
+  h+='<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--soft);margin-bottom:10px;">Sign up list 🎁</div>';
+  h+='<div id="signup-inline"></div>';   // host's items rendered inline (no modal)
+  h+='<div id="another-idea-wrap" style="margin-top:8px;"><button onclick="showAnotherIdea()" style="width:100%;background:#fff;color:var(--brand);border:1.5px solid var(--brand);padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;">+ I have another idea</button></div>';
   h+=buildMyPotluckContributionsHTML();
   return h;
 }
+// "I have another idea" -> add your own offering; it joins the shared list (savePotluckList) and you claim it (plQuickAdd).
+window.showAnotherIdea=function(){
+  var w=document.getElementById('another-idea-wrap'); if(!w) return;
+  w.innerHTML='<div style="background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:14px;">'
+    +'<div style="font-size:13px;color:var(--soft);margin-bottom:8px;">Add your own idea — it joins the list so others can sign up too.</div>'
+    +'<input type="text" id="pl-item-input" placeholder="Enter your offering" oninput="plFilterOfferings(this.value)" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;">'
+    +'<div id="pl-search-results" style="margin-top:4px;"></div>'
+    +'<button onclick="plQuickAdd()" style="width:100%;background:var(--brand);color:white;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;margin-top:10px;">Add to the list</button>'
+    +'</div>';
+  var f=document.getElementById('pl-item-input'); if(f) f.focus();
+};
 
 function buildMyPotluckContributionsHTML(){
   if(!_potluckClaims||!_appearId) return '';
@@ -2131,7 +2144,7 @@ window.closeSignupModal=function(){
   var m=document.getElementById('signup-modal'); if(m) m.remove();
 };
 function renderSignupModalBody(){
-  var body=document.getElementById('signup-modal-body'); if(!body) return;
+  var body=document.getElementById('signup-inline')||document.getElementById('signup-modal-body'); if(!body) return;
   if(!_signupList.length){
     body.innerHTML='<div style="color:var(--muted);font-size:14px;padding:10px 0;">Nothing on the list yet.</div>';
     return;
@@ -2193,7 +2206,7 @@ window.submitClaim=function(i){
   var elaboration=f?f.value.trim():'';
   claimItem(it.item,it.category,it.potluckType,elaboration,it.timeSpec||'',it.maxClaims?parseInt(it.maxClaims):0,function(d){
     _claimingIdx=-1;
-    loadPotluck(function(){renderSignupModalBody();});
+    loadPotluck(function(){renderScreenPotluck(null);});
   });
 };
 
@@ -2769,4 +2782,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.69 | Date: 2026-07-15 | LAST CHANGE: "This is so me:" answer now same font size as the label (10px) and bold. (Prev V2.68: removed add-your-own block from Event contribution screen.) -->
+<!-- Version: V2.70 | Date: 2026-07-15 | LAST CHANGE: Potluck ending: "View sign up page" modal replaced with an INLINE sign-up list (no modal) on the Event contribution screen; "I have another idea" adds your own offering to the shared list (others can sign up too). (Prev V2.69: "This is so me" answer styling.) -->
