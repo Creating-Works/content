@@ -1,4 +1,4 @@
-<!-- Version: V2.67 | Date: 2026-07-15 | LAST CHANGE: Intro/welcome screen before section 1 for new registrants (hub CTA passes &intro=1): context text + "Create my event profile" button -> "What do you enjoy doing?". (Prev V2.66: edit-page "Manage event" nav; no skin emojis.) -->
+<!-- Version: V2.68 | Date: 2026-07-15 | LAST CHANGE: Event contribution screen: removed the "add your own" block (divider + "Enter your offering" input + Add) for now - keeps "View sign up page" + Your contributions; add-your-own will move onto the View sign up page later. (Prev V2.67: intro/welcome screen before section 1.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1991,12 +1991,7 @@ function renderScreenPotluck(el){
 function renderPotluckAttendeeMode(){
   var h='';
   h+='<button onclick="openSignupModal()" style="width:100%;background:var(--brand);color:white;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;margin-bottom:12px;">View sign up page</button>';
-  h+='<div style="text-align:center;font-size:13px;color:var(--muted);margin-bottom:12px;">— or add your own below —</div>';
-  h+='<div style="background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:14px;">'
-    +'<input type="text" id="pl-item-input" placeholder="Enter your offering" oninput="plFilterOfferings(this.value)" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;">'
-    +'<div id="pl-search-results" style="margin-top:4px;"></div>'
-    +'<button onclick="plQuickAdd()" style="width:100%;background:var(--brand);color:white;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;margin-top:10px;">Add</button>'
-    +'</div>';
+  // "Add your own" (divider + input + Add) removed here for now — it will move onto the View sign up page later. plQuickAdd/plFilterOfferings/etc. kept for reuse.
   h+=buildMyPotluckContributionsHTML();
   return h;
 }
@@ -2774,4 +2769,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.67 | Date: 2026-07-15 | LAST CHANGE: Intro/welcome screen before section 1 for new registrants (hub CTA passes &intro=1): context text + "Create my event profile" button -> "What do you enjoy doing?". (Prev V2.66: edit-page "Manage event" nav; no skin emojis.) -->
+<!-- Version: V2.68 | Date: 2026-07-15 | LAST CHANGE: Event contribution screen: removed the "add your own" block (divider + "Enter your offering" input + Add) for now - keeps "View sign up page" + Your contributions; add-your-own will move onto the View sign up page later. (Prev V2.67: intro/welcome screen before section 1.) -->
