@@ -1,4 +1,4 @@
-<!-- Version: V2.70 | Date: 2026-07-15 | LAST CHANGE: Potluck ending: "View sign up page" modal replaced with an INLINE sign-up list (no modal) on the Event contribution screen; "I have another idea" adds your own offering to the shared list (others can sign up too). (Prev V2.69: "This is so me" answer styling.) -->
+<!-- Version: V2.71 | Date: 2026-07-15 | LAST CHANGE: Edit-mode skills section now includes the "What comes most naturally to you?" methods checklist (was only in the build flow). (Prev V2.70: inline potluck sign-up list, no modal.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2303,6 +2303,8 @@ function renderScreen2(el){
       +screenSearchHTML('2','Search skills to add...')
       +'<div id="drill-2"></div>'
       +'<div id="added-2">'+buildAddedHTML('2')+'</div>'
+      +'<div style="font-weight:700;font-size:15px;margin:18px 0 8px;">What comes most naturally to you?</div>'
+      +'<div id="methods-inline-list">'+buildMethodsChecklistHTML(_methods, (_refData&&_refData.methodsDisplay)||[])+'</div>'
       +navHTML(2);
   } else {
     cont.innerHTML=progressHTML(2)
@@ -2782,4 +2784,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.70 | Date: 2026-07-15 | LAST CHANGE: Potluck ending: "View sign up page" modal replaced with an INLINE sign-up list (no modal) on the Event contribution screen; "I have another idea" adds your own offering to the shared list (others can sign up too). (Prev V2.69: "This is so me" answer styling.) -->
+<!-- Version: V2.71 | Date: 2026-07-15 | LAST CHANGE: Edit-mode skills section now includes the "What comes most naturally to you?" methods checklist (was only in the build flow). (Prev V2.70: inline potluck sign-up list, no modal.) -->
