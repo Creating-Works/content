@@ -1,4 +1,4 @@
-<!-- Version: V2.71 | Date: 2026-07-15 | LAST CHANGE: Edit-mode skills section now includes the "What comes most naturally to you?" methods checklist (was only in the build flow). (Prev V2.70: inline potluck sign-up list, no modal.) -->
+<!-- Version: V2.72 | Date: 2026-07-16 | LAST CHANGE: Profile nav - added "Event hub" button (view + edit modes); view-mode "Edit profile" -> "Edit my event profile" (carries eventId), "Visit hub" -> "Event hub"; owner-detection for the Edit button now also reads a &me= URL param (reliable, not just localStorage). Fixed duplicate "Other" in the Person seeking sub-type chips (listed from reference-data AND hardcoded). (Prev V2.71: edit-mode methods checklist.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -720,7 +720,7 @@ window.setPersonSubType=function(sub){
     var bc=document.getElementById('needs-breadcrumb');
     if(bc) bc.innerHTML='<div style="font-size:13px;color:var(--brand);margin-bottom:8px;"><span style="cursor:pointer;text-decoration:underline;" onclick="_needsCat=\'\';_personSubType=\'\';renderScreen4(null);">What I\'m seeking</span> <span style="color:var(--muted);margin:0 4px;">›</span>Person</div>';
     // Re-render sub-chips
-    var personOpts=(_refData&&_refData.personTypes)||[];
+    var personOpts=((_refData&&_refData.personTypes)||[]).filter(function(p){return String(p).toLowerCase()!=='other';});
     var personChips='<div class="sub-chips" style="margin-bottom:14px;border:none;">';
     personOpts.forEach(function(p){personChips+='<div class="sub-chip" onclick="window.setPersonSubType(\''+esc(p)+'\')">'+esc(p)+'</div>';});
     personChips+='<div class="sub-chip" onclick="window.setPersonSubType(\'Other\')">+ Other</div>';
@@ -1716,18 +1716,18 @@ function renderProfile(el, viewerMode){
       +'</div>';
   }
   var allNeeds=_needsSkill.concat(_needsRes);
-  var _navOwn=!viewerMode; if(viewerMode){try{var _s=String(localStorage.getItem('appear-id')||'').replace(/\./g,'').toLowerCase();var _i=String(_showId||'').replace(/\./g,'').toLowerCase();_navOwn=!!(_i&&_s===_i);}catch(e){}}
+  var _navOwn=!viewerMode; if(viewerMode){var _i=String(_showId||'').replace(/\./g,'').toLowerCase();var _me=String(params.get('me')||'').replace(/\./g,'').toLowerCase();var _s='';try{_s=String(localStorage.getItem('appear-id')||'').replace(/\./g,'').toLowerCase();}catch(e){}_navOwn=!!(_i&&((_me&&_me===_i)||(_s&&_s===_i)));}
   var _navId=viewerMode?_showId:_appearId;
   var _WB='text-decoration:none;color:#185FA5;background:#fff;font-size:14px;font-weight:600;padding:8px 15px;border-radius:20px;white-space:nowrap;';
   var _navButtons='';
   if(_navOwn&&_navId){
     var _b='<a href="https://gather.2gather.network/events.html?memberCard='+encodeURIComponent(_navId)+'" style="'+_WB+'">All events</a>';
+    if(_eventId) _b+='<a href="https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+'&memberCard='+encodeURIComponent(_navId)+'" style="'+_WB+'">Event hub</a>';
     if(viewerMode){
-      if(_eventId) _b+='<a href="https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+'&memberCard='+encodeURIComponent(_navId)+'" style="'+_WB+'">Visit hub</a>';
-      _b+='<a href="https://creating.works/intake.html?id='+encodeURIComponent(_navId)+'" style="'+_WB+'">Edit profile</a>';
+      _b+='<a href="https://creating.works/intake.html?id='+encodeURIComponent(_navId)+(_eventId?'&eventId='+encodeURIComponent(_eventId):'')+'" style="'+_WB+'">Edit my event profile</a>';
       if(_eventId) _b+='<a href="https://gather.2gather.network/myevents.html?id='+encodeURIComponent(_navId)+'&event='+encodeURIComponent(_eventId)+'" style="'+_WB+'">Manage event</a>';
     } else {
-      _b+='<a href="https://creating.works/intake.html?show='+encodeURIComponent(_navId)+'" style="'+_WB+'">Event profile</a>';
+      _b+='<a href="https://creating.works/intake.html?show='+encodeURIComponent(_navId)+'&me='+encodeURIComponent(_navId)+'" style="'+_WB+'">Event profile</a>';
       if(_eventId) _b+='<a href="https://gather.2gather.network/myevents.html?id='+encodeURIComponent(_navId)+'&event='+encodeURIComponent(_eventId)+'" style="'+_WB+'">Manage event</a>';
     }
     _navButtons='<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:0 2px;margin:0 0 20px;">'+_b+'</div>';
@@ -2570,7 +2570,7 @@ window.setNeedsCat=function(cat){
   if(cat==='skill'){
     if(!_personSubType){
       // Show Person sub-chips loaded from reference-data Person column
-      var personOpts=(_refData&&_refData.personTypes)||[];
+      var personOpts=((_refData&&_refData.personTypes)||[]).filter(function(p){return String(p).toLowerCase()!=='other';});
       var personChips='<div class="sub-chips" style="margin-bottom:14px;border:none;">';
       personOpts.forEach(function(p){
         var selCls=(_personSubType===p)?' selected':'';
@@ -2784,4 +2784,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.71 | Date: 2026-07-15 | LAST CHANGE: Edit-mode skills section now includes the "What comes most naturally to you?" methods checklist (was only in the build flow). (Prev V2.70: inline potluck sign-up list, no modal.) -->
+<!-- Version: V2.72 | Date: 2026-07-16 | LAST CHANGE: Profile nav - added "Event hub" button (view + edit modes); view-mode "Edit profile" -> "Edit my event profile" (carries eventId), "Visit hub" -> "Event hub"; owner-detection for the Edit button now also reads a &me= URL param (reliable, not just localStorage). Fixed duplicate "Other" in the Person seeking sub-type chips (listed from reference-data AND hardcoded). (Prev V2.71: edit-mode methods checklist.) -->
