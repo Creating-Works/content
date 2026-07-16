@@ -1,4 +1,4 @@
-<!-- Version: V2.76 | Date: 2026-07-16 | LAST CHANGE: Seeking-chip (i) icon is upright (dropped italic). (V2.75: seeking-chip detail popover; V2.74: needs detail field + pencil-edit; ~encoded passthrough, no GAS.) -->
+<!-- Version: V2.77 | Date: 2026-07-16 | LAST CHANGE: Seeking-detail popover on the profile now has a prominent close (x) + click-outside dismiss + raised z-index (matches hub V2.64). (V2.76: upright (i) icon; V2.74: needs detail field + pencil-edit.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -121,7 +121,8 @@
     .profile-tag{padding:6px 12px;border-radius:20px;background:var(--sel-bg);border:1.5px solid var(--sel-border);font-size:13px;color:var(--brand);font-weight:500;}
     .tag-level{font-size:11px;color:var(--muted);font-weight:400;margin-left:4px;}
     .seek-info{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border:1px solid currentColor;border-radius:50%;font-size:9px;font-weight:700;margin-left:5px;vertical-align:middle;}
-    .seek-detail-pop{position:absolute;top:100%;left:0;margin-top:6px;z-index:50;background:#fff;border:1.5px solid var(--brand);border-radius:10px;padding:8px 12px;font-size:13px;color:var(--text);box-shadow:0 6px 20px rgba(0,0,0,.12);min-width:170px;max-width:260px;white-space:normal;text-align:left;line-height:1.4;}
+    .seek-detail-pop{position:absolute;top:100%;left:0;margin-top:6px;z-index:50;background:#fff;border:1.5px solid var(--brand);border-radius:10px;padding:8px 26px 8px 12px;font-size:13px;color:var(--text);box-shadow:0 6px 20px rgba(0,0,0,.12);min-width:170px;max-width:260px;white-space:normal;text-align:left;line-height:1.4;}
+    .seek-pop-close{position:absolute;top:2px;right:5px;background:none;border:none;font-size:17px;line-height:1;color:var(--soft);cursor:pointer;padding:2px 4px;font-family:inherit;}
     .profile-empty{font-size:13px;color:var(--muted);font-style:italic;}
     .profile-lang-row{margin-top:4px;padding-bottom:16px;border-bottom:1px solid var(--border);margin-bottom:0;display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
     .profile-lang-text{font-size:13px;color:var(--soft);}
@@ -1016,9 +1017,16 @@ window.toggleSeekDetail=function(id){
   var el=document.getElementById(id); if(!el) return;
   var willOpen=(el.style.display==='none'||!el.style.display);
   var pops=document.querySelectorAll('.seek-detail-pop');
-  for(var k=0;k<pops.length;k++) pops[k].style.display='none';
+  for(var k=0;k<pops.length;k++){ pops[k].style.display='none'; if(pops[k].parentNode) pops[k].parentNode.style.zIndex=''; }
   el.style.display=willOpen?'block':'none';
+  if(willOpen && el.parentNode) el.parentNode.style.zIndex='1000';
 };
+// Click outside an open seeking popover (and not on its (i)) closes it.
+document.addEventListener('click', function(e){
+  if(e.target && e.target.closest && (e.target.closest('.seek-detail-pop')||e.target.closest('.seek-info'))) return;
+  var pops=document.querySelectorAll('.seek-detail-pop');
+  for(var k=0;k<pops.length;k++){ if(pops[k].style.display==='block'){ pops[k].style.display='none'; if(pops[k].parentNode) pops[k].parentNode.style.zIndex=''; } }
+});
 // ── Pencil-edit a need in place: item / category / Local / detail ──
 var _editingNeed=null;
 window.openNeedEditor=function(s,idx){ _editingNeed={s:String(s),idx:parseInt(idx)}; rerenderNeeds(); };
@@ -1763,7 +1771,7 @@ function renderProfile(el, viewerMode){
           var popId='seek-pop-'+screenKey+'-'+i;
           var infoIcon=hasDetail?'<span class="seek-info">i</span>':'';
           var chipClick=hasDetail?' onclick="toggleSeekDetail(\''+popId+'\')" style="cursor:pointer;"':'';
-          var popover=hasDetail?'<div id="'+popId+'" class="seek-detail-pop" style="display:none;">Seeking: '+esc(r.detail)+'</div>':'';
+          var popover=hasDetail?'<div id="'+popId+'" class="seek-detail-pop" style="display:none;"><button class="seek-pop-close" onclick="toggleSeekDetail(\''+popId+'\')" aria-label="Close">×</button>Seeking: '+esc(r.detail)+'</div>':'';
           return '<div style="position:relative;display:inline-block;">'+'<div class="profile-tag"'+(missingLevel?' style="border-color:#d32f2f;"':'')+chipClick+'>'+esc(r.item)+(lv?'<span class="tag-level">'+esc(lv)+'</span>':'')+missingTag+local+subLabel+infoIcon+'</div>'+picker+popover+'</div>';
         }).join('')
       :'<div class="profile-empty">Nothing added yet.</div>';
@@ -2847,4 +2855,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.76 | Date: 2026-07-16 | LAST CHANGE: Seeking-chip (i) icon is upright (dropped italic). (V2.75: seeking-chip detail popover; V2.74: needs detail field + pencil-edit; ~encoded passthrough, no GAS.) -->
+<!-- Version: V2.77 | Date: 2026-07-16 | LAST CHANGE: Seeking-detail popover on the profile now has a prominent close (x) + click-outside dismiss + raised z-index (matches hub V2.64). (V2.76: upright (i) icon; V2.74: needs detail field + pencil-edit.) -->
