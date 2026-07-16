@@ -1,4 +1,4 @@
-<!-- Version: V2.72 | Date: 2026-07-16 | LAST CHANGE: Profile nav - added "Event hub" button (view + edit modes); view-mode "Edit profile" -> "Edit my event profile" (carries eventId), "Visit hub" -> "Event hub"; owner-detection for the Edit button now also reads a &me= URL param (reliable, not just localStorage). Fixed duplicate "Other" in the Person seeking sub-type chips (listed from reference-data AND hardcoded). (Prev V2.71: edit-mode methods checklist.) -->
+<!-- Version: V2.73 | Date: 2026-07-16 | LAST CHANGE: HOTFIX - V2.72 referenced out-of-scope 'params' in renderProfile (owner &me= detection), throwing a ReferenceError that hung every ?show= profile view on "Loading preferences". Now reads &me= via a local new URLSearchParams. (V2.72: Event hub nav, Edit my event profile, &me= owner detection, dup Other fix.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1716,7 +1716,7 @@ function renderProfile(el, viewerMode){
       +'</div>';
   }
   var allNeeds=_needsSkill.concat(_needsRes);
-  var _navOwn=!viewerMode; if(viewerMode){var _i=String(_showId||'').replace(/\./g,'').toLowerCase();var _me=String(params.get('me')||'').replace(/\./g,'').toLowerCase();var _s='';try{_s=String(localStorage.getItem('appear-id')||'').replace(/\./g,'').toLowerCase();}catch(e){}_navOwn=!!(_i&&((_me&&_me===_i)||(_s&&_s===_i)));}
+  var _navOwn=!viewerMode; if(viewerMode){var _i=String(_showId||'').replace(/\./g,'').toLowerCase();var _me='';try{_me=String(new URLSearchParams(window.location.search).get('me')||'').replace(/\./g,'').toLowerCase();}catch(e){}var _s='';try{_s=String(localStorage.getItem('appear-id')||'').replace(/\./g,'').toLowerCase();}catch(e){}_navOwn=!!(_i&&((_me&&_me===_i)||(_s&&_s===_i)));}
   var _navId=viewerMode?_showId:_appearId;
   var _WB='text-decoration:none;color:#185FA5;background:#fff;font-size:14px;font-weight:600;padding:8px 15px;border-radius:20px;white-space:nowrap;';
   var _navButtons='';
@@ -2784,4 +2784,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.72 | Date: 2026-07-16 | LAST CHANGE: Profile nav - added "Event hub" button (view + edit modes); view-mode "Edit profile" -> "Edit my event profile" (carries eventId), "Visit hub" -> "Event hub"; owner-detection for the Edit button now also reads a &me= URL param (reliable, not just localStorage). Fixed duplicate "Other" in the Person seeking sub-type chips (listed from reference-data AND hardcoded). (Prev V2.71: edit-mode methods checklist.) -->
+<!-- Version: V2.73 | Date: 2026-07-16 | LAST CHANGE: HOTFIX - V2.72 referenced out-of-scope 'params' in renderProfile (owner &me= detection), throwing a ReferenceError that hung every ?show= profile view on "Loading preferences". Now reads &me= via a local new URLSearchParams. (V2.72: Event hub nav, Edit my event profile, &me= owner detection, dup Other fix.) -->
