@@ -1,4 +1,4 @@
-<!-- Version: V2.74 | Date: 2026-07-16 | LAST CHANGE: "What I'm seeking" needs gain an optional free-text detail ("What exactly are you seeking?" e.g. "A baker for my wedding party") + a pencil on each need row to edit item / category / Local / detail inline. Detail stored client-side as a ~<encoded> suffix on the needs string (no GAS change - needs is a passthrough field); hub + match strip it so their chips stay clean. (V2.73: hotfix out-of-scope params.) -->
+<!-- Version: V2.75 | Date: 2026-07-16 | LAST CHANGE: Profile view - seeking chips that have a detail now show a small (i) icon; tapping the chip opens an inline popover right under it ("Seeking: ...") - no modal, works on your view and others'. (V2.74: needs detail field + pencil-edit; ~encoded passthrough, no GAS.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -120,6 +120,8 @@
     .profile-tags{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px;}
     .profile-tag{padding:6px 12px;border-radius:20px;background:var(--sel-bg);border:1.5px solid var(--sel-border);font-size:13px;color:var(--brand);font-weight:500;}
     .tag-level{font-size:11px;color:var(--muted);font-weight:400;margin-left:4px;}
+    .seek-info{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border:1px solid currentColor;border-radius:50%;font-size:9px;font-style:italic;font-weight:700;margin-left:5px;vertical-align:middle;}
+    .seek-detail-pop{position:absolute;top:100%;left:0;margin-top:6px;z-index:50;background:#fff;border:1.5px solid var(--brand);border-radius:10px;padding:8px 12px;font-size:13px;color:var(--text);box-shadow:0 6px 20px rgba(0,0,0,.12);min-width:170px;max-width:260px;white-space:normal;text-align:left;line-height:1.4;}
     .profile-empty{font-size:13px;color:var(--muted);font-style:italic;}
     .profile-lang-row{margin-top:4px;padding-bottom:16px;border-bottom:1px solid var(--border);margin-bottom:0;display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
     .profile-lang-text{font-size:13px;color:var(--soft);}
@@ -1009,6 +1011,14 @@ window.toggleLevelHelp=function(s){
   }
 };
 
+// Profile view: tap a seeking chip's ⓘ to reveal its "what exactly I'm seeking" detail in a popover under the chip.
+window.toggleSeekDetail=function(id){
+  var el=document.getElementById(id); if(!el) return;
+  var willOpen=(el.style.display==='none'||!el.style.display);
+  var pops=document.querySelectorAll('.seek-detail-pop');
+  for(var k=0;k<pops.length;k++) pops[k].style.display='none';
+  el.style.display=willOpen?'block':'none';
+};
 // ── Pencil-edit a need in place: item / category / Local / detail ──
 var _editingNeed=null;
 window.openNeedEditor=function(s,idx){ _editingNeed={s:String(s),idx:parseInt(idx)}; rerenderNeeds(); };
@@ -1749,7 +1759,12 @@ function renderProfile(el, viewerMode){
             var cp=r.category.split(' / ');
             if(personTypeList.indexOf(cp[0])>-1) subLabel='<span style="display:block;font-size:10px;color:var(--soft);margin-top:1px;">'+esc(cp[0])+'</span>';
           }
-          return '<div style="position:relative;display:inline-block;">'+'<div class="profile-tag"'+(missingLevel?' style="border-color:#d32f2f;"':'')+'>'+esc(r.item)+(lv?'<span class="tag-level">'+esc(lv)+'</span>':'')+missingTag+local+subLabel+'</div>'+picker+'</div>';
+          var hasDetail=(screenKey==='4'&&r.detail);
+          var popId='seek-pop-'+screenKey+'-'+i;
+          var infoIcon=hasDetail?'<span class="seek-info">i</span>':'';
+          var chipClick=hasDetail?' onclick="toggleSeekDetail(\''+popId+'\')" style="cursor:pointer;"':'';
+          var popover=hasDetail?'<div id="'+popId+'" class="seek-detail-pop" style="display:none;">Seeking: '+esc(r.detail)+'</div>':'';
+          return '<div style="position:relative;display:inline-block;">'+'<div class="profile-tag"'+(missingLevel?' style="border-color:#d32f2f;"':'')+chipClick+'>'+esc(r.item)+(lv?'<span class="tag-level">'+esc(lv)+'</span>':'')+missingTag+local+subLabel+infoIcon+'</div>'+picker+popover+'</div>';
         }).join('')
       :'<div class="profile-empty">Nothing added yet.</div>';
     var actions=!viewerMode
@@ -2832,4 +2847,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.74 | Date: 2026-07-16 | LAST CHANGE: "What I'm seeking" needs gain an optional free-text detail ("What exactly are you seeking?" e.g. "A baker for my wedding party") + a pencil on each need row to edit item / category / Local / detail inline. Detail stored client-side as a ~<encoded> suffix on the needs string (no GAS change - needs is a passthrough field); hub + match strip it so their chips stay clean. (V2.73: hotfix out-of-scope params.) -->
+<!-- Version: V2.75 | Date: 2026-07-16 | LAST CHANGE: Profile view - seeking chips that have a detail now show a small (i) icon; tapping the chip opens an inline popover right under it ("Seeking: ...") - no modal, works on your view and others'. (V2.74: needs detail field + pencil-edit; ~encoded passthrough, no GAS.) -->
