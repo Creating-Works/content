@@ -1,4 +1,4 @@
-<!-- Version: V2.77 | Date: 2026-07-16 | LAST CHANGE: Seeking-detail popover on the profile now has a prominent close (x) + click-outside dismiss + raised z-index (matches hub V2.64). (V2.76: upright (i) icon; V2.74: needs detail field + pencil-edit.) -->
+<!-- Version: V2.78 | Date: 2026-07-16 | LAST CHANGE: Profile nav now shows All events + Event hub for ANY viewer (not just the owner) - so a bare ?show= link shows nav back; Edit / Event profile / Manage stay owner-only. Event hub uses the profile's own eventId when the URL has none. (V2.77: seeking popover close/click-outside.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -469,6 +469,7 @@ async function loadProfileAndIntake(){
     if(resp.found&&resp.data){
       _hasProfile=true;
       var d=resp.data;
+      if(!_eventId && d.eventId) _eventId=String(d.eventId||'').trim();   // derive event from the profile when the URL has none (bare ?show=)
       _postal=d.postal||'';
       _retired=String(d.retired||'').trim().toLowerCase()==='true';
       _methods=(d.methods||'').split('|').filter(Boolean);
@@ -1790,10 +1791,11 @@ function renderProfile(el, viewerMode){
   var _navOwn=!viewerMode; if(viewerMode){var _i=String(_showId||'').replace(/\./g,'').toLowerCase();var _me='';try{_me=String(new URLSearchParams(window.location.search).get('me')||'').replace(/\./g,'').toLowerCase();}catch(e){}var _s='';try{_s=String(localStorage.getItem('appear-id')||'').replace(/\./g,'').toLowerCase();}catch(e){}_navOwn=!!(_i&&((_me&&_me===_i)||(_s&&_s===_i)));}
   var _navId=viewerMode?_showId:_appearId;
   var _WB='text-decoration:none;color:#185FA5;background:#fff;font-size:14px;font-weight:600;padding:8px 15px;border-radius:20px;white-space:nowrap;';
-  var _navButtons='';
+  var _mc=(_navOwn&&_navId)?('&memberCard='+encodeURIComponent(_navId)):'';
+  // All events + Event hub show for ANY viewer (navigation). Edit / Event profile / Manage are owner-only.
+  var _b='<a href="https://gather.2gather.network/events.html'+((_navOwn&&_navId)?('?memberCard='+encodeURIComponent(_navId)):'')+'" style="'+_WB+'">All events</a>';
+  if(_eventId) _b+='<a href="https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+_mc+'" style="'+_WB+'">Event hub</a>';
   if(_navOwn&&_navId){
-    var _b='<a href="https://gather.2gather.network/events.html?memberCard='+encodeURIComponent(_navId)+'" style="'+_WB+'">All events</a>';
-    if(_eventId) _b+='<a href="https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+'&memberCard='+encodeURIComponent(_navId)+'" style="'+_WB+'">Event hub</a>';
     if(viewerMode){
       _b+='<a href="https://creating.works/intake.html?id='+encodeURIComponent(_navId)+(_eventId?'&eventId='+encodeURIComponent(_eventId):'')+'" style="'+_WB+'">Edit my event profile</a>';
       if(_eventId) _b+='<a href="https://gather.2gather.network/myevents.html?id='+encodeURIComponent(_navId)+'&event='+encodeURIComponent(_eventId)+'" style="'+_WB+'">Manage event</a>';
@@ -1801,8 +1803,8 @@ function renderProfile(el, viewerMode){
       _b+='<a href="https://creating.works/intake.html?show='+encodeURIComponent(_navId)+'&me='+encodeURIComponent(_navId)+'" style="'+_WB+'">Event profile</a>';
       if(_eventId) _b+='<a href="https://gather.2gather.network/myevents.html?id='+encodeURIComponent(_navId)+'&event='+encodeURIComponent(_eventId)+'" style="'+_WB+'">Manage event</a>';
     }
-    _navButtons='<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:0 2px;margin:0 0 20px;">'+_b+'</div>';
   }
+  var _navButtons='<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:0 2px;margin:0 0 20px;">'+_b+'</div>';
   var _tnEl=document.getElementById('app-topnav'); if(_tnEl) _tnEl.innerHTML=_navButtons;
   var _photoHTML='';
   if(viewerMode&&_navOwn){
@@ -2855,4 +2857,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.77 | Date: 2026-07-16 | LAST CHANGE: Seeking-detail popover on the profile now has a prominent close (x) + click-outside dismiss + raised z-index (matches hub V2.64). (V2.76: upright (i) icon; V2.74: needs detail field + pencil-edit.) -->
+<!-- Version: V2.78 | Date: 2026-07-16 | LAST CHANGE: Profile nav now shows All events + Event hub for ANY viewer (not just the owner) - so a bare ?show= link shows nav back; Edit / Event profile / Manage stay owner-only. Event hub uses the profile's own eventId when the URL has none. (V2.77: seeking popover close/click-outside.) -->
