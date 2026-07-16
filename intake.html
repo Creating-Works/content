@@ -1,4 +1,4 @@
-<!-- Version: V2.73 | Date: 2026-07-16 | LAST CHANGE: HOTFIX - V2.72 referenced out-of-scope 'params' in renderProfile (owner &me= detection), throwing a ReferenceError that hung every ?show= profile view on "Loading preferences". Now reads &me= via a local new URLSearchParams. (V2.72: Event hub nav, Edit my event profile, &me= owner detection, dup Other fix.) -->
+<!-- Version: V2.74 | Date: 2026-07-16 | LAST CHANGE: "What I'm seeking" needs gain an optional free-text detail ("What exactly are you seeking?" e.g. "A baker for my wedding party") + a pencil on each need row to edit item / category / Local / detail inline. Detail stored client-side as a ~<encoded> suffix on the needs string (no GAS change - needs is a passthrough field); hub + match strip it so their chips stay clean. (V2.73: hotfix out-of-scope params.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -532,8 +532,11 @@ function parseTagStr(str,lk){
 function parseNeedsStr(str){
   if(!str) return [];
   return str.split('|').filter(Boolean).map(function(s){
+    // Save format: item[:local]:ntype[:category][~detail]  (~detail is URL-encoded free text)
+    var detail='';
+    var tio=s.indexOf('~');
+    if(tio>-1){ try{ detail=decodeURIComponent(s.slice(tio+1)); }catch(e){ detail=s.slice(tio+1); } s=s.slice(0,tio); }
     var p=s.split(':');
-    // Save format: item[:local]:ntype[:category]
     // p[0]=item. If p[1]==='local', local=true and ntype=p[2], category=p.slice(3).join(':')
     // else local=false, ntype=p[1], category=p.slice(2).join(':')
     var item=p[0];
@@ -547,7 +550,7 @@ function parseNeedsStr(str){
       ntype=p[1]||'skill';
       category=p.slice(2).join(':');
     }
-    return {item:item, category:category, local:local, ntype:ntype};
+    return {item:item, category:category, local:local, ntype:ntype, detail:detail};
   });
 }
 
@@ -559,8 +562,8 @@ function autoSave(){
   var vStr=_values.map(function(s){return s.item+':'+(s.category||'')+':'+(s.level||'');}).join('|');
   var dStr=_domains.map(function(s){return s.item+(s.level?':'+s.level:'');}).join('|');
   var nStr=[].concat(
-    _needsSkill.map(function(s){return s.item+(s.local?':local':'')+':'+(s.ntype||'skill')+(s.category?':'+s.category:'');}),
-    _needsRes.map(function(s){return s.item+(s.local?':local':'')+':'+(s.ntype||'thing')+(s.category?':'+s.category:'');})
+    _needsSkill.map(function(s){return s.item+(s.local?':local':'')+':'+(s.ntype||'skill')+(s.category?':'+s.category:'')+(s.detail?'~'+encodeURIComponent(s.detail):'');}),
+    _needsRes.map(function(s){return s.item+(s.local?':local':'')+':'+(s.ntype||'thing')+(s.category?':'+s.category:'')+(s.detail?'~'+encodeURIComponent(s.detail):'');})
   ).join('|');
   var mStr=_methods.join('|');
   fetch(GS_URL+'?action=saveIntake'
@@ -1006,6 +1009,45 @@ window.toggleLevelHelp=function(s){
   }
 };
 
+// ── Pencil-edit a need in place: item / category / Local / detail ──
+var _editingNeed=null;
+window.openNeedEditor=function(s,idx){ _editingNeed={s:String(s),idx:parseInt(idx)}; rerenderNeeds(); };
+window.closeNeedEditor=function(){ _editingNeed=null; rerenderNeeds(); };
+window.saveNeedEdit=function(s,idx){
+  s=String(s); idx=parseInt(idx);
+  var arr=getArr(s); var it=arr[idx];
+  if(it){
+    var iv=document.getElementById('ne-item-'+s+'-'+idx);
+    var cv=document.getElementById('ne-cat-'+s+'-'+idx);
+    var dv=document.getElementById('ne-detail-'+s+'-'+idx);
+    var lv=document.getElementById('ne-local-'+s+'-'+idx);
+    if(iv&&iv.value.trim()) it.item=iv.value.trim();
+    if(cv) it.category=cv.value;
+    if(dv) it.detail=dv.value.trim();
+    if(lv) it.local=lv.checked;
+  }
+  _editingNeed=null;
+  autoSave();
+  rerenderNeeds();
+};
+function rerenderNeeds(){
+  refreshNeedsVisible();
+  var a=document.getElementById('added-4s'); if(a) a.innerHTML=buildAddedHTML('4s');
+  var b=document.getElementById('added-4r'); if(b) b.innerHTML=buildAddedHTML('4r');
+}
+function needEditorRow(s, idx){
+  var arr=getArr(s); var it=arr[idx]||{};
+  var catOpts='<option value="">No category</option>'+PARENT_CATS.map(function(c){return '<option value="'+esc(c)+'"'+(it.category===c?' selected':'')+'>'+esc(c)+'</option>';}).join('');
+  var inpStyle='width:100%;padding:9px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;box-sizing:border-box;';
+  return '<div class="need-item" style="flex-direction:column;align-items:stretch;gap:8px;background:var(--input-bg);border:1.5px solid var(--brand);border-radius:10px;padding:12px;">'
+    +'<input id="ne-item-'+s+'-'+idx+'" type="text" value="'+esc(it.item||'')+'" placeholder="What I am seeking" style="'+inpStyle+'">'
+    +'<select id="ne-cat-'+s+'-'+idx+'" style="'+inpStyle+'">'+catOpts+'</select>'
+    +'<input id="ne-detail-'+s+'-'+idx+'" type="text" value="'+esc(it.detail||'')+'" placeholder="What exactly are you seeking? (e.g. A baker for my wedding party)" style="'+inpStyle+'">'
+    +'<label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--soft);"><input id="ne-local-'+s+'-'+idx+'" type="checkbox"'+(it.local?' checked':'')+'> 📍 Local</label>'
+    +'<div style="display:flex;gap:8px;"><button onclick="saveNeedEdit(\''+s+'\','+idx+')" style="flex:1;background:var(--brand);color:#fff;border:none;padding:10px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">Save</button>'
+    +'<button onclick="closeNeedEditor()" style="background:#fff;color:var(--soft);border:1.5px solid var(--border);padding:10px 16px;border-radius:8px;font-size:14px;cursor:pointer;font-family:inherit;">Cancel</button></div>'
+    +'</div>';
+}
 function buildNeedsSectionsHTML(){
   // Three sections by type: Person (skill ntype), Space (space ntype), Thing (thing/resource ntype)
   var personItems=_needsSkill.slice();
@@ -1026,6 +1068,7 @@ function buildOneNeedsSection(label, items, s){
     // Find the true index in the underlying array for remove/toggle
     var arr=s==='4s'?_needsSkill:_needsRes;
     var realIdx=arr.findIndex(function(r){return r.item===item.item&&r.category===item.category&&r.ntype===item.ntype;});
+    if(_editingNeed&&_editingNeed.s===s&&_editingNeed.idx===realIdx) return needEditorRow(s,realIdx);
     var catParts=item.category?item.category.split(' / '):[];
     var isPersonItem=catParts.length>=1&&personTypeList.indexOf(catParts[0])>-1;
     var personSubLabel=isPersonItem?catParts[0]:'';
@@ -1037,9 +1080,11 @@ function buildOneNeedsSection(label, items, s){
       :personSubLabel
         ?'<div style="font-size:11px;color:var(--soft);margin-top:2px;">'+esc(personSubLabel)+'</div>'
         :'<div class="need-item-cat">'+esc(item.category)+'</div>';
+    var detailLine=item.detail?'<div class="need-item-detail" style="font-size:11px;color:var(--brand);margin-top:2px;font-style:italic;">Seeking: '+esc(item.detail)+'</div>':'';
     return '<div class="need-item">'
-      +'<div class="need-item-left" style="position:relative;"><div class="need-item-name">'+esc(item.item)+'</div>'+catLabel+'</div>'
+      +'<div class="need-item-left" style="position:relative;"><div class="need-item-name">'+esc(item.item)+'</div>'+catLabel+detailLine+'</div>'
       +'<div class="need-item-right">'
+      +'<button class="practice-item-x" onclick="openNeedEditor(\''+s+'\','+realIdx+')" title="Edit" style="font-size:14px;">✏️</button>'
       +'<label class="local-toggle'+(item.local?' active':'')+'" ><input type="checkbox"'+(item.local?' checked':'')+' onchange="toggleLocal(\''+s+'\','+realIdx+')"> 📍 Local</label>'
       +'<button class="practice-item-x" onclick="removeItem(\''+s+'\','+realIdx+')">\u00d7</button>'
       +'</div></div>';
@@ -1065,6 +1110,7 @@ function buildAddedHTML(s){
     +'<div style="display:flex;align-items:center;gap:8px;">'+helpBtn+arrowSpan+'</div></div>';
   var bodyItems=arr.map(function(item,i){
     if(isNeed){
+      if(_editingNeed&&_editingNeed.s===s&&_editingNeed.idx===i) return needEditorRow(s,i);
       var catParts=item.category?item.category.split(' / '):[];
       var personTypeList=(_refData&&_refData.personTypes||['Skills/services','Recreation buddy','Accountability buddy']).concat(['Other']);
       var isPersonItem=catParts.length>=1&&personTypeList.indexOf(catParts[0])>-1;
@@ -1077,9 +1123,11 @@ function buildAddedHTML(s){
         :personSubLabel
           ?'<div style="font-size:11px;color:var(--soft);margin-top:2px;">'+esc(personSubLabel)+'</div>'
           :'<div class="need-item-cat">'+esc(item.category)+'</div>';
+      var detailLine=item.detail?'<div class="need-item-detail" style="font-size:11px;color:var(--brand);margin-top:2px;font-style:italic;">Seeking: '+esc(item.detail)+'</div>':'';
       return '<div class="need-item">'
-        +'<div class="need-item-left" id="need-item-wrap-'+s+'-'+i+'" style="position:relative;"><div class="need-item-name">'+esc(item.item)+'</div>'+catLabel+'</div>'
+        +'<div class="need-item-left" id="need-item-wrap-'+s+'-'+i+'" style="position:relative;"><div class="need-item-name">'+esc(item.item)+'</div>'+catLabel+detailLine+'</div>'
         +'<div class="need-item-right">'
+        +'<button class="practice-item-x" onclick="openNeedEditor(\''+s+'\','+i+')" title="Edit" style="font-size:14px;">✏️</button>'
         +'<label class="local-toggle'+(item.local?' active':'')+'" ><input type="checkbox"'+(item.local?' checked':'')+' onchange="toggleLocal(\''+s+'\','+i+')"> 📍 Local</label>'
         +'<button class="practice-item-x" onclick="removeItem(\''+s+'\','+i+')">\u00d7</button>'
         +'</div></div>';
@@ -2784,4 +2832,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.73 | Date: 2026-07-16 | LAST CHANGE: HOTFIX - V2.72 referenced out-of-scope 'params' in renderProfile (owner &me= detection), throwing a ReferenceError that hung every ?show= profile view on "Loading preferences". Now reads &me= via a local new URLSearchParams. (V2.72: Event hub nav, Edit my event profile, &me= owner detection, dup Other fix.) -->
+<!-- Version: V2.74 | Date: 2026-07-16 | LAST CHANGE: "What I'm seeking" needs gain an optional free-text detail ("What exactly are you seeking?" e.g. "A baker for my wedding party") + a pencil on each need row to edit item / category / Local / detail inline. Detail stored client-side as a ~<encoded> suffix on the needs string (no GAS change - needs is a passthrough field); hub + match strip it so their chips stay clean. (V2.73: hotfix out-of-scope params.) -->
