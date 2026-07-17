@@ -1,4 +1,4 @@
-<!-- Version: V2.97 | Date: 2026-07-17 | LAST CHANGE: Added a direct-link param (&screen=potluck) that jumps straight to the "Event contribution" sign-up screen for an existing profile, skipping the normal section-completeness checks. (V2.96: sign-up 3-column redesign.) -->
+<!-- Version: V2.98 | Date: 2026-07-17 | LAST CHANGE: Sign-up screen now breaks out of the narrow 660px card (widens to 1100px, card goes transparent) so the 3 white columns sit on the blue background like the hub, instead of overlapping inside the card; added the standard top nav to this screen; removed the "See the group" pill from the profile page. (V2.97: direct-link param.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -204,7 +204,7 @@
 </head>
 
 <body>
-<div style="max-width:660px;margin:0 auto;">
+<div style="max-width:660px;margin:0 auto;" id="page-wrap">
   <div id="app-topnav"></div>
   <div class="card" id="main-card">
     <div class="top-right-area" id="top-right-area"></div>
@@ -1654,6 +1654,11 @@ function render(){
   var el=document.getElementById('app-content'); if(!el) return;
   renderTopRight();
   var _tn0=document.getElementById('app-topnav'); if(_tn0) _tn0.innerHTML='';
+  if(_screen!=='potluck'){
+    // Undo the potluck screen's wide/transparent layout on every other screen
+    var _pw0=document.getElementById('page-wrap'); if(_pw0) _pw0.style.maxWidth='660px';
+    var _mc0=document.getElementById('main-card'); if(_mc0){ _mc0.style.background=''; _mc0.style.boxShadow=''; _mc0.style.padding=''; _mc0.style.border=''; }
+  }
   if(_viewerMode){
     if(_hasProfile) renderProfile(el,true);
     else el.innerHTML='<div class="empty" style="padding:40px;text-align:center;">No profile found.</div>';
@@ -1914,8 +1919,7 @@ function renderProfile(el, viewerMode){
     var careContent=valSection+domSection;
     return careContent?'<div class="profile-section"><div class="profile-section-header"><div class="profile-section-label">What I care about</div>'+careActions+'</div>'+careContent+'</div>':'';
   })(viewerMode)
-    +(_eventId?'<div id="profile-potluck-section">'+buildProfilePotluckSectionInner(viewerMode)+'</div>':'')
-    +(_eventId&&_appearId?'<div style="margin-top:16px;text-align:center;"><a href="https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+'&memberCard='+encodeURIComponent(_appearId)+'" style="display:inline-block;font-size:14px;color:var(--brand);font-weight:600;text-decoration:none;border:1.5px solid var(--brand);border-radius:20px;padding:8px 18px;">👥 See the group</a></div>':'');
+    +(_eventId?'<div id="profile-potluck-section">'+buildProfilePotluckSectionInner(viewerMode)+'</div>':'');
   if(_eventId&&!_potluckLoaded){
     loadPotluck(function(){
       var c=document.getElementById('profile-potluck-section');
@@ -2125,20 +2129,32 @@ function loadPotluck(cb){
     .catch(function(){_potluckLoaded=true;cb&&cb();});
 }
 
+function renderPotluckTopNav(){
+  var tn=document.getElementById('app-topnav'); if(!tn) return;
+  var WB='text-decoration:none;color:#185FA5;background:#fff;font-size:14px;font-weight:600;padding:8px 15px;border-radius:20px;white-space:nowrap;';
+  var b='<a href="https://gather.2gather.network/events.html?memberCard='+encodeURIComponent(_appearId)+'" style="'+WB+'">All events</a>';
+  if(_eventId) b+='<a href="https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+'&memberCard='+encodeURIComponent(_appearId)+'" style="'+WB+'">Event hub</a>';
+  b+='<a href="https://creating.works/intake.html?id='+encodeURIComponent(_appearId)+(_eventId?'&eventId='+encodeURIComponent(_eventId):'')+'" style="'+WB+'">Edit event profile</a>';
+  if(_eventId) b+='<a href="https://gather.2gather.network/myevents.html?id='+encodeURIComponent(_appearId)+'&event='+encodeURIComponent(_eventId)+'" style="'+WB+'">Manage my experience</a>';
+  tn.innerHTML='<div style="display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px;">'+b+'</div>';
+}
 function renderScreenPotluck(el){
   var cont=document.getElementById('app-content'); if(!cont) return;
+  var pw=document.getElementById('page-wrap'); if(pw) pw.style.maxWidth='1100px';
+  var mc=document.getElementById('main-card'); if(mc){ mc.style.background='transparent'; mc.style.boxShadow='none'; mc.style.padding='0'; mc.style.border='none'; }
+  renderPotluckTopNav();
   if(!_potluckLoaded){
-    cont.innerHTML='<div style="padding:40px 0;text-align:center;color:var(--muted);">Loading…</div>';
+    cont.innerHTML='<div style="padding:40px 0;text-align:center;color:#fff;">Loading…</div>';
     loadPotluck(function(){renderScreenPotluck(null);});
     return;
   }
-  var html='<div style="padding:20px 0;">'
+  var html='<div style="background:#fff;border-radius:14px;padding:20px 24px;margin-bottom:16px;">'
     +'<h2 style="margin-bottom:6px;">Event contribution 🎁</h2>'
-    +'<p style="font-size:14px;color:var(--soft);margin-bottom:20px;">This event is all about contribution. Think of it as a potluck of skills and offerings. What are you going to bring to the event that you want to be known for in our community?</p>'
-    +'<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--soft);margin-bottom:10px;">What you said you\'d like to bring</div>'
-    +'<div class="bring-grid" id="bring-grid"></div>'
+    +'<p style="font-size:14px;color:var(--soft);margin:0;">This event is all about contribution. Think of it as a potluck of skills and offerings. What are you going to bring to the event that you want to be known for in our community?</p>'
     +'</div>'
-    +(_editMode?'<div class="nav-row"><button class="btn-next" onclick="doneEdit()">Done</button></div>':'<div class="nav-row"><button class="btn-back" onclick="goBack()">← Back</button></div>');
+    +'<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#fff;margin:0 4px 10px;">What you said you\'d like to bring</div>'
+    +'<div class="bring-grid" id="bring-grid"></div>'
+    +(_editMode?'<div class="nav-row" style="margin:16px 4px 0;"><button class="btn-next" onclick="doneEdit()">Done</button></div>':'<div class="nav-row" style="margin:16px 4px 0;"><button class="btn-back" onclick="goBack()">← Back</button></div>');
   cont.innerHTML=html;
   renderPotluckColumns();
 }
@@ -3023,4 +3039,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.97 | Date: 2026-07-17 | LAST CHANGE: Added a direct-link param (&screen=potluck) that jumps straight to the "Event contribution" sign-up screen for an existing profile, skipping the normal section-completeness checks. (V2.96: sign-up 3-column redesign.) -->
+<!-- Version: V2.98 | Date: 2026-07-17 | LAST CHANGE: Sign-up screen now breaks out of the narrow 660px card (widens to 1100px, card goes transparent) so the 3 white columns sit on the blue background like the hub, instead of overlapping inside the card; added the standard top nav to this screen; removed the "See the group" pill from the profile page. (V2.97: direct-link param.) -->
