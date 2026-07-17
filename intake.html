@@ -1,4 +1,4 @@
-<!-- Version: V2.89 | Date: 2026-07-17 | LAST CHANGE: Boot loading text now reads "Loading your event profile..." instead of plain "Loading…". (V2.88: spinner icon style.) -->
+<!-- Version: V2.90 | Date: 2026-07-17 | LAST CHANGE: Sign-in gate copy no longer names Appear Network ("Sign in or up to continue"); seeking chips now show category subtext for every item, not just Person-type (matches the hub chips). (V2.89: boot loading text.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1651,7 +1651,7 @@ function render(){
     return;
   }
   if(!_appearId){
-    el.innerHTML='<div style="text-align:center;padding:40px 20px"><p style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px;">Sign in to continue</p><p style="font-size:14px;color:var(--soft)"><a href="https://appear.network" style="color:var(--brand);font-weight:600;">Go to Appear Network</a> and open this page from your profile.</p></div>';
+    el.innerHTML='<div style="text-align:center;padding:40px 20px"><p style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px;">Sign in or up to continue</p><p style="font-size:14px;color:var(--soft)"><a href="https://appear.network" style="color:var(--brand);font-weight:600;">Sign in or up</a> and open this page from your profile.</p></div>';
     return;
   }
   if(_screen==='intro'){ renderScreenIntro(el); return; }
@@ -1805,12 +1805,10 @@ function renderProfile(el, viewerMode){
           }).join(''):'';
           var picker=missingLevel?'<div class="cat-picker-inline" id="'+pickerId+'">'+pickerBtns+'</div>':'';
           var missingTag=missingLevel?'<span style="font-size:11px;color:#d32f2f;font-weight:500;margin-left:4px;cursor:pointer;" onclick="openCatPicker(\''+screenKey+'\','+i+')">Category missing ▾</span>':'';
-          // For seeking items (screen 4), show Person sub-type under the item name
+          // For seeking items (screen 4), show the category under the item name - same as the hub chips
           var subLabel='';
           if(screenKey==='4'&&r.category){
-            var personTypeList=(_refData&&_refData.personTypes||['Skills/services','Recreation buddy','Accountability buddy']).concat(['Other']);
-            var cp=r.category.split(' / ');
-            if(personTypeList.indexOf(cp[0])>-1) subLabel='<span style="display:block;font-size:10px;color:var(--soft);margin-top:1px;">'+esc(cp[0])+'</span>';
+            subLabel='<span style="display:block;font-size:10px;color:var(--soft);margin-top:1px;">'+esc(r.category)+'</span>';
           }
           var hasDetail=(screenKey==='4'&&r.detail);
           var popId='seek-pop-'+screenKey+'-'+i;
@@ -2902,4 +2900,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.89 | Date: 2026-07-17 | LAST CHANGE: Boot loading text now reads "Loading your event profile..." instead of plain "Loading…". (V2.88: spinner icon style.) -->
+<!-- Version: V2.90 | Date: 2026-07-17 | LAST CHANGE: Sign-in gate copy no longer names Appear Network ("Sign in or up to continue"); seeking chips now show category subtext for every item, not just Person-type (matches the hub chips). (V2.89: boot loading text.) -->
