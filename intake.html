@@ -1,4 +1,4 @@
-<!-- Version: V2.86 | Date: 2026-07-17 | LAST CHANGE: "My event profile" label added next to the wizard photo (screen 1 onward, not on the intro screen); each bring-type pick now reveals its own "why it matters" line (Skill/Experience/Thing). (V2.85: required bring-type pick.) -->
+<!-- Version: V2.87 | Date: 2026-07-17 | LAST CHANGE: ?id= boot now shows a "Loading…" spinner and waits for the real profile before first paint, instead of flashing the blank wizard then jumping to the saved profile. (V2.86: My event profile label + bring-type reveal lines.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2881,9 +2881,10 @@ window.goBack = function(){
   }
   if(!_appearId){ render(); return; }
   if(_introMode) _screen='intro';                // new registrant from the hub CTA -> welcome screen before section 1
+  var _bootEl=document.getElementById('app-content');
+  if(_bootEl) _bootEl.innerHTML='<div style="padding:60px 0;text-align:center;color:var(--muted);">Loading…</div>';
   await loadRefData();                           // cached + fast — needed to render the flow options
-  render();                                      // render-first: show the flow now, don't block on the profile
-  await loadProfileAndIntake();                  // one profile call, in the background of the first paint
+  await loadProfileAndIntake();                  // wait for the real profile before the first paint - avoids the blank-then-jump flash
   if(_hasProfile){
     _completed=true;
     // Only redirect if data actually loaded from sheet (at least one section has data)
@@ -2901,4 +2902,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.86 | Date: 2026-07-17 | LAST CHANGE: "My event profile" label added next to the wizard photo (screen 1 onward, not on the intro screen); each bring-type pick now reveals its own "why it matters" line (Skill/Experience/Thing). (V2.85: required bring-type pick.) -->
+<!-- Version: V2.87 | Date: 2026-07-17 | LAST CHANGE: ?id= boot now shows a "Loading…" spinner and waits for the real profile before first paint, instead of flashing the blank wizard then jumping to the saved profile. (V2.86: My event profile label + bring-type reveal lines.) -->
