@@ -1,4 +1,4 @@
-<!-- Version: V2.80 | Date: 2026-07-16 | LAST CHANGE: Nav labels - "Edit my event profile" -> "Edit event profile"; the myevents nav link is now "Manage my experience" (attendee default) instead of "Manage event" (hosts see "Manage event" on the myevents page itself). (V2.79: Bookmark-to-meet hidden on own profile.) -->
+<!-- Version: V2.81 | Date: 2026-07-17 | LAST CHANGE: New-registrant intro screen reworked - "You're in!" + multi-select "What will you bring?" (Skill/Experience/Thing) replaces the old single paragraph; saved as bringType on the profile. (V2.80: nav label changes.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -338,6 +338,7 @@ var _domains     = [];
 var _needsSkill  = [];
 var _needsRes    = [];
 var _methods     = [];
+var _bringType   = [];
 var _expression  = '';
 var _screen2step = 'lang';
 var _customCareParent = '';
@@ -473,6 +474,7 @@ async function loadProfileAndIntake(){
       _postal=d.postal||'';
       _retired=String(d.retired||'').trim().toLowerCase()==='true';
       _methods=(d.methods||'').split('|').filter(Boolean);
+      _bringType=(d.bringType||'').split('|').filter(Boolean);
       _expression=d.expression||'';
       _expressionItems=_expression?_expression.split('|').filter(Boolean):[];
       _languages=d.languages?d.languages.split('|').filter(Boolean):[];
@@ -510,6 +512,7 @@ async function loadIntake(){
       _postal=d.postal||'';
       _retired=String(d.retired||'').trim().toLowerCase()==='true';
       _methods=(d.methods||'').split('|').filter(Boolean);
+      _bringType=(d.bringType||'').split('|').filter(Boolean);
       _expression=d.expression||'';
       _expressionItems=_expression?_expression.split('|').filter(Boolean):[];
       _languages=d.languages?d.languages.split('|').filter(Boolean):[];
@@ -570,6 +573,7 @@ function autoSave(){
     _needsRes.map(function(s){return s.item+(s.local?':local':'')+':'+(s.ntype||'thing')+(s.category?':'+s.category:'')+(s.detail?'~'+encodeURIComponent(s.detail):'');})
   ).join('|');
   var mStr=_methods.join('|');
+  var btStr=_bringType.join('|');
   fetch(GS_URL+'?action=saveIntake'
     +'&appearId='+encodeURIComponent(_appearId)
     +'&languages='+encodeURIComponent(_languages.join('|'))
@@ -582,6 +586,7 @@ function autoSave(){
     +'&methods='+encodeURIComponent(mStr)
     +'&expression='+encodeURIComponent(_expression)
     +'&retired='+encodeURIComponent(_retired?'true':'')
+    +'&bringType='+encodeURIComponent(btStr)
   ).catch(function(){});
   _hasProfile=true;
 }
@@ -1654,12 +1659,32 @@ function render(){
 }
 
 // Intro/welcome shown before section 1 — only when the hub CTA passes &intro=1 (new registrants).
+var _bringOpts=[
+  {key:'skill',emoji:'👤',label:'Skill',ex:'demo, Q&A, workshop'},
+  {key:'experience',emoji:'🎉',label:'Experience',ex:'band, yoga session, pizza-making'},
+  {key:'thing',emoji:'📦',label:'Thing',ex:'food, coffee, wine, flowers'}
+];
 function renderScreenIntro(el){
+  var rows=_bringOpts.map(function(o){
+    var sel=_bringType.indexOf(o.key)>-1;
+    return '<div class="method-item'+(sel?' selected':'')+'" onclick="toggleBringType(\''+o.key+'\')">'
+      +'<div class="method-check'+(sel?' checked':'')+'">'+(sel?'✓':'')+'</div>'
+      +'<div class="method-text"><strong>'+o.emoji+' '+o.label+'</strong> - '+esc(o.ex)+'</div>'
+      +'</div>';
+  }).join('');
   el.innerHTML='<div style="padding:8px 2px 6px;">'
-    +'<p style="font-size:15.5px;line-height:1.55;color:var(--text);margin-bottom:22px;">We\'d like to know who you are and what you\'d like to bring to this event! When you share your interests, needs, and skills, we can match you to other compatible event attendees during AND after the event ends. This way, the event lives on...</p>'
+    +'<p style="font-size:17px;font-weight:700;color:var(--text);margin-bottom:14px;">You\'re in! 🎉</p>'
+    +'<p style="font-size:15.5px;line-height:1.55;color:var(--text);margin-bottom:14px;">What will you bring to this event?</p>'
+    +rows
+    +'<p style="font-size:14px;line-height:1.55;color:var(--soft);margin:16px 0 22px;">We\'ll show what you bring to other attendees and connect you with the people who want it - during the event, and after it ends.</p>'
     +'<button class="btn-next" onclick="_screen=1;render();">Create my event profile</button>'
     +'</div>';
 }
+window.toggleBringType=function(key){
+  var i=_bringType.indexOf(key);
+  if(i>-1) _bringType.splice(i,1); else _bringType.push(key);
+  render();
+};
 
 function progressHTML(n){
   var s=''; for(var i=1;i<=4;i++) s+='<div class="progress-step'+(i<=n?' done':'')+'"></div>';
@@ -2857,4 +2882,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.80 | Date: 2026-07-16 | LAST CHANGE: Nav labels - "Edit my event profile" -> "Edit event profile"; the myevents nav link is now "Manage my experience" (attendee default) instead of "Manage event" (hosts see "Manage event" on the myevents page itself). (V2.79: Bookmark-to-meet hidden on own profile.) -->
+<!-- Version: V2.81 | Date: 2026-07-17 | LAST CHANGE: New-registrant intro screen reworked - "You're in!" + multi-select "What will you bring?" (Skill/Experience/Thing) replaces the old single paragraph; saved as bringType on the profile. (V2.80: nav label changes.) -->
