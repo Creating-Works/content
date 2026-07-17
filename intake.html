@@ -1,4 +1,4 @@
-<!-- Version: V2.93 | Date: 2026-07-17 | LAST CHANGE: Seeking screen - added items now show their type (Person/Space/Thing) on both the item card and the "My needs so far" summary pills; Local auto-checks when a postal code is on file; new "+ Add another" nav button resets to the category picker. Expression screen: "Add as many as you like." shown once the first item is added. (V2.92: sign-up carry-forward.) -->
+<!-- Version: V2.94 | Date: 2026-07-17 | LAST CHANGE: Fixed wizard order - "What expresses you the most?" (screen 1b) now runs right after joy (section 1), before skills, matching its name; after needs (section 4) the wizard goes straight to sign-up/share instead of looping back through expression. Back button updated to match. (V2.93: seeking screen type labels.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2883,14 +2883,14 @@ window.goNext = function(){
   }
   autoSave();
   if(_screen===4){
-    // After needs, move to expression screen
-    _screen='1b'; render(); return;
-  }
-  if(_screen==='1b'){
-    // After expression: event visitors get the potluck screen, others go to share
+    // After needs: event visitors get the potluck screen, others go to share
     _completed=true; _hasProfile=true;
     if(_eventId){ _screen='potluck'; render(); return; }
     _screen='share'; render(); return;
+  }
+  if(_screen==='1b'){
+    // Expression sits right after joy (section 1) - continue on to skills (section 2)
+    _screen=2; render(); return;
   }
   if(_screen==='potluck'){
     _screen='share'; render(); return;
@@ -2907,7 +2907,7 @@ window.goNext = function(){
   if(_screen===3&&!_editMode&&_valTab!=='domains'){
     _valTab='domains'; renderScreen3(null); return;
   }
-  if(_screen===1){ _screen++; render(); return; }
+  if(_screen===1){ _screen='1b'; render(); return; }
   _screen++; render();
 };
 
@@ -2922,13 +2922,13 @@ window.goBack = function(){
     _screen2step='lang'; render(); return;
   }
   if(_screen===2&&!_editMode&&_screen2step==='lang'){
-    _screen=1; render(); return;
+    _screen='1b'; render(); return;
   }
-  if(_screen==='1b'){ _screen=4; render(); return; }
-  if(_screen==='potluck'){ _screen='1b'; render(); return; }
-  if(_screen==='share'){ 
+  if(_screen==='1b'){ _screen=1; render(); return; }
+  if(_screen==='potluck'){ _screen=4; render(); return; }
+  if(_screen==='share'){
     if(_eventId){ _screen='potluck'; render(); }
-    else { _screen='1b'; render(); }
+    else { _screen=4; render(); }
     return;
   }
   if(_screen===3&&!_editMode&&_valTab==='domains'){
@@ -2970,4 +2970,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.93 | Date: 2026-07-17 | LAST CHANGE: Seeking screen - added items now show their type (Person/Space/Thing) on both the item card and the "My needs so far" summary pills; Local auto-checks when a postal code is on file; new "+ Add another" nav button resets to the category picker. Expression screen: "Add as many as you like." shown once the first item is added. (V2.92: sign-up carry-forward.) -->
+<!-- Version: V2.94 | Date: 2026-07-17 | LAST CHANGE: Fixed wizard order - "What expresses you the most?" (screen 1b) now runs right after joy (section 1), before skills, matching its name; after needs (section 4) the wizard goes straight to sign-up/share instead of looping back through expression. Back button updated to match. (V2.93: seeking screen type labels.) -->
