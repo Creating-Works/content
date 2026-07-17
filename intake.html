@@ -1,4 +1,4 @@
-<!-- Version: V2.92 | Date: 2026-07-17 | LAST CHANGE: End-of-intake sign-up screen now carries forward the intro's bring-type picks (Skill/Experience/Thing) as "What you said you'd bring" inputs above the host sign-up list; submitting claims the item pre-tagged with that type. (V2.91: Email me host button.) -->
+<!-- Version: V2.93 | Date: 2026-07-17 | LAST CHANGE: Seeking screen - added items now show their type (Person/Space/Thing) on both the item card and the "My needs so far" summary pills; Local auto-checks when a postal code is on file; new "+ Add another" nav button resets to the category picker. Expression screen: "Add as many as you like." shown once the first item is added. (V2.92: sign-up carry-forward.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -802,7 +802,7 @@ window.confirmRecBuddyItem=function(){
   // Category format: Recreation buddy / [recType] / [item]
   var catNoItem='Recreation buddy'+(recType?' / '+recType:'');
   if(_needsSkill.some(function(r){return r.item===item&&r.category===catNoItem;})){toast('Already added');return;}
-  _needsSkill.unshift({item:item,category:catNoItem,local:false,ntype:'skill'});
+  _needsSkill.unshift({item:item,category:catNoItem,local:!!_postal,ntype:'skill'});
   _pendingNeedsItem={item:'',category:''};
   autoSave();
   refreshNeedsVisible();
@@ -817,7 +817,7 @@ window.confirmNeedsItem = function(){
   }
   var item=_pendingNeedsItem.item;
   if(_needsSkill.some(function(r){return r.item===item&&r.category===cat;})){toast('Already added');return;}
-  _needsSkill.unshift({item:item,category:cat,local:false,ntype:'skill'});
+  _needsSkill.unshift({item:item,category:cat,local:!!_postal,ntype:'skill'});
   var tc=document.getElementById('needs-type-chips');if(tc)tc.style.display='';
   _pendingNeedsItem={item:'',category:''};
   autoSave();
@@ -899,11 +899,11 @@ function addItem(screen, item, category){
       pcat4s=category||(_drill['4s']&&_drill['4s'].parentCat)||'';
       if(_needsCat==='skill'&&_personSubType&&pcat4s.indexOf(_personSubType)!==0){pcat4s=_personSubType+(pcat4s?' / '+pcat4s:'');}
     }
-    _needsSkill.unshift({item:item,category:pcat4s,local:false,ntype:'skill'});
+    _needsSkill.unshift({item:item,category:pcat4s,local:!!_postal,ntype:'skill'});
     var tc=document.getElementById('needs-type-chips');if(tc)tc.style.display='';
     setTimeout(function(){if(_needsCat)window.setNeedsCat(_needsCat);},50);
   }
-  else if(s==='4r'){_needsRes.unshift({item:item,category:category||(_drill['4r']&&_drill['4r'].parentCat)||'',local:false,ntype:'resource'});var tc2=document.getElementById('needs-type-chips');if(tc2)tc2.style.display='';setTimeout(function(){if(_needsCat)window.setNeedsCat(_needsCat);},50);}
+  else if(s==='4r'){_needsRes.unshift({item:item,category:category||(_drill['4r']&&_drill['4r'].parentCat)||'',local:!!_postal,ntype:'resource'});var tc2=document.getElementById('needs-type-chips');if(tc2)tc2.style.display='';setTimeout(function(){if(_needsCat)window.setNeedsCat(_needsCat);},50);}
   toast('Added below ↓');
   clearSearch(s);
   updateAddedSection(s);
@@ -1110,7 +1110,7 @@ function buildOneNeedsSection(label, items, s){
         :'<div class="need-item-cat">'+esc(item.category)+'</div>';
     var detailLine=item.detail?'<div class="need-item-detail" style="font-size:11px;color:var(--brand);margin-top:2px;font-style:italic;">Seeking: '+esc(item.detail)+'</div>':'';
     return '<div class="need-item">'
-      +'<div class="need-item-left" style="position:relative;"><div class="need-item-name">'+esc(item.item)+'</div>'+catLabel+detailLine+'</div>'
+      +'<div class="need-item-left" style="position:relative;"><div class="need-item-name">'+esc(item.item)+' <span style="font-weight:400;color:var(--soft);font-size:13px;">'+needTypeLabel(item.ntype)+'</span></div>'+catLabel+detailLine+'</div>'
       +'<div class="need-item-right">'
       +'<button class="practice-item-x" onclick="openNeedEditor(\''+s+'\','+realIdx+')" title="Edit" style="font-size:14px;">✏️</button>'
       +'<label class="local-toggle'+(item.local?' active':'')+'" ><input type="checkbox"'+(item.local?' checked':'')+' onchange="toggleLocal(\''+s+'\','+realIdx+')"> 📍 Local</label>'
@@ -1712,10 +1712,13 @@ function progressHTML(n){
 }
 
 
+function needTypeLabel(ntype){
+  return ntype==='skill'?'Person':ntype==='space'?'Space':'Thing';
+}
 function buildNeedsSummary(){
   var all=[];
-  _needsSkill.forEach(function(r){all.push(r.item+(r.local?' 📍':''));});
-  _needsRes.forEach(function(r){all.push(r.item+(r.local?' 📍':''));});
+  _needsSkill.forEach(function(r){all.push(r.item+' '+needTypeLabel(r.ntype)+(r.local?' 📍':''));});
+  _needsRes.forEach(function(r){all.push(r.item+' '+needTypeLabel(r.ntype)+(r.local?' 📍':''));});
   if(!all.length) return '';
   var tags=all.map(function(t){return '<span class="needs-summary-tag">'+esc(t)+'</span>';}).join('');
   return '<div class="needs-summary" id="needs-summary-block">'
@@ -1738,9 +1741,10 @@ function navHTML(screen){
   }
   var isFirst=(screen===1);
   var back=isFirst?'':'<button class="btn-back" onclick="goBack()">Back</button>';
+  var addAnother=(screen===4)?'<button class="btn-outlined" onclick="addAnotherNeed()">+ Add another</button>':'';
   var next='<button class="btn-next" onclick="goNext()">'+(screen===4?'Done':'Next')+'</button>';
   var summary=screen===4?buildNeedsSummary():'';
-  return summary+'<div class="nav-row">'+back+next+'</div>';
+  return summary+'<div class="nav-row">'+back+addAnother+next+'</div>';
 }
 
 function screenSearchHTML(s, placeholder, hideHelper){
@@ -2003,6 +2007,7 @@ function renderScreen1b(el){
         +'<span style="cursor:pointer;color:var(--muted);font-size:16px;" onclick="window.removeExpressionItem('+i+')">×</span>'
         +'</div>';
     });
+    addedHTML+='<div style="font-size:12px;color:var(--soft);margin-top:6px;">Add as many as you like.</div>';
     addedHTML+='</div>';
   }
   var customHTML='<div id="expression-custom"></div>';
@@ -2702,7 +2707,7 @@ window.setThingSubCat=function(sub){
     +'<div class="ideas-prompt" style="margin-bottom:10px;">'+esc(info.prompt)+'</div>'
     +'<input type="text" id="thing-detail-input" placeholder="Please share some details">'
     +'<label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;color:var(--soft);cursor:pointer;">'
-    +'<input type="checkbox" id="thing-local-check" onchange="if(this.checked)postalNudge(\'thing-local-check\')"> 📍 This is a local request</label>'
+    +'<input type="checkbox" id="thing-local-check"'+(_postal?' checked':'')+' onchange="if(this.checked)postalNudge(\'thing-local-check\')"> 📍 This is a local request</label>'
     +'<button class="btn-next" style="width:100%;margin-top:14px;" onclick="addThingItem()">Add to list</button>'
     +'</div>'
     +'<div id="added-4r">'+buildAddedHTML('4r')+'</div>';
@@ -2771,7 +2776,7 @@ window.setNeedsCat=function(cat){
     inner='<div class="ideas-prompt" style="border:none;">A home, a meeting room, a venue, studio, workshop, or desk.</div>'
       +'<input type="text" id="space-detail-input" placeholder="Please share some details" style="margin-top:8px;" oninput="var b=document.getElementById(\'add-space-btn\');if(b)b.style.display=this.value.trim()?\'\': \'none\';" >'
       +'<label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;color:var(--soft);cursor:pointer;">'
-      +'<input type="checkbox" id="space-local-check" onchange="if(this.checked)postalNudge(\'space-local-check\')"> 📍 This is a local request</label>'
+      +'<input type="checkbox" id="space-local-check"'+(_postal?' checked':'')+' onchange="if(this.checked)postalNudge(\'space-local-check\')"> 📍 This is a local request</label>'
       +'<button class="btn-outlined" id="add-space-btn" style="width:100%;margin-top:14px;display:none;" onclick="addSpaceItem()">Add space to my list</button>';
   }
   var cont=document.getElementById('needs-cat-content'); if(!cont) return;
@@ -2816,6 +2821,11 @@ function renderScreen4(el){
   if(!existing4s){var d=document.createElement('div');d.id='added-4s';d.style.display='none';document.getElementById('app-content').appendChild(d);}
   if(!existing4r){var d2=document.createElement('div');d2.id='added-4r';d2.style.display='none';document.getElementById('app-content').appendChild(d2);}
 }
+window.addAnotherNeed=function(){
+  _needsCat='';
+  _personSubType='';
+  renderScreen4(null);
+};
 // ─── Navigation ───────────────────────────────────────────────────────────────
 window.toggleRetired = function(){
   _retired=!_retired;
@@ -2960,4 +2970,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.92 | Date: 2026-07-17 | LAST CHANGE: End-of-intake sign-up screen now carries forward the intro's bring-type picks (Skill/Experience/Thing) as "What you said you'd bring" inputs above the host sign-up list; submitting claims the item pre-tagged with that type. (V2.91: Email me host button.) -->
+<!-- Version: V2.93 | Date: 2026-07-17 | LAST CHANGE: Seeking screen - added items now show their type (Person/Space/Thing) on both the item card and the "My needs so far" summary pills; Local auto-checks when a postal code is on file; new "+ Add another" nav button resets to the category picker. Expression screen: "Add as many as you like." shown once the first item is added. (V2.92: sign-up carry-forward.) -->
