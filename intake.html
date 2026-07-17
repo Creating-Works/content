@@ -1,4 +1,4 @@
-<!-- Version: V2.87 | Date: 2026-07-17 | LAST CHANGE: ?id= boot now shows a "Loading…" spinner and waits for the real profile before first paint, instead of flashing the blank wizard then jumping to the saved profile. (V2.86: My event profile label + bring-type reveal lines.) -->
+<!-- Version: V2.88 | Date: 2026-07-17 | LAST CHANGE: Boot loading state now uses the same spinning-icon style as index.html/events.html instead of plain "Loading…" text. (V2.87: boot-flash reorder.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2882,7 +2882,7 @@ window.goBack = function(){
   if(!_appearId){ render(); return; }
   if(_introMode) _screen='intro';                // new registrant from the hub CTA -> welcome screen before section 1
   var _bootEl=document.getElementById('app-content');
-  if(_bootEl) _bootEl.innerHTML='<div style="padding:60px 0;text-align:center;color:var(--muted);">Loading…</div>';
+  if(_bootEl) _bootEl.innerHTML='<div style="text-align:center;padding:60px 20px;"><div style="width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--brand);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px;"></div><p style="color:var(--muted);font-size:14px;margin:0;">Loading…</p></div>';
   await loadRefData();                           // cached + fast — needed to render the flow options
   await loadProfileAndIntake();                  // wait for the real profile before the first paint - avoids the blank-then-jump flash
   if(_hasProfile){
@@ -2902,4 +2902,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.87 | Date: 2026-07-17 | LAST CHANGE: ?id= boot now shows a "Loading…" spinner and waits for the real profile before first paint, instead of flashing the blank wizard then jumping to the saved profile. (V2.86: My event profile label + bring-type reveal lines.) -->
+<!-- Version: V2.88 | Date: 2026-07-17 | LAST CHANGE: Boot loading state now uses the same spinning-icon style as index.html/events.html instead of plain "Loading…" text. (V2.87: boot-flash reorder.) -->
