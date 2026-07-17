@@ -1,4 +1,4 @@
-<!-- Version: V2.90 | Date: 2026-07-17 | LAST CHANGE: Sign-in gate copy no longer names Appear Network ("Sign in or up to continue"); seeking chips now show category subtext for every item, not just Person-type (matches the hub chips). (V2.89: boot loading text.) -->
+<!-- Version: V2.91 | Date: 2026-07-17 | LAST CHANGE: Added "Email me" button on a host's profile page (viewer mode) when arriving via an event link and the viewed person is that event's host - confirmed via a getEventById lookup (needs GAS hostMemberCard field). (V2.90: sign-in copy + seeking chip category.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1863,7 +1863,8 @@ function renderProfile(el, viewerMode){
     _photoHTML='<div onclick="openPostalModal()" style="width:44px;height:44px;border-radius:50%;border:1.5px solid var(--sel-border);background:var(--input-bg);display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;flex-shrink:0;">'+_phInner+'</div>';
     var _tra=document.getElementById('top-right-area'); if(_tra) _tra.innerHTML='';
   }
-  el.innerHTML='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;"><h2 style="margin:0;">'+(viewerMode?'This is me 🌱':'Edit event profile')+'</h2>'+_photoHTML+'</div>'
+  var emailBtn=(viewerMode&&isViewingHost()&&_hostEmail)?'<button onclick="emailHostCopy(this)" style="background:none;border:1.5px solid var(--brand);color:var(--brand);border-radius:16px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;">✉️ Email me</button>':'';
+  el.innerHTML='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;"><h2 style="margin:0;">'+(viewerMode?'This is me 🌱':'Edit event profile')+'</h2>'+emailBtn+_photoHTML+'</div>'
     +section("What I'm seeking",allNeeds,false,'',4)
     +section('What I enjoy',_interests,true,'level',1,false,_expression?'<div style="margin-top:6px;display:flex;justify-content:flex-end;"><span style="font-size:13px;color:var(--soft);"><span style="font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:0.08em;color:var(--muted);">This is so me:</span> <span style="font-size:10px;font-weight:700;">'+esc(_expressionItems.join(', '))+'</span></span></div>':'')
     +'<div class="profile-section" style="border-bottom:none;padding-bottom:4px;">'
@@ -2064,6 +2065,29 @@ function fetchEventTitle(cb){
 // EVENT CONTRIBUTION / POTLUCK
 // ═══════════════════════════════════════════════════════════════════════════
 var _hostMemberCard='';        // set from getEventById
+var _hostEmail='';             // set from getEventById - used by the viewer-mode "Email me" button
+function loadHostInfoForViewer(){
+  if(!_viewerMode||!_eventId) return;
+  fetch(GS_URL+'?action=getEventById&id='+encodeURIComponent(_eventId))
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d&&d.found&&d.event){
+        _hostMemberCard=d.event.hostMemberCard||'';
+        _hostEmail=d.event.hostEmail||'';
+        if(isViewingHost()) render();
+      }
+    }).catch(function(){});
+}
+function isViewingHost(){
+  if(!_showId||!_hostMemberCard) return false;
+  return String(_showId).split('.').join('').toLowerCase()===String(_hostMemberCard).split('.').join('').toLowerCase();
+}
+window.emailHostCopy=function(btn){
+  var em=_hostEmail; if(!em) return;
+  function done(){ if(btn){ btn.textContent='Copied!'; setTimeout(function(){ btn.textContent='✉️ Email me'; },1500); } }
+  try{ navigator.clipboard.writeText(em).then(done).catch(function(){ window.location.href='mailto:'+em; }); }
+  catch(e){ window.location.href='mailto:'+em; }
+};
 var _signupList=[];            // host-built list: [{item,category,potluckType,timeSpec,maxClaims}]
 var _potluckClaims=[];         // claims from potluck-claims: [{item,appearId,name,photo,elaboration,...}]
 var _potluckLoaded=false;
@@ -2875,6 +2899,7 @@ window.goBack = function(){
     await loadProfileAndIntake();                // ONE combined call (getIntake + lookupProfile)
     render();                                    // paint the profile immediately
     loadRefData().then(function(){ render(); }); // lazy: category labels, then repaint
+    loadHostInfoForViewer();                     // lazy: only fires when an eventId is attached; repaints if this person is that event's host
     return;
   }
   if(!_appearId){ render(); return; }
@@ -2900,4 +2925,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.90 | Date: 2026-07-17 | LAST CHANGE: Sign-in gate copy no longer names Appear Network ("Sign in or up to continue"); seeking chips now show category subtext for every item, not just Person-type (matches the hub chips). (V2.89: boot loading text.) -->
+<!-- Version: V2.91 | Date: 2026-07-17 | LAST CHANGE: Added "Email me" button on a host's profile page (viewer mode) when arriving via an event link and the viewed person is that event's host - confirmed via a getEventById lookup (needs GAS hostMemberCard field). (V2.90: sign-in copy + seeking chip category.) -->
