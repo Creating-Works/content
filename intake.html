@@ -1,4 +1,4 @@
-<!-- Version: V2.81 | Date: 2026-07-17 | LAST CHANGE: New-registrant intro screen reworked - "You're in!" + multi-select "What will you bring?" (Skill/Experience/Thing) replaces the old single paragraph; saved as bringType on the profile. (V2.80: nav label changes.) -->
+<!-- Version: V2.82 | Date: 2026-07-17 | LAST CHANGE: Intro screen copy update + new "I want to see the sign up list!" checkbox (saved as wantsSignupList on the profile). (V2.81: bringType intro screen.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -339,6 +339,7 @@ var _needsSkill  = [];
 var _needsRes    = [];
 var _methods     = [];
 var _bringType   = [];
+var _wantsSignupList = false;
 var _expression  = '';
 var _screen2step = 'lang';
 var _customCareParent = '';
@@ -475,6 +476,7 @@ async function loadProfileAndIntake(){
       _retired=String(d.retired||'').trim().toLowerCase()==='true';
       _methods=(d.methods||'').split('|').filter(Boolean);
       _bringType=(d.bringType||'').split('|').filter(Boolean);
+      _wantsSignupList=String(d.wantsSignupList||'').trim().toLowerCase()==='true';
       _expression=d.expression||'';
       _expressionItems=_expression?_expression.split('|').filter(Boolean):[];
       _languages=d.languages?d.languages.split('|').filter(Boolean):[];
@@ -513,6 +515,7 @@ async function loadIntake(){
       _retired=String(d.retired||'').trim().toLowerCase()==='true';
       _methods=(d.methods||'').split('|').filter(Boolean);
       _bringType=(d.bringType||'').split('|').filter(Boolean);
+      _wantsSignupList=String(d.wantsSignupList||'').trim().toLowerCase()==='true';
       _expression=d.expression||'';
       _expressionItems=_expression?_expression.split('|').filter(Boolean):[];
       _languages=d.languages?d.languages.split('|').filter(Boolean):[];
@@ -587,6 +590,7 @@ function autoSave(){
     +'&expression='+encodeURIComponent(_expression)
     +'&retired='+encodeURIComponent(_retired?'true':'')
     +'&bringType='+encodeURIComponent(btStr)
+    +'&wantsSignupList='+encodeURIComponent(_wantsSignupList?'true':'')
   ).catch(function(){});
   _hasProfile=true;
 }
@@ -1660,29 +1664,38 @@ function render(){
 
 // Intro/welcome shown before section 1 — only when the hub CTA passes &intro=1 (new registrants).
 var _bringOpts=[
-  {key:'skill',emoji:'👤',label:'Skill',ex:'demo, Q&A, workshop'},
-  {key:'experience',emoji:'🎉',label:'Experience',ex:'band, yoga session, pizza-making'},
-  {key:'thing',emoji:'📦',label:'Thing',ex:'food, coffee, wine, flowers'}
+  {key:'skill',emoji:'👤',label:'Skill',ex:'Q&A time, demo, workshop'},
+  {key:'experience',emoji:'🎉',label:'Experience',ex:'band, yoga session, pizza-making class, etc'},
+  {key:'thing',emoji:'📦',label:'Thing',ex:'food, coffee, wine, flowers, etc'}
 ];
 function renderScreenIntro(el){
   var rows=_bringOpts.map(function(o){
     var sel=_bringType.indexOf(o.key)>-1;
     return '<div class="method-item'+(sel?' selected':'')+'" onclick="toggleBringType(\''+o.key+'\')">'
       +'<div class="method-check'+(sel?' checked':'')+'">'+(sel?'✓':'')+'</div>'
-      +'<div class="method-text"><strong>'+o.emoji+' '+o.label+'</strong> - '+esc(o.ex)+'</div>'
+      +'<div class="method-text"><strong>'+o.emoji+' '+o.label+'</strong> (Examples: '+esc(o.ex)+')</div>'
       +'</div>';
   }).join('');
+  var signupRow='<div class="method-item'+(_wantsSignupList?' selected':'')+'" onclick="toggleWantsSignupList()">'
+    +'<div class="method-check'+(_wantsSignupList?' checked':'')+'">'+(_wantsSignupList?'✓':'')+'</div>'
+    +'<div class="method-text"><strong>✅ I want to see the sign up list!</strong></div>'
+    +'</div>'
+    +(_wantsSignupList?'<div style="font-size:13px;color:var(--brand);margin:4px 0 4px 34px;">🎯 We\'ll share this sign up list after you create your event profile</div>':'');
   el.innerHTML='<div style="padding:8px 2px 6px;">'
     +'<p style="font-size:17px;font-weight:700;color:var(--text);margin-bottom:14px;">You\'re in! 🎉</p>'
-    +'<p style="font-size:15.5px;line-height:1.55;color:var(--text);margin-bottom:14px;">What will you bring to this event?</p>'
+    +'<p style="font-size:15.5px;line-height:1.55;color:var(--text);margin-bottom:14px;">What will you bring to this event? This gets you a ticket in! Check now what you\'re thinking and we\'ll ask you to share more later...</p>'
     +rows
-    +'<p style="font-size:14px;line-height:1.55;color:var(--soft);margin:16px 0 22px;">We\'ll show what you bring to other attendees and connect you with the people who want it - during the event, and after it ends.</p>'
-    +'<button class="btn-next" onclick="_screen=1;render();">Create my event profile</button>'
+    +signupRow
+    +'<button class="btn-next" style="margin-top:22px;" onclick="_screen=1;render();">Create my event profile</button>'
     +'</div>';
 }
 window.toggleBringType=function(key){
   var i=_bringType.indexOf(key);
   if(i>-1) _bringType.splice(i,1); else _bringType.push(key);
+  render();
+};
+window.toggleWantsSignupList=function(){
+  _wantsSignupList=!_wantsSignupList;
   render();
 };
 
@@ -2882,4 +2895,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.81 | Date: 2026-07-17 | LAST CHANGE: New-registrant intro screen reworked - "You're in!" + multi-select "What will you bring?" (Skill/Experience/Thing) replaces the old single paragraph; saved as bringType on the profile. (V2.80: nav label changes.) -->
+<!-- Version: V2.82 | Date: 2026-07-17 | LAST CHANGE: Intro screen copy update + new "I want to see the sign up list!" checkbox (saved as wantsSignupList on the profile). (V2.81: bringType intro screen.) -->
