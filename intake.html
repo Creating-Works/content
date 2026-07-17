@@ -1,4 +1,4 @@
-<!-- Version: V2.94 | Date: 2026-07-17 | LAST CHANGE: Fixed wizard order - "What expresses you the most?" (screen 1b) now runs right after joy (section 1), before skills, matching its name; after needs (section 4) the wizard goes straight to sign-up/share instead of looping back through expression. Back button updated to match. (V2.93: seeking screen type labels.) -->
+<!-- Version: V2.95 | Date: 2026-07-17 | LAST CHANGE: Free-text seeking entries (Space/Thing custom text) now capitalize the first letter automatically (e.g. "venue" -> "Venue"). (V2.94: wizard order fix.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -884,6 +884,7 @@ function addItem(screen, item, category){
     return;
   }
   var arr=getArr(s);
+  if(s==='4s'||s==='4r') item=capFirst(item);
   if(arr.some(function(r){return r.item===item;})){toast('Already added');return;}
   if(s==='1') _interests.unshift({item:item,category:category||'',level:''});
   else if(s==='2') _skills.unshift({item:item,category:category||'',level:''});
@@ -1427,6 +1428,10 @@ window.toggleMethodInline = function(i){
 
 
 
+function capFirst(str){
+  str=String(str||'');
+  return str?str.charAt(0).toUpperCase()+str.slice(1):str;
+}
 function toTitleCase(str){
   return str.replace(/[^\s]+/g,function(w){
     if(w.length<=5&&w===w.toUpperCase()&&/^[A-Z]+$/.test(w)) return w;
@@ -2714,7 +2719,7 @@ window.setThingSubCat=function(sub){
 };
 window.addThingItem=function(){
   var inp=document.getElementById('thing-detail-input');
-  var item=inp?inp.value.trim():'';
+  var item=inp?capFirst(inp.value.trim()):'';
   if(!item){toast('Please share some details first.');return;}
   var local=document.getElementById('thing-local-check');
   var isLocal=local?local.checked:false;
@@ -2785,7 +2790,7 @@ window.setNeedsCat=function(cat){
 };
 window.addSpaceItem=function(){
   var inp=document.getElementById('space-detail-input');
-  var item=inp?inp.value.trim():'';
+  var item=inp?capFirst(inp.value.trim()):'';
   if(!item){toast('Please share some details first.');return;}
   var local=document.getElementById('space-local-check');
   var isLocal=local?local.checked:false;
@@ -2970,4 +2975,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.94 | Date: 2026-07-17 | LAST CHANGE: Fixed wizard order - "What expresses you the most?" (screen 1b) now runs right after joy (section 1), before skills, matching its name; after needs (section 4) the wizard goes straight to sign-up/share instead of looping back through expression. Back button updated to match. (V2.93: seeking screen type labels.) -->
+<!-- Version: V2.95 | Date: 2026-07-17 | LAST CHANGE: Free-text seeking entries (Space/Thing custom text) now capitalize the first letter automatically (e.g. "venue" -> "Venue"). (V2.94: wizard order fix.) -->
