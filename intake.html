@@ -1,4 +1,4 @@
-<!-- Version: V2.95 | Date: 2026-07-17 | LAST CHANGE: Free-text seeking entries (Space/Thing custom text) now capitalize the first letter automatically (e.g. "venue" -> "Venue"). (V2.94: wizard order fix.) -->
+<!-- Version: V2.96 | Date: 2026-07-17 | LAST CHANGE: Sign-up screen redesigned into 3 wide white columns (Skill/Experience/Thing, matching the hub's box style) - each column has its own add-input plus the host's claimable items of that type, sorted in; collapses to 1 column on mobile. Replaces the old flat "Sign up list" + "I have another idea" + separate contributions sections. Header renamed "What you said you'd like to bring." (V2.95: capitalize seeking entries.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,6 +14,9 @@
     @keyframes spin{to{transform:rotate(360deg);}}
     .card{background:var(--card);max-width:660px;margin:0 auto;border-radius:16px;padding:52px;box-shadow:0 24px 64px rgba(0,0,0,0.25),0 4px 16px rgba(0,0,0,0.12);position:relative;}
     @media(max-width:520px){.card{padding:32px 20px;}}
+    .bring-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+    @media(max-width:640px){.bring-grid{grid-template-columns:1fr;}}
+    .bring-col{background:#fff;border-radius:14px;border:1px solid #e8eaf0;padding:16px;}
     /* Top right */
     .top-right-area{position:absolute;top:20px;right:20px;display:flex;align-items:center;gap:6px;z-index:10;}
     .ikigai-btn{display:flex;align-items:center;gap:8px;background:var(--sel-bg);border:1.5px solid var(--sel-border);border-radius:24px;padding:6px 14px 6px 6px;font-size:13px;font-weight:600;color:var(--brand);cursor:pointer;font-family:'DM Sans',sans-serif;transition:background 0.15s;}
@@ -2130,35 +2133,81 @@ function renderScreenPotluck(el){
   var html='<div style="padding:20px 0;">'
     +'<h2 style="margin-bottom:6px;">Event contribution 🎁</h2>'
     +'<p style="font-size:14px;color:var(--soft);margin-bottom:20px;">This event is all about contribution. Think of it as a potluck of skills and offerings. What are you going to bring to the event that you want to be known for in our community?</p>'
-    +renderPotluckAttendeeMode()
+    +'<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--soft);margin-bottom:10px;">What you said you\'d like to bring</div>'
+    +'<div class="bring-grid" id="bring-grid"></div>'
     +'</div>'
     +(_editMode?'<div class="nav-row"><button class="btn-next" onclick="doneEdit()">Done</button></div>':'<div class="nav-row"><button class="btn-back" onclick="goBack()">← Back</button></div>');
   cont.innerHTML=html;
-  renderSignupModalBody();   // fill the inline #signup-inline list
+  renderPotluckColumns();
 }
 
-// ─── Attendee mode: view list + claim, or add own ───────────────────────────
+// ─── Attendee mode: 3 columns (Skill / Experience / Thing), each with an add-input + that type's claimable items ──
 var _bringTypeMeta={skill:{emoji:'👤',label:'Skill'},experience:{emoji:'🎉',label:'Experience'},thing:{emoji:'📦',label:'Thing'}};
-function buildBringTypeCarryForwardHTML(){
-  if(!_bringType||!_bringType.length) return '';
-  var h='<div style="margin-bottom:18px;">'
-    +'<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--soft);margin-bottom:10px;">What you said you\'d bring</div>';
-  _bringType.forEach(function(key){
-    var meta=_bringTypeMeta[key]||{emoji:'',label:key};
-    h+='<div style="margin-bottom:10px;">'
-      +'<div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;">'+meta.emoji+' '+esc(meta.label)+'</div>'
-      +'<div style="display:flex;gap:8px;">'
-      +'<input type="text" id="bt-input-'+key+'" placeholder="What '+esc(meta.label.toLowerCase())+' will you bring?" style="flex:1;min-width:0;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;">'
-      +'<button onclick="submitBringTypeItem(\''+key+'\')" style="background:var(--brand);color:white;border:none;padding:10px 16px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap;">Add</button>'
+function bringTypeKey(potluckType){
+  var s=String(potluckType||'').trim().toLowerCase();
+  if(s==='skill') return 'skill';
+  if(s==='experience') return 'experience';
+  return 'thing';   // Thing, or anything unspecified/legacy, buckets into Thing
+}
+function renderSignupItemHTML(it,i){
+  var claims=_potluckClaims.filter(function(c){return c.item===it.item;});
+  var isFull=it.maxClaims&&claims.length>=parseInt(it.maxClaims);
+  var iClaimed=claims.some(function(c){return String(c.appearId).split('.').join('').toLowerCase()===String(_appearId).split('.').join('').toLowerCase();});
+  var h='<div style="border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">'
+    +'<div><div style="font-size:14px;font-weight:600;">'+esc(it.item)+'</div>'
+    +(it.category?'<div style="font-size:11px;color:var(--soft);margin-top:1px;">'+esc(it.category)+(it.timeSpec?' · '+esc(it.timeSpec):'')+'</div>':'')+'</div>';
+  if(iClaimed){
+    h+='<span style="font-size:12px;color:#1a7f4b;font-weight:600;white-space:nowrap;">✓ You\'re in</span>';
+  } else if(isFull){
+    h+='<span style="font-size:12px;color:var(--muted);white-space:nowrap;">Full</span>';
+  } else if(_claimingIdx===i){
+    h+='';
+  } else {
+    h+='<button onclick="startClaim('+i+')" style="background:var(--brand);color:white;border:none;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap;">I\'ll bring this! 🎁</button>';
+  }
+  h+='</div>';
+  if(_claimingIdx===i){
+    h+='<div style="margin-top:10px;">'
+      +'<div style="font-size:12px;color:var(--soft);margin-bottom:6px;">Please elaborate on what this is:</div>'
+      +'<textarea id="claim-elaborate-input" placeholder="Share some details…" style="width:100%;padding:9px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;min-height:56px;resize:vertical;"></textarea>'
+      +'<div style="display:flex;gap:8px;margin-top:8px;">'
+      +'<button onclick="cancelClaim()" style="flex:1;background:white;color:var(--brand);border:1.5px solid var(--border);padding:8px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;">Cancel</button>'
+      +'<button onclick="submitClaim('+i+')" style="flex:1;background:var(--brand);color:white;border:none;padding:8px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;">I\'ll bring this! 🎁</button>'
       +'</div></div>';
-  });
+  }
+  if(claims.length){
+    h+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">';
+    claims.forEach(function(c){
+      var ph=c.photo?'<img src="'+esc(c.photo)+'" style="width:22px;height:22px;border-radius:50%;object-fit:cover;" onerror="this.style.display=\'none\'">':'<div style="width:22px;height:22px;border-radius:50%;background:var(--brand);color:white;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;">'+esc((c.name||c.appearId||'?').charAt(0).toUpperCase())+'</div>';
+      h+='<div style="display:inline-flex;align-items:center;gap:4px;background:var(--input-bg);border-radius:20px;padding:2px 8px 2px 2px;" title="'+esc(c.elaboration||'')+'">'+ph+'<span style="font-size:11px;color:var(--soft);">'+esc(c.name||c.appearId)+'</span></div>';
+    });
+    h+='</div>';
+  }
   h+='</div>';
   return h;
+}
+function renderPotluckColumns(){
+  var el=document.getElementById('bring-grid'); if(!el) return;
+  var byType={skill:[],experience:[],thing:[]};
+  _signupList.forEach(function(it,i){ byType[bringTypeKey(it.potluckType)].push(i); });
+  el.innerHTML=['skill','experience','thing'].map(function(key){
+    var meta=_bringTypeMeta[key];
+    var inputRow='<div style="display:flex;gap:8px;margin-bottom:14px;">'
+      +'<input type="text" id="bt-input-'+key+'" placeholder="What '+esc(meta.label.toLowerCase())+' will you bring?" style="flex:1;min-width:0;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;">'
+      +'<button onclick="submitBringTypeItem(\''+key+'\')" style="background:var(--brand);color:white;border:none;padding:10px 16px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap;">Add</button>'
+      +'</div>';
+    var idxList=byType[key];
+    var itemsHTML=idxList.length
+      ? idxList.map(function(i){ return renderSignupItemHTML(_signupList[i],i); }).join('')
+      : '<div style="color:var(--muted);font-size:13px;font-style:italic;">Nothing here yet.</div>';
+    return '<div class="bring-col"><div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:12px;">'+meta.emoji+' '+esc(meta.label)+'</div>'+inputRow+itemsHTML+'</div>';
+  }).join('');
 }
 window.submitBringTypeItem=function(key){
   var inp=document.getElementById('bt-input-'+key);
   if(!inp||!inp.value.trim()){ toast('Please enter what you\'ll bring'); return; }
-  var item=inp.value.trim();
+  var item=capFirst(inp.value.trim());
   var potluckType=(_bringTypeMeta[key]||{}).label||key;
   var exists=_signupList.some(function(it){return it.item===item;});
   if(!exists){
@@ -2173,13 +2222,7 @@ window.submitBringTypeItem=function(key){
   });
 };
 function renderPotluckAttendeeMode(){
-  var h='';
-  h+=buildBringTypeCarryForwardHTML();
-  h+='<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--soft);margin-bottom:10px;">Sign up list 🎁</div>';
-  h+='<div id="signup-inline"></div>';   // host's items rendered inline (no modal)
-  h+='<div id="another-idea-wrap" style="margin-top:8px;"><button onclick="showAnotherIdea()" style="width:100%;background:#fff;color:var(--brand);border:1.5px solid var(--brand);padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;">+ I have another idea</button></div>';
-  h+=buildMyPotluckContributionsHTML();
-  return h;
+  return '';   // superseded by renderPotluckColumns() - kept as a no-op so any stray caller doesn't error
 }
 // "I have another idea" -> add your own offering; it joins the shared list (savePotluckList) and you claim it (plQuickAdd).
 window.showAnotherIdea=function(){
@@ -2377,11 +2420,13 @@ function renderSignupModalBody(){
 }
 window.startClaim=function(i){
   _claimingIdx=i;
+  renderPotluckColumns();
   renderSignupModalBody();
   var f=document.getElementById('claim-elaborate-input'); if(f) f.focus();
 };
 window.cancelClaim=function(){
   _claimingIdx=-1;
+  renderPotluckColumns();
   renderSignupModalBody();
 };
 window.submitClaim=function(i){
@@ -2975,4 +3020,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.95 | Date: 2026-07-17 | LAST CHANGE: Free-text seeking entries (Space/Thing custom text) now capitalize the first letter automatically (e.g. "venue" -> "Venue"). (V2.94: wizard order fix.) -->
+<!-- Version: V2.96 | Date: 2026-07-17 | LAST CHANGE: Sign-up screen redesigned into 3 wide white columns (Skill/Experience/Thing, matching the hub's box style) - each column has its own add-input plus the host's claimable items of that type, sorted in; collapses to 1 column on mobile. Replaces the old flat "Sign up list" + "I have another idea" + separate contributions sections. Header renamed "What you said you'd like to bring." (V2.95: capitalize seeking entries.) -->
