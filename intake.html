@@ -1,4 +1,4 @@
-<!-- Version: V2.78 | Date: 2026-07-16 | LAST CHANGE: Profile nav now shows All events + Event hub for ANY viewer (not just the owner) - so a bare ?show= link shows nav back; Edit / Event profile / Manage stay owner-only. Event hub uses the profile's own eventId when the URL has none. (V2.77: seeking popover close/click-outside.) -->
+<!-- Version: V2.79 | Date: 2026-07-16 | LAST CHANGE: "Bookmark to meet" no longer shows on your OWN profile when viewed via ?show=X&me=X - the owner check now honors the &me= param (was localStorage-only). (V2.78: profile nav for any viewer.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1738,7 +1738,7 @@ function _wtmDecorate(){
   var el=document.getElementById('app-content'); if(!el) return;
   if(!_viewerMode){ el.insertAdjacentHTML('beforeend', _wtmListHTML()); return; }   // edit view (?id=) = you -> show your list
   if(!_showId) return;
-  var own=false; try{ var _s=String(localStorage.getItem('appear-id')||'').replace(/\./g,'').toLowerCase(); var _i=_wtmNorm(_showId); own=!!(_i&&_s===_i); }catch(e){}
+  var own=false; try{ var _s=String(localStorage.getItem('appear-id')||'').replace(/\./g,'').toLowerCase(); var _me=String(new URLSearchParams(window.location.search).get('me')||'').replace(/\./g,'').toLowerCase(); var _i=_wtmNorm(_showId); own=!!(_i&&((_s&&_s===_i)||(_me&&_me===_i))); }catch(e){}
   if(own){ el.insertAdjacentHTML('beforeend', _wtmListHTML()); return; }
   var has=_wtmHas(_showId);
   var _bs='font-size:14px;font-weight:600;padding:9px 18px;border-radius:20px;cursor:pointer;font-family:inherit;border:1.5px solid #185FA5;background:#fff;color:#185FA5;';
@@ -2857,4 +2857,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.78 | Date: 2026-07-16 | LAST CHANGE: Profile nav now shows All events + Event hub for ANY viewer (not just the owner) - so a bare ?show= link shows nav back; Edit / Event profile / Manage stay owner-only. Event hub uses the profile's own eventId when the URL has none. (V2.77: seeking popover close/click-outside.) -->
+<!-- Version: V2.79 | Date: 2026-07-16 | LAST CHANGE: "Bookmark to meet" no longer shows on your OWN profile when viewed via ?show=X&me=X - the owner check now honors the &me= param (was localStorage-only). (V2.78: profile nav for any viewer.) -->
