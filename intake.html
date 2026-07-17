@@ -1,4 +1,4 @@
-<!-- Version: V2.96 | Date: 2026-07-17 | LAST CHANGE: Sign-up screen redesigned into 3 wide white columns (Skill/Experience/Thing, matching the hub's box style) - each column has its own add-input plus the host's claimable items of that type, sorted in; collapses to 1 column on mobile. Replaces the old flat "Sign up list" + "I have another idea" + separate contributions sections. Header renamed "What you said you'd like to bring." (V2.95: capitalize seeking entries.) -->
+<!-- Version: V2.97 | Date: 2026-07-17 | LAST CHANGE: Added a direct-link param (&screen=potluck) that jumps straight to the "Event contribution" sign-up screen for an existing profile, skipping the normal section-completeness checks. (V2.96: sign-up 3-column redesign.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -296,12 +296,14 @@ var _introMode  = false;
 var _eventId    = '';
 var _viewerPhoto = '';
 var _viewerName  = '';
+var _directScreen = '';
 
 (function(){
   var params=new URLSearchParams(window.location.search);
   _showId=params.get('show')||null;
   _eventId=params.get('eventId')||'';
   _introMode=(params.get('intro')==='1');
+  _directScreen=params.get('screen')||'';
   if(_showId){_viewerMode=true;return;}
   var urlId=params.get('id')||params.get('memberCard');
   if(urlId){_appearId=urlId;try{localStorage.setItem('appear-id',_appearId);}catch(e){}}
@@ -3005,6 +3007,7 @@ window.goBack = function(){
   await loadProfileAndIntake();                  // wait for the real profile before the first paint - avoids the blank-then-jump flash
   if(_hasProfile){
     _completed=true;
+    if(_directScreen==='potluck'){ _screen='potluck'; render(); return; }   // direct link from the hub's "Sign up list" pill
     // Only redirect if data actually loaded from sheet (at least one section has data)
     // Prevents redirect loop when GAS fetch fails or returns empty
     var _dataLoaded=(_interests.length||_skills.length||_values.length||_methods.length||_languages.length);
@@ -3020,4 +3023,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.96 | Date: 2026-07-17 | LAST CHANGE: Sign-up screen redesigned into 3 wide white columns (Skill/Experience/Thing, matching the hub's box style) - each column has its own add-input plus the host's claimable items of that type, sorted in; collapses to 1 column on mobile. Replaces the old flat "Sign up list" + "I have another idea" + separate contributions sections. Header renamed "What you said you'd like to bring." (V2.95: capitalize seeking entries.) -->
+<!-- Version: V2.97 | Date: 2026-07-17 | LAST CHANGE: Added a direct-link param (&screen=potluck) that jumps straight to the "Event contribution" sign-up screen for an existing profile, skipping the normal section-completeness checks. (V2.96: sign-up 3-column redesign.) -->
