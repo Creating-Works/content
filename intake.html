@@ -1,4 +1,4 @@
-<!-- Version: V2.84 | Date: 2026-07-17 | LAST CHANGE: Removed trailing "etc" from Experience and Thing bring-type examples. (V2.83: example text update.) -->
+<!-- Version: V2.85 | Date: 2026-07-17 | LAST CHANGE: "Create my event profile" now requires at least one bring-type pick; shows a toast prompt otherwise. (V2.84: removed "etc" from examples.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1686,9 +1686,13 @@ function renderScreenIntro(el){
     +'<p style="font-size:15.5px;line-height:1.55;color:var(--text);margin-bottom:14px;">What will you bring to this event? This gets you a ticket in! Check now what you\'re thinking and we\'ll ask you to share more later...</p>'
     +rows
     +signupRow
-    +'<button class="btn-next" style="margin-top:22px;" onclick="_screen=1;render();">Create my event profile</button>'
+    +'<button class="btn-next" style="margin-top:22px;" onclick="introContinue();">Create my event profile</button>'
     +'</div>';
 }
+window.introContinue=function(){
+  if(!_bringType.length){ toast('Please select one - this gets you a ticket in!'); return; }
+  _screen=1; render();
+};
 window.toggleBringType=function(key){
   var i=_bringType.indexOf(key);
   if(i>-1) _bringType.splice(i,1); else _bringType.push(key);
@@ -2895,4 +2899,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.84 | Date: 2026-07-17 | LAST CHANGE: Removed trailing "etc" from Experience and Thing bring-type examples. (V2.83: example text update.) -->
+<!-- Version: V2.85 | Date: 2026-07-17 | LAST CHANGE: "Create my event profile" now requires at least one bring-type pick; shows a toast prompt otherwise. (V2.84: removed "etc" from examples.) -->
