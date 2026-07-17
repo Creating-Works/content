@@ -1,4 +1,4 @@
-<!-- Version: V2.91 | Date: 2026-07-17 | LAST CHANGE: Added "Email me" button on a host's profile page (viewer mode) when arriving via an event link and the viewed person is that event's host - confirmed via a getEventById lookup (needs GAS hostMemberCard field). (V2.90: sign-in copy + seeking chip category.) -->
+<!-- Version: V2.92 | Date: 2026-07-17 | LAST CHANGE: End-of-intake sign-up screen now carries forward the intro's bring-type picks (Skill/Experience/Thing) as "What you said you'd bring" inputs above the host sign-up list; submitting claims the item pre-tagged with that type. (V2.91: Email me host button.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2128,8 +2128,43 @@ function renderScreenPotluck(el){
 }
 
 // ─── Attendee mode: view list + claim, or add own ───────────────────────────
+var _bringTypeMeta={skill:{emoji:'👤',label:'Skill'},experience:{emoji:'🎉',label:'Experience'},thing:{emoji:'📦',label:'Thing'}};
+function buildBringTypeCarryForwardHTML(){
+  if(!_bringType||!_bringType.length) return '';
+  var h='<div style="margin-bottom:18px;">'
+    +'<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--soft);margin-bottom:10px;">What you said you\'d bring</div>';
+  _bringType.forEach(function(key){
+    var meta=_bringTypeMeta[key]||{emoji:'',label:key};
+    h+='<div style="margin-bottom:10px;">'
+      +'<div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;">'+meta.emoji+' '+esc(meta.label)+'</div>'
+      +'<div style="display:flex;gap:8px;">'
+      +'<input type="text" id="bt-input-'+key+'" placeholder="What '+esc(meta.label.toLowerCase())+' will you bring?" style="flex:1;min-width:0;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;">'
+      +'<button onclick="submitBringTypeItem(\''+key+'\')" style="background:var(--brand);color:white;border:none;padding:10px 16px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap;">Add</button>'
+      +'</div></div>';
+  });
+  h+='</div>';
+  return h;
+}
+window.submitBringTypeItem=function(key){
+  var inp=document.getElementById('bt-input-'+key);
+  if(!inp||!inp.value.trim()){ toast('Please enter what you\'ll bring'); return; }
+  var item=inp.value.trim();
+  var potluckType=(_bringTypeMeta[key]||{}).label||key;
+  var exists=_signupList.some(function(it){return it.item===item;});
+  if(!exists){
+    _signupList.push({item:item,potluckType:potluckType,category:'',timeSpec:'',maxClaims:''});
+    savePotluckList();
+  }
+  claimItem(item,'',potluckType,'','',0,function(){
+    loadPotluck(function(){
+      renderScreenPotluck(null);
+      toast('Added! 🎁');
+    });
+  });
+};
 function renderPotluckAttendeeMode(){
   var h='';
+  h+=buildBringTypeCarryForwardHTML();
   h+='<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--soft);margin-bottom:10px;">Sign up list 🎁</div>';
   h+='<div id="signup-inline"></div>';   // host's items rendered inline (no modal)
   h+='<div id="another-idea-wrap" style="margin-top:8px;"><button onclick="showAnotherIdea()" style="width:100%;background:#fff;color:var(--brand);border:1.5px solid var(--brand);padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;">+ I have another idea</button></div>';
@@ -2925,4 +2960,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.91 | Date: 2026-07-17 | LAST CHANGE: Added "Email me" button on a host's profile page (viewer mode) when arriving via an event link and the viewed person is that event's host - confirmed via a getEventById lookup (needs GAS hostMemberCard field). (V2.90: sign-in copy + seeking chip category.) -->
+<!-- Version: V2.92 | Date: 2026-07-17 | LAST CHANGE: End-of-intake sign-up screen now carries forward the intro's bring-type picks (Skill/Experience/Thing) as "What you said you'd bring" inputs above the host sign-up list; submitting claims the item pre-tagged with that type. (V2.91: Email me host button.) -->
