@@ -1,4 +1,4 @@
-<!-- Version: V2.85 | Date: 2026-07-17 | LAST CHANGE: "Create my event profile" now requires at least one bring-type pick; shows a toast prompt otherwise. (V2.84: removed "etc" from examples.) -->
+<!-- Version: V2.86 | Date: 2026-07-17 | LAST CHANGE: "My event profile" label added next to the wizard photo (screen 1 onward, not on the intro screen); each bring-type pick now reveals its own "why it matters" line (Skill/Experience/Thing). (V2.85: required bring-type pick.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1618,7 +1618,8 @@ function renderTopRight(){
   } else {
     var phImg=_photo?'<div class="btn-photo"><img src="'+esc(_photo)+'" alt=""></div>':'<div class="btn-photo">🌱</div>';
     var photoClick=_screen===0?' onclick="openPostalModal()" style="cursor:pointer;"':'';
-    el.innerHTML='<div class="btn-photo"'+photoClick+'>'+phImg+'</div>';
+    var phLabel=(_screen!=='intro')?'<span style="font-size:12px;font-weight:600;color:var(--text);">My event profile</span>':'';
+    el.innerHTML=phLabel+'<div class="btn-photo"'+photoClick+'>'+phImg+'</div>';
   }
 }
 
@@ -1664,9 +1665,9 @@ function render(){
 
 // Intro/welcome shown before section 1 — only when the hub CTA passes &intro=1 (new registrants).
 var _bringOpts=[
-  {key:'skill',emoji:'👤',label:'Skill',ex:'Q&A time, demo, workshop'},
-  {key:'experience',emoji:'🎉',label:'Experience',ex:'food/coffee/wine tastings, band, yoga session'},
-  {key:'thing',emoji:'📦',label:'Thing',ex:'flowers, tent, speakers'}
+  {key:'skill',emoji:'👤',label:'Skill',ex:'Q&A time, demo, workshop',msg:'People who want your skills find you here during and after the event.'},
+  {key:'experience',emoji:'🎉',label:'Experience',ex:'food/coffee/wine tastings, band, yoga session',msg:'When you bring an experience people can join, some will want it again after the event.'},
+  {key:'thing',emoji:'📦',label:'Thing',ex:'flowers, tent, speakers',msg:'Bring a thing, people notice, some will want more of it after the event.'}
 ];
 function renderScreenIntro(el){
   var rows=_bringOpts.map(function(o){
@@ -1674,7 +1675,8 @@ function renderScreenIntro(el){
     return '<div class="method-item'+(sel?' selected':'')+'" onclick="toggleBringType(\''+o.key+'\')">'
       +'<div class="method-check'+(sel?' checked':'')+'">'+(sel?'✓':'')+'</div>'
       +'<div class="method-text"><strong>'+o.emoji+' '+o.label+'</strong> (Examples: '+esc(o.ex)+')</div>'
-      +'</div>';
+      +'</div>'
+      +(sel?'<div style="font-size:13px;color:var(--brand);margin:4px 0 4px 34px;">🎯 '+esc(o.msg)+'</div>':'');
   }).join('');
   var signupRow='<div class="method-item'+(_wantsSignupList?' selected':'')+'" onclick="toggleWantsSignupList()">'
     +'<div class="method-check'+(_wantsSignupList?' checked':'')+'">'+(_wantsSignupList?'✓':'')+'</div>'
@@ -2899,4 +2901,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.85 | Date: 2026-07-17 | LAST CHANGE: "Create my event profile" now requires at least one bring-type pick; shows a toast prompt otherwise. (V2.84: removed "etc" from examples.) -->
+<!-- Version: V2.86 | Date: 2026-07-17 | LAST CHANGE: "My event profile" label added next to the wizard photo (screen 1 onward, not on the intro screen); each bring-type pick now reveals its own "why it matters" line (Skill/Experience/Thing). (V2.85: required bring-type pick.) -->
