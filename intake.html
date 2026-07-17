@@ -1,4 +1,4 @@
-<!-- Version: V2.79 | Date: 2026-07-16 | LAST CHANGE: "Bookmark to meet" no longer shows on your OWN profile when viewed via ?show=X&me=X - the owner check now honors the &me= param (was localStorage-only). (V2.78: profile nav for any viewer.) -->
+<!-- Version: V2.80 | Date: 2026-07-16 | LAST CHANGE: Nav labels - "Edit my event profile" -> "Edit event profile"; the myevents nav link is now "Manage my experience" (attendee default) instead of "Manage event" (hosts see "Manage event" on the myevents page itself). (V2.79: Bookmark-to-meet hidden on own profile.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1797,11 +1797,11 @@ function renderProfile(el, viewerMode){
   if(_eventId) _b+='<a href="https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+_mc+'" style="'+_WB+'">Event hub</a>';
   if(_navOwn&&_navId){
     if(viewerMode){
-      _b+='<a href="https://creating.works/intake.html?id='+encodeURIComponent(_navId)+(_eventId?'&eventId='+encodeURIComponent(_eventId):'')+'" style="'+_WB+'">Edit my event profile</a>';
-      if(_eventId) _b+='<a href="https://gather.2gather.network/myevents.html?id='+encodeURIComponent(_navId)+'&event='+encodeURIComponent(_eventId)+'" style="'+_WB+'">Manage event</a>';
+      _b+='<a href="https://creating.works/intake.html?id='+encodeURIComponent(_navId)+(_eventId?'&eventId='+encodeURIComponent(_eventId):'')+'" style="'+_WB+'">Edit event profile</a>';
+      if(_eventId) _b+='<a href="https://gather.2gather.network/myevents.html?id='+encodeURIComponent(_navId)+'&event='+encodeURIComponent(_eventId)+'" style="'+_WB+'">Manage my experience</a>';
     } else {
       _b+='<a href="https://creating.works/intake.html?show='+encodeURIComponent(_navId)+'&me='+encodeURIComponent(_navId)+'" style="'+_WB+'">Event profile</a>';
-      if(_eventId) _b+='<a href="https://gather.2gather.network/myevents.html?id='+encodeURIComponent(_navId)+'&event='+encodeURIComponent(_eventId)+'" style="'+_WB+'">Manage event</a>';
+      if(_eventId) _b+='<a href="https://gather.2gather.network/myevents.html?id='+encodeURIComponent(_navId)+'&event='+encodeURIComponent(_eventId)+'" style="'+_WB+'">Manage my experience</a>';
     }
   }
   var _navButtons='<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:0 2px;margin:0 0 20px;">'+_b+'</div>';
@@ -1821,7 +1821,7 @@ function renderProfile(el, viewerMode){
     _photoHTML='<div onclick="openPostalModal()" style="width:44px;height:44px;border-radius:50%;border:1.5px solid var(--sel-border);background:var(--input-bg);display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;flex-shrink:0;">'+_phInner+'</div>';
     var _tra=document.getElementById('top-right-area'); if(_tra) _tra.innerHTML='';
   }
-  el.innerHTML='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;"><h2 style="margin:0;">'+(viewerMode?'This is me 🌱':'Edit my event profile')+'</h2>'+_photoHTML+'</div>'
+  el.innerHTML='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;"><h2 style="margin:0;">'+(viewerMode?'This is me 🌱':'Edit event profile')+'</h2>'+_photoHTML+'</div>'
     +section("What I'm seeking",allNeeds,false,'',4)
     +section('What I enjoy',_interests,true,'level',1,false,_expression?'<div style="margin-top:6px;display:flex;justify-content:flex-end;"><span style="font-size:13px;color:var(--soft);"><span style="font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:0.08em;color:var(--muted);">This is so me:</span> <span style="font-size:10px;font-weight:700;">'+esc(_expressionItems.join(', '))+'</span></span></div>':'')
     +'<div class="profile-section" style="border-bottom:none;padding-bottom:4px;">'
@@ -2857,4 +2857,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.79 | Date: 2026-07-16 | LAST CHANGE: "Bookmark to meet" no longer shows on your OWN profile when viewed via ?show=X&me=X - the owner check now honors the &me= param (was localStorage-only). (V2.78: profile nav for any viewer.) -->
+<!-- Version: V2.80 | Date: 2026-07-16 | LAST CHANGE: Nav labels - "Edit my event profile" -> "Edit event profile"; the myevents nav link is now "Manage my experience" (attendee default) instead of "Manage event" (hosts see "Manage event" on the myevents page itself). (V2.79: Bookmark-to-meet hidden on own profile.) -->
