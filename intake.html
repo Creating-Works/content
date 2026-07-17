@@ -1,4 +1,4 @@
-<!-- Version: V2.98 | Date: 2026-07-17 | LAST CHANGE: Sign-up screen now breaks out of the narrow 660px card (widens to 1100px, card goes transparent) so the 3 white columns sit on the blue background like the hub, instead of overlapping inside the card; added the standard top nav to this screen; removed the "See the group" pill from the profile page. (V2.97: direct-link param.) -->
+<!-- Version: V2.99 | Date: 2026-07-17 | LAST CHANGE: Bug fix found in live testing - loadPotluck() had no guard against firing a second concurrent getPotluckList request if the sign-up screen re-rendered before the first finished; added a loading flag. (V2.98: wide sign-up layout + top nav.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2110,12 +2110,15 @@ window.emailHostCopy=function(btn){
 var _signupList=[];            // host-built list: [{item,category,potluckType,timeSpec,maxClaims}]
 var _potluckClaims=[];         // claims from potluck-claims: [{item,appearId,name,photo,elaboration,...}]
 var _potluckLoaded=false;
+var _potluckLoading=false;   // guards against firing a second concurrent getPotluckList while one is in flight
 var _claimingIdx=-1;  // which signup item is currently showing the inline elaboration field
 // Wizard state for adding a new potluck item
 var _pl={step:'',item:'',potluckType:'',parentCat:'',category:'',timed:'',timeNum:'',timeUnit:'',maxClaims:''};
 
 function loadPotluck(cb){
   if(!_eventId){cb&&cb();return;}
+  if(_potluckLoading){return;}
+  _potluckLoading=true;
   fetch(GS_URL+'?action=getPotluckList&eventId='+encodeURIComponent(_eventId))
     .then(function(r){return r.json();})
     .then(function(d){
@@ -2124,9 +2127,10 @@ function loadPotluck(cb){
       }
       _potluckClaims=(d&&d.claims)||[];
       _potluckLoaded=true;
+      _potluckLoading=false;
       cb&&cb();
     })
-    .catch(function(){_potluckLoaded=true;cb&&cb();});
+    .catch(function(){_potluckLoaded=true;_potluckLoading=false;cb&&cb();});
 }
 
 function renderPotluckTopNav(){
@@ -3039,4 +3043,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.98 | Date: 2026-07-17 | LAST CHANGE: Sign-up screen now breaks out of the narrow 660px card (widens to 1100px, card goes transparent) so the 3 white columns sit on the blue background like the hub, instead of overlapping inside the card; added the standard top nav to this screen; removed the "See the group" pill from the profile page. (V2.97: direct-link param.) -->
+<!-- Version: V2.99 | Date: 2026-07-17 | LAST CHANGE: Bug fix found in live testing - loadPotluck() had no guard against firing a second concurrent getPotluckList request if the sign-up screen re-rendered before the first finished; added a loading flag. (V2.98: wide sign-up layout + top nav.) -->
