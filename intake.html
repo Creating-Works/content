@@ -1,4 +1,4 @@
-<!-- Version: V3.04 | Date: 2026-07-17 | LAST CHANGE: Added a Back button on "What do you enjoy doing?" (screen 1) that returns to the bring-type intro screen, when the person arrived via the intro flow. (V3.03: sign-up screen restructure.) -->
+<!-- Version: V3.05 | Date: 2026-07-17 | LAST CHANGE: Sign-up screen now shows the event's title/date/venue at top (was missing entirely, unlike the hub); "Who's bringing what" columns now use the hub's exact CSS classes (quadrant/q-header/q-title/q-body) and 240px minmax sizing, instead of approximated styling. (V3.04: back button.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,9 +14,12 @@
     @keyframes spin{to{transform:rotate(360deg);}}
     .card{background:var(--card);max-width:660px;margin:0 auto;border-radius:16px;padding:52px;box-shadow:0 24px 64px rgba(0,0,0,0.25),0 4px 16px rgba(0,0,0,0.12);position:relative;}
     @media(max-width:520px){.card{padding:32px 20px;}}
-    .bring-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;}
-    @media(max-width:640px){.bring-grid{grid-template-columns:1fr;}}
-    .bring-col{background:#fff;border-radius:14px;border:1px solid #e8eaf0;padding:16px;}
+    .bring-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;padding:14px 0;}
+    .quadrant{background:#fff;border-radius:14px;border:1px solid #e8eaf0;overflow:hidden;display:flex;flex-direction:column;}
+    .q-header{padding:10px 14px 8px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f0f1f5;background:#fff;}
+    .q-title{font-size:14px;font-weight:700;letter-spacing:0.04em;color:#374151;}
+    .q-body{padding:10px 12px;display:flex;flex-direction:column;gap:7px;}
+    .q-empty{font-size:12px;color:#c0c4d6;padding:4px 2px;font-style:italic;}
     /* Top right */
     .top-right-area{position:absolute;top:20px;right:20px;display:flex;align-items:center;gap:6px;z-index:10;}
     .ikigai-btn{display:flex;align-items:center;gap:8px;background:var(--sel-bg);border:1.5px solid var(--sel-border);border-radius:24px;padding:6px 14px 6px 6px;font-size:13px;font-weight:600;color:var(--brand);cursor:pointer;font-family:'DM Sans',sans-serif;transition:background 0.15s;}
@@ -2069,12 +2072,29 @@ window.confirmExpressionCustom=function(){
 };
 
 var _eventTitle='';
+var _eventDate='';
+var _eventVenue='';
+var _eventLocationAddr='';
+var _eventHeaderFetched=false;
+function fmtEventDate(d){
+  if(!d) return '';
+  var s=String(d).split('T')[0];   // drop any time/UTC-Z suffix - keep just the date
+  var dt=new Date(s+'T00:00:00');  // parse as local midnight, not UTC midnight
+  if(isNaN(dt.getTime())) return String(d);
+  return dt.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+}
 function fetchEventTitle(cb){
   if(!_eventId){cb();return;}
+  _eventHeaderFetched=true;
   fetch(GS_URL+'?action=getEventById&id='+encodeURIComponent(_eventId))
     .then(function(r){return r.json();})
     .then(function(d){
-      if(d&&d.found&&d.event&&d.event.title) _eventTitle=d.event.title;
+      if(d&&d.found&&d.event){
+        if(d.event.title) _eventTitle=d.event.title;
+        _eventDate=d.event.date||'';
+        _eventVenue=d.event.venue||'';
+        _eventLocationAddr=d.event.location||'';
+      }
       cb();
     })
     .catch(function(){cb();});
@@ -2153,6 +2173,7 @@ function renderPotluckTopNav(){
 function renderScreenPotluck(el){
   var cont=document.getElementById('app-content'); if(!cont) return;
   renderPotluckTopNav();
+  if(!_eventHeaderFetched){ fetchEventTitle(function(){renderScreenPotluck(null);}); }
   if(!_potluckLoaded){
     // Stay narrow/normal-card while loading - only widen once there's real content to fill the space.
     cont.innerHTML='<div style="text-align:center;padding:60px 20px;"><div style="width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--brand);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px;"></div><p style="color:var(--muted);font-size:14px;margin:0;">Loading the sign-up list...</p></div>';
@@ -2169,7 +2190,14 @@ function renderScreenPotluck(el){
       +'<button onclick="submitBringTypeItem(\''+key+'\')" style="background:var(--brand);color:white;border:none;padding:10px 16px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap;flex-shrink:0;">Add</button>'
       +'</div>';
   }).join('');
-  var html='<div style="background:#fff;border-radius:14px;padding:20px 24px;margin-bottom:16px;">'
+  var headerHTML=_eventTitle?'<div style="margin-bottom:14px;">'
+    +'<div style="font-size:20px;font-weight:700;color:#fff;">'+esc(_eventTitle)+'</div>'
+    +'<div style="font-size:13px;color:rgba(255,255,255,0.85);margin-top:2px;">'
+    +(_eventDate?'📅 '+esc(fmtEventDate(_eventDate))+' ':'')
+    +((_eventVenue||_eventLocationAddr)?'📍 '+esc([_eventVenue,_eventLocationAddr].filter(Boolean).join(', ')):'')
+    +'</div></div>':'';
+  var html=headerHTML
+    +'<div style="background:#fff;border-radius:14px;padding:20px 24px;margin-bottom:16px;">'
     +'<h2 style="margin-bottom:6px;">Event contribution 🎁</h2>'
     +'<p style="font-size:14px;color:var(--soft);margin:0 0 18px;">This event is all about contribution. Think of it as a potluck of skills and offerings. What are you going to bring to the event that you want to be known for in our community?</p>'
     +'<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--soft);margin-bottom:10px;">What you said you\'d like to bring</div>'
@@ -2237,8 +2265,8 @@ function renderPotluckColumns(){
     var idxList=byType[key];
     var itemsHTML=idxList.length
       ? idxList.map(function(i){ return renderSignupItemHTML(_signupList[i],i); }).join('')
-      : '<div style="color:var(--muted);font-size:13px;font-style:italic;">Nothing here yet.</div>';
-    return '<div class="bring-col"><div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:12px;">'+_bringColLabels[key]+'</div>'+itemsHTML+'</div>';
+      : '<span class="q-empty">Nothing here yet.</span>';
+    return '<div class="quadrant"><div class="q-header"><div class="q-title">'+_bringColLabels[key]+'</div></div><div class="q-body">'+itemsHTML+'</div></div>';
   }).join('');
 }
 window.submitBringTypeItem=function(key){
@@ -3059,4 +3087,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V3.04 | Date: 2026-07-17 | LAST CHANGE: Added a Back button on "What do you enjoy doing?" (screen 1) that returns to the bring-type intro screen, when the person arrived via the intro flow. (V3.03: sign-up screen restructure.) -->
+<!-- Version: V3.05 | Date: 2026-07-17 | LAST CHANGE: Sign-up screen now shows the event's title/date/venue at top (was missing entirely, unlike the hub); "Who's bringing what" columns now use the hub's exact CSS classes (quadrant/q-header/q-title/q-body) and 240px minmax sizing, instead of approximated styling. (V3.04: back button.) -->
