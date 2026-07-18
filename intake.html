@@ -1,4 +1,4 @@
-<!-- Version: V3.10 | Date: 2026-07-17 | LAST CHANGE: Potluck polish - "My event profile" label now white so it reads on the blue background; shortened the contribution intro copy; seeded pills also include Leading-level values and domains; back button lost its arrow and is now small and centred (no arrow glyphs in buttons anywhere). (V3.09: seeded contribution flow.) -->
+<!-- Version: V3.11 | Date: 2026-07-17 | LAST CHANGE: Potluck rebuilt as one question at a time - no longer re-asks what they will bring (they answered at the intro); it walks their intro picks one type at a time, offering their Expert/Coach/Leading items as the answer plus a free-text escape. "Add another" (the only place the type question appears) and "Done" (goes to the hub) are always available. Removed the three text-field rows. (V3.10: potluck polish.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2204,14 +2204,6 @@ function renderScreenPotluck(el){
     return;
   }
   document.body.classList.add('wide-mode');   // also set here for direct re-renders that skip render()
-  var addRows=['skill','experience','thing'].map(function(key){
-    var meta=_bringTypeMeta[key];
-    return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">'
-      +'<div style="font-size:13px;font-weight:600;color:var(--text);width:90px;flex-shrink:0;">'+meta.emoji+' '+esc(meta.label)+'</div>'
-      +'<input type="text" id="bt-input-'+key+'" placeholder="What '+esc(meta.label.toLowerCase())+' will you bring?" style="flex:1;min-width:0;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;">'
-      +'<button onclick="submitBringTypeItem(\''+key+'\')" style="background:var(--brand);color:white;border:none;padding:10px 16px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap;flex-shrink:0;">Add</button>'
-      +'</div>';
-  }).join('');
   var headerHTML=_eventTitle?'<div style="margin-bottom:14px;">'
     +'<div style="font-size:20px;font-weight:700;color:#fff;">'+esc(_eventTitle)+'</div>'
     +'<div style="font-size:13px;color:rgba(255,255,255,0.85);margin-top:2px;">'
@@ -2223,8 +2215,6 @@ function renderScreenPotluck(el){
     +'<h2 style="margin-bottom:6px;">Event contribution 🎁</h2>'
     +'<p style="font-size:14px;color:var(--soft);margin:0 0 18px;">This event is all about contribution. Think of it as a potluck of skills and offerings. What are you going to bring to the event?</p>'
     +seedBlockHTML()
-    +'<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--soft);margin-bottom:10px;">What you said you\'d like to bring'+bringPicksLabel()+'</div>'
-    +addRows
     +'</div>'
     +'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 4px 10px;flex-wrap:wrap;"><div style="font-size:18px;font-weight:800;color:#fff;">🎁 Who\'s bringing what</div></div>'
     +'<div class="bring-grid" id="bring-grid"></div>'
@@ -2264,15 +2254,6 @@ function seedBlockHTML(){
   var INP='width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;box-sizing:border-box;';
   var h='<div id="seed-block" style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border);">';
 
-  if(_seedFlow.step==='type'){
-    h+='<div style="font-size:13px;color:var(--text);font-weight:600;margin-bottom:8px;">How would you like to bring <strong>'+esc(_seedFlow.item)+'</strong>?</div>'
-      +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
-      +'<button onclick="seedSetType(\'skill\')" style="'+BTN+'">👤 As a skill</button>'
-      +'<button onclick="seedSetType(\'experience\')" style="'+BTN+'">🎉 As an experience</button>'
-      +'<button onclick="seedCancel()" style="'+BTN_O+'">Cancel</button>'
-      +'</div></div>';
-    return h;
-  }
   if(_seedFlow.step==='format'){
     h+='<div style="font-size:13px;color:var(--text);font-weight:600;margin-bottom:8px;">How would you like to contribute <strong>'+esc(_seedFlow.item)+'</strong>?</div>'
       +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
@@ -2292,52 +2273,100 @@ function seedBlockHTML(){
       +'</div></div>';
     return h;
   }
-  if(_seedFlow.step==='addown'){
-    h+='<div style="font-size:13px;color:var(--text);font-weight:600;margin-bottom:8px;">What skill would you like to bring?</div>'
-      +'<div style="font-size:12px;color:var(--soft);margin-bottom:8px;">We\'ll add it to your event profile too.</div>'
-      +'<input type="text" id="seed-own-input" placeholder="e.g. Photography" style="'+INP+'">'
-      +'<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">'
-      +'<button onclick="seedAddOwnSkill()" style="'+BTN+'">Continue</button>'
+  // "Add another" - the only place the type question appears, because now they're going
+  // beyond what they told us at the intro.
+  if(_seedFlow.step==='pickType'){
+    h+='<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:10px;">What else would you like to bring?</div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+      +['skill','experience','thing'].map(function(k){
+          var m=_bringTypeMeta[k];
+          return '<button onclick="seedStartFor(\''+k+'\')" style="'+BTN+'">'+m.emoji+' '+esc(m.label)+'</button>';
+        }).join('')
       +'<button onclick="seedCancel()" style="'+BTN_O+'">Cancel</button>'
       +'</div></div>';
     return h;
   }
-  // Resting state: the pills, or the prompt when we have nothing to offer back.
-  if(cands.length){
-    h+='<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--soft);margin-bottom:8px;">Bring something you\'re already known for</div>'
-      +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
-      +cands.map(function(c){ return '<button onclick="seedPick(\''+esc(c).replace(/'/g,"\\'")+'\')" style="'+PILL+'">'+esc(c)+'</button>'; }).join('')
+
+  // Ask about ONE type at a time - the next thing they said at the intro that they haven't
+  // contributed yet. No "what will you bring?" question here; they already answered that.
+  var pending=pendingBringTypes();
+  // A type chosen via "Add another" wins over the intro-pick queue.
+  var k=_seedFlow.forType||pending[0];
+  if(k){
+    var meta=_bringTypeMeta[k];
+    var seeds=(k==='thing')?[]:cands;
+    h+='<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:2px;">Which '+esc(meta.label.toLowerCase())+' will you bring?</div>'
+      +(_seedFlow.forType?'':'<div style="font-size:12px;color:var(--soft);margin-bottom:10px;">You said you\'d bring '+(meta.label==='Experience'?'an':'a')+' '+esc(meta.label.toLowerCase())+'.</div>');
+    if(seeds.length){
+      h+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">'
+        +seeds.map(function(c){ return '<button onclick="seedPickFor(\''+k+'\',\''+esc(c).replace(/'/g,"\\'")+'\')" style="'+PILL+'">'+esc(c)+'</button>'; }).join('')
+        +'</div>';
+    }
+    h+='<div style="display:flex;gap:8px;">'
+      +'<input type="text" id="seed-free-input" placeholder="'+(seeds.length?'Or type something else':'Type what you\'ll bring')+'" style="'+INP+'">'
+      +'<button onclick="seedFreeAdd(\''+k+'\')" style="'+BTN+'">Continue</button>'
       +'</div>';
-  } else {
-    h+='<div style="font-size:13px;color:var(--soft);margin-bottom:8px;">Would you like to pick a skill to bring?</div>'
-      +'<button onclick="seedStartAddOwn()" style="'+BTN_O+'">+ Choose a skill</button>';
+    h+=seedFooterHTML(BTN,BTN_O);
+    return h+'</div>';
   }
+
+  // Everything they said they'd bring is covered.
+  h+='<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:2px;">You\'re all set 🎁</div>'
+    +'<div style="font-size:13px;color:var(--soft);margin-bottom:12px;">Your contribution is on the list below.</div>'
+    +seedFooterHTML(BTN,BTN_O,true);
   return h+'</div>';
+}
+// "Add another" is always available; "Done" takes them to the hub to see it land.
+function seedFooterHTML(BTN,BTN_O,primaryDone){
+  var hubUrl=_eventId?('https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+(_appearId?'&memberCard='+encodeURIComponent(_appearId):'')):'';
+  return '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">'
+    +'<button onclick="seedAddAnother()" style="'+(primaryDone?BTN_O:BTN_O)+'">Add another</button>'
+    +(hubUrl?'<button onclick="window.location.href=\''+hubUrl+'\'" style="'+(primaryDone?BTN:BTN_O)+'">Done</button>':'')
+    +'</div>';
+}
+// Which of their intro picks still have nothing signed up for them.
+function pendingBringTypes(){
+  var mine={};
+  var norm=String(_appearId||'').split('.').join('').toLowerCase();
+  (_potluckClaims||[]).forEach(function(c){
+    if(String(c.appearId||'').split('.').join('').toLowerCase()!==norm) return;
+    var listItem=(_signupList||[]).find(function(it){return it.item===c.item;})||{};
+    mine[bringTypeKey(listItem.potluckType||c.potluckType)]=true;
+  });
+  return (_bringType||[]).filter(function(k){ return !mine[k]; });
 }
 function refreshSeedBlock(){
   var el=document.getElementById('seed-block'); if(!el) return;
   el.outerHTML=seedBlockHTML();
-  var f=document.getElementById('seed-thing-input')||document.getElementById('seed-own-input');
+  var f=document.getElementById('seed-thing-input')||document.getElementById('seed-free-input');
   if(f) f.focus();
 }
-window.seedPick=function(item){ _seedFlow={item:item,step:'type',type:''}; refreshSeedBlock(); };
 window.seedCancel=function(){ _seedFlow={item:'',step:'',type:''}; refreshSeedBlock(); };
-window.seedStartAddOwn=function(){ _seedFlow={item:'',step:'addown',type:''}; refreshSeedBlock(); };
-window.seedSetType=function(t){
-  _seedFlow.type=t;
-  _seedFlow.step=(t==='skill')?'format':'thing';
+window.seedAddAnother=function(){ _seedFlow={item:'',step:'pickType',type:''}; refreshSeedBlock(); };
+// Chose a type from "Add another" -> jump straight into that type's question.
+window.seedStartFor=function(k){
+  if(_bringType.indexOf(k)<0){ _bringType.push(k); autoSave(); }   // they changed their mind; remember it
+  _seedFlow={item:'',step:'',type:'',forType:k};                   // ask about THIS type next
   refreshSeedBlock();
 };
-window.seedAddOwnSkill=function(){
-  var inp=document.getElementById('seed-own-input');
-  var v=inp?capFirst(inp.value.trim()):'';
-  if(!v){ toast('Please enter a skill'); return; }
-  if(!_skills.some(function(s){return String(s.item).toLowerCase()===v.toLowerCase();})){
-    _skills.unshift({item:v,category:'',level:'Expert Level'});
-    autoSave();                                  // lands on their event profile too
-  }
-  _seedFlow={item:v,step:'type',type:''};
+// Picked one of their own seeded items for a given type.
+window.seedPickFor=function(k,item){
+  if(k==='skill'){ _seedFlow={item:item,step:'format',type:'skill'}; }
+  else if(k==='experience'){ _seedFlow={item:item,step:'thing',type:'experience'}; }
+  else { commitSeedEntries([{item:item,potluckType:'Thing'}]); return; }
   refreshSeedBlock();
+};
+// Typed something free-text for a given type.
+window.seedFreeAdd=function(k){
+  var inp=document.getElementById('seed-free-input');
+  var v=inp?capFirst(inp.value.trim()):'';
+  if(!v){ toast('Please enter what you\'ll bring'); return; }
+  // A skill they name here is worth keeping on their profile too.
+  if(k==='skill'&&!_skills.some(function(s){return String(s.item).toLowerCase()===v.toLowerCase();})){
+    _skills.unshift({item:v,category:'',level:'Expert Level'});
+    autoSave();
+  }
+  seedPickFor(k,v);
 };
 window.seedSetFormat=function(fmt){
   var label=_seedFlow.item+' - '+fmt;
@@ -2431,27 +2460,6 @@ function renderPotluckColumns(){
     return '<div class="quadrant"><div class="q-header"><div class="q-title">'+_bringColLabels[key]+'</div></div><div class="q-body">'+itemsHTML+'</div></div>';
   }).join('');
 }
-window.submitBringTypeItem=function(key){
-  var inp=document.getElementById('bt-input-'+key);
-  if(!inp||!inp.value.trim()){ toast('Please enter what you\'ll bring'); return; }
-  var item=capFirst(inp.value.trim());
-  var potluckType=(_bringTypeMeta[key]||{}).label||key;
-  var exists=_signupList.some(function(it){return it.item===item;});
-  var doClaim=function(){
-    claimItem(item,'',potluckType,'','',0,function(){
-      loadPotluck(function(){
-        renderScreenPotluck(null);
-        toast('Added! 🎁');
-      });
-    });
-  };
-  if(!exists){
-    _signupList.push({item:item,potluckType:potluckType,category:'',timeSpec:'',maxClaims:''});
-    savePotluckList(doClaim);   // wait for the write - overlapping calls to this backend 404
-  } else {
-    doClaim();
-  }
-};
 function renderPotluckAttendeeMode(){
   return '';   // superseded by renderPotluckColumns() - kept as a no-op so any stray caller doesn't error
 }
