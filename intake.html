@@ -1,4 +1,4 @@
-<!-- Version: V3.00 | Date: 2026-07-17 | LAST CHANGE: Sign-up screen's "Loading…" now has a 15s safety-net timeout so it can never get stuck forever if GAS hangs (matches other known slow/hanging GAS calls); reported as sticking on this screen. (V2.99: concurrent-request guard.) -->
+<!-- Version: V3.01 | Date: 2026-07-17 | LAST CHANGE: Sign-up screen columns made bigger/roomier - wider page container (1400px, was 1100px) and columns now use the same auto-fit/minmax sizing as the hub's boxes instead of 3 fixed-width columns. (V3.00: Loading timeout safety net.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,7 +14,7 @@
     @keyframes spin{to{transform:rotate(360deg);}}
     .card{background:var(--card);max-width:660px;margin:0 auto;border-radius:16px;padding:52px;box-shadow:0 24px 64px rgba(0,0,0,0.25),0 4px 16px rgba(0,0,0,0.12);position:relative;}
     @media(max-width:520px){.card{padding:32px 20px;}}
-    .bring-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+    .bring-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;}
     @media(max-width:640px){.bring-grid{grid-template-columns:1fr;}}
     .bring-col{background:#fff;border-radius:14px;border:1px solid #e8eaf0;padding:16px;}
     /* Top right */
@@ -2152,7 +2152,7 @@ function renderPotluckTopNav(){
 }
 function renderScreenPotluck(el){
   var cont=document.getElementById('app-content'); if(!cont) return;
-  var pw=document.getElementById('page-wrap'); if(pw) pw.style.maxWidth='1100px';
+  var pw=document.getElementById('page-wrap'); if(pw) pw.style.maxWidth='1400px';
   var mc=document.getElementById('main-card'); if(mc){ mc.style.background='transparent'; mc.style.boxShadow='none'; mc.style.padding='0'; mc.style.border='none'; }
   renderPotluckTopNav();
   if(!_potluckLoaded){
@@ -3051,4 +3051,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V3.00 | Date: 2026-07-17 | LAST CHANGE: Sign-up screen's "Loading…" now has a 15s safety-net timeout so it can never get stuck forever if GAS hangs (matches other known slow/hanging GAS calls); reported as sticking on this screen. (V2.99: concurrent-request guard.) -->
+<!-- Version: V3.01 | Date: 2026-07-17 | LAST CHANGE: Sign-up screen columns made bigger/roomier - wider page container (1400px, was 1100px) and columns now use the same auto-fit/minmax sizing as the hub's boxes instead of 3 fixed-width columns. (V3.00: Loading timeout safety net.) -->
