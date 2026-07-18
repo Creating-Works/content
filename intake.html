@@ -1,4 +1,4 @@
-<!-- Version: V3.11 | Date: 2026-07-17 | LAST CHANGE: Potluck rebuilt as one question at a time - no longer re-asks what they will bring (they answered at the intro); it walks their intro picks one type at a time, offering their Expert/Coach/Leading items as the answer plus a free-text escape. "Add another" (the only place the type question appears) and "Done" (goes to the hub) are always available. Removed the three text-field rows. (V3.10: potluck polish.) -->
+<!-- Version: V3.12 | Date: 2026-07-17 | LAST CHANGE: Three bug fixes - skills now save their category (item:category:level), which is why every skill read "Category missing" after a reload; a Coach-level recreation item is no longer copied into Skills (it stays in Recreation); and ticking "I want to see the sign up list" is now enough to continue without also picking a bring-type. (V3.11: potluck one-question-at-a-time.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -593,7 +593,9 @@ function parseNeedsStr(str){
 function autoSave(){
   if(!_appearId||_viewerMode) return;
   var iStr=_interests.map(function(s){return s.item+(s.level?':'+s.level:'');}).join('|');
-  var sStr=_skills.map(function(s){return s.item+(s.level?':'+s.level:'');}).join('|');
+  // item:category:level - the category used to be dropped here, so every skill came back
+  // "Category missing" after a reload. parseTagStr reads both the old 2-part and this 3-part form.
+  var sStr=_skills.map(function(s){return s.item+':'+(s.category||'')+':'+(s.level||'');}).join('|');
   var vStr=_values.map(function(s){return s.item+':'+(s.category||'')+':'+(s.level||'');}).join('|');
   var dStr=_domains.map(function(s){return s.item+(s.level?':'+s.level:'');}).join('|');
   var nStr=[].concat(
@@ -996,17 +998,9 @@ window.setLevel = function(screen, idx, level){
   if(pos>-1) parts.splice(pos,1); else parts.push(level);
   arr[idx].level=parts.join(',');
   updateAddedSection(s);
-  // Coach-level enjoy items also become a skill, needing a category later
-  if(s==='1'&&level==='Coach'&&!wasPresent){
-    var enjoyItem=arr[idx].item;
-    var alreadySkill=_skills.some(function(sk){return sk.item===enjoyItem;});
-    if(!alreadySkill){
-      _skills.unshift({item:enjoyItem,category:'',level:''});
-      toast('Added "'+enjoyItem+'" to your skills - pick a category on the skills screen');
-      autoSave();
-      updateAddedSection('2');
-    }
-  }
+  // A Coach-level recreation item used to be copied into Skills as well. That duplicated the
+  // item in two sections and landed there with no category, so it read as broken. It stays in
+  // Recreation as Coach now; the potluck flow already offers Coach items as things you can bring.
 };
 
 window.toggleLocal = function(screen, idx){
@@ -1725,7 +1719,8 @@ function renderScreenIntro(el){
     +'</div>';
 }
 window.introContinue=function(){
-  if(!_bringType.length){ toast('Please select one - this gets you a ticket in!'); return; }
+  // Asking to see the sign-up list is a valid answer on its own - don't block on a bring-type.
+  if(!_bringType.length&&!_wantsSignupList){ toast('Please select one - this gets you a ticket in!'); return; }
   _screen=1; render();
 };
 window.toggleBringType=function(key){
