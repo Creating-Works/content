@@ -1,4 +1,4 @@
-<!-- Version: V3.01 | Date: 2026-07-17 | LAST CHANGE: Sign-up screen columns made bigger/roomier - wider page container (1400px, was 1100px) and columns now use the same auto-fit/minmax sizing as the hub's boxes instead of 3 fixed-width columns. (V3.00: Loading timeout safety net.) -->
+<!-- Version: V3.02 | Date: 2026-07-17 | LAST CHANGE: Sign-up screen no longer widens to 1400px until data has actually loaded - during the ~5s load it stays narrow with a proper spinner, instead of a huge mostly-empty blue page that looked broken/stuck. (V3.01: bigger columns.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2152,14 +2152,15 @@ function renderPotluckTopNav(){
 }
 function renderScreenPotluck(el){
   var cont=document.getElementById('app-content'); if(!cont) return;
-  var pw=document.getElementById('page-wrap'); if(pw) pw.style.maxWidth='1400px';
-  var mc=document.getElementById('main-card'); if(mc){ mc.style.background='transparent'; mc.style.boxShadow='none'; mc.style.padding='0'; mc.style.border='none'; }
   renderPotluckTopNav();
   if(!_potluckLoaded){
-    cont.innerHTML='<div style="padding:40px 0;text-align:center;color:#fff;">Loading…</div>';
+    // Stay narrow/normal-card while loading - only widen once there's real content to fill the space.
+    cont.innerHTML='<div style="text-align:center;padding:60px 20px;"><div style="width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--brand);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px;"></div><p style="color:var(--muted);font-size:14px;margin:0;">Loading the sign-up list...</p></div>';
     loadPotluck(function(){renderScreenPotluck(null);});
     return;
   }
+  var pw=document.getElementById('page-wrap'); if(pw) pw.style.maxWidth='1400px';
+  var mc=document.getElementById('main-card'); if(mc){ mc.style.background='transparent'; mc.style.boxShadow='none'; mc.style.padding='0'; mc.style.border='none'; }
   var html='<div style="background:#fff;border-radius:14px;padding:20px 24px;margin-bottom:16px;">'
     +'<h2 style="margin-bottom:6px;">Event contribution 🎁</h2>'
     +'<p style="font-size:14px;color:var(--soft);margin:0;">This event is all about contribution. Think of it as a potluck of skills and offerings. What are you going to bring to the event that you want to be known for in our community?</p>'
@@ -3051,4 +3052,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V3.01 | Date: 2026-07-17 | LAST CHANGE: Sign-up screen columns made bigger/roomier - wider page container (1400px, was 1100px) and columns now use the same auto-fit/minmax sizing as the hub's boxes instead of 3 fixed-width columns. (V3.00: Loading timeout safety net.) -->
+<!-- Version: V3.02 | Date: 2026-07-17 | LAST CHANGE: Sign-up screen no longer widens to 1400px until data has actually loaded - during the ~5s load it stays narrow with a proper spinner, instead of a huge mostly-empty blue page that looked broken/stuck. (V3.01: bigger columns.) -->
