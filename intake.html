@@ -1,4 +1,4 @@
-<!-- Version: V3.06 | Date: 2026-07-17 | LAST CHANGE: Fixed the potluck width for real - .card had its own max-width:660px that was never overridden (only the outer wrapper was), so the columns stayed capped at 2. Replaced the scattered inline style mutations with one declarative body.wide-mode CSS class that also un-pins the absolutely-positioned profile photo (was overlapping the event header). (V3.05: event header + hub classes.) -->
+<!-- Version: V3.07 | Date: 2026-07-17 | LAST CHANGE: Potluck width actually fixed - #page-wrap carried an INLINE style="max-width:660px" attribute, which beats any stylesheet rule, so every wide-mode CSS override was silently ignored. Moved that width into CSS so wide-mode can win, and trimmed body side padding to the hub-s 14px. Usable width 660px -> full viewport. (V3.06: wide-mode class + card cap.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,9 +14,14 @@
     @keyframes spin{to{transform:rotate(360deg);}}
     .card{background:var(--card);max-width:660px;margin:0 auto;border-radius:16px;padding:52px;box-shadow:0 24px 64px rgba(0,0,0,0.25),0 4px 16px rgba(0,0,0,0.12);position:relative;}
     @media(max-width:520px){.card{padding:32px 20px;}}
+    /* Normal (narrow) page width. Declared here rather than as an inline style attribute on the
+       div, because an inline attribute beats any stylesheet rule and would block wide-mode. */
+    #page-wrap{max-width:660px;margin:0 auto;}
     /* Wide mode: one class on <body> turns the narrow single-card layout into a full-width
        hub-style page. Declared here (not mutated inline at render time) so there is one place
-       to read and nothing for other screens to undo. */
+       to read and nothing for other screens to undo. Body side padding drops to the hub's 14px
+       so the columns run edge-to-edge the way the hub's do. */
+    body.wide-mode{padding-left:14px;padding-right:14px;}
     body.wide-mode #page-wrap{max-width:none;}
     body.wide-mode .card{max-width:none;background:transparent;box-shadow:none;padding:0;border:none;}
     body.wide-mode .top-right-area{position:static;justify-content:flex-end;margin:0 0 10px;}
@@ -213,7 +218,7 @@
 </head>
 
 <body>
-<div style="max-width:660px;margin:0 auto;" id="page-wrap">
+<div id="page-wrap">
   <div id="app-topnav"></div>
   <div class="card" id="main-card">
     <div class="top-right-area" id="top-right-area"></div>
