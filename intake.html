@@ -1,4 +1,4 @@
-<!-- Version: V4.00 | Date: 2026-07-18 | LAST CHANGE: Two-screen intake. Screen 1 is the existing "what will you bring" intro, now with a plain text field under each checked type (saved inside bringType as key~text, so no GAS change). Screen 2 is one page holding all five fields the hub needs - postal, language, one thing you enjoy, one skill, and one thing you care about - as plain search fields with no category drill-downs and no level pickers; leaving one open names it and says plainly what it means for hub visibility, then lets you continue. Every original screen still exists and stays reachable from the profile pencils as optional enrichment. Potluck seeding now offers back everything listed (levels are no longer on the required path, so there is no Expert/Coach/Leading signal to filter on) and no longer stamps "Expert Level" on a skill the person never rated. (V3.13: potluck flow rework.) -->
+<!-- Version: V4.10 | Date: 2026-07-18 | LAST CHANGE: One profile screen, privileges decide what shows. The renderer was already shared, but "viewerMode" was doing double duty as "not the owner", so opening your own public ?show= link gave you a read-only copy of yourself. Ownership is now a single isOwner() check - "?id=" carries the capability, "?show=" recognises you by &me= or the appear-id this device stores - and the per-section pencils, the want-to-meet list, the nav pills and saving all key off that instead of the URL. Someone else's profile stays strictly read-only and cannot save. (V4.00: two-screen intake.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -324,11 +324,32 @@ var _directScreen = '';
   _eventId=params.get('eventId')||'';
   _introMode=(params.get('intro')==='1');
   _directScreen=params.get('screen')||'';
-  if(_showId){_viewerMode=true;return;}
+  if(_showId){
+    _viewerMode=true;
+    // The owner opening their own public URL is still the owner. Give them the same
+    // appearId the edit view uses so every save/edit path works without a second branch.
+    if(isOwner()) _appearId=_showId;
+    return;
+  }
   var urlId=params.get('id')||params.get('memberCard');
   if(urlId){_appearId=urlId;try{localStorage.setItem('appear-id',_appearId);}catch(e){}}
   else{try{_appearId=localStorage.getItem('appear-id');}catch(e){}}
 })();
+
+// ─── One privilege check for the whole profile ────────────────────────────────
+// There is a single profile renderer; what differs is what the viewer is allowed to do.
+// "?id=" carries the capability, so that is always the owner. On the public "?show=" URL
+// the owner is recognised by "&me=" or by the appear-id this device already stores - the
+// same test the nav pills have always used, now applied to the pencils and saves too.
+function isOwner(){
+  if(!_viewerMode) return !!_appearId;
+  var target=String(_showId||'').replace(/\./g,'').toLowerCase();
+  if(!target) return false;
+  var viaParam='',viaDevice='';
+  try{ viaParam=String(new URLSearchParams(window.location.search).get('me')||'').replace(/\./g,'').toLowerCase(); }catch(e){}
+  try{ viaDevice=String(localStorage.getItem('appear-id')||'').replace(/\./g,'').toLowerCase(); }catch(e){}
+  return !!((viaParam&&viaParam===target)||(viaDevice&&viaDevice===target));
+}
 
 var GS_URL='https://script.google.com/macros/s/AKfycbzEavMnG4tMeWemoT5FLu9f_zjlKVIJsZLueG4nhw9akK0_nZqpbkZiXrAlWu1Fyhq9/exec';
 
@@ -497,7 +518,8 @@ async function loadProfileAndIntake(){
     var res=await fetch(GS_URL+'?action=getProfile&appearId='+encodeURIComponent(id));
     var resp=await res.json();
     if(_viewerMode){_viewerPhoto=resp.photo||'';_viewerName=resp.name||'';}
-    else{_photo=resp.photo||'';_name=resp.name||'';}
+    // The owner renders through the edit view even on "?show=", so fill both slots for them.
+    if(!_viewerMode||isOwner()){_photo=resp.photo||'';_name=resp.name||'';}
     if(resp.found&&resp.data){
       _hasProfile=true;
       var d=resp.data;
@@ -608,7 +630,7 @@ function parseNeedsStr(str){
 
 // ─── Auto-save ────────────────────────────────────────────────────────────────
 function autoSave(){
-  if(!_appearId||_viewerMode) return;
+  if(!_appearId||!isOwner()) return;   // only the owner writes, on either URL
   var iStr=_interests.map(function(s){return s.item+(s.level?':'+s.level:'');}).join('|');
   // item:category:level - the category used to be dropped here, so every skill came back
   // "Category missing" after a reload. parseTagStr reads both the old 2-part and this 3-part form.
@@ -1694,7 +1716,9 @@ function render(){
   // Wide (hub-style) layout is potluck-only, and only once its data has loaded - a wide empty
   // page during the load reads as broken. One class toggle, no per-screen undo needed.
   document.body.classList.toggle('wide-mode', _screen==='potluck'&&_potluckLoaded);
-  if(_viewerMode){
+  // Someone else's profile is read-only, full stop. The owner on their own "?show=" URL
+  // falls through to the normal flow so the pencils and edit screens work there too.
+  if(_viewerMode&&!isOwner()){
     if(_hasProfile) renderProfile(el,true);
     else el.innerHTML='<div class="empty" style="padding:40px;text-align:center;">No profile found.</div>';
     _wtmDecorate();
@@ -1975,17 +1999,19 @@ function _wtmListHTML(){
 }
 function _wtmDecorate(){
   var el=document.getElementById('app-content'); if(!el) return;
-  if(!_viewerMode){ el.insertAdjacentHTML('beforeend', _wtmListHTML()); return; }   // edit view (?id=) = you -> show your list
+  // Your own list is yours on either URL; someone else's profile gets the bookmark button.
+  if(isOwner()){ el.insertAdjacentHTML('beforeend', _wtmListHTML()); return; }
   if(!_showId) return;
-  var own=false; try{ var _s=String(localStorage.getItem('appear-id')||'').replace(/\./g,'').toLowerCase(); var _me=String(new URLSearchParams(window.location.search).get('me')||'').replace(/\./g,'').toLowerCase(); var _i=_wtmNorm(_showId); own=!!(_i&&((_s&&_s===_i)||(_me&&_me===_i))); }catch(e){}
-  // Public profile view (?show=) never shows the want-to-meet list - it lives on the edit view only.
-  if(own) return;
   var has=_wtmHas(_showId);
   var _bs='font-size:14px;font-weight:600;padding:9px 18px;border-radius:20px;cursor:pointer;font-family:inherit;border:1.5px solid #185FA5;background:#fff;color:#185FA5;';
   var btn='<div style="padding:0 2px 14px;"><button id="wtm-btn" onclick="wtmToggle()" style="'+_bs+'">'+(has?'✓ Bookmarked':'Bookmark to meet')+'</button></div>';
   var host=document.getElementById('app-topnav'); if(host) host.innerHTML=btn;
 }
 function renderProfile(el, viewerMode){
+  // viewerMode = which URL/data source this is ("?show=" vs "?id="). canEdit = what this
+  // person is allowed to do. They used to be the same flag, which is why the owner opening
+  // their own "?show=" link got a read-only page.
+  var canEdit=isOwner();
   var SCREEN_LEVELS={'1':['Fan','Participant','Coach'],'2':['Entry Level','Mid Level','Expert Level'],'3':['Exploring','Engaged','Leading']};
   function section(label, arr, hasLevel, levelKey, screenNum, noBorder, extra){
     var screenKey=String(screenNum);
@@ -1994,7 +2020,7 @@ function renderProfile(el, viewerMode){
       ?arr.map(function(r,i){
           var lv=hasLevel?(r[levelKey]||''):'';
           var local=r.local?' 📍':'';
-          var missingLevel=hasLevel&&!lv&&!viewerMode;
+          var missingLevel=hasLevel&&!lv&&canEdit;
           var pickerId='cat-picker-'+screenKey+'-'+i;
           var pickerBtns=missingLevel?lvOpts.map(function(opt){
             return '<button class="cat-pick-btn" onclick="setCatLevel(\''+screenKey+'\','+i+',\''+opt+'\')">'+opt+'</button>';
@@ -2014,7 +2040,7 @@ function renderProfile(el, viewerMode){
           return '<div style="position:relative;display:inline-block;">'+'<div class="profile-tag"'+(missingLevel?' style="border-color:#d32f2f;"':'')+chipClick+'>'+esc(r.item)+(lv?'<span class="tag-level">'+esc(lv)+'</span>':'')+missingTag+local+subLabel+infoIcon+'</div>'+picker+popover+'</div>';
         }).join('')
       :'<div class="profile-empty">Nothing added yet.</div>';
-    var actions=!viewerMode
+    var actions=canEdit
       ?'<div class="profile-section-actions">'
         +'<button class="edit-btn" onclick="window.jumpTo('+screenNum+')">✏️ Edit</button>'
         +'</div>'
@@ -2026,7 +2052,7 @@ function renderProfile(el, viewerMode){
       +'</div>';
   }
   var allNeeds=_needsSkill.concat(_needsRes);
-  var _navOwn=!viewerMode; if(viewerMode){var _i=String(_showId||'').replace(/\./g,'').toLowerCase();var _me='';try{_me=String(new URLSearchParams(window.location.search).get('me')||'').replace(/\./g,'').toLowerCase();}catch(e){}var _s='';try{_s=String(localStorage.getItem('appear-id')||'').replace(/\./g,'').toLowerCase();}catch(e){}_navOwn=!!(_i&&((_me&&_me===_i)||(_s&&_s===_i)));}
+  var _navOwn=canEdit;   // isOwner() already performs the me/localStorage test this line used to repeat
   var _navId=viewerMode?_showId:_appearId;
   var _WB='text-decoration:none;color:#185FA5;background:#fff;font-size:14px;font-weight:600;padding:8px 15px;border-radius:20px;white-space:nowrap;';
   var _mc=(_navOwn&&_navId)?('&memberCard='+encodeURIComponent(_navId)):'';
@@ -2065,7 +2091,7 @@ function renderProfile(el, viewerMode){
     +section('What I enjoy',_interests,true,'level',1,false,_expression?'<div style="margin-top:6px;display:flex;justify-content:flex-end;"><span style="font-size:13px;color:var(--soft);"><span style="font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:0.08em;color:var(--muted);">This is so me:</span> <span style="font-size:10px;font-weight:700;">'+esc(_expressionItems.join(', '))+'</span></span></div>':'')
     +'<div class="profile-section" style="border-bottom:none;padding-bottom:4px;">'
     +'<div class="profile-section-header"><div class="profile-section-label">My skills</div>'
-    +(!viewerMode?'<div class="profile-section-actions"><button class="edit-btn" onclick="jumpTo(2)">✏️ Edit</button></div>':'')
+    +(canEdit?'<div class="profile-section-actions"><button class="edit-btn" onclick="jumpTo(2)">✏️ Edit</button></div>':'')
     +'</div>'
     +'<div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:10px;">'
     +(_methods.length
@@ -2076,7 +2102,7 @@ function renderProfile(el, viewerMode){
     +(_skills.length
       ?_skills.map(function(r,i){
           var lv=r.level||'';
-          var missingLevel=!lv&&!viewerMode;
+          var missingLevel=!lv&&canEdit;
           var pickerId='cat-picker-2-'+i;
           var lvOpts=['Entry Level','Mid Level','Expert Level'];
           var pickerBtns=missingLevel?lvOpts.map(function(opt){return '<button class="cat-pick-btn" onclick="setCatLevel(\'2\','+i+',\''+opt+'\')">' +opt+'</button>';}).join(''):'';
@@ -2087,29 +2113,29 @@ function renderProfile(el, viewerMode){
       :'<div class="profile-empty">Nothing added yet.</div>')
     +'</div></div>'
     +'<div class="profile-lang-row" id="profile-lang-row">'+buildLangRowHTML()+'</div>'
-    +(function(viewerMode){
+    +(function(canEdit){
     var valAdded=_values;
     var domAdded=_domains;
-    var careActions=!viewerMode?'<div class="profile-section-actions"><button class="edit-btn" onclick="window.jumpTo(3)">✏️ Edit</button></div>':'';
+    var careActions=canEdit?'<div class="profile-section-actions"><button class="edit-btn" onclick="window.jumpTo(3)">✏️ Edit</button></div>':'';
     var valSection=valAdded.length?'<div style="margin-bottom:8px;"><div style="font-size:10px;font-weight:700;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">VALUES</div><div class="profile-tags">'+valAdded.map(function(v){var lvl=v.level?'<span class="tag-level">'+esc(v.level)+'</span>':'';return '<div class="profile-tag">'+esc(v.item)+lvl+'</div>';}).join('')+'</div></div>':'';
     var domSection=domAdded.length?'<div><div style="font-size:10px;font-weight:700;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">DOMAINS</div><div class="profile-tags">'+domAdded.map(function(v){var lvl=v.level?'<span class="tag-level">'+esc(v.level)+'</span>':'';return '<div class="profile-tag">'+esc(v.item)+lvl+'</div>';}).join('')+'</div></div>':'';
     var careContent=valSection+domSection;
     return careContent?'<div class="profile-section"><div class="profile-section-header"><div class="profile-section-label">What I care about</div>'+careActions+'</div>'+careContent+'</div>':'';
-  })(viewerMode)
-    +(_eventId?'<div id="profile-potluck-section">'+buildProfilePotluckSectionInner(viewerMode)+'</div>':'');
+  })(canEdit)
+    +(_eventId?'<div id="profile-potluck-section">'+buildProfilePotluckSectionInner(canEdit)+'</div>':'');
   if(_eventId&&!_potluckLoaded){
     loadPotluck(function(){
       var c=document.getElementById('profile-potluck-section');
-      if(c) c.innerHTML=buildProfilePotluckSectionInner(viewerMode);
+      if(c) c.innerHTML=buildProfilePotluckSectionInner(canEdit);
     });
   }
 }
-function buildProfilePotluckSectionInner(viewerMode){
+function buildProfilePotluckSectionInner(canEdit){
   if(!_appearId) return '';
   var normalId=String(_appearId).split('.').join('').toLowerCase();
   var mine=(_potluckClaims||[]).filter(function(c){return String(c.appearId).split('.').join('').toLowerCase()===normalId;});
   var seen={};
-  var actions=!viewerMode?'<div class="profile-section-actions"><button class="edit-btn" onclick="window.jumpTo(\'potluck\')">✏️ Edit</button></div>':'';
+  var actions=canEdit?'<div class="profile-section-actions"><button class="edit-btn" onclick="window.jumpTo(\'potluck\')">✏️ Edit</button></div>':'';
   var tags=mine.length
     ?mine.filter(function(c){if(seen[c.item])return false;seen[c.item]=true;return true;}).map(function(c){
         var listItem=(_signupList.find(function(it){return it.item===c.item;}))||{};
@@ -3410,6 +3436,9 @@ window.goBack = function(){
 (async function init(){
   if(_viewerMode){
     await loadProfileAndIntake();                // ONE combined call (getIntake + lookupProfile)
+    // The owner opening their own public link lands on the same editable profile the
+    // "?id=" door leads to, rather than a read-only copy of themselves.
+    if(isOwner()){ _completed=_hasProfile; _screen=_hasProfile?0:'intro'; if(!_hasProfile) _fastPath=true; }
     render();                                    // paint the profile immediately
     loadRefData().then(function(){ render(); }); // lazy: category labels, then repaint
     loadHostInfoForViewer();                     // lazy: only fires when an eventId is attached; repaints if this person is that event's host
@@ -3440,4 +3469,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V4.00 | Date: 2026-07-18 | LAST CHANGE: Two-screen intake - see the top-of-file note. (The bottom stamp had drifted to V3.05 while the top read V3.13; both now read the same version.) -->
+<!-- Version: V4.10 | Date: 2026-07-18 | LAST CHANGE: One profile screen with privileges - see the top-of-file note. (V4.00: two-screen intake.) -->
