@@ -1,4 +1,4 @@
-<!-- Version: V3.13 | Date: 2026-07-17 | LAST CHANGE: Potluck flow reworked - header is now a hub-style white bar with dark event text; all seeded pills show at once (no per-type gating, so picking a value/domain no longer forces an odd "experience" framing); picking one asks how to bring it (Skill/Experience/Thing) with a breadcrumb so the context stays visible; and committing paints optimistically instead of re-fetching the whole list, cutting the wait from 4 backend calls to 2. (V3.12: three bug fixes.) -->
+<!-- Version: V4.00 | Date: 2026-07-18 | LAST CHANGE: Two-screen intake. Screen 1 is the existing "what will you bring" intro, now with a plain text field under each checked type (saved inside bringType as key~text, so no GAS change). Screen 2 is one page holding all five fields the hub needs - postal, language, one thing you enjoy, one skill, and one thing you care about - as plain search fields with no category drill-downs and no level pickers; leaving one open names it and says plainly what it means for hub visibility, then lets you continue. Every original screen still exists and stays reachable from the profile pencils as optional enrichment. Potluck seeding now offers back everything listed (levels are no longer on the required path, so there is no Expert/Coach/Leading signal to filter on) and no longer stamps "Expert Level" on a skill the person never rated. (V3.13: potluck flow rework.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -364,6 +364,11 @@ var _needsSkill  = [];
 var _needsRes    = [];
 var _methods     = [];
 var _bringType   = [];
+// Free text the person types under each checked bring-type on the first fast screen.
+// Saved inside bringType as key~<encoded text>, the same "~" convention needs already uses,
+// so no GAS change is needed and old records (no "~") still parse.
+var _bringText   = {skill:'',experience:'',thing:''};
+var _fastPath    = false;  // true once this visit came through the two fast screens, so Back returns there
 var _wantsSignupList = false;
 var _expression  = '';
 var _screen2step = 'lang';
@@ -500,7 +505,7 @@ async function loadProfileAndIntake(){
       _postal=d.postal||'';
       _retired=String(d.retired||'').trim().toLowerCase()==='true';
       _methods=(d.methods||'').split('|').filter(Boolean);
-      _bringType=(d.bringType||'').split('|').filter(Boolean);
+      _bringType=parseBringTypeStr(d.bringType);
       _wantsSignupList=String(d.wantsSignupList||'').trim().toLowerCase()==='true';
       _expression=d.expression||'';
       _expressionItems=_expression?_expression.split('|').filter(Boolean):[];
@@ -539,7 +544,7 @@ async function loadIntake(){
       _postal=d.postal||'';
       _retired=String(d.retired||'').trim().toLowerCase()==='true';
       _methods=(d.methods||'').split('|').filter(Boolean);
-      _bringType=(d.bringType||'').split('|').filter(Boolean);
+      _bringType=parseBringTypeStr(d.bringType);
       _wantsSignupList=String(d.wantsSignupList||'').trim().toLowerCase()==='true';
       _expression=d.expression||'';
       _expressionItems=_expression?_expression.split('|').filter(Boolean):[];
@@ -558,6 +563,18 @@ async function loadIntake(){
   if(_screen===2){var lb=document.getElementById('lang-edit-btn');if(lb)lb.textContent='✏️ '+(_languages.length?'Languages: '+_languages.join(', '):'Add your languages');}
 }
 
+// bringType save format: key[~<encoded free text>]|key[~...]
+// Returns the plain key list and fills _bringText as a side effect.
+function parseBringTypeStr(str){
+  _bringText={skill:'',experience:'',thing:''};
+  return String(str||'').split('|').filter(Boolean).map(function(p){
+    var i=p.indexOf('~');
+    if(i<0) return p;
+    var k=p.slice(0,i);
+    try{ _bringText[k]=decodeURIComponent(p.slice(i+1)); }catch(e){ _bringText[k]=p.slice(i+1); }
+    return k;
+  });
+}
 function parseTagStr(str,lk){
   if(!str) return [];
   return str.split('|').filter(Boolean).map(function(s){
@@ -603,7 +620,10 @@ function autoSave(){
     _needsRes.map(function(s){return s.item+(s.local?':local':'')+':'+(s.ntype||'thing')+(s.category?':'+s.category:'')+(s.detail?'~'+encodeURIComponent(s.detail):'');})
   ).join('|');
   var mStr=_methods.join('|');
-  var btStr=_bringType.join('|');
+  var btStr=_bringType.map(function(k){
+    var t=(_bringText&&_bringText[k])||'';
+    return k+(t?'~'+encodeURIComponent(t):'');
+  }).join('|');
   fetch(GS_URL+'?action=saveIntake'
     +'&appearId='+encodeURIComponent(_appearId)
     +'&languages='+encodeURIComponent(_languages.join('|'))
@@ -1010,6 +1030,9 @@ window.toggleLocal = function(screen, idx){
 };
 
 function updateAddedSection(s){
+  // The fast screen holds all three groups at once and shows plain chips (no levels),
+  // so it paints its own sections and none of the per-screen containers below exist.
+  if(_screen==='fast2'){ fastRefresh(); return; }
   if(s==='3'){
     // Update in place instead of full re-render to avoid wiping added sections
     var elV=document.getElementById('added-3-values');
@@ -1659,7 +1682,7 @@ async function _fillHubFromReg(){
 }
 window.goToProfile = function(){
   // Only go to profile if completed all 4 sections on first visit, or if returning edit
-  if(!_completed&&!_hasProfile){toast('Complete all 4 sections first.');return;}
+  if(!_completed&&!_hasProfile){toast('Your profile opens once you finish these two screens.');return;}
   _editMode=false; _screen=0; render();
 };
 
@@ -1683,6 +1706,7 @@ function render(){
   }
   if(_screen==='intro'){ renderScreenIntro(el); return; }
   if(_screen===0){ renderProfile(el,false); _wtmDecorate(); return; }
+  if(_screen==='fast2'){ renderScreenFast2(el); return; }
   if(_screen==='1b'){ renderScreen1b(el); return; }
   if(_screen==='potluck'){ renderScreenPotluck(el); return; }
   if(_screen==='share'){ renderScreenShare(el); return; }
@@ -1697,12 +1721,14 @@ var _bringOpts=[
   {key:'thing',emoji:'📦',label:'Thing',ex:'flowers, tent, speakers',msg:'Bring a thing, people notice, some will want more of it after the event.'}
 ];
 function renderScreenIntro(el){
+  var FINP='width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;box-sizing:border-box;margin:2px 0 6px 34px;max-width:calc(100% - 34px);';
   var rows=_bringOpts.map(function(o){
     var sel=_bringType.indexOf(o.key)>-1;
     return '<div class="method-item'+(sel?' selected':'')+'" onclick="toggleBringType(\''+o.key+'\')">'
       +'<div class="method-check'+(sel?' checked':'')+'">'+(sel?'✓':'')+'</div>'
       +'<div class="method-text"><strong>'+o.emoji+' '+o.label+'</strong> (Examples: '+esc(o.ex)+')</div>'
       +'</div>'
+      +(sel?'<input type="text" id="bring-text-'+o.key+'" placeholder="'+esc(o.ex)+'" value="'+esc(_bringText[o.key]||'')+'" style="'+FINP+'">':'')
       +(sel?'<div style="font-size:13px;color:var(--brand);margin:4px 0 4px 34px;">🎯 '+esc(o.msg)+'</div>':'');
   }).join('');
   var signupRow='<div class="method-item'+(_wantsSignupList?' selected':'')+'" onclick="toggleWantsSignupList()">'
@@ -1711,27 +1737,158 @@ function renderScreenIntro(el){
     +'</div>'
     +(_wantsSignupList?'<div style="font-size:13px;color:var(--brand);margin:4px 0 4px 34px;">🎯 We\'ll share this sign up list after you create your event profile</div>':'');
   el.innerHTML='<div style="padding:8px 2px 6px;">'
+    +fastStepHTML(1)
     +'<p style="font-size:17px;font-weight:700;color:var(--text);margin-bottom:14px;">You\'re in! 🎉</p>'
-    +'<p style="font-size:15.5px;line-height:1.55;color:var(--text);margin-bottom:14px;">What will you bring to this event? This gets you a ticket in! Check now what you\'re thinking and we\'ll ask you to share more later...</p>'
+    +'<p style="font-size:15.5px;line-height:1.55;color:var(--text);margin-bottom:14px;">What will you bring to this event? This gets you a ticket in. Check what you are thinking, and name it here if you already know.</p>'
     +rows
     +signupRow
-    +'<button class="btn-next" style="margin-top:22px;" onclick="introContinue();">Create my event profile</button>'
+    +'<button class="btn-next" style="margin-top:22px;" onclick="introContinue();">Next</button>'
     +'</div>';
 }
+// Any re-render of this screen rebuilds the inputs, so read them back into state first.
+function captureBringText(){
+  ['skill','experience','thing'].forEach(function(k){
+    var inp=document.getElementById('bring-text-'+k);
+    if(inp) _bringText[k]=inp.value.trim();
+  });
+}
 window.introContinue=function(){
+  captureBringText();
   // Asking to see the sign-up list is a valid answer on its own - don't block on a bring-type.
   if(!_bringType.length&&!_wantsSignupList){ toast('Please select one - this gets you a ticket in!'); return; }
-  _screen=1; render();
+  autoSave();
+  _fastPath=true; _screen='fast2'; render();
 };
 window.toggleBringType=function(key){
+  captureBringText();
   var i=_bringType.indexOf(key);
   if(i>-1) _bringType.splice(i,1); else _bringType.push(key);
   render();
 };
 window.toggleWantsSignupList=function(){
+  captureBringText();
   _wantsSignupList=!_wantsSignupList;
   render();
 };
+
+// ─── Fast path: two screens that collect everything the hub needs ─────────────
+// Screen 1 = the intro (what will you bring). Screen 2 = the five remaining hub fields
+// on one page, as plain search fields with no parent/sub drill-down and no level pickers.
+// Every original screen still exists and stays reachable from the profile as enrichment.
+function fastStepHTML(n){
+  return '<div class="progress-wrap"><div class="progress-steps">'
+    +'<div class="progress-step'+(n>=1?' done':'')+'"></div>'
+    +'<div class="progress-step'+(n>=2?' done':'')+'"></div>'
+    +'</div><div class="progress-label">Step '+n+' of 2</div></div>';
+}
+
+// The five things the hub needs before someone appears on it.
+function fastMissing(){
+  var m=[];
+  if(!_postal) m.push('a postal code');
+  if(!_languages.length) m.push('a language');
+  if(!_interests.length) m.push('one thing you enjoy');
+  if(!_skills.length) m.push('one skill');
+  if(!_values.length&&!_domains.length&&!_needsSkill.length&&!_needsRes.length) m.push('something you care about or need');
+  return m;
+}
+
+function fastChipsHTML(s){
+  var arr=String(s)==='3'?_values.concat(_domains):getArr(s);
+  if(!arr.length) return '';
+  return '<div style="display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 2px;">'
+    +arr.map(function(r,i){
+      return '<div style="display:inline-flex;align-items:center;gap:6px;background:var(--sel-bg);border:1.5px solid var(--brand);border-radius:18px;padding:5px 10px 5px 12px;font-size:13px;color:var(--brand);font-weight:500;">'
+        +esc(r.item)
+        +'<button onclick="removeItem(\''+s+'\','+i+')" aria-label="Remove" style="background:none;border:none;color:var(--brand);font-size:14px;line-height:1;cursor:pointer;padding:0;font-family:inherit;">✕</button>'
+        +'</div>';
+    }).join('')
+    +'</div>';
+}
+
+function fastLangHTML(){
+  var pool=(_refData&&_refData.languages)||[];
+  var q=String(_langFilter||'').toLowerCase();
+  var res=q?pool.filter(function(l){return String(l).toLowerCase().indexOf(q)>-1;}).slice(0,12):[];
+  var chosen=_languages.length
+    ?'<div style="display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 2px;">'
+      +_languages.map(function(l){
+        return '<div style="display:inline-flex;align-items:center;gap:6px;background:var(--sel-bg);border:1.5px solid var(--brand);border-radius:18px;padding:5px 10px 5px 12px;font-size:13px;color:var(--brand);font-weight:500;">'
+          +esc(l)
+          +'<button onclick="fastRemoveLang(\''+rawVal(l)+'\')" aria-label="Remove" style="background:none;border:none;color:var(--brand);font-size:14px;line-height:1;cursor:pointer;padding:0;font-family:inherit;">✕</button>'
+          +'</div>';
+      }).join('')+'</div>'
+    :'';
+  var results=res.length
+    ?'<div class="search-results">'+res.map(function(l){
+        return '<div class="search-result-item" onclick="fastAddLang(\''+rawVal(l)+'\')">'+esc(l)+'</div>';
+      }).join('')+'</div>'
+    :(q?'<div class="add-custom-row" onclick="fastAddTypedLang()">+ Add "'+esc(_langFilter)+'"</div>':'');
+  return '<div id="fast-lang-block">'
+    +'<div class="search-wrap"><span class="search-icon">🔍</span>'
+    +'<input type="text" id="fast-lang-input" placeholder="Search languages..." value="'+esc(_langFilter)+'" oninput="fastLangSearch(this.value)"></div>'
+    +results+chosen+'</div>';
+}
+window.fastLangSearch=function(q){
+  _langFilter=q;
+  var el=document.getElementById('fast-lang-block');
+  if(el){ el.outerHTML=fastLangHTML(); var i=document.getElementById('fast-lang-input'); if(i){ i.focus(); i.setSelectionRange(i.value.length,i.value.length); } }
+};
+window.fastAddLang=function(l){
+  l=String(l).trim(); if(!l) return;
+  if(_languages.indexOf(l)<0) _languages.push(l);
+  _langFilter='';
+  window.fastLangSearch('');
+  autoSave();
+};
+// Reads the typed value straight off the input so free text never rides through an inline handler.
+window.fastAddTypedLang=function(){
+  var i=document.getElementById('fast-lang-input');
+  if(i) window.fastAddLang(i.value);
+};
+window.fastRemoveLang=function(l){
+  var i=_languages.indexOf(l); if(i>-1) _languages.splice(i,1);
+  window.fastLangSearch(_langFilter);
+  autoSave();
+};
+
+// Re-paint the added chips after any add/remove made through the shared addItem/removeItem path.
+function fastRefresh(){
+  ['1','2','3'].forEach(function(s){
+    var el=document.getElementById('fast-added-'+s);
+    if(el) el.innerHTML=fastChipsHTML(s);
+  });
+}
+
+function fastFieldHTML(title, sub, s, placeholder){
+  return '<div style="margin-bottom:18px;">'
+    +'<div style="font-weight:700;font-size:15px;color:var(--text);margin-bottom:2px;">'+esc(title)+'</div>'
+    +(sub?'<div style="font-size:12px;color:var(--soft);margin-bottom:6px;">'+esc(sub)+'</div>':'')
+    +screenSearchHTML(s, placeholder, true)
+    +'<div id="fast-added-'+s+'">'+fastChipsHTML(s)+'</div>'
+    +'</div>';
+}
+
+function renderScreenFast2(el){
+  var cont=document.getElementById('app-content'); if(!cont) return;
+  var INP='width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;box-sizing:border-box;';
+  cont.innerHTML=fastStepHTML(2)
+    +'<h2>A little about you</h2>'
+    +'<p style="font-size:13px;color:var(--soft);margin:0 0 18px;">These five answers are what puts you on the event hub, where people can find you. You are welcome to add more to your profile afterwards.</p>'
+    +'<div style="margin-bottom:18px;">'
+      +'<div style="font-weight:700;font-size:15px;color:var(--text);margin-bottom:6px;">Postal code</div>'
+      +'<input type="text" id="fast-postal" placeholder="Your postal code" value="'+esc(_postal)+'" style="'+INP+'">'
+    +'</div>'
+    +'<div style="margin-bottom:18px;">'
+      +'<div style="font-weight:700;font-size:15px;color:var(--text);margin-bottom:6px;">Language you speak</div>'
+      +fastLangHTML()
+    +'</div>'
+    +fastFieldHTML('One thing you enjoy','Anything you do for fun counts here.','1','Search hobbies and recreation...')
+    +fastFieldHTML('One skill','What you are good at, paid or otherwise.','2','Search skills...')
+    +fastFieldHTML('Something you care about or need','This is what people connect with you over.','3','Search what you care about...')
+    +'<div id="fast-notice"></div>'
+    +'<div class="nav-row"><button class="btn-back" onclick="goBack()">Back</button><button class="btn-next" onclick="goNext()">Next</button></div>';
+}
 
 function progressHTML(n){
   var s=''; for(var i=1;i<=4;i++) s+='<div class="progress-step'+(i<=n?' done':'')+'"></div>';
@@ -2234,10 +2391,16 @@ var _seedFlow={item:'',step:'',type:''};
 var SEED_FORMATS=['Q&A time','Demo','Workshop'];
 function seedCandidates(){
   var out=[];
-  (_skills||[]).forEach(function(s){ if(s.item&&s.level==='Expert Level') out.push(s.item); });
-  (_interests||[]).forEach(function(s){ if(s.item&&s.level==='Coach') out.push(s.item); });
-  (_values||[]).forEach(function(s){ if(s.item&&s.level==='Leading') out.push(s.item); });
-  (_domains||[]).forEach(function(s){ if(s.item&&s.level==='Leading') out.push(s.item); });
+  // Levels left the required path with the two-screen intake, so there is no Expert/Coach/Leading
+  // signal to filter on any more. Offer back everything they listed and let them pick, starting
+  // with whatever they already named on the first screen.
+  ['skill','experience','thing'].forEach(function(k){
+    var t=(_bringText&&_bringText[k])||''; if(t) out.push(t);
+  });
+  (_skills||[]).forEach(function(s){ if(s.item) out.push(s.item); });
+  (_interests||[]).forEach(function(s){ if(s.item) out.push(s.item); });
+  (_values||[]).forEach(function(s){ if(s.item) out.push(s.item); });
+  (_domains||[]).forEach(function(s){ if(s.item) out.push(s.item); });
   var seen={},uniq=[];
   out.forEach(function(i){ var k=i.toLowerCase(); if(!seen[k]){seen[k]=1;uniq.push(i);} });
   return uniq;
@@ -2342,7 +2505,9 @@ window.seedSetHow=function(t){
   if(t==='skill'){
     // A skill they name here is worth keeping on their event profile too.
     if(!_skills.some(function(s){return String(s.item).toLowerCase()===String(_seedFlow.item).toLowerCase();})){
-      _skills.unshift({item:_seedFlow.item,category:'',level:'Expert Level'});
+      // No level is assumed here - levels are optional enrichment now, and claiming
+      // "Expert Level" on their behalf would put a word in their mouth they never picked.
+      _skills.unshift({item:_seedFlow.item,category:'',level:''});
     }
     _seedFlow={item:_seedFlow.item,step:'format',type:'skill'};
   } else if(t==='experience'){
@@ -3122,6 +3287,20 @@ window.toggleRetired = function(){
   autoSave();
 };
 window.goNext = function(){
+  if(_screen==='fast2'){
+    var fp=document.getElementById('fast-postal'); if(fp) _postal=fp.value.trim();
+    autoSave();
+    var miss=fastMissing();
+    var notice=document.getElementById('fast-notice');
+    // First tap names what is still open and what it means; a second tap continues anyway.
+    if(miss.length&&notice&&!notice.innerHTML){
+      notice.innerHTML='<div class="reminder-msg">Still open: '+esc(miss.join(', '))+'. You are welcome to continue. Your profile appears on the event hub once these are filled in, and you can come back to them from your profile at any time.</div>';
+      return;
+    }
+    _completed=true; _hasProfile=true;
+    if(_eventId){ _screen='potluck'; render(); return; }
+    _screen='share'; render(); return;
+  }
   if(_screen===2&&!_editMode&&_screen2step==='lang'){
     _screen2step='postal'; render(); return;
   }
@@ -3196,6 +3375,10 @@ window.goNext = function(){
 };
 
 window.goBack = function(){
+  if(_screen==='fast2'){
+    var fp2=document.getElementById('fast-postal'); if(fp2) _postal=fp2.value.trim();
+    _screen='intro'; render(); return;
+  }
   if(_screen===2&&!_editMode&&_screen2step==='skills'){
     _screen2step='naturally'; render(); return;
   }
@@ -3209,10 +3392,10 @@ window.goBack = function(){
     _screen='1b'; render(); return;
   }
   if(_screen==='1b'){ _screen=1; render(); return; }
-  if(_screen==='potluck'){ _screen=4; render(); return; }
+  if(_screen==='potluck'){ _screen=_fastPath?'fast2':4; render(); return; }
   if(_screen==='share'){
     if(_eventId){ _screen='potluck'; render(); }
-    else { _screen=4; render(); }
+    else { _screen=_fastPath?'fast2':4; render(); }
     return;
   }
   if(_screen===3&&!_editMode&&_valTab==='domains'){
@@ -3233,7 +3416,7 @@ window.goBack = function(){
     return;
   }
   if(!_appearId){ render(); return; }
-  if(_introMode) _screen='intro';                // new registrant from the hub CTA -> welcome screen before section 1
+  if(_introMode){ _screen='intro'; _fastPath=true; }   // new registrant from the hub CTA
   var _bootEl=document.getElementById('app-content');
   if(_bootEl) _bootEl.innerHTML='<div style="text-align:center;padding:60px 20px;"><div style="width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--brand);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px;"></div><p style="color:var(--muted);font-size:14px;margin:0;">Loading your event profile...</p></div>';
   await loadRefData();                           // cached + fast — needed to render the flow options
@@ -3244,16 +3427,17 @@ window.goBack = function(){
     // Only redirect if data actually loaded from sheet (at least one section has data)
     // Prevents redirect loop when GAS fetch fails or returns empty
     var _dataLoaded=(_interests.length||_skills.length||_values.length||_methods.length||_languages.length);
-    if(_dataLoaded){
-      if(!_interests.length){ _screen=1; render(); return; }
-      if(!_skills.length){ _screen=2; _screen2step='skills'; render(); return; }
-      if(!_values.length){ _screen=3; render(); return; }
-    }
+    // Anything still open goes to the one fast screen that holds all five, rather than
+    // dropping them back into the long wizard a section at a time.
+    if(_dataLoaded&&fastMissing().length){ _fastPath=true; _screen='fast2'; render(); return; }
     _screen=0;
+  } else {
+    // No profile yet: the fast path is the way in.
+    _screen='intro'; _fastPath=true;
   }
   render();
 })();
 </script>
 </body>
 </html>
-<!-- Version: V3.05 | Date: 2026-07-17 | LAST CHANGE: Sign-up screen now shows the event's title/date/venue at top (was missing entirely, unlike the hub); "Who's bringing what" columns now use the hub's exact CSS classes (quadrant/q-header/q-title/q-body) and 240px minmax sizing, instead of approximated styling. (V3.04: back button.) -->
+<!-- Version: V4.00 | Date: 2026-07-18 | LAST CHANGE: Two-screen intake - see the top-of-file note. (The bottom stamp had drifted to V3.05 while the top read V3.13; both now read the same version.) -->
