@@ -1,4 +1,4 @@
-<!-- Version: V3.07 | Date: 2026-07-17 | LAST CHANGE: Potluck width actually fixed - #page-wrap carried an INLINE style="max-width:660px" attribute, which beats any stylesheet rule, so every wide-mode CSS override was silently ignored. Moved that width into CSS so wide-mode can win, and trimmed body side padding to the hub-s 14px. Usable width 660px -> full viewport. (V3.06: wide-mode class + card cap.) -->
+<!-- Version: V3.08 | Date: 2026-07-17 | LAST CHANGE: (1) All profile pills now use the lighter background/border of the method pills. (3) "People I want to meet" no longer renders on the public ?show= profile at all (edit view only); the Bookmark-to-meet button is unaffected. (4) "(on the hub)" in that empty state is now a link to this event-s hub (plain text when no event is known). (5) Potluck header echoes their intro picks, e.g. "What you said you-d like to bring: Skill, Thing". (V3.07: width fix.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -135,7 +135,8 @@
     .profile-section-actions{display:flex;align-items:center;gap:8px;}
     .edit-btn{font-size:12px;font-weight:600;color:white;background:var(--brand);border:none;border-radius:16px;cursor:pointer;font-family:'DM Sans',sans-serif;padding:5px 12px;}
     .profile-tags{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px;}
-    .profile-tag{padding:6px 12px;border-radius:20px;background:var(--sel-bg);border:1.5px solid var(--sel-border);font-size:13px;color:var(--brand);font-weight:500;}
+    /* All profile pills share the lighter background/border of the method pills (Making and designing etc.). */
+    .profile-tag{padding:6px 12px;border-radius:20px;background:var(--input-bg);border:1.5px solid var(--border);font-size:13px;color:var(--brand);font-weight:500;}
     .tag-level{font-size:11px;color:var(--muted);font-weight:400;margin-left:4px;}
     .seek-info{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border:1px solid currentColor;border-radius:50%;font-size:9px;font-weight:700;margin-left:5px;vertical-align:middle;}
     .seek-detail-pop{position:absolute;top:100%;left:0;margin-top:6px;z-index:50;background:#fff;border:1.5px solid var(--brand);border-radius:10px;padding:8px 26px 8px 12px;font-size:13px;color:var(--text);box-shadow:0 6px 20px rgba(0,0,0,.12);min-width:170px;max-width:260px;white-space:normal;text-align:left;line-height:1.4;}
@@ -1798,6 +1799,12 @@ window.wtmToggle=function(){
   if(btn){ btn.textContent=has?'✓ Bookmarked':'Bookmark to meet'; }
 };
 window.wtmRemove=function(id){ var n=_wtmNorm(id); _wtmSet(_wtmGet().filter(function(p){return _wtmNorm(p.id)!==n;})); render(); };
+// "(on the hub)" - a link when we know which event's hub to send them to, plain text otherwise.
+function _wtmHubLink(){
+  if(!_eventId) return '(on the hub)';
+  var url='https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+(_appearId?'&memberCard='+encodeURIComponent(_appearId):'');
+  return '<a href="'+url+'" style="color:var(--brand);font-weight:600;">(on the hub)</a>';
+}
 function _wtmListHTML(){
   var a=_wtmGet();
   var inner = a.length ? a.map(function(p){
@@ -1806,7 +1813,7 @@ function _wtmListHTML(){
       +'<a href="https://creating.works/intake.html?show='+encodeURIComponent(p.id)+(p.eventId?'&eventId='+encodeURIComponent(p.eventId):'')+'" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;flex:1;">'+ph+'<span style="font-size:14px;font-weight:600;">'+esc(p.name||p.id)+'</span></a>'
       +'<button onclick="wtmRemove(\''+esc(String(p.id).replace(/\\/g,"\\\\").replace(/'/g,"\\'"))+'\')" aria-label="Remove" style="background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;">✕</button>'
       +'</div>';
-  }).join('') : '<div style="font-size:13px;color:var(--muted);padding:6px 0;">No one yet. Open someone\'s profile and tap "I want to meet!"</div>';
+  }).join('') : '<div style="font-size:13px;color:var(--muted);padding:6px 0;">No one yet. Open someone\'s profile '+_wtmHubLink()+' and tap "I want to meet!"</div>';
   return '<div style="margin-top:22px;padding-top:14px;border-top:1.5px solid var(--border);"><div style="font-size:16px;font-weight:700;margin-bottom:6px;">People I want to meet</div>'+inner+'</div>';
 }
 function _wtmDecorate(){
@@ -1814,7 +1821,8 @@ function _wtmDecorate(){
   if(!_viewerMode){ el.insertAdjacentHTML('beforeend', _wtmListHTML()); return; }   // edit view (?id=) = you -> show your list
   if(!_showId) return;
   var own=false; try{ var _s=String(localStorage.getItem('appear-id')||'').replace(/\./g,'').toLowerCase(); var _me=String(new URLSearchParams(window.location.search).get('me')||'').replace(/\./g,'').toLowerCase(); var _i=_wtmNorm(_showId); own=!!(_i&&((_s&&_s===_i)||(_me&&_me===_i))); }catch(e){}
-  if(own){ el.insertAdjacentHTML('beforeend', _wtmListHTML()); return; }
+  // Public profile view (?show=) never shows the want-to-meet list - it lives on the edit view only.
+  if(own) return;
   var has=_wtmHas(_showId);
   var _bs='font-size:14px;font-weight:600;padding:9px 18px;border-radius:20px;cursor:pointer;font-family:inherit;border:1.5px solid #185FA5;background:#fff;color:#185FA5;';
   var btn='<div style="padding:0 2px 14px;"><button id="wtm-btn" onclick="wtmToggle()" style="'+_bs+'">'+(has?'✓ Bookmarked':'Bookmark to meet')+'</button></div>';
@@ -2209,7 +2217,7 @@ function renderScreenPotluck(el){
     +'<div style="background:#fff;border-radius:14px;padding:20px 24px;margin-bottom:16px;">'
     +'<h2 style="margin-bottom:6px;">Event contribution 🎁</h2>'
     +'<p style="font-size:14px;color:var(--soft);margin:0 0 18px;">This event is all about contribution. Think of it as a potluck of skills and offerings. What are you going to bring to the event that you want to be known for in our community?</p>'
-    +'<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--soft);margin-bottom:10px;">What you said you\'d like to bring</div>'
+    +'<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--soft);margin-bottom:10px;">What you said you\'d like to bring'+bringPicksLabel()+'</div>'
     +addRows
     +'</div>'
     +'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 4px 10px;flex-wrap:wrap;"><div style="font-size:18px;font-weight:800;color:#fff;">🎁 Who\'s bringing what</div></div>'
@@ -2221,6 +2229,12 @@ function renderScreenPotluck(el){
 
 // ─── Bottom: 3 columns (Skills / Experiences / Things), styled like the hub's "Who's bringing what" boxes ──
 var _bringTypeMeta={skill:{emoji:'👤',label:'Skill'},experience:{emoji:'🎉',label:'Experience'},thing:{emoji:'📦',label:'Thing'}};
+// Echo back the types they actually picked on the intro screen, e.g. ": Skill, Thing".
+function bringPicksLabel(){
+  if(!_bringType||!_bringType.length) return '';
+  var names=_bringType.map(function(k){ return (_bringTypeMeta[k]||{}).label||k; });
+  return ': '+esc(names.join(', '));
+}
 function bringTypeKey(potluckType){
   var s=String(potluckType||'').trim().toLowerCase();
   if(s==='skill') return 'skill';
