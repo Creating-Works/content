@@ -1,4 +1,4 @@
-<!-- Version: V3.03 | Date: 2026-07-17 | LAST CHANGE: Restructured sign-up screen to match the hub: "What you said you'd like to bring" add-inputs (all 3 types, always) now sit in their own section at the top; the claimable-item columns moved to a "Who's bringing what" section at the bottom, styled exactly like the hub's boxes (plain Skills/Experiences/Things headers). Width cap removed entirely (was 1400px). (V3.02: loading-state fix.) -->
+<!-- Version: V3.04 | Date: 2026-07-17 | LAST CHANGE: Added a Back button on "What do you enjoy doing?" (screen 1) that returns to the bring-type intro screen, when the person arrived via the intro flow. (V3.03: sign-up screen restructure.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1754,7 +1754,7 @@ function navHTML(screen){
   if(_editMode){
     return '<div class="nav-row"><button class="btn-next" onclick="doneEdit()">Done</button></div>';
   }
-  var isFirst=(screen===1);
+  var isFirst=(screen===1&&!_introMode);
   var back=isFirst?'':'<button class="btn-back" onclick="goBack()">Back</button>';
   var addAnother=(screen===4)?'<button class="btn-outlined" onclick="addAnotherNeed()">+ Add another</button>':'';
   var next='<button class="btn-next" onclick="goNext()">'+(screen===4?'Done':'Next')+'</button>';
@@ -3021,6 +3021,7 @@ window.goBack = function(){
   if(_screen===3&&!_editMode&&_valTab==='domains'){
     _valTab=''; renderScreen3(null); return;
   }
+  if(_screen===1&&_introMode){ _screen='intro'; render(); return; }
   if(_screen<=1){ return; }
   _screen--; render();
 };
@@ -3058,4 +3059,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V3.03 | Date: 2026-07-17 | LAST CHANGE: Restructured sign-up screen to match the hub: "What you said you'd like to bring" add-inputs (all 3 types, always) now sit in their own section at the top; the claimable-item columns moved to a "Who's bringing what" section at the bottom, styled exactly like the hub's boxes (plain Skills/Experiences/Things headers). Width cap removed entirely (was 1400px). (V3.02: loading-state fix.) -->
+<!-- Version: V3.04 | Date: 2026-07-17 | LAST CHANGE: Added a Back button on "What do you enjoy doing?" (screen 1) that returns to the bring-type intro screen, when the person arrived via the intro flow. (V3.03: sign-up screen restructure.) -->
