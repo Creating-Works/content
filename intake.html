@@ -1,4 +1,4 @@
-<!-- Version: V3.12 | Date: 2026-07-17 | LAST CHANGE: Three bug fixes - skills now save their category (item:category:level), which is why every skill read "Category missing" after a reload; a Coach-level recreation item is no longer copied into Skills (it stays in Recreation); and ticking "I want to see the sign up list" is now enough to continue without also picking a bring-type. (V3.11: potluck one-question-at-a-time.) -->
+<!-- Version: V3.13 | Date: 2026-07-17 | LAST CHANGE: Potluck flow reworked - header is now a hub-style white bar with dark event text; all seeded pills show at once (no per-type gating, so picking a value/domain no longer forces an odd "experience" framing); picking one asks how to bring it (Skill/Experience/Thing) with a breadcrumb so the context stays visible; and committing paints optimistically instead of re-fetching the whole list, cutting the wait from 4 backend calls to 2. (V3.12: three bug fixes.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2199,9 +2199,10 @@ function renderScreenPotluck(el){
     return;
   }
   document.body.classList.add('wide-mode');   // also set here for direct re-renders that skip render()
-  var headerHTML=_eventTitle?'<div style="margin-bottom:14px;">'
-    +'<div style="font-size:20px;font-weight:700;color:#fff;">'+esc(_eventTitle)+'</div>'
-    +'<div style="font-size:13px;color:rgba(255,255,255,0.85);margin-top:2px;">'
+  // Same treatment as the hub: a white bar with the event in dark text, under the blue nav strip.
+  var headerHTML=_eventTitle?'<div style="background:#fff;border-bottom:1px solid #f0f1f5;border-radius:12px;padding:12px 20px 10px;margin-bottom:14px;">'
+    +'<div style="font-size:17px;font-weight:700;color:#1a1a2e;line-height:1.2;">'+esc(_eventTitle)+'</div>'
+    +'<div style="font-size:12.5px;color:#6b7280;font-weight:600;margin-top:3px;">'
     +(_eventDate?'📅 '+esc(fmtEventDate(_eventDate))+' ':'')
     +((_eventVenue||_eventLocationAddr)?'📍 '+esc([_eventVenue,_eventLocationAddr].filter(Boolean).join(', ')):'')
     +'</div></div>':'';
@@ -2249,8 +2250,32 @@ function seedBlockHTML(){
   var INP='width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;box-sizing:border-box;';
   var h='<div id="seed-block" style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border);">';
 
+  // Breadcrumb so the context of what you're building never disappears mid-flow.
+  var crumb=function(){
+    if(!_seedFlow.item) return '';
+    var parts=[esc(_seedFlow.item)];
+    if(_seedFlow.type) parts.push(esc((_bringTypeMeta[_seedFlow.type]||{}).label||_seedFlow.type));
+    if(_seedFlow.step==='thing') parts.push('Thing');
+    if(_seedFlow.step==='format') parts.push('Details');
+    return '<div style="font-size:12px;font-weight:700;color:var(--brand);margin-bottom:10px;">'+parts.join(' &rsaquo; ')+'</div>';
+  };
+
+  // Picked an item - now say how you want to bring it. This is the only type question.
+  if(_seedFlow.step==='how'){
+    h+=crumb()
+      +'<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:10px;">How would you like to bring <strong>'+esc(_seedFlow.item)+'</strong>?</div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+      +['skill','experience','thing'].map(function(t){
+          var m=_bringTypeMeta[t];
+          return '<button onclick="seedSetHow(\''+t+'\')" style="'+BTN+'">'+m.emoji+' '+esc(m.label)+'</button>';
+        }).join('')
+      +'<button onclick="seedCancel()" style="'+BTN_O+'">Cancel</button>'
+      +'</div></div>';
+    return h;
+  }
   if(_seedFlow.step==='format'){
-    h+='<div style="font-size:13px;color:var(--text);font-weight:600;margin-bottom:8px;">How would you like to contribute <strong>'+esc(_seedFlow.item)+'</strong>?</div>'
+    h+=crumb()
+      +'<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:10px;">How would you like to contribute <strong>'+esc(_seedFlow.item)+'</strong>?</div>'
       +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
       +SEED_FORMATS.map(function(f){ return '<button onclick="seedSetFormat(\''+esc(f).replace(/'/g,"\\'")+'\')" style="'+PILL+'">'+esc(f)+'</button>'; }).join('')
       +'<button onclick="seedCancel()" style="'+BTN_O+'">Cancel</button>'
@@ -2258,7 +2283,8 @@ function seedBlockHTML(){
     return h;
   }
   if(_seedFlow.step==='thing'){
-    h+='<div style="font-size:13px;color:var(--text);font-weight:600;margin-bottom:4px;">Does anything come with <strong>'+esc(_seedFlow.item)+'</strong>?</div>'
+    h+=crumb()
+      +'<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px;">Does anything come with <strong>'+esc(_seedFlow.item)+'</strong>?</div>'
       +'<div style="font-size:12px;color:var(--soft);margin-bottom:8px;">An experience is often a skill plus a thing. Name it and we\'ll list it under Things too.</div>'
       +'<input type="text" id="seed-thing-input" placeholder="e.g. yoga mats, a projector" style="'+INP+'">'
       +'<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">'
@@ -2268,46 +2294,20 @@ function seedBlockHTML(){
       +'</div></div>';
     return h;
   }
-  // "Add another" - the only place the type question appears, because now they're going
-  // beyond what they told us at the intro.
-  if(_seedFlow.step==='pickType'){
-    h+='<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:10px;">What else would you like to bring?</div>'
-      +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
-      +['skill','experience','thing'].map(function(k){
-          var m=_bringTypeMeta[k];
-          return '<button onclick="seedStartFor(\''+k+'\')" style="'+BTN+'">'+m.emoji+' '+esc(m.label)+'</button>';
-        }).join('')
-      +'<button onclick="seedCancel()" style="'+BTN_O+'">Cancel</button>'
-      +'</div></div>';
-    return h;
-  }
 
-  // Ask about ONE type at a time - the next thing they said at the intro that they haven't
-  // contributed yet. No "what will you bring?" question here; they already answered that.
-  var pending=pendingBringTypes();
-  // A type chosen via "Add another" wins over the intro-pick queue.
-  var k=_seedFlow.forType||pending[0];
-  if(k){
-    var meta=_bringTypeMeta[k];
-    var seeds=(k==='thing')?[]:cands;
-    h+='<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:2px;">Which '+esc(meta.label.toLowerCase())+' will you bring?</div>'
-      +(_seedFlow.forType?'':'<div style="font-size:12px;color:var(--soft);margin-bottom:10px;">You said you\'d bring '+(meta.label==='Experience'?'an':'a')+' '+esc(meta.label.toLowerCase())+'.</div>');
-    if(seeds.length){
-      h+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">'
-        +seeds.map(function(c){ return '<button onclick="seedPickFor(\''+k+'\',\''+esc(c).replace(/'/g,"\\'")+'\')" style="'+PILL+'">'+esc(c)+'</button>'; }).join('')
-        +'</div>';
-    }
-    h+='<div style="display:flex;gap:8px;">'
-      +'<input type="text" id="seed-free-input" placeholder="'+(seeds.length?'Or type something else':'Type what you\'ll bring')+'" style="'+INP+'">'
-      +'<button onclick="seedFreeAdd(\''+k+'\')" style="'+BTN+'">Continue</button>'
+  // Resting state: every pill at once, plus free text. No type gating - they pick a thing
+  // first and say what it is second, which is how people actually think about it.
+  h+='<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:2px;">What will you bring'+bringPicksLabel()+'</div>'
+    +'<div style="font-size:12px;color:var(--soft);margin-bottom:10px;">Pick something you already do, or type anything else.</div>';
+  if(cands.length){
+    h+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">'
+      +cands.map(function(c){ return '<button onclick="seedPick(\''+esc(c).replace(/'/g,"\\'")+'\')" style="'+PILL+'">'+esc(c)+'</button>'; }).join('')
       +'</div>';
-    h+=seedFooterHTML(BTN,BTN_O);
-    return h+'</div>';
   }
-
-  // Everything they said they'd bring is covered.
-  h+='<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:2px;">You\'re all set 🎁</div>'
-    +'<div style="font-size:13px;color:var(--soft);margin-bottom:12px;">Your contribution is on the list below.</div>'
+  h+='<div style="display:flex;gap:8px;">'
+    +'<input type="text" id="seed-free-input" placeholder="Type what you\'ll bring" style="'+INP+'">'
+    +'<button onclick="seedFreeAdd()" style="'+BTN+'">Continue</button>'
+    +'</div>'
     +seedFooterHTML(BTN,BTN_O,true);
   return h+'</div>';
 }
@@ -2319,17 +2319,6 @@ function seedFooterHTML(BTN,BTN_O,primaryDone){
     +(hubUrl?'<button onclick="window.location.href=\''+hubUrl+'\'" style="'+(primaryDone?BTN:BTN_O)+'">Done</button>':'')
     +'</div>';
 }
-// Which of their intro picks still have nothing signed up for them.
-function pendingBringTypes(){
-  var mine={};
-  var norm=String(_appearId||'').split('.').join('').toLowerCase();
-  (_potluckClaims||[]).forEach(function(c){
-    if(String(c.appearId||'').split('.').join('').toLowerCase()!==norm) return;
-    var listItem=(_signupList||[]).find(function(it){return it.item===c.item;})||{};
-    mine[bringTypeKey(listItem.potluckType||c.potluckType)]=true;
-  });
-  return (_bringType||[]).filter(function(k){ return !mine[k]; });
-}
 function refreshSeedBlock(){
   var el=document.getElementById('seed-block'); if(!el) return;
   el.outerHTML=seedBlockHTML();
@@ -2337,31 +2326,31 @@ function refreshSeedBlock(){
   if(f) f.focus();
 }
 window.seedCancel=function(){ _seedFlow={item:'',step:'',type:''}; refreshSeedBlock(); };
-window.seedAddAnother=function(){ _seedFlow={item:'',step:'pickType',type:''}; refreshSeedBlock(); };
-// Chose a type from "Add another" -> jump straight into that type's question.
-window.seedStartFor=function(k){
-  if(_bringType.indexOf(k)<0){ _bringType.push(k); autoSave(); }   // they changed their mind; remember it
-  _seedFlow={item:'',step:'',type:'',forType:k};                   // ask about THIS type next
-  refreshSeedBlock();
-};
-// Picked one of their own seeded items for a given type.
-window.seedPickFor=function(k,item){
-  if(k==='skill'){ _seedFlow={item:item,step:'format',type:'skill'}; }
-  else if(k==='experience'){ _seedFlow={item:item,step:'thing',type:'experience'}; }
-  else { commitSeedEntries([{item:item,potluckType:'Thing'}]); return; }
-  refreshSeedBlock();
-};
-// Typed something free-text for a given type.
-window.seedFreeAdd=function(k){
+window.seedAddAnother=function(){ _seedFlow={item:'',step:'',type:''}; refreshSeedBlock(); };
+// Picked a pill -> ask what kind of contribution it is.
+window.seedPick=function(item){ _seedFlow={item:item,step:'how',type:''}; refreshSeedBlock(); };
+// Typed free text -> same question.
+window.seedFreeAdd=function(){
   var inp=document.getElementById('seed-free-input');
   var v=inp?capFirst(inp.value.trim()):'';
   if(!v){ toast('Please enter what you\'ll bring'); return; }
-  // A skill they name here is worth keeping on their profile too.
-  if(k==='skill'&&!_skills.some(function(s){return String(s.item).toLowerCase()===v.toLowerCase();})){
-    _skills.unshift({item:v,category:'',level:'Expert Level'});
-    autoSave();
+  seedPick(v);
+};
+// Said what kind of contribution it is.
+window.seedSetHow=function(t){
+  if(_bringType.indexOf(t)<0) _bringType.push(t);   // they may be going beyond their intro picks
+  if(t==='skill'){
+    // A skill they name here is worth keeping on their event profile too.
+    if(!_skills.some(function(s){return String(s.item).toLowerCase()===String(_seedFlow.item).toLowerCase();})){
+      _skills.unshift({item:_seedFlow.item,category:'',level:'Expert Level'});
+    }
+    _seedFlow={item:_seedFlow.item,step:'format',type:'skill'};
+  } else if(t==='experience'){
+    _seedFlow={item:_seedFlow.item,step:'thing',type:'experience'};
+  } else {
+    commitSeedEntries([{item:_seedFlow.item,potluckType:'Thing'}]); return;
   }
-  seedPickFor(k,v);
+  refreshSeedBlock();
 };
 window.seedSetFormat=function(fmt){
   var label=_seedFlow.item+' - '+fmt;
@@ -2386,13 +2375,17 @@ function commitSeedEntries(entries){
     }
   });
   _seedFlow={item:'',step:'',type:''};
+  // Paint the result straight away. We already know what was added, so there's no reason to
+  // re-fetch the whole list afterwards - that round-trip was most of the wait.
+  entries.forEach(function(e){
+    _potluckClaims.push({item:e.item,potluckType:e.potluckType,appearId:_appearId,elaboration:'',name:_name||'',photo:_photo||''});
+  });
+  renderScreenPotluck(null);
+  toast('Added! 🎁');
   savePotluckList(function(){          // wait for the list write before claiming - no overlap
     var i=0;
     (function next(){
-      if(i>=entries.length){
-        loadPotluck(function(){ renderScreenPotluck(null); toast('Added! 🎁'); });
-        return;
-      }
+      if(i>=entries.length) return;
       var e=entries[i++];
       claimItem(e.item,'',e.potluckType,'','',0,next);
     })();
