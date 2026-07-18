@@ -1,4 +1,4 @@
-<!-- Version: V3.09 | Date: 2026-07-17 | LAST CHANGE: Seeded contribution flow on the potluck screen - offers back their Expert-level skills and Coach-level recreation as pills; pick one -> Skill or Experience -> (skill) Q&A time / Demo / Workshop, or (experience) name the thing it needs, which also gets its own Things entry. No Expert/Coach entries yet -> prompts them to choose a skill, which is saved to their profile. Also fixed savePotluckList overlapping the following claim call in all three add paths (concurrent calls to this backend 404). (V3.08: pill colour, want-to-meet, hub link, bring-picks label.) -->
+<!-- Version: V3.10 | Date: 2026-07-17 | LAST CHANGE: Potluck polish - "My event profile" label now white so it reads on the blue background; shortened the contribution intro copy; seeded pills also include Leading-level values and domains; back button lost its arrow and is now small and centred (no arrow glyphs in buttons anywhere). (V3.09: seeded contribution flow.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -25,6 +25,11 @@
     body.wide-mode #page-wrap{max-width:none;}
     body.wide-mode .card{max-width:none;background:transparent;box-shadow:none;padding:0;border:none;}
     body.wide-mode .top-right-area{position:static;justify-content:flex-end;margin:0 0 10px;}
+    /* Wide mode sits on the blue page background, so this label needs to be white to read. */
+    body.wide-mode .top-right-area span{color:#fff;}
+    /* Wide-mode footer nav: one small centred button, no arrow glyphs. */
+    body.wide-mode .nav-row{display:flex;justify-content:center;background:none;border:none;padding:0;}
+    body.wide-mode .nav-row .btn-back,body.wide-mode .nav-row .btn-next{width:auto;flex:0 0 auto;min-width:0;padding:9px 22px;font-size:14px;border-radius:20px;}
     .bring-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;padding:14px 0;}
     .quadrant{background:#fff;border-radius:14px;border:1px solid #e8eaf0;overflow:hidden;display:flex;flex-direction:column;}
     .q-header{padding:10px 14px 8px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f0f1f5;background:#fff;}
@@ -2216,14 +2221,14 @@ function renderScreenPotluck(el){
   var html=headerHTML
     +'<div style="background:#fff;border-radius:14px;padding:20px 24px;margin-bottom:16px;">'
     +'<h2 style="margin-bottom:6px;">Event contribution 🎁</h2>'
-    +'<p style="font-size:14px;color:var(--soft);margin:0 0 18px;">This event is all about contribution. Think of it as a potluck of skills and offerings. What are you going to bring to the event that you want to be known for in our community?</p>'
+    +'<p style="font-size:14px;color:var(--soft);margin:0 0 18px;">This event is all about contribution. Think of it as a potluck of skills and offerings. What are you going to bring to the event?</p>'
     +seedBlockHTML()
     +'<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--soft);margin-bottom:10px;">What you said you\'d like to bring'+bringPicksLabel()+'</div>'
     +addRows
     +'</div>'
     +'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 4px 10px;flex-wrap:wrap;"><div style="font-size:18px;font-weight:800;color:#fff;">🎁 Who\'s bringing what</div></div>'
     +'<div class="bring-grid" id="bring-grid"></div>'
-    +(_editMode?'<div class="nav-row" style="margin:16px 4px 0;"><button class="btn-next" onclick="doneEdit()">Done</button></div>':'<div class="nav-row" style="margin:16px 4px 0;"><button class="btn-back" onclick="goBack()">← Back</button></div>');
+    +(_editMode?'<div class="nav-row" style="margin:16px 4px 0;"><button class="btn-next" onclick="doneEdit()">Done</button></div>':'<div class="nav-row" style="margin:16px 4px 0;"><button class="btn-back" onclick="goBack()">Back</button></div>');
   cont.innerHTML=html;
   renderPotluckColumns();
 }
@@ -2245,6 +2250,8 @@ function seedCandidates(){
   var out=[];
   (_skills||[]).forEach(function(s){ if(s.item&&s.level==='Expert Level') out.push(s.item); });
   (_interests||[]).forEach(function(s){ if(s.item&&s.level==='Coach') out.push(s.item); });
+  (_values||[]).forEach(function(s){ if(s.item&&s.level==='Leading') out.push(s.item); });
+  (_domains||[]).forEach(function(s){ if(s.item&&s.level==='Leading') out.push(s.item); });
   var seen={},uniq=[];
   out.forEach(function(i){ var k=i.toLowerCase(); if(!seen[k]){seen[k]=1;uniq.push(i);} });
   return uniq;
@@ -2684,7 +2691,7 @@ function renderScreenShare(el){
     +'</div>'
     +'<button onclick="window.location.href=\''+esc(_eventId?eventShareUrl:pageUrl)+'\'" style="width:100%;background:var(--brand);color:white;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;">View my event profile</button>'
     +'</div>'
-    +'<div class="nav-row"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" onclick="goNext()">'+(_eventId?'See the group':'Done')+'</button></div>';
+    +'<div class="nav-row"><button class="btn-back" onclick="goBack()">Back</button><button class="btn-next" onclick="goNext()">'+(_eventId?'See the group':'Done')+'</button></div>';
   cont.innerHTML=html;
   if(_eventId&&!_eventTitle){
     fetchEventTitle(function(){
