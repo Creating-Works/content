@@ -1,4 +1,4 @@
-<!-- Version: V2.99 | Date: 2026-07-17 | LAST CHANGE: Bug fix found in live testing - loadPotluck() had no guard against firing a second concurrent getPotluckList request if the sign-up screen re-rendered before the first finished; added a loading flag. (V2.98: wide sign-up layout + top nav.) -->
+<!-- Version: V3.00 | Date: 2026-07-17 | LAST CHANGE: Sign-up screen's "Loading…" now has a 15s safety-net timeout so it can never get stuck forever if GAS hangs (matches other known slow/hanging GAS calls); reported as sticking on this screen. (V2.99: concurrent-request guard.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2119,18 +2119,26 @@ function loadPotluck(cb){
   if(!_eventId){cb&&cb();return;}
   if(_potluckLoading){return;}
   _potluckLoading=true;
+  var _settled=false;
+  var _finish=function(){
+    if(_settled) return; _settled=true;
+    _potluckLoaded=true;
+    _potluckLoading=false;
+    cb&&cb();
+  };
+  // Safety net: GAS is occasionally very slow or hangs (documented elsewhere) - never leave the screen stuck on "Loading…" forever.
+  setTimeout(function(){ if(!_settled) _finish(); },15000);
   fetch(GS_URL+'?action=getPotluckList&eventId='+encodeURIComponent(_eventId))
     .then(function(r){return r.json();})
     .then(function(d){
+      if(_settled) return;
       if(d&&d.signupPotluck){
         try{_signupList=JSON.parse(d.signupPotluck)||[];}catch(e){_signupList=[];}
       }
       _potluckClaims=(d&&d.claims)||[];
-      _potluckLoaded=true;
-      _potluckLoading=false;
-      cb&&cb();
+      _finish();
     })
-    .catch(function(){_potluckLoaded=true;_potluckLoading=false;cb&&cb();});
+    .catch(function(){_finish();});
 }
 
 function renderPotluckTopNav(){
@@ -3043,4 +3051,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V2.99 | Date: 2026-07-17 | LAST CHANGE: Bug fix found in live testing - loadPotluck() had no guard against firing a second concurrent getPotluckList request if the sign-up screen re-rendered before the first finished; added a loading flag. (V2.98: wide sign-up layout + top nav.) -->
+<!-- Version: V3.00 | Date: 2026-07-17 | LAST CHANGE: Sign-up screen's "Loading…" now has a 15s safety-net timeout so it can never get stuck forever if GAS hangs (matches other known slow/hanging GAS calls); reported as sticking on this screen. (V2.99: concurrent-request guard.) -->
