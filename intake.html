@@ -1,4 +1,4 @@
-<!-- Version: V3.02 | Date: 2026-07-17 | LAST CHANGE: Sign-up screen no longer widens to 1400px until data has actually loaded - during the ~5s load it stays narrow with a proper spinner, instead of a huge mostly-empty blue page that looked broken/stuck. (V3.01: bigger columns.) -->
+<!-- Version: V3.03 | Date: 2026-07-17 | LAST CHANGE: Restructured sign-up screen to match the hub: "What you said you'd like to bring" add-inputs (all 3 types, always) now sit in their own section at the top; the claimable-item columns moved to a "Who's bringing what" section at the bottom, styled exactly like the hub's boxes (plain Skills/Experiences/Things headers). Width cap removed entirely (was 1400px). (V3.02: loading-state fix.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2159,20 +2159,30 @@ function renderScreenPotluck(el){
     loadPotluck(function(){renderScreenPotluck(null);});
     return;
   }
-  var pw=document.getElementById('page-wrap'); if(pw) pw.style.maxWidth='1400px';
+  var pw=document.getElementById('page-wrap'); if(pw) pw.style.maxWidth='none';
   var mc=document.getElementById('main-card'); if(mc){ mc.style.background='transparent'; mc.style.boxShadow='none'; mc.style.padding='0'; mc.style.border='none'; }
+  var addRows=['skill','experience','thing'].map(function(key){
+    var meta=_bringTypeMeta[key];
+    return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">'
+      +'<div style="font-size:13px;font-weight:600;color:var(--text);width:90px;flex-shrink:0;">'+meta.emoji+' '+esc(meta.label)+'</div>'
+      +'<input type="text" id="bt-input-'+key+'" placeholder="What '+esc(meta.label.toLowerCase())+' will you bring?" style="flex:1;min-width:0;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;">'
+      +'<button onclick="submitBringTypeItem(\''+key+'\')" style="background:var(--brand);color:white;border:none;padding:10px 16px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap;flex-shrink:0;">Add</button>'
+      +'</div>';
+  }).join('');
   var html='<div style="background:#fff;border-radius:14px;padding:20px 24px;margin-bottom:16px;">'
     +'<h2 style="margin-bottom:6px;">Event contribution 🎁</h2>'
-    +'<p style="font-size:14px;color:var(--soft);margin:0;">This event is all about contribution. Think of it as a potluck of skills and offerings. What are you going to bring to the event that you want to be known for in our community?</p>'
+    +'<p style="font-size:14px;color:var(--soft);margin:0 0 18px;">This event is all about contribution. Think of it as a potluck of skills and offerings. What are you going to bring to the event that you want to be known for in our community?</p>'
+    +'<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--soft);margin-bottom:10px;">What you said you\'d like to bring</div>'
+    +addRows
     +'</div>'
-    +'<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#fff;margin:0 4px 10px;">What you said you\'d like to bring</div>'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 4px 10px;flex-wrap:wrap;"><div style="font-size:18px;font-weight:800;color:#fff;">🎁 Who\'s bringing what</div></div>'
     +'<div class="bring-grid" id="bring-grid"></div>'
     +(_editMode?'<div class="nav-row" style="margin:16px 4px 0;"><button class="btn-next" onclick="doneEdit()">Done</button></div>':'<div class="nav-row" style="margin:16px 4px 0;"><button class="btn-back" onclick="goBack()">← Back</button></div>');
   cont.innerHTML=html;
   renderPotluckColumns();
 }
 
-// ─── Attendee mode: 3 columns (Skill / Experience / Thing), each with an add-input + that type's claimable items ──
+// ─── Bottom: 3 columns (Skills / Experiences / Things), styled like the hub's "Who's bringing what" boxes ──
 var _bringTypeMeta={skill:{emoji:'👤',label:'Skill'},experience:{emoji:'🎉',label:'Experience'},thing:{emoji:'📦',label:'Thing'}};
 function bringTypeKey(potluckType){
   var s=String(potluckType||'').trim().toLowerCase();
@@ -2218,21 +2228,17 @@ function renderSignupItemHTML(it,i){
   h+='</div>';
   return h;
 }
+var _bringColLabels={skill:'Skills',experience:'Experiences',thing:'Things'};
 function renderPotluckColumns(){
   var el=document.getElementById('bring-grid'); if(!el) return;
   var byType={skill:[],experience:[],thing:[]};
   _signupList.forEach(function(it,i){ byType[bringTypeKey(it.potluckType)].push(i); });
   el.innerHTML=['skill','experience','thing'].map(function(key){
-    var meta=_bringTypeMeta[key];
-    var inputRow='<div style="display:flex;gap:8px;margin-bottom:14px;">'
-      +'<input type="text" id="bt-input-'+key+'" placeholder="What '+esc(meta.label.toLowerCase())+' will you bring?" style="flex:1;min-width:0;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;">'
-      +'<button onclick="submitBringTypeItem(\''+key+'\')" style="background:var(--brand);color:white;border:none;padding:10px 16px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap;">Add</button>'
-      +'</div>';
     var idxList=byType[key];
     var itemsHTML=idxList.length
       ? idxList.map(function(i){ return renderSignupItemHTML(_signupList[i],i); }).join('')
       : '<div style="color:var(--muted);font-size:13px;font-style:italic;">Nothing here yet.</div>';
-    return '<div class="bring-col"><div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:12px;">'+meta.emoji+' '+esc(meta.label)+'</div>'+inputRow+itemsHTML+'</div>';
+    return '<div class="bring-col"><div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:12px;">'+_bringColLabels[key]+'</div>'+itemsHTML+'</div>';
   }).join('');
 }
 window.submitBringTypeItem=function(key){
@@ -3052,4 +3058,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V3.02 | Date: 2026-07-17 | LAST CHANGE: Sign-up screen no longer widens to 1400px until data has actually loaded - during the ~5s load it stays narrow with a proper spinner, instead of a huge mostly-empty blue page that looked broken/stuck. (V3.01: bigger columns.) -->
+<!-- Version: V3.03 | Date: 2026-07-17 | LAST CHANGE: Restructured sign-up screen to match the hub: "What you said you'd like to bring" add-inputs (all 3 types, always) now sit in their own section at the top; the claimable-item columns moved to a "Who's bringing what" section at the bottom, styled exactly like the hub's boxes (plain Skills/Experiences/Things headers). Width cap removed entirely (was 1400px). (V3.02: loading-state fix.) -->
