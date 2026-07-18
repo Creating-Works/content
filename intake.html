@@ -1,4 +1,4 @@
-<!-- Version: V3.05 | Date: 2026-07-17 | LAST CHANGE: Sign-up screen now shows the event's title/date/venue at top (was missing entirely, unlike the hub); "Who's bringing what" columns now use the hub's exact CSS classes (quadrant/q-header/q-title/q-body) and 240px minmax sizing, instead of approximated styling. (V3.04: back button.) -->
+<!-- Version: V3.06 | Date: 2026-07-17 | LAST CHANGE: Fixed the potluck width for real - .card had its own max-width:660px that was never overridden (only the outer wrapper was), so the columns stayed capped at 2. Replaced the scattered inline style mutations with one declarative body.wide-mode CSS class that also un-pins the absolutely-positioned profile photo (was overlapping the event header). (V3.05: event header + hub classes.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,6 +14,12 @@
     @keyframes spin{to{transform:rotate(360deg);}}
     .card{background:var(--card);max-width:660px;margin:0 auto;border-radius:16px;padding:52px;box-shadow:0 24px 64px rgba(0,0,0,0.25),0 4px 16px rgba(0,0,0,0.12);position:relative;}
     @media(max-width:520px){.card{padding:32px 20px;}}
+    /* Wide mode: one class on <body> turns the narrow single-card layout into a full-width
+       hub-style page. Declared here (not mutated inline at render time) so there is one place
+       to read and nothing for other screens to undo. */
+    body.wide-mode #page-wrap{max-width:none;}
+    body.wide-mode .card{max-width:none;background:transparent;box-shadow:none;padding:0;border:none;}
+    body.wide-mode .top-right-area{position:static;justify-content:flex-end;margin:0 0 10px;}
     .bring-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;padding:14px 0;}
     .quadrant{background:#fff;border-radius:14px;border:1px solid #e8eaf0;overflow:hidden;display:flex;flex-direction:column;}
     .q-header{padding:10px 14px 8px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f0f1f5;background:#fff;}
@@ -1657,11 +1663,9 @@ function render(){
   var el=document.getElementById('app-content'); if(!el) return;
   renderTopRight();
   var _tn0=document.getElementById('app-topnav'); if(_tn0) _tn0.innerHTML='';
-  if(_screen!=='potluck'){
-    // Undo the potluck screen's wide/transparent layout on every other screen
-    var _pw0=document.getElementById('page-wrap'); if(_pw0) _pw0.style.maxWidth='660px';
-    var _mc0=document.getElementById('main-card'); if(_mc0){ _mc0.style.background=''; _mc0.style.boxShadow=''; _mc0.style.padding=''; _mc0.style.border=''; }
-  }
+  // Wide (hub-style) layout is potluck-only, and only once its data has loaded - a wide empty
+  // page during the load reads as broken. One class toggle, no per-screen undo needed.
+  document.body.classList.toggle('wide-mode', _screen==='potluck'&&_potluckLoaded);
   if(_viewerMode){
     if(_hasProfile) renderProfile(el,true);
     else el.innerHTML='<div class="empty" style="padding:40px;text-align:center;">No profile found.</div>';
@@ -2176,12 +2180,12 @@ function renderScreenPotluck(el){
   if(!_eventHeaderFetched){ fetchEventTitle(function(){renderScreenPotluck(null);}); }
   if(!_potluckLoaded){
     // Stay narrow/normal-card while loading - only widen once there's real content to fill the space.
+    document.body.classList.remove('wide-mode');
     cont.innerHTML='<div style="text-align:center;padding:60px 20px;"><div style="width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--brand);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px;"></div><p style="color:var(--muted);font-size:14px;margin:0;">Loading the sign-up list...</p></div>';
     loadPotluck(function(){renderScreenPotluck(null);});
     return;
   }
-  var pw=document.getElementById('page-wrap'); if(pw) pw.style.maxWidth='none';
-  var mc=document.getElementById('main-card'); if(mc){ mc.style.background='transparent'; mc.style.boxShadow='none'; mc.style.padding='0'; mc.style.border='none'; }
+  document.body.classList.add('wide-mode');   // also set here for direct re-renders that skip render()
   var addRows=['skill','experience','thing'].map(function(key){
     var meta=_bringTypeMeta[key];
     return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">'
