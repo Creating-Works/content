@@ -1,4 +1,4 @@
-<!-- Version: V5.40 | Date: 2026-07-18 | LAST CHANGE: Checking a bring-type now shows the field with an Add button beside it; Add commits the answer, collapses the field to what was written, and leaves a Change link to reopen it. The "🎯" line stays either way. Next is hidden until something has actually been added, or the sign-up list is ticked - typing alone no longer counts, so the button waits for a real answer. Typed text still survives a re-render: it sits in a draft until Add commits it. New example copy for Skill and Experience. (V5.33: category in the chips, three labels renamed.) -->
+<!-- Version: V6.00 | Date: 2026-07-18 | LAST CHANGE: Screen 1 reframed around the day itself. It opens by saying what this is - a block party of activity stations, food, music and time to get to know Lake Ballinger - then asks one question: host something, or help with something. Hosting takes a free-text answer with suggestions and an Add button. Helping points at the live list of what people are hoping to host, which now sits at the bottom of screen 1 as the same three columns the sign-up page uses; selecting something there claims it exactly as it does on that page. The Skill/Experience/Thing question is gone from screen 1 - skills come from the profile on screen 2, so the Skills column is dimmed here with a note saying so. "I want to see the sign up list" is gone too; the new screen 3 links there for everyone. Screen 3 is a confirmation: "You are in! Congratulations", with links to the hub, the sign-up list and the profile. Latency: the list is fetched only after the choices are painted, so the host path costs nothing and only the help path ever waits. (V5.40: Add commits each bring-type.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1794,6 +1794,7 @@ function render(){
   if(_screen==='intro'){ renderScreenIntro(el); return; }
   if(_screen===0){ renderProfile(el,false); _wtmDecorate(); return; }
   if(_screen==='fast2'){ renderScreenFast2(el); return; }
+  if(_screen==='confirm'){ renderScreenConfirm(el); return; }
   if(_screen==='1b'){ renderScreen1b(el); return; }
   if(_screen==='potluck'){ renderScreenPotluck(el); return; }
   if(_screen==='share'){ renderScreenShare(el); return; }
@@ -1808,51 +1809,8 @@ var _bringOpts=[
   {key:'thing',emoji:'📦',label:'Thing',ex:'flowers, tent, speakers',msg:'Bring a thing, people notice, some will want more of it after the event.'}
 ];
 // Before Add: the field with its button. After Add: what they wrote, with a way back to it.
-function bringFieldHTML(key,FINP){
-  var done=String(_bringText[key]||'').trim();
-  if(done){
-    return '<div style="display:flex;align-items:center;gap:8px;margin:2px 0 6px;flex-wrap:wrap;">'
-      +'<span style="font-size:14px;font-weight:600;color:var(--brand);background:var(--sel-bg);border:1.5px solid var(--brand);border-radius:8px;padding:8px 12px;">'+esc(done)+'</span>'
-      +'<button onclick="bringEdit(\''+key+'\')" style="background:none;border:none;color:var(--brand);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;text-decoration:underline;padding:0;">Change</button>'
-      +'</div>';
-  }
-  return '<div style="display:flex;gap:8px;margin:2px 0 6px;">'
-    +'<input type="text" id="bring-text-'+key+'" placeholder="What will you bring?" value="'+esc(_bringDraft[key]||'')+'" style="'+FINP+'margin:0;flex:1;min-width:0;">'
-    +'<button onclick="bringAdd(\''+key+'\')" style="background:var(--brand);color:#fff;border:none;padding:10px 18px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Add</button>'
-    +'</div>';
-}
-
-function renderScreenIntro(el){
-  // Field sits flush under its checkbox rather than indented, with the examples as a line
-  // above it instead of trailing the checkbox label.
-  var FINP='width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;box-sizing:border-box;margin:2px 0 6px;';
-  var rows=_bringOpts.map(function(o){
-    var sel=_bringType.indexOf(o.key)>-1;
-    return '<div class="method-item'+(sel?' selected':'')+'" onclick="toggleBringType(\''+o.key+'\')">'
-      +'<div class="method-check'+(sel?' checked':'')+'">'+(sel?'✓':'')+'</div>'
-      +'<div class="method-text"><strong>'+o.emoji+' '+o.label+'</strong></div>'
-      +'</div>'
-      +(sel?'<div style="font-size:12px;color:var(--soft);margin:8px 0 2px;">Examples: '+esc(o.ex)+'</div>':'')
-      +(sel?bringFieldHTML(o.key,FINP):'')
-      +(sel?'<div style="font-size:13px;color:var(--brand);margin:4px 0 10px;">🎯 '+esc(o.msg)+'</div>':'');
-  }).join('');
-  var signupRow='<div class="method-item'+(_wantsSignupList?' selected':'')+'" onclick="toggleWantsSignupList()">'
-    +'<div class="method-check'+(_wantsSignupList?' checked':'')+'">'+(_wantsSignupList?'✓':'')+'</div>'
-    +'<div class="method-text"><strong>✅ I want to see the sign up list!</strong></div>'
-    +'</div>'
-    +(_wantsSignupList?'<div style="font-size:13px;color:var(--brand);margin:4px 0 4px 34px;">🎯 We\'ll share this sign up list after you create your event profile</div>':'');
-  el.innerHTML='<div style="padding:8px 2px 6px;">'
-    +fastStepHTML(1)
-    +'<p style="font-size:17px;font-weight:700;color:var(--text);margin-bottom:14px;">You\'re in! 🎉</p>'
-    +'<p style="font-size:15.5px;line-height:1.55;color:var(--text);margin-bottom:14px;">What will you bring to this event? This gets you a ticket in. Check what you are thinking, and name it here if you already know.</p>'
-    +rows
-    +signupRow
-    +(bringReady()?'<button class="btn-next" style="margin-top:22px;" onclick="introContinue();">Next</button>':'')
-    +'</div>';
-}
-// Any re-render of this screen rebuilds the inputs, so read them back into state first.
 // What is typed sits in a draft until Add commits it to _bringText. Keeping the two apart
-// is what lets Next wait for a real answer rather than appearing the moment a key is pressed.
+// is what lets Next wait for a real answer rather than appearing on the first keypress.
 var _bringDraft={skill:'',experience:'',thing:''};
 function captureBringText(){
   ['skill','experience','thing'].forEach(function(k){
@@ -1863,7 +1821,7 @@ function captureBringText(){
 window.bringAdd=function(key){
   var inp=document.getElementById('bring-text-'+key);
   var v=inp?capFirst(inp.value.trim()):'';
-  if(!v){ toast('Please say what you\'ll bring'); return; }
+  if(!v){ toast('Please say what you\'ll host'); return; }
   _bringText[key]=v; _bringDraft[key]='';
   render();
 };
@@ -1872,14 +1830,100 @@ window.bringEdit=function(key){
   _bringText[key]='';
   render();
 };
-function bringReady(){
-  if(_wantsSignupList) return true;
-  return ['skill','experience','thing'].some(function(k){ return String(_bringText[k]||'').trim(); });
+
+// ─── Screen 1: what this day is, and how you want to be part of it ───────────
+// Host and help replace the old Skill/Experience/Thing question. Skills are not asked here
+// at all - they come from the profile on screen 2, so asking twice would be asking twice.
+var _wantHost=false, _wantHelp=false;
+var HOST_IDEAS='a cornhole toss, a drum circle, a children\'s art station, a jewelry making station';
+
+// Anything hosted is an Experience - it is a thing people take part in. Things get added
+// from the columns below, where the type is the column.
+function hostedItem(){ return String(_bringText.experience||'').trim(); }
+
+// Before Add: the field with its button. After Add: what they wrote, with a way back to it.
+function bringFieldHTML(key,FINP){
+  var done=String(_bringText[key]||'').trim();
+  if(done){
+    return '<div style="display:flex;align-items:center;gap:8px;margin:2px 0 6px;flex-wrap:wrap;">'
+      +'<span style="font-size:14px;font-weight:600;color:var(--brand);background:var(--sel-bg);border:1.5px solid var(--brand);border-radius:8px;padding:8px 12px;">'+esc(done)+'</span>'
+      +'<button onclick="bringEdit(\''+key+'\')" style="background:none;border:none;color:var(--brand);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;text-decoration:underline;padding:0;">Change</button>'
+      +'</div>';
+  }
+  return '<div style="display:flex;gap:8px;margin:2px 0 6px;">'
+    +'<input type="text" id="bring-text-'+key+'" placeholder="What will you host?" value="'+esc(_bringDraft[key]||'')+'" style="'+FINP+'margin:0;flex:1;min-width:0;">'
+    +'<button onclick="bringAdd(\''+key+'\')" style="background:var(--brand);color:#fff;border:none;padding:10px 18px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Add</button>'
+    +'</div>';
 }
+
+// How many things this person has already put their name to.
+function myClaimCount(){
+  if(!_appearId) return 0;
+  var n=String(_appearId).split('.').join('').toLowerCase();
+  return (_potluckClaims||[]).filter(function(c){ return String(c.appearId).split('.').join('').toLowerCase()===n; }).length;
+}
+function introReady(){ return !!hostedItem() || myClaimCount()>0; }
+
+window.toggleWantHost=function(){ captureBringText(); _wantHost=!_wantHost; render(); };
+window.toggleWantHelp=function(){
+  captureBringText(); _wantHelp=!_wantHelp; render();
+  // The list lives below; take them to it rather than making them hunt for it.
+  if(_wantHelp) setTimeout(function(){ var g=document.getElementById('intro-list'); if(g) g.scrollIntoView({behavior:'smooth',block:'start'}); },60);
+};
+
+function renderScreenIntro(el){
+  var FINP='width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;box-sizing:border-box;';
+  var row=function(on,fn,label){
+    return '<div class="method-item'+(on?' selected':'')+'" onclick="'+fn+'()">'
+      +'<div class="method-check'+(on?' checked':'')+'">'+(on?'✓':'')+'</div>'
+      +'<div class="method-text"><strong>'+label+'</strong></div>'
+      +'</div>';
+  };
+  var hostBlock=_wantHost
+    ? '<div style="margin:8px 0 14px;">'
+      +'<div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px;">What would you like to host or create?</div>'
+      +'<div style="font-size:12px;color:var(--soft);margin-bottom:6px;">Some ideas: '+esc(HOST_IDEAS)+'.</div>'
+      +bringFieldHTML('experience',FINP)
+      +'</div>'
+    : '';
+  var helpBlock=_wantHelp
+    ? '<div style="font-size:13px;color:var(--brand);margin:4px 0 14px;">🎯 Here is what people are hoping to host. Tap "I\'ll bring this!" on anything below.</div>'
+    : '';
+
+  el.innerHTML='<div style="padding:8px 2px 6px;">'
+    +fastStepHTML(1)
+    +'<p style="font-size:17px;font-weight:700;color:var(--text);margin-bottom:10px;">You\'re in! 🎉</p>'
+    +'<p style="font-size:15.5px;line-height:1.55;color:var(--text);margin-bottom:8px;">We are co-creating this day together. Think of it as a block party: activity stations people set up, food and drink to share, music, and time to get to know Lake Ballinger.</p>'
+    +'<p style="font-size:15.5px;line-height:1.55;color:var(--text);margin-bottom:14px;">Some people host a station. Some people help at one. Both make the day.</p>'
+    +row(_wantHost,'toggleWantHost','I would like to propose or host an activity')
+    +hostBlock
+    +row(_wantHelp,'toggleWantHelp','I would like to volunteer to help an activity')
+    +helpBlock
+    +(introReady()?'<button class="btn-next" style="margin-top:18px;" onclick="introContinue();">Next</button>':'')
+    +'</div>'
+    +'<div id="intro-list" style="margin-top:26px;">'+introListHTML()+'</div>';
+  // The list is the slowest thing here, so it is fetched only after the choices are painted.
+  if(_eventId&&!_potluckLoaded&&!_potluckLoading){
+    loadPotluck(function(){ if(_screen==='intro') renderScreenIntro(el); });
+  } else if(_potluckLoaded){
+    renderPotluckColumns();
+  }
+}
+
+// The same three columns as the sign-up page, shown here so people can see what is already
+// planned before they are asked anything about themselves.
+function introListHTML(){
+  if(!_eventId) return '';
+  if(!_potluckLoaded){
+    return '<div style="font-size:13px;color:#fff;opacity:0.85;padding:4px 2px;">Loading what people are bringing...</div>';
+  }
+  return '<div style="font-size:16px;font-weight:800;color:var(--text);margin:0 2px 8px;">What people are bringing 🎁</div>'
+    +'<div class="bring-grid" id="bring-grid"></div>';
+}
+
 window.introContinue=function(){
   captureBringText();
-  // Asking to see the sign-up list is a valid answer on its own - don't block on a bring-type.
-  if(!_bringType.length&&!_wantsSignupList){ toast('Please select one - this gets you a ticket in!'); return; }
+  if(hostedItem()&&_bringType.indexOf('experience')<0) _bringType.push('experience');
   autoSave();
   _fastPath=true; _screen='fast2'; render();
 };
@@ -1903,7 +1947,8 @@ function fastStepHTML(n){
   return '<div class="progress-wrap"><div class="progress-steps">'
     +'<div class="progress-step'+(n>=1?' done':'')+'"></div>'
     +'<div class="progress-step'+(n>=2?' done':'')+'"></div>'
-    +'</div><div class="progress-label">Step '+n+' of 2</div></div>';
+    +'<div class="progress-step'+(n>=3?' done':'')+'"></div>'
+    +'</div><div class="progress-label">Step '+n+' of 3</div></div>';
 }
 
 // The five things the hub needs before someone appears on it.
@@ -2051,6 +2096,23 @@ window.toggleOtwPay=function(p){
   }
   refreshOtw(); autoSave();
 };
+
+// ─── Screen 3: you are in ────────────────────────────────────────────────────
+function renderScreenConfirm(el){
+  var cont=document.getElementById('app-content'); if(!cont) return;
+  var BTN='display:inline-block;background:var(--brand);color:#fff;text-decoration:none;padding:12px 20px;border-radius:8px;font-size:15px;font-weight:700;font-family:inherit;';
+  var BTN_O='display:inline-block;background:#fff;color:var(--brand);border:1.5px solid var(--brand);text-decoration:none;padding:12px 20px;border-radius:8px;font-size:15px;font-weight:700;font-family:inherit;';
+  var hub=_eventId?('https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+(_appearId?'&memberCard='+encodeURIComponent(_appearId):'')):'';
+  cont.innerHTML=fastStepHTML(3)
+    +'<h2 style="margin-bottom:10px;">You\'re in! Congratulations 🎉</h2>'
+    +'<p style="font-size:15.5px;line-height:1.55;color:var(--text);margin-bottom:8px;">Your profile is on the event hub, so people can find you before the day.</p>'
+    +'<p style="font-size:15.5px;line-height:1.55;color:var(--text);margin-bottom:18px;">You are welcome to add more any time. Nothing here is fixed.</p>'
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+    +(hub?'<a href="'+hub+'" style="'+BTN+'">See the event hub</a>':'')
+    +'<button onclick="jumpTo(\'potluck\')" style="'+BTN_O+'cursor:pointer;">See the sign up list</button>'
+    +'<button onclick="goToProfile()" style="'+BTN_O+'cursor:pointer;">See my profile</button>'
+    +'</div>';
+}
 
 function renderScreenFast2(el){
   var cont=document.getElementById('app-content'); if(!cont) return;
@@ -2990,7 +3052,9 @@ function renderPotluckColumns(){
     body+=idxList.length
       ? idxList.map(function(i){ return renderSignupItemHTML(_signupList[i],i); }).join('')
       : '<span class="q-empty">Nothing here yet.</span>';
-    return '<div class="quadrant"><div class="q-header"><div class="q-title">'+_bringColLabels[key]+'</div></div><div class="q-body">'+body+'</div></div>';
+    var dim=(_screen==='intro'&&key==='skill');
+    var note=dim?'<div style="font-size:11px;color:var(--muted);padding:2px 2px 6px;">Skills come from your profile on the next step.</div>':'';
+    return '<div class="quadrant"'+(dim?' style="opacity:0.55;"':'')+'><div class="q-header"><div class="q-title">'+_bringColLabels[key]+'</div></div><div class="q-body">'+note+body+'</div></div>';
   }).join('');
 }
 
@@ -3689,8 +3753,11 @@ window.goNext = function(){
       return;
     }
     _completed=true; _hasProfile=true;
-    if(_eventId){ _screen='potluck'; render(); return; }
-    _screen='share'; render(); return;
+    _screen='confirm'; render(); return;
+  }
+  if(_screen==='confirm'){
+    if(_eventId&&_appearId){ window.location.href='https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+'&memberCard='+encodeURIComponent(_appearId); return; }
+    _screen=0; render(); return;
   }
   if(_screen===2&&!_editMode&&_screen2step==='lang'){
     _screen2step='postal'; render(); return;
@@ -3770,6 +3837,7 @@ window.goBack = function(){
     var fp2=document.getElementById('fast-postal'); if(fp2) _postal=fp2.value.trim();
     _screen='intro'; render(); return;
   }
+  if(_screen==='confirm'){ _screen='fast2'; render(); return; }
   if(_screen===2&&!_editMode&&_screen2step==='skills'){
     _screen2step='naturally'; render(); return;
   }
@@ -3834,4 +3902,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V5.40 | Date: 2026-07-18 | LAST CHANGE: Add button commits each bring-type; Next waits for a real answer. (V5.33: category in the chips.) -->
+<!-- Version: V6.00 | Date: 2026-07-18 | LAST CHANGE: Screen 1 reframed as host-or-help with the live activity list; new screen 3 confirmation - see the top-of-file note. (V5.40: Add commits each bring-type.) -->
