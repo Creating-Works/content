@@ -1,4 +1,4 @@
-<!-- Version: V4.20 | Date: 2026-07-18 | LAST CHANGE: A contribution is no longer turned into an open slot other people are invited to claim - items added through the contribution flow are marked contributed:true and render as "Being brought" with no "I'll bring this" button, so an offer reads as someone bringing it rather than something that needs bringing. The red "Category missing" tag is gone from the profile chips: it tested for a missing LEVEL, opened a LEVEL picker and set a level, while saying category, and since V4.00 took levels off the required path it was firing on nearly every chip; setCatLevel is renamed setProfileLevel to match what it does. The self-linking "Event profile" pill is removed from the profile page, and when the URL carries no eventId the page derives one (first from the profile row at no cost, then one non-blocking getRegistrations) so Event hub and Manage my experience can appear. (V4.12: one header, Open to work, skills-first potluck.) -->
+<!-- Version: V4.30 | Date: 2026-07-18 | LAST CHANGE: Sign-up page heading is now "What will you bring? 🎁". On the first fast screen the examples moved out of the checkbox label to a line above the field, the field sits flush under its checkbox instead of indented, and its placeholder reads "What will you bring?"; the Skill examples now read "Q&A time, 1:1 walk and talk, or workshop". "Open to work" became a progressive question - "Are you open to work?", then multi-select Full-time / Part-time / Projects, then multi-select Paid / Not paid - all carried in the existing passthrough "retired" cell as kind: and pay: entries, so still no new column and no GAS change. "A walk and talk" added to the contribution formats. The format and open-to-work option lists are hardcoded for now and belong in the reference-data sheet later. (V4.20: contributions are not claimable slots.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -420,15 +420,28 @@ var _customIsDomain=false;
 // as a short list ("true", "openToWork", or both). No new column and no GAS change.
 var _retired=false;
 var _openToWork=false;
+var _otwKinds=[];   // Full-time / Part-time / Projects - multi-select
+var _otwPay=[];     // Paid / Not paid - multi-select
+// Hardcoded for now; these belong in the reference-data sheet later, alongside the
+// contribution formats, so they can be edited without a deploy.
+var OTW_KINDS=['Full-time','Part-time','Projects'];
+var OTW_PAY=['Paid','Not paid'];
 function parseRetiredStr(str){
-  var parts=String(str||'').split('|').map(function(p){return p.trim().toLowerCase();}).filter(Boolean);
-  _retired=parts.indexOf('true')>-1;
-  _openToWork=parts.indexOf('opentowork')>-1;
+  var parts=String(str||'').split('|').map(function(p){return p.trim();}).filter(Boolean);
+  var low=parts.map(function(p){return p.toLowerCase();});
+  _retired=low.indexOf('true')>-1;
+  _openToWork=low.indexOf('opentowork')>-1;
+  _otwKinds=parts.filter(function(p){return p.indexOf('kind:')===0;}).map(function(p){return p.slice(5);});
+  _otwPay  =parts.filter(function(p){return p.indexOf('pay:')===0;}).map(function(p){return p.slice(4);});
 }
 function buildRetiredStr(){
   var out=[];
   if(_retired) out.push('true');
-  if(_openToWork) out.push('openToWork');
+  if(_openToWork){
+    out.push('openToWork');
+    _otwKinds.forEach(function(k){ out.push('kind:'+k); });
+    _otwPay.forEach(function(p){ out.push('pay:'+p); });
+  }
   return out.join('|');
 }
 var _personSubType='';
@@ -1761,20 +1774,23 @@ function render(){
 
 // Intro/welcome shown before section 1 — only when the hub CTA passes &intro=1 (new registrants).
 var _bringOpts=[
-  {key:'skill',emoji:'👤',label:'Skill',ex:'Q&A time, demo, workshop',msg:'People who want your skills find you here during and after the event.'},
+  {key:'skill',emoji:'👤',label:'Skill',ex:'Q&A time, 1:1 walk and talk, or workshop',msg:'People who want your skills find you here during and after the event.'},
   {key:'experience',emoji:'🎉',label:'Experience',ex:'food/coffee/wine tastings, band, yoga session',msg:'When you bring an experience people can join, some will want it again after the event.'},
   {key:'thing',emoji:'📦',label:'Thing',ex:'flowers, tent, speakers',msg:'Bring a thing, people notice, some will want more of it after the event.'}
 ];
 function renderScreenIntro(el){
-  var FINP='width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;box-sizing:border-box;margin:2px 0 6px 34px;max-width:calc(100% - 34px);';
+  // Field sits flush under its checkbox rather than indented, with the examples as a line
+  // above it instead of trailing the checkbox label.
+  var FINP='width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;box-sizing:border-box;margin:2px 0 6px;';
   var rows=_bringOpts.map(function(o){
     var sel=_bringType.indexOf(o.key)>-1;
     return '<div class="method-item'+(sel?' selected':'')+'" onclick="toggleBringType(\''+o.key+'\')">'
       +'<div class="method-check'+(sel?' checked':'')+'">'+(sel?'✓':'')+'</div>'
-      +'<div class="method-text"><strong>'+o.emoji+' '+o.label+'</strong> (Examples: '+esc(o.ex)+')</div>'
+      +'<div class="method-text"><strong>'+o.emoji+' '+o.label+'</strong></div>'
       +'</div>'
-      +(sel?'<input type="text" id="bring-text-'+o.key+'" placeholder="'+esc(o.ex)+'" value="'+esc(_bringText[o.key]||'')+'" style="'+FINP+'">':'')
-      +(sel?'<div style="font-size:13px;color:var(--brand);margin:4px 0 4px 34px;">🎯 '+esc(o.msg)+'</div>':'');
+      +(sel?'<div style="font-size:12px;color:var(--soft);margin:8px 0 2px;">Examples: '+esc(o.ex)+'</div>':'')
+      +(sel?'<input type="text" id="bring-text-'+o.key+'" placeholder="What will you bring?" value="'+esc(_bringText[o.key]||'')+'" style="'+FINP+'">':'')
+      +(sel?'<div style="font-size:13px;color:var(--brand);margin:4px 0 10px;">🎯 '+esc(o.msg)+'</div>':'');
   }).join('');
   var signupRow='<div class="method-item'+(_wantsSignupList?' selected':'')+'" onclick="toggleWantsSignupList()">'
     +'<div class="method-check'+(_wantsSignupList?' checked':'')+'">'+(_wantsSignupList?'✓':'')+'</div>'
@@ -1915,22 +1931,54 @@ function fastFieldHTML(title, sub, s, placeholder, extra){
     +'</div>';
 }
 
+// Opens one step at a time: the question, then which kinds of work, then whether it is paid.
+// Every level is multi-select, so someone can be open to part-time projects, paid or not.
+function otwPillsHTML(opts, chosen, fn){
+  var ON='padding:7px 14px;border-radius:20px;border:1.5px solid var(--brand);background:var(--sel-bg);color:var(--brand);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;';
+  var OFF='padding:7px 14px;border-radius:20px;border:1.5px solid var(--border);background:#fff;color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;';
+  return '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;">'
+    +opts.map(function(o){
+        var on=chosen.indexOf(o)>-1;
+        return '<button onclick="'+fn+'(\''+rawVal(o)+'\')" style="'+(on?ON:OFF)+'">'+esc(o)+'</button>';
+      }).join('')
+    +'</div>';
+}
 function openToWorkHTML(){
-  return '<div id="otw-row" style="display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:8px;cursor:pointer;" onclick="window.toggleOpenToWork()">'
-    +'<span style="font-size:14px;color:var(--text);">Open to work</span>'
-    +'<div id="otw-check" style="width:20px;height:20px;border-radius:4px;border:1.5px solid '+(_openToWork?'var(--brand)':'var(--border)')+';background:'+(_openToWork?'var(--brand)':'white')+';display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+  var h='<div id="otw-block" style="margin-top:10px;">'
+    +'<div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;cursor:pointer;" onclick="window.toggleOpenToWork()">'
+    +'<span style="font-size:14px;color:var(--text);">Are you open to work?</span>'
+    +'<div style="width:20px;height:20px;border-radius:4px;border:1.5px solid '+(_openToWork?'var(--brand)':'var(--border)')+';background:'+(_openToWork?'var(--brand)':'white')+';display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
     +(_openToWork?'<svg width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>':'')
     +'</div></div>';
+  if(_openToWork){
+    h+='<div style="font-size:12px;color:var(--soft);margin-top:10px;">Select which kind. You are welcome to pick more than one.</div>'
+      +otwPillsHTML(OTW_KINDS,_otwKinds,'toggleOtwKind');
+    if(_otwKinds.length){
+      h+='<div style="font-size:12px;color:var(--soft);margin-top:10px;">Paid or not paid?</div>'
+        +otwPillsHTML(OTW_PAY,_otwPay,'toggleOtwPay');
+    }
+  }
+  return h+'</div>';
+}
+function refreshOtw(){
+  var el=document.getElementById('otw-block');
+  if(el) el.outerHTML=openToWorkHTML();
 }
 window.toggleOpenToWork=function(){
   _openToWork=!_openToWork;
-  var c=document.getElementById('otw-check');
-  if(c){
-    c.style.borderColor=_openToWork?'var(--brand)':'var(--border)';
-    c.style.background=_openToWork?'var(--brand)':'white';
-    c.innerHTML=_openToWork?'<svg width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>':'';
-  }
-  autoSave();
+  if(!_openToWork){ _otwKinds=[]; _otwPay=[]; }   // closing the question clears its answers
+  refreshOtw(); autoSave();
+};
+window.toggleOtwKind=function(k){
+  var i=_otwKinds.indexOf(k);
+  if(i>-1) _otwKinds.splice(i,1); else _otwKinds.push(k);
+  if(!_otwKinds.length) _otwPay=[];               // no kind chosen, so the pay question goes away
+  refreshOtw(); autoSave();
+};
+window.toggleOtwPay=function(p){
+  var i=_otwPay.indexOf(p);
+  if(i>-1) _otwPay.splice(i,1); else _otwPay.push(p);
+  refreshOtw(); autoSave();
 };
 
 function renderScreenFast2(el){
@@ -2433,7 +2481,7 @@ function renderScreenPotluck(el){
     +'<p style="font-size:14px;color:var(--soft);margin:0 0 18px;">This event is all about contribution. Think of it as a potluck of skills and offerings. What are you going to bring to the event?</p>'
     +seedBlockHTML()
     +'</div>'
-    +'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 4px 10px;flex-wrap:wrap;"><div style="font-size:18px;font-weight:800;color:#fff;">🎁 Who\'s bringing what</div></div>'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 4px 10px;flex-wrap:wrap;"><div style="font-size:18px;font-weight:800;color:#fff;">What will you bring? 🎁</div></div>'
     +'<div class="bring-grid" id="bring-grid"></div>'
     +(_editMode?'<div class="nav-row" style="margin:16px 4px 0;"><button class="btn-next" onclick="doneEdit()">Done</button></div>':'<div class="nav-row" style="margin:16px 4px 0;"><button class="btn-back" onclick="goBack()">Back</button></div>');
   cont.innerHTML=html;
@@ -2452,7 +2500,9 @@ function bringPicksLabel(){
 // Offer back what they already told us they're good at (Expert-level skills, Coach-level
 // recreation) instead of making them retype it. Pick one -> Skill or Experience -> details.
 var _seedFlow={item:'',step:'',type:''};
-var SEED_FORMATS=['Q&A session','Workshop','Other'];
+// Hardcoded for now - these belong in the reference-data sheet later so they can be edited
+// without a deploy, same as the Potluck Type column.
+var SEED_FORMATS=['Q&A session','Workshop','A walk and talk','Other'];
 function seedCandidates(){
   var out=[];
   // The question is now specifically about skills, so the pills are their skills. Anything
@@ -3536,4 +3586,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V4.20 | Date: 2026-07-18 | LAST CHANGE: Contributions are not claimable slots, no more red "Category missing", no self-linking profile pill - see the top-of-file note. (V4.12: one header, Open to work, skills-first potluck.) -->
+<!-- Version: V4.30 | Date: 2026-07-18 | LAST CHANGE: Sign-up heading, first-screen field layout and examples, progressive Open to work, "A walk and talk" format - see the top-of-file note. (V4.20: contributions are not claimable slots.) -->
