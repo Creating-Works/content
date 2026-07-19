@@ -1,4 +1,4 @@
-<!-- Version: V5.31 | Date: 2026-07-18 | LAST CHANGE: "Know someone" now opens the invite inline so it can be read before it goes anywhere, with a Copy button and an x to close - it used to copy silently and flash "Copied!", giving no chance to see what was being sent. Only one panel is open at a time; opening another replaces it. The invite link is now lakeballingerhub.com, which 301s to the Glide page and reads better in a message than the /dl/ path. Inline panel, not an overlay. (V5.30: per-item Know someone pills.) -->
+<!-- Version: V5.32 | Date: 2026-07-18 | LAST CHANGE: "Know someone" takes the same 8px corners as the "I'll bring this" button above it, instead of being a rounded pill. New invite wording: "The [event] is seeking someone to bring this: [item] on [date]. I thought of you! Visit here if you are interested: lakeballingerhub.com" - with a version that drops the item clause when the add-your-own field is empty. (V5.31: invite opens inline with Copy and close.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2867,7 +2867,7 @@ function formatStepHTML(){
 
 // "I know someone!" - copy an invite to this event so they can paste it wherever they talk
 // to that person. Clipboard only; nothing is sent on their behalf.
-var KNOW_BTN='background:#fff;color:var(--brand);border:1.5px solid var(--brand);padding:7px 11px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;';
+var KNOW_BTN='background:#fff;color:var(--brand);border:1.5px solid var(--brand);padding:7px 11px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;';
 function knowBtnHTML(item){
   return '<button onclick="knowSomeone(this,\''+rawVal(item||'')+'\')" style="'+KNOW_BTN+'">👤 Know someone</button>';
 }
@@ -2885,9 +2885,10 @@ function inviteUrl(){
 }
 function inviteMsgFor(item){
   var when=_eventDate?(' on '+fmtEventDate(_eventDate)):'';
+  var tail=" I thought of you! Visit here if you're interested: "+inviteUrl();
   return item
-    ? ('They are looking for someone to bring '+item+' to '+(_eventTitle||'this event')+when+'. Do you know anyone? '+inviteUrl())
-    : ('I am going to '+(_eventTitle||'this event')+when+'. Come and bring something you love doing. '+inviteUrl());
+    ? ('The '+(_eventTitle||'event')+' is seeking someone to bring this: '+item+when+'.'+tail)
+    : ('The '+(_eventTitle||'event')+' is happening'+when+'.'+tail);
 }
 function knowPanelHTML(item){
   var msg=inviteMsgFor(item);
@@ -3797,4 +3798,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V5.31 | Date: 2026-07-18 | LAST CHANGE: Invite opens inline with Copy and x, and uses lakeballingerhub.com. (V5.30: per-item pills.) -->
+<!-- Version: V5.32 | Date: 2026-07-18 | LAST CHANGE: Square corners on Know someone, new invite wording. (V5.31: invite opens inline.) -->
