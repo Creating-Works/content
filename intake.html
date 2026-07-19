@@ -1,4 +1,4 @@
-<!-- Version: V5.30 | Date: 2026-07-18 | LAST CHANGE: "Know someone" is now a pill on every item rather than one button at the top, and it names the item it sits beside - copying "They are looking for someone to bring X..." instead of a bare event link, so whoever receives it knows what is being asked. Clipboard only; nothing is sent on anyone's behalf. On the add-your-own row it uses whatever has been typed, falling back to the general invite when the field is empty. Claimed and contributed items get no pill, since nobody is needed for those. A white pill under the heading explains the person icon, which had too little contrast as plain text on the blue. (V5.21: invite copies the sign-in-capable landing page.) -->
+<!-- Version: V5.31 | Date: 2026-07-18 | LAST CHANGE: "Know someone" now opens the invite inline so it can be read before it goes anywhere, with a Copy button and an x to close - it used to copy silently and flash "Copied!", giving no chance to see what was being sent. Only one panel is open at a time; opening another replaces it. The invite link is now lakeballingerhub.com, which 301s to the Glide page and reads better in a message than the /dl/ path. Inline panel, not an overlay. (V5.30: per-item Know someone pills.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2784,6 +2784,7 @@ function renderSignupItemHTML(it,i){
       +'</div>';
   }
   h+='</div>';
+  h+=knowPanelFor('item',it.item);
   if(_claimingIdx===i){
     h+='<div style="margin-top:10px;">'
       +'<div style="font-size:12px;color:var(--soft);margin-bottom:6px;">Please elaborate on what this is:</div>'
@@ -2826,7 +2827,8 @@ function addYourOwnHTML(key){
     +'<input type="text" id="col-add-'+key+'" placeholder="Add your own" value="'+esc(seed)+'" style="'+COL_INP+'">'
     +'<button onclick="colAdd(\''+key+'\')" style="'+COL_BTN+'">I\'ll bring this! 🎁</button>'
     +'<button onclick="knowSomeoneTyped(this,\''+key+'\')" style="'+KNOW_BTN+'">👤 Know someone</button>'
-    +'</div>';
+    +'</div>'
+    +knowPanelFor('col',key);
 }
 
 // Offer back the skills they already told us about, so they do not retype them.
@@ -2839,7 +2841,8 @@ function ownSkillsBlockHTML(){
           +'<div style="font-size:13px;font-weight:600;color:var(--brand);margin-bottom:6px;">'+esc(item)+'</div>'
           +'<button onclick="seedPick(\''+rawVal(item)+'\')" style="'+COL_BTN+'">I\'ll bring this! 🎁</button>'
           +knowBtnHTML(item)
-          +'</div>';
+          +'</div>'
+          +knowPanelFor('item',item);
       }).join('');
 }
 
@@ -2870,25 +2873,50 @@ function knowBtnHTML(item){
 }
 // Names the item, so the person receiving it knows what is being asked rather than getting a
 // bare event link. Clipboard only - nothing is sent on anyone's behalf.
-window.knowSomeoneTyped=function(btn,key){
-  var inp=document.getElementById('col-add-'+key);
-  window.knowSomeone(btn, inp?inp.value.trim():'');
-};
-window.knowSomeone=function(btn,item){
-  var url=(_eventId==='m97sjwa3')
-    ? 'https://2gather.network/dl/lakeballingerhubevent'
+// Opening the invite shows it inline so the person can read it before copying - it used to
+// copy silently and flash "Copied!", which gave no chance to see what was going out.
+// Inline panel, not an overlay (no-modals).
+var _knowCtx=null;   // null | {kind:'item'|'col', id:'…'}
+function inviteUrl(){
+  // lakeballingerhub.com 301s to the Glide page and reads better in a message than the /dl/ path.
+  return (_eventId==='m97sjwa3')
+    ? 'lakeballingerhub.com'
     : 'https://gather.2gather.network/event.html?id='+encodeURIComponent(_eventId||'');
+}
+function inviteMsgFor(item){
   var when=_eventDate?(' on '+fmtEventDate(_eventDate)):'';
-  var msg=item
-    ? ('They are looking for someone to bring '+item+' to '+(_eventTitle||'this event')+when+'. Do you know anyone? '+url)
-    : ('I am going to '+(_eventTitle||'this event')+when+'. Come and bring something you love doing. '+url);
-  var done=function(){
-    if(!btn) return;
-    var old=btn.innerHTML; btn.innerHTML='Copied!';
-    setTimeout(function(){ btn.innerHTML=old; },1800);
-  };
+  return item
+    ? ('They are looking for someone to bring '+item+' to '+(_eventTitle||'this event')+when+'. Do you know anyone? '+inviteUrl())
+    : ('I am going to '+(_eventTitle||'this event')+when+'. Come and bring something you love doing. '+inviteUrl());
+}
+function knowPanelHTML(item){
+  var msg=inviteMsgFor(item);
+  return '<div style="position:relative;border:1.5px solid var(--brand);background:var(--sel-bg);border-radius:10px;padding:10px 10px 10px;margin-top:8px;">'
+    +'<button onclick="knowClose()" aria-label="Close" style="position:absolute;top:4px;right:6px;background:none;border:none;color:var(--muted);font-size:16px;line-height:1;cursor:pointer;padding:2px;font-family:inherit;">\u00d7</button>'
+    +'<div style="font-size:12px;color:var(--text);line-height:1.5;padding-right:16px;margin-bottom:8px;">'+esc(msg)+'</div>'
+    +'<button onclick="knowCopy(this)" style="'+COL_BTN+'">Copy</button>'
+    +'</div>';
+}
+function knowPanelFor(kind,id){
+  if(!_knowCtx||_knowCtx.kind!==kind||_knowCtx.id!==id) return '';
+  return knowPanelHTML(_knowCtx.kind==='col'?_knowCtx.text:id);
+}
+window.knowClose=function(){ _knowCtx=null; renderPotluckColumns(); };
+window.knowCopy=function(btn){
+  var item=_knowCtx?(_knowCtx.kind==='col'?_knowCtx.text:_knowCtx.id):'';
+  var msg=inviteMsgFor(item);
+  var done=function(){ if(btn){ btn.textContent='Copied!'; setTimeout(function(){ btn.textContent='Copy'; },1600); } };
   try{ navigator.clipboard.writeText(msg).then(done,function(){ toast(msg); }); }
   catch(e){ toast(msg); }
+};
+window.knowSomeone=function(btn,item){
+  _knowCtx={kind:'item',id:item||''};
+  renderPotluckColumns();
+};
+window.knowSomeoneTyped=function(btn,key){
+  var inp=document.getElementById('col-add-'+key);
+  _knowCtx={kind:'col',id:key,text:inp?inp.value.trim():''};
+  renderPotluckColumns();
 };
 
 window.copyEventInvite=function(btn){
@@ -3769,4 +3797,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V5.30 | Date: 2026-07-18 | LAST CHANGE: Per-item "Know someone" pills that name the item - see the top-of-file note. (V5.21: invite landing page.) -->
+<!-- Version: V5.31 | Date: 2026-07-18 | LAST CHANGE: Invite opens inline with Copy and x, and uses lakeballingerhub.com. (V5.30: per-item pills.) -->
