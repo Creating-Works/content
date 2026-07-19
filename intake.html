@@ -1,4 +1,4 @@
-<!-- Version: V5.12 | Date: 2026-07-18 | LAST CHANGE: "Bookmark to meet" no longer appears on a bare "?show=" URL. Bookmarking is a me-to-them action, so it needs both people named in the URL; with only one person there is nobody to bookmark on behalf of, and personal UI should not appear off a device's stored id alone. The viewed person is now identified in a white pill at top right - their photo today, with their first name appearing as soon as getProfile returns it. The member id is never shown as a name. (V5.11: sign-up page Back button moved to the top.) -->
+<!-- Version: V5.13 | Date: 2026-07-18 | LAST CHANGE: In the top-right pill the first name now sits to the right of the photo rather than the left. Still shows photo-only until the getProfile Info-sheet change is deployed. (V5.12: bookmark needs two people; show whose profile this is.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1716,9 +1716,10 @@ function renderTopRight(){
       ?'<img src="'+esc(_viewerPhoto)+'" alt="" style="width:30px;height:30px;border-radius:50%;object-fit:cover;flex-shrink:0;">'
       :'<div style="width:30px;height:30px;border-radius:50%;background:#1F699E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;">'+esc((vName||'?').charAt(0).toUpperCase())+'</div>';
     if(!_viewerPhoto&&!vName){ el.innerHTML=''; return; }
-    el.innerHTML='<div style="display:inline-flex;align-items:center;gap:8px;background:#fff;border-radius:24px;padding:4px 6px 4px '+(vName?'14px':'6px')+';">'
+    el.innerHTML='<div style="display:inline-flex;align-items:center;gap:8px;background:#fff;border-radius:24px;padding:4px '+(vName?'14px':'6px')+' 4px 6px;">'
+      +vImg
       +(vName?'<span style="font-size:13px;font-weight:700;color:#185FA5;white-space:nowrap;">'+esc(vName)+'</span>':'')
-      +vImg+'</div>';
+      +'</div>';
     return;
   } else {
     var phImg=_photo?'<div class="btn-photo"><img src="'+esc(_photo)+'" alt=""></div>':'<div class="btn-photo">🌱</div>';
@@ -3692,4 +3693,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V5.12 | Date: 2026-07-18 | LAST CHANGE: Bookmark button needs both people in the URL; viewed person shown in a top-right pill - see the top-of-file note. (V5.11: Back button to the top.) -->
+<!-- Version: V5.13 | Date: 2026-07-18 | LAST CHANGE: First name moved to the right of the photo in the top-right pill. (V5.12: bookmark needs two people.) -->
