@@ -1,4 +1,4 @@
-<!-- Version: V5.14 | Date: 2026-07-18 | LAST CHANGE: The top-right pill now shows the person's first name. No GAS change was needed after all - "first" is a column on the ikigai row, so getProfile already returns it inside resp.data; the client was looking for it at the top level next to photo/name, found nothing, and fell back to Main's Name column, which is blank for most people. (V5.13: first name to the right of the photo.) -->
+<!-- Version: V5.20 | Date: 2026-07-18 | LAST CHANGE: A contribution is now written to the person's own profile BEFORE it reaches the hub - seedPick added the skill to the profile in memory but never saved it, so it appeared on the hub via the claim while the profile never recorded it. The three writes run strictly in order (profile, then sign-up list, then claim) since this backend 404s when calls overlap. The white photo pill is now used wherever a photo appears, not only on the sign-up page. Added "I know someone!" beside Back, which copies an invite to this event to the clipboard - nothing is sent on anyone's behalf. The three columns stack one per row below 720px and got more breathing room. (V5.14: first name read from resp.data.first.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -32,9 +32,14 @@
     body.wide-mode .nav-row .btn-back,body.wide-mode .nav-row .btn-next{width:auto;flex:0 0 auto;min-width:0;padding:9px 22px;font-size:14px;border-radius:20px;}
     .bring-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;padding:14px 0;}
     .quadrant{background:#fff;border-radius:14px;border:1px solid #e8eaf0;overflow:hidden;display:flex;flex-direction:column;}
-    .q-header{padding:10px 14px 8px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f0f1f5;background:#fff;}
-    .q-title{font-size:14px;font-weight:700;letter-spacing:0.04em;color:#374151;}
-    .q-body{padding:10px 12px;display:flex;flex-direction:column;gap:7px;}
+    .q-header{padding:14px 16px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f0f1f5;background:#fff;}
+    .q-title{font-size:15px;font-weight:700;letter-spacing:0.02em;color:#1a1a2e;}
+    .q-body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:9px;}
+    /* One column on a phone - three of these side by side are unreadable at that width. */
+    @media(max-width:720px){
+      .bring-grid{grid-template-columns:1fr;}
+      .q-body{padding:12px 14px 14px;}
+    }
     .q-empty{font-size:12px;color:#c0c4d6;padding:4px 2px;font-style:italic;}
     /* Top right */
     .top-right-area{position:absolute;top:20px;right:20px;display:flex;align-items:center;gap:6px;z-index:10;}
@@ -676,7 +681,7 @@ function autoSave(){
     var t=(_bringText&&_bringText[k])||'';
     return k+(t?'~'+encodeURIComponent(t):'');
   }).join('|');
-  fetch(GS_URL+'?action=saveIntake'
+  var _p=fetch(GS_URL+'?action=saveIntake'
     +'&appearId='+encodeURIComponent(_appearId)
     +'&languages='+encodeURIComponent(_languages.join('|'))
     +'&postal='+encodeURIComponent(_postal)
@@ -692,6 +697,7 @@ function autoSave(){
     +'&wantsSignupList='+encodeURIComponent(_wantsSignupList?'true':'')
   ).catch(function(){});
   _hasProfile=true;
+  return _p;
 }
 
 // ─── Drill-down render ────────────────────────────────────────────────────────
@@ -1729,14 +1735,16 @@ function renderTopRight(){
     var photoClick=_screen===0?' onclick="openPostalModal()" style="cursor:pointer;"':'';
     // The sign-up screen sits on the blue page background, where dark label text disappeared.
     // Wrap the label and photo in the same white pill the hub nav uses.
-    if(_screen==='potluck'){
-      el.innerHTML='<div style="display:inline-flex;align-items:center;gap:8px;background:#fff;border-radius:24px;padding:4px 10px 4px 14px;">'
-        +'<span style="font-size:12px;font-weight:600;color:#185FA5;white-space:nowrap;">My event profile</span>'
+    // Wherever a photo appears it sits in the same white pill, so the treatment reads the
+    // same on the white card and on the blue page background.
+    if(_screen==='intro'){
+      el.innerHTML='<div style="display:inline-flex;align-items:center;background:#fff;border-radius:24px;padding:4px;">'
         +'<div class="btn-photo"'+photoClick+'>'+phImg+'</div></div>';
       return;
     }
-    var phLabel=(_screen!=='intro')?'<span style="font-size:12px;font-weight:600;color:var(--text);">My event profile</span>':'';
-    el.innerHTML=phLabel+'<div class="btn-photo"'+photoClick+'>'+phImg+'</div>';
+    el.innerHTML='<div style="display:inline-flex;align-items:center;gap:8px;background:#fff;border-radius:24px;padding:4px 6px 4px 14px;">'
+      +'<span style="font-size:12px;font-weight:600;color:#185FA5;white-space:nowrap;">My event profile</span>'
+      +'<div class="btn-photo"'+photoClick+'>'+phImg+'</div></div>';
   }
 }
 
@@ -2514,8 +2522,12 @@ function renderScreenPotluck(el){
   // kind of contribution, so the type never has to be asked as a question.
   // Back sits at the top on the blue background, the same pill the hub uses when you drill
   // into a category - you should not have to scroll the whole list to get out.
+  var PILLBTN='display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:#fff;background:rgba(255,255,255,0.16);border:1px solid rgba(255,255,255,0.45);border-radius:20px;padding:8px 16px;cursor:pointer;font-family:inherit;';
   var backTop=_editMode?''
-    :'<div style="margin:0 4px 12px;"><button onclick="goBack()" style="display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:#fff;background:rgba(255,255,255,0.16);border:1px solid rgba(255,255,255,0.45);border-radius:20px;padding:8px 16px;cursor:pointer;font-family:inherit;">Back</button></div>';
+    :'<div style="display:flex;flex-wrap:wrap;gap:8px;margin:0 4px 12px;">'
+      +'<button onclick="goBack()" style="'+PILLBTN+'">Back</button>'
+      +'<button id="know-someone-btn" onclick="copyEventInvite(this)" style="'+PILLBTN+'">I know someone!</button>'
+      +'</div>';
   var html=headerHTML
     +backTop
     +'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 4px 10px;flex-wrap:wrap;"><div style="font-size:18px;font-weight:800;color:#fff;">What will you bring? 🎁</div></div>'
@@ -2724,14 +2736,20 @@ function commitSeedEntries(entries){
   });
   renderScreenPotluck(null);
   toast('Added! 🎁');
-  savePotluckList(function(){          // wait for the list write before claiming - no overlap
-    var i=0;
-    (function next(){
-      if(i>=entries.length) return;
-      var e=entries[i++];
-      claimItem(e.item,'',e.potluckType,'','',0,next);
-    })();
-  });
+  // The profile is written FIRST, so nothing reaches the hub that is not on the person's
+  // own profile. Strictly sequential - this backend 404s when calls overlap.
+  var _afterProfile=function(){
+    savePotluckList(function(){        // wait for the list write before claiming - no overlap
+      var i=0;
+      (function next(){
+        if(i>=entries.length) return;
+        var e=entries[i++];
+        claimItem(e.item,'',e.potluckType,'','',0,next);
+      })();
+    });
+  };
+  var _sp=autoSave();
+  if(_sp&&_sp.then) _sp.then(_afterProfile,_afterProfile); else _afterProfile();
 }
 function bringTypeKey(potluckType){
   var s=String(potluckType||'').trim().toLowerCase();
@@ -2836,6 +2854,22 @@ function formatStepHTML(){
   }
   return h+'</div>';
 }
+
+// "I know someone!" - copy an invite to this event so they can paste it wherever they talk
+// to that person. Clipboard only; nothing is sent on their behalf.
+window.copyEventInvite=function(btn){
+  var url='https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId||'');
+  var when=_eventDate?(' on '+fmtEventDate(_eventDate)):'';
+  var where=(_eventVenue||_eventLocationAddr)?(' at '+[_eventVenue,_eventLocationAddr].filter(Boolean).join(', ')):'';
+  var msg='I am going to '+(_eventTitle||'this event')+when+where+'. Come and bring something you love doing. '+url;
+  var done=function(){
+    if(!btn) return;
+    var old=btn.textContent; btn.textContent='Copied!';
+    setTimeout(function(){ btn.textContent=old; },1800);
+  };
+  try{ navigator.clipboard.writeText(msg).then(done,function(){ toast(msg); }); }
+  catch(e){ toast(msg); }
+};
 
 function renderPotluckColumns(){
   var el=document.getElementById('bring-grid'); if(!el) return;
@@ -3696,4 +3730,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V5.14 | Date: 2026-07-18 | LAST CHANGE: First name read from resp.data.first, where it already lived - no GAS change needed. (V5.13: name to the right of the photo.) -->
+<!-- Version: V5.20 | Date: 2026-07-18 | LAST CHANGE: Profile written before the hub, white pill on every photo, "I know someone!" invite, columns stack on a phone - see the top-of-file note. (V5.14: first name.) -->
