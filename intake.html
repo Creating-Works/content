@@ -1,4 +1,4 @@
-<!-- Version: V5.32 | Date: 2026-07-18 | LAST CHANGE: "Know someone" takes the same 8px corners as the "I'll bring this" button above it, instead of being a rounded pill. New invite wording: "The [event] is seeking someone to bring this: [item] on [date]. I thought of you! Visit here if you are interested: lakeballingerhub.com" - with a version that drops the item clause when the add-your-own field is empty. (V5.31: invite opens inline with Copy and close.) -->
+<!-- Version: V5.33 | Date: 2026-07-18 | LAST CHANGE: Chips on the second fast screen now carry the category they came from, under the item name, the way the profile chips do. Field labels renamed: "One thing you enjoy" -> "What I enjoy", "One skill" -> "Skills that pay the bills", "Something you care about or need" -> "Thing I care about or need" - the singular wording read as a limit when all three fields have always accepted more than one. (V5.32: square Know someone, new invite wording.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1888,8 +1888,10 @@ function fastChipsHTML(s){
   if(!arr.length) return '';
   return '<div style="display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 2px;">'
     +arr.map(function(r,i){
+      var cat=String(r.category||'').trim();
+      var catLabel=(cat&&cat.toLowerCase()!=='domain')?cat:(cat?'Domain':'');
       return '<div style="display:inline-flex;align-items:center;gap:6px;background:var(--sel-bg);border:1.5px solid var(--brand);border-radius:18px;padding:5px 10px 5px 12px;font-size:13px;color:var(--brand);font-weight:500;">'
-        +esc(r.item)
+        +'<span>'+esc(r.item)+(catLabel?'<span style="display:block;font-size:10px;font-weight:400;opacity:0.75;">'+esc(catLabel)+'</span>':'')+'</span>'
         +'<button onclick="removeItem(\''+s+'\','+i+')" aria-label="Remove" style="background:none;border:none;color:var(--brand);font-size:14px;line-height:1;cursor:pointer;padding:0;font-family:inherit;">✕</button>'
         +'</div>';
     }).join('')
@@ -2030,9 +2032,9 @@ function renderScreenFast2(el){
       +'<div style="font-weight:700;font-size:15px;color:var(--text);margin-bottom:6px;">Language you speak</div>'
       +fastLangHTML()
     +'</div>'
-    +fastFieldHTML('One thing you enjoy','Anything that brings you joy counts here.','1','Search hobbies and recreation...')
-    +fastFieldHTML('One skill','What you are good at, paid or otherwise.','2','Search skills...',openToWorkHTML())
-    +fastFieldHTML('Something you care about or need','People find you through this.','3','Search what you care about...')
+    +fastFieldHTML('What I enjoy','Anything that brings you joy counts here.','1','Search hobbies and recreation...')
+    +fastFieldHTML('Skills that pay the bills','What you are good at, paid or otherwise.','2','Search skills...',openToWorkHTML())
+    +fastFieldHTML('Thing I care about or need','People find you through this.','3','Search what you care about...')
     +'<div id="fast-notice"></div>'
     +'<div class="nav-row"><button class="btn-back" onclick="goBack()">Back</button><button class="btn-next" onclick="goNext()">Next</button></div>';
 }
@@ -3798,4 +3800,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V5.32 | Date: 2026-07-18 | LAST CHANGE: Square corners on Know someone, new invite wording. (V5.31: invite opens inline.) -->
+<!-- Version: V5.33 | Date: 2026-07-18 | LAST CHANGE: Category shown in the chips; three field labels renamed. (V5.32: square Know someone.) -->
