@@ -1,4 +1,4 @@
-<!-- Version: V4.11 | Date: 2026-07-18 | LAST CHANGE: Two copy edits on the second fast screen - "One thing you enjoy" now reads "Anything that brings you joy counts here.", and "Something you care about or need" now reads "People find you through this." (V4.10: one profile screen, privileges decide what shows.) -->
+<!-- Version: V4.12 | Date: 2026-07-18 | LAST CHANGE: One profile screen finished properly - the header is now "This is me" on both doors and the cross-linking "Edit event profile" pill is gone (top nav reads All events / Event hub / Event profile / Manage my experience for the owner); the per-section pencils are the only owner signal. Added an "Open to work" checkbox, right-justified under the One skill field, stored alongside the retired flag in the existing passthrough "retired" cell as a short list ("true", "openToWork", or both) so there is no new column and no GAS change. Potluck contribution is now skills-first: "Would you like to contribute any of the following skills at the event?" with their own skills as pills, then "How would you like to share it?" offering Q&A session / Workshop / Other, where Other opens a free text field. The Skill/Experience/Thing question is gone, since the pills are already known to be skills. The host sign-up list still renders below as before. (V4.11: two copy edits.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -416,7 +416,21 @@ var _searchQ={};
 var _customItem='';
 var _customScreen='';
 var _customIsDomain=false;
+// The ikigai "retired" cell is a passthrough string, so it carries both work-status flags
+// as a short list ("true", "openToWork", or both). No new column and no GAS change.
 var _retired=false;
+var _openToWork=false;
+function parseRetiredStr(str){
+  var parts=String(str||'').split('|').map(function(p){return p.trim().toLowerCase();}).filter(Boolean);
+  _retired=parts.indexOf('true')>-1;
+  _openToWork=parts.indexOf('opentowork')>-1;
+}
+function buildRetiredStr(){
+  var out=[];
+  if(_retired) out.push('true');
+  if(_openToWork) out.push('openToWork');
+  return out.join('|');
+}
 var _personSubType='';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -525,7 +539,7 @@ async function loadProfileAndIntake(){
       var d=resp.data;
       if(!_eventId && d.eventId) _eventId=String(d.eventId||'').trim();   // derive event from the profile when the URL has none (bare ?show=)
       _postal=d.postal||'';
-      _retired=String(d.retired||'').trim().toLowerCase()==='true';
+      parseRetiredStr(d.retired);
       _methods=(d.methods||'').split('|').filter(Boolean);
       _bringType=parseBringTypeStr(d.bringType);
       _wantsSignupList=String(d.wantsSignupList||'').trim().toLowerCase()==='true';
@@ -564,7 +578,7 @@ async function loadIntake(){
       _hasProfile=true;
       var d=data.data;
       _postal=d.postal||'';
-      _retired=String(d.retired||'').trim().toLowerCase()==='true';
+      parseRetiredStr(d.retired);
       _methods=(d.methods||'').split('|').filter(Boolean);
       _bringType=parseBringTypeStr(d.bringType);
       _wantsSignupList=String(d.wantsSignupList||'').trim().toLowerCase()==='true';
@@ -657,7 +671,7 @@ function autoSave(){
     +'&needs='+encodeURIComponent(nStr)
     +'&methods='+encodeURIComponent(mStr)
     +'&expression='+encodeURIComponent(_expression)
-    +'&retired='+encodeURIComponent(_retired?'true':'')
+    +'&retired='+encodeURIComponent(buildRetiredStr())
     +'&bringType='+encodeURIComponent(btStr)
     +'&wantsSignupList='+encodeURIComponent(_wantsSignupList?'true':'')
   ).catch(function(){});
@@ -1884,14 +1898,33 @@ function fastRefresh(){
   });
 }
 
-function fastFieldHTML(title, sub, s, placeholder){
+function fastFieldHTML(title, sub, s, placeholder, extra){
   return '<div style="margin-bottom:18px;">'
     +'<div style="font-weight:700;font-size:15px;color:var(--text);margin-bottom:2px;">'+esc(title)+'</div>'
     +(sub?'<div style="font-size:12px;color:var(--soft);margin-bottom:6px;">'+esc(sub)+'</div>':'')
     +screenSearchHTML(s, placeholder, true)
     +'<div id="fast-added-'+s+'">'+fastChipsHTML(s)+'</div>'
+    +(extra||'')
     +'</div>';
 }
+
+function openToWorkHTML(){
+  return '<div id="otw-row" style="display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:8px;cursor:pointer;" onclick="window.toggleOpenToWork()">'
+    +'<span style="font-size:14px;color:var(--text);">Open to work</span>'
+    +'<div id="otw-check" style="width:20px;height:20px;border-radius:4px;border:1.5px solid '+(_openToWork?'var(--brand)':'var(--border)')+';background:'+(_openToWork?'var(--brand)':'white')+';display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+    +(_openToWork?'<svg width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>':'')
+    +'</div></div>';
+}
+window.toggleOpenToWork=function(){
+  _openToWork=!_openToWork;
+  var c=document.getElementById('otw-check');
+  if(c){
+    c.style.borderColor=_openToWork?'var(--brand)':'var(--border)';
+    c.style.background=_openToWork?'var(--brand)':'white';
+    c.innerHTML=_openToWork?'<svg width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>':'';
+  }
+  autoSave();
+};
 
 function renderScreenFast2(el){
   var cont=document.getElementById('app-content'); if(!cont) return;
@@ -1908,7 +1941,7 @@ function renderScreenFast2(el){
       +fastLangHTML()
     +'</div>'
     +fastFieldHTML('One thing you enjoy','Anything that brings you joy counts here.','1','Search hobbies and recreation...')
-    +fastFieldHTML('One skill','What you are good at, paid or otherwise.','2','Search skills...')
+    +fastFieldHTML('One skill','What you are good at, paid or otherwise.','2','Search skills...',openToWorkHTML())
     +fastFieldHTML('Something you care about or need','People find you through this.','3','Search what you care about...')
     +'<div id="fast-notice"></div>'
     +'<div class="nav-row"><button class="btn-back" onclick="goBack()">Back</button><button class="btn-next" onclick="goNext()">Next</button></div>';
@@ -2060,13 +2093,10 @@ function renderProfile(el, viewerMode){
   var _b='<a href="https://gather.2gather.network/events.html'+((_navOwn&&_navId)?('?memberCard='+encodeURIComponent(_navId)):'')+'" style="'+_WB+'">All events</a>';
   if(_eventId) _b+='<a href="https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+_mc+'" style="'+_WB+'">Event hub</a>';
   if(_navOwn&&_navId){
-    if(viewerMode){
-      _b+='<a href="https://creating.works/intake.html?id='+encodeURIComponent(_navId)+(_eventId?'&eventId='+encodeURIComponent(_eventId):'')+'" style="'+_WB+'">Edit event profile</a>';
-      if(_eventId) _b+='<a href="https://gather.2gather.network/myevents.html?id='+encodeURIComponent(_navId)+'&event='+encodeURIComponent(_eventId)+'" style="'+_WB+'">Manage my experience</a>';
-    } else {
-      _b+='<a href="https://creating.works/intake.html?show='+encodeURIComponent(_navId)+'&me='+encodeURIComponent(_navId)+'" style="'+_WB+'">Event profile</a>';
-      if(_eventId) _b+='<a href="https://gather.2gather.network/myevents.html?id='+encodeURIComponent(_navId)+'&event='+encodeURIComponent(_eventId)+'" style="'+_WB+'">Manage my experience</a>';
-    }
+    // One screen, so one pill. There is no separate "edit" destination to advertise -
+    // the per-section pencils are what tell an owner they can change something.
+    _b+='<a href="https://creating.works/intake.html?show='+encodeURIComponent(_navId)+'&me='+encodeURIComponent(_navId)+(_eventId?'&eventId='+encodeURIComponent(_eventId):'')+'" style="'+_WB+'">Event profile</a>';
+    if(_eventId) _b+='<a href="https://gather.2gather.network/myevents.html?id='+encodeURIComponent(_navId)+'&event='+encodeURIComponent(_eventId)+'" style="'+_WB+'">Manage my experience</a>';
   }
   var _navButtons='<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:0 2px;margin:0 0 20px;">'+_b+'</div>';
   var _tnEl=document.getElementById('app-topnav'); if(_tnEl) _tnEl.innerHTML=_navButtons;
@@ -2086,7 +2116,7 @@ function renderProfile(el, viewerMode){
     var _tra=document.getElementById('top-right-area'); if(_tra) _tra.innerHTML='';
   }
   var emailBtn=(viewerMode&&isViewingHost()&&_hostEmail)?'<button onclick="emailHostCopy(this)" style="background:none;border:1.5px solid var(--brand);color:var(--brand);border-radius:16px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;">✉️ Email me</button>':'';
-  el.innerHTML='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;"><h2 style="margin:0;">'+(viewerMode?'This is me 🌱':'Edit event profile')+'</h2>'+emailBtn+_photoHTML+'</div>'
+  el.innerHTML='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;"><h2 style="margin:0;">This is me 🌱</h2>'+emailBtn+_photoHTML+'</div>'
     +section("What I'm seeking",allNeeds,false,'',4)
     +section('What I enjoy',_interests,true,'level',1,false,_expression?'<div style="margin-top:6px;display:flex;justify-content:flex-end;"><span style="font-size:13px;color:var(--soft);"><span style="font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:0.08em;color:var(--muted);">This is so me:</span> <span style="font-size:10px;font-weight:700;">'+esc(_expressionItems.join(', '))+'</span></span></div>':'')
     +'<div class="profile-section" style="border-bottom:none;padding-bottom:4px;">'
@@ -2366,7 +2396,7 @@ function renderPotluckTopNav(){
   var WB='text-decoration:none;color:#185FA5;background:#fff;font-size:14px;font-weight:600;padding:8px 15px;border-radius:20px;white-space:nowrap;';
   var b='<a href="https://gather.2gather.network/events.html?memberCard='+encodeURIComponent(_appearId)+'" style="'+WB+'">All events</a>';
   if(_eventId) b+='<a href="https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+'&memberCard='+encodeURIComponent(_appearId)+'" style="'+WB+'">Event hub</a>';
-  b+='<a href="https://creating.works/intake.html?id='+encodeURIComponent(_appearId)+(_eventId?'&eventId='+encodeURIComponent(_eventId):'')+'" style="'+WB+'">Edit event profile</a>';
+  b+='<a href="https://creating.works/intake.html?show='+encodeURIComponent(_appearId)+'&me='+encodeURIComponent(_appearId)+(_eventId?'&eventId='+encodeURIComponent(_eventId):'')+'" style="'+WB+'">Event profile</a>';
   if(_eventId) b+='<a href="https://gather.2gather.network/myevents.html?id='+encodeURIComponent(_appearId)+'&event='+encodeURIComponent(_eventId)+'" style="'+WB+'">Manage my experience</a>';
   tn.innerHTML='<div style="display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px;">'+b+'</div>';
 }
@@ -2414,19 +2444,16 @@ function bringPicksLabel(){
 // Offer back what they already told us they're good at (Expert-level skills, Coach-level
 // recreation) instead of making them retype it. Pick one -> Skill or Experience -> details.
 var _seedFlow={item:'',step:'',type:''};
-var SEED_FORMATS=['Q&A time','Demo','Workshop'];
+var SEED_FORMATS=['Q&A session','Workshop','Other'];
 function seedCandidates(){
   var out=[];
-  // Levels left the required path with the two-screen intake, so there is no Expert/Coach/Leading
-  // signal to filter on any more. Offer back everything they listed and let them pick, starting
-  // with whatever they already named on the first screen.
+  // The question is now specifically about skills, so the pills are their skills. Anything
+  // they typed on the first screen comes along, since that is what they already said they
+  // would bring. Interests and values are no longer offered here - they are not skills.
   ['skill','experience','thing'].forEach(function(k){
     var t=(_bringText&&_bringText[k])||''; if(t) out.push(t);
   });
   (_skills||[]).forEach(function(s){ if(s.item) out.push(s.item); });
-  (_interests||[]).forEach(function(s){ if(s.item) out.push(s.item); });
-  (_values||[]).forEach(function(s){ if(s.item) out.push(s.item); });
-  (_domains||[]).forEach(function(s){ if(s.item) out.push(s.item); });
   var seen={},uniq=[];
   out.forEach(function(i){ var k=i.toLowerCase(); if(!seen[k]){seen[k]=1;uniq.push(i);} });
   return uniq;
@@ -2464,9 +2491,20 @@ function seedBlockHTML(){
   }
   if(_seedFlow.step==='format'){
     h+=crumb()
-      +'<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:10px;">How would you like to contribute <strong>'+esc(_seedFlow.item)+'</strong>?</div>'
+      +'<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:10px;">How would you like to share <strong>'+esc(_seedFlow.item)+'</strong>?</div>'
       +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
       +SEED_FORMATS.map(function(f){ return '<button onclick="seedSetFormat(\''+esc(f).replace(/'/g,"\\'")+'\')" style="'+PILL+'">'+esc(f)+'</button>'; }).join('')
+      +'<button onclick="seedCancel()" style="'+BTN_O+'">Cancel</button>'
+      +'</div></div>';
+    return h;
+  }
+  // "Other" - they name the format themselves.
+  if(_seedFlow.step==='otherfmt'){
+    h+=crumb()
+      +'<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px;">How would you like to share <strong>'+esc(_seedFlow.item)+'</strong>?</div>'
+      +'<input type="text" id="seed-otherfmt-input" placeholder="e.g. a table, a demo, a walk and talk" style="'+INP+'">'
+      +'<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">'
+      +'<button onclick="seedOtherFormatAdd()" style="'+BTN+'">Add</button>'
       +'<button onclick="seedCancel()" style="'+BTN_O+'">Cancel</button>'
       +'</div></div>';
     return h;
@@ -2486,8 +2524,8 @@ function seedBlockHTML(){
 
   // Resting state: every pill at once, plus free text. No type gating - they pick a thing
   // first and say what it is second, which is how people actually think about it.
-  h+='<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:2px;">What will you bring'+bringPicksLabel()+'</div>'
-    +'<div style="font-size:12px;color:var(--soft);margin-bottom:10px;">Pick something you already do, or type anything else.</div>';
+  h+='<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:2px;">Would you like to contribute any of the following skills at the event?</div>'
+    +'<div style="font-size:12px;color:var(--soft);margin-bottom:10px;">Pick one you already listed, or type anything else.</div>';
   if(cands.length){
     h+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">'
       +cands.map(function(c){ return '<button onclick="seedPick(\''+esc(c).replace(/'/g,"\\'")+'\')" style="'+PILL+'">'+esc(c)+'</button>'; }).join('')
@@ -2511,13 +2549,22 @@ function seedFooterHTML(BTN,BTN_O,primaryDone){
 function refreshSeedBlock(){
   var el=document.getElementById('seed-block'); if(!el) return;
   el.outerHTML=seedBlockHTML();
-  var f=document.getElementById('seed-thing-input')||document.getElementById('seed-free-input');
+  var f=document.getElementById('seed-otherfmt-input')||document.getElementById('seed-thing-input')||document.getElementById('seed-free-input');
   if(f) f.focus();
 }
 window.seedCancel=function(){ _seedFlow={item:'',step:'',type:''}; refreshSeedBlock(); };
 window.seedAddAnother=function(){ _seedFlow={item:'',step:'',type:''}; refreshSeedBlock(); };
-// Picked a pill -> ask what kind of contribution it is.
-window.seedPick=function(item){ _seedFlow={item:item,step:'how',type:''}; refreshSeedBlock(); };
+// Picked a pill -> straight to how they want to share it. The Skill/Experience/Thing question
+// is gone: the pills come from their own skills, so the type is already known.
+window.seedPick=function(item){
+  // A skill they type here is worth keeping on their event profile too.
+  if(!_skills.some(function(s){return String(s.item).toLowerCase()===String(item).toLowerCase();})){
+    _skills.unshift({item:item,category:'',level:''});
+  }
+  if(_bringType.indexOf('skill')<0) _bringType.push('skill');
+  _seedFlow={item:item,step:'format',type:'skill'};
+  refreshSeedBlock();
+};
 // Typed free text -> same question.
 window.seedFreeAdd=function(){
   var inp=document.getElementById('seed-free-input');
@@ -2544,8 +2591,14 @@ window.seedSetHow=function(t){
   refreshSeedBlock();
 };
 window.seedSetFormat=function(fmt){
-  var label=_seedFlow.item+' - '+fmt;
-  commitSeedEntries([{item:label,potluckType:'Skill'}]);
+  if(fmt==='Other'){ _seedFlow={item:_seedFlow.item,step:'otherfmt',type:'skill'}; refreshSeedBlock(); return; }
+  commitSeedEntries([{item:_seedFlow.item+' - '+fmt,potluckType:'Skill'}]);
+};
+window.seedOtherFormatAdd=function(){
+  var inp=document.getElementById('seed-otherfmt-input');
+  var v=inp?inp.value.trim():'';
+  if(!v){ toast('Please say how you would like to share it'); return; }
+  commitSeedEntries([{item:_seedFlow.item+' - '+v,potluckType:'Skill'}]);
 };
 window.seedThingSkip=function(){
   commitSeedEntries([{item:_seedFlow.item,potluckType:'Experience'}]);
@@ -3469,4 +3522,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V4.11 | Date: 2026-07-18 | LAST CHANGE: Two copy edits on the second fast screen - see the top-of-file note. (V4.10: one profile screen.) -->
+<!-- Version: V4.12 | Date: 2026-07-18 | LAST CHANGE: One header and one profile pill, Open to work checkbox, skills-first potluck flow - see the top-of-file note. (V4.11: two copy edits.) -->
