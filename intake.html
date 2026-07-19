@@ -1,4 +1,4 @@
-<!-- Version: V4.30 | Date: 2026-07-18 | LAST CHANGE: Sign-up page heading is now "What will you bring? 🎁". On the first fast screen the examples moved out of the checkbox label to a line above the field, the field sits flush under its checkbox instead of indented, and its placeholder reads "What will you bring?"; the Skill examples now read "Q&A time, 1:1 walk and talk, or workshop". "Open to work" became a progressive question - "Are you open to work?", then multi-select Full-time / Part-time / Projects, then multi-select Paid / Not paid - all carried in the existing passthrough "retired" cell as kind: and pay: entries, so still no new column and no GAS change. "A walk and talk" added to the contribution formats. The format and open-to-work option lists are hardcoded for now and belong in the reference-data sheet later. (V4.20: contributions are not claimable slots.) -->
+<!-- Version: V4.31 | Date: 2026-07-18 | LAST CHANGE: Added a "Both" pill to the open-to-work pay question. It is mutually exclusive with Paid and Not paid - choosing Both clears them, choosing either of them clears Both - since holding both at once has no coherent meaning. (V4.30: bring-field layout, progressive Open to work, walk and talk.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -425,7 +425,7 @@ var _otwPay=[];     // Paid / Not paid - multi-select
 // Hardcoded for now; these belong in the reference-data sheet later, alongside the
 // contribution formats, so they can be edited without a deploy.
 var OTW_KINDS=['Full-time','Part-time','Projects'];
-var OTW_PAY=['Paid','Not paid'];
+var OTW_PAY=['Paid','Not paid','Both'];
 function parseRetiredStr(str){
   var parts=String(str||'').split('|').map(function(p){return p.trim();}).filter(Boolean);
   var low=parts.map(function(p){return p.toLowerCase();});
@@ -1977,7 +1977,13 @@ window.toggleOtwKind=function(k){
 };
 window.toggleOtwPay=function(p){
   var i=_otwPay.indexOf(p);
-  if(i>-1) _otwPay.splice(i,1); else _otwPay.push(p);
+  if(i>-1){ _otwPay.splice(i,1); }
+  else {
+    // "Both" and the individual answers cannot be true at the same time, so picking
+    // one side clears the other.
+    if(p==='Both') _otwPay=['Both'];
+    else _otwPay=_otwPay.filter(function(x){return x!=='Both';}).concat([p]);
+  }
   refreshOtw(); autoSave();
 };
 
@@ -3586,4 +3592,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V4.30 | Date: 2026-07-18 | LAST CHANGE: Sign-up heading, first-screen field layout and examples, progressive Open to work, "A walk and talk" format - see the top-of-file note. (V4.20: contributions are not claimable slots.) -->
+<!-- Version: V4.31 | Date: 2026-07-18 | LAST CHANGE: "Both" pill on the open-to-work pay question - see the top-of-file note. (V4.30: bring-field layout, progressive Open to work.) -->
