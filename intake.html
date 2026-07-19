@@ -1,4 +1,4 @@
-<!-- Version: V5.00 | Date: 2026-07-18 | LAST CHANGE: The sign-up page is now three self-contained columns. The separate "Event contribution" box above them is gone - each column takes a contribution of its own type, so the Skill/Experience/Thing question never has to be asked. Every column has an "Add your own" field with "I'll bring this" at the top, pre-filled with whatever was typed for that type on the first intake screen (and left empty when that item is already on the list). The Skills column additionally offers back the person's own skills under "Your skills", above the host's items under "From the sign-up list". Picking a skill asks how they want to share it - Q&A session / Workshop / A walk and talk / Other - inline in the column; an experience or a thing has nothing more to ask and commits straight away. (V4.32: seeking chip info icon.) -->
+<!-- Version: V5.10 | Date: 2026-07-18 | LAST CHANGE: Tapping anywhere on a seeking chip now opens its detail, not only the small info icon - the chip opened it and a document-level click handler immediately closed it again. "This is so me" picks up the hub's Show all orange. On the sign-up page the top-right profile label sits in a white pill (it was dark text on the blue background), the format question reads "How would you like to share this skill: X?", Cancel is replaced by an x in the corner of that box since it was never a format, and the list of who has claimed each item no longer repeats here - the item still shows "Being brought", and the names stay on the hub where there is room for them. (V5.00: three self-contained columns.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1125,7 +1125,7 @@ window.toggleSeekDetail=function(id){
 };
 // Click outside an open seeking popover (and not on its (i)) closes it.
 document.addEventListener('click', function(e){
-  if(e.target && e.target.closest && (e.target.closest('.seek-detail-pop')||e.target.closest('.seek-info'))) return;
+  if(e.target && e.target.closest && (e.target.closest('.seek-detail-pop')||e.target.closest('.seek-info')||e.target.closest('.profile-tag'))) return;
   var pops=document.querySelectorAll('.seek-detail-pop');
   for(var k=0;k<pops.length;k++){ if(pops[k].style.display==='block'){ pops[k].style.display='none'; if(pops[k].parentNode) pops[k].parentNode.style.zIndex=''; } }
 });
@@ -1714,6 +1714,14 @@ function renderTopRight(){
   } else {
     var phImg=_photo?'<div class="btn-photo"><img src="'+esc(_photo)+'" alt=""></div>':'<div class="btn-photo">🌱</div>';
     var photoClick=_screen===0?' onclick="openPostalModal()" style="cursor:pointer;"':'';
+    // The sign-up screen sits on the blue page background, where dark label text disappeared.
+    // Wrap the label and photo in the same white pill the hub nav uses.
+    if(_screen==='potluck'){
+      el.innerHTML='<div style="display:inline-flex;align-items:center;gap:8px;background:#fff;border-radius:24px;padding:4px 10px 4px 14px;">'
+        +'<span style="font-size:12px;font-weight:600;color:#185FA5;white-space:nowrap;">My event profile</span>'
+        +'<div class="btn-photo"'+photoClick+'>'+phImg+'</div></div>';
+      return;
+    }
     var phLabel=(_screen!=='intro')?'<span style="font-size:12px;font-weight:600;color:var(--text);">My event profile</span>':'';
     el.innerHTML=phLabel+'<div class="btn-photo"'+photoClick+'>'+phImg+'</div>';
   }
@@ -2180,7 +2188,7 @@ function renderProfile(el, viewerMode){
   var emailBtn=(viewerMode&&isViewingHost()&&_hostEmail)?'<button onclick="emailHostCopy(this)" style="background:none;border:1.5px solid var(--brand);color:var(--brand);border-radius:16px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;">✉️ Email me</button>':'';
   el.innerHTML='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;"><h2 style="margin:0;">This is me 🌱</h2>'+emailBtn+_photoHTML+'</div>'
     +section("What I'm seeking",allNeeds,false,'',4)
-    +section('What I enjoy',_interests,true,'level',1,false,_expression?'<div style="margin-top:6px;display:flex;justify-content:flex-end;"><span style="font-size:13px;color:var(--soft);"><span style="font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:0.08em;color:var(--muted);">This is so me:</span> <span style="font-size:10px;font-weight:700;">'+esc(_expressionItems.join(', '))+'</span></span></div>':'')
+    +section('What I enjoy',_interests,true,'level',1,false,_expression?'<div style="margin-top:6px;display:flex;justify-content:flex-end;"><span style="font-size:13px;color:var(--soft);"><span style="font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:0.08em;color:#BF5700;">This is so me:</span> <span style="font-size:10px;font-weight:700;">'+esc(_expressionItems.join(', '))+'</span></span></div>':'')
     +'<div class="profile-section" style="border-bottom:none;padding-bottom:4px;">'
     +'<div class="profile-section-header"><div class="profile-section-label">My skills</div>'
     +(canEdit?'<div class="profile-section-actions"><button class="edit-btn" onclick="jumpTo(2)">✏️ Edit</button></div>':'')
@@ -2552,7 +2560,7 @@ function seedBlockHTML(){
   }
   if(_seedFlow.step==='format'){
     h+=crumb()
-      +'<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:10px;">How would you like to share <strong>'+esc(_seedFlow.item)+'</strong>?</div>'
+      +'<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:10px;">How would you like to share this skill: <strong>'+esc(_seedFlow.item)+'</strong>?</div>'
       +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
       +SEED_FORMATS.map(function(f){ return '<button onclick="seedSetFormat(\''+esc(f).replace(/'/g,"\\'")+'\')" style="'+PILL+'">'+esc(f)+'</button>'; }).join('')
       +'<button onclick="seedCancel()" style="'+BTN_O+'">Cancel</button>'
@@ -2562,7 +2570,7 @@ function seedBlockHTML(){
   // "Other" - they name the format themselves.
   if(_seedFlow.step==='otherfmt'){
     h+=crumb()
-      +'<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px;">How would you like to share <strong>'+esc(_seedFlow.item)+'</strong>?</div>'
+      +'<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px;">How would you like to share this skill: <strong>'+esc(_seedFlow.item)+'</strong>?</div>'
       +'<input type="text" id="seed-otherfmt-input" placeholder="e.g. a table, a demo, a walk and talk" style="'+INP+'">'
       +'<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">'
       +'<button onclick="seedOtherFormatAdd()" style="'+BTN+'">Add</button>'
@@ -2736,7 +2744,9 @@ function renderSignupItemHTML(it,i){
       +'<button onclick="submitClaim('+i+')" style="flex:1;background:var(--brand);color:white;border:none;padding:8px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;">I\'ll bring this! 🎁</button>'
       +'</div></div>';
   }
-  if(claims.length){
+  // Who is bringing what lives on the hub - repeating every claimant here made the column
+  // a wall of names. The item still shows that it is spoken for.
+  if(claims.length && _screen!=='potluck'){
     h+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">';
     claims.forEach(function(c){
       var ph=c.photo?'<img src="'+esc(c.photo)+'" style="width:22px;height:22px;border-radius:50%;object-fit:cover;" onerror="this.style.display=\'none\'">':'<div style="width:22px;height:22px;border-radius:50%;background:var(--brand);color:white;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;">'+esc((c.name||c.appearId||'?').charAt(0).toUpperCase())+'</div>';
@@ -2785,17 +2795,18 @@ function ownSkillsBlockHTML(){
 // After picking a skill, the only question left is how they want to share it.
 function formatStepHTML(){
   if(!_seedFlow.item) return '';
-  var h='<div style="border:1.5px solid var(--brand);border-radius:10px;padding:10px;margin-bottom:12px;">'
-    +'<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px;">How would you like to share <strong>'+esc(_seedFlow.item)+'</strong>?</div>';
+  var h='<div style="position:relative;border:1.5px solid var(--brand);border-radius:10px;padding:10px;margin-bottom:12px;">'
+    +'<button onclick="seedCancel()" aria-label="Close" style="position:absolute;top:6px;right:8px;background:none;border:none;color:var(--muted);font-size:16px;line-height:1;cursor:pointer;padding:2px;font-family:inherit;">\u00d7</button>'
+    +'<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px;padding-right:18px;">How would you like to share this skill: <strong>'+esc(_seedFlow.item)+'</strong>?</div>';
   if(_seedFlow.step==='otherfmt'){
     h+='<input type="text" id="seed-otherfmt-input" placeholder="e.g. a table, a demo" style="'+COL_INP+'width:100%;margin-bottom:8px;">'
       +'<div style="display:flex;gap:6px;flex-wrap:wrap;">'
       +'<button onclick="seedOtherFormatAdd()" style="'+COL_BTN+'">Add</button>'
-      +'<button onclick="seedCancel()" style="'+COL_BTN_O+'">Cancel</button></div>';
+      +'</div>';
   } else {
     h+='<div style="display:flex;gap:6px;flex-wrap:wrap;">'
       +SEED_FORMATS.map(function(f){ return '<button onclick="seedSetFormat(\''+rawVal(f)+'\')" style="'+COL_BTN_O+'">'+esc(f)+'</button>'; }).join('')
-      +'<button onclick="seedCancel()" style="'+COL_BTN_O+'">Cancel</button></div>';
+      +'</div>';
   }
   return h+'</div>';
 }
@@ -3659,4 +3670,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V5.00 | Date: 2026-07-18 | LAST CHANGE: Sign-up page rebuilt as three self-contained columns - see the top-of-file note. (V4.32: seeking chip info icon.) -->
+<!-- Version: V5.10 | Date: 2026-07-18 | LAST CHANGE: Chip tap opens detail, orange accent, white pill on sign-up page, share wording, x instead of Cancel, claimant names off the sign-up page - see the top-of-file note. (V5.00: three columns.) -->
