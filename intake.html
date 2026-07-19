@@ -1,4 +1,4 @@
-<!-- Version: V5.13 | Date: 2026-07-18 | LAST CHANGE: In the top-right pill the first name now sits to the right of the photo rather than the left. Still shows photo-only until the getProfile Info-sheet change is deployed. (V5.12: bookmark needs two people; show whose profile this is.) -->
+<!-- Version: V5.14 | Date: 2026-07-18 | LAST CHANGE: The top-right pill now shows the person's first name. No GAS change was needed after all - "first" is a column on the ikigai row, so getProfile already returns it inside resp.data; the client was looking for it at the top level next to photo/name, found nothing, and fell back to Main's Name column, which is blank for most people. (V5.13: first name to the right of the photo.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -544,9 +544,12 @@ async function loadProfileAndIntake(){
   try{
     var res=await fetch(GS_URL+'?action=getProfile&appearId='+encodeURIComponent(id));
     var resp=await res.json();
-    if(_viewerMode){_viewerPhoto=resp.photo||'';_viewerName=resp.first||resp.name||'';}
+    // "first" is a column on the ikigai row, so it arrives inside resp.data - not at the top
+    // level next to photo/name. Main's Name column is blank for most people.
+    var _first=(resp.data&&resp.data.first)||resp.first||'';
+    if(_viewerMode){_viewerPhoto=resp.photo||'';_viewerName=_first||resp.name||'';}
     // The owner renders through the edit view even on "?show=", so fill both slots for them.
-    if(!_viewerMode||isOwner()){_photo=resp.photo||'';_name=resp.name||'';}
+    if(!_viewerMode||isOwner()){_photo=resp.photo||'';_name=_first||resp.name||'';}
     if(resp.found&&resp.data){
       _hasProfile=true;
       var d=resp.data;
@@ -3693,4 +3696,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V5.13 | Date: 2026-07-18 | LAST CHANGE: First name moved to the right of the photo in the top-right pill. (V5.12: bookmark needs two people.) -->
+<!-- Version: V5.14 | Date: 2026-07-18 | LAST CHANGE: First name read from resp.data.first, where it already lived - no GAS change needed. (V5.13: name to the right of the photo.) -->
