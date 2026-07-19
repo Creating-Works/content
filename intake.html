@@ -1,4 +1,4 @@
-<!-- Version: V5.11 | Date: 2026-07-18 | LAST CHANGE: The sign-up page's Back button moved from the bottom to the top, styled as the same white pill the hub uses when you drill into a category - you no longer have to scroll past all three columns to get out. Edit mode still keeps its Done button at the bottom. (V5.10: chip tap, orange accent, sign-up page polish.) -->
+<!-- Version: V5.12 | Date: 2026-07-18 | LAST CHANGE: "Bookmark to meet" no longer appears on a bare "?show=" URL. Bookmarking is a me-to-them action, so it needs both people named in the URL; with only one person there is nobody to bookmark on behalf of, and personal UI should not appear off a device's stored id alone. The viewed person is now identified in a white pill at top right - their photo today, with their first name appearing as soon as getProfile returns it. The member id is never shown as a name. (V5.11: sign-up page Back button moved to the top.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -544,7 +544,7 @@ async function loadProfileAndIntake(){
   try{
     var res=await fetch(GS_URL+'?action=getProfile&appearId='+encodeURIComponent(id));
     var resp=await res.json();
-    if(_viewerMode){_viewerPhoto=resp.photo||'';_viewerName=resp.name||'';}
+    if(_viewerMode){_viewerPhoto=resp.photo||'';_viewerName=resp.first||resp.name||'';}
     // The owner renders through the edit view even on "?show=", so fill both slots for them.
     if(!_viewerMode||isOwner()){_photo=resp.photo||'';_name=resp.name||'';}
     if(resp.found&&resp.data){
@@ -1708,8 +1708,17 @@ window.nativeShare = function(){
 function renderTopRight(){
   var el=document.getElementById('top-right-area'); if(!el) return;
   if(_viewerMode){
-    // Nav bar + "Tap to match" now render in normal flow inside renderProfile; keep the absolute corner empty.
-    el.innerHTML='';
+    // Say whose profile this is. The photo is available today; the first name fills in once
+    // getProfile returns it (Main's Name column is empty for most people - the names live in
+    // the Info sheet). Never fall back to the member id - that is not a name.
+    var vName=String(_viewerName||'').trim().split(' ')[0];
+    var vImg=_viewerPhoto
+      ?'<img src="'+esc(_viewerPhoto)+'" alt="" style="width:30px;height:30px;border-radius:50%;object-fit:cover;flex-shrink:0;">'
+      :'<div style="width:30px;height:30px;border-radius:50%;background:#1F699E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;">'+esc((vName||'?').charAt(0).toUpperCase())+'</div>';
+    if(!_viewerPhoto&&!vName){ el.innerHTML=''; return; }
+    el.innerHTML='<div style="display:inline-flex;align-items:center;gap:8px;background:#fff;border-radius:24px;padding:4px 6px 4px '+(vName?'14px':'6px')+';">'
+      +(vName?'<span style="font-size:13px;font-weight:700;color:#185FA5;white-space:nowrap;">'+esc(vName)+'</span>':'')
+      +vImg+'</div>';
     return;
   } else {
     var phImg=_photo?'<div class="btn-photo"><img src="'+esc(_photo)+'" alt=""></div>':'<div class="btn-photo">🌱</div>';
@@ -2099,11 +2108,19 @@ function _wtmListHTML(){
   }).join('') : '<div style="font-size:13px;color:var(--muted);padding:6px 0;">No one yet. Open someone\'s profile '+_wtmHubLink()+' and tap "I want to meet!"</div>';
   return '<div style="margin-top:22px;padding-top:14px;border-top:1.5px solid var(--border);"><div style="font-size:16px;font-weight:700;margin-bottom:6px;">People I want to meet</div>'+inner+'</div>';
 }
+// Bookmarking is a "me -> them" action, so it needs BOTH people named in the URL. On a bare
+// "?show=" there is no viewer, so there is nobody to bookmark on behalf of - and personal UI
+// should never appear off a device's stored id alone.
+function _viewerIdParam(){
+  try{ return String(new URLSearchParams(window.location.search).get('me')||new URLSearchParams(window.location.search).get('memberCard')||'').trim(); }
+  catch(e){ return ''; }
+}
 function _wtmDecorate(){
   var el=document.getElementById('app-content'); if(!el) return;
   // Your own list is yours on either URL; someone else's profile gets the bookmark button.
   if(isOwner()){ el.insertAdjacentHTML('beforeend', _wtmListHTML()); return; }
   if(!_showId) return;
+  if(!_viewerIdParam()) return;   // only one person in the URL - no bookmark button
   var has=_wtmHas(_showId);
   var _bs='font-size:14px;font-weight:600;padding:9px 18px;border-radius:20px;cursor:pointer;font-family:inherit;border:1.5px solid #185FA5;background:#fff;color:#185FA5;';
   var btn='<div style="padding:0 2px 14px;"><button id="wtm-btn" onclick="wtmToggle()" style="'+_bs+'">'+(has?'✓ Bookmarked':'Bookmark to meet')+'</button></div>';
@@ -3675,4 +3692,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V5.11 | Date: 2026-07-18 | LAST CHANGE: Sign-up page Back button moved to the top as a hub-style pill - see the top-of-file note. (V5.10: chip tap, orange accent.) -->
+<!-- Version: V5.12 | Date: 2026-07-18 | LAST CHANGE: Bookmark button needs both people in the URL; viewed person shown in a top-right pill - see the top-of-file note. (V5.11: Back button to the top.) -->
