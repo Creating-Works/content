@@ -1,4 +1,4 @@
-<!-- Version: V4.32 | Date: 2026-07-18 | LAST CHANGE: The seeking chip's info icon sat on its own third line. The category under it renders as a block element, so anything placed after it wrapped to a new line - the icon just needed to come before it. The chip is now two rows, "Cooking 📍 ⓘ" over the category, instead of three. Tap-to-reveal is unchanged. (V4.31: Both pill on the open-to-work pay question.) -->
+<!-- Version: V5.00 | Date: 2026-07-18 | LAST CHANGE: The sign-up page is now three self-contained columns. The separate "Event contribution" box above them is gone - each column takes a contribution of its own type, so the Skill/Experience/Thing question never has to be asked. Every column has an "Add your own" field with "I'll bring this" at the top, pre-filled with whatever was typed for that type on the first intake screen (and left empty when that item is already on the list). The Skills column additionally offers back the person's own skills under "Your skills", above the host's items under "From the sign-up list". Picking a skill asks how they want to share it - Q&A session / Workshop / A walk and talk / Other - inline in the column; an experience or a thing has nothing more to ask and commits straight away. (V4.32: seeking chip info icon.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2481,12 +2481,9 @@ function renderScreenPotluck(el){
     +(_eventDate?'📅 '+esc(fmtEventDate(_eventDate))+' ':'')
     +((_eventVenue||_eventLocationAddr)?'📍 '+esc([_eventVenue,_eventLocationAddr].filter(Boolean).join(', ')):'')
     +'</div></div>':'';
+  // The separate contribution box above the columns is gone - each column now takes its own
+  // kind of contribution, so the type never has to be asked as a question.
   var html=headerHTML
-    +'<div style="background:#fff;border-radius:14px;padding:20px 24px;margin-bottom:16px;">'
-    +'<h2 style="margin-bottom:6px;">Event contribution 🎁</h2>'
-    +'<p style="font-size:14px;color:var(--soft);margin:0 0 18px;">This event is all about contribution. Think of it as a potluck of skills and offerings. What are you going to bring to the event?</p>'
-    +seedBlockHTML()
-    +'</div>'
     +'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 4px 10px;flex-wrap:wrap;"><div style="font-size:18px;font-weight:800;color:#fff;">What will you bring? 🎁</div></div>'
     +'<div class="bring-grid" id="bring-grid"></div>'
     +(_editMode?'<div class="nav-row" style="margin:16px 4px 0;"><button class="btn-next" onclick="doneEdit()">Done</button></div>':'<div class="nav-row" style="margin:16px 4px 0;"><button class="btn-back" onclick="goBack()">Back</button></div>');
@@ -2610,10 +2607,11 @@ function seedFooterHTML(BTN,BTN_O,primaryDone){
     +(hubUrl?'<button onclick="window.location.href=\''+hubUrl+'\'" style="'+(primaryDone?BTN:BTN_O)+'">Done</button>':'')
     +'</div>';
 }
+// The flow now lives inside the Skills column, so repaint the columns rather than a
+// standalone block. (seedBlockHTML is kept but no longer rendered anywhere.)
 function refreshSeedBlock(){
-  var el=document.getElementById('seed-block'); if(!el) return;
-  el.outerHTML=seedBlockHTML();
-  var f=document.getElementById('seed-otherfmt-input')||document.getElementById('seed-thing-input')||document.getElementById('seed-free-input');
+  renderPotluckColumns();
+  var f=document.getElementById('seed-otherfmt-input');
   if(f) f.focus();
 }
 window.seedCancel=function(){ _seedFlow={item:'',step:'',type:''}; refreshSeedBlock(); };
@@ -2750,18 +2748,87 @@ function renderSignupItemHTML(it,i){
   return h;
 }
 var _bringColLabels={skill:'Skills',experience:'Experiences',thing:'Things'};
+var COL_BTN='background:var(--brand);color:#fff;border:none;padding:7px 10px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;';
+var COL_BTN_O='background:#fff;color:var(--brand);border:1.5px solid var(--brand);padding:7px 10px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;';
+var COL_INP='flex:1;min-width:0;padding:8px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box;';
+
+// Already on the list under this person's name, so it should not be offered back to them again.
+function alreadyOffered(item){
+  return _signupList.some(function(it){ return String(it.item).toLowerCase()===String(item).toLowerCase(); })
+      || _signupList.some(function(it){ return String(it.item).toLowerCase().indexOf(String(item).toLowerCase()+' - ')===0; });
+}
+
+// Each column can take a contribution of its own type. The type is the column, so there is
+// no Skill/Experience/Thing question - and whatever they typed on the first intake screen
+// pre-fills the matching column.
+function addYourOwnHTML(key){
+  var seed=(!alreadyOffered((_bringText&&_bringText[key])||'')&&_bringText&&_bringText[key])?_bringText[key]:'';
+  return '<div style="display:flex;gap:6px;margin-bottom:12px;">'
+    +'<input type="text" id="col-add-'+key+'" placeholder="Add your own" value="'+esc(seed)+'" style="'+COL_INP+'">'
+    +'<button onclick="colAdd(\''+key+'\')" style="'+COL_BTN+'">I\'ll bring this! 🎁</button>'
+    +'</div>';
+}
+
+// Offer back the skills they already told us about, so they do not retype them.
+function ownSkillsBlockHTML(){
+  var mine=(_skills||[]).map(function(s){return s.item;}).filter(function(i){return i&&!alreadyOffered(i);});
+  if(!mine.length) return '';
+  return '<div style="font-size:11px;font-weight:700;color:var(--brand);margin-bottom:6px;">Your skills</div>'
+    +mine.map(function(item){
+        return '<div style="border:1.5px solid var(--brand);background:var(--sel-bg);border-radius:10px;padding:10px;margin-bottom:8px;">'
+          +'<div style="font-size:13px;font-weight:600;color:var(--brand);margin-bottom:6px;">'+esc(item)+'</div>'
+          +'<button onclick="seedPick(\''+rawVal(item)+'\')" style="'+COL_BTN+'">I\'ll bring this! 🎁</button>'
+          +'</div>';
+      }).join('');
+}
+
+// After picking a skill, the only question left is how they want to share it.
+function formatStepHTML(){
+  if(!_seedFlow.item) return '';
+  var h='<div style="border:1.5px solid var(--brand);border-radius:10px;padding:10px;margin-bottom:12px;">'
+    +'<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px;">How would you like to share <strong>'+esc(_seedFlow.item)+'</strong>?</div>';
+  if(_seedFlow.step==='otherfmt'){
+    h+='<input type="text" id="seed-otherfmt-input" placeholder="e.g. a table, a demo" style="'+COL_INP+'width:100%;margin-bottom:8px;">'
+      +'<div style="display:flex;gap:6px;flex-wrap:wrap;">'
+      +'<button onclick="seedOtherFormatAdd()" style="'+COL_BTN+'">Add</button>'
+      +'<button onclick="seedCancel()" style="'+COL_BTN_O+'">Cancel</button></div>';
+  } else {
+    h+='<div style="display:flex;gap:6px;flex-wrap:wrap;">'
+      +SEED_FORMATS.map(function(f){ return '<button onclick="seedSetFormat(\''+rawVal(f)+'\')" style="'+COL_BTN_O+'">'+esc(f)+'</button>'; }).join('')
+      +'<button onclick="seedCancel()" style="'+COL_BTN_O+'">Cancel</button></div>';
+  }
+  return h+'</div>';
+}
+
 function renderPotluckColumns(){
   var el=document.getElementById('bring-grid'); if(!el) return;
   var byType={skill:[],experience:[],thing:[]};
   _signupList.forEach(function(it,i){ byType[bringTypeKey(it.potluckType)].push(i); });
   el.innerHTML=['skill','experience','thing'].map(function(key){
+    var body=addYourOwnHTML(key);
+    if(key==='skill'){
+      body+=formatStepHTML();
+      body+=ownSkillsBlockHTML();
+    }
     var idxList=byType[key];
-    var itemsHTML=idxList.length
+    body+='<div style="font-size:11px;font-weight:700;color:var(--soft);margin:4px 0 6px;padding-top:10px;border-top:1px solid var(--border);">From the sign-up list</div>';
+    body+=idxList.length
       ? idxList.map(function(i){ return renderSignupItemHTML(_signupList[i],i); }).join('')
       : '<span class="q-empty">Nothing here yet.</span>';
-    return '<div class="quadrant"><div class="q-header"><div class="q-title">'+_bringColLabels[key]+'</div></div><div class="q-body">'+itemsHTML+'</div></div>';
+    return '<div class="quadrant"><div class="q-header"><div class="q-title">'+_bringColLabels[key]+'</div></div><div class="q-body">'+body+'</div></div>';
   }).join('');
 }
+
+// Typed into a column's own field. Skills still get the "how" question; an experience or a
+// thing has nothing further to ask, so it commits straight away.
+window.colAdd=function(key){
+  var inp=document.getElementById('col-add-'+key);
+  var v=inp?capFirst(inp.value.trim()):'';
+  if(!v){ toast('Please say what you\'ll bring'); return; }
+  if(key==='skill'){ seedPick(v); return; }
+  if(_bringType.indexOf(key)<0) _bringType.push(key);
+  commitSeedEntries([{item:v,potluckType:(key==='experience'?'Experience':'Thing')}]);
+};
 function renderPotluckAttendeeMode(){
   return '';   // superseded by renderPotluckColumns() - kept as a no-op so any stray caller doesn't error
 }
@@ -3592,4 +3659,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V4.32 | Date: 2026-07-18 | LAST CHANGE: Seeking chip info icon moved onto the item line - see the top-of-file note. (V4.31: Both pill.) -->
+<!-- Version: V5.00 | Date: 2026-07-18 | LAST CHANGE: Sign-up page rebuilt as three self-contained columns - see the top-of-file note. (V4.32: seeking chip info icon.) -->
