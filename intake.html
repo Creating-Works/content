@@ -1,4 +1,4 @@
-<!-- Version: V5.33 | Date: 2026-07-18 | LAST CHANGE: Chips on the second fast screen now carry the category they came from, under the item name, the way the profile chips do. Field labels renamed: "One thing you enjoy" -> "What I enjoy", "One skill" -> "Skills that pay the bills", "Something you care about or need" -> "Thing I care about or need" - the singular wording read as a limit when all three fields have always accepted more than one. (V5.32: square Know someone, new invite wording.) -->
+<!-- Version: V5.40 | Date: 2026-07-18 | LAST CHANGE: Checking a bring-type now shows the field with an Add button beside it; Add commits the answer, collapses the field to what was written, and leaves a Change link to reopen it. The "🎯" line stays either way. Next is hidden until something has actually been added, or the sign-up list is ticked - typing alone no longer counts, so the button waits for a real answer. Typed text still survives a re-render: it sits in a draft until Add commits it. New example copy for Skill and Experience. (V5.33: category in the chips, three labels renamed.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1803,10 +1803,25 @@ function render(){
 
 // Intro/welcome shown before section 1 — only when the hub CTA passes &intro=1 (new registrants).
 var _bringOpts=[
-  {key:'skill',emoji:'👤',label:'Skill',ex:'Q&A time, 1:1 walk and talk, or workshop',msg:'People who want your skills find you here during and after the event.'},
-  {key:'experience',emoji:'🎉',label:'Experience',ex:'food/coffee/wine tastings, band, yoga session',msg:'When you bring an experience people can join, some will want it again after the event.'},
+  {key:'skill',emoji:'👤',label:'Skill',ex:'Q&A time, 1:1 walk and talk, or workshop on a specific topic',msg:'People who want your skills find you here during and after the event.'},
+  {key:'experience',emoji:'🎉',label:'Experience',ex:'Make the event experiential, like providing tastings, facilitating a yoga session, or having your band play.',msg:'When you bring an experience people can join, some will want it again after the event.'},
   {key:'thing',emoji:'📦',label:'Thing',ex:'flowers, tent, speakers',msg:'Bring a thing, people notice, some will want more of it after the event.'}
 ];
+// Before Add: the field with its button. After Add: what they wrote, with a way back to it.
+function bringFieldHTML(key,FINP){
+  var done=String(_bringText[key]||'').trim();
+  if(done){
+    return '<div style="display:flex;align-items:center;gap:8px;margin:2px 0 6px;flex-wrap:wrap;">'
+      +'<span style="font-size:14px;font-weight:600;color:var(--brand);background:var(--sel-bg);border:1.5px solid var(--brand);border-radius:8px;padding:8px 12px;">'+esc(done)+'</span>'
+      +'<button onclick="bringEdit(\''+key+'\')" style="background:none;border:none;color:var(--brand);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;text-decoration:underline;padding:0;">Change</button>'
+      +'</div>';
+  }
+  return '<div style="display:flex;gap:8px;margin:2px 0 6px;">'
+    +'<input type="text" id="bring-text-'+key+'" placeholder="What will you bring?" value="'+esc(_bringDraft[key]||'')+'" style="'+FINP+'margin:0;flex:1;min-width:0;">'
+    +'<button onclick="bringAdd(\''+key+'\')" style="background:var(--brand);color:#fff;border:none;padding:10px 18px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Add</button>'
+    +'</div>';
+}
+
 function renderScreenIntro(el){
   // Field sits flush under its checkbox rather than indented, with the examples as a line
   // above it instead of trailing the checkbox label.
@@ -1818,7 +1833,7 @@ function renderScreenIntro(el){
       +'<div class="method-text"><strong>'+o.emoji+' '+o.label+'</strong></div>'
       +'</div>'
       +(sel?'<div style="font-size:12px;color:var(--soft);margin:8px 0 2px;">Examples: '+esc(o.ex)+'</div>':'')
-      +(sel?'<input type="text" id="bring-text-'+o.key+'" placeholder="What will you bring?" value="'+esc(_bringText[o.key]||'')+'" style="'+FINP+'">':'')
+      +(sel?bringFieldHTML(o.key,FINP):'')
       +(sel?'<div style="font-size:13px;color:var(--brand);margin:4px 0 10px;">🎯 '+esc(o.msg)+'</div>':'');
   }).join('');
   var signupRow='<div class="method-item'+(_wantsSignupList?' selected':'')+'" onclick="toggleWantsSignupList()">'
@@ -1832,15 +1847,34 @@ function renderScreenIntro(el){
     +'<p style="font-size:15.5px;line-height:1.55;color:var(--text);margin-bottom:14px;">What will you bring to this event? This gets you a ticket in. Check what you are thinking, and name it here if you already know.</p>'
     +rows
     +signupRow
-    +'<button class="btn-next" style="margin-top:22px;" onclick="introContinue();">Next</button>'
+    +(bringReady()?'<button class="btn-next" style="margin-top:22px;" onclick="introContinue();">Next</button>':'')
     +'</div>';
 }
 // Any re-render of this screen rebuilds the inputs, so read them back into state first.
+// What is typed sits in a draft until Add commits it to _bringText. Keeping the two apart
+// is what lets Next wait for a real answer rather than appearing the moment a key is pressed.
+var _bringDraft={skill:'',experience:'',thing:''};
 function captureBringText(){
   ['skill','experience','thing'].forEach(function(k){
     var inp=document.getElementById('bring-text-'+k);
-    if(inp) _bringText[k]=inp.value.trim();
+    if(inp) _bringDraft[k]=inp.value.trim();
   });
+}
+window.bringAdd=function(key){
+  var inp=document.getElementById('bring-text-'+key);
+  var v=inp?capFirst(inp.value.trim()):'';
+  if(!v){ toast('Please say what you\'ll bring'); return; }
+  _bringText[key]=v; _bringDraft[key]='';
+  render();
+};
+window.bringEdit=function(key){
+  _bringDraft[key]=_bringText[key]||'';
+  _bringText[key]='';
+  render();
+};
+function bringReady(){
+  if(_wantsSignupList) return true;
+  return ['skill','experience','thing'].some(function(k){ return String(_bringText[k]||'').trim(); });
 }
 window.introContinue=function(){
   captureBringText();
@@ -3800,4 +3834,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V5.33 | Date: 2026-07-18 | LAST CHANGE: Category shown in the chips; three field labels renamed. (V5.32: square Know someone.) -->
+<!-- Version: V5.40 | Date: 2026-07-18 | LAST CHANGE: Add button commits each bring-type; Next waits for a real answer. (V5.33: category in the chips.) -->
