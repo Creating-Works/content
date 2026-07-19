@@ -1,4 +1,4 @@
-<!-- Version: V4.10 | Date: 2026-07-18 | LAST CHANGE: One profile screen, privileges decide what shows. The renderer was already shared, but "viewerMode" was doing double duty as "not the owner", so opening your own public ?show= link gave you a read-only copy of yourself. Ownership is now a single isOwner() check - "?id=" carries the capability, "?show=" recognises you by &me= or the appear-id this device stores - and the per-section pencils, the want-to-meet list, the nav pills and saving all key off that instead of the URL. Someone else's profile stays strictly read-only and cannot save. (V4.00: two-screen intake.) -->
+<!-- Version: V4.11 | Date: 2026-07-18 | LAST CHANGE: Two copy edits on the second fast screen - "One thing you enjoy" now reads "Anything that brings you joy counts here.", and "Something you care about or need" now reads "People find you through this." (V4.10: one profile screen, privileges decide what shows.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1907,9 +1907,9 @@ function renderScreenFast2(el){
       +'<div style="font-weight:700;font-size:15px;color:var(--text);margin-bottom:6px;">Language you speak</div>'
       +fastLangHTML()
     +'</div>'
-    +fastFieldHTML('One thing you enjoy','Anything you do for fun counts here.','1','Search hobbies and recreation...')
+    +fastFieldHTML('One thing you enjoy','Anything that brings you joy counts here.','1','Search hobbies and recreation...')
     +fastFieldHTML('One skill','What you are good at, paid or otherwise.','2','Search skills...')
-    +fastFieldHTML('Something you care about or need','This is what people connect with you over.','3','Search what you care about...')
+    +fastFieldHTML('Something you care about or need','People find you through this.','3','Search what you care about...')
     +'<div id="fast-notice"></div>'
     +'<div class="nav-row"><button class="btn-back" onclick="goBack()">Back</button><button class="btn-next" onclick="goNext()">Next</button></div>';
 }
@@ -3469,4 +3469,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V4.10 | Date: 2026-07-18 | LAST CHANGE: One profile screen with privileges - see the top-of-file note. (V4.00: two-screen intake.) -->
+<!-- Version: V4.11 | Date: 2026-07-18 | LAST CHANGE: Two copy edits on the second fast screen - see the top-of-file note. (V4.10: one profile screen.) -->
