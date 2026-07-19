@@ -1,4 +1,4 @@
-<!-- Version: V5.10 | Date: 2026-07-18 | LAST CHANGE: Tapping anywhere on a seeking chip now opens its detail, not only the small info icon - the chip opened it and a document-level click handler immediately closed it again. "This is so me" picks up the hub's Show all orange. On the sign-up page the top-right profile label sits in a white pill (it was dark text on the blue background), the format question reads "How would you like to share this skill: X?", Cancel is replaced by an x in the corner of that box since it was never a format, and the list of who has claimed each item no longer repeats here - the item still shows "Being brought", and the names stay on the hub where there is room for them. (V5.00: three self-contained columns.) -->
+<!-- Version: V5.11 | Date: 2026-07-18 | LAST CHANGE: The sign-up page's Back button moved from the bottom to the top, styled as the same white pill the hub uses when you drill into a category - you no longer have to scroll past all three columns to get out. Edit mode still keeps its Done button at the bottom. (V5.10: chip tap, orange accent, sign-up page polish.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2491,10 +2491,15 @@ function renderScreenPotluck(el){
     +'</div></div>':'';
   // The separate contribution box above the columns is gone - each column now takes its own
   // kind of contribution, so the type never has to be asked as a question.
+  // Back sits at the top on the blue background, the same pill the hub uses when you drill
+  // into a category - you should not have to scroll the whole list to get out.
+  var backTop=_editMode?''
+    :'<div style="margin:0 4px 12px;"><button onclick="goBack()" style="display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:#fff;background:rgba(255,255,255,0.16);border:1px solid rgba(255,255,255,0.45);border-radius:20px;padding:8px 16px;cursor:pointer;font-family:inherit;">Back</button></div>';
   var html=headerHTML
+    +backTop
     +'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 4px 10px;flex-wrap:wrap;"><div style="font-size:18px;font-weight:800;color:#fff;">What will you bring? 🎁</div></div>'
     +'<div class="bring-grid" id="bring-grid"></div>'
-    +(_editMode?'<div class="nav-row" style="margin:16px 4px 0;"><button class="btn-next" onclick="doneEdit()">Done</button></div>':'<div class="nav-row" style="margin:16px 4px 0;"><button class="btn-back" onclick="goBack()">Back</button></div>');
+    +(_editMode?'<div class="nav-row" style="margin:16px 4px 0;"><button class="btn-next" onclick="doneEdit()">Done</button></div>':'');
   cont.innerHTML=html;
   renderPotluckColumns();
 }
@@ -3670,4 +3675,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V5.10 | Date: 2026-07-18 | LAST CHANGE: Chip tap opens detail, orange accent, white pill on sign-up page, share wording, x instead of Cancel, claimant names off the sign-up page - see the top-of-file note. (V5.00: three columns.) -->
+<!-- Version: V5.11 | Date: 2026-07-18 | LAST CHANGE: Sign-up page Back button moved to the top as a hub-style pill - see the top-of-file note. (V5.10: chip tap, orange accent.) -->
