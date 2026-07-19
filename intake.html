@@ -1,4 +1,4 @@
-<!-- Version: V5.20 | Date: 2026-07-18 | LAST CHANGE: A contribution is now written to the person's own profile BEFORE it reaches the hub - seedPick added the skill to the profile in memory but never saved it, so it appeared on the hub via the claim while the profile never recorded it. The three writes run strictly in order (profile, then sign-up list, then claim) since this backend 404s when calls overlap. The white photo pill is now used wherever a photo appears, not only on the sign-up page. Added "I know someone!" beside Back, which copies an invite to this event to the clipboard - nothing is sent on anyone's behalf. The three columns stack one per row below 720px and got more breathing room. (V5.14: first name read from resp.data.first.) -->
+<!-- Version: V5.21 | Date: 2026-07-18 | LAST CHANGE: "I know someone!" now copies the landing page that actually offers Sign in / Sign up - the Glide page for Lake Ballinger, which is where event.html force-forwards anyway. It previously copied the hub, which asks an unregistered person to sign in without giving them anywhere to do it. Any other event has no Glide page, so its own event page is used instead. (V5.20: profile written before the hub, white pill everywhere, invite, mobile columns.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2858,7 +2858,12 @@ function formatStepHTML(){
 // "I know someone!" - copy an invite to this event so they can paste it wherever they talk
 // to that person. Clipboard only; nothing is sent on their behalf.
 window.copyEventInvite=function(btn){
-  var url='https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId||'');
+  // Someone who is not registered needs the door that offers Sign in / Sign up. For Lake
+  // Ballinger that is the Glide page (event.html force-forwards there anyway); any other
+  // event has no Glide page, so its own event page is the right landing.
+  var url=(_eventId==='m97sjwa3')
+    ? 'https://2gather.network/dl/lakeballingerhubevent'
+    : 'https://gather.2gather.network/event.html?id='+encodeURIComponent(_eventId||'');
   var when=_eventDate?(' on '+fmtEventDate(_eventDate)):'';
   var where=(_eventVenue||_eventLocationAddr)?(' at '+[_eventVenue,_eventLocationAddr].filter(Boolean).join(', ')):'';
   var msg='I am going to '+(_eventTitle||'this event')+when+where+'. Come and bring something you love doing. '+url;
@@ -3730,4 +3735,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V5.20 | Date: 2026-07-18 | LAST CHANGE: Profile written before the hub, white pill on every photo, "I know someone!" invite, columns stack on a phone - see the top-of-file note. (V5.14: first name.) -->
+<!-- Version: V5.21 | Date: 2026-07-18 | LAST CHANGE: Invite copies the sign-in-capable landing page rather than the hub. (V5.20: profile before hub, white pill, invite, mobile columns.) -->
