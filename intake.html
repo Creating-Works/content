@@ -1,4 +1,4 @@
-<!-- Version: V5.21 | Date: 2026-07-18 | LAST CHANGE: "I know someone!" now copies the landing page that actually offers Sign in / Sign up - the Glide page for Lake Ballinger, which is where event.html force-forwards anyway. It previously copied the hub, which asks an unregistered person to sign in without giving them anywhere to do it. Any other event has no Glide page, so its own event page is used instead. (V5.20: profile written before the hub, white pill everywhere, invite, mobile columns.) -->
+<!-- Version: V5.30 | Date: 2026-07-18 | LAST CHANGE: "Know someone" is now a pill on every item rather than one button at the top, and it names the item it sits beside - copying "They are looking for someone to bring X..." instead of a bare event link, so whoever receives it knows what is being asked. Clipboard only; nothing is sent on anyone's behalf. On the add-your-own row it uses whatever has been typed, falling back to the general invite when the field is empty. Claimed and contributed items get no pill, since nobody is needed for those. A white pill under the heading explains the person icon, which had too little contrast as plain text on the blue. (V5.21: invite copies the sign-in-capable landing page.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2526,11 +2526,13 @@ function renderScreenPotluck(el){
   var backTop=_editMode?''
     :'<div style="display:flex;flex-wrap:wrap;gap:8px;margin:0 4px 12px;">'
       +'<button onclick="goBack()" style="'+PILLBTN+'">Back</button>'
-      +'<button id="know-someone-btn" onclick="copyEventInvite(this)" style="'+PILLBTN+'">I know someone!</button>'
       +'</div>';
   var html=headerHTML
     +backTop
-    +'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 4px 10px;flex-wrap:wrap;"><div style="font-size:18px;font-weight:800;color:#fff;">What will you bring? 🎁</div></div>'
+    +'<div style="display:flex;align-items:center;gap:10px;margin:6px 4px 10px;flex-wrap:wrap;">'
+      +'<div style="font-size:18px;font-weight:800;color:#fff;">What will you bring? 🎁</div>'
+      +'<span style="background:#fff;color:#185FA5;font-size:13px;font-weight:600;border-radius:20px;padding:6px 14px;white-space:nowrap;">Click if you know someone! 👤</span>'
+      +'</div>'
     +'<div class="bring-grid" id="bring-grid"></div>'
     +(_editMode?'<div class="nav-row" style="margin:16px 4px 0;"><button class="btn-next" onclick="doneEdit()">Done</button></div>':'');
   cont.innerHTML=html;
@@ -2776,7 +2778,10 @@ function renderSignupItemHTML(it,i){
     // but it is not an open slot, so no claim button.
     h+='<span style="font-size:12px;color:var(--soft);white-space:nowrap;">Being brought</span>';
   } else {
-    h+='<button onclick="startClaim('+i+')" style="background:var(--brand);color:white;border:none;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap;">I\'ll bring this! 🎁</button>';
+    h+='<div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;">'
+      +'<button onclick="startClaim('+i+')" style="background:var(--brand);color:white;border:none;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap;">I\'ll bring this! 🎁</button>'
+      +knowBtnHTML(it.item)
+      +'</div>';
   }
   h+='</div>';
   if(_claimingIdx===i){
@@ -2820,6 +2825,7 @@ function addYourOwnHTML(key){
   return '<div style="display:flex;gap:6px;margin-bottom:12px;">'
     +'<input type="text" id="col-add-'+key+'" placeholder="Add your own" value="'+esc(seed)+'" style="'+COL_INP+'">'
     +'<button onclick="colAdd(\''+key+'\')" style="'+COL_BTN+'">I\'ll bring this! 🎁</button>'
+    +'<button onclick="knowSomeoneTyped(this,\''+key+'\')" style="'+KNOW_BTN+'">👤 Know someone</button>'
     +'</div>';
 }
 
@@ -2832,6 +2838,7 @@ function ownSkillsBlockHTML(){
         return '<div style="border:1.5px solid var(--brand);background:var(--sel-bg);border-radius:10px;padding:10px;margin-bottom:8px;">'
           +'<div style="font-size:13px;font-weight:600;color:var(--brand);margin-bottom:6px;">'+esc(item)+'</div>'
           +'<button onclick="seedPick(\''+rawVal(item)+'\')" style="'+COL_BTN+'">I\'ll bring this! 🎁</button>'
+          +knowBtnHTML(item)
           +'</div>';
       }).join('');
 }
@@ -2857,6 +2864,33 @@ function formatStepHTML(){
 
 // "I know someone!" - copy an invite to this event so they can paste it wherever they talk
 // to that person. Clipboard only; nothing is sent on their behalf.
+var KNOW_BTN='background:#fff;color:var(--brand);border:1.5px solid var(--brand);padding:7px 11px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;';
+function knowBtnHTML(item){
+  return '<button onclick="knowSomeone(this,\''+rawVal(item||'')+'\')" style="'+KNOW_BTN+'">👤 Know someone</button>';
+}
+// Names the item, so the person receiving it knows what is being asked rather than getting a
+// bare event link. Clipboard only - nothing is sent on anyone's behalf.
+window.knowSomeoneTyped=function(btn,key){
+  var inp=document.getElementById('col-add-'+key);
+  window.knowSomeone(btn, inp?inp.value.trim():'');
+};
+window.knowSomeone=function(btn,item){
+  var url=(_eventId==='m97sjwa3')
+    ? 'https://2gather.network/dl/lakeballingerhubevent'
+    : 'https://gather.2gather.network/event.html?id='+encodeURIComponent(_eventId||'');
+  var when=_eventDate?(' on '+fmtEventDate(_eventDate)):'';
+  var msg=item
+    ? ('They are looking for someone to bring '+item+' to '+(_eventTitle||'this event')+when+'. Do you know anyone? '+url)
+    : ('I am going to '+(_eventTitle||'this event')+when+'. Come and bring something you love doing. '+url);
+  var done=function(){
+    if(!btn) return;
+    var old=btn.innerHTML; btn.innerHTML='Copied!';
+    setTimeout(function(){ btn.innerHTML=old; },1800);
+  };
+  try{ navigator.clipboard.writeText(msg).then(done,function(){ toast(msg); }); }
+  catch(e){ toast(msg); }
+};
+
 window.copyEventInvite=function(btn){
   // Someone who is not registered needs the door that offers Sign in / Sign up. For Lake
   // Ballinger that is the Glide page (event.html force-forwards there anyway); any other
@@ -3735,4 +3769,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V5.21 | Date: 2026-07-18 | LAST CHANGE: Invite copies the sign-in-capable landing page rather than the hub. (V5.20: profile before hub, white pill, invite, mobile columns.) -->
+<!-- Version: V5.30 | Date: 2026-07-18 | LAST CHANGE: Per-item "Know someone" pills that name the item - see the top-of-file note. (V5.21: invite landing page.) -->
