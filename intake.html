@@ -1,4 +1,4 @@
-<!-- Version: V4.31 | Date: 2026-07-18 | LAST CHANGE: Added a "Both" pill to the open-to-work pay question. It is mutually exclusive with Paid and Not paid - choosing Both clears them, choosing either of them clears Both - since holding both at once has no coherent meaning. (V4.30: bring-field layout, progressive Open to work, walk and talk.) -->
+<!-- Version: V4.32 | Date: 2026-07-18 | LAST CHANGE: The seeking chip's info icon sat on its own third line. The category under it renders as a block element, so anything placed after it wrapped to a new line - the icon just needed to come before it. The chip is now two rows, "Cooking 📍 ⓘ" over the category, instead of three. Tap-to-reveal is unchanged. (V4.31: Both pill on the open-to-work pay question.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2131,7 +2131,7 @@ function renderProfile(el, viewerMode){
           var infoIcon=hasDetail?'<span class="seek-info">i</span>':'';
           var chipClick=hasDetail?' onclick="toggleSeekDetail(\''+popId+'\')" style="cursor:pointer;"':'';
           var popover=hasDetail?'<div id="'+popId+'" class="seek-detail-pop" style="display:none;"><button class="seek-pop-close" onclick="toggleSeekDetail(\''+popId+'\')" aria-label="Close">×</button>Seeking: '+esc(r.detail)+'</div>':'';
-          return '<div style="position:relative;display:inline-block;">'+'<div class="profile-tag"'+(missingLevel?' style="border-color:#d32f2f;"':'')+chipClick+'>'+esc(r.item)+(lv?'<span class="tag-level">'+esc(lv)+'</span>':'')+missingTag+local+subLabel+infoIcon+'</div>'+picker+popover+'</div>';
+          return '<div style="position:relative;display:inline-block;">'+'<div class="profile-tag"'+(missingLevel?' style="border-color:#d32f2f;"':'')+chipClick+'>'+esc(r.item)+(lv?'<span class="tag-level">'+esc(lv)+'</span>':'')+missingTag+local+infoIcon+subLabel+'</div>'+picker+popover+'</div>';
         }).join('')
       :'<div class="profile-empty">Nothing added yet.</div>';
     var actions=canEdit
@@ -3592,4 +3592,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V4.31 | Date: 2026-07-18 | LAST CHANGE: "Both" pill on the open-to-work pay question - see the top-of-file note. (V4.30: bring-field layout, progressive Open to work.) -->
+<!-- Version: V4.32 | Date: 2026-07-18 | LAST CHANGE: Seeking chip info icon moved onto the item line - see the top-of-file note. (V4.31: Both pill.) -->
