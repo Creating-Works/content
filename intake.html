@@ -1,4 +1,4 @@
-<!-- Version: V6.15 | Date: 2026-07-20 | LAST CHANGE: Made the sign-up list save safe. It wrote the whole list and called the same callback on success and failure, so a failed write was indistinguishable from a good one. Worse, the 15s load timeout marks the list loaded even when the fetch never returned, so _signupList could be [] while the screen believed it had the list - any add then overwrote everyone's items with nothing, with nobody doing anything wrong. Writes now require the list to have genuinely arrived, queue behind each other, and on failure restore what the server last accepted and say so. (V6.14: the sign-up list heading was white on white.) -->
+<!-- Version: V6.16 | Date: 2026-07-20 | LAST CHANGE: Two fixes on someone else's profile. The heading read "This is me" with their name beside it - it now names the person being shown ("This is Carolyn"), keeping "This is me" only on your own. And the "Bookmark to meet" button used to overwrite the whole top nav (it set app-topnav's innerHTML to just the button), so bookmarking a person cost you the "All events / Event hub" navigation - it now appends beside the nav instead. (V6.15: the sign-up list save can no longer wipe the list.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2211,8 +2211,14 @@ function _wtmDecorate(){
   if(!_viewerIdParam()) return;   // only one person in the URL - no bookmark button
   var has=_wtmHas(_showId);
   var _bs='font-size:14px;font-weight:600;padding:9px 18px;border-radius:20px;cursor:pointer;font-family:inherit;border:1.5px solid #185FA5;background:#fff;color:#185FA5;';
-  var btn='<div style="padding:0 2px 14px;"><button id="wtm-btn" onclick="wtmToggle()" style="'+_bs+'">'+(has?'✓ Bookmarked':'Bookmark to meet')+'</button></div>';
-  var host=document.getElementById('app-topnav'); if(host) host.innerHTML=btn;
+  var btn='<div id="wtm-wrap" style="padding:0 2px 14px;"><button id="wtm-btn" onclick="wtmToggle()" style="'+_bs+'">'+(has?'✓ Bookmarked':'Bookmark to meet')+'</button></div>';
+  // V6.16: append, do not replace. This used to set app-topnav's innerHTML to the button
+  // alone, wiping the "All events / Event hub" nav that renders there - so bookmarking a
+  // person cost you the navigation. Re-decorating removes any prior button first so it does
+  // not stack.
+  var host=document.getElementById('app-topnav'); if(!host) return;
+  var _old=document.getElementById('wtm-wrap'); if(_old) _old.remove();
+  host.insertAdjacentHTML('beforeend', btn);
 }
 function renderProfile(el, viewerMode){
   // viewerMode = which URL/data source this is ("?show=" vs "?id="). canEdit = what this
@@ -2291,7 +2297,10 @@ function renderProfile(el, viewerMode){
     var _tra=document.getElementById('top-right-area'); if(_tra) _tra.innerHTML='';
   }
   var emailBtn=(viewerMode&&isViewingHost()&&_hostEmail)?'<button onclick="emailHostCopy(this)" style="background:none;border:1.5px solid var(--brand);color:var(--brand);border-radius:16px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;">✉️ Email me</button>':'';
-  el.innerHTML='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;"><h2 style="margin:0;">This is me 🌱</h2>'+emailBtn+_photoHTML+'</div>'
+  // V6.16: on someone else's profile the heading read "This is me" with their name beside it.
+  // Name the person being shown; keep "This is me" only when you are looking at your own.
+  var _hdrName=(viewerMode&&!isOwner()&&String(_viewerName||'').trim())?('This is '+esc(String(_viewerName).trim().split(' ')[0])):'This is me';
+  el.innerHTML='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;"><h2 style="margin:0;">'+_hdrName+' 🌱</h2>'+emailBtn+_photoHTML+'</div>'
     +section("What I'm seeking",allNeeds,false,'',4)
     +section('What I enjoy',_interests,true,'level',1,false,_expression?'<div style="margin-top:6px;display:flex;justify-content:flex-end;"><span style="font-size:13px;color:var(--soft);"><span style="font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:0.08em;color:#BF5700;">This is so me:</span> <span style="font-size:10px;font-weight:700;">'+esc(_expressionItems.join(', '))+'</span></span></div>':'')
     +'<div class="profile-section" style="border-bottom:none;padding-bottom:4px;">'
@@ -3915,4 +3924,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V6.15 | Date: 2026-07-20 | LAST CHANGE: Made the sign-up list save safe. It wrote the whole list and called the same callback on success and failure, so a failed write was indistinguishable from a good one. Worse, the 15s load timeout marks the list loaded even when the fetch never returned, so _signupList could be [] while the screen believed it had the list - any add then overwrote everyone's items with nothing, with nobody doing anything wrong. Writes now require the list to have genuinely arrived, queue behind each other, and on failure restore what the server last accepted and say so. (V6.14: the sign-up list heading was white on white.) -->
+<!-- Version: V6.16 | Date: 2026-07-20 | LAST CHANGE: Two fixes on someone else's profile. The heading read "This is me" with their name beside it - it now names the person being shown ("This is Carolyn"), keeping "This is me" only on your own. And the "Bookmark to meet" button used to overwrite the whole top nav (it set app-topnav's innerHTML to just the button), so bookmarking a person cost you the "All events / Event hub" navigation - it now appends beside the nav instead. (V6.15: the sign-up list save can no longer wipe the list.) -->
