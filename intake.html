@@ -1,4 +1,4 @@
-<!-- Version: V6.13 | Date: 2026-07-18 | LAST CHANGE: Multi-value level pills read "Participant, Fan" instead of "Participant,Fan". Display only - the stored string keeps its comma-joined form because other pages parse it. (V6.12: skills subtitle.) -->
+<!-- Version: V6.14 | Date: 2026-07-19 | LAST CHANGE: The sign-up list heading, its instruction line and its loading message were white text on the white intro card, so all three were invisible - only their emojis showed. The block was styled for the blue background it used to sit on; its only call site is now renderScreenIntro. This restored "Sign up list" and, more importantly, "Know someone? Click the person.", which is the only explanation of the person button. (V6.13: spaces after commas in level pills.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1883,10 +1883,10 @@ function renderScreenIntro(el){
 // the sign-up page afterwards - neither belongs in the way on the first screen.
 function introListHTML(){
   if(!_eventId) return '';
-  var head='<div style="font-size:17px;font-weight:800;color:#fff;margin:0 2px 2px;">Sign up list 🎁</div>'
-    +'<div style="font-size:13px;color:rgba(255,255,255,0.9);margin:0 2px 10px;">🎯 Here are activities to sign up for. Know someone? Click the person.</div>';
+  var head='<div style="font-size:17px;font-weight:800;color:var(--text);margin:0 2px 2px;">Sign up list 🎁</div>'
+    +'<div style="font-size:13px;color:var(--text);margin:0 2px 10px;">🎯 Here are activities to sign up for. Know someone? Click the person.</div>';
   if(!_potluckLoaded){
-    return head+'<div style="font-size:13px;color:#fff;opacity:0.85;padding:4px 2px;">Loading the sign up list...</div>';
+    return head+'<div style="font-size:13px;color:var(--soft);padding:4px 2px;">Loading the sign up list...</div>';
   }
   var idx=[];
   _signupList.forEach(function(it,i){ if(bringTypeKey(it.potluckType)==='experience') idx.push(i); });
@@ -3882,4 +3882,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V6.13 | Date: 2026-07-18 | LAST CHANGE: Spaces after commas in level pills, display only. (V6.12: skills subtitle.) -->
+<!-- Version: V6.14 | Date: 2026-07-19 | LAST CHANGE: The sign-up list heading, its instruction line and its loading message were white text on the white intro card, so all three were invisible - only their emojis showed. The block was styled for the blue background it used to sit on; its only call site is now renderScreenIntro. This restored "Sign up list" and, more importantly, "Know someone? Click the person.", which is the only explanation of the person button. (V6.13: spaces after commas in level pills.) -->
