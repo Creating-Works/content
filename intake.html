@@ -1,4 +1,4 @@
-<!-- Version: V6.12 | Date: 2026-07-18 | LAST CHANGE: The skills subtitle reads "What you are good at." - it said "paid or otherwise", which contradicted the heading above it. (V6.11: confirmation copy and one button.) -->
+<!-- Version: V6.13 | Date: 2026-07-18 | LAST CHANGE: Multi-value level pills read "Participant, Fan" instead of "Participant,Fan". Display only - the stored string keeps its comma-joined form because other pages parse it. (V6.12: skills subtitle.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -452,6 +452,9 @@ function buildRetiredStr(){
 var _personSubType='';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
+// Levels are stored comma-joined with no space ("Participant,Fan"). Space them for display
+// only - the stored string is parsed elsewhere and must not change.
+function fmtLevels(v){ return String(v||'').split(',').map(function(x){return x.trim();}).filter(Boolean).join(', '); }
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function rawVal(s){return String(s||'').replace(/'/g,"\\'");}
 function toast(msg){var t=document.getElementById('toast');if(!t)return;t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2600);}
@@ -1262,7 +1265,7 @@ function buildAddedHTML(s){
         +'</div></div>';
     }
     var btns=levels?levels.map(function(lv){
-      return '<button class="practice-btn'+(item.level&&item.level.split(',').indexOf(lv)>-1?' selected':'')+'" onclick="setLevel(\''+s+'\','+i+',\''+esc(lv)+'\')">'+lv+'</button>';
+      return '<button class="practice-btn'+(item.level&&item.level.split(',').indexOf(lv)>-1?' selected':'')+'" onclick="setLevel(\''+s+'\','+i+',\''+esc(fmtLevels(lv))+'\')">'+lv+'</button>';
     }).join(''):'';
     var catMissingHTML='';
     if(s==='2'&&!item.category){
@@ -2241,7 +2244,7 @@ function renderProfile(el, viewerMode){
           var infoIcon=hasDetail?'<span class="seek-info">i</span>':'';
           var chipClick=hasDetail?' onclick="toggleSeekDetail(\''+popId+'\')" style="cursor:pointer;"':'';
           var popover=hasDetail?'<div id="'+popId+'" class="seek-detail-pop" style="display:none;"><button class="seek-pop-close" onclick="toggleSeekDetail(\''+popId+'\')" aria-label="Close">×</button>Seeking: '+esc(r.detail)+'</div>':'';
-          return '<div style="position:relative;display:inline-block;">'+'<div class="profile-tag"'+(missingLevel?' style="border-color:#d32f2f;"':'')+chipClick+'>'+esc(r.item)+(lv?'<span class="tag-level">'+esc(lv)+'</span>':'')+missingTag+local+infoIcon+subLabel+'</div>'+picker+popover+'</div>';
+          return '<div style="position:relative;display:inline-block;">'+'<div class="profile-tag"'+(missingLevel?' style="border-color:#d32f2f;"':'')+chipClick+'>'+esc(r.item)+(lv?'<span class="tag-level">'+esc(fmtLevels(lv))+'</span>':'')+missingTag+local+infoIcon+subLabel+'</div>'+picker+popover+'</div>';
         }).join('')
       :'<div class="profile-empty">Nothing added yet.</div>';
     var actions=canEdit
@@ -2310,7 +2313,7 @@ function renderProfile(el, viewerMode){
           var pickerBtns=missingLevel?lvOpts.map(function(opt){return '<button class="cat-pick-btn" onclick="setProfileLevel(\'2\','+i+',\''+opt+'\')">' +opt+'</button>';}).join(''):'';
           var picker=missingLevel?'<div class="cat-picker-inline" id="'+pickerId+'">'+pickerBtns+'</div>':'';
           var missingTag=missingLevel?'<span style="font-size:11px;color:#d32f2f;font-weight:500;margin-left:4px;cursor:pointer;" onclick="openCatPicker(\'2\','+i+')">Category missing ▾</span>':'';
-          return '<div style="position:relative;display:inline-block;"><div class="profile-tag"'+(missingLevel?' style="border-color:#d32f2f;"':'')+'>'+esc(r.item)+(lv?'<span class="tag-level">'+esc(lv)+'</span>':'')+missingTag+'</div>'+picker+'</div>';
+          return '<div style="position:relative;display:inline-block;"><div class="profile-tag"'+(missingLevel?' style="border-color:#d32f2f;"':'')+'>'+esc(r.item)+(lv?'<span class="tag-level">'+esc(fmtLevels(lv))+'</span>':'')+missingTag+'</div>'+picker+'</div>';
         }).join('')
       :'<div class="profile-empty">Nothing added yet.</div>')
     +'</div></div>'
@@ -2319,8 +2322,8 @@ function renderProfile(el, viewerMode){
     var valAdded=_values;
     var domAdded=_domains;
     var careActions=canEdit?'<div class="profile-section-actions"><button class="edit-btn" onclick="window.jumpTo(3)">✏️ Edit</button></div>':'';
-    var valSection=valAdded.length?'<div style="margin-bottom:8px;"><div style="font-size:10px;font-weight:700;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">VALUES</div><div class="profile-tags">'+valAdded.map(function(v){var lvl=v.level?'<span class="tag-level">'+esc(v.level)+'</span>':'';return '<div class="profile-tag">'+esc(v.item)+lvl+'</div>';}).join('')+'</div></div>':'';
-    var domSection=domAdded.length?'<div><div style="font-size:10px;font-weight:700;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">DOMAINS</div><div class="profile-tags">'+domAdded.map(function(v){var lvl=v.level?'<span class="tag-level">'+esc(v.level)+'</span>':'';return '<div class="profile-tag">'+esc(v.item)+lvl+'</div>';}).join('')+'</div></div>':'';
+    var valSection=valAdded.length?'<div style="margin-bottom:8px;"><div style="font-size:10px;font-weight:700;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">VALUES</div><div class="profile-tags">'+valAdded.map(function(v){var lvl=v.level?'<span class="tag-level">'+esc(fmtLevels(v.level))+'</span>':'';return '<div class="profile-tag">'+esc(v.item)+lvl+'</div>';}).join('')+'</div></div>':'';
+    var domSection=domAdded.length?'<div><div style="font-size:10px;font-weight:700;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">DOMAINS</div><div class="profile-tags">'+domAdded.map(function(v){var lvl=v.level?'<span class="tag-level">'+esc(fmtLevels(v.level))+'</span>':'';return '<div class="profile-tag">'+esc(v.item)+lvl+'</div>';}).join('')+'</div></div>':'';
     var careContent=valSection+domSection;
     return careContent?'<div class="profile-section"><div class="profile-section-header"><div class="profile-section-label">What I care about</div>'+careActions+'</div>'+careContent+'</div>':'';
   })(canEdit)
@@ -3879,4 +3882,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V6.12 | Date: 2026-07-18 | LAST CHANGE: Skills subtitle no longer contradicts its heading. (V6.11: confirmation copy.) -->
+<!-- Version: V6.13 | Date: 2026-07-18 | LAST CHANGE: Spaces after commas in level pills, display only. (V6.12: skills subtitle.) -->
