@@ -1,4 +1,4 @@
-<!-- Version: V6.10 | Date: 2026-07-18 | LAST CHANGE: Screen 1 simplified to one list. The host/help checkboxes are gone - signing up for something, or adding your own idea, already says which you are. Only the Experiences column shows; skills come from the profile on screen 2 and things can be added from the sign-up page afterwards. The heading is "Sign up list 🎁" with "Here are activities to sign up for. Know someone? Click the person." An idea field with a blue Add button sits above the items, and adding there puts it on the sign-up list under this person's name, exactly as the sign-up page does. "Know someone" is now the person icon alone on both screens, since each carries a line explaining it. The event title is fetched after the list, chained not concurrent, so the invite names the event. (V6.00: screen 1 reframed as host or help.) -->
+<!-- Version: V6.11 | Date: 2026-07-18 | LAST CHANGE: Confirmation screen copy: "You are in! 🎉 Next, view the hub, view suggested people to meet, and start building your event experience!" with a single "View event hub" button that goes straight to the hub. The sign-up-list and profile buttons are gone - the hub links to both. (V6.10: screen 1 simplified to one list.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2082,13 +2082,10 @@ function renderScreenConfirm(el){
   var BTN_O='display:inline-block;background:#fff;color:var(--brand);border:1.5px solid var(--brand);text-decoration:none;padding:12px 20px;border-radius:8px;font-size:15px;font-weight:700;font-family:inherit;';
   var hub=_eventId?('https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+(_appearId?'&memberCard='+encodeURIComponent(_appearId):'')):'';
   cont.innerHTML=fastStepHTML(3)
-    +'<h2 style="margin-bottom:10px;">You\'re in! Congratulations 🎉</h2>'
-    +'<p style="font-size:15.5px;line-height:1.55;color:var(--text);margin-bottom:8px;">Your profile is on the event hub, so people can find you before the day.</p>'
-    +'<p style="font-size:15.5px;line-height:1.55;color:var(--text);margin-bottom:18px;">You are welcome to add more any time. Nothing here is fixed.</p>'
+    +'<h2 style="margin-bottom:10px;">You\'re in! 🎉</h2>'
+    +'<p style="font-size:15.5px;line-height:1.55;color:var(--text);margin-bottom:18px;">Next, view the hub, view suggested people to meet, and start building your event experience!</p>'
     +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
-    +(hub?'<a href="'+hub+'" style="'+BTN+'">See the event hub</a>':'')
-    +'<button onclick="jumpTo(\'potluck\')" style="'+BTN_O+'cursor:pointer;">See the sign up list</button>'
-    +'<button onclick="goToProfile()" style="'+BTN_O+'cursor:pointer;">See my profile</button>'
+    +(hub?'<a href="'+hub+'" style="'+BTN+'">View event hub</a>':'<button onclick="goToProfile()" style="'+BTN+'cursor:pointer;">View my profile</button>')
     +'</div>';
 }
 
@@ -3882,4 +3879,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V6.10 | Date: 2026-07-18 | LAST CHANGE: Screen 1 simplified to one Experiences list with an idea field - see the top-of-file note. (V6.00: host or help.) -->
+<!-- Version: V6.11 | Date: 2026-07-18 | LAST CHANGE: Confirmation copy and a single View event hub button. (V6.10: screen 1 simplified.) -->
