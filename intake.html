@@ -1,4 +1,4 @@
-<!-- Version: V6.14 | Date: 2026-07-19 | LAST CHANGE: The sign-up list heading, its instruction line and its loading message were white text on the white intro card, so all three were invisible - only their emojis showed. The block was styled for the blue background it used to sit on; its only call site is now renderScreenIntro. This restored "Sign up list" and, more importantly, "Know someone? Click the person.", which is the only explanation of the person button. (V6.13: spaces after commas in level pills.) -->
+<!-- Version: V6.15 | Date: 2026-07-20 | LAST CHANGE: Made the sign-up list save safe. It wrote the whole list and called the same callback on success and failure, so a failed write was indistinguishable from a good one. Worse, the 15s load timeout marks the list loaded even when the fetch never returned, so _signupList could be [] while the screen believed it had the list - any add then overwrote everyone's items with nothing, with nobody doing anything wrong. Writes now require the list to have genuinely arrived, queue behind each other, and on failure restore what the server last accepted and say so. (V6.14: the sign-up list heading was white on white.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2536,6 +2536,14 @@ var _signupList=[];            // host-built list: [{item,category,potluckType,t
 var _potluckClaims=[];         // claims from potluck-claims: [{item,appearId,name,photo,elaboration,...}]
 var _potluckLoaded=false;
 var _potluckLoading=false;   // guards against firing a second concurrent getPotluckList while one is in flight
+// V6.15: _potluckLoaded means "stop showing Loading", and the 15s safety timeout sets it even
+// when the fetch never returned - so it can be true while _signupList is still []. Writing the
+// whole list in that state overwrites everyone's items with nothing. _potluckFetched is the
+// stricter flag: true only when the server actually gave us the list, and only it may authorise
+// a write. _plLastSaved is what the server last accepted, so a failed write can be undone.
+var _potluckFetched=false;
+var _plLastSaved=null;
+var _plSaveChain=Promise.resolve();
 var _claimingIdx=-1;  // which signup item is currently showing the inline elaboration field
 // Wizard state for adding a new potluck item
 var _pl={step:'',item:'',potluckType:'',parentCat:'',category:'',timed:'',timeNum:'',timeUnit:'',maxClaims:''};
@@ -2561,6 +2569,8 @@ function loadPotluck(cb){
         try{_signupList=JSON.parse(d.signupPotluck)||[];}catch(e){_signupList=[];}
       }
       _potluckClaims=(d&&d.claims)||[];
+      _potluckFetched=true;                                   // the list is genuinely the server's
+      try{_plLastSaved=JSON.stringify(_signupList);}catch(e){_plLastSaved=null;}
       _finish();
     })
     .catch(function(){_finish();});
@@ -3162,9 +3172,32 @@ window.plPickOffering=function(item){
 // cb is optional: callers that need to chain another GAS call must wait for this one to finish,
 // because overlapping requests to this backend 404.
 function savePotluckList(cb){
-  fetch(GS_URL+'?action=savePotluckItem&eventId='+encodeURIComponent(_eventId)
-    +'&potluckJson='+encodeURIComponent(JSON.stringify(_signupList)))
-    .then(function(){cb&&cb();},function(){cb&&cb();});
+  // Refuse to write a list we never actually received. Both branches used to call cb, so a
+  // failed write was indistinguishable from a good one and the caller carried on claiming
+  // against items that never saved.
+  if(!_potluckFetched){
+    toast('The sign up list has not loaded yet. Nothing was saved.');
+    return;
+  }
+  var _attempt=JSON.stringify(_signupList);
+  var _restore=_plLastSaved;
+  // Queue behind anything already in flight. This backend 404s on overlapping calls and runs
+  // 2.5s-52s, so ordering has to be guaranteed rather than hoped for.
+  _plSaveChain=_plSaveChain.then(function(){
+    return fetch(GS_URL+'?action=savePotluckItem&eventId='+encodeURIComponent(_eventId)
+      +'&potluckJson='+encodeURIComponent(_attempt))
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(!d||d.status!=='ok') throw new Error('rejected');
+        _plLastSaved=_attempt;
+        cb&&cb();                                             // only chain on a real success
+      })
+      .catch(function(){
+        if(_restore!=null){ try{_signupList=JSON.parse(_restore);}catch(e){} }
+        toast('Could not save. Your change was undone, please try again.');
+        try{ if(_screen==='intro') render(); else renderScreenPotluck(null); }catch(e){}
+      });
+  });
 }
 
 function claimItem(item,category,potluckType,elaboration,timeSpec,maxClaims,cb){
@@ -3882,4 +3915,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V6.14 | Date: 2026-07-19 | LAST CHANGE: The sign-up list heading, its instruction line and its loading message were white text on the white intro card, so all three were invisible - only their emojis showed. The block was styled for the blue background it used to sit on; its only call site is now renderScreenIntro. This restored "Sign up list" and, more importantly, "Know someone? Click the person.", which is the only explanation of the person button. (V6.13: spaces after commas in level pills.) -->
+<!-- Version: V6.15 | Date: 2026-07-20 | LAST CHANGE: Made the sign-up list save safe. It wrote the whole list and called the same callback on success and failure, so a failed write was indistinguishable from a good one. Worse, the 15s load timeout marks the list loaded even when the fetch never returned, so _signupList could be [] while the screen believed it had the list - any add then overwrote everyone's items with nothing, with nobody doing anything wrong. Writes now require the list to have genuinely arrived, queue behind each other, and on failure restore what the server last accepted and say so. (V6.14: the sign-up list heading was white on white.) -->
