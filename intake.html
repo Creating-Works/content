@@ -1,4 +1,4 @@
-<!-- Version: V6.11 | Date: 2026-07-18 | LAST CHANGE: Confirmation screen copy: "You are in! 🎉 Next, view the hub, view suggested people to meet, and start building your event experience!" with a single "View event hub" button that goes straight to the hub. The sign-up-list and profile buttons are gone - the hub links to both. (V6.10: screen 1 simplified to one list.) -->
+<!-- Version: V6.12 | Date: 2026-07-18 | LAST CHANGE: The skills subtitle reads "What you are good at." - it said "paid or otherwise", which contradicted the heading above it. (V6.11: confirmation copy and one button.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2104,7 +2104,7 @@ function renderScreenFast2(el){
       +fastLangHTML()
     +'</div>'
     +fastFieldHTML('What I enjoy','Anything that brings you joy counts here.','1','Search hobbies and recreation...')
-    +fastFieldHTML('Skills that pay the bills','What you are good at, paid or otherwise.','2','Search skills...',openToWorkHTML())
+    +fastFieldHTML('Skills that pay the bills','What you are good at.','2','Search skills...',openToWorkHTML())
     +fastFieldHTML('Thing I care about or need','People find you through this.','3','Search what you care about...')
     +'<div id="fast-notice"></div>'
     +'<div class="nav-row"><button class="btn-back" onclick="goBack()">Back</button><button class="btn-next" onclick="goNext()">Next</button></div>';
@@ -3879,4 +3879,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V6.11 | Date: 2026-07-18 | LAST CHANGE: Confirmation copy and a single View event hub button. (V6.10: screen 1 simplified.) -->
+<!-- Version: V6.12 | Date: 2026-07-18 | LAST CHANGE: Skills subtitle no longer contradicts its heading. (V6.11: confirmation copy.) -->
