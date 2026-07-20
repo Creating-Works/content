@@ -1,4 +1,4 @@
-<!-- Version: V6.00 | Date: 2026-07-18 | LAST CHANGE: Screen 1 reframed around the day itself. It opens by saying what this is - a block party of activity stations, food, music and time to get to know Lake Ballinger - then asks one question: host something, or help with something. Hosting takes a free-text answer with suggestions and an Add button. Helping points at the live list of what people are hoping to host, which now sits at the bottom of screen 1 as the same three columns the sign-up page uses; selecting something there claims it exactly as it does on that page. The Skill/Experience/Thing question is gone from screen 1 - skills come from the profile on screen 2, so the Skills column is dimmed here with a note saying so. "I want to see the sign up list" is gone too; the new screen 3 links there for everyone. Screen 3 is a confirmation: "You are in! Congratulations", with links to the hub, the sign-up list and the profile. Latency: the list is fetched only after the choices are painted, so the host path costs nothing and only the help path ever waits. (V5.40: Add commits each bring-type.) -->
+<!-- Version: V6.10 | Date: 2026-07-18 | LAST CHANGE: Screen 1 simplified to one list. The host/help checkboxes are gone - signing up for something, or adding your own idea, already says which you are. Only the Experiences column shows; skills come from the profile on screen 2 and things can be added from the sign-up page afterwards. The heading is "Sign up list 🎁" with "Here are activities to sign up for. Know someone? Click the person." An idea field with a blue Add button sits above the items, and adding there puts it on the sign-up list under this person's name, exactly as the sign-up page does. "Know someone" is now the person icon alone on both screens, since each carries a line explaining it. The event title is fetched after the list, chained not concurrent, so the invite names the event. (V6.00: screen 1 reframed as host or help.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1831,30 +1831,10 @@ window.bringEdit=function(key){
   render();
 };
 
-// ─── Screen 1: what this day is, and how you want to be part of it ───────────
-// Host and help replace the old Skill/Experience/Thing question. Skills are not asked here
-// at all - they come from the profile on screen 2, so asking twice would be asking twice.
-var _wantHost=false, _wantHelp=false;
-var HOST_IDEAS='a cornhole toss, a drum circle, a children\'s art station, a jewelry making station';
-
-// Anything hosted is an Experience - it is a thing people take part in. Things get added
-// from the columns below, where the type is the column.
-function hostedItem(){ return String(_bringText.experience||'').trim(); }
-
-// Before Add: the field with its button. After Add: what they wrote, with a way back to it.
-function bringFieldHTML(key,FINP){
-  var done=String(_bringText[key]||'').trim();
-  if(done){
-    return '<div style="display:flex;align-items:center;gap:8px;margin:2px 0 6px;flex-wrap:wrap;">'
-      +'<span style="font-size:14px;font-weight:600;color:var(--brand);background:var(--sel-bg);border:1.5px solid var(--brand);border-radius:8px;padding:8px 12px;">'+esc(done)+'</span>'
-      +'<button onclick="bringEdit(\''+key+'\')" style="background:none;border:none;color:var(--brand);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;text-decoration:underline;padding:0;">Change</button>'
-      +'</div>';
-  }
-  return '<div style="display:flex;gap:8px;margin:2px 0 6px;">'
-    +'<input type="text" id="bring-text-'+key+'" placeholder="What will you host?" value="'+esc(_bringDraft[key]||'')+'" style="'+FINP+'margin:0;flex:1;min-width:0;">'
-    +'<button onclick="bringAdd(\''+key+'\')" style="background:var(--brand);color:#fff;border:none;padding:10px 18px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Add</button>'
-    +'</div>';
-}
+// ─── Screen 1: what this day is, and what you will bring to it ───────────────
+// One list, one field. The host/help question is gone - signing up for something or adding
+// your own idea says which you are without having to ask.
+var IDEA_PLACEHOLDER='Examples: a drum circle, a children\'s art station, a pizza making session, a band';
 
 // How many things this person has already put their name to.
 function myClaimCount(){
@@ -1862,68 +1842,66 @@ function myClaimCount(){
   var n=String(_appearId).split('.').join('').toLowerCase();
   return (_potluckClaims||[]).filter(function(c){ return String(c.appearId).split('.').join('').toLowerCase()===n; }).length;
 }
-function introReady(){ return !!hostedItem() || myClaimCount()>0; }
+function introReady(){ return myClaimCount()>0; }
 
-window.toggleWantHost=function(){ captureBringText(); _wantHost=!_wantHost; render(); };
-window.toggleWantHelp=function(){
-  captureBringText(); _wantHelp=!_wantHelp; render();
-  // The list lives below; take them to it rather than making them hunt for it.
-  if(_wantHelp) setTimeout(function(){ var g=document.getElementById('intro-list'); if(g) g.scrollIntoView({behavior:'smooth',block:'start'}); },60);
+// Adding an idea here puts it on the sign-up list under this person's name, exactly as the
+// sign-up page does - so screen 1 and that page never disagree about what was offered.
+window.introIdeaAdd=function(){
+  var inp=document.getElementById('intro-idea');
+  var v=inp?capFirst(inp.value.trim()):'';
+  if(!v){ toast('Please say what you\'ll bring'); return; }
+  if(_bringType.indexOf('experience')<0) _bringType.push('experience');
+  commitSeedEntries([{item:v,potluckType:'Experience'}]);
 };
 
 function renderScreenIntro(el){
-  var FINP='width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;box-sizing:border-box;';
-  var row=function(on,fn,label){
-    return '<div class="method-item'+(on?' selected':'')+'" onclick="'+fn+'()">'
-      +'<div class="method-check'+(on?' checked':'')+'">'+(on?'✓':'')+'</div>'
-      +'<div class="method-text"><strong>'+label+'</strong></div>'
-      +'</div>';
-  };
-  var hostBlock=_wantHost
-    ? '<div style="margin:8px 0 14px;">'
-      +'<div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px;">What would you like to host or create?</div>'
-      +'<div style="font-size:12px;color:var(--soft);margin-bottom:6px;">Some ideas: '+esc(HOST_IDEAS)+'.</div>'
-      +bringFieldHTML('experience',FINP)
-      +'</div>'
-    : '';
-  var helpBlock=_wantHelp
-    ? '<div style="font-size:13px;color:var(--brand);margin:4px 0 14px;">🎯 Here is what people are hoping to host. Tap "I\'ll bring this!" on anything below.</div>'
-    : '';
-
   el.innerHTML='<div style="padding:8px 2px 6px;">'
     +fastStepHTML(1)
-    +'<p style="font-size:17px;font-weight:700;color:var(--text);margin-bottom:10px;">You\'re in! 🎉</p>'
-    +'<p style="font-size:15.5px;line-height:1.55;color:var(--text);margin-bottom:8px;">We are co-creating this day together. Think of it as a block party: activity stations people set up, food and drink to share, music, and time to get to know Lake Ballinger.</p>'
-    +'<p style="font-size:15.5px;line-height:1.55;color:var(--text);margin-bottom:14px;">Some people host a station. Some people help at one. Both make the day.</p>'
-    +row(_wantHost,'toggleWantHost','I would like to propose or host an activity')
-    +hostBlock
-    +row(_wantHelp,'toggleWantHelp','I would like to volunteer to help an activity')
-    +helpBlock
-    +(introReady()?'<button class="btn-next" style="margin-top:18px;" onclick="introContinue();">Next</button>':'')
+    +'<div style="background:#fff;border-radius:12px;padding:16px 18px;margin-bottom:16px;">'
+      +'<p style="font-size:17px;font-weight:700;color:var(--text);margin:0 0 8px;">You\'re in! 🎉</p>'
+      +'<p style="font-size:15px;line-height:1.55;color:var(--text);margin:0 0 6px;">We are co-creating this day together. Think of it as a block party: activity stations people set up, food and drink to share, music, and time to get to know Lake Ballinger.</p>'
+      +'<p style="font-size:15px;line-height:1.55;color:var(--text);margin:0;">Some people host a station. Some people help at one. Both make the day.</p>'
     +'</div>'
-    +'<div id="intro-list" style="margin-top:26px;">'+introListHTML()+'</div>';
-  // The list is the slowest thing here, so it is fetched only after the choices are painted.
+    +'</div>'
+    +'<div id="intro-list">'+introListHTML()+'</div>'
+    +(introReady()?'<div style="padding:14px 2px 6px;"><button class="btn-next" onclick="introContinue();">Next</button></div>':'');
+  // The list is the slowest thing on this screen, so it is fetched after the rest is painted.
+  // The event title follows it, chained rather than fired alongside - this backend 404s when
+  // calls overlap - so the invite names the event instead of saying "the event".
   if(_eventId&&!_potluckLoaded&&!_potluckLoading){
-    loadPotluck(function(){ if(_screen==='intro') renderScreenIntro(el); });
-  } else if(_potluckLoaded){
-    renderPotluckColumns();
+    loadPotluck(function(){
+      if(_screen==='intro') render();
+      if(!_eventHeaderFetched) fetchEventTitle(function(){ if(_screen==='intro') render(); });
+    });
   }
 }
 
-// The same three columns as the sign-up page, shown here so people can see what is already
-// planned before they are asked anything about themselves.
+// Experiences only. Skills come from the profile on screen 2, and things can be added from
+// the sign-up page afterwards - neither belongs in the way on the first screen.
 function introListHTML(){
   if(!_eventId) return '';
+  var head='<div style="font-size:17px;font-weight:800;color:#fff;margin:0 2px 2px;">Sign up list 🎁</div>'
+    +'<div style="font-size:13px;color:rgba(255,255,255,0.9);margin:0 2px 10px;">🎯 Here are activities to sign up for. Know someone? Click the person.</div>';
   if(!_potluckLoaded){
-    return '<div style="font-size:13px;color:#fff;opacity:0.85;padding:4px 2px;">Loading what people are bringing...</div>';
+    return head+'<div style="font-size:13px;color:#fff;opacity:0.85;padding:4px 2px;">Loading the sign up list...</div>';
   }
-  return '<div style="font-size:16px;font-weight:800;color:var(--text);margin:0 2px 8px;">What people are bringing 🎁</div>'
-    +'<div class="bring-grid" id="bring-grid"></div>';
+  var idx=[];
+  _signupList.forEach(function(it,i){ if(bringTypeKey(it.potluckType)==='experience') idx.push(i); });
+  var items=idx.length
+    ? idx.map(function(i){ return renderSignupItemHTML(_signupList[i],i); }).join('')
+    : '<span class="q-empty">Nothing here yet.</span>';
+  return head
+    +'<div class="quadrant"><div class="q-body">'
+      +'<div style="font-size:13px;font-weight:600;color:var(--brand);margin-bottom:6px;">Have your own idea? Share what experience you\'ll bring.</div>'
+      +'<div style="display:flex;gap:8px;margin-bottom:14px;">'
+        +'<input type="text" id="intro-idea" placeholder="'+esc(IDEA_PLACEHOLDER)+'" style="flex:1;min-width:0;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box;">'
+        +'<button onclick="introIdeaAdd()" style="background:var(--brand);color:#fff;border:none;padding:10px 18px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Add</button>'
+      +'</div>'
+      +'<div style="border-top:1px solid var(--border);padding-top:12px;">'+items+'</div>'
+    +'</div></div>';
 }
 
 window.introContinue=function(){
-  captureBringText();
-  if(hostedItem()&&_bringType.indexOf('experience')<0) _bringType.push('experience');
   autoSave();
   _fastPath=true; _screen='fast2'; render();
 };
@@ -2834,7 +2812,7 @@ function commitSeedEntries(entries){
   entries.forEach(function(e){
     _potluckClaims.push({item:e.item,potluckType:e.potluckType,appearId:_appearId,elaboration:'',name:_name||'',photo:_photo||''});
   });
-  renderScreenPotluck(null);
+  if(_screen==='intro') render(); else renderScreenPotluck(null);
   toast('Added! 🎁');
   // The profile is written FIRST, so nothing reaches the hub that is not on the person's
   // own profile. Strictly sequential - this backend 404s when calls overlap.
@@ -2924,7 +2902,7 @@ function addYourOwnHTML(key){
   return '<div style="display:flex;gap:6px;margin-bottom:12px;">'
     +'<input type="text" id="col-add-'+key+'" placeholder="Add your own" value="'+esc(seed)+'" style="'+COL_INP+'">'
     +'<button onclick="colAdd(\''+key+'\')" style="'+COL_BTN+'">I\'ll bring this! 🎁</button>'
-    +'<button onclick="knowSomeoneTyped(this,\''+key+'\')" style="'+KNOW_BTN+'">👤 Know someone</button>'
+    +'<button onclick="knowSomeoneTyped(this,\''+key+'\')" aria-label="Know someone" style="'+KNOW_BTN+'">👤</button>'
     +'</div>'
     +knowPanelFor('col',key);
 }
@@ -2967,7 +2945,7 @@ function formatStepHTML(){
 // to that person. Clipboard only; nothing is sent on their behalf.
 var KNOW_BTN='background:#fff;color:var(--brand);border:1.5px solid var(--brand);padding:7px 11px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;';
 function knowBtnHTML(item){
-  return '<button onclick="knowSomeone(this,\''+rawVal(item||'')+'\')" style="'+KNOW_BTN+'">👤 Know someone</button>';
+  return '<button onclick="knowSomeone(this,\''+rawVal(item||'')+'\')" aria-label="Know someone" style="'+KNOW_BTN+'">👤</button>';
 }
 // Names the item, so the person receiving it knows what is being asked rather than getting a
 // bare event link. Clipboard only - nothing is sent on anyone's behalf.
@@ -2975,6 +2953,8 @@ function knowBtnHTML(item){
 // copy silently and flash "Copied!", which gave no chance to see what was going out.
 // Inline panel, not an overlay (no-modals).
 var _knowCtx=null;   // null | {kind:'item'|'col', id:'…'}
+// Screen 1 shows the list too, but not as the three columns - repaint whichever is on screen.
+function repaintList(){ if(_screen==='intro') render(); else renderPotluckColumns(); }
 function inviteUrl(){
   // lakeballingerhub.com 301s to the Glide page and reads better in a message than the /dl/ path.
   return (_eventId==='m97sjwa3')
@@ -3000,7 +2980,7 @@ function knowPanelFor(kind,id){
   if(!_knowCtx||_knowCtx.kind!==kind||_knowCtx.id!==id) return '';
   return knowPanelHTML(_knowCtx.kind==='col'?_knowCtx.text:id);
 }
-window.knowClose=function(){ _knowCtx=null; renderPotluckColumns(); };
+window.knowClose=function(){ _knowCtx=null; repaintList(); };
 window.knowCopy=function(btn){
   var item=_knowCtx?(_knowCtx.kind==='col'?_knowCtx.text:_knowCtx.id):'';
   var msg=inviteMsgFor(item);
@@ -3010,12 +2990,12 @@ window.knowCopy=function(btn){
 };
 window.knowSomeone=function(btn,item){
   _knowCtx={kind:'item',id:item||''};
-  renderPotluckColumns();
+  repaintList();
 };
 window.knowSomeoneTyped=function(btn,key){
   var inp=document.getElementById('col-add-'+key);
   _knowCtx={kind:'col',id:key,text:inp?inp.value.trim():''};
-  renderPotluckColumns();
+  repaintList();
 };
 
 window.copyEventInvite=function(btn){
@@ -3902,4 +3882,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V6.00 | Date: 2026-07-18 | LAST CHANGE: Screen 1 reframed as host-or-help with the live activity list; new screen 3 confirmation - see the top-of-file note. (V5.40: Add commits each bring-type.) -->
+<!-- Version: V6.10 | Date: 2026-07-18 | LAST CHANGE: Screen 1 simplified to one Experiences list with an idea field - see the top-of-file note. (V6.00: host or help.) -->
