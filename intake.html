@@ -1,4 +1,4 @@
-<!-- Version: V6.16 | Date: 2026-07-20 | LAST CHANGE: Two fixes on someone else's profile. The heading read "This is me" with their name beside it - it now names the person being shown ("This is Carolyn"), keeping "This is me" only on your own. And the "Bookmark to meet" button used to overwrite the whole top nav (it set app-topnav's innerHTML to just the button), so bookmarking a person cost you the "All events / Event hub" navigation - it now appends beside the nav instead. (V6.15: the sign-up list save can no longer wipe the list.) -->
+<!-- Version: V6.17 | Date: 2026-07-20 | LAST CHANGE: A person with no profile no longer lands on the Lake Ballinger potluck intro on every event. That intro (fast step 1) is Lake Ballinger specific and now shows ONLY with intro=1; every other event - including the "My event profile" embed (?show=X&me=X) - starts a no-profile person at the generic profile builder (fast2: postal, language, enjoy, skills, care/need). The step counter shows "Step 1 of 2" in the generic flow (no potluck step), Back is hidden on that first step, and Back no longer drops anyone onto the potluck. Anything reached with intro=1 is unchanged. (V6.16: name the person on their profile, keep the nav when bookmarking.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1925,11 +1925,13 @@ window.toggleWantsSignupList=function(){
 // on one page, as plain search fields with no parent/sub drill-down and no level pickers.
 // Every original screen still exists and stays reachable from the profile as enrichment.
 function fastStepHTML(n){
-  return '<div class="progress-wrap"><div class="progress-steps">'
-    +'<div class="progress-step'+(n>=1?' done':'')+'"></div>'
-    +'<div class="progress-step'+(n>=2?' done':'')+'"></div>'
-    +'<div class="progress-step'+(n>=3?' done':'')+'"></div>'
-    +'</div><div class="progress-label">Step '+n+' of 3</div></div>';
+  // n is the potluck-mode step (intro=1, fast2=2, confirm=3). With no potluck (no intro=1)
+  // there is no step 1, so the total drops to 2 and the numbers shift down.
+  var total=_introMode?3:2;
+  var step=_introMode?n:(n-1);
+  var dots='';
+  for(var i=1;i<=total;i++){ dots+='<div class="progress-step'+(step>=i?' done':'')+'"></div>'; }
+  return '<div class="progress-wrap"><div class="progress-steps">'+dots+'</div><div class="progress-label">Step '+step+' of '+total+'</div></div>';
 }
 
 // The five things the hub needs before someone appears on it.
@@ -2110,7 +2112,8 @@ function renderScreenFast2(el){
     +fastFieldHTML('Skills that pay the bills','What you are good at.','2','Search skills...',openToWorkHTML())
     +fastFieldHTML('Thing I care about or need','People find you through this.','3','Search what you care about...')
     +'<div id="fast-notice"></div>'
-    +'<div class="nav-row"><button class="btn-back" onclick="goBack()">Back</button><button class="btn-next" onclick="goNext()">Next</button></div>';
+    // V6.17: no Back on the generic first step - fast2 is step 1 when there is no potluck intro.
+    +'<div class="nav-row">'+(_introMode?'<button class="btn-back" onclick="goBack()">Back</button>':'<span></span>')+'<button class="btn-next" onclick="goNext()">Next</button></div>';
 }
 
 function progressHTML(n){
@@ -3857,7 +3860,9 @@ window.goNext = function(){
 window.goBack = function(){
   if(_screen==='fast2'){
     var fp2=document.getElementById('fast-postal'); if(fp2) _postal=fp2.value.trim();
-    _screen='intro'; render(); return;
+    // V6.17: only the potluck flow has a step before fast2. Generic events have none, so
+    // Back stays put rather than dropping onto the Lake Ballinger potluck intro.
+    _screen=_introMode?'intro':'fast2'; render(); return;
   }
   if(_screen==='confirm'){ _screen='fast2'; render(); return; }
   if(_screen===2&&!_editMode&&_screen2step==='skills'){
@@ -3893,7 +3898,7 @@ window.goBack = function(){
     await loadProfileAndIntake();                // ONE combined call (getIntake + lookupProfile)
     // The owner opening their own public link lands on the same editable profile the
     // "?id=" door leads to, rather than a read-only copy of themselves.
-    if(isOwner()){ _completed=_hasProfile; _screen=_hasProfile?0:'intro'; if(!_hasProfile) _fastPath=true; }
+    if(isOwner()){ _completed=_hasProfile; _screen=_hasProfile?0:(_introMode?'intro':'fast2'); if(!_hasProfile) _fastPath=true; }
     render();                                    // paint the profile immediately
     loadRefData().then(function(){ render(); }); // lazy: category labels, then repaint
     loadHostInfoForViewer();                     // lazy: only fires when an eventId is attached; repaints if this person is that event's host
@@ -3916,12 +3921,14 @@ window.goBack = function(){
     if(_dataLoaded&&fastMissing().length){ _fastPath=true; _screen='fast2'; render(); return; }
     _screen=0;
   } else {
-    // No profile yet: the fast path is the way in.
-    _screen='intro'; _fastPath=true;
+    // No profile yet: the fast path is the way in. The potluck intro (step 1) is Lake
+    // Ballinger specific and only appears with intro=1; every other event skips straight to
+    // the profile builder (fast2).
+    _screen=_introMode?'intro':'fast2'; _fastPath=true;
   }
   render();
 })();
 </script>
 </body>
 </html>
-<!-- Version: V6.16 | Date: 2026-07-20 | LAST CHANGE: Two fixes on someone else's profile. The heading read "This is me" with their name beside it - it now names the person being shown ("This is Carolyn"), keeping "This is me" only on your own. And the "Bookmark to meet" button used to overwrite the whole top nav (it set app-topnav's innerHTML to just the button), so bookmarking a person cost you the "All events / Event hub" navigation - it now appends beside the nav instead. (V6.15: the sign-up list save can no longer wipe the list.) -->
+<!-- Version: V6.17 | Date: 2026-07-20 | LAST CHANGE: A person with no profile no longer lands on the Lake Ballinger potluck intro on every event. That intro (fast step 1) is Lake Ballinger specific and now shows ONLY with intro=1; every other event - including the "My event profile" embed (?show=X&me=X) - starts a no-profile person at the generic profile builder (fast2: postal, language, enjoy, skills, care/need). The step counter shows "Step 1 of 2" in the generic flow (no potluck step), Back is hidden on that first step, and Back no longer drops anyone onto the potluck. Anything reached with intro=1 is unchanged. (V6.16: name the person on their profile, keep the nav when bookmarking.) -->
