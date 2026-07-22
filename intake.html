@@ -1,4 +1,4 @@
-<!-- Version: V6.17 | Date: 2026-07-20 | LAST CHANGE: A person with no profile no longer lands on the Lake Ballinger potluck intro on every event. That intro (fast step 1) is Lake Ballinger specific and now shows ONLY with intro=1; every other event - including the "My event profile" embed (?show=X&me=X) - starts a no-profile person at the generic profile builder (fast2: postal, language, enjoy, skills, care/need). The step counter shows "Step 1 of 2" in the generic flow (no potluck step), Back is hidden on that first step, and Back no longer drops anyone onto the potluck. Anything reached with intro=1 is unchanged. (V6.16: name the person on their profile, keep the nav when bookmarking.) -->
+<!-- Version: V6.18 | Date: 2026-07-20 | LAST CHANGE: New registrants start with English pre-selected as a language, so the language step (now required by the event room gate) is one fewer tap - removable/changeable. Existing profiles untouched. (V6.17: generic profile builder for events without a potluck.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -3898,7 +3898,7 @@ window.goBack = function(){
     await loadProfileAndIntake();                // ONE combined call (getIntake + lookupProfile)
     // The owner opening their own public link lands on the same editable profile the
     // "?id=" door leads to, rather than a read-only copy of themselves.
-    if(isOwner()){ _completed=_hasProfile; _screen=_hasProfile?0:(_introMode?'intro':'fast2'); if(!_hasProfile) _fastPath=true; }
+    if(isOwner()){ _completed=_hasProfile; _screen=_hasProfile?0:(_introMode?'intro':'fast2'); if(!_hasProfile){ _fastPath=true; if(!_languages.length) _languages=['English']; } }
     render();                                    // paint the profile immediately
     loadRefData().then(function(){ render(); }); // lazy: category labels, then repaint
     loadHostInfoForViewer();                     // lazy: only fires when an eventId is attached; repaints if this person is that event's host
@@ -3923,12 +3923,14 @@ window.goBack = function(){
   } else {
     // No profile yet: the fast path is the way in. The potluck intro (step 1) is Lake
     // Ballinger specific and only appears with intro=1; every other event skips straight to
-    // the profile builder (fast2).
+    // the profile builder (fast2). V6.18: pre-select English so the language step (now required
+    // by the room gate) is one fewer tap; the person can remove or change it.
     _screen=_introMode?'intro':'fast2'; _fastPath=true;
+    if(!_languages.length) _languages=['English'];
   }
   render();
 })();
 </script>
 </body>
 </html>
-<!-- Version: V6.17 | Date: 2026-07-20 | LAST CHANGE: A person with no profile no longer lands on the Lake Ballinger potluck intro on every event. That intro (fast step 1) is Lake Ballinger specific and now shows ONLY with intro=1; every other event - including the "My event profile" embed (?show=X&me=X) - starts a no-profile person at the generic profile builder (fast2: postal, language, enjoy, skills, care/need). The step counter shows "Step 1 of 2" in the generic flow (no potluck step), Back is hidden on that first step, and Back no longer drops anyone onto the potluck. Anything reached with intro=1 is unchanged. (V6.16: name the person on their profile, keep the nav when bookmarking.) -->
+<!-- Version: V6.18 | Date: 2026-07-20 | LAST CHANGE: New registrants start with English pre-selected as a language, so the language step (now required by the event room gate) is one fewer tap - removable/changeable. Existing profiles untouched. (V6.17: generic profile builder for events without a potluck.) -->
