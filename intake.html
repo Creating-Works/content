@@ -1,4 +1,4 @@
-<!-- Version: V6.18 | Date: 2026-07-20 | LAST CHANGE: New registrants start with English pre-selected as a language, so the language step (now required by the event room gate) is one fewer tap - removable/changeable. Existing profiles untouched. (V6.17: generic profile builder for events without a potluck.) -->
+<!-- Version: V6.19 | Date: 2026-07-22 | LAST CHANGE: "Bookmark to meet" / "People I want to meet" now persist to the (ignore) Bookmarked tab (saveBookmark/getBookmarks) instead of localStorage, so a bookmark follows you across devices and is actually recorded. One non-blocking getBookmarks read fills the list on load; toggle/remove write through fire-and-forget with optimistic UI. me = the viewer (?me= / ?memberCard=), them = ?show=. (V6.18: English pre-selected for new registrants.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2167,21 +2167,40 @@ function screenSearchHTML(s, placeholder, hideHelper){
 }
 
 // Profile
-// ─── "I want to meet!" bookmarks (localStorage) ──────────────────────────────
-function _wtmGet(){ try{ return JSON.parse(localStorage.getItem('want-to-meet')||'[]'); }catch(e){ return []; } }
-function _wtmSet(a){ try{ localStorage.setItem('want-to-meet', JSON.stringify(a)); }catch(e){} }
+// ─── "I want to meet!" bookmarks (backend: (ignore) Bookmarked tab) ───────────
+// V6.19: persisted to the (ignore) Bookmarked tab (saveBookmark/getBookmarks) instead of
+// localStorage, so a bookmark follows you across devices and is actually recorded. _wtmData is
+// filled by ONE non-blocking getBookmarks read on load; toggles write through fire-and-forget.
+var _wtmData=null, _wtmLoaded=false, _wtmLoading=false;
 function _wtmNorm(id){ return String(id||'').replace(/\./g,'').toLowerCase(); }
-function _wtmHas(id){ var n=_wtmNorm(id); return _wtmGet().some(function(p){return _wtmNorm(p.id)===n;}); }
+function _wtmMyId(){ return _viewerIdParam() || (isOwner() ? String(_appearId||'') : ''); }
+function _wtmHas(id){ var n=_wtmNorm(id); return (_wtmData||[]).some(function(p){return _wtmNorm(p.id)===n;}); }
+function _wtmLoad(){
+  var me=_wtmMyId();
+  if(_wtmLoaded||_wtmLoading||!me) return;
+  _wtmLoading=true;
+  fetch(GS_URL+'?action=getBookmarks&appearId='+encodeURIComponent(me))
+    .then(function(r){return r.json();})
+    .then(function(d){ _wtmData=((d&&d.bookmarks)||[]).map(function(b){return {id:b.appearId, name:b.name||'', photo:b.photo||''};}); })
+    .catch(function(){ if(!_wtmData) _wtmData=[]; })
+    .then(function(){ _wtmLoaded=true; _wtmLoading=false; render(); });
+}
 window.wtmToggle=function(){
-  if(!_showId) return;
-  var a=_wtmGet(), n=_wtmNorm(_showId);
-  if(a.some(function(p){return _wtmNorm(p.id)===n;})) a=a.filter(function(p){return _wtmNorm(p.id)!==n;});
-  else a.push({id:_showId, name:_viewerName||'', photo:_viewerPhoto||'', eventId:_eventId||''});
-  _wtmSet(a);
-  var btn=document.getElementById('wtm-btn'); var has=_wtmHas(_showId);
-  if(btn){ btn.textContent=has?'✓ Bookmarked':'Bookmark to meet'; }
+  var me=_viewerIdParam(), them=_showId;
+  if(!me||!them) return;
+  var wasHas=_wtmHas(them);
+  if(!_wtmData) _wtmData=[];
+  if(wasHas){ var n=_wtmNorm(them); _wtmData=_wtmData.filter(function(p){return _wtmNorm(p.id)!==n;}); }
+  else { _wtmData.push({id:them, name:_viewerName||'', photo:_viewerPhoto||''}); }
+  var btn=document.getElementById('wtm-btn'); if(btn){ btn.textContent=_wtmHas(them)?'✓ Bookmarked':'Bookmark to meet'; }
+  fetch(GS_URL+'?action=saveBookmark&from='+encodeURIComponent(me)+'&to='+encodeURIComponent(them)+(wasHas?'&remove=true':''));
 };
-window.wtmRemove=function(id){ var n=_wtmNorm(id); _wtmSet(_wtmGet().filter(function(p){return _wtmNorm(p.id)!==n;})); render(); };
+window.wtmRemove=function(id){
+  var me=_wtmMyId(), n=_wtmNorm(id);
+  if(_wtmData) _wtmData=_wtmData.filter(function(p){return _wtmNorm(p.id)!==n;});
+  if(me) fetch(GS_URL+'?action=saveBookmark&from='+encodeURIComponent(me)+'&to='+encodeURIComponent(id)+'&remove=true');
+  render();
+};
 // "(on the hub)" - a link when we know which event's hub to send them to, plain text otherwise.
 function _wtmHubLink(){
   if(!_eventId) return '(on the hub)';
@@ -2189,7 +2208,7 @@ function _wtmHubLink(){
   return '<a href="'+url+'" style="color:var(--brand);font-weight:600;">(on the hub)</a>';
 }
 function _wtmListHTML(){
-  var a=_wtmGet();
+  var a=_wtmData||[];
   var inner = a.length ? a.map(function(p){
     var ph = p.photo ? '<img src="'+esc(p.photo)+'" alt="" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">' : '<div style="width:36px;height:36px;border-radius:50%;background:#1F699E;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;">'+esc((p.name||p.id||'?').charAt(0).toUpperCase())+'</div>';
     return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">'
@@ -2208,6 +2227,8 @@ function _viewerIdParam(){
 }
 function _wtmDecorate(){
   var el=document.getElementById('app-content'); if(!el) return;
+  _wtmLoad();   // V6.19: one non-blocking read of your bookmarks; re-renders when it lands
+
   // Your own list is yours on either URL; someone else's profile gets the bookmark button.
   if(isOwner()){ el.insertAdjacentHTML('beforeend', _wtmListHTML()); return; }
   if(!_showId) return;
@@ -3933,4 +3954,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V6.18 | Date: 2026-07-20 | LAST CHANGE: New registrants start with English pre-selected as a language, so the language step (now required by the event room gate) is one fewer tap - removable/changeable. Existing profiles untouched. (V6.17: generic profile builder for events without a potluck.) -->
+<!-- Version: V6.19 | Date: 2026-07-22 | LAST CHANGE: "Bookmark to meet" / "People I want to meet" now persist to the (ignore) Bookmarked tab (saveBookmark/getBookmarks) instead of localStorage, so a bookmark follows you across devices and is actually recorded. One non-blocking getBookmarks read fills the list on load; toggle/remove write through fire-and-forget with optimistic UI. me = the viewer (?me= / ?memberCard=), them = ?show=. (V6.18: English pre-selected for new registrants.) -->
