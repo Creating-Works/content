@@ -1,4 +1,4 @@
-<!-- Version: V1.00 | Date: 2026-07-22 | LAST CHANGE: New "Claim your link" page for vanity Appear URLs (appear.network/<slug>). Paste your Appear page link + pick a slug; live availability check (checkVanity); claim writes slug + link to Main via saveVanity. Needs the GAS actions checkVanity/saveVanity/vanity deployed and the appear.network Worker route. -->
+<!-- Version: V1.01 | Date: 2026-07-22 | LAST CHANGE: Show the person's Appear page link as a read-only clickable link (opens new tab), passed in via ?link= (from the event form / their profile), instead of an editable paste field. Pick a slug -> live checkVanity -> saveVanity writes slug + fills Main "Page link". Needs GAS checkVanity/saveVanity/vanity + the appear.network Worker. -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Claim your link</title>
@@ -13,6 +13,10 @@
   label{display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin:14px 0 6px}
   input{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:11px 14px;font-size:14px;font-family:inherit;color:var(--dark);outline:none}
   input:focus{border-color:var(--primary)}
+  .linkbox{font-size:14px;padding:11px 14px;background:#f3f5f7;border-radius:8px;word-break:break-all}
+  .linkbox a{color:var(--primary);font-weight:600;text-decoration:none}
+  .linkbox a:hover{text-decoration:underline}
+  .nolink{font-size:14px;padding:11px 14px;background:#FFF8E7;border:1px solid #F0B429;border-radius:8px;color:#7B5800}
   .slug-row{display:flex;align-items:center;gap:0;border:1.5px solid var(--border);border-radius:8px;overflow:hidden}
   .slug-row .pfx{background:#f3f5f7;color:var(--muted);font-size:14px;padding:11px 10px 11px 14px;white-space:nowrap;border-right:1px solid var(--border)}
   .slug-row input{border:none;border-radius:0;padding-left:8px}
@@ -29,9 +33,9 @@
   <h1>Claim your link</h1>
   <p class="sub">A short, memorable web address that opens your Appear Network page — like <b>appear.network/yourname</b>.</p>
 
-  <label>Your Appear Network page link</label>
-  <input id="appear-link" type="url" placeholder="https://appear.network/dl/page/s/…/r/…">
-  <div class="hint" id="link-hint"></div>
+  <label>Your Appear Network page</label>
+  <div class="linkbox" id="link-box" style="display:none;">Opens in a new tab: <a id="appear-link" href="#" target="_blank" rel="noopener"></a></div>
+  <div class="nolink" id="no-link" style="display:none;">Open this from your event post or your Appear page so we know which page to link.</div>
 
   <label>Choose your link</label>
   <div class="slug-row">
@@ -52,25 +56,26 @@ var GS_URL='https://script.google.com/macros/s/AKfycbzEavMnG4tMeWemoT5FLu9f_zjlK
 var RESERVED=['daybalancer','creatingworks','intake','giving','2gather','events','admin','claim','dl','api','u','r','s','page'];
 function qp(k){ try{return new URLSearchParams(location.search).get(k)||'';}catch(e){return '';} }
 var _me=(qp('id')||qp('memberCard')||qp('me')).trim();
-var linkEl=document.getElementById('appear-link'), slugEl=document.getElementById('slug');
-var linkHint=document.getElementById('link-hint'), slugHint=document.getElementById('slug-hint');
-var btn=document.getElementById('claim-btn');
+var _appearLink=(qp('link')||'').trim();
+var slugEl=document.getElementById('slug'), slugHint=document.getElementById('slug-hint'), btn=document.getElementById('claim-btn');
 var _linkOK=false, _slugOK=false, _checkTimer=null;
 
-function normSlug(v){ return String(v||'').trim().toLowerCase().replace(/[^a-z0-9-]/g,''); }
 function validLink(v){ return /^https?:\/\/appear\.network\//i.test(String(v||'').trim()); }
+(function initLink(){
+  if(validLink(_appearLink)){
+    var a=document.getElementById('appear-link'); a.href=_appearLink; a.textContent=_appearLink;
+    document.getElementById('link-box').style.display='block';
+    _linkOK=true;
+  } else {
+    document.getElementById('no-link').style.display='block';
+    _linkOK=false;
+  }
+})();
 
-linkEl.addEventListener('input', function(){
-  var v=linkEl.value.trim();
-  if(!v){ linkHint.textContent=''; linkHint.className='hint'; _linkOK=false; refresh(); return; }
-  if(validLink(v)){ linkHint.textContent='✓ Looks like your Appear page'; linkHint.className='hint ok'; _linkOK=true; }
-  else { linkHint.textContent='Paste the link to your Appear Network page (must include appear.network).'; linkHint.className='hint bad'; _linkOK=false; }
-  refresh();
-});
-
+function normSlug(v){ return String(v||'').trim().toLowerCase().replace(/[^a-z0-9-]/g,''); }
 slugEl.addEventListener('input', function(){
   var v=normSlug(slugEl.value);
-  if(slugEl.value!==v) slugEl.value=v;   // normalize live (lowercase, safe chars)
+  if(slugEl.value!==v) slugEl.value=v;
   _slugOK=false; refresh();
   clearTimeout(_checkTimer);
   if(!v){ slugHint.textContent=''; slugHint.className='hint'; return; }
@@ -81,7 +86,7 @@ slugEl.addEventListener('input', function(){
     fetch(GS_URL+'?action=checkVanity&slug='+encodeURIComponent(v))
       .then(function(r){return r.json();})
       .then(function(d){
-        if(normSlug(slugEl.value)!==v) return;   // input changed since
+        if(normSlug(slugEl.value)!==v) return;
         if(d&&d.available){ slugHint.textContent='✓ appear.network/'+v+' is available'; slugHint.className='hint ok'; _slugOK=true; }
         else { slugHint.textContent='Taken — try another.'; slugHint.className='hint bad'; _slugOK=false; }
         refresh();
@@ -89,13 +94,16 @@ slugEl.addEventListener('input', function(){
   },400);
 });
 
-function refresh(){ btn.disabled=!(_linkOK&&_slugOK&&_me); if(!_me){ slugHint.textContent='Open this from your profile so we know it is you.'; slugHint.className='hint bad'; } }
+function refresh(){
+  btn.disabled=!(_linkOK&&_slugOK&&_me);
+  if(!_me && _linkOK){ slugHint.textContent='Open this from your profile so we know it is you.'; slugHint.className='hint bad'; }
+}
 
 btn.addEventListener('click', function(){
   if(btn.disabled) return;
-  var v=normSlug(slugEl.value), link=linkEl.value.trim();
+  var v=normSlug(slugEl.value);
   btn.disabled=true; btn.textContent='Claiming…';
-  fetch(GS_URL+'?action=saveVanity&appearId='+encodeURIComponent(_me)+'&slug='+encodeURIComponent(v)+'&link='+encodeURIComponent(link))
+  fetch(GS_URL+'?action=saveVanity&appearId='+encodeURIComponent(_me)+'&slug='+encodeURIComponent(v)+'&link='+encodeURIComponent(_appearLink))
     .then(function(r){return r.json();})
     .then(function(d){
       if(d&&d.status==='ok'){
