@@ -1,4 +1,4 @@
-<!-- Version: V6.19 | Date: 2026-07-22 | LAST CHANGE: "Bookmark to meet" / "People I want to meet" now persist to the (ignore) Bookmarked tab (saveBookmark/getBookmarks) instead of localStorage, so a bookmark follows you across devices and is actually recorded. One non-blocking getBookmarks read fills the list on load; toggle/remove write through fire-and-forget with optimistic UI. me = the viewer (?me= / ?memberCard=), them = ?show=. (V6.18: English pre-selected for new registrants.) -->
+<!-- Version: V6.20 | Date: 2026-07-22 | LAST CHANGE: (1) The "Event hub" top-nav pill now shows ONLY for events marked hasHub (read from getEventById, which now returns it); the nav triggers the fetch then re-renders. (2) Added a "📍 = a local request or offer" legend under "What I'm seeking" (only when there are items). (V6.19: Bookmark-to-meet persists to the (ignore) Bookmarked tab.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2293,9 +2293,10 @@ function renderProfile(el, viewerMode){
   var _navId=viewerMode?_showId:_appearId;
   var _WB='text-decoration:none;color:#185FA5;background:#fff;font-size:14px;font-weight:600;padding:8px 15px;border-radius:20px;white-space:nowrap;';
   var _mc=(_navOwn&&_navId)?('&memberCard='+encodeURIComponent(_navId)):'';
-  // All events + Event hub show for ANY viewer (navigation). Edit / Event profile / Manage are owner-only.
+  if(_eventId && !_eventHeaderFetched){ fetchEventTitle(function(){ render(); }); }   // V6.20: learn hasHub, then re-render the nav
+  // All events shows always. Event hub shows only for events marked as having a hub (hasHub). Edit / Manage are owner-only.
   var _b='<a href="https://gather.2gather.network/events.html'+((_navOwn&&_navId)?('?memberCard='+encodeURIComponent(_navId)):'')+'" style="'+_WB+'">All events</a>';
-  if(_eventId) _b+='<a href="https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+_mc+'" style="'+_WB+'">Event hub</a>';
+  if(_eventId && _eventHasHub) _b+='<a href="https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+_mc+'" style="'+_WB+'">Event hub</a>';
   if(_navOwn&&_navId){
     // No "Event profile" pill here - it would point at the page you are already on. The
     // per-section pencils are what tell an owner they can change something.
@@ -2326,6 +2327,7 @@ function renderProfile(el, viewerMode){
   var _hdrName=(viewerMode&&!isOwner()&&String(_viewerName||'').trim())?('This is '+esc(String(_viewerName).trim().split(' ')[0])):'This is me';
   el.innerHTML='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;"><h2 style="margin:0;">'+_hdrName+' 🌱</h2>'+emailBtn+_photoHTML+'</div>'
     +section("What I'm seeking",allNeeds,false,'',4)
+    +((allNeeds.length)?'<div style="font-size:12px;color:var(--muted);margin:-6px 0 14px;">📍 = a local request or offer</div>':'')
     +section('What I enjoy',_interests,true,'level',1,false,_expression?'<div style="margin-top:6px;display:flex;justify-content:flex-end;"><span style="font-size:13px;color:var(--soft);"><span style="font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:0.08em;color:#BF5700;">This is so me:</span> <span style="font-size:10px;font-weight:700;">'+esc(_expressionItems.join(', '))+'</span></span></div>':'')
     +'<div class="profile-section" style="border-bottom:none;padding-bottom:4px;">'
     +'<div class="profile-section-header"><div class="profile-section-label">My skills</div>'
@@ -2514,6 +2516,7 @@ var _eventDate='';
 var _eventVenue='';
 var _eventLocationAddr='';
 var _eventHeaderFetched=false;
+var _eventHasHub=false;   // V6.20: from getEventById; gates the "Event hub" nav to hub events only
 function fmtEventDate(d){
   if(!d) return '';
   var s=String(d).split('T')[0];   // drop any time/UTC-Z suffix - keep just the date
@@ -2532,6 +2535,7 @@ function fetchEventTitle(cb){
         _eventDate=d.event.date||'';
         _eventVenue=d.event.venue||'';
         _eventLocationAddr=d.event.location||'';
+        _eventHasHub=(d.event.hasHub===true||String(d.event.hasHub||'').toLowerCase()==='true');
       }
       cb();
     })
@@ -2613,7 +2617,7 @@ function renderPotluckTopNav(){
   var tn=document.getElementById('app-topnav'); if(!tn) return;
   var WB='text-decoration:none;color:#185FA5;background:#fff;font-size:14px;font-weight:600;padding:8px 15px;border-radius:20px;white-space:nowrap;';
   var b='<a href="https://gather.2gather.network/events.html?memberCard='+encodeURIComponent(_appearId)+'" style="'+WB+'">All events</a>';
-  if(_eventId) b+='<a href="https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+'&memberCard='+encodeURIComponent(_appearId)+'" style="'+WB+'">Event hub</a>';
+  if(_eventId && _eventHasHub) b+='<a href="https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+'&memberCard='+encodeURIComponent(_appearId)+'" style="'+WB+'">Event hub</a>';
   b+='<a href="https://creating.works/intake.html?show='+encodeURIComponent(_appearId)+'&me='+encodeURIComponent(_appearId)+(_eventId?'&eventId='+encodeURIComponent(_eventId):'')+'" style="'+WB+'">Event profile</a>';
   if(_eventId) b+='<a href="https://gather.2gather.network/myevents.html?id='+encodeURIComponent(_appearId)+'&event='+encodeURIComponent(_eventId)+'" style="'+WB+'">Manage my experience</a>';
   tn.innerHTML='<div style="display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px;">'+b+'</div>';
@@ -3954,4 +3958,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V6.19 | Date: 2026-07-22 | LAST CHANGE: "Bookmark to meet" / "People I want to meet" now persist to the (ignore) Bookmarked tab (saveBookmark/getBookmarks) instead of localStorage, so a bookmark follows you across devices and is actually recorded. One non-blocking getBookmarks read fills the list on load; toggle/remove write through fire-and-forget with optimistic UI. me = the viewer (?me= / ?memberCard=), them = ?show=. (V6.18: English pre-selected for new registrants.) -->
+<!-- Version: V6.20 | Date: 2026-07-22 | LAST CHANGE: (1) The "Event hub" top-nav pill now shows ONLY for events marked hasHub (read from getEventById, which now returns it); the nav triggers the fetch then re-renders. (2) Added a "📍 = a local request or offer" legend under "What I'm seeking" (only when there are items). (V6.19: Bookmark-to-meet persists to the (ignore) Bookmarked tab.) -->
