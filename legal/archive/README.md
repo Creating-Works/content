@@ -1,6 +1,6 @@
 # Legal document archive
 
-Superseded versions of the privacy policy, terms of service and code of conduct live here at
+Superseded versions of the privacy policy, terms of service, and code of conduct live here at
 permanent addresses, so anyone can see what they agreed to and when without having to ask us.
 
 ## How it works
