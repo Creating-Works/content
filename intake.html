@@ -1,4 +1,4 @@
-<!-- Version: V6.20 | Date: 2026-07-22 | LAST CHANGE: (1) The "Event hub" top-nav pill now shows ONLY for events marked hasHub (read from getEventById, which now returns it); the nav triggers the fetch then re-renders. (2) Added a "📍 = a local request or offer" legend under "What I'm seeking" (only when there are items). (V6.19: Bookmark-to-meet persists to the (ignore) Bookmarked tab.) -->
+<!-- Version: V6.21 | Date: 2026-08-01 | LAST CHANGE: Privacy. Removed the viewer-mode "Email me" button, the _hostEmail variable and emailHostCopy(). Host email addresses are no longer sent to the browser. (V6.20: Event hub pill gated on hasHub; local request legend.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2321,7 +2321,9 @@ function renderProfile(el, viewerMode){
     _photoHTML='<div onclick="openPostalModal()" style="width:44px;height:44px;border-radius:50%;border:1.5px solid var(--sel-border);background:var(--input-bg);display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;flex-shrink:0;">'+_phInner+'</div>';
     var _tra=document.getElementById('top-right-area'); if(_tra) _tra.innerHTML='';
   }
-  var emailBtn=(viewerMode&&isViewingHost()&&_hostEmail)?'<button onclick="emailHostCopy(this)" style="background:none;border:1.5px solid var(--brand);color:var(--brand);border-radius:16px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;">✉️ Email me</button>':'';
+  // 2026-08-01 privacy: the viewer-mode "Email me" button is gone. Host email addresses are no
+  // longer sent to the browser.
+  var emailBtn='';
   // V6.16: on someone else's profile the heading read "This is me" with their name beside it.
   // Name the person being shown; keep "This is me" only when you are looking at your own.
   var _hdrName=(viewerMode&&!isOwner()&&String(_viewerName||'').trim())?('This is '+esc(String(_viewerName).trim().split(' ')[0])):'This is me';
@@ -2546,7 +2548,6 @@ function fetchEventTitle(cb){
 // EVENT CONTRIBUTION / POTLUCK
 // ═══════════════════════════════════════════════════════════════════════════
 var _hostMemberCard='';        // set from getEventById
-var _hostEmail='';             // set from getEventById - used by the viewer-mode "Email me" button
 function loadHostInfoForViewer(){
   if(!_viewerMode||!_eventId) return;
   fetch(GS_URL+'?action=getEventById&id='+encodeURIComponent(_eventId))
@@ -2554,7 +2555,6 @@ function loadHostInfoForViewer(){
     .then(function(d){
       if(d&&d.found&&d.event){
         _hostMemberCard=d.event.hostMemberCard||'';
-        _hostEmail=d.event.hostEmail||'';
         if(isViewingHost()) render();
       }
     }).catch(function(){});
@@ -2563,12 +2563,6 @@ function isViewingHost(){
   if(!_showId||!_hostMemberCard) return false;
   return String(_showId).split('.').join('').toLowerCase()===String(_hostMemberCard).split('.').join('').toLowerCase();
 }
-window.emailHostCopy=function(btn){
-  var em=_hostEmail; if(!em) return;
-  function done(){ if(btn){ btn.textContent='Copied!'; setTimeout(function(){ btn.textContent='✉️ Email me'; },1500); } }
-  try{ navigator.clipboard.writeText(em).then(done).catch(function(){ window.location.href='mailto:'+em; }); }
-  catch(e){ window.location.href='mailto:'+em; }
-};
 var _signupList=[];            // host-built list: [{item,category,potluckType,timeSpec,maxClaims}]
 var _potluckClaims=[];         // claims from potluck-claims: [{item,appearId,name,photo,elaboration,...}]
 var _potluckLoaded=false;
@@ -3958,4 +3952,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V6.20 | Date: 2026-07-22 | LAST CHANGE: (1) The "Event hub" top-nav pill now shows ONLY for events marked hasHub (read from getEventById, which now returns it); the nav triggers the fetch then re-renders. (2) Added a "📍 = a local request or offer" legend under "What I'm seeking" (only when there are items). (V6.19: Bookmark-to-meet persists to the (ignore) Bookmarked tab.) -->
+<!-- Version: V6.21 | Date: 2026-08-01 | LAST CHANGE: Privacy. Removed the viewer-mode "Email me" button, the _hostEmail variable and emailHostCopy(). Host email addresses are no longer sent to the browser. (V6.20: Event hub pill gated on hasHub; local request legend.) -->

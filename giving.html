@@ -1,4 +1,4 @@
-<!-- Version: V2.38 | LAST CHANGE: On the "Ways to give to me" viewer, moved the "Create my gift list" button OUT of the white card and onto the blue below it (white-outline .btn-below in a #below-card sibling), removed the extra <hr> after the list, and dropped the trailing divider under the last item (.wish-item:last-child). | Date: 2026-07-27 -->
+<!-- Version: V2.39 | LAST CHANGE: Privacy. Dropped a call to a backend action that does not exist; it cost a round trip and returned data this page never used. | Date: 2026-08-01 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1060,10 +1060,8 @@ function generateLink() {
   if (!_appearId) { toast('Sign in to generate a link'); return; }
   shareURL = location.origin + location.pathname + '?owner=' + encodeURIComponent(_appearId);
   try { localStorage.setItem('giving_shareURL', shareURL); } catch(e) {}
-  fetch(GS_URL + '?action=saveShareURL'
-    + '&appearId=' + encodeURIComponent(_appearId)
-    + '&url='      + encodeURIComponent(shareURL)
-  ).catch(() => {});
+  // 2026-08-01: dropped a call to a backend action that does not exist. It returned data this
+  // page never used and cost a round trip. The share link is built and stored locally.
   renderDrawer();
 }
 
