@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--
+  ARCHIVED DOCUMENT. Do not edit the wording.
+  The terms of service as they stood on February 4, 2026, recovered from the Wayback Machine
+  snapshot of daybalancer.com/terms-of-service taken 2026-04-11. Text is verbatim; links were
+  removed because they pointed at Squarespace pages, and obfuscated email addresses were decoded.
+-->
+<head>
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex, follow">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms of service, February 4 2026 (archived) - Creating Works</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%25' stop-color='%2310B981'/><stop offset='33%25' stop-color='%233B82F6'/><stop offset='66%25' stop-color='%238B5CF6'/><stop offset='100%25' stop-color='%23F43F5E'/></linearGradient></defs><circle cx='18' cy='18' r='16' fill='transparent' stroke='url(%23g)' stroke-width='3'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:       #0B0F1A;
+      --surface:  #141924;
+      --surface2: #1C2333;
+      --border:   #252D3D;
+      --text:     #FFFFFF;
+      --muted:    #94A3B8;
+      --green:    #059669;
+      --blue:     #3B82F6;
+      --purple:   #8B5CF6;
+      --pink:     #F43F5E;
+      --grad: linear-gradient(90deg, #10B981, #3B82F6, #8B5CF6, #F43F5E);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.7;
+    }
+
+    /* ---- NAV ---- */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      height: 64px;
+      background: rgba(11,15,26,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .logo-icon { width: 36px; height: 36px; position: relative; flex-shrink: 0; }
+    .logo-ring {
+      position: absolute; inset: 0; border-radius: 50%;
+      background: var(--grad);
+      -webkit-mask: radial-gradient(circle, transparent 13px, #000 13px);
+      mask: radial-gradient(circle, transparent 13px, #000 13px);
+    }
+    .logo-arrows { position: absolute; inset: 9px; }
+    .nav-wordmark { font-size: 17px; font-weight: 700; color: var(--text); letter-spacing: -0.01em; }
+    .nav-links { display: flex; gap: 28px; list-style: none; }
+    .nav-links a { font-size: 14px; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--text); }
+
+    /* ---- PAGE ---- */
+    .wrap { max-width: 780px; margin: 0 auto; padding: 120px 40px 40px; }
+    .eyebrow {
+      font-size: 12px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 14px;
+    }
+    h1 { font-size: 40px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 12px; }
+    .dates { font-size: 14px; color: var(--muted); margin-bottom: 40px; }
+
+    .principles {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 32px;
+      margin-bottom: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    .principles::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--grad);
+    }
+    .principles h2 { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+    .principles ol { list-style: none; counter-reset: p; }
+    .principles li {
+      counter-increment: p;
+      position: relative;
+      padding-left: 34px;
+      margin-bottom: 10px;
+      font-size: 16px;
+      font-weight: 400;
+    }
+    .principles li:last-child { margin-bottom: 0; }
+    .principles li::before {
+      content: counter(p);
+      position: absolute; left: 0; top: 2px;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--surface2); border: 1px solid var(--border);
+      font-size: 12px; font-weight: 700; color: var(--muted);
+      display: flex; align-items: center; justify-content: center;
+      line-height: 1;
+    }
+
+    .intro p { font-size: 17px; color: #CBD5E1; margin-bottom: 16px; }
+    .intro .lede { color: var(--text); font-weight: 400; }
+    .intro .plain {
+      border-left: 2px solid var(--green);
+      padding-left: 18px;
+      color: var(--text);
+      font-weight: 400;
+    }
+
+    h2.sec {
+      font-size: 22px; font-weight: 700; letter-spacing: -0.01em;
+      margin: 44px 0 14px; padding-top: 26px;
+      border-top: 1px solid var(--border);
+    }
+    h2.sec .num { color: var(--muted); font-weight: 500; margin-right: 10px; }
+    p { font-size: 16px; color: #CBD5E1; margin-bottom: 14px; }
+    ul.body { list-style: none; margin: 0 0 16px; }
+    ul.body li {
+      position: relative; padding-left: 20px; margin-bottom: 12px;
+      font-size: 16px; color: #CBD5E1;
+    }
+    ul.body li::before {
+      content: ''; position: absolute; left: 0; top: 11px;
+      width: 6px; height: 6px; border-radius: 50%; background: var(--blue);
+    }
+    ul.body li b, p b { color: var(--text); font-weight: 700; }
+    a.inline { color: var(--blue); text-decoration: none; border-bottom: 1px solid rgba(59,130,246,0.4); }
+    a.inline:hover { color: var(--text); border-bottom-color: var(--text); }
+
+    .callout {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--pink);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin: 20px 0;
+    }
+    .callout p:last-child { margin-bottom: 0; }
+    .callout .lbl { color: var(--text); font-weight: 700; }
+
+
+    .datebar {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; flex-wrap: wrap;
+      margin-top: 40px; margin-bottom: 30px; padding-top: 20px;
+      border-top: 1px solid var(--border);
+      font-size: 14px; color: var(--muted);
+    }
+    .datebar a { color: var(--muted); text-decoration: none; border-bottom: 1px solid var(--border); }
+    .datebar a:hover { color: var(--text); border-bottom-color: var(--text); }
+    .archived {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-left: 3px solid var(--pink); border-radius: 12px;
+      padding: 18px 24px; margin-bottom: 32px;
+      font-size: 15px; color: var(--text);
+    }
+    .archived a { color: var(--blue); text-decoration: none; border-bottom: 1px solid rgba(59,130,246,0.4); }
+
+    .contact {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 32px;
+      margin-top: 40px;
+    }
+    .contact .name { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+
+    /* ---- FOOTER ---- */
+    footer {
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+      padding: 32px 40px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 16px;
+    }
+    .footer-left { display: flex; align-items: center; gap: 16px; }
+    .footer-wordmark { font-size: 16px; font-weight: 700; color: var(--text); }
+    .footer-links { display: flex; gap: 24px; }
+    .footer-links a { font-size: 13px; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--text); }
+    .footer-copy { font-size: 12px; color: var(--muted); }
+
+    @media (max-width: 768px) {
+      nav { padding: 0 20px; }
+      .nav-links { display: none; }
+      .wrap { padding: 100px 20px 30px; }
+      h1 { font-size: 30px; }
+      .principles, .contact { padding: 22px 20px; }
+      footer { flex-direction: column; align-items: flex-start; padding: 28px 20px; }
+      .footer-links { flex-wrap: wrap; gap: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="https://creating.works/" class="nav-logo">
+      <div class="logo-icon">
+        <div class="logo-ring"></div>
+        <svg class="logo-arrows" width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M3.5 7 Q3.5 3.5 7 3.5 H11" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+          <path d="M9.5 2 L11.5 3.5 L9.5 5" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M11 3.5 Q14.5 3.5 14.5 7 V11" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+          <path d="M13 9.5 L14.5 11.5 L16 9.5" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M14.5 11 Q14.5 14.5 11 14.5 H7" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+          <path d="M8.5 13 L6.5 14.5 L8.5 16" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M7 14.5 Q3.5 14.5 3.5 11 V7" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+          <path d="M5 8.5 L3.5 6.5 L2 8.5" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <span class="nav-wordmark">Creating Works</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="https://creating.works/">Home</a></li>
+      <li><a href="https://creating.works/#ethos">Our ethos</a></li>
+    </ul>
+  </nav>
+
+  <div class="wrap">
+
+    <div class="eyebrow">Creating Works</div>
+    <div class="archived">This document has been replaced by a <a href="https://creating.works/terms-of-service.html">newer version</a> and is kept here for archival purposes. It is no longer in effect.</div>
+
+    <h1>Terms of service</h1>
+    <div class="datebar"><span>Effective February 4, 2026</span></div>
+
+    <p>Welcome, and thank you for your interest in DayBalancer LLC ("us," "we," "DayBalancer," or the "Company"), our website at https://www.daybalancer.com, and various related services (collectively, the "Services"). The Services and their features are provided to you subject to your compliance with all the terms, conditions, and notices contained or referenced in this agreement (the "Agreement").</p>
+    <p>This Agreement is between DayBalancer LLC, the creator of DayBalancer and the cooperative networking platform ("DayBalancer"), and DayBalancer partners, users, and other individuals who access or view DayBalancer materials and content (together, the "Users"). This Agreement outlines the scope of services provided by DayBalancer and details your obligations as a User.</p>
+    <p><strong>Eligibility and age requirements:</strong> You must be at least 18 years old to use the Services. By using the Services, you represent and warrant that you meet this age requirement.</p>
+    <p>Your profile photo and name are visible to:</p>
+    <ul class="body"><li>
+    <p><strong>Anyone who visits your page</strong> via direct link or QR code (your page is publicly accessible once completed and discoverable through search)</p></li><li>
+    <p><strong>All DayBalancer network members</strong></p></li></ul>
+
+    <p><strong>Contact Information:</strong> Your contact info is only shared when you mutually connect with someone. Supporting members can choose to share their contact info with anyone.</p>
+    <p><strong>Job Matching Exception:</strong> When matched with work opportunities or clients, your profile remains anonymous until both parties agree to connect. This reduces unconscious bias and ensures connections are based on skills, values, and compatibility. Once both parties choose to connect, full profiles (including names, photos, and contact info) become visible to each other.</p>
+    <p>Scope of Services</p>
+    <p>The services provided by DayBalancer include the content, materials, tools, and assessment programs designed to provide career development and facilitate connections for meaningful work and life through cooperative networks. DayBalancer operates as a peer-to-peer platform that facilitates:</p>
+    <ul class="body"><li>
+    <p>Peer-to-peer (P2P) connections: Independent service providers connecting directly with other independents for mentoring, collaboration, and meaningful work opportunities</p></li><li>
+    <p>Service provider-to-client (P2C) connections: Independent service providers connecting with clients who need their services</p></li><li>
+    <p>Business-to-business (B2B) connections: Organizations and teams connecting for partnerships, collaborations, and business development</p></li></ul>
+
+    <p>These DayBalancer Services include online assessment tools, educational resources, a cooperative network, and a community of DayBalancer members (together, the "Services").</p>
+    <p>User Services</p>
+    <p>If you are a DayBalancer user or individual viewing or using DayBalancer content, you may use the Services to explore your work opportunities and build trusted professional networks. Use of the Services does not constitute professional, financial, medical, psychological, legal, or other advice.</p>
+    <p>DayBalancer connects independent service providers but does not conduct background checks, verify credentials, or guarantee outcomes. You are responsible for vetting potential collaborators, clients, or service providers. Always meet in public spaces initially, verify references independently, and use written agreements for paid work. Report suspicious activity immediately.</p>
+    <p>Independent contractor status: DayBalancer facilitates connections between independent service providers and clients. DayBalancer does not create employment relationships, does not employ service providers, and is not responsible for any contractual arrangements between users. All users engaging in work through DayBalancer connections are responsible for their own tax obligations, insurance, licenses, and legal compliance as independent contractors.</p>
+    <p>No content on the DayBalancer platform, regardless of date, should ever be used as a substitute for direct medical advice from your doctor or other qualified clinician.</p>
+    <p>Use of User Data</p>
+    <p>By using the Services, you grant DayBalancer permission to use your information to continue its research into healthy, successful professional communications and cooperative networking, in accordance with applicable data protection laws. This research may be published in academic journals or other publications; however, any use of this content will comply with the DayBalancer Privacy Policy .</p>
+    <p>Services tiers and fees</p>
+    <p>DayBalancer operates as a member-owned cooperative business model. Services and associated fees include:</p>
+    <ul class="body"><li>
+    <p>Free profile creation and basic network access for all independent service providers</p></li><li>
+    <p>Platform customization fees for tailored SaaS features</p></li><li>
+    <p>Hiring and collaboration intelligence services</p></li><li>
+    <p>Partner services for facilitating paid DayBalancer assessments with groups of users</p></li><li>
+    <p>Premium support and account management for subscribers</p></li></ul>
+
+    <p>Specific pricing and service details are available here . Additional details upon request at [email&#160;protected] .</p>
+    <p>Code of Conduct</p>
+    <p>By using the Services, you agree to abide by the DayBalancer Code of Conduct, which can be found at daybalancer.com/code-of-conduct . The Code of Conduct establishes standards for respectful interaction, inclusive communication, and ethical behavior within our community. Violation of the Code of Conduct may result in suspension or termination of your access to the Services.</p>
+    <p>Acceptance of Terms; Amendment</p>
+    <p>By using the Services, you agree to be bound by and comply with these Terms of Service and the DayBalancer Code of Conduct. DayBalancer may amend or modify these Terms of Service at any time, for any reason, with notice posted on our website. Changes are effective immediately upon posting to the DayBalancer website (https://daybalancer.com/terms-of-service). We may also notify you via email at the address associated with your account. It is your responsibility to review these Terms of Service prior to use of the Services. Your continued use of the Services now, or following the posting of any changes, indicates your acceptance.</p>
+    <p>Termination</p>
+    <p>DayBalancer may, without notice or liability, change, suspend, or discontinue any portion of the Services at any time, including your access to the Services or the availability of any feature, database, or content. DayBalancer reserves the right to terminate your access to the Services if you violate these Terms of Service or the Code of Conduct. If you find any of these Terms of Service or any future changes unacceptable, you may discontinue your use of the Services and cancel your registration by contacting info@daybalancer.com.</p>
+    <p>Account suspension appeals</p>
+    <p>If your account is suspended or terminated, you may appeal the decision by contacting [email&#160;protected] with "Account Appeal" in the subject line. We will review appeals within 10 business days.</p>
+    <p>Use of Services</p>
+    <p>You may use the Services for:</p>
+    <ul class="body"><li>
+    <p>Creating a professional profile to connect with meaningful work opportunities</p></li><li>
+    <p>Networking with clients and other independent service providers who share your values</p></li><li>
+    <p>Discovering opportunities that match your skills, interests, and work preferences</p></li><li>
+    <p>Accessing career development resources and assessments</p></li><li>
+    <p>Building cooperative networks for mutual support</p></li><li>
+    <p>Connecting with clients for full-time, part-time, contract, freelance, or project-based work</p></li><li>
+    <p>Building and participating in professional communities within the cooperative network</p></li></ul>
+
+    <p>In all cases, your use must comply with these Terms of Service.</p>
+    <p>Support and Account Management</p>
+    <p>Depending on your service tier, you may have access to account management and premium support services. Account managers provide platform guidance, optimize your experience, and ensure you're getting value from the Services.</p>
+    <p>User Conduct</p>
+    <p>You are responsible for maintaining the confidentiality of your login and registration information. You may not authorize others to use your account, and you may not assign or otherwise transfer your account to any other person or entity. You are solely responsible for all activities that occur under your account. You will use the Services in a manner consistent with all applicable local, state, federal, and international laws and regulations. You may not hold yourself out to be, in any way, sponsored by, affiliated with, or endorsed by DayBalancer, any of its affiliates, or any of its service providers.</p>
+    <p>You may not:</p>
+    <ul class="body"><li>
+    <p>Use the Services for any illegal purpose or to violate any laws</p></li><li>
+    <p>Impersonate another person or entity</p></li><li>
+    <p>Interfere with or disrupt the Services or servers</p></li><li>
+    <p>Attempt to gain unauthorized access to any portion of the Services</p></li><li>
+    <p>Use automated systems (bots, scrapers) to access the Services without permission</p></li><li>
+    <p>Harass, abuse, or harm other users</p></li><li>
+    <p>Post false, misleading, or fraudulent information</p></li><li>
+    <p>Violate any third party's intellectual property or privacy rights</p></li></ul>
+
+    <p>Data Security and Privacy</p>
+    <p>You agree to protect the privacy and security of other users' information. You will not attempt to access, collect, store, or disclose personal data of other users without explicit permission. DayBalancer takes data security seriously and expects all users to respect privacy boundaries. </p>
+    <p>Data retention and deletion</p>
+    <p>You may request deletion of your account and associated data at any time by contacting [email&#160;protected] . We will process deletion requests within 30 days, subject to legal retention requirements.</p>
+    <p>User-Generated Content and Community Interactions</p>
+    <p>The Services may include community features, forums, and interactive areas where users can create, post, transmit, and share content ("User-Generated Content"). By posting any User-Generated Content, you:</p>
+    <ul class="body"><li>
+    <p>Grant DayBalancer a worldwide, non-exclusive, royalty-free license to use, reproduce, modify, adapt, publish, and display such content in connection with providing and promoting the Services</p></li><li>
+    <p>Represent and warrant that you own or have the necessary rights to post such content and that it does not violate the rights of any third party or any applicable laws </p></li><li>
+    <p>Acknowledge that DayBalancer does not endorse, support, represent, or guarantee the completeness, truthfulness, accuracy, or reliability of any User-Generated Content</p></li><li>
+    <p>Understand that DayBalancer acts as a passive conduit for the distribution of User-Generated Content and has no obligation to screen, edit, or monitor such content </p></li><li>
+    <p>Acknowledge that DayBalancer may remove any User-Generated Content that violates these Terms of Service or the Code of Conduct, but is under no obligation to do so</p></li><li>
+    <p>Agree that DayBalancer shall not be liable for any User-Generated Content or for any loss or damage resulting from your reliance on such content</p></li><li>
+    <p>Accept that opinions, advice, statements, or other information expressed by users are those of the respective author(s) and not of DayBalancer</p></li></ul>
+
+    <p>DMCA copyright policy</p>
+    <p>DayBalancer respects intellectual property rights. If you believe content on our Services infringes your copyright, contact us at [email&#160;protected] with:</p>
+    <ul class="body"><li>
+    <p>Your contact information </p></li><li>
+    <p>Description of the copyrighted work</p></li><li>
+    <p>Location of the infringing material </p></li><li>
+    <p>Statement of good faith belief </p></li><li>
+    <p>Statement of accuracy under penalty of perjury </p></li><li>
+    <p>Your physical or electronic signature</p></li></ul>
+
+    <p>License; Proprietary Rights</p>
+    <p>No License</p>
+    <p>DayBalancer does not grant you any license or rights to the proprietary software, tools, or content that are part of the Services.</p>
+    <p>Protected Rights</p>
+    <p>Certain DayBalancer content provided in the Services may be protected by copyright, trademark, patent, and other proprietary rights. You may not modify, publish, transmit, reproduce, create new works from, distribute, or display the Services, DayBalancer content, or any DayBalancer trademarks, service marks, or other intellectual property. You may not adapt, translate, modify, decompile, or reverse engineer any part of the Services.</p>
+    <p>Comments and Feedback</p>
+    <p>DayBalancer welcomes your feedback, but you are under no obligation to provide it. All comments, feedback, ideas, questions, or suggestions that you submit to DayBalancer will be considered non-proprietary and may be used by DayBalancer without any obligation to compensate you for them or give you attribution.</p>
+    <p>Disclaimers and limitations</p>
+    <p>The services are provided "as-is," and DayBalancer disclaims any and all representations and warranties, whether express or implied, including, but not limited to, implied warranties of title, merchantability, fitness for a particular purpose, and non-infringement. DayBalancer does its best to keep the Services safe, but cannot guarantee that the DayBalancer website is free of viruses or other harmful components.</p>
+    <p>Because the Services rely, in part, on self-report, DayBalancer does not guarantee that the Services are error-free. DayBalancer does not adopt, endorse, or accept responsibility for the accuracy or reliability of any opinion, advice, or statement made by any party other than DayBalancer. Under no circumstances will DayBalancer be responsible for any loss or damage resulting from anyone's reliance on information transmitted to or by any User.</p>
+    <p>DayBalancer does not warrant that Internet-based Services will be secure, uninterrupted, always available, or error-free.<br><br>DayBalancer does not guarantee the accuracy of self-reported information, assessment results, or user-generated content. We do not warrant uninterrupted or error-free service.</p>
+    <p>Limitation of liability</p>
+    <p>In no event will DayBalancer, its officers, directors, employees, or agents be liable to you, or any third party, for any loss or damage, whether direct, indirect, consequential, exemplary, incidental, special, or punitive arising from the use of the Services or other DayBalancer materials, except in cases of willful misconduct or gross negligence. This includes, but is not limited to, any liability arising from User-Generated Content shared within our communities, interactions between users, or information shared through community features. You acknowledge that DayBalancer is not responsible for the conduct of any user and that you use our community features at your own risk.</p>
+    <p>Indemnification</p>
+    <p>You agree to indemnify and hold DayBalancer, its directors, officers, agents, and employees harmless from and against any loss, liability, claim, demand, damages, costs, and expenses, including reasonable attorney's fees, arising out of or in connection with the use of the Services; conduct in connection with the Services; or any violation of these Terms of Service, the DayBalancer Code of Conduct, the DayBalancer Privacy Policy, or of any law or the rights of any third party.</p>
+    <p>Payment and refunds</p>
+    <p><strong>Payment terms:</strong> Fees for platform customization, hiring intelligence, and other paid services will be invoiced according to the terms agreed upon in your service agreement. Payment is due within 30 days of invoice date unless otherwise specified.</p>
+    <p><strong>Refund policy: </strong>Refunds for paid services are handled on a case-by-case basis. Contact [email&#160;protected] to request a refund with details about your service and reason for the request.</p>
+    <p>Accessibility</p>
+    <p>DayBalancer is committed to making its Services accessible to all users, including those with disabilities. We strive to comply with applicable accessibility standards. If you encounter accessibility issues, please contact us at info@daybalancer.com.</p>
+    <p>International use and export compliance</p>
+    <p>The Services are controlled and operated from the United States. If you access the Services from outside the United States, you are responsible for compliance with local laws. You agree to comply with all applicable export and import control laws and regulations.</p>
+    <p>Force majeure</p>
+    <p>DayBalancer is not liable for any failure or delay in performance due to circumstances beyond our reasonable control, including acts of God, natural disasters, war, terrorism, riots, embargoes, acts of civil or military authorities, fire, floods, accidents, pandemics, strikes, or shortages of transportation, facilities, fuel, energy, labor, or materials.</p>
+    <p>Governing Law</p>
+    <p>These Terms of Service are governed by the laws of the State of Washington.</p>
+    <p>Dispute Resolution</p>
+    <p>To resolve any complaint you may have regarding the Services, you agree to first contact DayBalancer and express your concerns. Correspondence regarding any complaint should be sent to info@daybalancer.com (include Terms of Service in your subject line). If your complaint cannot be resolved through discussion with DayBalancer, any controversy or claim arising out of or relating to these Terms of Service, the Services, or any other DayBalancer materials will be settled by binding arbitration, in accordance with the rules of the American Arbitration Association (AAA).</p>
+    <p>Any controversy or claim must be arbitrated on an individual basis, and may not be consolidated with any claim or controversy of any other party. Any arbitration must take place in King County, Washington.</p>
+    <p>Member disputes will be resolved through:</p><ol><li>
+    <p>Direct discussion with DayBalancer</p></li><li>
+    <p>Member-elected grievance committee review</p></li><li>
+    <p>Binding arbitration only if democratic resolution fails</p></li><li>
+    <p>Collective disputes involving 10+ members may be heard as a group</p></li></ol>
+    <p>Updates and Notifications</p>
+    <p>We may provide notices regarding changes to these Terms of Service by posting them on our website or sending you an email. You are responsible for providing us with your current email address. If the email address you provide is incorrect or outdated, you may miss important notices.</p>
+    <p>Entire Agreement</p>
+    <p>This Agreement, including the DayBalancer Privacy Policy found at daybalancer.com/privacy-policy, and the DayBalancer Code of Conduct, is the entire agreement between you and DayBalancer regarding your use of the Services.</p>
+    <p>Nonwaiver</p>
+    <p>If either party fails to require the other party to perform any term of this Agreement, that failure does not prevent the party from later enforcing that term. If either party waives the other's breach of a term, that waiver does not waive a later breach of that term.</p>
+    <p>Severability</p>
+    <p>If any part of this Agreement is found to be invalid or unenforceable by a court of competent jurisdiction under Washington law, the remainder of this Agreement will remain in full force and effect.</p>
+    <p>Electronic signatures</p>
+    <p>By clicking "I agree," checking a box, or otherwise indicating acceptance, you agree that such action constitutes your electronic signature and your consent to enter into agreements electronically.</p>
+    <p>Last Updated: Feb 4, 2026</p>
+    <p>For questions about these Terms of Service, contact us at [email&#160;protected] .<br></p>
+
+    <div class="archived">This document has been replaced by a <a href="https://creating.works/terms-of-service.html">newer version</a> and is kept here for archival purposes. It is no longer in effect.</div>
+
+  </div>
+
+  <footer>
+    <div class="footer-left">
+      <span class="footer-wordmark">Creating Works</span>
+    </div>
+    <div class="footer-links">
+      <a href="https://app.daybalancer.com/" target="_blank">DayBalancer</a>
+      <a href="https://appear.network/" target="_blank">Appear Network</a>
+      <a href="https://2gather.network/" target="_blank">2Gather</a>
+    </div>
+    <span class="footer-copy">© 2026 Creating Works</span>
+  </footer>
+
+<!--
+  Version: V1.03 | Date: 2026-07-31
+  LAST CHANGE: S4 opener reads "a match for jobs" rather than "a match for work".
+  (V1.02: added S4 "Anonymous matching" and renumbered to 14 sections. Jessie confirmed the match screen in the Glide
+  app already hides both people's name and photo until a connection request is accepted, so the claim goes back in scoped
+  to that screen, with a line pointing at S3 so nobody reads it as covering their Appear page. S1 "Connection preferences"
+  now says hiring detail stays off the public page.
+  (V1.01: reframed on Creating Works operated by DayBalancer LLC per operating agreement 1.3, one profile across three
+  tools. S3 in Jessie's words. Backend architecture detail left out. S6 lists Google / Glide / Cloudflare / GitHub /
+  Squarespace / Kumu. S7 says "parts of this software" plus per-category AI consent per doc 04. S9 corrected: Glide sets
+  one 3-hour build cookie, verified live, and storage keys are described rather than named. S13 reframed on operating
+  agreement 2.4 / 6 / Article X. Contact is hello@creating.works throughout.))
+  OPEN: the age-18 sentence in S12 is true once intake V6.22 plus the Glide flag ship, so hold publication until then.
+  S10 and S11 want a lawyer's read. Gift lists on giving.html?owner= are public by link and S3 does not name them.
+  2Gather event profiles are reachable by link today but nothing in the product surfaces them; revisit S3 when event
+  profiles get socialised.
+-->
+</body>
+</html>
