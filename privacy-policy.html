@@ -160,6 +160,24 @@
     .callout p:last-child { margin-bottom: 0; }
     .callout .lbl { color: var(--text); font-weight: 700; }
 
+
+    .datebar {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; flex-wrap: wrap;
+      margin-top: 40px; padding-top: 20px;
+      border-top: 1px solid var(--border);
+      font-size: 14px; color: var(--muted);
+    }
+    .datebar a { color: var(--muted); text-decoration: none; border-bottom: 1px solid var(--border); }
+    .datebar a:hover { color: var(--text); border-bottom-color: var(--text); }
+    .archived {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-left: 3px solid var(--pink); border-radius: 12px;
+      padding: 18px 24px; margin-bottom: 32px;
+      font-size: 15px; color: var(--text);
+    }
+    .archived a { color: var(--blue); text-decoration: none; border-bottom: 1px solid rgba(59,130,246,0.4); }
+
     .contact {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -239,6 +257,7 @@
       <p>Creating Works is operated by DayBalancer LLC. We treat your data with the same care and respect we would our own. We run a platform where you define, express and share who you are, what you offer and what you seek. There are no hidden revenue streams and no data-sharing arrangements with advertisers.</p>
       <p>We designed our business model around protecting your information. We hold transparent and ethical relationships with the people who use our platform.</p>
       <p class="plain">This policy describes the software as it runs today. Where a protection is planned rather than built, we say so in the section that covers it. We would rather tell you what is here now than describe something you cannot yet rely on.</p>
+      <p class="plain">This policy sits alongside our <a class="inline" href="/terms-of-service.html">terms of service</a> and our <a class="inline" href="/code-of-conduct.html">code of conduct</a>.</p>
     </div>
 
     <h2 class="sec"><span class="num">1</span>Information we collect</h2>
@@ -335,14 +354,14 @@
     <p>If the company ever winds down, the agreement sends what remains to the commons or to a community organization that shares our purpose. Your personal information moves only to an organization that holds it under this policy or a stronger one. We tell you before that happens and you can export or delete your information first.</p>
 
     <h2 class="sec"><span class="num">14</span>Changes to this policy</h2>
-    <p>We update this policy when our practices change or when the law calls for it. We tell you about a significant change by updating the effective date at the foot of this page and by sending notice through email or through the platform. This version takes effect on July 31, 2026 and replaces the version of July 21, 2026. To see the changes from an earlier version, write to us and we will send them.</p>
+    <p>We update this policy when our practices change or when the law calls for it. We tell you about a significant change by updating the effective date at the foot of this page and by sending notice through email or through the platform. This version takes effect on July 31, 2026 and replaces the version of July 21, 2026. Earlier versions stay published at their own addresses, linked from the foot of this page.</p>
 
     <div class="contact">
       <div class="name">Creating Works</div>
       <p style="margin-bottom:0;">Operated by DayBalancer LLC. Questions about this policy, or a request to exercise your data rights: <a class="inline" href="mailto:hello@creating.works">hello@creating.works</a></p>
     </div>
 
-    <p class="dates" style="margin-top:34px;text-align:right;">Effective July 31, 2026. Previous version July 21, 2026.</p>
+    <div class="datebar"><span>Effective July 31, 2026</span><a href="/legal/archive/">Previous version: July 21, 2026</a></div>
 
   </div>
 

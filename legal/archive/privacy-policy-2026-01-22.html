@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--
+  ARCHIVED DOCUMENT. Do not edit the wording. This is the privacy policy as it stood on
+  January 22, 2026, recovered from the Wayback Machine snapshot of daybalancer.com/privacy-policy
+  taken 2026-04-11. Text is verbatim, including its section numbering (there are three sections
+  numbered 8, which is how it was published). The contact address was recovered from the page's
+  Cloudflare email obfuscation: privacy@daybalancer.com.
+  It names an earlier version effective 4/19/2023 which has not been recovered.
+-->
+<head>
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex, follow">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy policy, January 22 2026 (archived) - Creating Works</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%25' stop-color='%2310B981'/><stop offset='33%25' stop-color='%233B82F6'/><stop offset='66%25' stop-color='%238B5CF6'/><stop offset='100%25' stop-color='%23F43F5E'/></linearGradient></defs><circle cx='18' cy='18' r='16' fill='transparent' stroke='url(%23g)' stroke-width='3'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:       #0B0F1A;
+      --surface:  #141924;
+      --surface2: #1C2333;
+      --border:   #252D3D;
+      --text:     #FFFFFF;
+      --muted:    #94A3B8;
+      --green:    #059669;
+      --blue:     #3B82F6;
+      --purple:   #8B5CF6;
+      --pink:     #F43F5E;
+      --grad: linear-gradient(90deg, #10B981, #3B82F6, #8B5CF6, #F43F5E);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.7;
+    }
+
+    /* ---- NAV ---- */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      height: 64px;
+      background: rgba(11,15,26,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .logo-icon { width: 36px; height: 36px; position: relative; flex-shrink: 0; }
+    .logo-ring {
+      position: absolute; inset: 0; border-radius: 50%;
+      background: var(--grad);
+      -webkit-mask: radial-gradient(circle, transparent 13px, #000 13px);
+      mask: radial-gradient(circle, transparent 13px, #000 13px);
+    }
+    .logo-arrows { position: absolute; inset: 9px; }
+    .nav-wordmark { font-size: 17px; font-weight: 700; color: var(--text); letter-spacing: -0.01em; }
+    .nav-links { display: flex; gap: 28px; list-style: none; }
+    .nav-links a { font-size: 14px; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--text); }
+
+    /* ---- PAGE ---- */
+    .wrap { max-width: 780px; margin: 0 auto; padding: 120px 40px 40px; }
+    .eyebrow {
+      font-size: 12px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 14px;
+    }
+    h1 { font-size: 40px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 12px; }
+    .dates { font-size: 14px; color: var(--muted); margin-bottom: 40px; }
+
+    .principles {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 32px;
+      margin-bottom: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    .principles::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--grad);
+    }
+    .principles h2 { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+    .principles ol { list-style: none; counter-reset: p; }
+    .principles li {
+      counter-increment: p;
+      position: relative;
+      padding-left: 34px;
+      margin-bottom: 10px;
+      font-size: 16px;
+      font-weight: 400;
+    }
+    .principles li:last-child { margin-bottom: 0; }
+    .principles li::before {
+      content: counter(p);
+      position: absolute; left: 0; top: 2px;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--surface2); border: 1px solid var(--border);
+      font-size: 12px; font-weight: 700; color: var(--muted);
+      display: flex; align-items: center; justify-content: center;
+      line-height: 1;
+    }
+
+    .intro p { font-size: 17px; color: #CBD5E1; margin-bottom: 16px; }
+    .intro .lede { color: var(--text); font-weight: 400; }
+    .intro .plain {
+      border-left: 2px solid var(--green);
+      padding-left: 18px;
+      color: var(--text);
+      font-weight: 400;
+    }
+
+    h2.sec {
+      font-size: 22px; font-weight: 700; letter-spacing: -0.01em;
+      margin: 44px 0 14px; padding-top: 26px;
+      border-top: 1px solid var(--border);
+    }
+    h2.sec .num { color: var(--muted); font-weight: 500; margin-right: 10px; }
+    p { font-size: 16px; color: #CBD5E1; margin-bottom: 14px; }
+    ul.body { list-style: none; margin: 0 0 16px; }
+    ul.body li {
+      position: relative; padding-left: 20px; margin-bottom: 12px;
+      font-size: 16px; color: #CBD5E1;
+    }
+    ul.body li::before {
+      content: ''; position: absolute; left: 0; top: 11px;
+      width: 6px; height: 6px; border-radius: 50%; background: var(--blue);
+    }
+    ul.body li b, p b { color: var(--text); font-weight: 700; }
+    a.inline { color: var(--blue); text-decoration: none; border-bottom: 1px solid rgba(59,130,246,0.4); }
+    a.inline:hover { color: var(--text); border-bottom-color: var(--text); }
+
+    .callout {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--pink);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin: 20px 0;
+    }
+    .callout p:last-child { margin-bottom: 0; }
+    .callout .lbl { color: var(--text); font-weight: 700; }
+
+
+    .datebar {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; flex-wrap: wrap;
+      margin-top: 40px; padding-top: 20px;
+      border-top: 1px solid var(--border);
+      font-size: 14px; color: var(--muted);
+    }
+    .datebar a { color: var(--muted); text-decoration: none; border-bottom: 1px solid var(--border); }
+    .datebar a:hover { color: var(--text); border-bottom-color: var(--text); }
+    .archived {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-left: 3px solid var(--pink); border-radius: 12px;
+      padding: 18px 24px; margin-bottom: 32px;
+      font-size: 15px; color: var(--text);
+    }
+    .archived a { color: var(--blue); text-decoration: none; border-bottom: 1px solid rgba(59,130,246,0.4); }
+
+    .contact {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 32px;
+      margin-top: 40px;
+    }
+    .contact .name { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+
+    /* ---- FOOTER ---- */
+    footer {
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+      padding: 32px 40px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 16px;
+    }
+    .footer-left { display: flex; align-items: center; gap: 16px; }
+    .footer-wordmark { font-size: 16px; font-weight: 700; color: var(--text); }
+    .footer-links { display: flex; gap: 24px; }
+    .footer-links a { font-size: 13px; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--text); }
+    .footer-copy { font-size: 12px; color: var(--muted); }
+
+    @media (max-width: 768px) {
+      nav { padding: 0 20px; }
+      .nav-links { display: none; }
+      .wrap { padding: 100px 20px 30px; }
+      h1 { font-size: 30px; }
+      .principles, .contact { padding: 22px 20px; }
+      footer { flex-direction: column; align-items: flex-start; padding: 28px 20px; }
+      .footer-links { flex-wrap: wrap; gap: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="https://creating.works/" class="nav-logo">
+      <div class="logo-icon">
+        <div class="logo-ring"></div>
+        <svg class="logo-arrows" width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M3.5 7 Q3.5 3.5 7 3.5 H11" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+          <path d="M9.5 2 L11.5 3.5 L9.5 5" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M11 3.5 Q14.5 3.5 14.5 7 V11" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+          <path d="M13 9.5 L14.5 11.5 L16 9.5" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M14.5 11 Q14.5 14.5 11 14.5 H7" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+          <path d="M8.5 13 L6.5 14.5 L8.5 16" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M7 14.5 Q3.5 14.5 3.5 11 V7" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+          <path d="M5 8.5 L3.5 6.5 L2 8.5" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <span class="nav-wordmark">Creating Works</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="https://creating.works/">Home</a></li>
+      <li><a href="https://creating.works/#ethos">Our ethos</a></li>
+    </ul>
+  </nav>
+
+  <div class="wrap">
+
+    <div class="eyebrow">Creating Works</div>
+    <div class="archived">This document has been replaced by a <a href="https://creating.works/privacy-policy.html">newer version</a>, and is kept here for archival purposes. It is no longer in effect.</div>
+
+    <h1>Privacy policy</h1>
+
+    <div class="principles">
+      <h2>Our privacy principles</h2>
+      <ol>
+        <li>Your data belongs to you, not us.</li>
+        <li>We never sell or trade your information.</li>
+        <li>We built our business to serve you, not advertisers.</li>
+      </ol>
+    </div>
+
+    <div class="intro">
+      <p class="lede">At DayBalancer, we treat your data with the same care and respect we would our own. Privacy is fundamental to our business model. We provide innovative talent matching technology through our platform at competitive rates. When you find value in our services, you pay us for platform customization and hiring intelligence - never for successful connections or placements. There are no hidden revenue streams or data-sharing arrangements with third parties.</p>
+      <p>We specifically designed our business model to align with protecting your information, not exploit it. As a mission-driven company, we believe in transparent, ethical relationships with the professionals and team leaders who use our platform.</p>
+    </div>
+
+    <h2 class="sec"><span class="num">1</span>Information we collect</h2>
+    <p>We collect the following types of information to provide our talent solutions:</p>
+    <ul class="body">
+      <li><b>Personal information:</b> your name, email address, phone number, and professional information such as skills, experience, and career goals.</li>
+      <li><b>Professional preferences:</b> information about your work style, management preferences, communication patterns, and mission alignment areas (such as social and ecological goals).</li>
+      <li><b>Resilience data:</b> information about your energy levels, stress factors, work-life balance preferences, personality traits, and learning preferences. This helps us understand how to better support you and ensure suitable matches.</li>
+      <li><b>Matching parameters:</b> information about your career objectives, availability, desired compensation, and compatibility factors.</li>
+      <li><b>Technical data:</b> information such as IP address, browser type, and device information collected through cookies and similar technologies.</li>
+    </ul>
+
+    <h2 class="sec"><span class="num">2</span>How we use your information</h2>
+    <p>We use collected data to:</p>
+    <ul class="body">
+      <li><b>Connect you with opportunities:</b> match you with aligned work opportunities and people who share your values.</li>
+      <li><b>Provide compatibility analysis:</b> generate compatibility assessments to help both you and hiring managers make informed decisions.</li>
+      <li><b>Support your career journey:</b> help you understand your strengths, resilience factors, and career capital to enhance your professional growth.</li>
+      <li><b>Improve our services:</b> analyze how people use our tools, platform, and community to enhance our platform's effectiveness.</li>
+      <li><b>Build resilient teams:</b> help team leaders identify and develop workforce resilience.</li>
+      <li><b>Communicate with you:</b> respond to your inquiries and share relevant updates about our services.</li>
+      <li><b>Conduct research:</b> use anonymized data for research to improve career matching and team resilience.</li>
+    </ul>
+
+    <h2 class="sec"><span class="num">3</span>Our commitment to your personal wellness data</h2>
+    <p>Personal wellness data is treated with special care:</p>
+    <ul class="body">
+      <li><b>Separate storage:</b> your resilience metrics are stored separately from your professional profile.</li>
+      <li><b>Never shared with employers:</b> resilience information is never shared with potential employers and does not affect hiring decisions.</li>
+      <li><b>Confidential use:</b> this data is only used to support your career journey and provide personalized guidance.</li>
+      <li><b>Complete control:</b> you can opt out of sharing resilience information without impacting your access to job opportunities.</li>
+      <li><b>Deletion rights:</b> you can request deletion of this data at any time.</li>
+    </ul>
+
+    <h2 class="sec"><span class="num">4</span>How we share your information</h2>
+    <p>We never sell your personal information. We may share your data in these limited circumstances:</p>
+    <ul class="body">
+      <li><b>With your permission:</b> your professional profile (not personal data) may be shared with potential employers or partners with your explicit consent.</li>
+      <li><b>Service providers:</b> we use third-party vendors (e.g., cloud providers, payment processors) who assist in providing our services. These providers are contractually obligated to protect your information.</li>
+      <li><b>Legal requirements:</b> we may disclose information when required by law, or to protect our rights or prevent harm.</li>
+      <li><b>Business transfers:</b> if DayBalancer undergoes a merger, acquisition, or asset sale, we'll ensure your data remains protected under equivalent or stronger privacy safeguards. We'll notify you before any transfer occurs and provide options for reviewing or deleting your information.</li>
+    </ul>
+
+    <h2 class="sec"><span class="num">5</span>International data transfers and compliance</h2>
+    <p>As a platform serving independent professionals globally, we comply with major data protection regulations:</p>
+    <ul class="body">
+      <li><b>GDPR compliance:</b> for European users, we act as a data controller and processor under the General Data Protection Regulation. We provide all rights required under GDPR including access, correction, deletion, and data portability.</li>
+      <li><b>CCPA/CPRA compliance:</b> for California residents, we honor your rights under the California Consumer Privacy Act and California Privacy Rights Act, including the right to know, delete, and opt-out of sales of personal information.</li>
+      <li><b>Data transfer mechanisms:</b> when transferring data internationally, we employ Standard Contractual Clauses and other appropriate safeguards to ensure adequate protection.</li>
+    </ul>
+
+    <h2 class="sec"><span class="num">6</span>Security measures</h2>
+    <p>We implement comprehensive security measures to protect your information:</p>
+    <ul class="body">
+      <li><b>Encryption:</b> all data is encrypted in transit and at rest.</li>
+      <li><b>Secure infrastructure:</b> our platform operates on Google Cloud infrastructure, which maintains compliance with GDPR, SOC 2, and ISO 27001 standards.</li>
+      <li><b>Access controls:</b> strict internal policies limit access to your information.</li>
+      <li><b>Regular audits:</b> we conduct security assessments to identify and address potential vulnerabilities.</li>
+    </ul>
+
+    <h2 class="sec"><span class="num">7</span>Cookies and tracking technologies</h2>
+    <p>We use cookies and similar technologies to:</p>
+    <ul class="body">
+      <li><b>Enhance platform functionality:</b> remember your preferences and settings.</li>
+      <li><b>Analyze usage patterns:</b> understand how you navigate through our platform.</li>
+      <li><b>Personalize experience:</b> tailor content based on your interests and usage.</li>
+    </ul>
+    <p>You can manage cookie preferences through your browser settings, though this may affect certain features.</p>
+
+    <h2 class="sec"><span class="num">8</span>Your data rights</h2>
+    <p>You have the following rights regarding your personal data:</p>
+    <ul class="body">
+      <li><b>Access:</b> request copies of your personal information.</li>
+      <li><b>Correction:</b> request updates to inaccurate or incomplete information.</li>
+      <li><b>Deletion:</b> request removal of your information from our systems.</li>
+      <li><b>Restriction:</b> limit how we process certain information.</li>
+      <li><b>Portability:</b> receive your data in a structured, machine-readable format.</li>
+      <li><b>Objection:</b> contest certain processing activities.</li>
+    </ul>
+    <p>To exercise these rights, please contact <a class="inline" href="mailto:privacy@daybalancer.com">privacy@daybalancer.com</a>.</p>
+
+    <h2 class="sec"><span class="num">8</span>Work opportunity matching and privacy</h2>
+    <p>Your profile photo and name are visible to all network members. Although, when DayBalancer matches you with work opportunities or clients, your name and photo remain anonymous until both parties mutually agree to connect. This anonymous matching process is designed to reduce unconscious bias and ensure connections are based on skills, values, and compatibility. Once both parties choose to connect, full profiles (including names and photos) become visible to each other.</p>
+
+    <h2 class="sec"><span class="num">9</span>Children's privacy</h2>
+    <p>Our services are not intended for individuals under 18 years of age. During registration, we ask users to confirm they are at least 18 years old. We do not knowingly collect personal information from children under 18. If we discover we have collected information from a child under 18, we will promptly delete that information. If you believe we might have information from or about a child under 18, please contact us at <a class="inline" href="mailto:privacy@daybalancer.com">privacy@daybalancer.com</a>.</p>
+
+    <h2 class="sec"><span class="num">10</span>Changes to this policy</h2>
+    <p>We may update this Privacy Policy periodically to reflect changes in our practices or for legal reasons. We'll notify you of significant changes by updating the effective date and providing notice through email or our platform. This was last updated on January 22, 2026. To request track changes made from our previous version effective on 4/19/2023, please contact us.</p>
+
+    <h2 class="sec"><span class="num">8</span>Contact information</h2>
+    <p>If you have any questions or concerns about this Privacy Policy, or if you wish to exercise your data rights, please contact us:</p>
+    <div class="contact">
+      <div class="name">DayBalancer LLC</div>
+      <p style="margin-bottom:0;"><a class="inline" href="mailto:privacy@daybalancer.com">privacy@daybalancer.com</a><br>1215 4th Ave, Seattle, WA 98101</p>
+    </div>
+
+    <div class="archived">This document has been replaced by a <a href="https://creating.works/privacy-policy.html">newer version</a>, and is kept here for archival purposes. It is no longer in effect.</div>
+    <div class="datebar"><span>Effective January 22, 2026</span><span>Previous version: April 19, 2023, not recovered</span></div>
+
+  </div>
+
+  <footer>
+    <div class="footer-left">
+      <span class="footer-wordmark">Creating Works</span>
+    </div>
+    <div class="footer-links">
+      <a href="https://app.daybalancer.com/" target="_blank">DayBalancer</a>
+      <a href="https://appear.network/" target="_blank">Appear Network</a>
+      <a href="https://2gather.network/" target="_blank">2Gather</a>
+    </div>
+    <span class="footer-copy">© 2026 Creating Works</span>
+  </footer>
+
+<!--
+  Version: V1.03 | Date: 2026-07-31
+  LAST CHANGE: S4 opener reads "a match for jobs" rather than "a match for work".
+  (V1.02: added S4 "Anonymous matching" and renumbered to 14 sections. Jessie confirmed the match screen in the Glide
+  app already hides both people's name and photo until a connection request is accepted, so the claim goes back in scoped
+  to that screen, with a line pointing at S3 so nobody reads it as covering their Appear page. S1 "Connection preferences"
+  now says hiring detail stays off the public page.
+  (V1.01: reframed on Creating Works operated by DayBalancer LLC per operating agreement 1.3, one profile across three
+  tools. S3 in Jessie's words. Backend architecture detail left out. S6 lists Google / Glide / Cloudflare / GitHub /
+  Squarespace / Kumu. S7 says "parts of this software" plus per-category AI consent per doc 04. S9 corrected: Glide sets
+  one 3-hour build cookie, verified live, and storage keys are described rather than named. S13 reframed on operating
+  agreement 2.4 / 6 / Article X. Contact is hello@creating.works throughout.))
+  OPEN: the age-18 sentence in S12 is true once intake V6.22 plus the Glide flag ship, so hold publication until then.
+  S10 and S11 want a lawyer's read. Gift lists on giving.html?owner= are public by link and S3 does not name them.
+  2Gather event profiles are reachable by link today but nothing in the product surfaces them; revisit S3 when event
+  profiles get socialised.
+-->
+</body>
+</html>
