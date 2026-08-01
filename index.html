@@ -782,11 +782,24 @@
     </div>
   </section>
 
-  <!-- MAP - removed 2026-08-01.
-       The embedded map published more about each person than it drew on screen, including
-       precise home coordinates. Do not restore this section until the map is rebuilt from a
-       source that holds coarse location only (city, county, postal), and confirm what the
-       embed itself serves rather than what the map displays. -->
+  <!-- MAP - hidden 2026-08-01, kept for when the embed comes back.
+       The old embed published more about each person than it drew on screen, including precise
+       home coordinates, so the section is hidden and the iframe has no src.
+
+       To bring it back: (1) confirm the new embed's own data feed, not just what the map draws,
+       (2) put the new embed URL in the iframe src below, (3) delete the display:none here and
+       restore the "Circulation map" nav link near the top of this file. -->
+  <section class="section" id="map" style="display:none;padding-top:48px;padding-bottom:24px;">
+    <div class="section-inner">
+      <h2 style="font-size:clamp(28px,4vw,40px);font-weight:700;letter-spacing:-0.02em;margin-bottom:16px;">Circulation map</h2>
+      <p style="font-size:16px;font-weight:300;color:var(--muted);margin-bottom:32px;max-width:600px;line-height:1.7;">See how people, skills, and needs connect across the network.</p>
+      <div style="position:relative;width:100%;padding-bottom:56.25%;height:0;border-radius:12px;overflow:hidden;">
+        <iframe
+          style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;"
+          allowfullscreen></iframe>
+      </div>
+    </div>
+  </section>
 
   <!-- ETHOS -->
   <section class="section" id="ethos" style="background:#FFFFFF;margin:0 24px 40px;border-radius:20px;overflow:hidden;">
