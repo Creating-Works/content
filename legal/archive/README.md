@@ -22,11 +22,17 @@ where the previous date links to the archived copy.
 
 Archive on change rather than on a schedule. A version that was never published never needs a copy.
 
-## What is here, and what is missing
+## Keep this page small
 
-Nothing yet. All three documents are at their first published version on creating.works.
+The index is one line of prose and one link per archived version. Resist adding explanations,
+contact blocks, or rows for versions we do not hold. Anthropic does not publish an index at all;
+their archived documents are reachable only from the "Previous version" link on the live page.
+Every sentence here is a sentence someone has to keep true.
 
-**Missing, and worth recovering:** the privacy policy effective July 21, 2026. It predates this
-page and is not in the repository history. `daybalancer.com/privacy-policy` now only links out, and
-the nearest Wayback Machine snapshot is April 11, 2026, which is an older and different version.
-Squarespace keeps page version history, so it may still be recoverable from there.
+## Versions we do not hold
+
+Not listed on the index, on purpose, so the page stays short. Recorded here instead:
+
+- **Privacy policy, effective July 21, 2026.** Published on daybalancer.com and replaced ten days
+  later. Squarespace page version history is the one place it may survive.
+- **Privacy policy, effective April 19, 2023.** Named by the January 2026 version. No trace found.
