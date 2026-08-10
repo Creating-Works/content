@@ -177,6 +177,13 @@
       line-height: 1.7;
       margin: 32px auto 48px;
     }
+    .rotator {
+      display: inline-block;
+      color: var(--text);
+      transition: opacity .2s ease;
+    }
+    .rotator.out { opacity: 0; }
+    @media (prefers-reduced-motion: reduce) { .rotator { transition: none; } }
     .hero-sub a { color: var(--blue); text-decoration: none; border-bottom: 1px solid rgba(59,130,246,0.4); }
     .hero-sub a:hover { border-color: var(--blue); }
     .hero-btns {
@@ -712,7 +719,7 @@
   <!-- HERO -->
   <section class="hero" style="padding-bottom:0;">
     <h1>One profile.<br><span class="grad-text">Three tools to circulate.</span></h1>
-        <p class="hero-sub" style="max-width:640px;margin:22px auto 0;text-align:center;">We are building a tech company that helps community members give back to who and what support them.</p>
+        <p class="hero-sub" style="max-width:640px;margin:22px auto 0;text-align:center;">Discovery of [<span class="rotator" id="rot">purpose</span>] on arrival, in service to the community at large.</p>
     <div style="display:flex;justify-content:center;margin:24px 0 0;">
       <div class="hero-badge">
         <div class="badge-dot"></div>
@@ -1007,6 +1014,26 @@
   LAST CHANGE: 2Gather button deep orange→peach; tagline and link colored deep orange; arrow changed to →
   Version: V36 | Date: 2026-06-15
 -->
+<script>
+(function () {
+  var words = ['purpose','ikigai','ideas','people','gifts','needs','skills',
+               'projects','events','resources','values','belonging'];
+  var el = document.getElementById('rot');
+  if (!el) return;
+  // Rotating text is a migraine and vestibular trigger, so anyone whose system
+  // asks for reduced motion keeps the first word and nothing moves.
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var i = 0;
+  setInterval(function () {
+    el.classList.add('out');
+    setTimeout(function () {
+      i = (i + 1) % words.length;
+      el.textContent = words[i];
+      el.classList.remove('out');
+    }, 200);
+  }, 1000);
+})();
+</script>
 </body>
 <!--
   Copyright 2026 DayBalancer LLC. All rights reserved.
