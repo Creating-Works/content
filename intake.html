@@ -1,4 +1,4 @@
-<!-- Version: V6.21 | Date: 2026-08-01 | LAST CHANGE: Privacy. Removed the viewer-mode "Email me" button, the _hostEmail variable and emailHostCopy(). Host email addresses are no longer sent to the browser. (V6.20: Event hub pill gated on hasHub; local request legend.) -->
+<!-- Version: V6.22 | Date: 2026-08-10 | LAST CHANGE: The "You're in!" screen no longer promises a hub and suggested people to everyone. It now always offers "View event profile", which opens the finished profile with its pencils, and adds "View event hub" only for an event carrying hasHub - the same gate the Event hub nav pill uses. The screen fetches hasHub once if nothing has yet. (V6.21: host email addresses removed from the browser.) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2085,13 +2085,20 @@ function renderScreenConfirm(el){
   var cont=document.getElementById('app-content'); if(!cont) return;
   var BTN='display:inline-block;background:var(--brand);color:#fff;text-decoration:none;padding:12px 20px;border-radius:8px;font-size:15px;font-weight:700;font-family:inherit;';
   var BTN_O='display:inline-block;background:#fff;color:var(--brand);border:1.5px solid var(--brand);text-decoration:none;padding:12px 20px;border-radius:8px;font-size:15px;font-weight:700;font-family:inherit;';
-  var hub=_eventId?('https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+(_appearId?'&memberCard='+encodeURIComponent(_appearId):'')):'';
+  // V6.22: the profile is the one place everybody who finishes here has, so it leads and it is
+  // always offered. Most people arrive without an event at all, and the old copy promised them a
+  // hub and suggested people that were never going to appear. The hub is now an extra, shown only
+  // for an event carrying hasHub - the same test the "Event hub" pill in the nav already applies.
+  var hub=(_eventId&&_eventHasHub)?('https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+(_appearId?'&memberCard='+encodeURIComponent(_appearId):'')):'';
   cont.innerHTML=fastStepHTML(3)
-    +'<h2 style="margin-bottom:10px;">You\'re in! 🎉</h2>'
-    +'<p style="font-size:15.5px;line-height:1.55;color:var(--text);margin-bottom:18px;">Next, view the hub, view suggested people to meet, and start building your event experience!</p>'
+    +'<h2 style="margin-bottom:18px;">You\'re in! 🎉</h2>'
     +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
-    +(hub?'<a href="'+hub+'" style="'+BTN+'">View event hub</a>':'<button onclick="goToProfile()" style="'+BTN+'cursor:pointer;">View my profile</button>')
+    +'<button onclick="goToProfile()" style="'+BTN+'cursor:pointer;">View event profile</button>'
+    +(hub?'<a href="'+hub+'" style="'+BTN_O+'">View event hub</a>':'')
     +'</div>';
+  // hasHub arrives from getEventById. If this screen is the first to need it, fetch once and
+  // redraw, otherwise a hub event would land here with the hub button missing.
+  if(_eventId && !_eventHeaderFetched){ fetchEventTitle(function(){ if(_screen==='confirm') renderScreenConfirm(el); }); }
 }
 
 function renderScreenFast2(el){
@@ -3952,4 +3959,4 @@ window.goBack = function(){
 </script>
 </body>
 </html>
-<!-- Version: V6.21 | Date: 2026-08-01 | LAST CHANGE: Privacy. Removed the viewer-mode "Email me" button, the _hostEmail variable and emailHostCopy(). Host email addresses are no longer sent to the browser. (V6.20: Event hub pill gated on hasHub; local request legend.) -->
+<!-- Version: V6.22 | Date: 2026-08-10 | LAST CHANGE: The "You're in!" screen no longer promises a hub and suggested people to everyone. It now always offers "View event profile", which opens the finished profile with its pencils, and adds "View event hub" only for an event carrying hasHub - the same gate the Event hub nav pill uses. The screen fetches hasHub once if nothing has yet. (V6.21: host email addresses removed from the browser.) -->
