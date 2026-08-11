@@ -179,6 +179,7 @@
     }
     .rotator {
       display: inline-block;
+      font-weight: 700;
       color: var(--text);
       transition: opacity .2s ease;
     }
@@ -560,131 +561,6 @@
     }
 
     /* ---- QA POPUP ---- */
-    .qa-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.7);
-      z-index: 999;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-    }
-    .qa-overlay.active { display: flex; }
-    .qa-modal {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      width: 100%;
-      max-width: 620px;
-      max-height: 80vh;
-      overflow-y: auto;
-      padding: 36px;
-      position: relative;
-    }
-    .qa-modal h3 {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 6px;
-    }
-    .qa-hint {
-      font-size: 13px;
-      font-weight: 300;
-      color: var(--muted);
-      margin-bottom: 24px;
-      line-height: 1.6;
-    }
-    .qa-item { margin-bottom: 20px; }
-    .qa-q {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--muted);
-      margin-bottom: 4px;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
-    .qa-a {
-      font-size: 15px;
-      font-weight: 300;
-      color: var(--text);
-      line-height: 1.6;
-    }
-    .qa-btn-row { display:flex; gap:12px; margin-top:24px; }
-    .qa-copy-btn {
-      flex:1;
-      background: linear-gradient(135deg, #10B981, #3B82F6, #8B5CF6);
-      color: #fff;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 15px;
-      font-weight: 500;
-      border: none;
-      border-radius: 8px;
-      padding: 12px 16px;
-      cursor: pointer;
-      transition: opacity 0.2s;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      text-decoration:none;
-    }
-    .qa-copy-btn:hover { opacity: 0.88; }
-    .qa-book-btn {
-      flex:1;
-      background: #FFFFFF;
-      color: #0B0F1A;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 15px;
-      font-weight: 500;
-      border: 1.5px solid #E2E8F0;
-      border-radius: 8px;
-      padding: 12px 16px;
-      cursor: pointer;
-      transition: background 0.2s;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      text-decoration:none;
-    }
-    .qa-book-btn:hover { background: #F1F5F9; }
-    .qa-close-btn {
-      width: 100%;
-      background: transparent;
-      color: var(--muted);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 14px;
-      font-weight: 400;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 20px;
-      cursor: pointer;
-      margin-top: 10px;
-      transition: border-color 0.2s;
-    }
-    .qa-btn-row { display:flex; gap:12px; margin-top:24px; }
-    .qa-book-btn {
-      flex:1;
-      background: #FFFFFF;
-      color: #0B0F1A;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 15px;
-      font-weight: 500;
-      border: 1.5px solid #E2E8F0;
-      border-radius: 8px;
-      padding: 12px 16px;
-      cursor: pointer;
-      text-decoration: none;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      transition: background 0.2s;
-    }
-    .qa-book-btn:hover { background: #F1F5F9; }
-    .qa-copy-btn { flex:1; }
-    .qa-close-btn:hover { border-color: var(--muted); }
   </style>
 </head>
 <body>
@@ -718,8 +594,8 @@
 
   <!-- HERO -->
   <section class="hero" style="padding-bottom:0;">
-    <h1>One profile.<br><span class="grad-text">Three tools to circulate.</span></h1>
-        <p class="hero-sub" style="max-width:640px;margin:22px auto 0;text-align:center;">Tools that help people discover [<span class="rotator" id="rot">purpose</span>] on arrival, in service to your community at large.</p>
+    <h1>One profile.<br><span class="grad-text">Three tools to create.</span></h1>
+        <p class="hero-sub" style="max-width:640px;margin:22px auto 0;text-align:center;">Tools that help people discover <span class="rotator" id="rot">purpose</span><br>on arrival, in service to your community at large.</p>
     <div style="display:flex;justify-content:center;margin:24px 0 0;">
       <div class="hero-badge">
         <div class="badge-dot"></div>
@@ -866,151 +742,7 @@
   </footer>
 
 
-  <!-- QA POPUP -->
-  <div class="qa-overlay" id="qa-overlay">
-    <div class="qa-modal" id="qa-modal">
-      <h3>Your answers</h3>
-      <p class="qa-hint">Check your email for a copy before closing. You can also copy your answers and paste them into the booking notes when scheduling a call.</p>
-      <div id="qa-content"></div>
-      <div class="qa-btn-row">
-        <button class="qa-copy-btn" onclick="copyAnswers()">
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="5" y="5" width="9" height="9" rx="1.5" stroke="white" stroke-width="1.5"/><path d="M3 11V3a1 1 0 011-1h8" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
-          Copy my answers
-        </button>
-        <a href="https://cal.com/jessieupp/25min" target="_blank" class="qa-book-btn">
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="12" rx="2" stroke="#0B0F1A" stroke-width="1.5"/><path d="M1 7h14" stroke="#0B0F1A" stroke-width="1.5"/><path d="M5 1v4M11 1v4" stroke="#0B0F1A" stroke-width="1.5" stroke-linecap="round"/></svg>
-          Book a call
-        </a>
-      </div>
-      <button class="qa-close-btn" onclick="closePopup()">Close</button>
-    </div>
-  </div>
-
-  <script>
-    const radioSelections = {};
-
-    function selectRadio(groupId, el, value) {
-      document.querySelectorAll('#' + groupId + ' .radio-option').forEach(o => o.classList.remove('selected'));
-      el.classList.add('selected');
-      radioSelections[groupId] = value;
-    }
-
-    function nextStep(current) {
-      document.getElementById('step-' + current).classList.remove('active');
-      document.getElementById('step-' + (current + 1)).classList.add('active');
-      document.getElementById('progress').style.width = ((current + 1) * 25) + '%';
-      document.getElementById('step-' + (current + 1)).scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-
-    function prevStep(current) {
-      document.getElementById('step-' + current).classList.remove('active');
-      document.getElementById('step-' + (current - 1)).classList.add('active');
-      document.getElementById('progress').style.width = ((current - 1) * 25) + '%';
-      document.getElementById('step-' + (current - 1)).scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-
-    async function submitForm() {
-      const email = document.getElementById('user-email').value.trim();
-      const sendCopy = document.getElementById('send-copy').checked;
-      
-
-      let body = 'Circulation intake\n\n';
-      body += 'TEND TO SELF\n';
-      body += 'When did you last feel like your day was "on your terms"?\n' + (radioSelections['rg1'] || '(no answer)') + '\n\n';
-      body += 'How would you be living your days if money wasn\'t a factor?\n' + (document.getElementById('q2').value.trim() || '(no answer)') + '\n\n';
-      body += 'Three things that reliably give you energy:\n' + (document.getElementById('q3').value.trim() || '(no answer)') + '\n\n';
-      body += 'TEND TO YOUR NETWORK\n';
-      body += 'When you need help, do you know who to call?\n' + (radioSelections['rg4'] || '(no answer)') + '\n\n';
-      body += 'Someone in your life who needs what you\'re good at:\n' + (document.getElementById('q5').value.trim() || '(no answer)') + '\n\n';
-      body += 'Giving or receiving something that doesn\'t relate to money:\n' + (document.getElementById('q6').value.trim() || '(no answer)') + '\n\n';
-      body += 'TEND TO COMMUNITY\n';
-      body += 'Do you have a third place you call community?\n' + (radioSelections['rg7'] || '(no answer)') + '\n\n';
-      body += 'A group you show up for that also gives back:\n' + (document.getElementById('q8').value.trim() || '(no answer)') + '\n\n';
-      body += 'A local community project you\'re inspired by:\n' + (document.getElementById('q9').value.trim() || '(no answer)') + '\n\n';
-      body += 'BLOCKAGE TO CIRCULATION\n';
-      body += 'Where does life feel stuck right now?\n' + (document.getElementById('q10').value.trim() || '(no answer)') + '\n\n';
-
-      const btn = document.querySelector('.btn-submit');
-      btn.textContent = 'Sending...';
-      btn.disabled = true;
-
-      const params = new URLSearchParams({
-        userEmail: email,
-        jessieEmail: 'hello@creating.works',
-        sendCopy: sendCopy,
-        subject: 'Circulation intake',
-        body: body
-      });
-
-      // Show confirmation immediately
-      // Build popup Q&A content
-      const qaQuestions = [
-        { q: 'When did you last feel like your day was "on your terms"?', a: radioSelections['rg1'] || '' },
-        { q: 'How would you be living your days if money wasn\'t a factor?', a: document.getElementById('q2').value.trim() },
-        { q: 'Three things that reliably give you energy', a: document.getElementById('q3').value.trim() },
-        { q: 'When you need help, do you know who to call?', a: radioSelections['rg4'] || '' },
-        { q: 'Someone in your life who needs what you\'re good at', a: document.getElementById('q5').value.trim() },
-        { q: 'Giving or receiving something that doesn\'t relate to money', a: document.getElementById('q6').value.trim() },
-        { q: 'Do you have a third place you call community?', a: radioSelections['rg7'] || '' },
-        { q: 'A group you show up for that also gives back', a: document.getElementById('q8').value.trim() },
-        { q: 'A local community project you\'re inspired by', a: document.getElementById('q9').value.trim() },
-        { q: 'Where does life feel stuck right now?', a: document.getElementById('q10').value.trim() },
-      ];
-      const qaContent = document.getElementById('qa-content');
-      qaContent.innerHTML = qaQuestions.filter(item => item.a).map(item => `
-        <div class="qa-item">
-          <div class="qa-q">${item.q}</div>
-          <div class="qa-a">${item.a}</div>
-        </div>`).join('');
-      document.getElementById('qa-overlay').classList.add('active');
-
-      const formCard = document.querySelector('.form-card');
-      formCard.innerHTML = `
-        <div id="confirm-msg" style="padding:52px;text-align:center;">
-          <div style="font-size:40px;margin-bottom:16px;">✓</div>
-          <h3 style="font-size:20px;font-weight:700;color:#ffffff;margin-bottom:12px;">Answers sent.</h3>
-          <p style="font-size:16px;font-weight:300;color:#7A8AA0;line-height:1.7;">
-            
-          </p>
-        </div>`;
-      setTimeout(() => {
-        document.getElementById('confirm-msg').scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 50);
-
-      try {
-        const res = await fetch('https://circulate.jessieupp.workers.dev', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: params.toString()
-        });
-        if (!res.ok) console.error('Worker error:', await res.text());
-      } catch (err) {
-        console.error('Fetch failed:', err);
-      }
-    }
-
-    function closePopup() {
-      document.getElementById('qa-overlay').classList.remove('active');
-    }
-
-
-
-    function copyAnswers() {
-      const items = document.querySelectorAll('#qa-content .qa-item');
-      let text = 'My circulation answers\n\n';
-      items.forEach(item => {
-        const q = item.querySelector('.qa-q').textContent;
-        const a = item.querySelector('.qa-a').textContent;
-        text += q + '\n' + a + '\n\n';
-      });
-      navigator.clipboard.writeText(text).then(() => {
-        const btn = document.querySelector('.qa-copy-btn');
-        btn.textContent = 'Copied!';
-        setTimeout(() => btn.textContent = 'Copy answers', 2000);
-      });
-    }
-  </script>
-<!-- 
+  <!-- 
   LAST CHANGE: 2Gather button deep orange→peach; tagline and link colored deep orange; arrow changed to →
   Version: V36 | Date: 2026-06-15
 -->
@@ -1024,14 +756,26 @@
   // asks for reduced motion keeps the first word and nothing moves.
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   var i = 0;
-  setInterval(function () {
+  var timer = null;
+  function step() {
     el.classList.add('out');
     setTimeout(function () {
       i = (i + 1) % words.length;
       el.textContent = words[i];
       el.classList.remove('out');
     }, 200);
-  }, 1000);
+  }
+  // iOS freezes timers on a backgrounded tab and often restores the page from a
+  // snapshot where the interval never restarts, so the word sat still on return.
+  // Restarting on visibilitychange fixes that, and pageshow catches the iOS
+  // back-forward cache. Stopping while hidden also saves battery.
+  function start() { if (!timer) timer = setInterval(step, 1000); }
+  function stop()  { clearInterval(timer); timer = null; }
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) { stop(); } else { start(); }
+  });
+  window.addEventListener('pageshow', start);
+  start();
 })();
 </script>
 </body>
