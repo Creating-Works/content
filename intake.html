@@ -592,36 +592,38 @@ async function loadProfileAndIntake(){
       _needsRes=np.filter(function(n){return n.ntype!=='skill';});
     }
   }catch(e){}
-  // 2026-08-17: Main → ikigai pre-fill. If no ikigai row exists for this person, fetch
-  // their Main data (Glide/Appear source of truth) and pre-fill the form. The user reviews,
-  // edits, and hits Save; the existing saveIntake path creates the ikigai row on submit.
-  // Fields with no direct Main equivalent (postal, methods, bringType, needs, expression)
-  // stay empty. Skills/interests/values/domains/languages/name/photo pre-fill only when
-  // the corresponding intake field is still empty.
-  if(!_hasProfile){
-    try{
-      var mres=await fetch(GS_URL+'?action=getMainProfile&appearId='+encodeURIComponent(id));
-      var mresp=await mres.json();
-      if(mresp.found&&mresp.data){
-        var md=mresp.data;
+  // 2026-08-18 Union merge: always fetch Main and combine with ikigai. Everything from both
+  // sources surfaces; duplicates prefer ikigai (has sub-levels like level, role, category, detail).
+  // Fields with no direct Main equivalent (postal, methods, bringType, expression) stay ikigai-driven.
+  try{
+    var mres=await fetch(GS_URL+'?action=getMainProfile&appearId='+encodeURIComponent(id));
+    var mresp=await mres.json();
+    if(mresp.found&&mresp.data){
+      var md=mresp.data;
+      var mainInterests=md.interests?parseTagStr(md.interests,'level'):[];
+      var mainSkills   =md.skills   ?parseTagStr(md.skills,'level')   :[];
+      var mainValues   =md.values   ?parseTagStr(md.values,'level')   :[];
+      var mainDomains  =md.domains  ?parseTagStr(md.domains,'level').map(function(dm){dm.category='domain';return dm;}):[];
+      var mainNeedsRaw =md.needs    ?parseNeedsStr(md.needs)          :[];
+      if(!_hasProfile){
         _isPrefillFromMain=true;
-        // Mark the profile as present so render() reaches renderProfile in viewer mode
-        // (and the fast-path check in owner mode skips the empty-wizard reroute). saveIntake
-        // still writes a fresh ikigai row on submit.
-        _hasProfile=true;
-        if(!_interests.length&&md.interests) _interests=parseTagStr(md.interests,'level');
-        if(!_skills.length&&md.skills)       _skills=parseTagStr(md.skills,'level');
-        if(!_values.length&&md.values)       _values=parseTagStr(md.values,'level');
-        if(!_domains.length&&md.domains)     _domains=parseTagStr(md.domains,'level').map(function(dm){dm.category='domain';return dm;});
-        if(!_languages.length&&md.languages) _languages=md.languages.split(/[|,]/).map(function(s){return s.trim();}).filter(Boolean);
-        if(!_name&&(md.first||md.name))      _name=md.first||md.name;
-        if(_viewerMode){
-          if(!_viewerName&&(md.first||md.name)) _viewerName=md.first||md.name;
-          if(!_viewerPhoto&&md.photo) _viewerPhoto=md.photo;
-        } else if(!_photo&&md.photo) _photo=md.photo;
+        _hasProfile = (mainInterests.length||mainSkills.length||mainValues.length||mainDomains.length||mainNeedsRaw.length) ? true : _hasProfile;
       }
-    }catch(e){}
-  }
+      _interests=unionMerge(mainInterests, _interests);
+      _skills   =unionMerge(mainSkills,    _skills);
+      _values   =unionMerge(mainValues,    _values);
+      _domains  =unionMerge(mainDomains,   _domains);
+      var mergedNeeds=unionMerge(mainNeedsRaw, _needsSkill.concat(_needsRes));
+      _needsSkill=mergedNeeds.filter(function(n){return n.ntype==='skill';});
+      _needsRes  =mergedNeeds.filter(function(n){return n.ntype!=='skill';});
+      if(!_languages.length&&md.languages) _languages=md.languages.split(/[|,]/).map(function(s){return s.trim();}).filter(Boolean);
+      if(!_name&&(md.first||md.name))      _name=md.first||md.name;
+      if(_viewerMode){
+        if(!_viewerName&&(md.first||md.name)) _viewerName=md.first||md.name;
+        if(!_viewerPhoto&&md.photo) _viewerPhoto=md.photo;
+      } else if(!_photo&&md.photo) _photo=md.photo;
+    }
+  }catch(e){}
   if(_screen===2){var lb=document.getElementById('lang-edit-btn');if(lb)lb.textContent='✏️ '+(_languages.length?'Languages: '+_languages.join(', '):'Add your languages');}
 }
 async function loadProfile(){
@@ -676,6 +678,25 @@ function parseBringTypeStr(str){
     try{ _bringText[k]=decodeURIComponent(p.slice(i+1)); }catch(e){ _bringText[k]=p.slice(i+1); }
     return k;
   });
+}
+// Union merge: everything from both sources shows. Duplicates prefer ikigai (has sub-levels
+// like level, role, category, detail). Main-only items appended after ikigai items. Matching
+// is case-insensitive on the item name.
+function unionMerge(mainList, ikigaiList){
+  var out=[]; var seen={};
+  (ikigaiList||[]).forEach(function(it){
+    if(!it||!it.item) return;
+    var k=String(it.item).toLowerCase().trim();
+    if(seen[k]) return;
+    seen[k]=true; out.push(it);
+  });
+  (mainList||[]).forEach(function(it){
+    if(!it||!it.item) return;
+    var k=String(it.item).toLowerCase().trim();
+    if(seen[k]) return;
+    seen[k]=true; out.push(it);
+  });
+  return out;
 }
 function parseTagStr(str,lk){
   if(!str) return [];
