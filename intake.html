@@ -1822,12 +1822,18 @@ function render(){
   renderTopRight();
   var _tn0=document.getElementById('app-topnav');
   if(_tn0){
-    // Back to group hub - only when the profile was opened from group.html (carries &groupId=).
+    // Back to hub - only when the profile was opened from a hub (carries &groupId= or &hubEventId=).
     var _bgParams=new URLSearchParams(window.location.search);
     var _bgGroup=_bgParams.get('groupId');
+    var _bgHubEvent=_bgParams.get('hubEventId');
     var _bgMe=_bgParams.get('me');
+    var _bgUrl='';
     if(_bgGroup){
-      var _bgUrl='https://gather.2gather.network/group.html?id='+encodeURIComponent(_bgGroup)+(_bgMe?'&memberCard='+encodeURIComponent(_bgMe):'');
+      _bgUrl='https://gather.2gather.network/group.html?id='+encodeURIComponent(_bgGroup)+(_bgMe?'&memberCard='+encodeURIComponent(_bgMe):'');
+    } else if(_bgHubEvent){
+      _bgUrl='https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_bgHubEvent)+(_bgMe?'&memberCard='+encodeURIComponent(_bgMe):'');
+    }
+    if(_bgUrl){
       _tn0.innerHTML='<div style="padding:12px 6px 0;"><a href="'+_bgUrl+'" style="text-decoration:none;color:#1F699E;background:#fff;font-size:14px;font-weight:600;padding:8px 16px;border-radius:20px;display:inline-block;">Back to hub</a></div>';
     } else {
       _tn0.innerHTML='';
@@ -2357,24 +2363,29 @@ function renderProfile(el, viewerMode){
   var _mc=(_navOwn&&_navId)?('&memberCard='+encodeURIComponent(_navId)):'';
   if(_eventId && !_eventHeaderFetched){ fetchEventTitle(function(){ render(); }); }   // V6.20: learn hasHub, then re-render the nav
   // All events shows always. Event hub shows only for events marked as having a hub (hasHub). Edit / Manage are owner-only.
-  // Back to group leads. Renders only when the URL carries &groupId=, i.e. the profile was opened from group.html.
+  // Back to hub leads. Renders when the URL carries &groupId= (from group.html) or &hubEventId= (from attendees.html).
   var _bgP=new URLSearchParams(window.location.search);
   var _bgG=_bgP.get('groupId');
+  var _bgH=_bgP.get('hubEventId');
+  var _fromHub=!!(_bgG||_bgH);
   var _bgM=_bgP.get('me');
   var _b='';
   if(_bgG){
     var _bgU='https://gather.2gather.network/group.html?id='+encodeURIComponent(_bgG)+(_bgM?'&memberCard='+encodeURIComponent(_bgM):'');
     _b+='<a href="'+_bgU+'" style="'+_WB+'">Back to hub</a>';
+  } else if(_bgH){
+    var _bgU='https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_bgH)+(_bgM?'&memberCard='+encodeURIComponent(_bgM):'');
+    _b+='<a href="'+_bgU+'" style="'+_WB+'">Back to hub</a>';
   }
-  // When the viewer came from a group hub, only Back to hub belongs up here - All events and
-  // Manage my experience would pull them out of the group context. Event hub stays if the event
+  // When the viewer came from a hub, only Back to hub belongs up here - All events and
+  // Manage my experience would pull them out of that hub context. Event hub stays if the event
   // has a hub, because that's a lateral move within the same event context.
-  if(!_bgG) _b+='<a href="https://gather.2gather.network/events.html'+((_navOwn&&_navId)?('?memberCard='+encodeURIComponent(_navId)):'')+'" style="'+_WB+'">All events</a>';
-  if(_eventId && _eventHasHub) _b+='<a href="https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+_mc+'" style="'+_WB+'">Event hub</a>';
+  if(!_fromHub) _b+='<a href="https://gather.2gather.network/events.html'+((_navOwn&&_navId)?('?memberCard='+encodeURIComponent(_navId)):'')+'" style="'+_WB+'">All events</a>';
+  if(_eventId && _eventHasHub && !_bgH) _b+='<a href="https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+_mc+'" style="'+_WB+'">Event hub</a>';
   if(_navOwn&&_navId){
     // No "Event profile" pill here - it would point at the page you are already on. The
     // per-section pencils are what tell an owner they can change something.
-    if(_eventId && !_bgG) _b+='<a href="https://gather.2gather.network/myevents.html?id='+encodeURIComponent(_navId)+'&event='+encodeURIComponent(_eventId)+'" style="'+_WB+'">Manage my experience</a>';
+    if(_eventId && !_fromHub) _b+='<a href="https://gather.2gather.network/myevents.html?id='+encodeURIComponent(_navId)+'&event='+encodeURIComponent(_eventId)+'" style="'+_WB+'">Manage my experience</a>';
     // The other pills need an event. If the URL did not carry one, go find it once.
     if(!_eventId) _fillHubFromReg();
   }
