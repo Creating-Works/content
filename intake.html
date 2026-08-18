@@ -605,6 +605,10 @@ async function loadProfileAndIntake(){
       if(mresp.found&&mresp.data){
         var md=mresp.data;
         _isPrefillFromMain=true;
+        // Mark the profile as present so render() reaches renderProfile in viewer mode
+        // (and the fast-path check in owner mode skips the empty-wizard reroute). saveIntake
+        // still writes a fresh ikigai row on submit.
+        _hasProfile=true;
         if(!_interests.length&&md.interests) _interests=parseTagStr(md.interests,'level');
         if(!_skills.length&&md.skills)       _skills=parseTagStr(md.skills,'level');
         if(!_values.length&&md.values)       _values=parseTagStr(md.values,'level');
