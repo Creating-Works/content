@@ -2356,7 +2356,16 @@ function renderProfile(el, viewerMode){
   var _mc=(_navOwn&&_navId)?('&memberCard='+encodeURIComponent(_navId)):'';
   if(_eventId && !_eventHeaderFetched){ fetchEventTitle(function(){ render(); }); }   // V6.20: learn hasHub, then re-render the nav
   // All events shows always. Event hub shows only for events marked as having a hub (hasHub). Edit / Manage are owner-only.
-  var _b='<a href="https://gather.2gather.network/events.html'+((_navOwn&&_navId)?('?memberCard='+encodeURIComponent(_navId)):'')+'" style="'+_WB+'">All events</a>';
+  // Back to group leads. Renders only when the URL carries &groupId=, i.e. the profile was opened from group.html.
+  var _bgP=new URLSearchParams(window.location.search);
+  var _bgG=_bgP.get('groupId');
+  var _bgM=_bgP.get('me');
+  var _b='';
+  if(_bgG){
+    var _bgU='https://gather.2gather.network/group.html?id='+encodeURIComponent(_bgG)+(_bgM?'&memberCard='+encodeURIComponent(_bgM):'');
+    _b+='<a href="'+_bgU+'" style="'+_WB+'">Back to group</a>';
+  }
+  _b+='<a href="https://gather.2gather.network/events.html'+((_navOwn&&_navId)?('?memberCard='+encodeURIComponent(_navId)):'')+'" style="'+_WB+'">All events</a>';
   if(_eventId && _eventHasHub) _b+='<a href="https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+_mc+'" style="'+_WB+'">Event hub</a>';
   if(_navOwn&&_navId){
     // No "Event profile" pill here - it would point at the page you are already on. The
