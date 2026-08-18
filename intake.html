@@ -251,7 +251,7 @@
       </div>
     </div>
   </div>
-  <div class="footer"><a href="https://creating.works">Creating Works</a></div>
+  <div class="footer"></div>
 </div>
 
 <!-- Lang modal -->
@@ -2276,7 +2276,7 @@ function _wtmListHTML(){
       +'<a href="https://creating.works/intake.html?show='+encodeURIComponent(p.id)+(p.eventId?'&eventId='+encodeURIComponent(p.eventId):'')+'" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;flex:1;">'+ph+'<span style="font-size:14px;font-weight:600;">'+esc(p.name||p.id)+'</span></a>'
       +'<button onclick="wtmRemove(\''+esc(String(p.id).replace(/\\/g,"\\\\").replace(/'/g,"\\'"))+'\')" aria-label="Remove" style="background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;">✕</button>'
       +'</div>';
-  }).join('') : '<div style="font-size:13px;color:var(--muted);padding:6px 0;">No one yet. Open someone\'s profile '+_wtmHubLink()+' and tap "I want to meet!"</div>';
+  }).join('') : '<div style="font-size:13px;color:var(--muted);padding:6px 0;">No one yet. Open someone\'s profile '+_wtmHubLink()+' and tap "Bookmark to meet".</div>';
   return '<div style="margin-top:22px;padding-top:14px;border-top:1.5px solid var(--border);"><div style="font-size:16px;font-weight:700;margin-bottom:6px;">People I want to meet</div>'+inner+'</div>';
 }
 // Bookmarking is a "me -> them" action, so it needs BOTH people named in the URL. On a bare
@@ -2296,14 +2296,15 @@ function _wtmDecorate(){
   if(!_viewerIdParam()) return;   // only one person in the URL - no bookmark button
   var has=_wtmHas(_showId);
   var _bs='font-size:14px;font-weight:600;padding:9px 18px;border-radius:20px;cursor:pointer;font-family:inherit;border:1.5px solid #185FA5;background:#fff;color:#185FA5;';
-  var btn='<div id="wtm-wrap" style="padding:0 2px 14px;"><button id="wtm-btn" onclick="wtmToggle()" style="'+_bs+'">'+(has?'✓ Bookmarked':'Bookmark to meet')+'</button></div>';
+  var btn='<button id="wtm-btn" data-wtm-wrap="1" onclick="wtmToggle()" style="'+_bs+'">'+(has?'✓ Bookmarked':'Bookmark to meet')+'</button>';
   // V6.16: append, do not replace. This used to set app-topnav's innerHTML to the button
-  // alone, wiping the "All events / Event hub" nav that renders there - so bookmarking a
-  // person cost you the navigation. Re-decorating removes any prior button first so it does
-  // not stack.
+  // alone, wiping the "All events / Event hub" nav that renders there.
+  // V6.24: insert INSIDE the nav-buttons flex row so the button sits on the same line as the
+  // other pills instead of stacking below. Re-decorating removes any prior button first.
   var host=document.getElementById('app-topnav'); if(!host) return;
-  var _old=document.getElementById('wtm-wrap'); if(_old) _old.remove();
-  host.insertAdjacentHTML('beforeend', btn);
+  var _old=host.querySelector('[data-wtm-wrap]'); if(_old) _old.remove();
+  var target=host.firstElementChild||host;
+  target.insertAdjacentHTML('beforeend', btn);
 }
 function renderProfile(el, viewerMode){
   // viewerMode = which URL/data source this is ("?show=" vs "?id="). canEdit = what this
