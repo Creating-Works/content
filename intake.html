@@ -2365,12 +2365,15 @@ function renderProfile(el, viewerMode){
     var _bgU='https://gather.2gather.network/group.html?id='+encodeURIComponent(_bgG)+(_bgM?'&memberCard='+encodeURIComponent(_bgM):'');
     _b+='<a href="'+_bgU+'" style="'+_WB+'">Back to hub</a>';
   }
-  _b+='<a href="https://gather.2gather.network/events.html'+((_navOwn&&_navId)?('?memberCard='+encodeURIComponent(_navId)):'')+'" style="'+_WB+'">All events</a>';
+  // When the viewer came from a group hub, only Back to hub belongs up here - All events and
+  // Manage my experience would pull them out of the group context. Event hub stays if the event
+  // has a hub, because that's a lateral move within the same event context.
+  if(!_bgG) _b+='<a href="https://gather.2gather.network/events.html'+((_navOwn&&_navId)?('?memberCard='+encodeURIComponent(_navId)):'')+'" style="'+_WB+'">All events</a>';
   if(_eventId && _eventHasHub) _b+='<a href="https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+_mc+'" style="'+_WB+'">Event hub</a>';
   if(_navOwn&&_navId){
     // No "Event profile" pill here - it would point at the page you are already on. The
     // per-section pencils are what tell an owner they can change something.
-    if(_eventId) _b+='<a href="https://gather.2gather.network/myevents.html?id='+encodeURIComponent(_navId)+'&event='+encodeURIComponent(_eventId)+'" style="'+_WB+'">Manage my experience</a>';
+    if(_eventId && !_bgG) _b+='<a href="https://gather.2gather.network/myevents.html?id='+encodeURIComponent(_navId)+'&event='+encodeURIComponent(_eventId)+'" style="'+_WB+'">Manage my experience</a>';
     // The other pills need an event. If the URL did not carry one, go find it once.
     if(!_eventId) _fillHubFromReg();
   }
