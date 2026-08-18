@@ -1820,7 +1820,19 @@ window.goToProfile = function(){
 function render(){
   var el=document.getElementById('app-content'); if(!el) return;
   renderTopRight();
-  var _tn0=document.getElementById('app-topnav'); if(_tn0) _tn0.innerHTML='';
+  var _tn0=document.getElementById('app-topnav');
+  if(_tn0){
+    // Back to group hub - only when the profile was opened from group.html (carries &groupId=).
+    var _bgParams=new URLSearchParams(window.location.search);
+    var _bgGroup=_bgParams.get('groupId');
+    var _bgMe=_bgParams.get('me');
+    if(_bgGroup){
+      var _bgUrl='https://gather.2gather.network/group.html?id='+encodeURIComponent(_bgGroup)+(_bgMe?'&memberCard='+encodeURIComponent(_bgMe):'');
+      _tn0.innerHTML='<div style="padding:12px 6px 0;"><a href="'+_bgUrl+'" style="text-decoration:none;color:#1F699E;background:#fff;font-size:14px;font-weight:600;padding:8px 16px;border-radius:20px;display:inline-block;">Back to group</a></div>';
+    } else {
+      _tn0.innerHTML='';
+    }
+  }
   // Wide (hub-style) layout is potluck-only, and only once its data has loaded - a wide empty
   // page during the load reads as broken. One class toggle, no per-screen undo needed.
   document.body.classList.toggle('wide-mode', _screen==='potluck'&&_potluckLoaded);
