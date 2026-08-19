@@ -95,9 +95,9 @@
   .a-locpill a{color:#1F699E;font-weight:700;text-decoration:underline;font-size:12px;}
 
   /* In-app help box (Glide-style) with Mark as read */
-  .a-help{background:#E8EEF9;border-radius:16px;padding:16px 18px 52px;font-size:13px;line-height:1.6;color:#1A2E42;position:relative;margin-top:16px;text-align:left;}
+  .a-help{background:#E8EEF9;border-radius:16px;padding:52px 18px 18px;font-size:13px;line-height:1.6;color:#1A2E42;position:relative;margin-top:16px;text-align:left;}
   .a-help b{font-weight:800;}
-  .a-help .mark{position:absolute;bottom:12px;right:12px;background:#fff;border:1.5px solid #DDE4EE;border-radius:20px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:#1A2E42;display:inline-flex;align-items:center;gap:6px;}
+  .a-help .mark{position:absolute;top:12px;right:12px;background:#fff;border:1.5px solid #DDE4EE;border-radius:20px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:#1A2E42;}
 
   /* Force DM Sans on all form controls inside a design section */
   .design input,.design button,.design select,.design textarea{font-family:'DM Sans',sans-serif;}
@@ -109,17 +109,17 @@
   .a-results-grid{display:grid;grid-template-columns:1fr;gap:12px;}
   @media(min-width:900px){.a-results-grid{grid-template-columns:1fr 1fr;}}
 
-  .mcard{background:#fff;border:1.5px solid #C9DFF3;border-radius:14px;padding:14px 16px;text-align:left;display:flex;flex-direction:column;gap:8px;}
-  .mcard-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
-  .mcard-meta .type,.mcard-meta .locbadge{background:#fff;border:1px solid #DDE4EE;border-radius:14px;padding:3px 10px;font-size:11px;font-weight:700;color:#1A2E42;}
-  .mcard-meta .urgent{background:#FDECEC;border:1px solid #F1A0A0;border-radius:14px;padding:3px 10px;font-size:11px;font-weight:800;color:#B33131;}
-  .mcard .sentence{font-size:15px;line-height:1.5;color:#1A2E42;}
+  .mcard{background:#fff;border:1.5px solid #C9DFF3;border-radius:14px;padding:14px 16px;text-align:left;display:flex;flex-direction:column;gap:8px;font-size:14px;color:#1A2E42;}
+  .mcard-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:flex-end;}
+  .mcard-meta .type,.mcard-meta .locbadge{background:#fff;border:1px solid #DDE4EE;border-radius:14px;padding:3px 10px;font-size:14px;font-weight:500;color:#1A2E42;}
+  .mcard-meta .urgent{background:#FDECEC;border:1px solid #F1A0A0;border-radius:14px;padding:3px 10px;font-size:14px;font-weight:500;color:#1A2E42;}
+  .mcard .sentence{font-size:14px;line-height:1.5;color:#1A2E42;}
   .mcard .who{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:#1A2E42;vertical-align:middle;padding:2px 10px 2px 2px;background:#fff;border:1px solid #DDE4EE;border-radius:20px;margin-right:2px;}
   .mcard .who:hover{background:#F1F3F7;}
   .mcard .who .avatar{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#7DD3FC,#1F699E);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;}
   .mcard .who .name{font-size:14px;font-weight:500;color:#1A2E42;}
-  .mcard .match-line{font-size:12px;color:#6B7A8D;}
-  .mcard .match-line b{color:#1A2E42;background:#FFF4CC;padding:1px 4px;border-radius:4px;font-weight:700;}
+  .mcard .match-line{font-size:14px;color:#1A2E42;}
+  .mcard .match-line b{color:#1A2E42;background:#FFF4CC;padding:1px 4px;border-radius:4px;font-weight:500;}
   .mcard .actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px;}
   .a-cross-hint{margin-top:16px;padding:12px 14px;background:#F7F9FC;border-radius:10px;font-size:13px;color:#4B5A6D;}
   .a-cross-hint a{color:#1F699E;font-weight:700;text-decoration:none;}
@@ -270,7 +270,7 @@
         <b>Offers</b> = things people in this group have said they can give.
         <b>Needs</b> = things they've said they're looking for.
         Toggle any time.
-        <button class="mark">✓ Mark as read</button>
+        <button class="mark">Mark as read</button>
       </div>
     </div>
 
