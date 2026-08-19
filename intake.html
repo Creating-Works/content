@@ -1854,11 +1854,17 @@ function render(){
     } else if(_bgHubEvent){
       _bgUrl='https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_bgHubEvent)+(_bgMe?'&memberCard='+encodeURIComponent(_bgMe):'');
     }
-    if(_bgUrl){
-      _tn0.innerHTML='<div style="padding:12px 6px 0;"><a href="'+_bgUrl+'" style="text-decoration:none;color:#1F699E;background:#fff;font-size:14px;font-weight:600;padding:8px 16px;border-radius:20px;display:inline-block;">Back to hub</a></div>';
-    } else {
-      _tn0.innerHTML='';
+    // In edit mode (owner editing any screen other than the profile view), also show a
+    // "Hub profile" pill next to Back to hub so the person can bounce back to their profile
+    // view without having to scroll to Done. Same effect as Done but always in reach.
+    var _navPillCss='text-decoration:none;color:#1F699E;background:#fff;font-size:14px;font-weight:600;padding:8px 16px;border-radius:20px;display:inline-block;';
+    var _pills='';
+    if(_bgUrl){ _pills += '<a href="'+_bgUrl+'" style="'+_navPillCss+'">Back to hub</a>'; }
+    if(_editMode && _appearId){
+      if(_pills) _pills += ' ';
+      _pills += '<a onclick="doneEdit();return false;" style="cursor:pointer;'+_navPillCss+'">Hub profile</a>';
     }
+    _tn0.innerHTML = _pills ? ('<div style="padding:12px 6px 0;display:flex;flex-wrap:wrap;gap:8px;">'+_pills+'</div>') : '';
   }
   // Wide (hub-style) layout is potluck-only, and only once its data has loaded - a wide empty
   // page during the load reads as broken. One class toggle, no per-screen undo needed.
