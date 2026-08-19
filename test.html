@@ -1,1985 +1,515 @@
 <!--
-  Copyright 2026 DayBalancer LLC. All rights reserved.
-
-  The code and the content here power Creating.Works, DayBalancer, Appear Network,
-  and 2Gather. They are published so they can be read, audited, and dated.
-
-  Running either as a separate offering requires a license, whether you brand it as
-  ours or as your own, and whether or not money changes hands.
-
-  hello@creating.works
+  Group hub design mocks — three alternatives on one page.
+  All hardcoded static data pulled from the CCC '26 ShareOuts doc so the matches read as real.
+  Viewer persona for every mock: Karina (Capitol Hill; offers a room, biochar knowledge, 20 acres).
+  Not wired to any backend. Compare shapes, pick one, we'll wire it up for real.
 -->
-<!-- Version: V2.36 | LAST CHANGE: Pass 1 - copy fixes, domains split, postal code step, expression moved to end, share button | Date: 2026-07-05 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Community profile</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&display=swap" rel="stylesheet">
-  <style>
-    :root{--bg:#1F699E;--card:#FFFFFF;--text:#1A2E42;--soft:#4A6080;--muted:#6A8FAF;--brand:#1F699E;--border:#DDE4EE;--input-bg:#F7F9FC;--hover:#185885;--ph:#B8CCDE;--sel-bg:#EBF3FA;--sel-border:#1F699E;}
-    *{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padding:40px 20px 60px;color:var(--text);}
-    @keyframes spin{to{transform:rotate(360deg);}}
-    .card{background:var(--card);max-width:660px;margin:0 auto;border-radius:16px;padding:52px;box-shadow:0 24px 64px rgba(0,0,0,0.25),0 4px 16px rgba(0,0,0,0.12);position:relative;}
-    @media(max-width:520px){.card{padding:32px 20px;}}
-    /* Top right */
-    .top-right-area{position:absolute;top:20px;right:20px;display:flex;align-items:center;gap:6px;z-index:10;}
-    .ikigai-btn{display:flex;align-items:center;gap:8px;background:var(--sel-bg);border:1.5px solid var(--sel-border);border-radius:24px;padding:6px 14px 6px 6px;font-size:13px;font-weight:600;color:var(--brand);cursor:pointer;font-family:'DM Sans',sans-serif;transition:background 0.15s;}
-    .ikigai-btn:hover{background:#d6eaf8;}
-    .btn-photo{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--sel-border);background:var(--input-bg);display:flex;align-items:center;justify-content:center;font-size:14px;overflow:hidden;flex-shrink:0;}
-    .btn-photo img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
-    .share-btn{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--sel-border);background:var(--sel-bg);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;flex-shrink:0;transition:background 0.15s;}
-    .share-btn:hover{background:#d6eaf8;}
-    .footer{text-align:center;margin-top:20px;}
-    .footer a{color:white;font-size:13px;text-decoration:none;opacity:0.85;font-family:'DM Sans',sans-serif;}
-    h2{font-size:20px;font-weight:700;color:var(--text);line-height:1.3;margin-bottom:16px;margin-top:20px;}
-    hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
-    label{display:block;font-size:14px;color:var(--muted);margin-bottom:6px;font-weight:500;}
-    input[type="text"]{width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--text);outline:none;transition:border-color 0.2s;}
-    input[type="text"]:focus{border-color:var(--brand);}
-    input[type="text"]::placeholder{color:var(--ph);}
-    select{width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--text);outline:none;}
-    /* Progress */
-    .progress-wrap{margin-bottom:28px;padding-top:8px;}
-    .progress-steps{display:flex;gap:6px;margin-bottom:8px;}
-    .progress-step{flex:1;height:4px;border-radius:2px;background:var(--border);transition:background 0.3s;}
-    .progress-step.done{background:var(--brand);}
-    .progress-label{font-size:12px;color:var(--muted);}
-    /* Breadcrumb */
-    .breadcrumb-nav{font-size:12px;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;flex-wrap:wrap;gap:4px;}
-    .breadcrumb-link{color:var(--brand);cursor:pointer;font-weight:500;text-decoration:underline;}
-    .breadcrumb-link:hover{text-decoration:underline;}
-    /* Category chips grid */
-    .cat-chips-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
-    .cat-chip{padding:10px 14px;border-radius:20px;border:1.5px solid var(--border);background:white;font-size:13px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;text-align:center;}
-    .cat-chip:hover{border-color:var(--brand);color:var(--brand);}
-    .cat-chip.selected{background:var(--brand);border-color:var(--brand);color:white;font-weight:600;}
-    /* Sub chips */
-    .sub-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px;}
-    /* sub-chip style defined below */
-    .sub-chip:hover{border-color:var(--brand);color:var(--brand);}
-    .sub-chip.selected{background:var(--brand);border-color:var(--brand);color:white;font-weight:500;}
-    /* Item chips */
-    .item-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px;}
-    .item-chip{padding:6px 13px;border-radius:18px;border:1.5px solid var(--border);background:white;font-size:12px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
-    .item-chip:hover{border-color:var(--brand);color:var(--brand);border-style:solid;background:var(--sel-bg);}
-    .item-chip.added{background:var(--brand);border-color:var(--brand);border-style:solid;color:white;font-weight:600;}
-    .item-chip.added:hover{background:var(--brand);border-color:var(--brand);color:white;}
-    .item-chip.selected{background:var(--brand);border-color:var(--brand);border-style:solid;color:white;font-weight:600;}
-    .btn-primary{background:var(--brand);color:white;border:none;border-radius:10px;padding:8px 18px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;}
-    .btn-primary:hover{opacity:0.9;}
-    /* Search */
-    .search-wrap{position:relative;margin-bottom:14px;}
-    .search-wrap input{padding-left:36px;border-radius:8px;}
-    .search-wrap input.has-results{border-radius:8px 8px 0 0;border-bottom-color:transparent;}
-    .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none;}
-    .search-results{background:white;border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;max-height:220px;overflow-y:auto;box-shadow:0 6px 20px rgba(0,0,0,0.08);margin-bottom:14px;}
-    .search-result-item{padding:10px 14px;font-size:14px;color:var(--text);cursor:pointer;border-bottom:1px solid var(--border);transition:background 0.1s;}
-    .search-result-item:last-child{border-bottom:none;}
-    .search-result-item:hover{background:var(--sel-bg);}
-    .search-result-breadcrumb{font-size:11px;color:var(--muted);margin-top:2px;}
-    .add-custom-row{padding:12px 16px;font-size:14px;color:white;font-weight:600;cursor:pointer;border:none;border-radius:0 0 10px 10px;background:var(--brand);margin-bottom:14px;display:block;text-align:center;transition:background 0.15s;}
-    .custom-add-box{background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px;}
-    .custom-add-box label{margin-bottom:6px;}
-    .custom-add-box select{margin-bottom:10px;}
-    .custom-add-confirm{background:var(--brand);color:white;border:none;border-radius:8px;padding:10px 20px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;}
-    .custom-add-cancel{background:none;border:none;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;margin-left:10px;}
-    /* Added items */
-    .added-section{margin-top:16px;} .practice-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;}
-    .added-label{font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
-    .practice-item{background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:10px;min-width:0;}
-    .practice-item-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
-    .practice-item-name{font-size:14px;font-weight:600;color:var(--text);}
-    .practice-item-x{background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:0;line-height:1;}
-    .practice-item-x:hover{color:var(--text);}
-    .practice-item-cat{font-size:11px;color:var(--brand);margin-bottom:8px;}
-    .practice-required{font-size:12px;color:var(--brand);font-weight:400;margin-bottom:8px;}
-    .practice-options{display:flex;flex-wrap:wrap;gap:8px;}
-    .practice-btn{padding:6px 14px;border-radius:16px;border:1.5px solid var(--border);background:white;font-size:12px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
-    .practice-btn:hover{border-color:var(--brand);color:var(--brand);}
-    .practice-btn.selected{background:var(--brand);border-color:var(--brand);color:white;font-weight:500;}
-    /* Needs two-section */
-    /* Need items */
-    .need-item{background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
-    .need-item-left{flex:1;}
-    .need-item-name{font-size:14px;font-weight:600;color:var(--text);}
-    .need-item-cat{font-size:11px;color:var(--muted);margin-top:2px;}
-    .need-item-right{display:flex;align-items:center;gap:10px;}
-    .local-toggle{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--soft);cursor:pointer;}
-    .local-toggle input{width:14px;height:14px;accent-color:var(--brand);cursor:pointer;}
-    .local-toggle.active{color:var(--brand);font-weight:600;}
-    /* Warning */
-    .warning-msg{background:#FFF8E1;border:1px solid #FFD54F;border-radius:8px;padding:10px 14px;font-size:13px;color:#7A5F00;margin-bottom:12px;}
-    .reminder-msg{font-size:12px;color:var(--brand);display:inline-block;padding:0;}
-    /* Nav */
-    .nav-row{display:flex;gap:12px;margin-top:28px;}
-    .btn-back{flex:1;padding:14px;border-radius:10px;border:1.5px solid var(--border);background:white;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;color:var(--soft);cursor:pointer;transition:all 0.15s;}
-    .btn-back:hover{border-color:var(--brand);color:var(--brand);}
-    .btn-next{flex:2;padding:14px;border-radius:10px;border:none;background:var(--brand);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;color:white;cursor:pointer;transition:background 0.15s;}
-    .btn-next:hover{background:var(--hover);}
-    .btn-outlined{flex:2;padding:14px;border-radius:10px;border:2px solid var(--brand);background:white;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;color:var(--brand);cursor:pointer;transition:all 0.15s;}
-    .btn-outlined:hover{background:var(--brand);color:white;}
-    /* Profile */
-    .profile-section{margin-bottom:0;padding-bottom:20px;border-bottom:1px solid var(--border);margin-top:20px;}
-    .profile-section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
-    .profile-section-label{font-size:16px;font-weight:700;color:var(--text);letter-spacing:0;text-transform:none;}
-    .profile-section-actions{display:flex;align-items:center;gap:8px;}
-    .edit-btn{font-size:12px;font-weight:600;color:white;background:var(--brand);border:none;border-radius:16px;cursor:pointer;font-family:'DM Sans',sans-serif;padding:5px 12px;}
-    .profile-tags{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px;}
-    .profile-tag{padding:6px 12px;border-radius:20px;background:var(--sel-bg);border:1.5px solid var(--sel-border);font-size:13px;color:var(--brand);font-weight:500;}
-    .tag-level{font-size:11px;color:var(--muted);font-weight:400;margin-left:4px;}
-    .profile-empty{font-size:13px;color:var(--muted);font-style:italic;}
-    .profile-lang-row{margin-top:4px;padding-bottom:16px;border-bottom:1px solid var(--border);margin-bottom:0;display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
-    .profile-lang-text{font-size:13px;color:var(--soft);}
-    /* Lang modal */
-    .lang-dropdown-wrap{position:relative;margin-bottom:12px;}
-    .lang-search-input{padding-left:36px !important;border-radius:8px 8px 0 0 !important;border-bottom:none !important;}
-    .lang-search-icon{position:absolute;left:12px;top:13px;font-size:15px;pointer-events:none;}
-    .lang-list{background:white;border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;max-height:200px;overflow-y:auto;box-shadow:0 6px 20px rgba(0,0,0,0.08);}
-    .lang-list-item{padding:10px 14px;font-size:14px;color:var(--text);cursor:pointer;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;transition:background 0.1s;}
-    .lang-list-item:last-child{border-bottom:none;}
-    .lang-list-item:hover{background:var(--sel-bg);}
-    .lang-list-item.selected{background:var(--sel-bg);color:var(--brand);font-weight:500;}
-    .lang-check{color:var(--brand);font-size:14px;min-width:16px;}
-    .lang-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
-    .lang-tag{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;background:var(--sel-bg);border:1.5px solid var(--sel-border);font-size:13px;color:var(--brand);font-weight:500;}
-    .lang-tag-remove{cursor:pointer;color:var(--muted);font-size:15px;}
-    /* Modals */
-    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;align-items:flex-start;justify-content:center;padding:12px 0 0;}
-    .modal-overlay.open{display:flex;}
-    .modal{background:#fff;border-radius:16px;padding:32px;max-width:480px;width:100%;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);}
-    .modal-title{font-size:18px;font-weight:700;color:var(--text);margin-bottom:16px;}
-    .modal-close{float:right;background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);}
-    /* Share modal */
-    .share-actions{display:flex;gap:10px;margin-bottom:20px;}
-    .share-copy-btn{flex:1;padding:12px;border-radius:10px;border:none;background:var(--brand);color:white;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;}
-    .share-native-btn{flex:1;padding:12px;border-radius:10px;border:1.5px solid var(--border);background:white;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;}
-    .qr-wrap{background:white;border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;}
-    .qr-wrap img{max-width:200px;width:100%;border-radius:8px;}
-    .copy-confirm{font-size:12px;color:var(--brand);margin-top:6px;display:none;}
-    .toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:white;border-radius:10px;padding:12px 20px;font-size:14px;font-weight:500;z-index:9999;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap;}
-    .toast.show{opacity:1;}
-    .empty{font-size:13px;color:var(--muted);font-style:italic;margin-top:8px;}
-    .added-header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
-    .level-help-btn{background:none;border:1.5px solid var(--border);border-radius:50%;width:20px;height:20px;font-size:11px;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;justify-content:center;padding:0;}
-    .level-help-btn:hover{border-color:var(--brand);color:var(--brand);}
-    .ideas-prompt{font-size:13px;color:var(--muted);font-style:italic;margin-bottom:10px;}
-    /* needs-top-chips moved below */
-    .needs-top-chip{padding:10px 18px;border-radius:20px;border:1.5px solid var(--border);background:white;font-size:14px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;transition:all 0.15s;}
-    .needs-top-chip:hover{border-color:var(--brand);color:var(--brand);}
-    .needs-top-chips{display:flex;gap:10px;margin-bottom:0;flex-wrap:wrap;padding-bottom:14px;}
-    .cat-picker-inline{background:white;border:1.5px solid var(--brand);border-radius:10px;padding:10px 12px;display:none;flex-wrap:wrap;gap:6px;position:absolute;left:0;top:100%;z-index:200;min-width:220px;box-shadow:0 4px 16px rgba(0,0,0,0.12);}
-    .cat-picker-inline.open{display:flex;}
-    .cat-pick-btn{padding:5px 12px;border-radius:18px;border:1.5px solid var(--border);background:white;font-size:12px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;}
-    .cat-pick-btn:hover{border-color:var(--brand);color:var(--brand);}
-    .needs-summary{background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:14px;}
-    .needs-summary-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-size:14px;font-weight:600;color:var(--text);}
-    .needs-summary-body{margin-top:10px;display:flex;flex-wrap:wrap;gap:7px;}
-    .needs-summary-tag{background:white;border:1.5px solid var(--border);border-radius:18px;padding:5px 12px;font-size:13px;color:var(--text);}
-    .needs-top-chip.selected{background:var(--brand);border-color:var(--brand);color:white;font-weight:600;}
-    .needs-detail-box{background:var(--input-bg);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;}
-    .sub-chip{padding:8px 14px;border-radius:18px;border:1.5px solid var(--border);background:white;font-size:13px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;transition:all 0.15s;display:inline-flex;align-items:center;gap:5px;}
-    .sub-chip:hover{border-color:var(--brand);color:var(--brand);}
-    .sub-chip.selected{background:var(--brand);border-color:var(--brand);color:white;font-weight:600;}
-    .sub-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border);}
-    .level-popup{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;background:white;border:1px solid var(--border);border-radius:14px;padding:18px 20px;font-size:13px;color:var(--soft);line-height:1.7;box-shadow:0 8px 30px rgba(0,0,0,0.18);max-width:320px;width:90%;}
-    .level-popup.open{display:block;}
-    .level-popup-close{display:block;margin-top:14px;text-align:center;font-weight:600;color:var(--brand);cursor:pointer;font-size:14px;}
-    .methods-list{margin:12px 0 20px;}
-    .method-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;cursor:pointer;transition:background 0.1s;border:1.5px solid transparent;margin-bottom:4px;}
-    .method-item:hover{background:var(--sel-bg);}
-    .method-item.selected{background:var(--sel-bg);border-color:var(--brand);}
-    .method-check{width:22px;height:22px;border-radius:5px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;transition:all 0.15s;}
-    .method-check.checked{background:var(--brand);border-color:var(--brand);color:white;font-size:13px;}
-    .method-text{font-size:14px;color:var(--text);line-height:1.4;}
-    .methods-selected-row{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 12px;}
-    .methods-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:9000;align-items:flex-start;padding-top:4vh;}
-    .methods-modal-overlay.open{display:flex;}
-    .methods-modal{background:white;border-radius:16px;padding:18px 16px;width:88%;max-width:400px;margin:0 auto;max-height:82vh;overflow-y:auto;box-sizing:border-box;}
-    .values-tabs{display:flex;flex-direction:row;gap:8px;margin-bottom:14px;}
-    .values-tab{flex:1;text-align:center;padding:10px 8px;border-radius:10px;border:1.5px solid var(--border);background:white;font-size:14px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;transition:all 0.15s;}
-    .values-tab.active{background:var(--brand);border-color:var(--brand);color:white;}
-    .values-section-label{font-size:13px;font-weight:700;color:var(--text);margin:16px 0 8px;}
-    .btn-link{background:none;border:none;color:var(--brand);font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif;padding:0;}
-    .inline-edit-row{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--soft);flex-wrap:wrap;}
-  </style>
-</head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Group hub design mocks</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎨</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'DM Sans',sans-serif;background:#F1F3F7;color:#1A2E42;line-height:1.45;}
+  a{color:inherit;}
+  .top-note{background:#1A2E42;color:#fff;padding:22px 24px;font-size:14px;line-height:1.55;}
+  .top-note h1{margin:0 0 6px;font-size:22px;font-weight:800;}
+  .top-note strong{color:#7DD3FC;}
+  .top-note .persona{background:rgba(255,255,255,.12);padding:10px 14px;border-radius:10px;margin-top:12px;font-size:13px;}
+  .picker{display:flex;gap:0;background:#0F1F30;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.15);}
+  .picker a{flex:1;text-align:center;color:#8FA5BC;text-decoration:none;padding:14px 8px;font-weight:700;font-size:13px;letter-spacing:.04em;text-transform:uppercase;border-bottom:3px solid transparent;transition:color .12s,border-color .12s;}
+  .picker a:hover{color:#fff;}
+  .picker a.active{color:#fff;border-color:#7DD3FC;}
+  .design{background:#1F699E;padding:24px 20px 40px;min-height:100vh;}
+  .design-header{color:#fff;max-width:1200px;margin:0 auto 20px;}
+  .design-header .tag{display:inline-block;background:rgba(255,255,255,.16);padding:4px 10px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;}
+  .design-header h2{margin:0 0 6px;font-size:24px;font-weight:800;}
+  .design-header p{margin:0;font-size:14px;opacity:.85;max-width:800px;}
+  .design-body{max-width:1200px;margin:0 auto;}
 
+  /* Shared card + chip primitives */
+  .card{background:#fff;border-radius:14px;padding:20px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.06);}
+  .card h3{margin:0 0 4px;font-size:17px;font-weight:800;}
+  .card .sub{color:#6B7A8D;font-size:12px;margin-bottom:14px;}
+  .chip{display:inline-flex;align-items:center;gap:8px;background:#F7F9FC;border:1px solid #DDE4EE;border-radius:22px;padding:6px 12px 6px 6px;margin:3px 4px 3px 0;font-size:13px;font-weight:600;line-height:1;max-width:100%;}
+  .chip .ph{width:26px;height:26px;border-radius:50%;background:#B7C4D6;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+  .chip .lbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .chip .sub2{color:#8896A8;font-size:11px;font-weight:500;margin-left:4px;}
+  .btn{display:inline-flex;align-items:center;gap:6px;background:#1F699E;color:#fff;border:none;padding:9px 16px;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;text-decoration:none;}
+  .btn.ghost{background:#fff;color:#1F699E;border:1.5px solid #1F699E;}
+  .btn.sm{padding:6px 12px;font-size:12px;}
+  .btn-row{display:flex;gap:8px;flex-wrap:wrap;}
+  .empty-sub{color:#8896A8;font-size:12px;font-style:italic;}
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     DESIGN A — Auto-Match Cards on top, chip grid below (need-first)
+     Big matched-pair cards greet the viewer with 3 concrete introductions
+     based on offer/need overlap. Below: standard chip quadrants but with
+     specifiers on every chip.  Aggregate group needs collapsed to an
+     Insights section at the bottom.
+     ═══════════════════════════════════════════════════════════════════════ */
+  .a-header{background:#fff;border-radius:14px;padding:18px 22px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;}
+  .a-header h3{margin:0;font-size:18px;font-weight:800;}
+  .a-header .sub{margin:0;color:#6B7A8D;font-size:13px;}
+  .a-hero{background:#fff;border-radius:14px;padding:18px 22px;margin-bottom:16px;}
+  .a-hero .h{font-size:12px;font-weight:800;letter-spacing:.08em;color:#1F699E;text-transform:uppercase;margin-bottom:6px;}
+  .a-hero h3{margin:0 0 4px;font-size:20px;font-weight:800;}
+  .a-hero .sub{color:#6B7A8D;font-size:13px;margin-bottom:14px;}
+  .match-card{background:#F7FBFF;border:1.5px solid #C9DFF3;border-radius:14px;padding:16px;margin-bottom:12px;display:flex;gap:14px;align-items:flex-start;}
+  .match-card:last-child{margin-bottom:0;}
+  .match-card .theme{background:#1F699E;color:#fff;border-radius:10px;padding:8px 12px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;flex-shrink:0;align-self:flex-start;}
+  .match-card .body{flex:1;min-width:0;}
+  .match-card .peeps{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+  .match-card .peep{display:flex;align-items:center;gap:8px;background:#fff;border-radius:20px;padding:4px 12px 4px 4px;border:1px solid #DDE4EE;}
+  .match-card .peep .ph{width:28px;height:28px;border-radius:50%;background:#B7C4D6;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;}
+  .match-card .peep .txt{font-size:13px;font-weight:600;}
+  .match-card .peep .role{font-size:11px;color:#8896A8;font-weight:500;margin-left:4px;}
+  .match-card .cta{margin-top:12px;}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .grid-2 .card{margin-bottom:0;}
+  @media(max-width:820px){.grid-2{grid-template-columns:1fr;}}
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     DESIGN B — Two-column Offer/Need Wall
+     Left column: everything OFFERED (grouped by category). Right column:
+     everything NEEDED (grouped by category). Colored dots draw the eye to
+     matches (same category on both sides). Search at top narrows both.
+     ═══════════════════════════════════════════════════════════════════════ */
+  .b-search{background:#fff;border-radius:14px;padding:16px 18px;display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
+  .b-search input{flex:1;min-width:220px;padding:10px 14px;border:1.5px solid #DDE4EE;border-radius:24px;font-family:inherit;font-size:14px;}
+  .b-search .filters{display:flex;gap:6px;flex-wrap:wrap;}
+  .b-search .fchip{background:#F7F9FC;border:1px solid #DDE4EE;border-radius:16px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;}
+  .b-search .fchip.on{background:#1F699E;color:#fff;border-color:#1F699E;}
+  .b-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:820px){.b-cols{grid-template-columns:1fr;}}
+  .b-col{background:#fff;border-radius:14px;padding:18px;}
+  .b-col.offer{border-top:5px solid #1F9E7A;}
+  .b-col.need{border-top:5px solid #E58C1F;}
+  .b-col h3{margin:0 0 10px;font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px;}
+  .b-col .cat{margin-top:14px;}
+  .b-col .cat:first-of-type{margin-top:0;}
+  .b-col .cat h4{margin:0 0 6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#6B7A8D;display:flex;align-items:center;justify-content:space-between;}
+  .b-col .cat h4 .n{background:#F1F3F7;border-radius:10px;padding:2px 8px;font-size:11px;font-weight:700;color:#1A2E42;}
+  .b-col .cat h4 .match-hint{background:#E7F5EF;border:1px solid #7DCFA3;color:#1F9E7A;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;text-transform:none;letter-spacing:0;margin-left:6px;}
+  .b-col.need .cat h4 .match-hint{background:#FDF1E4;border-color:#F1B36B;color:#B36A0F;}
+  .b-col .row{background:#F7F9FC;border-radius:10px;padding:10px 12px;margin-bottom:6px;font-size:13px;display:flex;align-items:center;gap:10px;}
+  .b-col .row.matched{background:#F0F8F4;border-left:3px solid #7DCFA3;}
+  .b-col.need .row.matched{background:#FEF6ED;border-left-color:#F1B36B;}
+  .b-col .row .ph{width:32px;height:32px;border-radius:50%;background:#B7C4D6;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
+  .b-col .row .who{font-weight:700;font-size:13px;}
+  .b-col .row .what{color:#4B5A6D;font-size:12px;}
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     DESIGN C — Personal Feed
+     A scrollable, personalized feed of match cards ranked for the viewer.
+     Feels like a notifications inbox: three actions per card (Introduce me,
+     Bookmark, Skip). Group aggregate is a tiny "Group insights" strip at
+     the top that expands to reveal the classic chip quadrants.
+     ═══════════════════════════════════════════════════════════════════════ */
+  .c-strip{background:#fff;border-radius:14px;padding:14px 18px;margin-bottom:16px;display:flex;gap:14px;align-items:center;justify-content:space-between;font-size:13px;}
+  .c-strip .stats{color:#6B7A8D;}
+  .c-strip .stats b{color:#1F699E;font-weight:800;}
+  .c-strip a{color:#1F699E;font-weight:700;text-decoration:none;font-size:13px;}
+  .c-hero{background:#fff;border-radius:14px;padding:22px;margin-bottom:16px;display:flex;gap:18px;align-items:center;}
+  .c-hero .avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#7DD3FC,#1F699E);color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;flex-shrink:0;}
+  .c-hero .h{font-size:12px;font-weight:800;color:#1F699E;letter-spacing:.06em;text-transform:uppercase;}
+  .c-hero h3{margin:2px 0 2px;font-size:20px;font-weight:800;}
+  .c-hero p{margin:0;color:#6B7A8D;font-size:13px;}
+  .feed-card{background:#fff;border-radius:14px;padding:18px 20px;margin-bottom:12px;position:relative;}
+  .feed-card .kicker{font-size:11px;font-weight:800;letter-spacing:.05em;color:#1F699E;text-transform:uppercase;margin-bottom:6px;}
+  .feed-card .body{font-size:15px;line-height:1.5;}
+  .feed-card .body b{font-weight:800;}
+  .feed-card .who-row{display:flex;gap:8px;margin-top:12px;align-items:center;flex-wrap:wrap;}
+  .feed-card .who{display:flex;align-items:center;gap:8px;background:#F7F9FC;border-radius:20px;padding:4px 12px 4px 4px;font-size:13px;font-weight:600;}
+  .feed-card .who .ph{width:26px;height:26px;border-radius:50%;background:#B7C4D6;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+  .feed-card .actions{margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;}
+  .feed-card .why{margin-top:10px;font-size:12px;color:#6B7A8D;font-style:italic;}
+  .feed-card.strong{border-left:5px solid #1F9E7A;background:#F7FBFF;}
+
+  /* Collapsible insights section shared across A + C */
+  details.insights{background:#F7F9FC;border-radius:12px;padding:0;margin-top:22px;border:1px solid #DDE4EE;}
+  details.insights summary{padding:14px 18px;cursor:pointer;font-weight:700;font-size:13px;color:#1A2E42;list-style:none;display:flex;align-items:center;justify-content:space-between;}
+  details.insights summary::-webkit-details-marker{display:none;}
+  details.insights summary::after{content:'▾';color:#6B7A8D;}
+  details.insights[open] summary::after{content:'▴';}
+  details.insights .content{padding:0 18px 18px;}
+  .insights-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .insights-grid .qbox{background:#fff;border-radius:10px;padding:12px 14px;}
+  .insights-grid .qbox h4{margin:0 0 8px;font-size:12px;font-weight:800;color:#6B7A8D;text-transform:uppercase;letter-spacing:.05em;}
+  .insights-grid .qbox .mini{display:inline-block;background:#F1F3F7;padding:3px 9px;border-radius:12px;font-size:11px;font-weight:700;margin:2px 3px 2px 0;color:#1A2E42;}
+  @media(max-width:820px){.insights-grid{grid-template-columns:1fr;}}
+</style>
+</head>
 <body>
-<div style="max-width:660px;margin:0 auto;">
-  <div class="card" id="main-card">
-    <div class="top-right-area" id="top-right-area"></div>
-    <div id="app-content">
-      <div style="text-align:center;padding:60px 40px">
-        <div style="width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--brand);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px;"></div>
-        <p style="color:var(--muted);font-size:14px;margin:0;">Loading preferences...</p>
+
+<div class="top-note">
+  <h1>Group hub — three design mocks</h1>
+  <p>Same viewer, same data, three different UI shapes for the same group. All mocks address the seven UX asks from the Marohn review: need-first ordering, de-emphasized aggregates, chip specifiers, cleaner filter semantics, the explicit housing case (Karina/Teresa/Monika), noise reduction, and (comments-only) the ID-in-URL cleanup. Data is real, drawn from the CCC '26 ShareOuts doc.</p>
+  <div class="persona">
+    <strong>Viewer persona:</strong> Karina (Capitol Hill). Offers: a room to crash in on Capitol Hill · biochar knowledge · 20 acres open for camping. Needs: co-hosts for biochar events. — This is who the whole page is being rendered for.
+  </div>
+</div>
+
+<div class="picker">
+  <a href="#design-a" class="active" onclick="pick(this,'a')">A — Match cards + chips</a>
+  <a href="#design-b" onclick="pick(this,'b')">B — Offer / Need wall</a>
+  <a href="#design-c" onclick="pick(this,'c')">C — Personal feed</a>
+</div>
+
+<!-- ═══════════════════ DESIGN A — Match cards on top ═══════════════════ -->
+<div class="design" id="design-a">
+  <div class="design-header">
+    <span class="tag">Design A</span>
+    <h2>Match cards on top, chip grid below</h2>
+    <p>The three biggest concrete introductions greet Karina at the top of the page as pre-formed suggestions. Below the matches, the classic four chip quadrants (Skills / Interests / Values / Needs) show the group's shape, but every chip carries a specifier ("Advice: gardening" not just "Advice"). The aggregate "what our group needs" panel collapses to a low-key "Group insights" section at the bottom.</p>
+  </div>
+  <div class="design-body">
+
+    <!-- Hero: 3 auto-match cards -->
+    <div class="a-hero">
+      <div class="h">3 introductions we think you should make</div>
+      <h3>Because of what you and others have shared with the group</h3>
+      <div class="sub">Ranked by strength of overlap. Tap Introduce me to bring the two people into a thread.</div>
+
+      <div class="match-card">
+        <div class="theme">🏠 Capitol Hill housing</div>
+        <div class="body">
+          <div><b>You offer a room to crash in on Capitol Hill.</b> Two people said they need housing there.</div>
+          <div class="peeps">
+            <div class="peep"><span class="ph">T</span><span class="txt">Theresa</span><span class="role">wants Cap Hill w/ outdoor space</span></div>
+            <div class="peep"><span class="ph">M</span><span class="txt">Monika</span><span class="role">Cap Hill for 2 + dog</span></div>
+          </div>
+          <div class="cta btn-row">
+            <button class="btn sm">Introduce me to both</button>
+            <button class="btn sm ghost">Message individually</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="match-card">
+        <div class="theme">🌱 Biochar events</div>
+        <div class="body">
+          <div><b>You want co-hosts for "burning shit for the planet" biochar events.</b> Lowell offered to help people turn ideas into working things.</div>
+          <div class="peeps">
+            <div class="peep"><span class="ph">L</span><span class="txt">Lowell</span><span class="role">helps build ideas → real things</span></div>
+          </div>
+          <div class="cta btn-row">
+            <button class="btn sm">Introduce me</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="match-card">
+        <div class="theme">🌾 Land + camping</div>
+        <div class="body">
+          <div><b>You have 20 acres open for camping (no infrastructure).</b> Holly at River Farm needs volunteer help removing invasive plants; Caitlyn has crash space in Bellingham for the same crowd.</div>
+          <div class="peeps">
+            <div class="peep"><span class="ph">H</span><span class="txt">Holly</span><span class="role">needs invasive-plant help</span></div>
+            <div class="peep"><span class="ph">C</span><span class="txt">Caitlyn</span><span class="role">Bellingham crash space</span></div>
+          </div>
+          <div class="cta btn-row">
+            <button class="btn sm">Introduce me to both</button>
+          </div>
+        </div>
       </div>
     </div>
+
+    <!-- Standard-shaped quadrants — but chips now carry specifiers -->
+    <div class="grid-2">
+      <div class="card">
+        <h3>Skills represented</h3>
+        <div class="sub">17 people · 42 skills</div>
+        <span class="chip"><span class="ph">L</span><span class="lbl">Software: prototyping</span></span>
+        <span class="chip"><span class="ph">T</span><span class="lbl">Editing: solarpunk writing</span></span>
+        <span class="chip"><span class="ph">G</span><span class="lbl">Advice: gardening</span></span>
+        <span class="chip"><span class="ph">A</span><span class="lbl">Guerrilla gardening</span></span>
+        <span class="chip"><span class="ph">K</span><span class="lbl">Biochar: on-site</span></span>
+        <span class="chip"><span class="ph">H</span><span class="lbl">Teaches: theater camp</span></span>
+        <span class="chip"><span class="ph">I</span><span class="lbl">Governance: dynamic</span></span>
+        <span class="chip"><span class="ph">R</span><span class="lbl">Movement research</span></span>
+      </div>
+
+      <div class="card">
+        <h3>Recreational interests of our group</h3>
+        <div class="sub">12 people · 28 interests</div>
+        <span class="chip"><span class="ph">K</span><span class="lbl">Pottery <span class="sub2">Fan</span></span></span>
+        <span class="chip"><span class="ph">S</span><span class="lbl">Watercolor <span class="sub2">Participant</span></span></span>
+        <span class="chip"><span class="ph">C</span><span class="lbl">Solarpunk games <span class="sub2">Coach</span></span></span>
+        <span class="chip"><span class="ph">M</span><span class="lbl">Mindfulness <span class="sub2">Participant</span></span></span>
+        <span class="chip"><span class="ph">A</span><span class="lbl">Wildflower harvesting</span></span>
+        <span class="chip"><span class="ph">R</span><span class="lbl">TTRPGs <span class="sub2">Participant</span></span></span>
+      </div>
+
+      <div class="card">
+        <h3>Values represented</h3>
+        <div class="sub">14 people · 33 values</div>
+        <span class="chip"><span class="ph">A</span><span class="lbl">Climate action</span></span>
+        <span class="chip"><span class="ph">K</span><span class="lbl">Carbon sequestration <span class="sub2">Leading</span></span></span>
+        <span class="chip"><span class="ph">S</span><span class="lbl">Solar policy <span class="sub2">Engaged</span></span></span>
+        <span class="chip"><span class="ph">C</span><span class="lbl">Community raising <span class="sub2">Exploring</span></span></span>
+        <span class="chip"><span class="ph">J</span><span class="lbl">Storytelling</span></span>
+      </div>
+
+      <div class="card">
+        <h3>What people are asking for</h3>
+        <div class="sub">9 people · 14 requests <span style="color:#1F699E;">· 3 match what you offer</span></div>
+        <span class="chip"><span class="ph">T</span><span class="lbl">Housing: Capitol Hill w/ outdoor</span></span>
+        <span class="chip"><span class="ph">M</span><span class="lbl">Housing: Capitol Hill (2 + dog)</span></span>
+        <span class="chip"><span class="ph">S</span><span class="lbl">Playtesters: solarpunk city game</span></span>
+        <span class="chip"><span class="ph">H</span><span class="lbl">Volunteers: invasive-plant removal</span></span>
+        <span class="chip"><span class="ph">I</span><span class="lbl">Governance: farmers market</span></span>
+        <span class="chip"><span class="ph">A</span><span class="lbl">Job: part-time</span></span>
+        <span class="chip"><span class="ph">M</span><span class="lbl">Pod: mindfulness + burnout</span></span>
+      </div>
+    </div>
+
+    <details class="insights">
+      <summary>Group insights (aggregate stats — moved out of the way for individuals)</summary>
+      <div class="content">
+        <div class="insights-grid">
+          <div class="qbox">
+            <h4>Most-asked-about needs</h4>
+            <span class="mini">Housing — 4</span><span class="mini">Land — 3</span><span class="mini">Software prototyping — 2</span>
+          </div>
+          <div class="qbox">
+            <h4>Most-offered</h4>
+            <span class="mini">Advice — 5</span><span class="mini">Hosting/crashing — 4</span><span class="mini">Editing — 2</span>
+          </div>
+          <div class="qbox">
+            <h4>Overlap density</h4>
+            <span class="mini">Housing has 3 offers, 2 asks</span><span class="mini">Software has 2 offers, 3 asks</span>
+          </div>
+          <div class="qbox">
+            <h4>Quiet spots</h4>
+            <span class="mini">No one asked for legal help yet</span><span class="mini">Land is offered but no takers</span>
+          </div>
+        </div>
+      </div>
+    </details>
+
   </div>
-  <div class="footer"></div>
 </div>
 
-<!-- Lang modal -->
-<div class="modal-overlay" id="lang-modal">
-  <div class="modal">
-    <button class="modal-close" onclick="closeLangModal()">✕</button>
-    <div class="modal-title">Languages</div>
-    <div class="lang-dropdown-wrap">
-      <span class="lang-search-icon">🔍</span>
-      <input type="text" class="lang-search-input" id="lang-modal-search" placeholder="Search languages..." oninput="filterLangs(this.value)">
-      <div class="lang-list" id="lang-list"></div>
+<!-- ═══════════════════ DESIGN B — Offer / Need wall ═══════════════════ -->
+<div class="design" id="design-b" style="background:#256B6A;">
+  <div class="design-header">
+    <span class="tag">Design B</span>
+    <h2>Offer / Need wall — everything at a glance</h2>
+    <p>Two columns side by side: what the group is offering on the left, what the group needs on the right. Categories that appear in BOTH columns light up green (offer side) or amber (need side) so the eye jumps to overlap. Search + explicit filter chips at the top; the filter join is spelled out ("filter offers AND needs by category: Housing"). Great for hosts scanning what the group has and needs at a glance.</p>
+  </div>
+  <div class="design-body">
+
+    <div class="b-search">
+      <input placeholder="Search offers and needs (people, place, skill)">
+      <div class="filters">
+        <span class="fchip on">All categories</span>
+        <span class="fchip">🏠 Housing</span>
+        <span class="fchip">🌱 Land</span>
+        <span class="fchip">💻 Software</span>
+        <span class="fchip">🌿 Gardening</span>
+        <span class="fchip">🎓 Governance</span>
+      </div>
+      <div style="width:100%;font-size:12px;color:#6B7A8D;margin-top:4px;">Filters narrow <b>both</b> columns to the picked category. "All categories" shows everything.</div>
     </div>
-    <div class="lang-tags" id="lang-tags"></div>
-    <div style="margin-top:16px">
-      <button class="custom-add-confirm" onclick="saveLangModal()">Done</button>
-      <button class="custom-add-cancel" onclick="closeLangModal()">Cancel</button>
+
+    <div class="b-cols">
+      <div class="b-col offer">
+        <h3>🟢 Offered by our group <span style="color:#8896A8;font-size:12px;font-weight:600;">21 offers</span></h3>
+
+        <div class="cat">
+          <h4>🏠 Housing / crash space <span class="n">4</span><span class="match-hint">2 people need this →</span></h4>
+          <div class="row matched"><span class="ph">K</span><div><div class="who">Karina</div><div class="what">A room to crash in on Capitol Hill</div></div></div>
+          <div class="row"><span class="ph">G</span><div><div class="who">Greg</div><div class="what">Guest room + sauna, Bellingham (no dogs)</div></div></div>
+          <div class="row"><span class="ph">C</span><div><div class="who">Caitlyn</div><div class="what">Big house, Bellingham (5 people, 4 dogs OK)</div></div></div>
+          <div class="row"><span class="ph">K</span><div><div class="who">Karina</div><div class="what">20 acres for camping (no infrastructure)</div></div></div>
+        </div>
+
+        <div class="cat">
+          <h4>💻 Software / prototyping <span class="n">2</span><span class="match-hint">3 people need this →</span></h4>
+          <div class="row matched"><span class="ph">L</span><div><div class="who">Lowell</div><div class="what">Helps turn ideas into working things, incl. software</div></div></div>
+          <div class="row"><span class="ph">B</span><div><div class="who">Brian</div><div class="what">Runs Human-in-the-Loop AI Prototyping Workshop</div></div></div>
+        </div>
+
+        <div class="cat">
+          <h4>🌿 Gardening / land advice <span class="n">3</span></h4>
+          <div class="row"><span class="ph">G</span><div><div class="who">Greg</div><div class="what">Garden advice</div></div></div>
+          <div class="row"><span class="ph">A</span><div><div class="who">Alecia</div><div class="what">Guerrilla gardening / planting scouting</div></div></div>
+          <div class="row"><span class="ph">K</span><div><div class="who">Kimberly</div><div class="what">Beacon Food Forest tours</div></div></div>
+        </div>
+
+        <div class="cat">
+          <h4>✏️ Editing / writing <span class="n">2</span></h4>
+          <div class="row"><span class="ph">T</span><div><div class="who">Tim</div><div class="what">Edits solarpunk writing</div></div></div>
+          <div class="row"><span class="ph">A</span><div><div class="who">Author (name TBC)</div><div class="what">Willing to co-edit</div></div></div>
+        </div>
+
+        <div class="cat">
+          <h4>🎯 Coaching / support <span class="n">2</span></h4>
+          <div class="row"><span class="ph">L</span><div><div class="who">Lowell</div><div class="what">Physical strength, joyfully</div></div></div>
+          <div class="row"><span class="ph">I</span><div><div class="who">Iris</div><div class="what">Governance help for Climate Camp gatherings</div></div></div>
+        </div>
+      </div>
+
+      <div class="b-col need">
+        <h3>🟠 Needed by our group <span style="color:#8896A8;font-size:12px;font-weight:600;">14 needs</span></h3>
+
+        <div class="cat">
+          <h4>🏠 Housing / crash space <span class="n">2</span><span class="match-hint">← 4 people offer this</span></h4>
+          <div class="row matched"><span class="ph">T</span><div><div class="who">Theresa</div><div class="what">Wants to move to Capitol Hill w/ outdoor space</div></div></div>
+          <div class="row matched"><span class="ph">M</span><div><div class="who">Monika</div><div class="what">Cap Hill or Central District, 2 adults + dog</div></div></div>
+        </div>
+
+        <div class="cat">
+          <h4>💻 Software / prototyping <span class="n">3</span><span class="match-hint">← 2 people offer this</span></h4>
+          <div class="row matched"><span class="ph">S</span><div><div class="who">Spencer</div><div class="what">Playtesters for a solarpunk city-building game</div></div></div>
+          <div class="row matched"><span class="ph">J</span><div><div class="who">Jacob</div><div class="what">Graphic novel platform for solarpunk media</div></div></div>
+          <div class="row matched"><span class="ph">K</span><div><div class="who">Karina</div><div class="what">Co-hosts for biochar events → looking for tooling help</div></div></div>
+        </div>
+
+        <div class="cat">
+          <h4>🌾 Land / volunteers <span class="n">2</span></h4>
+          <div class="row"><span class="ph">H</span><div><div class="who">Holly</div><div class="what">Volunteers to remove invasive plants (River Farm)</div></div></div>
+          <div class="row"><span class="ph">K</span><div><div class="who">Karina</div><div class="what">Co-organizers for biochar camping</div></div></div>
+        </div>
+
+        <div class="cat">
+          <h4>👥 Community / pods <span class="n">3</span></h4>
+          <div class="row"><span class="ph">M</span><div><div class="who">Monika</div><div class="what">Pod to work through a "life instruction manual"</div></div></div>
+          <div class="row"><span class="ph">G</span><div><div class="who">Greg</div><div class="what">People to do community-raising with</div></div></div>
+          <div class="row"><span class="ph">S</span><div><div class="who">Spencer</div><div class="what">Community child-raising (no bio kids)</div></div></div>
+        </div>
+
+        <div class="cat">
+          <h4>🎓 Governance / structure <span class="n">1</span></h4>
+          <div class="row"><span class="ph">I</span><div><div class="who">Iris</div><div class="what">Dynamic governance for Burien farmers-market space</div></div></div>
+        </div>
+
+        <div class="cat">
+          <h4>💼 Job / work <span class="n">1</span></h4>
+          <div class="row"><span class="ph">A</span><div><div class="who">Alecia</div><div class="what">Part-time work, willing to talk ideas</div></div></div>
+        </div>
+      </div>
     </div>
+
+    <div style="color:#fff;text-align:center;margin-top:22px;font-size:13px;opacity:.85;">
+      <b>Match legend:</b> A category that appears in BOTH columns lights up on both sides —
+      the green/amber left border marks a specific person whose offer or need matches something across the wall.
+    </div>
+
   </div>
 </div>
 
+<!-- ═══════════════════ DESIGN C — Personal feed ═══════════════════ -->
+<div class="design" id="design-c" style="background:#5A2E7A;">
+  <div class="design-header">
+    <span class="tag">Design C</span>
+    <h2>Personal feed — like a matchmaker's inbox</h2>
+    <p>Karina scrolls a personalized feed of match cards. Each card names one match, explains why, and offers three actions: Introduce me, Bookmark, Skip. Group-level aggregate is a one-line strip at the top that expands into the classic quadrants when she wants — otherwise the aggregate stays out of her way entirely. Great for daily-checkin usage: "what's for me today?"</p>
+  </div>
+  <div class="design-body">
 
-<!-- Postal modal -->
-<div class="modal-overlay" id="postal-modal">
-  <div class="modal">
-    <button class="modal-close" onclick="closePostalModal()">✕</button>
-    <div class="modal-title">Postal code</div>
-    <p style="font-size:14px;color:var(--soft);margin:0 0 14px;">Used to show local requests and offers near you.</p>
-    <input type="text" id="postal-modal-input" placeholder="Enter your postal code" style="width:100%;padding:12px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;font-family:'DM Sans',sans-serif;box-sizing:border-box;">
-    <div style="margin-top:16px">
-      <button class="custom-add-confirm" onclick="savePostalModal()">Done</button>
-      <button class="custom-add-cancel" onclick="closePostalModal()">Cancel</button>
+    <div class="c-hero">
+      <div class="avatar">K</div>
+      <div>
+        <div class="h">Karina, we found matches for you</div>
+        <h3>3 introductions ready, 2 more brewing</h3>
+        <p>Ranked by strongest overlap with what you shared. Skipped cards don't come back.</p>
+      </div>
     </div>
+
+    <div class="c-strip">
+      <div class="stats">This group has <b>21 offers</b> and <b>14 needs</b> across 17 people. Housing is the biggest match cluster.</div>
+      <a href="#">Show group aggregate →</a>
+    </div>
+
+    <div class="feed-card strong">
+      <div class="kicker">🏠 Match · Housing on Capitol Hill · 2 people</div>
+      <div class="body">You offer <b>a room to crash in on Capitol Hill</b>. Two people said they're looking for a place there.</div>
+      <div class="who-row">
+        <div class="who"><span class="ph">T</span>Theresa · wants Cap Hill w/ outdoor space</div>
+        <div class="who"><span class="ph">M</span>Monika · Cap Hill for 2 + dog</div>
+      </div>
+      <div class="why">Both said this at CCC '26 ShareOuts. Theresa also asked about mindfulness reading; Monika mentioned a "life instruction manual" pod.</div>
+      <div class="actions">
+        <button class="btn">Introduce me to both</button>
+        <button class="btn ghost sm">Message Theresa</button>
+        <button class="btn ghost sm">Message Monika</button>
+        <button class="btn ghost sm">Skip</button>
+      </div>
+    </div>
+
+    <div class="feed-card strong">
+      <div class="kicker">🌱 Match · Biochar co-host · 1 person</div>
+      <div class="body">You want <b>co-hosts for "burning shit for the planet" biochar events</b>. Lowell said he helps turn ideas into working things and has open capacity.</div>
+      <div class="who-row">
+        <div class="who"><span class="ph">L</span>Lowell · Green Lake/Tangletown · builds ideas → real things</div>
+      </div>
+      <div class="why">Lowell noted he's specifically open to software prototyping now that AI makes it easier. Your biochar events probably need a signup + reminder flow.</div>
+      <div class="actions">
+        <button class="btn">Introduce me</button>
+        <button class="btn ghost sm">Bookmark</button>
+        <button class="btn ghost sm">Skip</button>
+      </div>
+    </div>
+
+    <div class="feed-card">
+      <div class="kicker">🌾 Match · Your 20 acres · 2 people</div>
+      <div class="body">You mentioned <b>20 acres open for camping (no infrastructure)</b>. Two people might be interested for different reasons.</div>
+      <div class="who-row">
+        <div class="who"><span class="ph">H</span>Holly · River Farm · needs volunteers to remove invasive plants</div>
+        <div class="who"><span class="ph">C</span>Caitlyn · Bellingham · offers crash space, likes doing "cool shit" together</div>
+      </div>
+      <div class="why">Holly might send a crew that would use your acres; Caitlyn's crash space could pair with a weekend up at your land.</div>
+      <div class="actions">
+        <button class="btn">Introduce me to both</button>
+        <button class="btn ghost sm">Skip</button>
+      </div>
+    </div>
+
+    <div class="feed-card">
+      <div class="kicker">💡 Brewing · Waiting for one more overlap</div>
+      <div class="body"><b>Alecia (Capitol Hill)</b> is doing guerrilla gardening and looking for planting sites. Your 20 acres is a possible fit, but she asked for close-to-home spots — better as a Bellingham/Cascadia intro if that ever surfaces.</div>
+      <div class="actions">
+        <button class="btn ghost sm">Bookmark for later</button>
+        <button class="btn ghost sm">Skip</button>
+      </div>
+    </div>
+
+    <div class="feed-card">
+      <div class="kicker">📚 Brewing · Interest overlap, no ask yet</div>
+      <div class="body">Three people in this group are pottery / watercolor / mending curious — no one has asked to organize, but if you want to host a crafting drop-in at the Capitol Hill room, we can set that up.</div>
+      <div class="actions">
+        <button class="btn ghost sm">Start an event</button>
+        <button class="btn ghost sm">Skip</button>
+      </div>
+    </div>
+
+    <details class="insights" style="background:rgba(255,255,255,.94);">
+      <summary>Show group aggregate (skills / interests / values / needs quadrants)</summary>
+      <div class="content">
+        <div class="insights-grid">
+          <div class="qbox"><h4>Skills</h4><span class="mini">Software</span><span class="mini">Editing</span><span class="mini">Gardening</span><span class="mini">Biochar</span><span class="mini">Governance</span></div>
+          <div class="qbox"><h4>Interests</h4><span class="mini">Pottery</span><span class="mini">Watercolor</span><span class="mini">Solarpunk games</span><span class="mini">Mindfulness</span></div>
+          <div class="qbox"><h4>Values</h4><span class="mini">Carbon sequestration</span><span class="mini">Community raising</span><span class="mini">Storytelling</span><span class="mini">Solar policy</span></div>
+          <div class="qbox"><h4>Needs</h4><span class="mini">Housing</span><span class="mini">Volunteers</span><span class="mini">Playtesters</span><span class="mini">Governance</span><span class="mini">Job</span></div>
+        </div>
+      </div>
+    </details>
+
   </div>
 </div>
-<!-- Methods modal (edit mode) -->
-<div class="methods-modal-overlay" id="methods-modal">
-  <div class="methods-modal">
-    <h3 style="margin:0 0 4px;font-size:17px;font-weight:700;">What comes most naturally to you?</h3>
-    
-    <div class="methods-list" id="methods-modal-list"></div>
-    <div style="margin-top:8px;display:flex;gap:10px;">
-      <button class="custom-add-confirm" onclick="saveMethodsModal()">Done</button>
-      <button class="custom-add-cancel" onclick="closeMethodsModal()">Cancel</button>
-    </div>
-  </div>
-</div>
-
-<!-- Share modal -->
-<div class="modal-overlay" id="share-modal">
-  <div class="modal">
-    <button class="modal-close" onclick="closeShareModal()" style="position:absolute;top:16px;right:16px;">✕</button>
-    <div class="modal-title">Share my community profile</div>
-    <div class="share-actions">
-      <button class="share-copy-btn" onclick="copyShareLink()">Copy link</button>
-      <button class="share-native-btn" onclick="nativeShare()">Share ↗</button>
-    </div>
-    <div class="copy-confirm" id="copy-confirm">Link copied!</div>
-    <div class="qr-wrap">
-      <img id="qr-img" src="" alt="QR code">
-      <p style="font-size:12px;color:var(--muted);margin-top:10px;">Scan to view</p>
-    <button onclick="closeShareModal()" style="display:block;width:100%;margin-top:16px;padding:12px;background:var(--input-bg);border:1px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:var(--soft);cursor:pointer;">Close</button>
-    </div>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-<div class="level-popup" id="level-popup-1"></div>
-<div class="level-popup" id="level-popup-2"></div>
-<div class="level-popup" id="level-popup-3"></div>
 
 <script>
-// ─── Identity ────────────────────────────────────────────────────────────────
-var _appearId   = null;
-var _showId     = null;
-var _viewerMode = false;
-var _viewerPhoto = '';
-var _viewerName  = '';
-
-(function(){
-  var params=new URLSearchParams(window.location.search);
-  _showId=params.get('show')||null;
-  if(_showId){_viewerMode=true;return;}
-  var urlId=params.get('id')||params.get('memberCard');
-  if(urlId){_appearId=urlId;try{localStorage.setItem('appear-id',_appearId);}catch(e){}}
-  else{try{_appearId=localStorage.getItem('appear-id');}catch(e){}}
-})();
-
-var GS_URL='https://cw-api-gate.jessieupp.workers.dev';
-
-var PARENT_CATS=[
-  'Arts & Culture','Business & Finance','Community & Civic','Events & Gatherings',
-  'Family Wellbeing','Food & Drink','Home & Transportation','Mental Wellbeing',
-  'Nature & Outdoors','Pets & Animal Care','Physical Wellbeing','Recreation & Hobbies',
-  'Self-Expression & Beauty','Technology & Communications'
-];
-var FLAGGED_WORDS=['expert','leader','director','senior','advanced','junior'];
-var REC_TYPES=['Movement & Performance','Sports','Outdoor & Nature','Games & Strategy','Making & Collecting'];
-
-// ─── State ───────────────────────────────────────────────────────────────────
-var _screen      = 1;
-var _editMode    = false;   // true when editing from profile summary
-var _completed   = false;   // true after all 4 screens visited on first pass
-var _hasProfile  = false;   // true when ikigai data exists in sheet
-var _refData     = null;
-var _photo       = '';
-var _name        = '';
-var _languages   = [];
-var _langFilter  = '';
-var _postal      = '';
-
-var _interests   = [];
-var _skills      = [];
-var _values      = [];
-var _domains     = [];
-var _needsSkill  = [];
-var _needsRes    = [];
-var _methods     = [];
-var _expression  = '';
-var _screen2step = 'lang';
-var _customCareParent = '';
-
-// Drill state — all keys are strings
-var _drill = {
-  '1':  {parentCat:'',subCat:'',itemCat:''},
-  '2':  {parentCat:'',subCat:'',itemCat:''},
-  '3':  {parentCat:'',subCat:'',itemCat:''},
-  '4s': {parentCat:'',subCat:'',itemCat:''},
-  '4r': {parentCat:'',subCat:'',itemCat:''}
-};
-function getDrill(s){return _drill[String(s)]||{};}
-function resetDrillTo(s,level){
-  var d=_drill[String(s)]; if(!d) return;
-  if(level<=0){d.parentCat='';d.subCat='';d.itemCat='';}
-  else if(level===1){d.subCat='';d.itemCat='';}
-  else{d.itemCat='';}
+function pick(el, key){
+  document.querySelectorAll('.picker a').forEach(function(a){ a.classList.remove('active'); });
+  el.classList.add('active');
+  document.getElementById('design-'+key).scrollIntoView({behavior:'smooth', block:'start'});
 }
-
-var _searchQ={};
-var _customItem='';
-var _customScreen='';
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function rawVal(s){return String(s||'').replace(/'/g,"\\'");}
-function toast(msg){var t=document.getElementById('toast');if(!t)return;t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2600);}
-function shuffle(arr){var a=arr.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=a[i];a[i]=a[j];a[j]=tmp;}return a;}
-function sortAlpha(arr){return arr.slice().sort(function(a,b){return a.localeCompare(b);});}
-
-function matchesQuery(r,ql){
-  if((r.item||'').toLowerCase().includes(ql)) return true;
-  if((r.category||'').toLowerCase().includes(ql)) return true;
-  if((r.recType||'').toLowerCase().includes(ql)) return true;
-  var assoc=r.associations||'';
-  if(!assoc) return false;
-  return assoc.toLowerCase().split(/[\s,]+/).some(function(w){return w===ql||w.startsWith(ql);});
-}
-
-function checkFlag(q){var ql=q.toLowerCase();for(var i=0;i<FLAGGED_WORDS.length;i++){if(ql.includes(FLAGGED_WORDS[i]))return FLAGGED_WORDS[i];}return '';}
-
-// ─── Pool helpers ─────────────────────────────────────────────────────────────
-function getSkillPool(d){
-  if(!_refData) return [];
-  var base=_refData.skills||[];
-  if(d&&d.parentCat) base=base.filter(function(r){return r.category===d.parentCat;});
-  return base;
-}
-function getRecPool(d){
-  if(!_refData) return [];
-  var base=_refData.recreation||[];
-  if(d&&d.itemCat) return base.filter(function(r){return r.category===d.itemCat;});
-  if(d&&d.subCat) return base.filter(function(r){return r.category===d.subCat;});
-  if(d&&d.parentCat) return base.filter(function(r){return r.recType===d.parentCat;});
-  return base;
-}
-function getValuePool(d){
-  if(!_refData) return [];
-  var base=(_refData.values||[]).concat(_refData.domains||[]);
-  if(d&&d.parentCat) base=base.filter(function(r){return r.category===d.parentCat;});
-  return base;
-}
-function getResPool(d){
-  if(!_refData) return [];
-  var base=_refData.resources||[];
-  if(d&&d.parentCat) base=base.filter(function(r){return r.category===d.parentCat;});
-  return base;
-}
-function getPool(screen){
-  var s=String(screen);
-  var d=getDrill(s);
-  if(s==='1') return getRecPool(d);
-  if(s==='2') return getSkillPool(d);
-  if(s==='3') return getValuePool(d);
-  if(s==='4s') return getSkillPool(d);
-  if(s==='4r') return getResPool(d);
-  return [];
-}
-
-function getItemChips(screen){
-  var pool=getPool(screen);
-  return shuffle(pool.map(function(r){return r.item||r;}).filter(Boolean)).slice(0,30);
-}
-
-// Sub cats for skills — returns empty if none (falls to item chips directly)
-function getSkillSubCats(parentCat){
-  if(!_refData||!_refData.skills) return [];
-  var s={};
-  (_refData.skills||[]).filter(function(r){return r.category===parentCat;})
-    .forEach(function(r){if(r.subCategory) s[r.subCategory]=1;});
-  return sortAlpha(Object.keys(s));
-}
-
-// ─── Data loading ─────────────────────────────────────────────────────────────
-async function loadRefData(){
-  try{var res=await fetch(GS_URL+'?action=getReferenceData');_refData=await res.json();}
-  catch(e){_refData={languages:[],skills:[],values:[],domains:[],recreation:[],resources:[]};}
-}
-async function loadProfile(){
-  var id=_viewerMode?_showId:_appearId; if(!id) return;
-  try{
-    var res=await fetch(GS_URL+'?action=lookupProfile&appearId='+encodeURIComponent(id));
-    var data=await res.json();
-    if(data.found){
-      if(_viewerMode){_viewerPhoto=data.photo||'';_viewerName=data.name||'';}
-      else{_photo=data.photo||'';_name=data.name||'';}
-    }
-  }catch(e){}
-}
-async function loadIntake(){
-  var id=_viewerMode?_showId:_appearId; if(!id) return;
-  try{
-    var res=await fetch(GS_URL+'?action=getIntake&appearId='+encodeURIComponent(id));
-    var data=await res.json();
-    if(data.found&&data.data){
-      _hasProfile=true;
-      var d=data.data;
-      _postal=d.postal||'';
-      _methods=(d.methods||'').split('|').filter(Boolean);
-      _expression=d.expression||'';
-      _expressionItems=_expression?_expression.split('|').filter(Boolean):[];
-      _languages=d.languages?d.languages.split('|').filter(Boolean):[];
-      _interests=parseTagStr(d.interests,'level');
-      _skills=parseTagStr(d.skills,'level');
-      _values=parseTagStr(d.values,'level');
-      _domains=parseTagStr(d.domains,'level');
-      var np=parseNeedsStr(d.needs);
-      _needsSkill=np.filter(function(n){return n.ntype!=='resource';});
-      _needsRes=np.filter(function(n){return n.ntype==='resource';});
-    }
-  }catch(e){}
-  // If skills screen already rendered, update lang button immediately
-  if(_screen===2){var lb=document.getElementById('lang-edit-btn');if(lb)lb.textContent='✏️ '+(_languages.length?'Languages: '+_languages.join(', '):'Add your languages');}
-}
-
-function parseTagStr(str,lk){
-  if(!str) return [];
-  return str.split('|').filter(Boolean).map(function(s){
-    var p=s.split(':');var o={item:p[0],category:p.length>=3?p[1]:''};o[lk]=p.length>=3?p[2]||'':p[1]||'';return o;
-  });
-}
-function parseNeedsStr(str){
-  if(!str) return [];
-  return str.split('|').filter(Boolean).map(function(s){
-    var p=s.split(':');
-    return{item:p[0],category:p[3]||'',local:p[1]==='local',ntype:p[2]||'skill'};
-  });
-}
-
-// ─── Auto-save ────────────────────────────────────────────────────────────────
-function autoSave(){
-  if(!_appearId||_viewerMode) return;
-  var iStr=_interests.map(function(s){return s.item+(s.level?':'+s.level:'');}).join('|');
-  var sStr=_skills.map(function(s){return s.item+(s.level?':'+s.level:'');}).join('|');
-  var vStr=_values.map(function(s){return s.item+':'+(s.category||'')+':'+(s.level||'');}).join('|');
-  var dStr=_domains.map(function(s){return s.item+(s.level?':'+s.level:'');}).join('|');
-  var nStr=[].concat(
-    _needsSkill.map(function(s){return s.item+(s.local?':local':'')+':skill'+(s.category?':'+s.category:'');}),
-    _needsRes.map(function(s){return s.item+(s.local?':local':'')+':thing'+(s.category?':'+s.category:'');})
-  ).join('|');
-  var mStr=_methods.join('|');
-  fetch(GS_URL+'?action=saveIntake'
-    +'&appearId='+encodeURIComponent(_appearId)
-    +'&languages='+encodeURIComponent(_languages.join('|'))
-    +'&postal='+encodeURIComponent(_postal)
-    +'&interests='+encodeURIComponent(iStr)
-    +'&skills='+encodeURIComponent(sStr)
-    +'&values='+encodeURIComponent(vStr)
-    +'&domains='+encodeURIComponent(dStr)
-    +'&needs='+encodeURIComponent(nStr)
-    +'&methods='+encodeURIComponent(mStr)
-    +'&expression='+encodeURIComponent(_expression)
-  ).catch(function(){});
-  _hasProfile=true;
-}
-
-// ─── Drill-down render ────────────────────────────────────────────────────────
-window.renderDrill = function(screen, containerId){
-  var el=document.getElementById(containerId); if(!el) return;
-  var s=String(screen);
-  var d=getDrill(s);
-  var html='';
-
-  // Breadcrumb
-  if(d.parentCat){
-    html+='<div class="breadcrumb-nav">';
-    html+='<span class="breadcrumb-link" onclick="doResetDrill(\''+s+'\',0)">All categories</span>';
-    html+='<span> › </span><span class="breadcrumb-link" onclick="doResetDrill(\''+s+'\',1)">'+esc(d.parentCat)+'</span>';
-    if(d.subCat) html+='<span> › </span><span class="breadcrumb-link" onclick="doResetDrill(\''+s+'\',2)">'+esc(d.subCat)+'</span>';
-    if(d.itemCat) html+='<span> › </span><span>'+esc(d.itemCat)+'</span>';
-    html+='</div>';
-  }
-
-  if(!d.parentCat){
-    // Level 0: show top-level chips
-    if(s==='1'){
-      // Recreation: show rec types as sub chips
-      html+='<div class="sub-chips">';
-      REC_TYPES.forEach(function(t){
-        html+='<div class="sub-chip" onclick="doSetDrill(\'1\',\'parentCat\',\''+rawVal(t)+'\')">'+esc(t)+'</div>';
-      });
-      html+='</div>';
-    } else {
-      html+='<div class="cat-chips-grid">';
-      PARENT_CATS.forEach(function(c){
-        html+='<div class="cat-chip" onclick="doSetDrill(\''+s+'\',\'parentCat\',\''+rawVal(c)+'\')">'+esc(c)+'</div>';
-      });
-      html+='</div>';
-    }
-  } else if(s==='1'){
-    // Rec drill: level 1 = sub sport cats, level 2 = items
-    var pool=(_refData&&_refData.recreation)||[];
-    if(!d.subCat){
-      var subCats=(function(){var sc={};pool.filter(function(r){return r.recType===d.parentCat;}).forEach(function(r){if(r.category)sc[r.category]=1;});return sortAlpha(Object.keys(sc));})();
-      if(subCats.length){
-        html+='<div class="sub-chips">';
-        subCats.forEach(function(c){html+='<div class="sub-chip" onclick="doSetDrill(\'1\',\'subCat\',\''+rawVal(c)+'\')">'+esc(c)+'</div>';});
-        html+='</div>';
-      }
-    }
-    // Show chips: always when rec type has no sub-cats, or when subCat is selected
-    var chips=getItemChips(s);
-    var hasSubCats=(function(){var sc={};pool.filter(function(r){return r.recType===d.parentCat;}).forEach(function(r){if(r.category)sc[r.category]=1;});return Object.keys(sc).length>0;})();
-    if(chips.length && (d.subCat || !hasSubCats)){
-      var addedArr=_interests;
-      html+='<div class="ideas-prompt">Here are some ideas to get you started.</div>';
-      html+='<div class="item-chips">';
-      chips.forEach(function(item){
-        var isAdded=addedArr.some(function(r){return r.item===item;});
-        html+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="addItemFromChip(\''+s+'\',\''+esc(item)+'\',\''+esc(d.parentCat)+'\')">'+esc(item)+'</div>';
-      });
-      html+='<div class="item-chip" style="border-style:dashed;color:var(--brand);font-weight:700;" onclick="showCustomAdd(\'1\',\'\')" >+ Other</div>';
-      html+='</div>';
-    }
-  } else {
-    // Non-rec: check for sub-cats (skills only), then show item chips
-    if(s==='2'||s==='4s'){
-      var subs=getSkillSubCats(d.parentCat);
-      if(subs.length&&!d.subCat){
-        html+='<div class="sub-chips">';
-        subs.forEach(function(c){html+='<div class="sub-chip" onclick="doSetDrill(\''+s+'\',\'subCat\',\''+rawVal(c)+'\')">'+esc(c)+'</div>';});
-        html+='</div>';
-      }
-    }
-    // Item chips
-    var chips2=getItemChips(s);
-    if(chips2.length){
-      var arr2=s==='2'?_skills:s==='3'?_values:s==='4s'?_needsSkill:_needsRes;
-      html+='<div class="ideas-prompt">Here are some ideas to get you started.</div>';
-      html+='<div class="item-chips">';
-      chips2.forEach(function(item){
-        var isAdded=arr2.some(function(r){return r.item===item;});
-        var isPending=s==='4s'&&_pendingNeedsItem.item===item;
-        var chipOnclick=s==='4s'?'selectNeedsItem(\''+esc(item)+'\',\''+esc(d.parentCat)+'\')':'addItemFromChip(\''+s+'\',\''+esc(item)+'\',\''+esc(d.parentCat)+'\')';
-        html+='<div class="item-chip'+(isAdded?' added':isPending?' selected':'')+'\" onclick="'+chipOnclick+'">'+esc(item)+'</div>';
-      });
-      html+='<div class="item-chip" style="border-style:dashed;color:var(--brand);font-weight:700;" onclick="showCustomAdd(\''+s+'\',\'\')" >+ Other</div>';
-      html+='</div>';
-      if(s==='4s'&&_pendingNeedsItem.item){
-        html+='<div id="needs-confirm-bar" style="margin-top:12px;padding:12px;background:var(--input-bg);border-radius:10px;display:flex;align-items:center;justify-content:space-between;">'          +'<span style="font-size:14px;color:var(--soft);">'+esc(_pendingNeedsItem.item)+'</span>'          +'<div style="display:flex;gap:8px;">'          +'<button class="btn-outlined" style="padding:6px 14px;font-size:13px;" onclick="_pendingNeedsItem={item:\'\',category:\'\'};renderDrill(\'4s\',\'drill-4s\')">Cancel</button>'          +'<button class="btn-primary" style="padding:6px 14px;font-size:13px;" onclick="confirmNeedsItem()">Add '+esc(_pendingNeedsItem.item)+'</button>'          +'</div></div>';
-      }
-    }
-  }
-
-  el.innerHTML=html;
-};
-
-window.doSetDrill = function(screen, key, val){
-  var s=String(screen);
-  var d=_drill[s]; if(!d) return;
-  if(key==='parentCat'){
-    if(d.parentCat===val){d.parentCat='';d.subCat='';d.itemCat='';}
-    else{d.parentCat=val;d.subCat='';d.itemCat='';}
-  } else if(key==='subCat'){d.subCat=val;d.itemCat='';}
-  else{d.itemCat=val;}
-  window.renderDrill(s,'drill-'+s);
-};
-
-window.doResetDrill = function(screen, level){
-  resetDrillTo(screen, level);
-  window.renderDrill(String(screen),'drill-'+String(screen));
-};
-
-// ─── Add items ────────────────────────────────────────────────────────────────
-function refreshNeedsSummary(){
-  var el=document.getElementById('needs-summary-block');
-  if(!el) return;
-  var expanded=document.getElementById('needs-summary-body')&&document.getElementById('needs-summary-body').style.display!=='none';
-  var html=buildNeedsSummary();
-  var nav=document.querySelector('.nav-row');
-  if(nav&&nav.parentNode){
-    var old=document.getElementById('needs-summary-block');
-    if(old) old.parentNode.removeChild(old);
-    var tmp=document.createElement('div');
-    tmp.innerHTML=html;
-    if(tmp.firstChild) nav.parentNode.insertBefore(tmp.firstChild,nav);
-    if(expanded){
-      var body=document.getElementById('needs-summary-body');
-      var arrow=document.getElementById('needs-summary-arrow');
-      if(body) body.style.display='flex';
-      if(arrow) arrow.textContent='▲';
-    }
-  }
-}
-window.selectNeedsItem = function(item, category){
-  _pendingNeedsItem={item:item,category:category};
-  window.renderDrill('4s','drill-4s');
-};
-window.confirmNeedsItem = function(){
-  if(!_pendingNeedsItem.item) return;
-  window.addItemFromChip('4s',_pendingNeedsItem.item,_pendingNeedsItem.category);
-  _pendingNeedsItem={item:'',category:''};
-};
-window.addItemFromChip = function(screen, item, category){
-  var s=String(screen);
-  var arr=getArr(s);
-  // Already added — deselect and remove
-  if(arr.some(function(r){return r.item===item;})){
-    var idx=arr.findIndex(function(r){return r.item===item;});
-    if(idx>-1) arr.splice(idx,1);
-    document.querySelectorAll('.item-chips .item-chip').forEach(function(el){
-      if(el.textContent.trim()===item) el.classList.remove('added');
-    });
-    if(s==='3'){
-      var el0v=document.getElementById('added-3-values');
-      var el0d=document.getElementById('added-3-domains');
-      if(el0v) el0v.innerHTML=buildValAddedHTML(_values.filter(function(v){return v.category&&v.category!=='domain';}), 'Added values');
-      if(el0d) el0d.innerHTML=buildValAddedHTML(_values.filter(function(v){return !v.category||v.category==='domain';}), 'Added domains');
-    } else { updateAddedSection(s); }
-    if(s==='4s'||s==='4r') refreshNeedsSummary();
-    autoSave();
-    return;
-  }
-  addItem(screen, item, category);
-  document.querySelectorAll('.item-chips .item-chip').forEach(function(el){
-    if(el.textContent.trim()===item) el.classList.add('added');
-  });
-  if(s==='3'){
-    // Auto-expand the section that got a new item
-    if(category&&category!=='domain') expandValSection('val-body-Added-values','val-arrow-Added-values');
-    else expandValSection('val-body-Added-domains','val-arrow-Added-domains');
-  }
-  if(s==='4s'||s==='4r') refreshNeedsSummary();
-};
-
-function addItem(screen, item, category){
-  var s=String(screen);
-  var arr=getArr(s);
-  if(arr.some(function(r){return r.item===item;})){toast('Already added');return;}
-  if(s==='1') _interests.unshift({item:item,category:category||'',level:''});
-  else if(s==='2') _skills.unshift({item:item,category:category||'',level:''});
-  else if(s==='3'){
-    if(_valTab==='domains'||(!_editMode&&_screen2step==='domains')) _domains.unshift({item:item,category:category||'',level:''});
-    else _values.unshift({item:item,category:category||'',level:''});
-  }
-  else if(s==='4s'){_needsSkill.unshift({item:item,category:category||(_drill['4s']&&_drill['4s'].parentCat)||'',local:false,ntype:'skill'});var tc=document.getElementById('needs-type-chips');if(tc)tc.style.display='';setTimeout(function(){if(_needsCat)window.setNeedsCat(_needsCat);},50);}
-  else if(s==='4r'){_needsRes.unshift({item:item,category:category||(_drill['4r']&&_drill['4r'].parentCat)||'',local:false,ntype:'resource'});var tc2=document.getElementById('needs-type-chips');if(tc2)tc2.style.display='';setTimeout(function(){if(_needsCat)window.setNeedsCat(_needsCat);},50);}
-  toast('Added below ↓');
-  clearSearch(s);
-  updateAddedSection(s);
-}
-
-function getArr(s){
-  s=String(s);
-  if(s==='1') return _interests;
-  if(s==='2') return _skills;
-  if(s==='3') return _values.concat(_domains);
-  if(s==='4s') return _needsSkill;
-  if(s==='4r') return _needsRes;
-  return [];
-}
-
-function refreshNeedsVisible(){
-  var vis=document.getElementById('needs-added-visible');
-  if(vis){
-    vis.innerHTML=(_needsSkill.length?buildAddedHTML('4s'):'')+(_needsRes.length?buildAddedHTML('4r'):'');
-  }
-}
-window.removeItem = function(screen, idx){
-  var s=String(screen);
-  if(s==='3'){
-    // For screen 3, need to determine if item is from _values or _domains
-    // Combined array is _values.concat(_domains)
-    if(idx<_values.length){
-      _values.splice(idx,1);
-    } else {
-      _domains.splice(idx-_values.length,1);
-    }
-  } else {
-    getArr(s).splice(idx,1);
-  }
-  updateAddedSection(s);
-  if(s==='4s'||s==='4r') refreshNeedsVisible();
-  else window.renderDrill(s,'drill-'+s);
-};
-
-window.setLevel = function(screen, idx, level){
-  var s=String(screen);
-  var arr;
-  if(s==='3'){
-    // For screen 3, determine which array and adjust index
-    if(idx<_values.length){
-      arr=_values;
-    } else {
-      arr=_domains;
-      idx=idx-_values.length;
-    }
-  } else {
-    arr=getArr(s);
-  }
-  if(!arr[idx]) return;
-  if(s==='3'){
-    arr[idx].level=(arr[idx].level===level?'':level);
-    updateAddedSection('3');
-    return;
-  }
-  var current=arr[idx].level||'';
-  var parts=current?current.split(','):[];
-  var pos=parts.indexOf(level);
-  if(pos>-1) parts.splice(pos,1); else parts.push(level);
-  arr[idx].level=parts.join(',');
-  updateAddedSection(s);
-};
-
-window.toggleLocal = function(screen, idx){
-  var arr=getArr(String(screen));
-  if(arr[idx]) arr[idx].local=!arr[idx].local;
-  updateAddedSection(String(screen));
-};
-
-function updateAddedSection(s){
-  if(s==='3'){
-    // Update in place instead of full re-render to avoid wiping added sections
-    var valAdded=_values.filter(function(v){return v.category&&v.category!=='domain';});
-    var domAdded=_values.filter(function(v){return !v.category||v.category==='domain';});
-    var elV=document.getElementById('added-3-values');
-    var elD=document.getElementById('added-3-domains');
-    if(elV) elV.innerHTML=buildValAddedHTML(valAdded,'Added values');
-    if(elD) elD.innerHTML=buildValAddedHTML(domAdded,'Added domains');
-    return;
-  }
-  var el=document.getElementById('added-'+s);
-  if(el){ el.innerHTML=buildAddedHTML(s); expandAddedSection('added-body-'+s,'added-arrow-'+s); }
-  if(s==='4s'||s==='4r') refreshNeedsVisible();
-}
-
-var LEVEL_HELP={
-  '1':'<b>Fan:</b> You follow it, watch it, or love it from the sideline.<br><b>Participant:</b> You do it yourself, with some regularity.<br><b>Coach:</b> You guide others in it.',
-  '2':'<b>Entry Level:</b> You are learning and building confidence.<br><b>Mid Level:</b> You do this regularly and do it well.<br><b>Expert Level:</b> You help others develop this skill.',
-  '3':'<b>Exploring:</b> You are drawn to this and want to learn more.<br><b>Engaged:</b> You act on this regularly in your life or work.<br><b>Leading:</b> You take initiative and bring others into it.'
-};
-window.toggleLevelHelp=function(s){
-  var p=document.getElementById('level-popup-'+s);if(!p)return;
-  var isOpen=p.classList.contains('open');
-  document.querySelectorAll('.level-popup').forEach(function(el){el.classList.remove('open');});
-  var ob=document.getElementById('popup-overlay');
-  if(!isOpen){
-    p.innerHTML=(LEVEL_HELP[s]||'')+'<span class="level-popup-close" onclick="document.querySelectorAll(\'.level-popup\').forEach(function(p){p.classList.remove(\'open\');});var ob=document.getElementById(\'popup-overlay\');if(ob)ob.remove();">Close</span>';
-    p.classList.add('open');
-    if(!ob){ob=document.createElement('div');ob.id='popup-overlay';ob.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:9998;';ob.onclick=function(){document.querySelectorAll('.level-popup').forEach(function(el){el.classList.remove('open');});ob.remove();};document.body.appendChild(ob);}
-  } else {
-    if(ob) ob.remove();
-  }
-};
-
-function buildAddedHTML(s){
-  var arr=getArr(s);
-  var levels=s==='1'?['Fan','Participant','Coach']:s==='2'?['Entry Level','Mid Level','Expert Level']:s==='3'?['Exploring','Engaged','Leading']:null;
-  var helpBtn=levels?'<button class="level-help-btn" style="border-color:rgba(255,255,255,0.5);color:white;" onclick="toggleLevelHelp('+JSON.stringify(s)+')">?</button>':'';
-  if(!arr.length) return '<div class="empty">Nothing added yet.</div>';
-  var isNeed=(s==='4s'||s==='4r');
-  var useGrid=!isNeed;
-  var bodyId='added-body-'+s;
-  var arrowId='added-arrow-'+s;
-  var label=s==='1'?'Joy added ('+arr.length+')':s==='2'?'Skills added ('+arr.length+')':s==='4s'?'Services added ('+arr.length+')':s==='4r'?'Resources added ('+arr.length+')':'Added ('+arr.length+')';
-  var showArrow=arr.length>7;
-  var arrowSpan=showArrow?'<span id="'+arrowId+'" style="font-size:12px;color:white;">&#9660;</span>':'';
-  var hdrClick=showArrow?' onclick="toggleAddedSection(\''+bodyId+'\',\''+arrowId+'\')"':'';
-  var hdrCursor=showArrow?'cursor:pointer;':'';
-  var header='<div class="added-header-row" style="'+hdrCursor+'background:var(--brand);border-radius:8px;padding:8px 12px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;"'+hdrClick+'>'
-    +'<div class="added-label" style="color:white;font-size:13px;font-weight:700;">'+label+'</div>'
-    +'<div style="display:flex;align-items:center;gap:8px;">'+helpBtn+arrowSpan+'</div></div>';
-  var bodyItems=arr.map(function(item,i){
-    if(isNeed){
-      var catMissing=!item.category;
-      var pickerId='need-cat-picker-'+s+'-'+i;
-      var catLabel=catMissing
-        ?'<div class="need-missing-cat" style="font-size:11px;color:#d32f2f;cursor:pointer;" onclick="window.openNeedCatPicker(\''+s+'\','+i+')">Category missing \u25be</div>'
-         +'<div class="cat-picker-inline" id="'+pickerId+'">'+PARENT_CATS.map(function(c){return '<button class="cat-pick-btn" onclick="setNeedCat(\''+s+'\','+i+',\''+c+'\')">'+c+'</button>';}).join('')+'</div>'
-        :'<div class="need-item-cat">'+esc(item.category)+'</div>';
-      return '<div class="need-item">'
-        +'<div class="need-item-left" id="need-item-wrap-'+s+'-'+i+'" style="position:relative;"><div class="need-item-name">'+esc(item.item)+'</div>'+catLabel+'</div>'
-        +'<div class="need-item-right">'
-        +'<label class="local-toggle'+(item.local?' active':'')+'" ><input type="checkbox"'+(item.local?' checked':'')+' onchange="toggleLocal(\''+s+'\','+i+')"> 📍 Local</label>'
-        +'<button class="practice-item-x" onclick="removeItem(\''+s+'\','+i+')">\u00d7</button>'
-        +'</div></div>';
-    }
-    var btns=levels?levels.map(function(lv){
-      return '<button class="practice-btn'+(item.level&&item.level.split(',').indexOf(lv)>-1?' selected':'')+'" onclick="setLevel(\''+s+'\','+i+',\''+esc(lv)+'\')">'+lv+'</button>';
-    }).join(''):'';
-    return '<div class="practice-item">'
-      +'<div class="practice-item-header"><div class="practice-item-name">'+esc(item.item)+'</div>'
-      +'<button class="practice-item-x" onclick="removeItem(\''+s+'\','+i+')">\u00d7</button></div>'
-      +(item.category?'<div class="practice-item-cat">'+esc(item.category)+'</div>':'')
-      +(levels?'<div class="practice-options">'+btns+'</div>':'')
-      +'</div>';
-  }).join('');
-  return '<div class="added-section">'+header+'<div id="'+bodyId+'" style="display:block;">'+(useGrid?'<div class="practice-grid">':'')+bodyItems+(useGrid?'</div>':'')+'</div></div>';
-}
-
-// ─── Search ───────────────────────────────────────────────────────────────────
-function getFullPool(s){
-  if(!_refData) return [];
-  if(s==='1') return _refData.recreation||[];
-  if(s==='2'||s==='4s') return _refData.skills||[];
-  if(s==='3') return (_refData.values||[]).concat(_refData.domains||[]);
-  if(s==='4r') return _refData.resources||[];
-  return [];
-}
-window.runSearch = function(screen, q){
-  var s=String(screen);
-  _searchQ[s]=q;
-  if(s==='2'){
-    var flagged=checkFlag(q);
-    var warnEl=document.getElementById('title-warning-2');
-    if(warnEl) warnEl.innerHTML=flagged?'<div class="warning-msg">Gentle note: titles like "'+esc(flagged)+'" carry a level of knowledge we ask about separately. Try the role name on its own.</div>':'';
-  }
-  var pool=q&&q.length>=1?getFullPool(s):getPool(s);
-  var res=[];
-  if(q&&q.length>=1){var ql=q.toLowerCase();res=pool.filter(function(r){return matchesQuery(r,ql);}).slice(0,25);}
-  var container=document.getElementById('search-results-'+s); if(!container) return;
-  var inp=document.getElementById('search-input-'+s);
-  if(inp){if(q&&res.length)inp.classList.add('has-results');else inp.classList.remove('has-results');}
-  if(!q||q.length<1){container.innerHTML='';return;}
-  if(res.length){
-    container.innerHTML='<div class="search-results">'
-      +res.map(function(r){
-          var item=esc(r.item||r);
-          var crumb=s==='1'?breadcrumbForRec(r):(r.category||'');
-          return '<div class="search-result-item" onclick="addItem(\''+s+'\',\''+item+'\',\''+esc(r.category||'')+'\')">'
-            +item+(crumb?'<div class="search-result-breadcrumb">'+esc(crumb)+'</div>':'')+'</div>';
-        }).join('')+'</div>';
-  } else {
-    container.innerHTML='<div class="add-custom-row" onclick="showCustomAdd(\''+s+'\',\''+esc(q)+'\')">+ Add "'+esc(q)+'" to my list</div>';
-  }
-};
-
-function breadcrumbForRec(r){
-  var parts=['Recreation & Hobbies'];
-  if(r.recType) parts.push(r.recType);
-  if(r.category&&r.category!==r.recType) parts.push(r.category);
-  return parts.join(' › ');
-}
-
-function clearSearch(s){
-  _searchQ[s]='';
-  var inp=document.getElementById('search-input-'+s);
-  if(inp){inp.value='';inp.classList.remove('has-results');}
-  var rc=document.getElementById('search-results-'+s); if(rc) rc.innerHTML='';
-}
-
-// ─── Custom add ───────────────────────────────────────────────────────────────
-window.showCustomAdd = function(screen, item){
-  _customScreen=String(screen);
-  // Detect if item is a care category label (parent cat, not an item name)
-  var isCareParent=CARE_CATS&&CARE_CATS.some(function(c){return c.label===item;});
-  if(isCareParent){
-    _customItem=''; _customCareParent=item;
-  } else {
-    _customItem=toTitleCase(item); _customCareParent='';
-  }
-  // Try search-results container first, fall back to a modal approach
-  var container=document.getElementById('search-results-'+_customScreen);
-  if(!container) container=document.getElementById('needs-cat-content');
-  if(!container) container=document.getElementById('drill-'+_customScreen);
-  if(!container) return;
-  var opts='<option value="">Select a category</option>'
-    +PARENT_CATS.map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join('');
-  // If item is empty, show text input first
-  if(isCareParent){
-    // Care category +Other: render below chips using placeholder div
-    var ci=CARE_CATS?CARE_CATS.findIndex(function(c){return c.label===item;}):-1;
-    var careContainer=ci>-1?document.getElementById('custom-add-care-'+ci):null;
-    if(careContainer){
-      careContainer.innerHTML='<div class="custom-add-box" style="margin-top:8px;">'
-        +'<label style="font-size:13px;color:var(--soft);display:block;margin-bottom:6px;">What would you like to add under '+esc(item)+'?</label>'
-        +'<input type="text" id="custom-item-input" placeholder="Type your item..." style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;margin-bottom:8px;">'
-        +'<button class="custom-add-confirm" onclick="confirmCustomAdd()">Add to my list</button>'
-        +'<button class="custom-add-cancel" onclick="cancelCustomAdd()">Cancel</button>'
-        +'</div>';
-    }
-    return;
-  }
-  var itemField=item?'':'<input type="text" id="custom-item-input" placeholder="What would you like to add?" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;margin-bottom:8px;">';
-  var drillCat=getDrill(_customScreen).parentCat||'';
-  if(drillCat){
-    // Drilled into a category - auto-assign, no dropdown
-    container.innerHTML='<div class="custom-add-box">'
-      +itemField
-      +'<label style="font-size:13px;color:var(--soft);display:block;margin-bottom:6px;">Add your own to '+esc(drillCat)+':</label>'
-      +'<button class="custom-add-confirm" onclick="confirmCustomAdd()">Add to my list</button>'
-      +'<button class="custom-add-cancel" onclick="cancelCustomAdd()">Cancel</button>'
-      +'</div>';
-  } else {
-    // Top level - show category dropdown
-    var labelText=item?'What category does "'+esc(item)+'" belong to?':'Add your own:';
-    container.innerHTML='<div class="custom-add-box">'
-      +itemField
-      +'<label style="font-size:13px;color:var(--soft);display:block;margin-bottom:6px;">'+labelText+'</label>'
-      +'<select id="custom-cat-select" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;margin-bottom:8px;">'+opts+'</select>'
-      +'<button class="custom-add-confirm" onclick="confirmCustomAdd()">Add to my list</button>'
-      +'<button class="custom-add-cancel" onclick="cancelCustomAdd()">Cancel</button>'
-      +'</div>';
-  }
-};
-
-window.confirmCustomAdd = function(){
-  // If there was a text input for item name, read it
-  var itemInp=document.getElementById('custom-item-input');
-  if(itemInp&&itemInp.value.trim()) _customItem=toTitleCase(itemInp.value.trim());
-  if(!_customItem){toast('Please enter an item name');return;}
-  var cat=_customCareParent||'';
-  if(!cat){
-    // Check drill state first (auto-categorized from +Other in drill)
-    var drillCat=getDrill(_customScreen).parentCat||'';
-    if(drillCat){ cat=drillCat; }
-    else {
-      var sel=document.getElementById('custom-cat-select'); cat=sel?sel.value:'';
-      if(!cat){toast('Please select a category');return;}
-    }
-  }
-  fetch(GS_URL+'?action=addCustomSkill&appearId='+encodeURIComponent(_appearId)
-    +'&item='+encodeURIComponent(_customItem)+'&category='+encodeURIComponent(cat));
-  addItem(_customScreen,_customItem,cat);
-  var cs=_customScreen; _customItem=''; _customScreen='';
-  var c=document.getElementById('search-results-'+cs); if(c) c.innerHTML='';
-  var c2=document.getElementById('needs-cat-content'); if(c2&&!c) c2.innerHTML='';
-};
-
-window.cancelCustomAdd = function(){
-  var cs=_customScreen; _customItem=''; _customScreen='';
-  clearSearch(cs||'2');
-};
-
-// ─── Methods ──────────────────────────────────────────────────────────────────
-var _methodsDraft = [];
-window.openMethodsModal = function(){
-  var disp=(_refData&&_refData.methodsDisplay)||[];
-  _methodsDraft=_methods.map(function(m){
-    var match=disp.find(function(d){return methodsMatch(d,m);});
-    return match||m;
-  });
-  var m=document.getElementById('methods-modal'); if(m) m.classList.add('open');
-  renderMethodsModalList();
-};
-window.closeMethodsModal = function(){
-  var m=document.getElementById('methods-modal'); if(m) m.classList.remove('open');
-};
-window.saveMethodsModal = function(){
-  _methods = _methodsDraft.slice();
-  window.closeMethodsModal();
-  autoSave();
-  render();
-};
-function stripMethodEmoji(s){
-  // Remove leading emoji + space (emoji are typically 2 chars via surrogate pairs or single codepoints)
-  return s.replace(/^[\uD800-\uDBFF][\uDC00-\uDFFF]\s*/,'').replace(/^\p{Emoji}\s*/u,'').trim();
-}
-function methodsMatch(a, b){
-  return stripMethodEmoji(a)===stripMethodEmoji(b);
-}
-var _methodOpts=[];
-function renderMethodsModalList(){
-  var el=document.getElementById('methods-modal-list'); if(!el) return;
-  var opts=(_refData&&_refData.methodsDisplay)||[];
-  if(!opts.length){el.innerHTML='<div class="empty">Loading...</div>';return;}
-  _methodOpts=opts.slice();
-  el.innerHTML=opts.map(function(m,i){
-    var checked=_methodsDraft.some(function(d){return methodsMatch(d,m);});
-    return '<div class="method-item'+(checked?' selected':'')+'" onclick="toggleMethodDraft('+i+')">'
-      +'<div class="method-check'+(checked?' checked':'')+'">'+( checked?'✓':'')+'</div>'
-      +'<div class="method-text">'+esc(m)+'</div>'
-      +'</div>';
-  }).join('');
-}
-window.toggleMethodDraft = function(i){
-  var m=_methodOpts[i]; if(m===undefined) return;
-  var idx=-1;
-  _methodsDraft.forEach(function(d,j){if(methodsMatch(d,m))idx=j;});
-  if(idx>-1){ _methodsDraft.splice(idx,1); }
-  else { _methodsDraft.push(m); }
-  renderMethodsModalList();
-};
-var _methodInlineOpts=[];
-function buildMethodsChecklistHTML(draftArr, opts, maxLabel){
-  if(!opts||!opts.length) return '<div class="empty">Loading...</div>';
-  _methodInlineOpts=opts.slice();
-  var h='<div class="methods-list">';
-  opts.forEach(function(m,i){
-    var checked=draftArr.some(function(d){return methodsMatch(d,m);});
-    h+='<div class="method-item'+(checked?' selected':'')+'" onclick="toggleMethodInline('+i+')">'
-      +'<div class="method-check'+(checked?' checked':'')+'">'+( checked?'✓':'')+'</div>'
-      +'<div class="method-text">'+esc(m)+'</div>'
-      +'</div>';
-  });
-  h+='</div>';
-  return h;
-}
-window.toggleMethodInline = function(i){
-  var m=_methodInlineOpts[i]; if(m===undefined) return;
-  var idx=-1;
-  _methods.forEach(function(d,j){if(methodsMatch(d,m))idx=j;});
-  if(idx>-1){ _methods.splice(idx,1); }
-  else { _methods.push(m); }
-  var el=document.getElementById('methods-inline-list'); if(!el) return;
-  var opts=(_refData&&_refData.methodsDisplay)||[];
-  el.innerHTML=buildMethodsChecklistHTML(_methods, opts);
-};
-
-
-
-function toTitleCase(str){
-  return str.replace(/[^\s]+/g,function(w){
-    if(w.length<=5&&w===w.toUpperCase()&&/^[A-Z]+$/.test(w)) return w;
-    return w.charAt(0).toUpperCase()+w.slice(1).toLowerCase();
-  });
-}
-window.expandValSection=function(bodyId,arrowId){
-  var body=document.getElementById(bodyId);
-  var arrow=document.getElementById(arrowId);
-  if(body){body.style.display='block';}
-  if(arrow){arrow.innerHTML='&#9650;';}
-};
-window.toggleAddedSection=function(bodyId,arrowId){
-  var body=document.getElementById(bodyId);
-  var arrow=document.getElementById(arrowId);
-  if(!body) return;
-  if(body.style.display==='none'||body.style.display===''){
-    body.style.display='block';if(arrow)arrow.innerHTML='&#9650;';
-  } else {
-    body.style.display='none';if(arrow)arrow.innerHTML='&#9660;';
-  }
-};
-window.expandAddedSection=function(bodyId,arrowId){
-  var body=document.getElementById(bodyId);
-  var arrow=document.getElementById(arrowId);
-  if(body) body.style.display='block';
-  if(arrow) arrow.innerHTML='&#9650;';
-};
-window.toggleValSection=function(bodyId,arrowId){
-  var body=document.getElementById(bodyId);
-  var arrow=document.getElementById(arrowId);
-  if(!body) return;
-  if(body.style.display==='none'){body.style.display='block';if(arrow)arrow.textContent='\u25b2';}
-  else{body.style.display='none';if(arrow)arrow.textContent='\u25bc';}
-};
-window.openNeedCatPicker=function(s,idx){
-  var arr=getArr(s);
-  if(!arr||!arr[idx]) return;
-  var pickerId='need-cat-picker-'+s+'-'+idx;
-  var existing=document.getElementById(pickerId);
-  if(existing){existing.classList.toggle('open');return;}
-  // Rebuild the need item with inline select showing
-  var item=arr[idx];
-  var containerId='need-item-wrap-'+s+'-'+idx;
-  var wrap=document.getElementById(containerId);
-  if(wrap){
-    var opts='<option value="">Select category</option>'+PARENT_CATS.map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join('');
-    var sel='<div style="margin-top:4px;"><select style="font-size:12px;padding:4px 8px;border-radius:6px;border:1.5px solid var(--brand);width:100%;" onchange="window.setNeedCat(\''+s+'\','+idx+',this.value)"><option value="">Select category</option>'+PARENT_CATS.map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join('')+'</select></div>';
-    var catDiv=wrap.querySelector('.need-missing-cat');
-    if(catDiv) catDiv.innerHTML='<span style="font-size:11px;color:#d32f2f;">Category missing ▾</span>'+sel;
-  }
-};
-window.setNeedCat=function(s,idx,cat){
-  var arr=getArr(s);
-  if(arr&&arr[idx]) arr[idx].category=cat;
-  autoSave();
-  refreshNeedsVisible();
-};
-window.openCatPicker=function(screenKey, itemIdx){
-  // Close any open pickers first
-  document.querySelectorAll('.cat-picker-inline').forEach(function(el){el.classList.remove('open');});
-  var el=document.getElementById('cat-picker-'+screenKey+'-'+itemIdx);
-  if(el) el.classList.toggle('open');
-};
-window.setCatLevel=function(screenKey, itemIdx, level){
-  var arr=getArr(screenKey);
-  if(arr&&arr[itemIdx]) arr[itemIdx].level=level;
-  autoSave();
-  // Close picker and re-render profile
-  document.querySelectorAll('.cat-picker-inline').forEach(function(el){el.classList.remove('open');});
-  render();
-};
-window.openPostalModal=function(){
-  var m=document.getElementById('postal-modal'); if(m) m.classList.add('open');
-  var inp=document.getElementById('postal-modal-input'); if(inp) inp.value=_postal||'';
-  setTimeout(function(){if(inp) inp.focus();},100);
-};
-window.closePostalModal=function(){ var m=document.getElementById('postal-modal'); if(m) m.classList.remove('open'); };
-window.savePostalModal=function(){
-  var inp=document.getElementById('postal-modal-input');
-  _postal=(inp?inp.value.trim():'');
-  autoSave();
-  window.closePostalModal();
-  render();
-};
-window.openLangModal = function(){
-  var m=document.getElementById('lang-modal'); if(m) m.classList.add('open');
-  filterLangs('');
-  var si=document.getElementById('lang-modal-search'); if(si) si.value='';
-};
-window.closeLangModal = function(){ var m=document.getElementById('lang-modal'); if(m) m.classList.remove('open'); };
-window.saveLangModal = function(){
-  window.closeLangModal();
-  var el=document.getElementById('profile-lang-row'); if(el) el.innerHTML=buildLangRowHTML();
-  autoSave();
-  // Re-render lang step so tags show updated selections
-  if(!_editMode && _screen===2 && _screen2step==='lang') renderScreen2(null);
-};
-window.filterLangs = function(q){
-  _langFilter=q;
-  var list=document.getElementById('lang-list'); if(!list) return;
-  var langs=(_refData&&_refData.languages)?_refData.languages:[];
-  var ql=q.toLowerCase();
-  var filtered=ql?langs.filter(function(l){return l.toLowerCase().includes(ql);}):langs;
-  list.innerHTML=filtered.map(function(lang){
-    var sel=_languages.indexOf(lang)>-1;
-    return '<div class="lang-list-item'+(sel?' selected':'')+'" onclick="toggleLang(\''+esc(lang)+'\')">'
-      +'<span class="lang-check">'+(sel?'✓':'')+'</span>'+esc(lang)+'</div>';
-  }).join('');
-  var te=document.getElementById('lang-tags'); if(te) te.innerHTML=buildLangTagsHTML();
-};
-window.toggleLang = function(lang){ var idx=_languages.indexOf(lang);if(idx>-1)_languages.splice(idx,1);else _languages.push(lang);window.filterLangs(_langFilter); };
-window.removeLang = function(lang){ var idx=_languages.indexOf(lang);if(idx>-1)_languages.splice(idx,1);window.filterLangs(_langFilter); };
-function buildLangTagsHTML(){return _languages.map(function(l){return '<div class="lang-tag">'+esc(l)+'<span class="lang-tag-remove" onclick="removeLang(\''+esc(l)+'\')">×</span></div>';}).join('');}
-function buildLangRowHTML(){
-  var chips=_languages.map(function(l){
-    return '<div class="profile-tag" style="background:var(--input-bg);border-color:var(--border);color:var(--soft);">'+esc(l)+'</div>';
-  }).join('');
-  return chips||'';
-}
-
-// ─── Share modal ──────────────────────────────────────────────────────────────
-function getShareURL(){return 'https://creating.works/intake.html?show='+encodeURIComponent(_appearId||_showId||'');}
-window.openShareModal = function(){
-  var m=document.getElementById('share-modal'); if(m) m.classList.add('open');
-  var qi=document.getElementById('qr-img');
-  if(qi) qi.src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(getShareURL());
-  var cc=document.getElementById('copy-confirm'); if(cc) cc.style.display='none';
-};
-window.closeShareModal = function(){ var m=document.getElementById('share-modal'); if(m) m.classList.remove('open'); };
-window.copyShareLink = function(){
-  try{navigator.clipboard.writeText(getShareURL()).then(function(){var cc=document.getElementById('copy-confirm');if(cc){cc.style.display='block';setTimeout(function(){cc.style.display='none';},2000);}});}
-  catch(e){toast('Copy: '+getShareURL());}
-};
-window.nativeShare = function(){
-  if(navigator.share){navigator.share({title:'Community profile',url:getShareURL()}).catch(function(){});}
-  else{window.copyShareLink();}
-};
-
-// ─── Top right ────────────────────────────────────────────────────────────────
-function renderTopRight(){
-  var el=document.getElementById('top-right-area'); if(!el) return;
-  if(_viewerMode){
-    var ph=_viewerPhoto?'<div class="btn-photo"><img src="'+esc(_viewerPhoto)+'" alt=""></div>':'<div class="btn-photo">🌱</div>';
-    var givingLink='https://creating.works/giving.html?owner='+encodeURIComponent(_showId);
-    el.innerHTML='<a href="'+givingLink+'" target="_blank" style="text-decoration:none;color:inherit;"><div class="ikigai-btn" style="cursor:pointer;">'+ph+esc(_viewerName||'Profile')+'</div></a>';
-  } else {
-    var phImg=_photo?'<div class="btn-photo"><img src="'+esc(_photo)+'" alt=""></div>':'<div class="btn-photo">🌱</div>';
-    var photoClick=_screen===0?' onclick="openPostalModal()" style="cursor:pointer;"':'';
-    el.innerHTML='<div class="btn-photo"'+photoClick+'>'+phImg+'</div>';
-  }
-}
-
-window.goToProfile = function(){
-  // Only go to profile if completed all 4 sections on first visit, or if returning edit
-  if(!_completed&&!_hasProfile){toast('Complete all 4 sections first.');return;}
-  _editMode=false; _screen=0; render();
-};
-
-// ─── Render ───────────────────────────────────────────────────────────────────
-function render(){
-  var el=document.getElementById('app-content'); if(!el) return;
-  renderTopRight();
-  if(_viewerMode){
-    if(_hasProfile) renderProfile(el,true);
-    else el.innerHTML='<div class="empty" style="padding:40px;text-align:center;">No profile found.</div>';
-    return;
-  }
-  if(!_appearId){
-    el.innerHTML='<div style="text-align:center;padding:40px 20px"><p style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px;">Sign in to continue</p><p style="font-size:14px;color:var(--soft)"><a href="https://appear.network" style="color:var(--brand);font-weight:600;">Go to Appear Network</a> and open this page from your profile.</p></div>';
-    return;
-  }
-  if(_screen===0){ renderProfile(el,false); return; }
-  if(_screen==='1b'){ renderScreen1b(el); return; }
-  if(_screen==='share'){ renderScreenShare(el); return; }
-  var fn={1:renderScreen1,2:renderScreen2,3:renderScreen3,4:renderScreen4}[_screen];
-  if(fn) fn(el);
-}
-
-function progressHTML(n){
-  var s=''; for(var i=1;i<=4;i++) s+='<div class="progress-step'+(i<=n?' done':'')+'"></div>';
-  var labs=['','Recreation and hobbies','Your skillset','What you care about','What you need'];
-  return '<div class="progress-wrap"><div class="progress-steps">'+s+'</div><div class="progress-label">Section '+n+' of 4 — '+labs[n]+'</div></div>';
-}
-
-
-function buildNeedsSummary(){
-  var all=[];
-  _needsSkill.forEach(function(r){all.push(r.item+(r.local?' 📍':''));});
-  _needsRes.forEach(function(r){all.push(r.item+(r.local?' 📍':''));});
-  if(!all.length) return '';
-  var tags=all.map(function(t){return '<span class="needs-summary-tag">'+esc(t)+'</span>';}).join('');
-  return '<div class="needs-summary" id="needs-summary-block">'
-    +'<div class="needs-summary-header" onclick="toggleNeedsSummary()">'
-    +'<span>My needs so far ('+all.length+')</span><span id="needs-summary-arrow">▼</span>'
-    +'</div>'
-    +'<div class="needs-summary-body" id="needs-summary-body" style="display:none;">'+tags+'</div>'
-    +'</div>';
-}
-window.toggleNeedsSummary=function(){
-  var body=document.getElementById('needs-summary-body');
-  var arrow=document.getElementById('needs-summary-arrow');
-  if(!body) return;
-  if(body.style.display==='none'){body.style.display='flex';if(arrow)arrow.textContent='▲';}
-  else{body.style.display='none';if(arrow)arrow.textContent='▼';}
-};
-function navHTML(screen){
-  if(_editMode){
-    return '<div class="nav-row"><button class="btn-next" onclick="doneEdit()">Done</button></div>';
-  }
-  var isFirst=(screen===1);
-  var back=isFirst?'':'<button class="btn-back" onclick="goBack()">Back</button>';
-  var next='<button class="btn-next" onclick="goNext()">'+(screen===4?'Done':'Next')+'</button>';
-  var summary=screen===4?buildNeedsSummary():'';
-  return summary+'<div class="nav-row">'+back+next+'</div>';
-}
-
-function screenSearchHTML(s, placeholder, hideHelper){
-  var helper=hideHelper?'':'<div style="font-size:13px;color:var(--brand);margin:0 0 6px;">Search by keywords, select chips to add, or add your own.</div>';
-  return helper
-    +'<div class="search-wrap"><span class="search-icon">🔍</span>'
-    +'<input type="text" id="search-input-'+s+'" placeholder="'+esc(placeholder)+'" oninput="runSearch(\''+s+'\',this.value)"></div>'
-    +'<div id="search-results-'+s+'"></div>';
-}
-
-// Profile
-function renderProfile(el, viewerMode){
-  var SCREEN_LEVELS={'1':['Fan','Participant','Coach'],'2':['Entry Level','Mid Level','Expert Level'],'3':['Exploring','Engaged','Leading']};
-  function section(label, arr, hasLevel, levelKey, screenNum, noBorder, extra){
-    var screenKey=String(screenNum);
-    var lvOpts=SCREEN_LEVELS[screenKey]||[];
-    var tags=arr.length
-      ?arr.map(function(r,i){
-          var lv=hasLevel?(r[levelKey]||''):'';
-          var local=r.local?' 📍':'';
-          var missingLevel=hasLevel&&!lv&&!viewerMode;
-          var pickerId='cat-picker-'+screenKey+'-'+i;
-          var pickerBtns=missingLevel?lvOpts.map(function(opt){
-            return '<button class="cat-pick-btn" onclick="setCatLevel(\''+screenKey+'\','+i+',\''+opt+'\')">'+opt+'</button>';
-          }).join(''):'';
-          var picker=missingLevel?'<div class="cat-picker-inline" id="'+pickerId+'">'+pickerBtns+'</div>':'';
-          var missingTag=missingLevel?'<span style="font-size:11px;color:#d32f2f;font-weight:500;margin-left:4px;cursor:pointer;" onclick="openCatPicker(\''+screenKey+'\','+i+')">Category missing ▾</span>':'';
-          return '<div style="position:relative;display:inline-block;">'+'<div class="profile-tag"'+(missingLevel?' style="border-color:#d32f2f;"':'')+'>'+esc(r.item)+(lv?'<span class="tag-level">'+esc(lv)+'</span>':'')+missingTag+local+'</div>'+picker+'</div>';
-        }).join('')
-      :'<div class="profile-empty">Nothing added yet.</div>';
-    var actions=!viewerMode
-      ?'<div class="profile-section-actions">'
-        +'<button class="edit-btn" onclick="window.jumpTo('+screenNum+')">✏️ Edit</button>'
-        +'</div>'
-      :'';
-    return '<div class="profile-section"'+(noBorder?' style="border-bottom:none;padding-bottom:4px;"':'')+'>'+''
-      +'<div class="profile-section-header"><div class="profile-section-label">'+label+'</div>'+actions+'</div>'
-      +'<div class="profile-tags">'+tags+'</div>'
-      +(extra||'')
-      +'</div>';
-  }
-  var allNeeds=_needsSkill.concat(_needsRes);
-  el.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><h2 style="margin:0;">'+(viewerMode?'This is me 🌱':'Edit my event profile')+'</h2></div>'
-    +section("What I'm seeking",allNeeds,false,'',4)
-    +section('What I enjoy',_interests,true,'level',1,false,_expression?'<div style="margin-top:6px;display:flex;justify-content:flex-end;"><span style="font-size:13px;color:var(--soft);"><span style="font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:0.08em;color:var(--muted);">This is so me:</span> '+esc(_expressionItems.join(', '))+'</span></div>':'')
-    +'<div class="profile-section" style="border-bottom:none;padding-bottom:4px;">'
-    +'<div class="profile-section-header"><div class="profile-section-label">My skills</div>'
-    +(!viewerMode?'<div class="profile-section-actions"><button class="edit-btn" onclick="jumpTo(2)">✏️ Edit</button></div>':'')
-    +'</div>'
-    +'<div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:10px;">'
-    +(_methods.length
-      ?_methods.map(function(m){return '<div class="profile-tag" style="background:var(--input-bg);border-color:var(--border);color:var(--soft);font-size:12px;">'+esc(m)+'</div>';}).join('')
-      :'<span style="font-size:13px;color:var(--muted);">What comes most naturally to you?</span>')
-    +'</div>'
-    +'<div class="profile-tags">'
-    +(_skills.length
-      ?_skills.map(function(r,i){
-          var lv=r.level||'';
-          var missingLevel=!lv&&!viewerMode;
-          var pickerId='cat-picker-2-'+i;
-          var lvOpts=['Entry Level','Mid Level','Expert Level'];
-          var pickerBtns=missingLevel?lvOpts.map(function(opt){return '<button class="cat-pick-btn" onclick="setCatLevel(\'2\','+i+',\''+opt+'\')">' +opt+'</button>';}).join(''):'';
-          var picker=missingLevel?'<div class="cat-picker-inline" id="'+pickerId+'">'+pickerBtns+'</div>':'';
-          var missingTag=missingLevel?'<span style="font-size:11px;color:#d32f2f;font-weight:500;margin-left:4px;cursor:pointer;" onclick="openCatPicker(\'2\','+i+')">Category missing ▾</span>':'';
-          return '<div style="position:relative;display:inline-block;"><div class="profile-tag"'+(missingLevel?' style="border-color:#d32f2f;"':'')+'>'+esc(r.item)+(lv?'<span class="tag-level">'+esc(lv)+'</span>':'')+missingTag+'</div>'+picker+'</div>';
-        }).join('')
-      :'<div class="profile-empty">Nothing added yet.</div>')
-    +'</div></div>'
-    +'<div class="profile-lang-row" id="profile-lang-row">'+buildLangRowHTML()+'</div>'
-    +(function(viewerMode){
-    var valAdded=_values.filter(function(v){return v.category&&v.category!=='domain';});
-    var domAdded=_values.filter(function(v){return !v.category||v.category==='domain';});
-    var careActions=!viewerMode?'<div class="profile-section-actions"><button class="edit-btn" onclick="window.jumpTo(3)">✏️ Edit</button></div>':'';
-    var valSection=valAdded.length?'<div style="margin-bottom:8px;"><div style="font-size:10px;font-weight:700;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">VALUES</div><div class="profile-tags">'+valAdded.map(function(v){var lvl=v.level?'<span class="tag-level">'+esc(v.level)+'</span>':'';return '<div class="profile-tag">'+esc(v.item)+lvl+'</div>';}).join('')+'</div></div>':'';
-    var domSection=domAdded.length?'<div><div style="font-size:10px;font-weight:700;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">DOMAINS</div><div class="profile-tags">'+domAdded.map(function(v){var lvl=v.level?'<span class="tag-level">'+esc(v.level)+'</span>':'';return '<div class="profile-tag">'+esc(v.item)+lvl+'</div>';}).join('')+'</div></div>':'';
-    var careContent=valSection+domSection;
-    return careContent?'<div class="profile-section"><div class="profile-section-header"><div class="profile-section-label">What I care about</div>'+careActions+'</div>'+careContent+'</div>':'';
-  })(viewerMode)
-}
-
-window.jumpTo = function(screen){
-  _editMode=true; _screen=screen; render();
-};
-
-window.doneEdit = function(){ autoSave(); _editMode=false; _screen=0; render(); };
-// Glide scope safety
-if(typeof jumpTo==='undefined') var jumpTo=window.jumpTo;
-
-// Screen renders
-function renderScreen(s, heading, searchPlaceholder, drillId, addedId){
-  var el=document.getElementById('app-content'); if(!el) return;
-  el.innerHTML=(_editMode?'':progressHTML(s))
-    +'<h2>'+heading+'</h2>'
-    +(s===2?'<div id="title-warning-2"></div>':'')
-    
-    +screenSearchHTML(String(s),searchPlaceholder)
-    +'<div id="'+drillId+'"></div>'
-    +'<div id="'+addedId+'">'+buildAddedHTML(String(s))+'</div>'
-    +navHTML(s);
-  window.renderDrill(String(s),drillId);
-}
-
-function renderScreen1(el){
-  renderScreen(1,'What do you enjoy doing?','Search to add...','drill-1','added-1');
-  if(_editMode){
-    var cont=document.getElementById('app-content');
-    if(cont){
-      var chips=['My kitchen','My car','My bike','My garden','My wardrobe','My friends'];
-      var chipsHTML='<div class="item-chips" style="margin:4px 0 10px;">';
-      chips.forEach(function(c){
-        var isAdded=_expressionItems.indexOf(c)>-1;
-        chipsHTML+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="window.toggleExpressionChip(\''+esc(c)+'\')">'+c+'</div>';
-      });
-      chipsHTML+='<div class="item-chip" style="border-style:dashed;color:var(--brand);font-weight:700;" onclick="window.showExpressionCustom()">+ Other</div>';
-      chipsHTML+='</div>';
-      var addedHTML='';
-      if(_expressionItems.length){
-        addedHTML='<div class="added-section" style="margin-top:8px;">'
-          +'<div class="added-label">This is so me ('+_expressionItems.length+')</div>';
-        _expressionItems.forEach(function(item,i){
-          addedHTML+='<div class="added-item-row" style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--input-bg);border-radius:8px;margin-bottom:6px;">'
-            +'<span style="font-size:14px;color:var(--soft);">'+esc(item)+'</span>'
-            +'<span style="cursor:pointer;color:var(--muted);font-size:16px;" onclick="window.removeExpressionItem('+i+')">\u00d7</span>'
-            +'</div>';
-        });
-        addedHTML+='</div>';
-      }
-      var exprDiv=document.createElement('div');
-      exprDiv.style.cssText='margin-top:20px;padding-top:16px;border-top:1px solid var(--border);';
-      exprDiv.innerHTML='<h3 style="font-size:15px;font-weight:700;color:var(--soft);margin:0 0 6px;">What thing in your life expresses you the most?</h3>'
-        +chipsHTML+addedHTML+'<div id="expression-custom"></div>';
-      var nav=cont.querySelector('.nav-row');
-      if(nav) cont.insertBefore(exprDiv,nav);
-      else cont.appendChild(exprDiv);
-    }
-  }
-}
-var _expressionItems=[];
-function renderScreen1b(el){
-  var cont=document.getElementById('app-content'); if(!cont) return;
-  var chips=['My kitchen','My car','My bike','My garden','My wardrobe','My friends'];
-  var chipsHTML='<div class="ideas-prompt">Here are some ideas to get you started.</div><div class="item-chips">';
-  chips.forEach(function(c){
-    var isAdded=_expressionItems.indexOf(c)>-1;
-    chipsHTML+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="window.toggleExpressionChip(\''+esc(c)+'\')">'+c+'</div>';
-  });
-  chipsHTML+='<div class="item-chip" style="border-style:dashed;color:var(--brand);font-weight:700;" onclick="window.showExpressionCustom()">+ Other</div>';
-  chipsHTML+='</div>';
-  var addedHTML='';
-  if(_expressionItems.length){
-    addedHTML='<div class="added-section" style="margin-top:12px;">'
-      +'<div class="added-label">Added ('+_expressionItems.length+')</div>';
-    _expressionItems.forEach(function(item,i){
-      addedHTML+='<div class="added-item-row" style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--input-bg);border-radius:8px;margin-bottom:6px;">'
-        +'<span style="font-size:14px;color:var(--soft);">'+esc(item)+'</span>'
-        +'<span style="cursor:pointer;color:var(--muted);font-size:16px;" onclick="window.removeExpressionItem('+i+')">×</span>'
-        +'</div>';
-    });
-    addedHTML+='</div>';
-  }
-  var customHTML='<div id="expression-custom"></div>';
-  cont.innerHTML=(_editMode?'':progressHTML(1))
-    +'<h2>What thing in your life expresses you the most?</h2>'
-    +chipsHTML
-    +addedHTML
-    +customHTML
-    +navHTML('1b');
-}
-window.toggleExpressionChip=function(item){
-  var idx=_expressionItems.indexOf(item);
-  if(idx>-1) _expressionItems.splice(idx,1);
-  else _expressionItems.push(item);
-  _expression=_expressionItems.join('|');
-  autoSave();
-  if(_editMode) renderScreen1(null);
-  else renderScreen1b(null);
-};
-window.removeExpressionItem=function(i){
-  _expressionItems.splice(i,1);
-  _expression=_expressionItems.join('|');
-  autoSave();
-  if(_editMode) renderScreen1(null);
-  else renderScreen1b(null);
-};
-window.showExpressionCustom=function(){
-  var cont=document.getElementById('expression-custom');
-  if(!cont) return;
-  cont.innerHTML='<div class="custom-add-box" style="margin-top:8px;">'
-    +'<input type="text" id="expression-custom-input" placeholder="Type your item..." style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:\'DM Sans\',sans-serif;box-sizing:border-box;margin-bottom:8px;">'
-    +'<button class="custom-add-confirm" onclick="window.confirmExpressionCustom()">Add to my list</button>'
-    +'<button class="custom-add-cancel" onclick="document.getElementById(\'expression-custom\').innerHTML=\'\' ">Cancel</button>'
-    +'</div>';
-};
-window.confirmExpressionCustom=function(){
-  var inp=document.getElementById('expression-custom-input');
-  if(!inp||!inp.value.trim()) return;
-  _expressionItems.push(inp.value.trim());
-  _expression=_expressionItems.join('|');
-  autoSave();
-  if(_editMode) renderScreen1(null);
-  else renderScreen1b(null);
-};
-
-function renderScreenShare(el){
-  var cont=document.getElementById('app-content'); if(!cont) return;
-  var pageUrl=_appearId?'https://appear.network/dl/page/s/e13594/r/'+encodeURIComponent(_appearId):'';
-  cont.innerHTML='<div style="padding:20px 0;">'
-    +'<h2 style="margin-bottom:20px;">Share your page</h2>'
-    +'<p style="font-size:14px;color:var(--soft);margin-bottom:16px;">Your profile is now live. Share this link with your network.</p>'
-    +'<div style="background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:16px;display:flex;align-items:center;gap:10px;">'
-    +'<input type="text" value="'+esc(pageUrl)+'" readonly style="border:none;background:transparent;flex:1;font-size:13px;color:var(--text);font-family:monospace;outline:none;">'
-    +'<button onclick="navigator.clipboard.writeText(\''+esc(pageUrl)+'\').then(function(){toast(\'Link copied!\');},function(){})" style="background:var(--brand);color:white;border:none;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;">Copy link</button>'
-    +'</div>'
-    +'<button onclick="window.location.href=\'https://appear.network/dl/page/s/e13594/\'" style="width:100%;background:var(--brand);color:white;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;">View your profile</button>'
-    +'</div>'
-    +'<div class="nav-row"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" onclick="goNext()">Done</button></div>';
-}
-
-function renderScreen2(el){
-  var cont=document.getElementById('app-content'); if(!cont) return;
-  var opts=(_refData&&_refData.methodsDisplay)||[];
-
-  // Intake only: step 1 — languages
-  if(!_editMode&&_screen2step==='lang'){
-    var langTags=_languages.length
-      ?'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;">'+_languages.map(function(l){return '<div style="background:var(--sel-bg);border:1.5px solid var(--brand);border-radius:18px;padding:5px 12px;font-size:13px;color:var(--brand);font-weight:500;">'+esc(l)+'</div>';}).join('')+'</div>'
-      :'';
-    cont.innerHTML=progressHTML(2)
-      +'<h2>What language(s) do you speak?</h2>'
-      +'<p style="font-size:13px;color:var(--soft);margin:0 0 16px;">This helps us match you with people who speak your language.</p>'
-      +'<button class="btn-next" style="width:auto;padding:10px 20px;" onclick="openLangModal()">+ Add languages</button>'
-      +langTags
-      +navHTML(2);
-    return;
-  }
-  // Intake only: step 2 — naturally
-  if(!_editMode&&_screen2step==='naturally'){
-    var methodOpts=(_refData&&_refData.methodsDisplay)||[];
-    var methodsHTML='<div id="methods-inline-list" style="margin:12px 0;">';
-    methodOpts.forEach(function(m,i){
-      var checked=_methods.some(function(d){return methodsMatch(d,m);});
-      methodsHTML+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer;" onclick="window.toggleMethodInline('+i+')">'
-        +'<div style="width:20px;height:20px;border-radius:4px;border:1.5px solid '+(checked?'var(--brand)':'var(--border)')+';background:'+(checked?'var(--brand)':'white')+';display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
-        +(checked?'<svg width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>':'')
-        +'</div>'
-        +'<span style="font-size:15px;color:var(--text);">'+esc(m)+'</span>'
-        +'</div>';
-    });
-    methodsHTML+='</div>';
-    _methodInlineOpts=methodOpts.slice();
-    cont.innerHTML=progressHTML(2)
-      +'<h2>What comes most naturally to you?</h2>'
-      +methodsHTML
-      +navHTML(2);
-    return;
-  }
-
-  // Intake only: step 3 — postal code
-  if(!_editMode&&_screen2step==='postal'){
-    cont.innerHTML=progressHTML(2)
-      +'<h2>Where are you located?</h2>'
-      +'<p style="font-size:13px;color:var(--soft);margin:0 0 16px;">City, postal code, or region.</p>'
-      +'<input type="text" id="postal-input" placeholder="Your location" value="'+esc(_postal)+'" style="margin-bottom:14px;">'
-      +'<div style="display:flex;gap:10px;font-size:12px;color:var(--muted);margin-bottom:14px;">'
-      +'<span>✓</span>'
-      +'<span>Optional — you can add this anytime.</span>'
-      +'</div>'
-      +navHTML(2);
-    var inp=document.getElementById('postal-input');
-    if(inp){inp.focus();inp.addEventListener('keypress',function(e){if(e.key==='Enter'){goNext();}});}
-    return;
-  }
-
-  var methodsRow=_methods.length
-    ?'<div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:14px;">'
-      +'<button class="edit-btn" style="margin-right:6px;" onclick="openMethodsModal()">✏️</button>'
-      +_methods.map(function(m){return '<div class="profile-tag" style="font-size:12px;">'+esc(m)+'</div>';}).join('')
-      +'</div>'
-    :'';
-
-  if(_editMode){
-    cont.innerHTML=''
-      +'<h2>What skill pays the bills?</h2>'
-      
-            +'<div id="title-warning-2"></div>'
-      +'<div style="margin-bottom:14px;">'
-      +'<button id="lang-edit-btn" class="edit-btn" onclick="openLangModal()" style="display:inline-flex;align-items:center;gap:6px;">✏️ '
-      +(_languages.length?'Languages: '+_languages.join(', '):'Add your languages')+'</button>'
-      +'</div>'
-      +screenSearchHTML('2','Search skills to add...')
-      +'<div id="drill-2"></div>'
-      +'<div id="added-2">'+buildAddedHTML('2')+'</div>'
-      +navHTML(2);
-  } else {
-    cont.innerHTML=progressHTML(2)
-      +'<h2 style="padding-top:8px;">What skill pays the bills?</h2>'
-      
-            +'<div id="title-warning-2"></div>'
-      +screenSearchHTML('2','Search skills to add...')
-      +'<div id="drill-2"></div>'
-      +'<div id="added-2">'+buildAddedHTML('2')+'</div>'
-      +navHTML(2);
-  }
-  window.renderDrill('2','drill-2');
-}
-var _valTab=''; // '' | 'values' | 'domains'
-var CARE_CATS=[
-  {label:'Basic needs and security',items:['Water security','Food security','Safety and peace','Housing and shelter','Urgent medical care','Clothing and supplies'],type:'social'},
-  {label:'Human development',items:['Knowledge and skills','Physical and mental wellbeing','Empowerment and resilience','Freedom and autonomy','Personal expression'],type:'social'},
-  {label:'Economy and innovation',items:['Economic opportunity','Local economic vitality','Economic resilience','Wealth equity','Quality goods and services'],type:'social'},
-  {label:'Community and culture',items:['Information access and sharing','Social and civic engagement','Community health','Cultural vitality','Shared community resources'],type:'social'},
-  {label:'Systems and infrastructure',items:['Transportation access','Reliable utilities','Digital connectivity','Land security'],type:'social'},
-  {label:'Environmental values',items:['Clean air','Clean water','Clean soil','Clean food','Clean energy','Biodiversity','Climate stability','Animal welfare'],type:'environmental'}
-];
-
-var _careValCat=''; // selected care value category in intake/edit values tab
-window.setCareValCatByIdx=function(i){var c=CARE_CATS[i];if(c)window.setCareValCat(c.label);};
-window.setCareValCat=function(cat){
-  _careValCat=(_careValCat===cat?'':cat);
-  renderScreen3(null);
-};
-window.setValTab=function(tab){
-  _valTab=(_valTab===tab?'':tab);
-  renderScreen3(null);
-};
-
-function buildValAddedHTML(arr, label){
-  if(!arr.length) return '';
-  var safeId=label.replace(/[^a-zA-Z]/g,'-');
-  var bodyId='val-body-'+safeId;
-  var arrowId='val-arrow-'+safeId;
-  var h='<div class="added-section" style="margin-top:10px;">';
-  var valShowArrow=arr.length>7;
-  var valArrowSpan=valShowArrow?'<span id="'+arrowId+'" style="font-size:12px;color:white;">▼</span>':'';
-  var valHdrClick=valShowArrow?' onclick="toggleValSection(\''+bodyId+'\',\''+arrowId+'\')"':'';
-  var valHdrCursor=valShowArrow?'cursor:pointer;':'';
-  h+='<div class="added-header-row" style="'+valHdrCursor+'background:var(--brand);border-radius:8px;padding:8px 12px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;"'+valHdrClick+'>';
-  h+='<div class="added-label" style="color:white;font-size:13px;font-weight:700;">'+label+' ('+arr.length+')</div>';
-  h+='<div style="display:flex;align-items:center;gap:8px;">';
-  h+='<button class="level-help-btn" style="border-color:rgba(255,255,255,0.5);color:white;" onclick="event.stopPropagation();toggleLevelHelp(\'3\')">?</button>';
-  h+=valArrowSpan;
-  h+='</div></div>';
-  h+='<div id="'+bodyId+'" style="display:block;"><div class="practice-grid">';
-  arr.forEach(function(item,i){
-    // Calculate combined index: if this item is in _domains, add _values.length
-    var idx=i;
-    if(arr===_domains) idx=_values.length+i;
-    var btns='';
-    ['Exploring','Engaged','Leading'].forEach(function(lv){
-      var sel=item.level===lv;
-      btns+='<button class="practice-btn'+(sel?' selected':'')+'" onclick="setLevel(\'3\','+idx+',\''+lv+'\')">'+lv+'</button>';
-    });
-    h+='<div class="practice-item">';
-    h+='<div class="practice-item-header">';
-    h+='<div>';
-    h+='<div class="practice-item-name">'+esc(item.item)+'</div>';
-    if(item.category) h+='<div style="font-size:11px;color:var(--muted);margin-top:2px;">'+esc(item.category)+'</div>';
-    h+='</div>';
-    h+='<button class="practice-item-x" onclick="removeItem(\'3\','+idx+')">×</button></div>';
-    h+='<div class="practice-options">'+btns+'</div>';
-    h+='</div>';
-  });
-  h+='</div></div></div>';
-  return h;
-}
-
-
-
-function renderScreen3(el){
-  var cont=document.getElementById('app-content'); if(!cont) return;
-  var valAdded=_values;
-  var domAdded=_domains;
-
-  // Build 6-category Values UI (used in both intake and edit Values tab)
-  function buildCareCatHTML(){
-    // If a category is active, show breadcrumb + sub-chips only (hide other categories)
-    if(_careValCat){
-      var activeCat=CARE_CATS.find(function(c){return c.label===_careValCat;});
-      var ci=CARE_CATS.findIndex(function(c){return c.label===_careValCat;});
-      if(!activeCat) return '';
-      var html='<div style="margin-bottom:8px;"><span class="breadcrumb-link" onclick="window.setCareValCat(\'\')" style="font-size:12px;">Values</span>'
-        +' <span style="color:var(--muted);font-size:12px;">›</span>'
-        +' <span class="breadcrumb-link" onclick="window.setCareValCat(\'\')" style="font-size:12px;">'+esc(activeCat.label)+'</span></div>';
-      html+='<div class="item-chips" style="margin-bottom:8px;padding:8px;background:var(--input-bg);border-radius:10px;">';
-      activeCat.items.forEach(function(item){
-        var isAdded=_values.some(function(v){return v.item===item;});
-        html+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="addItemFromChip(\'3\',\''+esc(item)+'\',\''+esc(activeCat.label)+'\')">'+esc(item)+'</div>';
-      });
-      html+='<div class="item-chip" style="border-style:dashed;color:var(--brand);font-weight:700;" onclick="showCustomAdd(\'3\',\''+activeCat.label+'\')" >+ Other</div>';
-      html+='</div>';
-      html+='<div id="custom-add-care-'+ci+'"></div>';
-      return html;
-    }
-    // No active category: show all 6 buttons
-    var html='<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">';
-    CARE_CATS.forEach(function(c,ci){
-      html+='<div style="padding:10px 16px;border-radius:10px;border:1.5px solid var(--border);background:white;font-size:14px;font-weight:600;color:var(--soft);cursor:pointer;" onclick="window.setCareValCatByIdx('+ci+')">'+c.label+'</div>';
-    });
-    html+='</div>';
-    return html;
-  }
-
-  var tabs='<div class="values-tabs">'
-    +'<div class="values-tab'+(_valTab==='values'?' active':'')+'" onclick="setValTab(\'values\')">Values</div>'
-    +'<div class="values-tab'+(_valTab==='domains'?' active':'')+'" onclick="setValTab(\'domains\')">Domains</div>'
-    +'</div>';
-
-  // INTAKE: split into 3a (values) and 3b (domains)
-  if(!_editMode){
-    if(_valTab!=='domains'){
-      // 3a — Values with 6 categories
-      var careHTML=buildCareCatHTML();
-      cont.innerHTML=progressHTML(3)
-        +'<h2>What do you care about deeply?</h2>'
-          +'<p style="font-size:14px;color:var(--soft);margin:0 0 14px;">Where do you (or would you) like to volunteer your time or energy on a project or cause?</p>'
-        +screenSearchHTML('3','Search to add...')
-        +careHTML
-        +'<div id="added-3-values">'+buildValAddedHTML(valAdded,'Added values')+'</div>'
-        +'<div id="added-3-domains" style="display:none;"></div>'
-        +'<div id="added-3" style="display:none;"></div>'
-        +navHTML(3);
-      return;
-    } else {
-      // 3b — Domains
-      var doms=(_refData&&_refData.domains)||[];
-      var domChips='<div class="item-chips">';
-      doms.forEach(function(r){
-        var item=r.item||r;
-        var isAdded=_domains.some(function(v){return v.item===item;});
-        domChips+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="addItemFromChip(\'3\',\''+esc(item)+'\',\'domain\')">' +esc(item)+'</div>';
-      });
-      domChips+='<div class="item-chip" style="border-style:dashed;color:var(--brand);font-weight:700;" onclick="showCustomAdd(\'3\',\'domain\')">+ Other</div>';
-      domChips+='</div>';
-      cont.innerHTML=progressHTML(3)
-        +'<h2>Which domains are you most interested in?</h2>'
-        +screenSearchHTML('3','Search domains...')
-        +domChips
-        +'<div id="added-3-domains">'+buildValAddedHTML(domAdded,'Added domains')+'</div>'
-        +'<div id="added-3-values" style="display:none;"></div>'
-        +'<div id="added-3" style="display:none;"></div>'
-        +navHTML(3);
-      return;
-    }
-  }
-
-  // EDIT MODE: Values | Domains tabs side by side
-  var chipsHTML='';
-  if(!_valTab){
-    chipsHTML='<div class="ideas-prompt" style="color:var(--muted);">Select Values or Domains above to see ideas.</div>';
-  } else if(_valTab==='values'){
-    chipsHTML=buildCareCatHTML();
-  } else {
-    var doms2=(_refData&&_refData.domains)||[];
-    chipsHTML='<div class="ideas-prompt">Areas where you put your energy.</div><div class="item-chips">';
-    doms2.forEach(function(r){
-      var item=r.item||r;
-      var isAdded=_domains.some(function(v){return v.item===item;});
-      chipsHTML+='<div class="item-chip'+(isAdded?' added':'')+'" onclick="addItemFromChip(\'3\',\''+esc(item)+'\',\'domain\')">' +esc(item)+'</div>';
-    });
-    chipsHTML+='</div>';
-  }
-  cont.innerHTML=progressHTML(3)
-    +'<h2>What do you care about deeply?</h2>'
-    +screenSearchHTML('3','Search to add...')
-    +tabs
-    +chipsHTML
-    +'<div id="added-3-values"'+(_valTab==="domains"?' style="display:none;"':'')+'>'+buildValAddedHTML(valAdded,'Added values')+'</div>'
-    +'<div id="added-3-domains"'+(_valTab==="values"?' style="display:none;"':'')+'>'+buildValAddedHTML(domAdded,'Added domains')+'</div>'
-    +'<div id="added-3" style="display:none;"></div>'
-    +navHTML(3);
-}
-
-
-var _needsCat='';
-var _pendingNeedsItem={item:'',category:''};
-
-var THING_SUBS={
-  'Physical goods':{emoji:'📦',prompt:'Share details below. Examples: a book, gear or equipment, art supplies, a tool I need'},
-  'Consumables':{emoji:'🍲',prompt:'Share details below. Examples: coffee, a homemade meal, local ingredients, food for the week'},
-  'Money':{emoji:'💙',prompt:'Helping with medical, rent, household bills, or funding a business or passion project.'},
-  'Living things':{emoji:'🪴',prompt:'Share details below. Examples: a Persian cucumber plant, a bouquet of flowers, eggplant seeds, a clipping from your garden, ladybugs for my garden'}
-};
-var _thingSub='';
-
-
-window.postalNudge=function(checkboxId){
-  if(!_postal){
-    toast('Add your postal code first — tap ✏️ Postal code above.');
-    var el=document.getElementById(checkboxId);
-    if(el) el.checked=false;
-  }
-};
-window.setThingSubCat=function(sub){
-  _thingSub=sub;
-  Object.keys(THING_SUBS).forEach(function(k){
-    var el=document.getElementById('thing-sub-'+k.replace(/ /g,'-'));
-    if(el) el.className='sub-chip'+(sub===k?' selected':'');
-  });
-  var info=THING_SUBS[sub];
-  var cont=document.getElementById('thing-detail-area'); if(!cont) return;
-  cont.innerHTML='<div class="needs-detail-box">'
-    +'<div class="ideas-prompt" style="margin-bottom:10px;">'+esc(info.prompt)+'</div>'
-    +'<input type="text" id="thing-detail-input" placeholder="Please share some details">'
-    +'<label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;color:var(--soft);cursor:pointer;">'
-    +'<input type="checkbox" id="thing-local-check" onchange="if(this.checked)postalNudge(\'thing-local-check\')"> 📍 This is a local request</label>'
-    +'<button class="btn-next" style="width:100%;margin-top:14px;" onclick="addThingItem()">Add to list</button>'
-    +'</div>'
-    +'<div id="added-4r">'+buildAddedHTML('4r')+'</div>';
-};
-window.addThingItem=function(){
-  var inp=document.getElementById('thing-detail-input');
-  var item=inp?inp.value.trim():'';
-  if(!item){toast('Please share some details first.');return;}
-  var local=document.getElementById('thing-local-check');
-  var isLocal=local?local.checked:false;
-  if(_needsRes.some(function(r){return r.item===item;})){toast('Already added');return;}
-  _needsRes.unshift({item:item,category:_thingSub,local:isLocal,ntype:'thing'});
-  autoSave();
-  // reset
-  if(inp) inp.value='';
-  if(local) local.checked=false;
-  var added=document.getElementById('added-4r');
-  if(added) added.innerHTML=buildAddedHTML('4r');
-  toast('Added to your list.');
-  refreshNeedsSummary();
-};
-
-window.setNeedsCat=function(cat){
-  if(_needsCat===cat){_needsCat='';renderScreen4(null);return;}
-  // Reset breadcrumb on new selection
-  _needsCat=cat;
-  // Hide all type chips, show breadcrumb
-  var typeChips=document.getElementById('needs-type-chips');
-  if(typeChips) typeChips.style.display='none';
-  var topSearch=document.querySelector('#app-content .search-wrap');
-  if(topSearch) topSearch.style.display='none';
-  var breadcrumbArea=document.getElementById('needs-breadcrumb');
-  var labels={'skill':'Skill or service','thing':'Thing','space':'Space'};
-  if(breadcrumbArea) breadcrumbArea.innerHTML='<div style="font-size:13px;color:var(--brand);margin-bottom:8px;"><span style="cursor:pointer;text-decoration:underline;" onclick="_needsCat=\'\';renderScreen4(null);">What I\'m seeking</span> <span style="color:var(--muted);margin:0 4px;">›</span>'+(labels[cat]||cat)+'</div>';
-  ['skill','thing','space'].forEach(function(c){
-    var el=document.getElementById('needs-top-'+c);
-    if(el) el.className='needs-top-chip'+(cat===c?' selected':'');
-  });
-  var inner='';
-  if(cat==='skill'){
-    resetDrillTo('4s',0);
-    inner=screenSearchHTML('4s','Search for a skill or service...',true)
-      +'<div id="drill-4s"></div>'
-      ;/* added items shown in needs-added-visible below */;
-  } else if(cat==='thing'){
-    _thingSub='';
-    var subChips=Object.keys(THING_SUBS).map(function(k){
-      var info=THING_SUBS[k];
-      return '<div class="sub-chip" id="thing-sub-'+k.replace(/ /g,'-')+'" onclick="setThingSubCat(\''+k+'\')">' +info.emoji+' '+k+'</div>';
-    }).join('');
-    inner='<div class="sub-chips" style="margin-bottom:14px;border:none;">'+subChips+'</div>'
-      +'<div id="thing-detail-area"></div>';
-  } else if(cat==='space'){
-    inner='<div class="ideas-prompt" style="border:none;">A home, a meeting room, a venue, studio, workshop, or desk.</div>'
-      +'<input type="text" id="space-detail-input" placeholder="Please share some details" style="margin-top:8px;" oninput="var b=document.getElementById(\'add-space-btn\');if(b)b.style.display=this.value.trim()?\'\': \'none\';" >'
-      +'<label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;color:var(--soft);cursor:pointer;">'
-      +'<input type="checkbox" id="space-local-check" onchange="if(this.checked)postalNudge(\'space-local-check\')"> 📍 This is a local request</label>'
-      +'<button class="btn-outlined" id="add-space-btn" style="width:100%;margin-top:14px;display:none;" onclick="addSpaceItem()">Add space to my list</button>'
-      +'<div id="added-4r">'+buildAddedHTML('4r')+'</div>';
-  }
-  var cont=document.getElementById('needs-cat-content'); if(!cont) return;
-  cont.innerHTML=inner;
-  if(cat==='skill') window.renderDrill('4s','drill-4s');
-};
-window.addSpaceItem=function(){
-  var inp=document.getElementById('space-detail-input');
-  var item=inp?inp.value.trim():'';
-  if(!item){toast('Please share some details first.');return;}
-  var local=document.getElementById('space-local-check');
-  var isLocal=local?local.checked:false;
-  if(_needsRes.some(function(r){return r.item===item;})){toast('Already added');return;}
-  _needsRes.unshift({item:item,category:'Space',local:isLocal,ntype:'space'});
-  autoSave();
-  if(inp) inp.value='';
-  if(local) local.checked=false;
-  var added=document.getElementById('added-4r');
-  if(added) added.innerHTML=buildAddedHTML('4r');
-  toast('Added to your list.');
-  refreshNeedsSummary();
-};
-
-function renderScreen4(el){
-  var cont=document.getElementById('app-content'); if(!cont) return;
-    cont.innerHTML=(_editMode?'':progressHTML(4))
-    +'<h2>What are you seeking right now?</h2>'
-    +'<div id="needs-breadcrumb"></div>'
-    +'<div class="needs-top-chips" style="margin-top:14px;" id="needs-type-chips">'
-    +'<div class="needs-top-chip'+('skill'===_needsCat?' selected':'')+'" id="needs-top-skill" onclick="setNeedsCat(\'skill\')">✨ Skill or service</div>'
-    +'<div class="needs-top-chip'+('thing'===_needsCat?' selected':'')+'" id="needs-top-thing" onclick="setNeedsCat(\'thing\')">📦 Thing</div>'
-    +'<div class="needs-top-chip'+('space'===_needsCat?' selected':'')+'" id="needs-top-space" onclick="setNeedsCat(\'space\')">🏡 Space</div>'
-    +'</div>'
-    +'<div id="needs-cat-content"></div>'
-    +'<div id="needs-added-visible" style="margin-top:14px;">'
-    +(_needsSkill.length?buildAddedHTML('4s'):'')
-    +(_needsRes.length?buildAddedHTML('4r'):'')
-    +'</div>'
-    +navHTML(4);
-  if(_needsCat) window.setNeedsCat(_needsCat);
-  // Hidden divs needed for updateAddedSection to find elements
-  var existing4s=document.getElementById('added-4s');
-  var existing4r=document.getElementById('added-4r');
-  if(!existing4s){var d=document.createElement('div');d.id='added-4s';d.style.display='none';document.getElementById('app-content').appendChild(d);}
-  if(!existing4r){var d2=document.createElement('div');d2.id='added-4r';d2.style.display='none';document.getElementById('app-content').appendChild(d2);}
-}
-// ─── Navigation ───────────────────────────────────────────────────────────────
-window.goNext = function(){
-  if(_screen===2&&!_editMode&&_screen2step==='lang'){
-    _screen2step='naturally'; render(); return;
-  }
-  if(_screen===2&&!_editMode&&_screen2step==='naturally'){
-    _screen2step='postal'; render(); return;
-  }
-  if(_screen===2&&!_editMode&&_screen2step==='postal'){
-    var inp=document.getElementById('postal-input');
-    if(inp) _postal=inp.value.trim();
-    _screen2step='skills'; render(); return;
-  }
-  if(_screen===2){
-    var missing=_skills.filter(function(s){return !s.level;});
-    if(missing.length){
-      var ex=document.getElementById('skill-reminder');
-      if(!ex){
-        var nr=document.createElement('div');
-        nr.id='skill-reminder';nr.className='reminder-msg';
-        nr.textContent='Gentle reminder: '+missing.map(function(s){return s.item;}).join(', ')+(missing.length===1?' is':' are')+' still missing a level.';
-        var nav=document.querySelector('.nav-row');
-        if(nav) nav.parentNode.insertBefore(nr,nav);
-        return;
-      }
-    }
-  }
-  autoSave();
-  if(_screen===4){
-    // After needs, move to expression screen
-    _screen='1b'; render(); return;
-  }
-  if(_screen==='1b'){
-    // After expression, move to share/completion
-    _completed=true; _hasProfile=true; _screen='share'; render(); return;
-  }
-  if(_screen==='share'){
-    // Complete intake
-    _screen=0; render(); return;
-  }
-  if(_screen===3&&!_editMode&&_valTab!=='domains'){
-    _valTab='domains'; renderScreen3(null); return;
-  }
-  if(_screen===1){ _screen++; render(); return; }
-  _screen++; render();
-};
-
-window.goBack = function(){
-  if(_screen===2&&!_editMode&&_screen2step==='postal'){
-    _screen2step='naturally'; render(); return;
-  }
-  if(_screen===2&&!_editMode&&_screen2step==='naturally'){
-    _screen2step='lang'; render(); return;
-  }
-  if(_screen===2&&!_editMode&&_screen2step==='lang'){
-    _screen=1; render(); return;
-  }
-  if(_screen==='1b'){ _screen=4; render(); return; }
-  if(_screen==='share'){ _screen='1b'; render(); return; }
-  if(_screen===3&&!_editMode&&_valTab==='domains'){
-    _valTab=''; renderScreen3(null); return;
-  }
-  if(_screen<=1){ return; }
-  _screen--; render();
-};
-
-// ─── Boot ─────────────────────────────────────────────────────────────────────
-(async function init(){
-  if(_viewerMode){ await Promise.all([loadRefData(),loadProfile(),loadIntake()]); render(); return; }
-  if(!_appearId){ render(); return; }
-  await Promise.all([loadRefData(),loadProfile(),loadIntake()]);
-  if(_hasProfile){
-    _completed=true;
-    // Only redirect if data actually loaded from sheet (at least one section has data)
-    // Prevents redirect loop when GAS fetch fails or returns empty
-    var _dataLoaded=(_interests.length||_skills.length||_values.length||_methods.length||_languages.length);
-    if(_dataLoaded){
-      if(!_interests.length){ _screen=1; render(); return; }
-      if(!_skills.length){ _screen=2; _screen2step='skills'; render(); return; }
-      if(!_values.length){ _screen=3; render(); return; }
-    }
-    _screen=0;
-  }
-  render();
-})();
 </script>
+
 </body>
-<!--
-  Copyright 2026 DayBalancer LLC. All rights reserved.
-
-  The code and the content here power Creating.Works, DayBalancer, Appear Network,
-  and 2Gather. They are published so they can be read, audited, and dated.
-
-  Running either as a separate offering requires a license, whether you brand it as
-  ours or as your own, and whether or not money changes hands.
-
-  hello@creating.works
--->
 </html>
-<!-- Version: V2.36 | LAST CHANGE: Pass 1 - copy fixes, domains split, postal code step, expression moved to end, share button | Date: 2026-07-05 -->
