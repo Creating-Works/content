@@ -81,17 +81,26 @@
   .a-input-row .ico{font-size:18px;}
   .a-input-row input{flex:1;border:none;background:transparent;font-family:inherit;font-size:15px;padding:10px 4px;outline:none;color:#1A2E42;}
   .a-input-row button{padding:11px 22px;font-size:14px;border-radius:24px;}
-  .a-toggles{display:flex;align-items:center;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
-  .a-toggles .lab{font-size:12px;font-weight:700;color:#6B7A8D;text-transform:uppercase;letter-spacing:.05em;}
+  .a-toggles{display:flex;align-items:center;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:16px;}
   .a-toggle{display:inline-flex;background:#F1F3F7;border-radius:22px;padding:4px;gap:0;}
   .a-toggle button{background:transparent;color:#6B7A8D;border:none;border-radius:20px;padding:7px 16px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;}
   .a-toggle button.on{background:#1F699E;color:#fff;}
-  .a-loc-prompt{margin-top:14px;background:#FEF6ED;border:1px solid #F1B36B;border-radius:12px;padding:12px 16px;font-size:13px;color:#4B5A6D;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;max-width:640px;margin-left:auto;margin-right:auto;}
-  .a-loc-prompt .btn{padding:7px 14px;font-size:12px;}
-  .a-loc-prompt input{border:1px solid #DDE4EE;border-radius:16px;padding:7px 12px;font-family:inherit;font-size:12px;min-width:150px;}
-  .a-loc-prompt .or{color:#8896A8;font-size:11px;font-weight:700;}
-  .a-legend{font-size:12px;color:#8896A8;margin-top:12px;line-height:1.6;}
-  .a-legend b{color:#1A2E42;}
+
+  /* Location cascade (events.html pattern) + collapsed pill */
+  .a-loccascade{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;margin-top:16px;}
+  .a-loccascade .lead{font-size:14px;font-weight:800;color:#1A2E42;}
+  .a-loccascade select{padding:8px 14px;border:1.5px solid #DDE4EE;border-radius:20px;font-family:inherit;font-size:13px;font-weight:600;color:#1A2E42;background:#fff;cursor:pointer;}
+  .a-locpill{display:inline-flex;align-items:center;gap:10px;background:#F1F3F7;border-radius:20px;padding:8px 16px;font-size:13px;color:#1A2E42;margin-top:16px;}
+  .a-locpill b{font-weight:800;}
+  .a-locpill a{color:#1F699E;font-weight:700;text-decoration:underline;font-size:12px;}
+
+  /* In-app help box (Glide-style) with Mark as read */
+  .a-help{background:#E8EEF9;border-radius:16px;padding:16px 18px 52px;font-size:13px;line-height:1.6;color:#1A2E42;position:relative;margin-top:16px;text-align:left;}
+  .a-help b{font-weight:800;}
+  .a-help .mark{position:absolute;bottom:12px;right:12px;background:#fff;border:1.5px solid #DDE4EE;border-radius:20px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:#1A2E42;display:inline-flex;align-items:center;gap:6px;}
+
+  /* Force DM Sans on all form controls inside a design section */
+  .design input,.design button,.design select,.design textarea{font-family:'DM Sans',sans-serif;}
 
   .a-results{background:#fff;border-radius:14px;padding:22px;margin-bottom:14px;}
   .a-results-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
@@ -100,18 +109,15 @@
   .a-results-grid{display:grid;grid-template-columns:1fr;gap:12px;}
   @media(min-width:900px){.a-results-grid{grid-template-columns:1fr 1fr;}}
 
-  .mcard{background:#F7FBFF;border:1.5px solid #C9DFF3;border-radius:14px;padding:14px 16px;text-align:left;display:flex;flex-direction:column;gap:8px;}
+  .mcard{background:#fff;border:1.5px solid #C9DFF3;border-radius:14px;padding:14px 16px;text-align:left;display:flex;flex-direction:column;gap:8px;}
   .mcard-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
-  .mcard-meta .type{background:#fff;border:1px solid #DDE4EE;border-radius:14px;padding:3px 10px;font-size:11px;font-weight:700;color:#1A2E42;}
-  .mcard-meta .locbadge{background:#E7F5EF;border:1px solid #7DCFA3;border-radius:14px;padding:3px 10px;font-size:11px;font-weight:700;color:#1F7A56;}
-  .mcard-meta .locbadge.virtual{background:#E8EEF9;border-color:#8FA5C9;color:#1F4A9E;}
-  .mcard-meta .catchip{background:#F1F3F7;border-radius:14px;padding:3px 10px;font-size:11px;font-weight:700;color:#1A2E42;}
+  .mcard-meta .type,.mcard-meta .locbadge{background:#fff;border:1px solid #DDE4EE;border-radius:14px;padding:3px 10px;font-size:11px;font-weight:700;color:#1A2E42;}
   .mcard-meta .urgent{background:#FDECEC;border:1px solid #F1A0A0;border-radius:14px;padding:3px 10px;font-size:11px;font-weight:800;color:#B33131;}
   .mcard .sentence{font-size:15px;line-height:1.5;color:#1A2E42;}
-  .mcard .who{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:#1F699E;font-weight:800;vertical-align:middle;padding:2px 8px 2px 2px;background:#fff;border:1px solid #DDE4EE;border-radius:20px;margin-right:2px;}
+  .mcard .who{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:#1A2E42;vertical-align:middle;padding:2px 10px 2px 2px;background:#fff;border:1px solid #DDE4EE;border-radius:20px;margin-right:2px;}
   .mcard .who:hover{background:#F1F3F7;}
   .mcard .who .avatar{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#7DD3FC,#1F699E);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;}
-  .mcard .who .name{font-size:14px;font-weight:800;}
+  .mcard .who .name{font-size:14px;font-weight:500;color:#1A2E42;}
   .mcard .match-line{font-size:12px;color:#6B7A8D;}
   .mcard .match-line b{color:#1A2E42;background:#FFF4CC;padding:1px 4px;border-radius:4px;font-weight:700;}
   .mcard .actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px;}
@@ -234,15 +240,10 @@
       </div>
 
       <div class="a-toggles">
-        <span class="lab">Search across</span>
         <div class="a-toggle">
           <button class="on">🟢 Offers</button>
           <button>🟠 Needs</button>
         </div>
-      </div>
-
-      <div class="a-toggles">
-        <span class="lab">Where</span>
         <div class="a-toggle">
           <button class="on">📍 Local</button>
           <button>💻 Virtual</button>
@@ -250,19 +251,26 @@
         </div>
       </div>
 
-      <!-- Location prompt: shows the first time someone picks Local -->
-      <div class="a-loc-prompt">
-        📍 <b>Local matches need your location.</b>
-        <button class="btn">Use my location</button>
-        <span class="or">OR</span>
-        <input placeholder="City, State">
-        <button class="btn ghost">Save</button>
+      <!-- Location — first-time state: cascade to pick (only shown when Local is picked and no location on file yet).
+           Real behavior: on first Local click, we check the person's postal / saved region in the main sheet. If it's
+           there, we skip straight to the pill below. If it's missing, we show this cascade. -->
+      <div class="a-loccascade">
+        <span class="lead">📍 Where are you?</span>
+        <select><option>North America</option><option>Europe</option><option>Asia</option></select>
+        <select><option>United States</option><option>Canada</option><option>Mexico</option></select>
+        <select><option>Washington</option><option>Oregon</option><option>California</option></select>
       </div>
 
-      <div class="a-legend">
+      <!-- Location — saved state: after the person picks (or when we already knew), the cascade collapses to this pill. -->
+      <div style="text-align:center;">
+        <span class="a-locpill">📍 <b>Location: Washington, United States</b> <a href="#">Change</a></span>
+      </div>
+
+      <div class="a-help">
         <b>Offers</b> = things people in this group have said they can give.
         <b>Needs</b> = things they've said they're looking for.
         Toggle any time.
+        <button class="mark">✓ Mark as read</button>
       </div>
     </div>
 
@@ -270,7 +278,7 @@
     <div class="a-results">
       <div class="a-results-head">
         <div>
-          <div class="a-results-kicker">Results · 🟢 Offers · 📍 Local (Seattle area)</div>
+          <div class="a-results-kicker">🟢 Offers · 📍 Local (Seattle area)</div>
           <h3>3 offers match "Capitol Hill housing"</h3>
         </div>
         <button class="btn ghost sm">Modify search</button>
@@ -282,7 +290,6 @@
           <div class="mcard-meta">
             <span class="type">🏡 Space</span>
             <span class="locbadge">📍 Local · Seattle</span>
-            <span class="catchip">🏠 Housing</span>
           </div>
           <div class="sentence">
             <a href="#" class="who"><span class="avatar">K</span><span class="name">Karina</span></a>
@@ -292,6 +299,7 @@
           <div class="actions">
             <button class="btn sm">Message Karina</button>
             <button class="btn sm ghost">Bookmark</button>
+            <button class="btn sm ghost">View profile</button>
           </div>
         </div>
 
@@ -299,7 +307,6 @@
           <div class="mcard-meta">
             <span class="type">🏡 Space</span>
             <span class="locbadge">📍 Local · Bellingham</span>
-            <span class="catchip">🏠 Housing</span>
           </div>
           <div class="sentence">
             <a href="#" class="who"><span class="avatar">G</span><span class="name">Greg</span></a>
@@ -309,6 +316,7 @@
           <div class="actions">
             <button class="btn sm">Message Greg</button>
             <button class="btn sm ghost">Bookmark</button>
+            <button class="btn sm ghost">View profile</button>
           </div>
         </div>
 
@@ -316,7 +324,6 @@
           <div class="mcard-meta">
             <span class="type">🏡 Space</span>
             <span class="locbadge">📍 Local · Bellingham</span>
-            <span class="catchip">🏠 Housing</span>
           </div>
           <div class="sentence">
             <a href="#" class="who"><span class="avatar">C</span><span class="name">Caitlyn</span></a>
@@ -326,6 +333,7 @@
           <div class="actions">
             <button class="btn sm">Message Caitlyn</button>
             <button class="btn sm ghost">Bookmark</button>
+            <button class="btn sm ghost">View profile</button>
           </div>
         </div>
 
@@ -341,7 +349,7 @@
     <div class="a-results" id="a-needs-preview">
       <div class="a-results-head">
         <div>
-          <div class="a-results-kicker">Preview · toggled to 🟠 Needs · same query</div>
+          <div class="a-results-kicker">🟠 Needs · 📍 Local (Seattle area)</div>
           <h3>2 people in your group are asking for "Capitol Hill housing"</h3>
         </div>
         <button class="btn ghost sm">Modify search</button>
@@ -353,7 +361,6 @@
           <div class="mcard-meta">
             <span class="type">👤 Person</span>
             <span class="locbadge">📍 Local · Seattle</span>
-            <span class="catchip">🏠 Housing</span>
             <span class="urgent">⏰ Needs by Sept 1 · 12 days</span>
           </div>
           <div class="sentence">
@@ -365,6 +372,7 @@
             <button class="btn sm">Message Theresa</button>
             <button class="btn sm ghost">Introduce me to Karina</button>
             <button class="btn sm ghost">Bookmark</button>
+            <button class="btn sm ghost">View profile</button>
           </div>
         </div>
 
@@ -372,7 +380,6 @@
           <div class="mcard-meta">
             <span class="type">👤 Person</span>
             <span class="locbadge">📍 Local · Seattle</span>
-            <span class="catchip">🏠 Housing</span>
           </div>
           <div class="sentence">
             <a href="#" class="who"><span class="avatar">M</span><span class="name">Monika</span></a>
@@ -383,6 +390,7 @@
             <button class="btn sm">Message Monika</button>
             <button class="btn sm ghost">Introduce me to Karina</button>
             <button class="btn sm ghost">Bookmark</button>
+            <button class="btn sm ghost">View profile</button>
           </div>
         </div>
 
