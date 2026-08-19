@@ -2431,7 +2431,7 @@ function renderProfile(el, viewerMode){
   // When the viewer came from a hub, only Back to hub belongs up here - All events and
   // Manage my experience would pull them out of that hub context. Event hub stays if the event
   // has a hub, because that's a lateral move within the same event context.
-  if(!_fromHub) _b+='<a href="https://gather.2gather.network/events.html'+((_navOwn&&_navId)?('?memberCard='+encodeURIComponent(_navId)):'')+'" style="'+_WB+'">All events</a>';
+  if(!_fromHub) _b+='<a href="https://gather.2gather.network/myevents.html'+((_navOwn&&_navId)?('?id='+encodeURIComponent(_navId)):'')+'" style="'+_WB+'">My events</a> <a href="https://appear.network/dl/groups" style="'+_WB+'">My groups</a>';
   if(_eventId && _eventHasHub && !_bgH) _b+='<a href="https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+_mc+'" style="'+_WB+'">Event hub</a>';
   if(_navOwn&&_navId){
     // No "Event profile" or "Manage my experience" pill here — the profile page already IS
