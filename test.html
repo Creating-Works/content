@@ -155,15 +155,133 @@
 </div>
 
 <div class="picker">
-  <a href="#design-a" class="active" onclick="pick(this,'a')">A — Match cards + chips</a>
-  <a href="#design-b" onclick="pick(this,'b')">B — Offer / Need wall</a>
-  <a href="#design-c" onclick="pick(this,'c')">C — Personal feed</a>
+  <a href="#design-a" class="active" onclick="pick(this,'a')">A — Ask &amp; find</a>
+  <a href="#design-b" onclick="pick(this,'b')">B — Match cards + chips</a>
+  <a href="#design-c" onclick="pick(this,'c')">C — Offer / Need wall</a>
+  <a href="#design-d" onclick="pick(this,'d')">D — Personal feed</a>
 </div>
 
-<!-- ═══════════════════ DESIGN A — Match cards on top ═══════════════════ -->
+<!-- ═══════════════════ DESIGN A — Ask & find (Google-style) ═══════════════════
+     One clear question at the top, one clear answer below. The person picks
+     whether they're searching offers or needs, types what they're looking for,
+     and hits Find. Results are the relevant match cards; if nothing matches,
+     the fallback is the existing chip quadrants + a link to browse.
+     Same blue as the current hub so it doesn't feel like a different product.
+     ═══════════════════════════════════════════════════════════════════════ -->
 <div class="design" id="design-a">
   <div class="design-header">
     <span class="tag">Design A</span>
+    <h2>Ask &amp; find</h2>
+    <p>One question, one answer. Search across the group's stated offers OR stated needs — the toggle is right under the search box, no scrolling to change modes. If a search returns nothing, the classic chip quadrants come back as a fallback with a "See everything" link.</p>
+  </div>
+  <div class="design-body">
+
+    <!-- The seek block -->
+    <div style="background:#fff;border-radius:20px;padding:38px 32px 32px;text-align:center;margin-bottom:20px;box-shadow:0 8px 24px rgba(0,0,0,.08);">
+      <div style="font-size:12px;font-weight:800;letter-spacing:.08em;color:#1F699E;text-transform:uppercase;margin-bottom:6px;">Group hub</div>
+      <h2 style="margin:0 0 20px;font-size:28px;font-weight:800;">What are you seeking?</h2>
+
+      <div style="max-width:640px;margin:0 auto;">
+        <div style="display:flex;align-items:center;gap:10px;background:#F7F9FC;border:1.5px solid #DDE4EE;border-radius:32px;padding:8px 8px 8px 22px;box-shadow:0 2px 8px rgba(0,0,0,.04);">
+          <span style="font-size:18px;">🔎</span>
+          <input placeholder="e.g. Capitol Hill housing, biochar co-host, graphic novel platform"
+                 value="Capitol Hill housing"
+                 style="flex:1;border:none;background:transparent;font-family:inherit;font-size:16px;padding:10px 4px;outline:none;color:#1A2E42;">
+          <button class="btn" style="padding:12px 24px;font-size:14px;border-radius:24px;">Find</button>
+        </div>
+
+        <div style="display:inline-flex;gap:0;margin-top:18px;background:#F1F3F7;border-radius:22px;padding:4px;">
+          <button class="btn sm" style="background:#1F699E;color:#fff;border:none;border-radius:20px;padding:8px 20px;font-weight:700;">🟢 Search offers</button>
+          <button class="btn sm" style="background:transparent;color:#6B7A8D;border:none;border-radius:20px;padding:8px 20px;font-weight:700;">🟠 Search needs</button>
+        </div>
+        <div style="font-size:12px;color:#8896A8;margin-top:8px;">
+          <b>Offers</b> = things people in this group have said they can give. <b>Needs</b> = things they've said they're looking for. Toggle any time.
+        </div>
+      </div>
+    </div>
+
+    <!-- Results block (the state AFTER a successful search) -->
+    <div style="background:#fff;border-radius:14px;padding:22px;margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+        <div>
+          <div style="font-size:12px;font-weight:800;letter-spacing:.06em;color:#1F699E;text-transform:uppercase;">Results · 3 offers match "Capitol Hill housing"</div>
+          <h3 style="margin:4px 0 0;font-size:18px;font-weight:800;">People in your group offering this</h3>
+        </div>
+        <button class="btn ghost sm">Change search</button>
+      </div>
+
+      <div class="match-card">
+        <div class="theme">🏠 Capitol Hill</div>
+        <div class="body">
+          <div><b>Karina</b> has a room to crash in on Capitol Hill.</div>
+          <div class="peeps">
+            <div class="peep"><span class="ph">K</span><span class="txt">Karina</span><span class="role">Capitol Hill · has room</span></div>
+          </div>
+          <div class="cta btn-row">
+            <button class="btn sm">Message Karina</button>
+            <button class="btn sm ghost">Bookmark</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="match-card">
+        <div class="theme">🏠 Bellingham</div>
+        <div class="body">
+          <div><b>Greg</b> has a guest room + sauna in Bellingham and wants to host + cook dinner. No dogs.</div>
+          <div class="peeps">
+            <div class="peep"><span class="ph">G</span><span class="txt">Greg</span><span class="role">Bellingham · guest room</span></div>
+          </div>
+          <div class="cta btn-row">
+            <button class="btn sm">Message Greg</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="match-card">
+        <div class="theme">🏠 Bellingham</div>
+        <div class="body">
+          <div><b>Caitlyn</b> has a big house in Bellingham (5 people, 4 dogs) — open to anyone who wants to come do cool shit.</div>
+          <div class="peeps">
+            <div class="peep"><span class="ph">C</span><span class="txt">Caitlyn</span><span class="role">Bellingham · big house</span></div>
+          </div>
+          <div class="cta btn-row">
+            <button class="btn sm">Message Caitlyn</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;padding:12px 14px;background:#F7F9FC;border-radius:10px;font-size:13px;color:#4B5A6D;">
+        💡 <b>Also 2 people are asking for the same thing.</b> Toggle to <b>Search needs</b> above to see Theresa and Monika, who both want Capitol Hill housing — they might want to meet each other, and you might want to introduce them.
+      </div>
+    </div>
+
+    <!-- Null-state fallback (what shows when a search returns nothing) -->
+    <details class="insights" open>
+      <summary>Fallback preview — what shows when a search returns 0 matches</summary>
+      <div class="content" style="padding:14px 0 4px;">
+        <div style="background:#fff;border-radius:14px;padding:18px 22px;">
+          <div style="font-size:14px;margin-bottom:14px;color:#4B5A6D;">
+            <b>No exact matches for "Capitol Hill housing" in <b>offers</b>.</b>
+            Here's the whole group by category — you can browse to see if something related is being offered or asked for.
+            <a href="#" style="color:#1F699E;font-weight:700;text-decoration:none;">See everything →</a>
+          </div>
+          <div class="insights-grid">
+            <div class="qbox"><h4>Skills · 42</h4><span class="mini">Software</span><span class="mini">Editing</span><span class="mini">Gardening</span><span class="mini">Biochar</span><span class="mini">Governance</span></div>
+            <div class="qbox"><h4>Interests · 28</h4><span class="mini">Pottery</span><span class="mini">Watercolor</span><span class="mini">Solarpunk games</span><span class="mini">Mindfulness</span></div>
+            <div class="qbox"><h4>Values · 33</h4><span class="mini">Carbon sequestration</span><span class="mini">Community raising</span><span class="mini">Storytelling</span></div>
+            <div class="qbox"><h4>Needs · 14</h4><span class="mini">Housing</span><span class="mini">Volunteers</span><span class="mini">Playtesters</span><span class="mini">Governance</span></div>
+          </div>
+        </div>
+      </div>
+    </details>
+
+  </div>
+</div>
+
+<!-- ═══════════════════ DESIGN B — Match cards on top ═══════════════════ -->
+<div class="design" id="design-b">
+  <div class="design-header">
+    <span class="tag">Design B</span>
     <h2>Match cards on top, chip grid below</h2>
     <p>The three biggest concrete introductions greet Karina at the top of the page as pre-formed suggestions. Below the matches, the classic four chip quadrants (Skills / Interests / Values / Needs) show the group's shape, but every chip carries a specifier ("Advice: gardening" not just "Advice"). The aggregate "what our group needs" panel collapses to a low-key "Group insights" section at the bottom.</p>
   </div>
@@ -294,10 +412,10 @@
   </div>
 </div>
 
-<!-- ═══════════════════ DESIGN B — Offer / Need wall ═══════════════════ -->
-<div class="design" id="design-b" style="background:#256B6A;">
+<!-- ═══════════════════ DESIGN C — Offer / Need wall ═══════════════════ -->
+<div class="design" id="design-c" style="background:#256B6A;">
   <div class="design-header">
-    <span class="tag">Design B</span>
+    <span class="tag">Design C</span>
     <h2>Offer / Need wall — everything at a glance</h2>
     <p>Two columns side by side: what the group is offering on the left, what the group needs on the right. Categories that appear in BOTH columns light up green (offer side) or amber (need side) so the eye jumps to overlap. Search + explicit filter chips at the top; the filter join is spelled out ("filter offers AND needs by category: Housing"). Great for hosts scanning what the group has and needs at a glance.</p>
   </div>
@@ -403,10 +521,10 @@
   </div>
 </div>
 
-<!-- ═══════════════════ DESIGN C — Personal feed ═══════════════════ -->
-<div class="design" id="design-c" style="background:#5A2E7A;">
+<!-- ═══════════════════ DESIGN D — Personal feed ═══════════════════ -->
+<div class="design" id="design-d" style="background:#5A2E7A;">
   <div class="design-header">
-    <span class="tag">Design C</span>
+    <span class="tag">Design D</span>
     <h2>Personal feed — like a matchmaker's inbox</h2>
     <p>Karina scrolls a personalized feed of match cards. Each card names one match, explains why, and offers three actions: Introduce me, Bookmark, Skip. Group-level aggregate is a one-line strip at the top that expands into the classic quadrants when she wants — otherwise the aggregate stays out of her way entirely. Great for daily-checkin usage: "what's for me today?"</p>
   </div>
