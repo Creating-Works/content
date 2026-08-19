@@ -2304,7 +2304,7 @@ function _wtmListHTML(){
       +'<button onclick="wtmRemove(\''+esc(String(p.id).replace(/\\/g,"\\\\").replace(/'/g,"\\'"))+'\')" aria-label="Remove" style="background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;">✕</button>'
       +'</div>';
   }).join('') : '<div style="font-size:13px;color:var(--muted);padding:6px 0;">No one yet. Open someone\'s profile '+_wtmHubLink()+' and tap "Bookmark to meet".</div>';
-  return '<div style="margin-top:22px;padding-top:14px;border-top:1.5px solid var(--border);"><div style="font-size:16px;font-weight:700;margin-bottom:6px;">People I want to meet</div>'+inner+'</div>';
+  return '<div style="margin-top:22px;padding-top:14px;border-top:1.5px solid var(--border);"><div style="font-size:16px;font-weight:700;margin-bottom:6px;">People I want to meet (bookmarked)</div>'+inner+'</div>';
 }
 // Bookmarking is a "me -> them" action, so it needs BOTH people named in the URL. On a bare
 // "?show=" there is no viewer, so there is nobody to bookmark on behalf of - and personal UI
