@@ -1864,7 +1864,7 @@ function render(){
       if(_pills) _pills += ' ';
       _pills += '<a onclick="doneEdit();return false;" style="cursor:pointer;'+_navPillCss+'">Hub profile</a>';
     }
-    _tn0.innerHTML = _pills ? ('<div style="padding:12px 6px 0;display:flex;flex-wrap:wrap;gap:8px;">'+_pills+'</div>') : '';
+    _tn0.innerHTML = _pills ? ('<div style="padding:12px 6px 16px;display:flex;flex-wrap:wrap;gap:8px;">'+_pills+'</div>') : '';
   }
   // Wide (hub-style) layout is potluck-only, and only once its data has loaded - a wide empty
   // page during the load reads as broken. One class toggle, no per-screen undo needed.
