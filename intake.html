@@ -1864,23 +1864,26 @@ function render(){
   renderTopRight();
   var _tn0=document.getElementById('app-topnav');
   if(_tn0){
-    // Back to hub - only when the profile was opened from a hub (carries &groupId= or &hubEventId=).
+    // Back to source - only when the profile was opened from a hub (carries &groupId= or &hubEventId=).
+    // Label matches the source: "Back to group" from group.html, "Back to event" from attendees.html.
     var _bgParams=new URLSearchParams(window.location.search);
     var _bgGroup=_bgParams.get('groupId');
     var _bgHubEvent=_bgParams.get('hubEventId');
     var _bgMe=_bgParams.get('me');
-    var _bgUrl='';
+    var _bgUrl='', _bgLabel='';
     if(_bgGroup){
       _bgUrl='https://gather.2gather.network/group.html?id='+encodeURIComponent(_bgGroup)+(_bgMe?'&memberCard='+encodeURIComponent(_bgMe):'');
+      _bgLabel='Back to group';
     } else if(_bgHubEvent){
       _bgUrl='https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_bgHubEvent)+(_bgMe?'&memberCard='+encodeURIComponent(_bgMe):'');
+      _bgLabel='Back to venue';
     }
     // In edit mode (owner editing any screen other than the profile view), also show a
-    // "Hub profile" pill next to Back to hub so the person can bounce back to their profile
+    // "My profile" pill next to Back-to-source so the person can bounce back to their profile
     // view without having to scroll to Done. Same effect as Done but always in reach.
     var _navPillCss='text-decoration:none;color:#1F699E;background:#fff;font-size:14px;font-weight:600;padding:8px 16px;border-radius:20px;display:inline-block;';
     var _pills='';
-    if(_bgUrl){ _pills += '<a href="'+_bgUrl+'" style="'+_navPillCss+'">Back to hub</a>'; }
+    if(_bgUrl){ _pills += '<a href="'+_bgUrl+'" style="'+_navPillCss+'">'+_bgLabel+'</a>'; }
     if(_editMode && _appearId){
       if(_pills) _pills += ' ';
       _pills += '<a onclick="doneEdit();return false;" style="cursor:pointer;'+_navPillCss+'">My profile</a>';
@@ -2202,7 +2205,7 @@ function renderScreenConfirm(el){
     +'<h2 style="margin-bottom:18px;">You\'re in! 🎉</h2>'
     +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
     +'<button onclick="goToProfile()" style="'+BTN+'cursor:pointer;">View event profile</button>'
-    +(hub?'<a href="'+hub+'" style="'+BTN_O+'">View event hub</a>':'')
+    +(hub?'<a href="'+hub+'" style="'+BTN_O+'">View event venue</a>':'')
     +'</div>';
   // hasHub arrives from getEventById. If this screen is the first to need it, fetch once and
   // redraw, otherwise a hub event would land here with the hub button missing.
@@ -2214,7 +2217,7 @@ function renderScreenFast2(el){
   var INP='width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;box-sizing:border-box;';
   cont.innerHTML=fastStepHTML(2)
     +'<h2>A little about you</h2>'
-    +'<p style="font-size:13px;color:var(--soft);margin:0 0 18px;">These five answers are what puts you on the event hub, where people can find you. You are welcome to add more to your profile afterwards.</p>'
+    +'<p style="font-size:13px;color:var(--soft);margin:0 0 18px;">These five answers are what puts you on the event venue, where people can find you. You are welcome to add more to your profile afterwards.</p>'
     +'<div style="margin-bottom:18px;">'
       +'<div style="font-weight:700;font-size:15px;color:var(--text);margin-bottom:6px;">Postal code</div>'
       +'<input type="text" id="fast-postal" placeholder="Your postal code" value="'+esc(_postal)+'" style="'+INP+'">'
@@ -2316,11 +2319,11 @@ window.wtmRemove=function(id){
   if(me) fetch(GS_URL+'?action=saveBookmark&from='+encodeURIComponent(me)+'&to='+encodeURIComponent(id)+'&remove=true');
   render();
 };
-// "(on the hub)" - a link when we know which event's hub to send them to, plain text otherwise.
+// "(on the venue)" - a link when we know which event's hub to send them to, plain text otherwise.
 function _wtmHubLink(){
-  if(!_eventId) return '(on the hub)';
+  if(!_eventId) return '(on the venue)';
   var url='https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+(_appearId?'&memberCard='+encodeURIComponent(_appearId):'');
-  return '<a href="'+url+'" style="color:var(--brand);font-weight:600;">(on the hub)</a>';
+  return '<a href="'+url+'" style="color:var(--brand);font-weight:600;">(on the venue)</a>';
 }
 function _wtmListHTML(){
   var a=_wtmData||[];
@@ -2420,10 +2423,10 @@ function renderProfile(el, viewerMode){
   var _b='';
   if(_bgG){
     var _bgU='https://gather.2gather.network/group.html?id='+encodeURIComponent(_bgG)+(_bgM?'&memberCard='+encodeURIComponent(_bgM):'');
-    _b+='<a href="'+_bgU+'" style="'+_WB+'">Back to hub</a>';
+    _b+='<a href="'+_bgU+'" style="'+_WB+'">Back to group</a>';
   } else if(_bgH){
     var _bgU='https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_bgH)+(_bgM?'&memberCard='+encodeURIComponent(_bgM):'');
-    _b+='<a href="'+_bgU+'" style="'+_WB+'">Back to hub</a>';
+    _b+='<a href="'+_bgU+'" style="'+_WB+'">Back to venue</a>';
   }
   // When the viewer came from a hub, only Back to hub belongs up here - All events and
   // Manage my experience would pull them out of that hub context. Event hub stays if the event
