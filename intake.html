@@ -1213,6 +1213,7 @@ window.saveNeedEdit=function(s,idx){
   var arr=getArr(s); var it=arr[idx];
   if(it){
     var iv=document.getElementById('ne-item-'+s+'-'+idx);
+    var tv=document.getElementById('ne-type-'+s+'-'+idx);
     var cv=document.getElementById('ne-cat-'+s+'-'+idx);
     var dv=document.getElementById('ne-detail-'+s+'-'+idx);
     var lv=document.getElementById('ne-local-'+s+'-'+idx);
@@ -1220,6 +1221,19 @@ window.saveNeedEdit=function(s,idx){
     if(cv) it.category=cv.value;
     if(dv) it.detail=dv.value.trim();
     if(lv) it.local=lv.checked;
+    // Type change moves the item between _needsSkill (Person) and _needsRes (Space/Thing).
+    if(tv){
+      var newType=tv.value;
+      if(newType && newType !== it.ntype){
+        it.ntype=newType;
+        var targetIsSkill=(newType==='skill');
+        var sourceIsSkill=(s==='4s');
+        if(targetIsSkill !== sourceIsSkill){
+          arr.splice(idx,1);
+          (targetIsSkill?_needsSkill:_needsRes).push(it);
+        }
+      }
+    }
   }
   _editingNeed=null;
   autoSave();
@@ -1234,8 +1248,15 @@ function needEditorRow(s, idx){
   var arr=getArr(s); var it=arr[idx]||{};
   var catOpts='<option value="">No category</option>'+PARENT_CATS.map(function(c){return '<option value="'+esc(c)+'"'+(it.category===c?' selected':'')+'>'+esc(c)+'</option>';}).join('');
   var inpStyle='width:100%;padding:9px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;box-sizing:border-box;';
+  // Type picker: Person (skill) / Space / Thing. Changing type moves the item between
+  // _needsSkill and _needsRes on save.
+  var curType=(it.ntype==='space'?'space':(it.ntype==='skill'?'skill':'thing'));
+  var typeOpts=[['skill','👤 Person'],['space','🏡 Space'],['thing','📦 Thing']].map(function(p){
+    return '<option value="'+p[0]+'"'+(curType===p[0]?' selected':'')+'>'+p[1]+'</option>';
+  }).join('');
   return '<div class="need-item" style="flex-direction:column;align-items:stretch;gap:8px;background:var(--input-bg);border:1.5px solid var(--brand);border-radius:10px;padding:12px;">'
     +'<input id="ne-item-'+s+'-'+idx+'" type="text" value="'+esc(it.item||'')+'" placeholder="What I am seeking" style="'+inpStyle+'">'
+    +'<select id="ne-type-'+s+'-'+idx+'" style="'+inpStyle+'">'+typeOpts+'</select>'
     +'<select id="ne-cat-'+s+'-'+idx+'" style="'+inpStyle+'">'+catOpts+'</select>'
     +'<input id="ne-detail-'+s+'-'+idx+'" type="text" value="'+esc(it.detail||'')+'" placeholder="What exactly are you seeking? (e.g. A baker for my wedding party)" style="'+inpStyle+'">'
     +'<label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--soft);"><input id="ne-local-'+s+'-'+idx+'" type="checkbox"'+(it.local?' checked':'')+'> 📍 Local</label>'
@@ -1277,7 +1298,7 @@ function buildOneNeedsSection(label, items, s){
         :'<div class="need-item-cat">'+esc(item.category)+'</div>';
     var detailLine=item.detail?'<div class="need-item-detail" style="font-size:11px;color:var(--brand);margin-top:2px;font-style:italic;">Seeking: '+esc(item.detail)+'</div>':'';
     return '<div class="need-item">'
-      +'<div class="need-item-left" style="position:relative;"><div class="need-item-name">'+esc(item.item)+' <span style="font-weight:400;color:var(--soft);font-size:13px;">'+needTypeLabel(item.ntype)+'</span></div>'+catLabel+detailLine+'</div>'
+      +'<div class="need-item-left" style="position:relative;"><div class="need-item-name">'+esc(needTypeLabel(item.ntype))+': '+esc(item.item)+'</div>'+catLabel+detailLine+'</div>'
       +'<div class="need-item-right">'
       +'<button class="practice-item-x" onclick="openNeedEditor(\''+s+'\','+realIdx+')" title="Edit" style="font-size:14px;">✏️</button>'
       +'<label class="local-toggle'+(item.local?' active':'')+'" ><input type="checkbox"'+(item.local?' checked':'')+' onchange="toggleLocal(\''+s+'\','+realIdx+')"> 📍 Local</label>'
@@ -1320,7 +1341,7 @@ function buildAddedHTML(s){
           :'<div class="need-item-cat">'+esc(item.category)+'</div>';
       var detailLine=item.detail?'<div class="need-item-detail" style="font-size:11px;color:var(--brand);margin-top:2px;font-style:italic;">Seeking: '+esc(item.detail)+'</div>':'';
       return '<div class="need-item">'
-        +'<div class="need-item-left" id="need-item-wrap-'+s+'-'+i+'" style="position:relative;"><div class="need-item-name">'+esc(item.item)+'</div>'+catLabel+detailLine+'</div>'
+        +'<div class="need-item-left" id="need-item-wrap-'+s+'-'+i+'" style="position:relative;"><div class="need-item-name">'+esc(needTypeLabel(item.ntype))+': '+esc(item.item)+'</div>'+catLabel+detailLine+'</div>'
         +'<div class="need-item-right">'
         +'<button class="practice-item-x" onclick="openNeedEditor(\''+s+'\','+i+')" title="Edit" style="font-size:14px;">✏️</button>'
         +'<label class="local-toggle'+(item.local?' active':'')+'" ><input type="checkbox"'+(item.local?' checked':'')+' onchange="toggleLocal(\''+s+'\','+i+')"> 📍 Local</label>'
