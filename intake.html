@@ -1883,7 +1883,7 @@ function render(){
     if(_bgUrl){ _pills += '<a href="'+_bgUrl+'" style="'+_navPillCss+'">Back to hub</a>'; }
     if(_editMode && _appearId){
       if(_pills) _pills += ' ';
-      _pills += '<a onclick="doneEdit();return false;" style="cursor:pointer;'+_navPillCss+'">Hub profile</a>';
+      _pills += '<a onclick="doneEdit();return false;" style="cursor:pointer;'+_navPillCss+'">My profile</a>';
     }
     _tn0.innerHTML = _pills ? ('<div style="padding:12px 6px 16px;display:flex;flex-wrap:wrap;gap:8px;">'+_pills+'</div>') : '';
   }
