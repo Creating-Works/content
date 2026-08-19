@@ -2434,9 +2434,9 @@ function renderProfile(el, viewerMode){
   if(!_fromHub) _b+='<a href="https://gather.2gather.network/events.html'+((_navOwn&&_navId)?('?memberCard='+encodeURIComponent(_navId)):'')+'" style="'+_WB+'">All events</a>';
   if(_eventId && _eventHasHub && !_bgH) _b+='<a href="https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+_mc+'" style="'+_WB+'">Event hub</a>';
   if(_navOwn&&_navId){
-    // No "Event profile" pill here - it would point at the page you are already on. The
-    // per-section pencils are what tell an owner they can change something.
-    if(_eventId && !_fromHub) _b+='<a href="https://gather.2gather.network/myevents.html?id='+encodeURIComponent(_navId)+'&event='+encodeURIComponent(_eventId)+'" style="'+_WB+'">Manage my experience</a>';
+    // No "Event profile" or "Manage my experience" pill here — the profile page already IS
+    // the owner's landing, and per-event management lives on myevents.html which they can
+    // reach from the Events list. Dropping the pill removes a confusing sideways nav.
     // The other pills need an event. If the URL did not carry one, go find it once.
     if(!_eventId) _fillHubFromReg();
   }
