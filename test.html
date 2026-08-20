@@ -224,7 +224,6 @@
          Pills on blue, group title + search + View all inside a white card, photo strip below. -->
     <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px;">
       <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;">
-        <a href="#" style="text-decoration:none;color:#185FA5;background:#fff;font-size:15px;font-weight:700;padding:6px 16px;border-radius:20px;display:inline-flex;align-items:center;gap:8px;line-height:24px;">My profile <span style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#7DD3FC,#1F699E);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;">K</span></a>
         <a href="#" style="text-decoration:none;color:#185FA5;background:#fff;font-size:15px;font-weight:700;padding:6px 16px;border-radius:20px;line-height:24px;">My groups</a>
       </div>
       <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;">
@@ -257,15 +256,30 @@
         <span style="width:36px;height:36px;border-radius:50%;background:#B7C4D6;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;">H</span>
         <span style="width:36px;height:36px;border-radius:50%;background:#B7C4D6;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;">S</span>
       </div>
+      <!-- Stats line moved from the removed c-strip. Sits UNDER the photo strip per Jessie 2026-08-20. -->
+      <div style="font-size:13px;color:#6B7A8D;padding-top:12px;margin-top:12px;border-top:1px solid #f0f1f5;">This group has <b style="color:#1A2E42;">21 offers</b> and <b style="color:#1A2E42;">14 needs</b> across 17 people. Housing is the biggest match cluster.</div>
     </div>
 
     <!-- Update-my-own inline reveal — the designer flagged that mixing "search others" with
          "edit myself" conflates two ingresses. Kept separate: this CTA at the top of Home reveals
          a small inline form with the person's own offers + needs (fields from intake.html Screen 4).
          Search-others lives on the Explore page. NO modal — Glide renders modals badly. -->
-    <div style="background:#fff;border-radius:14px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
-      <div style="font-size:14px;color:#1A2E42;"><b>Your offers &amp; needs</b> — 3 offers, 1 need on file. The feed below is built from these.</div>
-      <button class="btn ghost sm" onclick="var p=document.getElementById('update-my-panel');p.style.display=p.style.display==='none'?'block':'none';">📝 Update</button>
+    <!-- Combined Karina + Your offers & needs card (2026-08-20). Karina block on top,
+         Your-offers row underneath with the Update pill. -->
+    <div style="background:#fff;border-radius:14px;padding:20px 22px;margin-bottom:16px;">
+      <div style="display:flex;gap:18px;align-items:center;">
+        <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#7DD3FC,#1F699E);color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;flex-shrink:0;">K</div>
+        <div>
+          <div style="font-size:12px;font-weight:800;color:#1F699E;letter-spacing:.06em;text-transform:uppercase;">Karina, we found matches for you</div>
+          <h3 style="margin:2px 0 2px;font-size:20px;font-weight:800;color:#1A2E42;">3 introductions ready, 2 more brewing</h3>
+          <p style="margin:0;color:#6B7A8D;font-size:13px;">Ranked by strongest overlap with what you shared. Skipped cards don't come back.</p>
+        </div>
+      </div>
+      <div style="height:1px;background:#f0f1f5;margin:16px 0;"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+        <div style="font-size:14px;color:#1A2E42;"><b>Your offers &amp; needs</b> — 3 offers, 1 need on file. The feed below is built from these.</div>
+        <button class="btn ghost sm" onclick="var p=document.getElementById('update-my-panel');p.style.display=p.style.display==='none'?'block':'none';">📝 Update</button>
+      </div>
     </div>
     <div id="update-my-panel" style="display:none;background:#fff;border:1.5px dashed #C9DFF3;border-radius:14px;padding:16px 18px;margin-bottom:16px;">
       <div style="font-size:12px;font-weight:800;letter-spacing:.06em;color:#1F699E;text-transform:uppercase;margin-bottom:8px;">🟢 I'm offering</div>
@@ -285,21 +299,9 @@
       </div>
     </div>
 
-    <div class="c-hero">
-      <div class="avatar">K</div>
-      <div>
-        <div class="h">Karina, we found matches for you</div>
-        <h3>3 introductions ready, 2 more brewing</h3>
-        <p>Ranked by strongest overlap with what you shared. Skipped cards don't come back.</p>
-      </div>
-    </div>
-
-    <div class="c-strip">
-      <div class="stats">This group has <b>21 offers</b> and <b>14 needs</b> across 17 people. Housing is the biggest match cluster.</div>
-      <a href="#">Show group aggregate →</a>
-    </div>
-
-    <div class="feed-card strong">
+    <!-- Feed match cards — 2-column grid on desktop (1-col on mobile via .grid-2 media query). -->
+    <div class="grid-2" style="margin-bottom:14px;">
+    <div class="feed-card strong" style="margin-bottom:0;">
       <div class="kicker">🏠 Match · Housing on Capitol Hill · 2 people</div>
       <div class="body">You offer <b>a room to crash in on Capitol Hill</b>. Two people said they're looking for a place there.</div>
       <div class="who-row">
@@ -315,7 +317,7 @@
       </div>
     </div>
 
-    <div class="feed-card strong">
+    <div class="feed-card strong" style="margin-bottom:0;">
       <div class="kicker">🌱 Match · Biochar co-host · 1 person</div>
       <div class="body">You want <b>co-hosts for "burning shit for the planet" biochar events</b>. Lowell said he helps turn ideas into working things and has open capacity.</div>
       <div class="who-row">
@@ -329,7 +331,7 @@
       </div>
     </div>
 
-    <div class="feed-card">
+    <div class="feed-card" style="margin-bottom:0;">
       <div class="kicker">🌾 Match · Your 20 acres · 2 people</div>
       <div class="body">You mentioned <b>20 acres open for camping (no infrastructure)</b>. Two people might be interested for different reasons.</div>
       <div class="who-row">
@@ -343,7 +345,7 @@
       </div>
     </div>
 
-    <div class="feed-card">
+    <div class="feed-card" style="margin-bottom:0;">
       <div class="kicker">💡 Brewing · Waiting for one more overlap</div>
       <div class="body"><b>Alecia (Capitol Hill)</b> is doing guerrilla gardening and looking for planting sites. Your 20 acres is a possible fit, but she asked for close-to-home spots — better as a Bellingham/Cascadia intro if that ever surfaces.</div>
       <div class="actions">
@@ -352,7 +354,7 @@
       </div>
     </div>
 
-    <div class="feed-card">
+    <div class="feed-card" style="margin-bottom:0;">
       <div class="kicker">📚 Brewing · Interest overlap, no ask yet</div>
       <div class="body">Three people in this group are pottery / watercolor / mending curious — no one has asked to organize, but if you want to host a crafting drop-in at the Capitol Hill room, we can set that up.</div>
       <div class="actions">
@@ -361,8 +363,10 @@
       </div>
     </div>
 
-    <details class="insights" style="background:rgba(255,255,255,.94);">
-      <summary>Show group aggregate — skills / interests / values / needs</summary>
+    </div>
+    <!-- Aggregate details removed 2026-08-20 — View all button in the header covers this. -->
+    <details style="display:none;">
+      <summary>_hidden_</summary>
       <div class="content">
         <div class="grid-2">
           <div class="card">
