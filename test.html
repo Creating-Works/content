@@ -220,6 +220,45 @@
 <div class="design" id="home" style="background:#1F699E;">
   <div class="design-body">
 
+    <!-- Live group.html top-nav pattern mirrored INTO the mock (2026-08-20 per [mock-vs-live-boundary]).
+         Pills on blue, group title + search + View all inside a white card, photo strip below. -->
+    <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px;">
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;">
+        <a href="#" style="text-decoration:none;color:#185FA5;background:#fff;font-size:15px;font-weight:700;padding:6px 16px;border-radius:20px;display:inline-flex;align-items:center;gap:8px;line-height:24px;">My profile <span style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#7DD3FC,#1F699E);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;">K</span></a>
+        <a href="#" style="text-decoration:none;color:#185FA5;background:#fff;font-size:15px;font-weight:700;padding:6px 16px;border-radius:20px;line-height:24px;">My groups</a>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;">
+        <a href="#" style="text-decoration:none;color:#185FA5;background:#fff;font-size:15px;font-weight:700;padding:6px 16px;border-radius:20px;line-height:24px;">📅 Group events (3)</a>
+        <a href="#" style="text-decoration:none;color:#185FA5;background:#fff;font-size:15px;font-weight:700;padding:6px 16px;border-radius:20px;line-height:24px;">+ Post an event</a>
+      </div>
+    </div>
+
+    <div style="background:#fff;border-radius:14px;padding:16px 20px;margin-bottom:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;">
+        <div>
+          <div style="font-size:18px;font-weight:800;color:#1A2E42;">Group: Climate Camp</div>
+          <div style="font-size:12px;color:#6B7A8D;margin-top:2px;">17 people</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;background:#F7F9FC;border:1.5px solid #DDE4EE;border-radius:24px;padding:6px 14px;flex:1;min-width:220px;max-width:340px;">
+          <span>🔍</span>
+          <input placeholder="Search skills, interests, values..." style="border:none;background:transparent;flex:1;font-family:inherit;font-size:14px;outline:none;color:#1A2E42;">
+        </div>
+        <button class="btn" style="background:#1F699E;color:#fff;">View all (16)</button>
+      </div>
+      <!-- Photo strip mock — real page loads photos from getGroupMembers. -->
+      <div style="display:flex;flex-wrap:wrap;gap:6px;padding-top:12px;margin-top:12px;border-top:1px solid #f0f1f5;">
+        <div style="font-size:12.5px;color:#6b7280;font-weight:600;width:100%;">17 people here</div>
+        <span style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#7DD3FC,#1F699E);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;">K</span>
+        <span style="width:36px;height:36px;border-radius:50%;background:#B7C4D6;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;">T</span>
+        <span style="width:36px;height:36px;border-radius:50%;background:#B7C4D6;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;">M</span>
+        <span style="width:36px;height:36px;border-radius:50%;background:#B7C4D6;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;">L</span>
+        <span style="width:36px;height:36px;border-radius:50%;background:#B7C4D6;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;">G</span>
+        <span style="width:36px;height:36px;border-radius:50%;background:#B7C4D6;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;">C</span>
+        <span style="width:36px;height:36px;border-radius:50%;background:#B7C4D6;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;">H</span>
+        <span style="width:36px;height:36px;border-radius:50%;background:#B7C4D6;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;">S</span>
+      </div>
+    </div>
+
     <!-- Update-my-own inline reveal — the designer flagged that mixing "search others" with
          "edit myself" conflates two ingresses. Kept separate: this CTA at the top of Home reveals
          a small inline form with the person's own offers + needs (fields from intake.html Screen 4).
