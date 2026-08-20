@@ -205,10 +205,7 @@
 </head>
 <body>
 
-<div class="picker">
-  <a href="#home" class="active" onclick="pick(this,'home')">🏠 Home — personal feed</a>
-  <a href="#explore" onclick="pick(this,'explore')">🔍 Explore — search offers &amp; needs</a>
-</div>
+<!-- Top tabs removed 2026-08-20 — the Home → Explore flow now scrolls linearly. Search all button in the header + Explore CTA at the bottom of the feed both scroll to #explore. -->
 
 <!-- ═══════════════════ DESIGN A — Ask & find (Google-style) ═══════════════════
      One clear question at the top, one clear answer below. The person picks
@@ -242,22 +239,22 @@
           <span>🔍</span>
           <input placeholder="Search skills, interests, values..." style="border:none;background:transparent;flex:1;font-family:inherit;font-size:14px;outline:none;color:#1A2E42;">
         </div>
-        <button class="btn" style="background:#1F699E;color:#fff;">View all (16)</button>
+        <button class="btn" style="background:#1F699E;color:#fff;" onclick="document.getElementById('explore').scrollIntoView({behavior:'smooth',block:'start'});">Search all (16)</button>
       </div>
       <!-- Photo strip mock — real page loads photos from getGroupMembers. -->
       <div style="display:flex;flex-wrap:wrap;gap:6px;padding-top:12px;margin-top:12px;border-top:1px solid #f0f1f5;">
         <div style="font-size:12.5px;color:#6b7280;font-weight:600;width:100%;">17 people here</div>
-        <span style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#7DD3FC,#1F699E);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;">K</span>
-        <span style="width:36px;height:36px;border-radius:50%;background:#B7C4D6;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;">T</span>
-        <span style="width:36px;height:36px;border-radius:50%;background:#B7C4D6;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;">M</span>
-        <span style="width:36px;height:36px;border-radius:50%;background:#B7C4D6;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;">L</span>
-        <span style="width:36px;height:36px;border-radius:50%;background:#B7C4D6;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;">G</span>
-        <span style="width:36px;height:36px;border-radius:50%;background:#B7C4D6;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;">C</span>
-        <span style="width:36px;height:36px;border-radius:50%;background:#B7C4D6;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;">H</span>
-        <span style="width:36px;height:36px;border-radius:50%;background:#B7C4D6;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;">S</span>
+        <a href="#" title="K" style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#7DD3FC,#1F699E);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;text-decoration:none;cursor:pointer;">K</a>
+        <a href="#" title="T" style="width:36px;height:36px;border-radius:50%;background:#B7C4D6;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;text-decoration:none;cursor:pointer;">T</a>
+        <a href="#" title="M" style="width:36px;height:36px;border-radius:50%;background:#B7C4D6;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;text-decoration:none;cursor:pointer;">M</a>
+        <a href="#" title="L" style="width:36px;height:36px;border-radius:50%;background:#B7C4D6;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;text-decoration:none;cursor:pointer;">L</a>
+        <a href="#" title="G" style="width:36px;height:36px;border-radius:50%;background:#B7C4D6;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;text-decoration:none;cursor:pointer;">G</a>
+        <a href="#" title="C" style="width:36px;height:36px;border-radius:50%;background:#B7C4D6;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;text-decoration:none;cursor:pointer;">C</a>
+        <a href="#" title="H" style="width:36px;height:36px;border-radius:50%;background:#B7C4D6;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;text-decoration:none;cursor:pointer;">H</a>
+        <a href="#" title="S" style="width:36px;height:36px;border-radius:50%;background:#B7C4D6;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;text-decoration:none;cursor:pointer;">S</a>
       </div>
       <!-- Stats line moved from the removed c-strip. Sits UNDER the photo strip per Jessie 2026-08-20. -->
-      <div style="font-size:13px;color:#6B7A8D;padding-top:12px;margin-top:12px;border-top:1px solid #f0f1f5;">This group has <b style="color:#1A2E42;">21 offers</b> and <b style="color:#1A2E42;">14 needs</b> across 17 people. Housing is the biggest match cluster.</div>
+      <div style="font-size:13px;color:#6B7A8D;padding-top:12px;margin-top:12px;border-top:1px solid #f0f1f5;">This group has <b style="color:#1A2E42;">21 offers</b> and <b style="color:#1A2E42;">14 needs</b> across 17 people. Housing is the biggest topic.</div>
     </div>
 
     <!-- Update-my-own inline reveal — the designer flagged that mixing "search others" with
@@ -272,30 +269,8 @@
         <div>
           <div style="font-size:12px;font-weight:800;color:#1F699E;letter-spacing:.06em;text-transform:uppercase;">Karina, we found matches for you</div>
           <h3 style="margin:2px 0 2px;font-size:20px;font-weight:800;color:#1A2E42;">3 introductions ready, 2 more brewing</h3>
-          <p style="margin:0;color:#6B7A8D;font-size:13px;">Ranked by strongest overlap with what you shared. Skipped cards don't come back.</p>
+          <p style="margin:0;color:#6B7A8D;font-size:13px;">Ranked by strongest overlap with what you shared. Skip any card to hide.</p>
         </div>
-      </div>
-      <div style="height:1px;background:#f0f1f5;margin:16px 0;"></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
-        <div style="font-size:14px;color:#1A2E42;"><b>Your offers &amp; needs</b> — 3 offers, 1 need on file. The feed below is built from these.</div>
-        <button class="btn ghost sm" onclick="var p=document.getElementById('update-my-panel');p.style.display=p.style.display==='none'?'block':'none';">📝 Update</button>
-      </div>
-    </div>
-    <div id="update-my-panel" style="display:none;background:#fff;border:1.5px dashed #C9DFF3;border-radius:14px;padding:16px 18px;margin-bottom:16px;">
-      <div style="font-size:12px;font-weight:800;letter-spacing:.06em;color:#1F699E;text-transform:uppercase;margin-bottom:8px;">🟢 I'm offering</div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;">
-        <span class="chip"><span class="lbl">A room to crash in on Capitol Hill</span></span>
-        <span class="chip"><span class="lbl">Biochar knowledge (on-site)</span></span>
-        <span class="chip"><span class="lbl">20 acres open for camping</span></span>
-        <span class="chip" style="border-style:dashed;color:#1F699E;"><span class="lbl">+ Add an offer</span></span>
-      </div>
-      <div style="font-size:12px;font-weight:800;letter-spacing:.06em;color:#B36A0F;text-transform:uppercase;margin-bottom:8px;">🟠 I'm seeking</div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px;">
-        <span class="chip"><span class="lbl">Co-hosts for biochar events</span></span>
-        <span class="chip" style="border-style:dashed;color:#B36A0F;"><span class="lbl">+ Add a need</span></span>
-      </div>
-      <div style="margin-top:14px;text-align:right;">
-        <button class="btn sm" onclick="var p=document.getElementById('update-my-panel');p.style.display='none';">Save</button>
       </div>
     </div>
 
@@ -305,8 +280,8 @@
       <div class="kicker">🏠 Match · Housing on Capitol Hill · 2 people</div>
       <div class="body">You offer <b>a room to crash in on Capitol Hill</b>. Two people said they're looking for a place there.</div>
       <div class="who-row">
-        <div class="who"><span class="ph">T</span>Theresa · wants Cap Hill w/ outdoor space</div>
-        <div class="who"><span class="ph">M</span>Monika · Cap Hill for 2 + dog</div>
+        <a href="#" class="who" style="text-decoration:none;color:inherit;cursor:pointer;" title="Theresa"><span class="ph">T</span>Theresa · wants Cap Hill w/ outdoor space</a>
+        <a href="#" class="who" style="text-decoration:none;color:inherit;cursor:pointer;" title="Monika"><span class="ph">M</span>Monika · Cap Hill for 2 + dog</a>
       </div>
       <div class="why">Both said this at CCC '26 ShareOuts. Theresa also asked about mindfulness reading; Monika mentioned a "life instruction manual" pod.</div>
       <div class="actions">
@@ -321,7 +296,7 @@
       <div class="kicker">🌱 Match · Biochar co-host · 1 person</div>
       <div class="body">You want <b>co-hosts for "burning shit for the planet" biochar events</b>. Lowell said he helps turn ideas into working things and has open capacity.</div>
       <div class="who-row">
-        <div class="who"><span class="ph">L</span>Lowell · Green Lake/Tangletown · builds ideas → real things</div>
+        <a href="#" class="who" style="text-decoration:none;color:inherit;cursor:pointer;" title="Lowell"><span class="ph">L</span>Lowell · Green Lake/Tangletown · builds ideas → real things</a>
       </div>
       <div class="why">Lowell noted he's specifically open to software prototyping now that AI makes it easier. Your biochar events probably need a signup + reminder flow.</div>
       <div class="actions">
@@ -335,8 +310,8 @@
       <div class="kicker">🌾 Match · Your 20 acres · 2 people</div>
       <div class="body">You mentioned <b>20 acres open for camping (no infrastructure)</b>. Two people might be interested for different reasons.</div>
       <div class="who-row">
-        <div class="who"><span class="ph">H</span>Holly · River Farm · needs volunteers to remove invasive plants</div>
-        <div class="who"><span class="ph">C</span>Caitlyn · Bellingham · offers crash space, likes doing "cool shit" together</div>
+        <a href="#" class="who" style="text-decoration:none;color:inherit;cursor:pointer;" title="Holly"><span class="ph">H</span>Holly · River Farm · needs volunteers to remove invasive plants</a>
+        <a href="#" class="who" style="text-decoration:none;color:inherit;cursor:pointer;" title="Caitlyn"><span class="ph">C</span>Caitlyn · Bellingham · offers crash space, likes doing "cool shit" together</a>
       </div>
       <div class="why">Holly might send a crew that would use your acres; Caitlyn's crash space could pair with a weekend up at your land.</div>
       <div class="actions">
@@ -421,9 +396,33 @@
     <!-- Bridge to Explore — Jessie's ask: on top of the daily feed, surface a way to browse
          everyone else's offers/needs to find things you didn't know to look for. -->
     <div style="text-align:center;margin-top:22px;">
-      <a href="#explore" onclick="pick(document.querySelectorAll('.picker a')[1],'explore')" style="display:inline-flex;align-items:center;gap:8px;background:#fff;color:#1F699E;text-decoration:none;font-size:15px;font-weight:800;padding:14px 26px;border-radius:28px;box-shadow:0 6px 18px rgba(0,0,0,.15);">🔍 Explore everyone's offers &amp; needs</a>
-      <div style="color:rgba(255,255,255,.85);font-size:12px;margin-top:8px;">Explore group needs and offers.</div>
+      <a href="#explore" onclick="document.getElementById('explore').scrollIntoView({behavior:'smooth',block:'start'});return false;" style="display:inline-flex;align-items:center;gap:8px;background:#fff;color:#1F699E;text-decoration:none;font-size:15px;font-weight:800;padding:14px 26px;border-radius:28px;box-shadow:0 6px 18px rgba(0,0,0,.15);">🔍 Explore all</a>
     </div>
+
+    <!-- Skipped cards — review & unhide. Collapsible, lives at the bottom of Home. -->
+    <details style="background:rgba(255,255,255,.94);border-radius:12px;margin-top:22px;">
+      <summary style="padding:14px 18px;cursor:pointer;font-weight:700;font-size:13px;color:#1A2E42;list-style:none;display:flex;align-items:center;justify-content:space-between;">
+        <span>Skipped cards <span style="color:#6B7A8D;font-weight:500;">(3)</span></span>
+        <span style="color:#6B7A8D;">▾</span>
+      </summary>
+      <div style="padding:0 18px 18px;">
+        <div style="font-size:12px;color:#6B7A8D;margin-bottom:10px;">Cards you skipped stay hidden from the feed above. Unhide any to bring it back.</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="background:#fff;border:1px solid #DDE4EE;border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;">
+            <div><b style="color:#1A2E42;">🌾 Your 20 acres · 2 people</b> <span style="color:#6B7A8D;font-size:12px;">— skipped Aug 18</span></div>
+            <button class="btn ghost sm">Unhide</button>
+          </div>
+          <div style="background:#fff;border:1px solid #DDE4EE;border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;">
+            <div><b style="color:#1A2E42;">💡 Alecia · guerrilla gardening</b> <span style="color:#6B7A8D;font-size:12px;">— skipped Aug 15</span></div>
+            <button class="btn ghost sm">Unhide</button>
+          </div>
+          <div style="background:#fff;border:1px solid #DDE4EE;border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;">
+            <div><b style="color:#1A2E42;">📚 Crafting drop-in idea</b> <span style="color:#6B7A8D;font-size:12px;">— skipped Aug 14</span></div>
+            <button class="btn ghost sm">Unhide</button>
+          </div>
+        </div>
+      </div>
+    </details>
 
   </div>
 </div>
