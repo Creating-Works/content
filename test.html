@@ -94,10 +94,11 @@
   .a-locpill b{font-weight:800;}
   .a-locpill a{color:#1F699E;font-weight:700;text-decoration:underline;font-size:12px;}
 
-  /* In-app help box (Glide-style) with Mark as read */
-  .a-help{background:#E8EEF9;border-radius:16px;padding:52px 18px 18px;font-size:13px;line-height:1.6;color:#1A2E42;position:relative;margin-top:16px;text-align:left;}
+  /* In-app help box (Glide-style) — text sits to the LEFT of "Mark as read" so the box stays short. */
+  .a-help{background:#E8EEF9;border-radius:16px;padding:14px 16px;font-size:13px;line-height:1.5;color:#1A2E42;margin-top:16px;text-align:left;display:flex;align-items:center;gap:14px;}
+  .a-help .txt{flex:1;min-width:0;}
   .a-help b{font-weight:800;}
-  .a-help .mark{position:absolute;top:12px;right:12px;background:#fff;border:1.5px solid #DDE4EE;border-radius:20px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:#1A2E42;}
+  .a-help .mark{flex-shrink:0;background:#fff;border:1.5px solid #DDE4EE;border-radius:20px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:#1A2E42;}
 
   /* Force DM Sans on all form controls inside a design section */
   .design input,.design button,.design select,.design textarea{font-family:'DM Sans',sans-serif;}
@@ -278,20 +279,34 @@
         <span class="a-locpill">📍 <b>Location: Washington, United States</b> <a href="#">Change</a></span>
       </div>
 
-      <div class="a-help">
-        <b>Offers</b> = things people in this group have said they can give.
-        <b>Needs</b> = things they've said they're looking for.
-        Toggle any time.
-        <button class="mark">Mark as read</button>
+      <div class="a-help" id="help-offers-vs-needs">
+        <div class="txt"><b>Offers</b> = things people in this group have said they can give. <b>Needs</b> = things they've said they're looking for. Toggle any time.</div>
+        <button class="mark" onclick="markHelpRead('offers-vs-needs', this)">Mark as read</button>
       </div>
+
+      <script>
+      // Notification-read wiring: hides the help box on click, calls GAS to persist so it stays
+      // hidden on future visits. GAS sheet: read-messages (userID, messageID, readAt) on APP_ID.
+      window.markHelpRead = function(messageID, btn){
+        var box = btn && btn.closest('.a-help');
+        if (box) box.style.display = 'none';
+        // Live call would go to the gate — mock here just logs. Replace with real fetch when wired.
+        try {
+          var userID = 'w.hss';   // TODO: read from page context (memberCard / _myId)
+          var url = 'https://cw-api-gate.jessieupp.workers.dev/?action=markMessageRead&userID=' + encodeURIComponent(userID) + '&messageID=' + encodeURIComponent(messageID);
+          fetch(url).catch(function(){});   // fire-and-forget; UI already hid the box
+          console.log('[markMessageRead]', {userID: userID, messageID: messageID, url: url});
+        } catch(e){}
+      };
+      </script>
     </div>
 
     <!-- RESULTS: OFFERS state (currently active) -->
     <div class="a-results">
       <div class="a-results-head">
         <div>
+          <h3>3 offers in your group match "Capitol Hill housing"</h3>
           <div class="a-results-kicker">🟢 Offers · 📍 Local (Seattle area)</div>
-          <h3>3 offers match "Capitol Hill housing"</h3>
         </div>
         <button class="btn ghost sm">Modify search</button>
       </div>
@@ -362,8 +377,8 @@
     <div class="a-results" id="a-needs-preview">
       <div class="a-results-head">
         <div>
-          <div class="a-results-kicker">🟠 Needs · 📍 Local (Seattle area)</div>
           <h3>2 people in your group are asking for "Capitol Hill housing"</h3>
+          <div class="a-results-kicker">🟠 Needs · 📍 Local (Seattle area)</div>
         </div>
         <button class="btn ghost sm">Modify search</button>
       </div>
