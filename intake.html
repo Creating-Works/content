@@ -4088,7 +4088,7 @@ window.goBack = function(){
   if(!_appearId){ render(); return; }
   if(_introMode){ _screen='intro'; _fastPath=true; }   // new registrant from the hub CTA
   var _bootEl=document.getElementById('app-content');
-  if(_bootEl) _bootEl.innerHTML='<div style="text-align:center;padding:60px 20px;"><div style="width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--brand);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px;"></div><p style="color:var(--muted);font-size:14px;margin:0;">Loading your event profile...</p></div>';
+  if(_bootEl) _bootEl.innerHTML='<div style="text-align:center;padding:60px 20px;"><div style="width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--brand);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px;"></div><p style="color:var(--muted);font-size:14px;margin:0;">Loading your profile...</p></div>';
   await loadRefData();                           // cached + fast — needed to render the flow options
   await loadProfileAndIntake();                  // wait for the real profile before the first paint - avoids the blank-then-jump flash
   if(_hasProfile){
