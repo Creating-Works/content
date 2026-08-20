@@ -275,9 +275,8 @@
 <div class="card" id="app"></div>
 <div id="below-card"></div>
 <div class="toast" id="toast"></div>
-<div class="page-footer">
-  <a href="https://creating.works">Creating Works</a>
-</div>
+<!-- Footer removed 2026-08-20 per Jessie's ask. -->
+
 <div id="debug-id" style="text-align:center;margin-top:12px;font-size:11px;color:#1F699E;user-select:all;"></div>
 
 <div class="modal-overlay" id="gift-drawer-modal" onclick="if(event.target===this)closeDrawer()">
@@ -1010,7 +1009,7 @@ function renderDrawer() {
         const from = g.anonymous === 'true'
           ? 'Given anonymously'
           : profileUrl
-            ? `From <a href="${esc(profileUrl)}" target="_blank">${esc(g.gifterAppearId)}</a>`
+            ? `From <a role="link" tabindex="0" data-nav="${esc(profileUrl)}" onclick="return _safeNavGo(this)" title="${esc(g.gifterAppearId)}" style="cursor:pointer;color:inherit;text-decoration:underline;">${esc(g.gifterAppearId)}</a>`
             : `From ${esc(g.gifterAppearId)}`;
         const itemJson = JSON.stringify({ category: g.category||'', subCategory: g.subCategory||'', item: g.item, note: g.note||'' });
         return `
@@ -1043,7 +1042,7 @@ function renderDrawer() {
             ${photoEl}
             <div class="history-body">
               <div class="history-title">${esc(g.item)}</div>
-              <div class="history-meta">To <a href="${esc(profileUrl)}" target="_blank">${esc(g.ownerAppearId)}</a> · ${formatDate(g.timestamp)}</div>
+              <div class="history-meta">To <a role="link" tabindex="0" data-nav="${esc(profileUrl)}" onclick="return _safeNavGo(this)" title="${esc(g.ownerAppearId)}" style="cursor:pointer;color:inherit;text-decoration:underline;">${esc(g.ownerAppearId)}</a> · ${formatDate(g.timestamp)}</div>
             </div>
           </div>`;
       }).join('');
@@ -1414,6 +1413,9 @@ function viewerHTML() {
 function qs(sel)  { return document.querySelector(sel); }
 function uid()    { return Date.now() + '_' + Math.random().toString(36).slice(2); }
 function esc(s)   { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+// Hover-URL leak protection — same pattern as intake.html + the 4 live pages.
+window._safeNavGo=function(el){try{var u=el&&el.getAttribute&&el.getAttribute('data-nav');if(u){window.location.href=u;}}catch(e){}return false;};
+document.addEventListener('keydown',function(e){if(e.key!=='Enter'&&e.key!==' ')return;var t=e.target;if(t&&t.tagName==='A'&&!t.hasAttribute('href')&&t.hasAttribute('data-nav')){e.preventDefault();_safeNavGo(t);}});
 function toast(msg) {
   const el = qs('#toast');
   el.textContent = msg;
