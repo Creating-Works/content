@@ -114,10 +114,11 @@
   .mcard-meta .type,.mcard-meta .locbadge{background:#fff;border:1px solid #DDE4EE;border-radius:14px;padding:3px 10px;font-size:14px;font-weight:500;color:#1A2E42;}
   .mcard-meta .urgent{background:#FDECEC;border:1px solid #F1A0A0;border-radius:14px;padding:3px 10px;font-size:14px;font-weight:500;color:#1A2E42;}
   .mcard .sentence{font-size:14px;line-height:1.5;color:#1A2E42;}
-  .mcard .who{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:#1A2E42;vertical-align:middle;margin-right:2px;}
+  .mcard .who{text-decoration:none;color:#1A2E42;margin-right:2px;white-space:nowrap;}
   .mcard .who:hover .name{text-decoration:underline;}
-  .mcard .who .avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7DD3FC,#1F699E);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;}
-  .mcard .who .name{font-size:14px;font-weight:500;color:#1A2E42;}
+  .mcard .who .avatar{display:inline-block;width:28px;height:28px;line-height:28px;text-align:center;border-radius:50%;background:linear-gradient(135deg,#7DD3FC,#1F699E);color:#fff;font-size:13px;font-weight:800;vertical-align:middle;margin-right:6px;}
+  .mcard .who .name{font-size:14px;font-weight:500;color:#1A2E42;vertical-align:middle;}
+  .mcard .match-line .mlab{font-weight:800;color:#1A2E42;}
   .mcard .match-line{font-size:14px;color:#1A2E42;}
   .mcard .match-line b{color:#1A2E42;background:#FFF4CC;padding:1px 4px;border-radius:4px;font-weight:500;}
 
@@ -301,9 +302,9 @@
             <a href="#" class="who"><span class="avatar">K</span><span class="name">Karina</span></a>
             has a room to crash in on Capitol Hill.
           </div>
-          <div class="match-line">Match: <b>Capitol Hill</b>, <b>housing</b>, room</div>
+          <div class="match-line"><span class="mlab">Match:</span> <b>Capitol Hill</b>, <b>housing</b>, room</div>
           <div class="actions">
-            <button class="btn sm">Message Karina</button>
+            <button class="btn sm">Message</button>
             <button class="btn sm ghost">Bookmark</button>
             <button class="btn sm ghost">View profile</button>
           </div>
@@ -318,9 +319,9 @@
             <a href="#" class="who"><span class="avatar">G</span><span class="name">Greg</span></a>
             has a guest room + sauna in Bellingham and wants to host + cook dinner. No dogs.
           </div>
-          <div class="match-line">Match: <b>housing</b>, guest room, Bellingham</div>
+          <div class="match-line"><span class="mlab">Match:</span> <b>housing</b>, guest room, Bellingham</div>
           <div class="actions">
-            <button class="btn sm">Message Greg</button>
+            <button class="btn sm">Message</button>
             <button class="btn sm ghost">Bookmark</button>
             <button class="btn sm ghost">View profile</button>
           </div>
@@ -335,9 +336,9 @@
             <a href="#" class="who"><span class="avatar">C</span><span class="name">Caitlyn</span></a>
             has a big house in Bellingham (5 people, 4 dogs) — open to anyone who wants to come do cool shit.
           </div>
-          <div class="match-line">Match: <b>housing</b>, big house, Bellingham</div>
+          <div class="match-line"><span class="mlab">Match:</span> <b>housing</b>, big house, Bellingham</div>
           <div class="actions">
-            <button class="btn sm">Message Caitlyn</button>
+            <button class="btn sm">Message</button>
             <button class="btn sm ghost">Bookmark</button>
             <button class="btn sm ghost">View profile</button>
           </div>
@@ -346,7 +347,7 @@
       </div>
 
       <div class="a-cross-toggle">
-        <span class="lab">Also matching this search:</span>
+        <span class="lab">Matching this search</span>
         <button class="opt on">🟢 3 offers</button>
         <button class="opt">🟠 2 needs</button>
       </div>
@@ -374,9 +375,9 @@
             <a href="#" class="who"><span class="avatar">T</span><span class="name">Theresa</span></a>
             wants to move to Capitol Hill with outdoor space.
           </div>
-          <div class="match-line">Match: <b>Capitol Hill</b>, <b>housing</b>, outdoor</div>
+          <div class="match-line"><span class="mlab">Match:</span> <b>Capitol Hill</b>, <b>housing</b>, outdoor</div>
           <div class="actions">
-            <button class="btn sm">Message Theresa</button>
+            <button class="btn sm">Message</button>
             <button class="btn sm ghost">Introduce me to Karina</button>
             <button class="btn sm ghost">Bookmark</button>
             <button class="btn sm ghost">View profile</button>
@@ -392,9 +393,9 @@
             <a href="#" class="who"><span class="avatar">M</span><span class="name">Monika</span></a>
             needs Capitol Hill or Central District for 2 adults + a dog.
           </div>
-          <div class="match-line">Match: <b>Capitol Hill</b>, <b>housing</b>, dog-friendly</div>
+          <div class="match-line"><span class="mlab">Match:</span> <b>Capitol Hill</b>, <b>housing</b>, dog-friendly</div>
           <div class="actions">
-            <button class="btn sm">Message Monika</button>
+            <button class="btn sm">Message</button>
             <button class="btn sm ghost">Introduce me to Karina</button>
             <button class="btn sm ghost">Bookmark</button>
             <button class="btn sm ghost">View profile</button>
@@ -404,7 +405,7 @@
       </div>
 
       <div class="a-cross-toggle">
-        <span class="lab">Also matching this search:</span>
+        <span class="lab">Matching this search</span>
         <button class="opt">🟢 3 offers</button>
         <button class="opt on">🟠 2 needs</button>
       </div>
