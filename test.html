@@ -232,8 +232,8 @@
     <div style="background:#fff;border-radius:14px;padding:16px 20px;margin-bottom:16px;">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;">
         <div>
-          <div style="font-size:18px;font-weight:800;color:#1A2E42;">Group: Climate Camp</div>
-          <div style="font-size:12px;color:#6B7A8D;margin-top:2px;">17 people</div>
+          <div id="mp-group-name" style="font-size:18px;font-weight:800;color:#1A2E42;">Group: Climate Camp</div>
+          <div id="mp-group-count" style="font-size:12px;color:#6B7A8D;margin-top:2px;">17 people</div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;background:#F7F9FC;border:1.5px solid #DDE4EE;border-radius:24px;padding:6px 14px;flex:1;min-width:220px;max-width:340px;">
           <span>🔍</span>
@@ -242,8 +242,8 @@
         <button class="btn" style="background:#1F699E;color:#fff;" onclick="document.getElementById('explore').scrollIntoView({behavior:'smooth',block:'start'});">Search all (16)</button>
       </div>
       <!-- Photo strip mock — real page loads photos from getGroupMembers. -->
-      <div style="display:flex;flex-wrap:wrap;gap:6px;padding-top:12px;margin-top:12px;border-top:1px solid #f0f1f5;">
-        <div style="font-size:12.5px;color:#6b7280;font-weight:600;width:100%;">17 people here</div>
+      <div id="mp-photo-strip" style="display:flex;flex-wrap:wrap;gap:6px;padding-top:12px;margin-top:12px;border-top:1px solid #f0f1f5;">
+        <div id="mp-photo-count" style="font-size:12.5px;color:#6b7280;font-weight:600;width:100%;">17 people here</div>
         <a role="link" tabindex="0" title="K" style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#7DD3FC,#1F699E);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;text-decoration:none;cursor:pointer;">K</a>
         <a role="link" tabindex="0" title="T" style="width:36px;height:36px;border-radius:50%;background:#B7C4D6;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;text-decoration:none;cursor:pointer;">T</a>
         <a role="link" tabindex="0" title="M" style="width:36px;height:36px;border-radius:50%;background:#B7C4D6;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;text-decoration:none;cursor:pointer;">M</a>
@@ -254,7 +254,7 @@
         <a role="link" tabindex="0" title="S" style="width:36px;height:36px;border-radius:50%;background:#B7C4D6;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;text-decoration:none;cursor:pointer;">S</a>
       </div>
       <!-- Stats line moved from the removed c-strip. Sits UNDER the photo strip per Jessie 2026-08-20. -->
-      <div style="font-size:13px;color:#6B7A8D;padding-top:12px;margin-top:12px;border-top:1px solid #f0f1f5;">This group has <b style="color:#1A2E42;">21 offers</b> and <b style="color:#1A2E42;">14 needs</b> across 17 people. Housing is the biggest topic.</div>
+      <div id="mp-stats" style="font-size:13px;color:#6B7A8D;padding-top:12px;margin-top:12px;border-top:1px solid #f0f1f5;">This group has <b style="color:#1A2E42;">21 offers</b> and <b style="color:#1A2E42;">14 needs</b> across 17 people. Housing is the biggest topic.</div>
     </div>
 
     <!-- Update-my-own inline reveal — the designer flagged that mixing "search others" with
@@ -265,9 +265,9 @@
          Your-offers row underneath with the Update pill. -->
     <div style="background:#fff;border-radius:14px;padding:20px 22px;margin-bottom:16px;">
       <div style="display:flex;gap:18px;align-items:center;">
-        <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#7DD3FC,#1F699E);color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;flex-shrink:0;">K</div>
+        <div id="mp-hero-avatar" style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#7DD3FC,#1F699E);color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;flex-shrink:0;overflow:hidden;">K</div>
         <div>
-          <div style="font-size:12px;font-weight:800;color:#1F699E;letter-spacing:.06em;text-transform:uppercase;">Karina, we found matches for you</div>
+          <div id="mp-hero-kicker" style="font-size:12px;font-weight:800;color:#1F699E;letter-spacing:.06em;text-transform:uppercase;">Karina, we found matches for you</div>
           <h3 style="margin:2px 0 2px;font-size:20px;font-weight:800;color:#1A2E42;">3 introductions ready, 2 more brewing</h3>
           <p style="margin:0;color:#6B7A8D;font-size:13px;">Ranked by strongest overlap with what you shared. Skip any card to hide.</p>
         </div>
@@ -446,8 +446,8 @@
     <div style="background:#fff;border-radius:14px;padding:16px 20px;margin-bottom:16px;">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;">
         <div>
-          <div style="font-size:18px;font-weight:800;color:#1A2E42;">Group: Climate Camp</div>
-          <div style="font-size:12px;color:#6B7A8D;margin-top:2px;">17 people</div>
+          <div id="mp-group-name-2" style="font-size:18px;font-weight:800;color:#1A2E42;">Group: Climate Camp</div>
+          <div id="mp-group-count-2" style="font-size:12px;color:#6B7A8D;margin-top:2px;">17 people</div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;background:#F7F9FC;border:1.5px solid #DDE4EE;border-radius:24px;padding:6px 14px;flex:1;min-width:220px;max-width:340px;">
           <span>🔍</span>
@@ -455,8 +455,8 @@
         </div>
         <button class="btn" style="background:#1F699E;color:#fff;" onclick="document.getElementById('home').scrollIntoView({behavior:'smooth',block:'start'});">Search all (16)</button>
       </div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px;padding-top:12px;margin-top:12px;border-top:1px solid #f0f1f5;">
-        <div style="font-size:12.5px;color:#6b7280;font-weight:600;width:100%;">17 people here</div>
+      <div id="mp-photo-strip-2" style="display:flex;flex-wrap:wrap;gap:6px;padding-top:12px;margin-top:12px;border-top:1px solid #f0f1f5;">
+        <div id="mp-photo-count-2" style="font-size:12.5px;color:#6b7280;font-weight:600;width:100%;">17 people here</div>
         <a role="link" tabindex="0" title="K" style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#7DD3FC,#1F699E);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;text-decoration:none;cursor:pointer;">K</a>
         <a role="link" tabindex="0" title="T" style="width:36px;height:36px;border-radius:50%;background:#B7C4D6;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;text-decoration:none;cursor:pointer;">T</a>
         <a role="link" tabindex="0" title="M" style="width:36px;height:36px;border-radius:50%;background:#B7C4D6;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;text-decoration:none;cursor:pointer;">M</a>
@@ -466,7 +466,7 @@
         <a role="link" tabindex="0" title="H" style="width:36px;height:36px;border-radius:50%;background:#B7C4D6;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;text-decoration:none;cursor:pointer;">H</a>
         <a role="link" tabindex="0" title="S" style="width:36px;height:36px;border-radius:50%;background:#B7C4D6;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;text-decoration:none;cursor:pointer;">S</a>
       </div>
-      <div style="font-size:13px;color:#6B7A8D;padding-top:12px;margin-top:12px;border-top:1px solid #f0f1f5;">This group has <b style="color:#1A2E42;">21 offers</b> and <b style="color:#1A2E42;">14 needs</b> across 17 people. Housing is the biggest topic.</div>
+      <div id="mp-stats-2" style="font-size:13px;color:#6B7A8D;padding-top:12px;margin-top:12px;border-top:1px solid #f0f1f5;">This group has <b style="color:#1A2E42;">21 offers</b> and <b style="color:#1A2E42;">14 needs</b> across 17 people. Housing is the biggest topic.</div>
     </div>
 
     <div class="a-searchbox">
@@ -758,5 +758,107 @@ function pick(el, key){
 }
 </script>
 
+
+<script>
+// MVP wiring 2026-08-20 — test.html accepts ?id=<groupId>&memberCard=<viewerId> and renders
+// the header block (group name, count, photo strip, stats, viewer's first name) with real data
+// from getGroupMembers. Feed match cards stay hardcoded for now — the real match algorithm
+// (viewer's offers × others' needs) is a larger next-phase build.
+(function(){
+  var GS_URL = 'https://cw-api-gate.jessieupp.workers.dev';
+  // Small GROUP_NAMES snapshot mirroring group.html — falls back to "Group" when unknown.
+  var GROUP_NAMES = {
+    'eH7Z9mVdT1O2470M-u.BJA':'Seattle Tech Network','tn.jgL8wQliq26wEwTv-ow':'Seattle Tech Network',
+    'LC4PlqUwTX-w2XzdYNXVJw':'Climate Group','hDW0yKagQemPm0BckoQDow':'Climate Group',
+    'beYd4M39RCqGSbP4KsNqGQ':'Appear Network','uF3ymszISk6ZxAsiLkIJlg':'Campfire',
+    'iUIQ2.fWT0uHbJuffaqliA':'GRC Network','mTXIojX7TbSd6-Bo-ETnng':'GRC Network',
+    '7LXDK-P.R7KAimhUCBBHOQ':'Creating Works Co-Creation Team',
+    'v-SI8y5OSUKcA6to2U87yg':'Creating Works Co-Creation Team',
+    'umXYs0cCTlW0uDVcqBi8UQ':'Hack for Social Impact',
+    'wb-wqx2vTTWtKurfBBDjxA':'Women in Tech Seattle Regatta',
+    'f-fb7Y5MSKmMDaJRUaPX4w':'Lake Ballinger Center','ygerrVqVTD2q62REgC2aSQ':'Lake Ballinger Center'
+  };
+  var params = new URLSearchParams(window.location.search);
+  var groupId = (params.get('id')||'').trim();
+  var meId    = (params.get('memberCard')||params.get('me')||'').trim();
+  if (!groupId) return; // no group specified — leave hardcoded mock intact for design review
+
+  var groupName = GROUP_NAMES[groupId] || 'Group';
+  document.title = groupName + ' — Match page';
+
+  // Fill in group name in both header blocks.
+  ['mp-group-name','mp-group-name-2'].forEach(function(id){
+    var el = document.getElementById(id); if (el) el.textContent = 'Group: ' + groupName;
+  });
+
+  function initialOf(nm){ return String(nm||'?').trim().charAt(0).toUpperCase(); }
+  function hueOf(str){ var h=0; for (var i=0;i<str.length;i++){ h=(h*31+str.charCodeAt(i))|0; } return Math.abs(h)%360; }
+
+  function renderStrip(el, countEl, people){
+    if (!el) return;
+    var count = people.length;
+    if (countEl) countEl.textContent = count + ' people here';
+    // Remove old circles (keep the count element).
+    Array.prototype.slice.call(el.children).forEach(function(c){ if (c.id && c.id.indexOf('mp-photo-count')===0) return; c.remove(); });
+    people.slice(0,20).forEach(function(p){
+      var a = document.createElement('a');
+      a.setAttribute('role','link'); a.setAttribute('tabindex','0');
+      a.setAttribute('title', p.first || p.name || p.appearId || '');
+      var bg = p.photo ? 'transparent' : ('hsl('+hueOf(p.appearId||p.name||'x')+',35%,72%)');
+      a.setAttribute('style','width:36px;height:36px;border-radius:50%;background:'+bg+';color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;text-decoration:none;cursor:pointer;overflow:hidden;');
+      if (p.photo) {
+        var img = document.createElement('img');
+        img.src = p.photo; img.alt = '';
+        img.setAttribute('style','width:100%;height:100%;object-fit:cover;display:block;');
+        a.appendChild(img);
+      } else {
+        a.textContent = initialOf(p.first || p.name || p.appearId);
+      }
+      el.appendChild(a);
+    });
+  }
+
+  function computeStats(people){
+    var offers=0, needs=0;
+    people.forEach(function(p){
+      offers += ((p.skills||'').split('|').filter(Boolean).length);
+      offers += ((p.interests||'').split('|').filter(Boolean).length);
+      offers += ((p.values||'').split('|').filter(Boolean).length);
+      needs  += ((p.needs||'').split('|').filter(Boolean).length);
+    });
+    return {offers: offers, needs: needs, count: people.length};
+  }
+
+  fetch(GS_URL + '?action=getGroupMembers&groupId=' + encodeURIComponent(groupId) + (meId ? '&me=' + encodeURIComponent(meId) : ''))
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (!d) return;
+      var attendees = (d.attendees||[]).filter(function(p){ return p.photo || p.first || p.name; });
+      // Counts
+      var totalCount = attendees.length + (d.me && !attendees.some(function(a){return a.appearId===d.me.appearId;}) ? 1 : 0);
+      ['mp-group-count','mp-group-count-2'].forEach(function(id){
+        var el = document.getElementById(id); if (el) el.textContent = totalCount + ' people';
+      });
+      renderStrip(document.getElementById('mp-photo-strip'), document.getElementById('mp-photo-count'), attendees);
+      renderStrip(document.getElementById('mp-photo-strip-2'), document.getElementById('mp-photo-count-2'), attendees);
+      var st = computeStats(attendees);
+      var statsHTML = 'This group has <b style="color:#1A2E42;">'+st.offers+' offers</b> and <b style="color:#1A2E42;">'+st.needs+' needs</b> across '+st.count+' people.';
+      ['mp-stats','mp-stats-2'].forEach(function(id){
+        var el = document.getElementById(id); if (el) el.innerHTML = statsHTML;
+      });
+      // Viewer's first name into the hero
+      if (d.me && d.me.first) {
+        var kicker = document.getElementById('mp-hero-kicker');
+        if (kicker) kicker.textContent = d.me.first + ', we found matches for you';
+        var av = document.getElementById('mp-hero-avatar');
+        if (av) {
+          if (d.me.photo) { av.innerHTML = '<img src="'+d.me.photo+'" alt="" style="width:100%;height:100%;object-fit:cover;">'; }
+          else { av.textContent = initialOf(d.me.first); }
+        }
+      }
+    })
+    .catch(function(){});
+})();
+</script>
 </body>
 </html>
