@@ -238,12 +238,9 @@
     .inline-edit-row{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--soft);flex-wrap:wrap;}
     /* Hover-URL leak protection: anchors that navigate to member-scoped URLs render WITHOUT
        an href (so the browser's URL preview stays empty) and the real URL is read from data-nav
-       at click time. data-hover carries a friendly label (person / group / event name, or
-       "Groups" / "Events") which renders as a custom tooltip above the anchor. */
+       at click time. The visible tooltip on hover comes from the standard title="" attribute
+       (matching group.html's photo strip style — small, unobtrusive, browser-native). */
     [data-nav]{cursor:pointer;}
-    [data-hover]{position:relative;}
-    [data-hover]:hover::after{content:attr(data-hover);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#1A2E42;color:#fff;padding:5px 10px;border-radius:6px;font-size:12px;font-weight:600;white-space:nowrap;z-index:1000;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,.2);font-family:'DM Sans',sans-serif;}
-    [data-hover]:hover::before{content:'';position:absolute;bottom:calc(100% + 1px);left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#1A2E42;z-index:1000;pointer-events:none;}
   </style>
 </head>
 
@@ -2337,14 +2334,14 @@ window.wtmRemove=function(id){
 function _wtmHubLink(){
   if(!_eventId) return '(on the venue)';
   var url='https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+(_appearId?'&memberCard='+encodeURIComponent(_appearId):'');
-  return '<a role="link" tabindex="0" data-nav="'+esc(url)+'" data-hover="'+esc(_eventTitle||'Venue')+'" onclick="return _safeNavGo(this)" style="color:var(--brand);font-weight:600;">(on the venue)</a>';
+  return '<a role="link" tabindex="0" data-nav="'+esc(url)+'" title="'+esc(_eventTitle||'Venue')+'" onclick="return _safeNavGo(this)" style="color:var(--brand);font-weight:600;">(on the venue)</a>';
 }
 function _wtmListHTML(){
   var a=_wtmData||[];
   var inner = a.length ? a.map(function(p){
     var ph = p.photo ? '<img src="'+esc(p.photo)+'" alt="" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">' : '<div style="width:36px;height:36px;border-radius:50%;background:#1F699E;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;">'+esc((p.name||p.id||'?').charAt(0).toUpperCase())+'</div>';
     return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">'
-      +'<a role="link" tabindex="0" data-nav="'+esc('https://creating.works/intake.html?show='+encodeURIComponent(p.id)+(p.eventId?'&eventId='+encodeURIComponent(p.eventId):''))+'" data-hover="'+esc(p.name||p.id)+'" onclick="return _safeNavGo(this)" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;flex:1;">'+ph+'<span style="font-size:14px;font-weight:600;">'+esc(p.name||p.id)+'</span></a>'
+      +'<a role="link" tabindex="0" data-nav="'+esc('https://creating.works/intake.html?show='+encodeURIComponent(p.id)+(p.eventId?'&eventId='+encodeURIComponent(p.eventId):''))+'" title="'+esc(p.name||p.id)+'" onclick="return _safeNavGo(this)" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;flex:1;">'+ph+'<span style="font-size:14px;font-weight:600;">'+esc(p.name||p.id)+'</span></a>'
       +'<button onclick="wtmRemove(\''+esc(String(p.id).replace(/\\/g,"\\\\").replace(/'/g,"\\'"))+'\')" aria-label="Remove" style="background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;">✕</button>'
       +'</div>';
   }).join('') : '<div style="font-size:13px;color:var(--muted);padding:6px 0;">No one yet. Open someone\'s profile '+_wtmHubLink()+' and tap "Bookmark to meet".</div>';
@@ -2437,22 +2434,22 @@ function renderProfile(el, viewerMode){
   var _b='';
   if(_bgG){
     var _bgU='https://gather.2gather.network/group.html?id='+encodeURIComponent(_bgG)+(_bgM?'&memberCard='+encodeURIComponent(_bgM):'');
-    _b+='<a role="link" tabindex="0" data-nav="'+esc(_bgU)+'" data-hover="Back to group" onclick="return _safeNavGo(this)" style="'+_WB+'">Back to group</a>';
+    _b+='<a role="link" tabindex="0" data-nav="'+esc(_bgU)+'" title="Back to group" onclick="return _safeNavGo(this)" style="'+_WB+'">Back to group</a>';
   } else if(_bgH){
     var _bgU='https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_bgH)+(_bgM?'&memberCard='+encodeURIComponent(_bgM):'');
-    _b+='<a role="link" tabindex="0" data-nav="'+esc(_bgU)+'" data-hover="'+esc(_eventTitle||'Back to venue')+'" onclick="return _safeNavGo(this)" style="'+_WB+'">Back to venue</a>';
+    _b+='<a role="link" tabindex="0" data-nav="'+esc(_bgU)+'" title="'+esc(_eventTitle||'Back to venue')+'" onclick="return _safeNavGo(this)" style="'+_WB+'">Back to venue</a>';
   }
   // When the viewer came from a hub, only Back to hub belongs up here - All events and
   // Manage my experience would pull them out of that hub context. Event hub stays if the event
   // has a hub, because that's a lateral move within the same event context.
   if(!_fromHub){
     var _meUrl='https://gather.2gather.network/myevents.html'+((_navOwn&&_navId)?('?id='+encodeURIComponent(_navId)):'');
-    _b+='<a role="link" tabindex="0" data-nav="'+esc(_meUrl)+'" data-hover="Events" onclick="return _safeNavGo(this)" style="'+_WB+'">My events</a> ';
-    _b+='<a href="https://appear.network/dl/groups" data-hover="Groups" style="'+_WB+'">My groups</a>';
+    _b+='<a role="link" tabindex="0" data-nav="'+esc(_meUrl)+'" title="Events" onclick="return _safeNavGo(this)" style="'+_WB+'">My events</a> ';
+    _b+='<a href="https://appear.network/dl/groups" title="Groups" style="'+_WB+'">My groups</a>';
   }
   if(_eventId && _eventHasHub && !_bgH){
     var _ehUrl='https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+_mc;
-    _b+='<a role="link" tabindex="0" data-nav="'+esc(_ehUrl)+'" data-hover="'+esc(_eventTitle||'Event page')+'" onclick="return _safeNavGo(this)" style="'+_WB+'">Event hub</a>';
+    _b+='<a role="link" tabindex="0" data-nav="'+esc(_ehUrl)+'" title="'+esc(_eventTitle||'Event page')+'" onclick="return _safeNavGo(this)" style="'+_WB+'">Event hub</a>';
   }
   if(_navOwn&&_navId){
     // No "Event profile" or "Manage my experience" pill here — the profile page already IS
@@ -2466,7 +2463,7 @@ function renderProfile(el, viewerMode){
   var _photoHTML='';
   if(viewerMode&&_navOwn){
     var _matchUrl='https://gather.2gather.network/match.html?me='+encodeURIComponent(_navId);
-    _photoHTML='<a role="link" tabindex="0" data-nav="'+esc(_matchUrl)+'" data-hover="Show your 1:1 match code" onclick="return _safeNavGo(this)" style="text-decoration:none;text-align:center;flex-shrink:0;">'
+    _photoHTML='<a role="link" tabindex="0" data-nav="'+esc(_matchUrl)+'" title="Show your 1:1 match code" onclick="return _safeNavGo(this)" style="text-decoration:none;text-align:center;flex-shrink:0;">'
       +'<span style="position:relative;display:inline-block;width:44px;height:44px;">'
       +'<img src="'+esc(_viewerPhoto||('https://ui-avatars.com/api/?name='+encodeURIComponent(_navId)+'&size=44&background=1F699E&color=fff'))+'" alt="" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid #fff;box-shadow:0 0 0 1px var(--border);">'
       +'<span style="position:absolute;bottom:-2px;right:-2px;width:19px;height:19px;border-radius:6px;background:#fff;border:1.5px solid #1F699E;display:flex;align-items:center;justify-content:center;">'
@@ -2768,16 +2765,16 @@ function renderPotluckTopNav(){
   var tn=document.getElementById('app-topnav'); if(!tn) return;
   var WB='text-decoration:none;color:#185FA5;background:#fff;font-size:14px;font-weight:600;padding:8px 15px;border-radius:20px;white-space:nowrap;';
   var _uAll='https://gather.2gather.network/events.html?memberCard='+encodeURIComponent(_appearId);
-  var b='<a role="link" tabindex="0" data-nav="'+esc(_uAll)+'" data-hover="Events" onclick="return _safeNavGo(this)" style="'+WB+'">All events</a>';
+  var b='<a role="link" tabindex="0" data-nav="'+esc(_uAll)+'" title="Events" onclick="return _safeNavGo(this)" style="'+WB+'">All events</a>';
   if(_eventId && _eventHasHub){
     var _uEh='https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+'&memberCard='+encodeURIComponent(_appearId);
-    b+='<a role="link" tabindex="0" data-nav="'+esc(_uEh)+'" data-hover="'+esc(_eventTitle||'Event page')+'" onclick="return _safeNavGo(this)" style="'+WB+'">Event hub</a>';
+    b+='<a role="link" tabindex="0" data-nav="'+esc(_uEh)+'" title="'+esc(_eventTitle||'Event page')+'" onclick="return _safeNavGo(this)" style="'+WB+'">Event hub</a>';
   }
   var _uEp='https://creating.works/intake.html?show='+encodeURIComponent(_appearId)+'&me='+encodeURIComponent(_appearId)+(_eventId?'&eventId='+encodeURIComponent(_eventId):'');
-  b+='<a role="link" tabindex="0" data-nav="'+esc(_uEp)+'" data-hover="'+esc(_viewerName||'My profile')+'" onclick="return _safeNavGo(this)" style="'+WB+'">Event profile</a>';
+  b+='<a role="link" tabindex="0" data-nav="'+esc(_uEp)+'" title="'+esc(_viewerName||'My profile')+'" onclick="return _safeNavGo(this)" style="'+WB+'">Event profile</a>';
   if(_eventId){
     var _uMm='https://gather.2gather.network/myevents.html?id='+encodeURIComponent(_appearId)+'&event='+encodeURIComponent(_eventId);
-    b+='<a role="link" tabindex="0" data-nav="'+esc(_uMm)+'" data-hover="Manage my experience" onclick="return _safeNavGo(this)" style="'+WB+'">Manage my experience</a>';
+    b+='<a role="link" tabindex="0" data-nav="'+esc(_uMm)+'" title="Manage my experience" onclick="return _safeNavGo(this)" style="'+WB+'">Manage my experience</a>';
   }
   tn.innerHTML='<div style="display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px;">'+b+'</div>';
 }
