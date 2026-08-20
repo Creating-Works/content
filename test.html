@@ -206,18 +206,16 @@
 <body>
 
 <div class="top-note">
-  <h1>Group — design mocks</h1>
-  <p>Same viewer, same data, four different UI shapes for the same group. All mocks address the seven UX asks from the Marohn review: need-first ordering, de-emphasized aggregates, chip specifiers, cleaner filter semantics, the explicit housing case (Karina/Theresa/Monika), noise reduction, and (comments-only) the ID-in-URL cleanup. Data is real, drawn from the CCC '26 ShareOuts doc.</p>
+  <h1>Match page</h1>
+  <p><strong>Home = a personal feed of matches (formerly Design D).</strong> Least "make me think" — the reader sees who to introduce themselves to first, brewing overlaps second, and the raw aggregate only on demand. <strong>Explore = the search page (formerly Design A).</strong> Reachable from a button at the bottom of Home. Same colors across both so they read as one product. Two designs kept, B and C archived in the mockup file matchpage-aug-20-24.html.</p>
   <div class="persona">
     <strong>Viewer persona:</strong> Karina (Capitol Hill). Offers: a room to crash in on Capitol Hill · biochar knowledge · 20 acres open for camping. Needs: co-hosts for biochar events. — This is who the whole page is being rendered for.
   </div>
 </div>
 
 <div class="picker">
-  <a href="#design-a" class="active" onclick="pick(this,'a')">A — Ask &amp; find</a>
-  <a href="#design-b" onclick="pick(this,'b')">B — Match cards + chips</a>
-  <a href="#design-c" onclick="pick(this,'c')">C — Offer / Need wall</a>
-  <a href="#design-d" onclick="pick(this,'d')">D — Personal feed</a>
+  <a href="#home" class="active" onclick="pick(this,'home')">🏠 Home — personal feed</a>
+  <a href="#explore" onclick="pick(this,'explore')">🔍 Explore — search offers &amp; needs</a>
 </div>
 
 <!-- ═══════════════════ DESIGN A — Ask & find (Google-style) ═══════════════════
@@ -227,11 +225,144 @@
      the fallback is the existing chip quadrants + a link to browse.
      Same blue as the current group page so it doesn't feel like a different product.
      ═══════════════════════════════════════════════════════════════════════ -->
-<div class="design" id="design-a">
+<div class="design" id="home" style="background:#1F699E;">
   <div class="design-header">
-    <span class="tag">Design A</span>
-    <h2>Ask &amp; find</h2>
-    <p>One question, one answer. Search across the group's stated offers OR stated needs — the toggle is right under the search box, no scrolling to change modes. If a search returns nothing, the classic chip quadrants come back as a fallback with a "See everything" link.</p>
+    <span class="tag">🏠 Home</span>
+    <h2>Personal feed — like a matchmaker's inbox</h2>
+    <p>You see who to introduce yourself to first, then brewing overlaps, then the raw aggregate on demand. Update your own offers/needs from the pill at the top; go deep on what everyone else has said via the Explore button at the bottom.</p>
+  </div>
+  <div class="design-body">
+
+    <!-- Update-my-own inline reveal — the designer flagged that mixing "search others" with
+         "edit myself" conflates two ingresses. Kept separate: this CTA at the top of Home reveals
+         a small inline form with the person's own offers + needs (fields from intake.html Screen 4).
+         Search-others lives on the Explore page. NO modal — Glide renders modals badly. -->
+    <div style="background:#fff;border-radius:14px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+      <div style="font-size:14px;color:#1A2E42;"><b>Your offers &amp; needs</b> — 3 offers, 1 need on file. The feed below is built from these.</div>
+      <button class="btn ghost sm" onclick="var p=document.getElementById('update-my-panel');p.style.display=p.style.display==='none'?'block':'none';">📝 Update</button>
+    </div>
+    <div id="update-my-panel" style="display:none;background:#fff;border:1.5px dashed #C9DFF3;border-radius:14px;padding:16px 18px;margin-bottom:16px;">
+      <div style="font-size:12px;font-weight:800;letter-spacing:.06em;color:#1F699E;text-transform:uppercase;margin-bottom:8px;">🟢 I'm offering</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;">
+        <span class="chip"><span class="lbl">A room to crash in on Capitol Hill</span></span>
+        <span class="chip"><span class="lbl">Biochar knowledge (on-site)</span></span>
+        <span class="chip"><span class="lbl">20 acres open for camping</span></span>
+        <span class="chip" style="border-style:dashed;color:#1F699E;"><span class="lbl">+ Add an offer</span></span>
+      </div>
+      <div style="font-size:12px;font-weight:800;letter-spacing:.06em;color:#B36A0F;text-transform:uppercase;margin-bottom:8px;">🟠 I'm seeking</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;">
+        <span class="chip"><span class="lbl">Co-hosts for biochar events</span></span>
+        <span class="chip" style="border-style:dashed;color:#B36A0F;"><span class="lbl">+ Add a need</span></span>
+      </div>
+      <div style="margin-top:14px;text-align:right;">
+        <button class="btn sm" onclick="var p=document.getElementById('update-my-panel');p.style.display='none';">Save</button>
+      </div>
+    </div>
+
+    <div class="c-hero">
+      <div class="avatar">K</div>
+      <div>
+        <div class="h">Karina, we found matches for you</div>
+        <h3>3 introductions ready, 2 more brewing</h3>
+        <p>Ranked by strongest overlap with what you shared. Skipped cards don't come back.</p>
+      </div>
+    </div>
+
+    <div class="c-strip">
+      <div class="stats">This group has <b>21 offers</b> and <b>14 needs</b> across 17 people. Housing is the biggest match cluster.</div>
+      <a href="#">Show group aggregate →</a>
+    </div>
+
+    <div class="feed-card strong">
+      <div class="kicker">🏠 Match · Housing on Capitol Hill · 2 people</div>
+      <div class="body">You offer <b>a room to crash in on Capitol Hill</b>. Two people said they're looking for a place there.</div>
+      <div class="who-row">
+        <div class="who"><span class="ph">T</span>Theresa · wants Cap Hill w/ outdoor space</div>
+        <div class="who"><span class="ph">M</span>Monika · Cap Hill for 2 + dog</div>
+      </div>
+      <div class="why">Both said this at CCC '26 ShareOuts. Theresa also asked about mindfulness reading; Monika mentioned a "life instruction manual" pod.</div>
+      <div class="actions">
+        <button class="btn">Introduce me to both</button>
+        <button class="btn ghost sm">Message Theresa</button>
+        <button class="btn ghost sm">Message Monika</button>
+        <button class="btn ghost sm">Skip</button>
+      </div>
+    </div>
+
+    <div class="feed-card strong">
+      <div class="kicker">🌱 Match · Biochar co-host · 1 person</div>
+      <div class="body">You want <b>co-hosts for "burning shit for the planet" biochar events</b>. Lowell said he helps turn ideas into working things and has open capacity.</div>
+      <div class="who-row">
+        <div class="who"><span class="ph">L</span>Lowell · Green Lake/Tangletown · builds ideas → real things</div>
+      </div>
+      <div class="why">Lowell noted he's specifically open to software prototyping now that AI makes it easier. Your biochar events probably need a signup + reminder flow.</div>
+      <div class="actions">
+        <button class="btn">Introduce me</button>
+        <button class="btn ghost sm">Bookmark</button>
+        <button class="btn ghost sm">Skip</button>
+      </div>
+    </div>
+
+    <div class="feed-card">
+      <div class="kicker">🌾 Match · Your 20 acres · 2 people</div>
+      <div class="body">You mentioned <b>20 acres open for camping (no infrastructure)</b>. Two people might be interested for different reasons.</div>
+      <div class="who-row">
+        <div class="who"><span class="ph">H</span>Holly · River Farm · needs volunteers to remove invasive plants</div>
+        <div class="who"><span class="ph">C</span>Caitlyn · Bellingham · offers crash space, likes doing "cool shit" together</div>
+      </div>
+      <div class="why">Holly might send a crew that would use your acres; Caitlyn's crash space could pair with a weekend up at your land.</div>
+      <div class="actions">
+        <button class="btn">Introduce me to both</button>
+        <button class="btn ghost sm">Skip</button>
+      </div>
+    </div>
+
+    <div class="feed-card">
+      <div class="kicker">💡 Brewing · Waiting for one more overlap</div>
+      <div class="body"><b>Alecia (Capitol Hill)</b> is doing guerrilla gardening and looking for planting sites. Your 20 acres is a possible fit, but she asked for close-to-home spots — better as a Bellingham/Cascadia intro if that ever surfaces.</div>
+      <div class="actions">
+        <button class="btn ghost sm">Bookmark for later</button>
+        <button class="btn ghost sm">Skip</button>
+      </div>
+    </div>
+
+    <div class="feed-card">
+      <div class="kicker">📚 Brewing · Interest overlap, no ask yet</div>
+      <div class="body">Three people in this group are pottery / watercolor / mending curious — no one has asked to organize, but if you want to host a crafting drop-in at the Capitol Hill room, we can set that up.</div>
+      <div class="actions">
+        <button class="btn ghost sm">Start an event</button>
+        <button class="btn ghost sm">Skip</button>
+      </div>
+    </div>
+
+    <details class="insights" style="background:rgba(255,255,255,.94);">
+      <summary>Show group aggregate (skills / interests / values / needs quadrants)</summary>
+      <div class="content">
+        <div class="insights-grid">
+          <div class="qbox"><h4>Skills</h4><span class="mini">Software</span><span class="mini">Editing</span><span class="mini">Gardening</span><span class="mini">Biochar</span><span class="mini">Governance</span></div>
+          <div class="qbox"><h4>Interests</h4><span class="mini">Pottery</span><span class="mini">Watercolor</span><span class="mini">Solarpunk games</span><span class="mini">Mindfulness</span></div>
+          <div class="qbox"><h4>Values</h4><span class="mini">Carbon sequestration</span><span class="mini">Community raising</span><span class="mini">Storytelling</span><span class="mini">Solar policy</span></div>
+          <div class="qbox"><h4>Needs</h4><span class="mini">Housing</span><span class="mini">Volunteers</span><span class="mini">Playtesters</span><span class="mini">Governance</span><span class="mini">Job</span></div>
+        </div>
+      </div>
+    </details>
+
+    <!-- Bridge to Explore — Jessie's ask: on top of the daily feed, surface a way to browse
+         everyone else's offers/needs to find things you didn't know to look for. -->
+    <div style="text-align:center;margin-top:22px;">
+      <a href="#explore" onclick="pick(document.querySelectorAll('.picker a')[1],'explore')" style="display:inline-flex;align-items:center;gap:8px;background:#fff;color:#1F699E;text-decoration:none;font-size:15px;font-weight:800;padding:14px 26px;border-radius:28px;box-shadow:0 6px 18px rgba(0,0,0,.15);">🔍 Explore everyone's offers &amp; needs →</a>
+      <div style="color:rgba(255,255,255,.85);font-size:12px;margin-top:8px;">Surface things you didn't think to search for.</div>
+    </div>
+
+  </div>
+</div>
+
+
+<div class="design" id="explore">
+  <div class="design-header">
+    <span class="tag">🔍 Explore</span>
+    <h2>Search everyone's offers &amp; needs</h2>
+    <p>Reached from the Home page. Search across what the group has said they can give (Offers) or what they've said they're looking for (Needs) — toggle right under the search box. If a search returns nothing, the classic chip quadrants come back as a fallback.</p>
   </div>
   <div class="design-body">
 
@@ -496,354 +627,13 @@
   </div>
 </div>
 
-<!-- ═══════════════════ DESIGN B — Match cards on top ═══════════════════ -->
-<div class="design" id="design-b">
-  <div class="design-header">
-    <span class="tag">Design B</span>
-    <h2>Match cards on top, chip grid below</h2>
-    <p>The three biggest concrete introductions greet Karina at the top of the page as pre-formed suggestions. Below the matches, the classic four chip quadrants (Skills / Interests / Values / Needs) show the group's shape, but every chip carries a specifier ("Advice: gardening" not just "Advice"). The aggregate "what our group needs" panel collapses to a low-key "Group insights" section at the bottom.</p>
-  </div>
-  <div class="design-body">
-
-    <!-- Hero: 3 auto-match cards -->
-    <div class="a-hero">
-      <div class="h">3 introductions we think you should make</div>
-      <h3>Because of what you and others have shared with the group</h3>
-      <div class="sub">Ranked by strength of overlap. Tap Introduce me to bring the two people into a thread.</div>
-
-      <div class="match-card">
-        <div class="theme">🏠 Capitol Hill housing</div>
-        <div class="body">
-          <div><b>You offer a room to crash in on Capitol Hill.</b> Two people said they need housing there.</div>
-          <div class="peeps">
-            <div class="peep"><span class="ph">T</span><span class="txt">Theresa</span><span class="role">wants Cap Hill w/ outdoor space</span></div>
-            <div class="peep"><span class="ph">M</span><span class="txt">Monika</span><span class="role">Cap Hill for 2 + dog</span></div>
-          </div>
-          <div class="cta btn-row">
-            <button class="btn sm">Introduce me to both</button>
-            <button class="btn sm ghost">Message individually</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="match-card">
-        <div class="theme">🌱 Biochar events</div>
-        <div class="body">
-          <div><b>You want co-hosts for "burning shit for the planet" biochar events.</b> Lowell offered to help people turn ideas into working things.</div>
-          <div class="peeps">
-            <div class="peep"><span class="ph">L</span><span class="txt">Lowell</span><span class="role">helps build ideas → real things</span></div>
-          </div>
-          <div class="cta btn-row">
-            <button class="btn sm">Introduce me</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="match-card">
-        <div class="theme">🌾 Land + camping</div>
-        <div class="body">
-          <div><b>You have 20 acres open for camping (no infrastructure).</b> Holly at River Farm needs volunteer help removing invasive plants; Caitlyn has crash space in Bellingham for the same crowd.</div>
-          <div class="peeps">
-            <div class="peep"><span class="ph">H</span><span class="txt">Holly</span><span class="role">needs invasive-plant help</span></div>
-            <div class="peep"><span class="ph">C</span><span class="txt">Caitlyn</span><span class="role">Bellingham crash space</span></div>
-          </div>
-          <div class="cta btn-row">
-            <button class="btn sm">Introduce me to both</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Standard-shaped quadrants — but chips now carry specifiers -->
-    <div class="grid-2">
-      <div class="card">
-        <h3>Skills represented</h3>
-        <div class="sub">17 people · 42 skills</div>
-        <span class="chip"><span class="ph">L</span><span class="lbl">Software: prototyping</span></span>
-        <span class="chip"><span class="ph">T</span><span class="lbl">Editing: solarpunk writing</span></span>
-        <span class="chip"><span class="ph">G</span><span class="lbl">Advice: gardening</span></span>
-        <span class="chip"><span class="ph">A</span><span class="lbl">Guerrilla gardening</span></span>
-        <span class="chip"><span class="ph">K</span><span class="lbl">Biochar: on-site</span></span>
-        <span class="chip"><span class="ph">H</span><span class="lbl">Teaches: theater camp</span></span>
-        <span class="chip"><span class="ph">I</span><span class="lbl">Governance: dynamic</span></span>
-        <span class="chip"><span class="ph">R</span><span class="lbl">Movement research</span></span>
-      </div>
-
-      <div class="card">
-        <h3>Recreational interests of our group</h3>
-        <div class="sub">12 people · 28 interests</div>
-        <span class="chip"><span class="ph">K</span><span class="lbl">Pottery <span class="sub2">Fan</span></span></span>
-        <span class="chip"><span class="ph">S</span><span class="lbl">Watercolor <span class="sub2">Participant</span></span></span>
-        <span class="chip"><span class="ph">C</span><span class="lbl">Solarpunk games <span class="sub2">Coach</span></span></span>
-        <span class="chip"><span class="ph">M</span><span class="lbl">Mindfulness <span class="sub2">Participant</span></span></span>
-        <span class="chip"><span class="ph">A</span><span class="lbl">Wildflower harvesting</span></span>
-        <span class="chip"><span class="ph">R</span><span class="lbl">TTRPGs <span class="sub2">Participant</span></span></span>
-      </div>
-
-      <div class="card">
-        <h3>Values represented</h3>
-        <div class="sub">14 people · 33 values</div>
-        <span class="chip"><span class="ph">A</span><span class="lbl">Climate action</span></span>
-        <span class="chip"><span class="ph">K</span><span class="lbl">Carbon sequestration <span class="sub2">Leading</span></span></span>
-        <span class="chip"><span class="ph">S</span><span class="lbl">Solar policy <span class="sub2">Engaged</span></span></span>
-        <span class="chip"><span class="ph">C</span><span class="lbl">Community raising <span class="sub2">Exploring</span></span></span>
-        <span class="chip"><span class="ph">J</span><span class="lbl">Storytelling</span></span>
-      </div>
-
-      <div class="card">
-        <h3>What people are asking for</h3>
-        <div class="sub">9 people · 14 requests <span style="color:#1F699E;">· 3 match what you offer</span></div>
-        <span class="chip"><span class="ph">T</span><span class="lbl">Housing: Capitol Hill w/ outdoor</span></span>
-        <span class="chip"><span class="ph">M</span><span class="lbl">Housing: Capitol Hill (2 + dog)</span></span>
-        <span class="chip"><span class="ph">S</span><span class="lbl">Playtesters: solarpunk city game</span></span>
-        <span class="chip"><span class="ph">H</span><span class="lbl">Volunteers: invasive-plant removal</span></span>
-        <span class="chip"><span class="ph">I</span><span class="lbl">Governance: farmers market</span></span>
-        <span class="chip"><span class="ph">A</span><span class="lbl">Job: part-time</span></span>
-        <span class="chip"><span class="ph">M</span><span class="lbl">Pod: mindfulness + burnout</span></span>
-      </div>
-    </div>
-
-    <details class="insights">
-      <summary>Group insights (aggregate stats — moved out of the way for individuals)</summary>
-      <div class="content">
-        <div class="insights-grid">
-          <div class="qbox">
-            <h4>Most-asked-about needs</h4>
-            <span class="mini">Housing — 4</span><span class="mini">Land — 3</span><span class="mini">Software prototyping — 2</span>
-          </div>
-          <div class="qbox">
-            <h4>Most-offered</h4>
-            <span class="mini">Advice — 5</span><span class="mini">Hosting/crashing — 4</span><span class="mini">Editing — 2</span>
-          </div>
-          <div class="qbox">
-            <h4>Overlap density</h4>
-            <span class="mini">Housing has 3 offers, 2 asks</span><span class="mini">Software has 2 offers, 3 asks</span>
-          </div>
-          <div class="qbox">
-            <h4>Quiet spots</h4>
-            <span class="mini">No one asked for legal help yet</span><span class="mini">Land is offered but no takers</span>
-          </div>
-        </div>
-      </div>
-    </details>
-
-  </div>
-</div>
-
-<!-- ═══════════════════ DESIGN C — Offer / Need wall ═══════════════════ -->
-<div class="design" id="design-c" style="background:#256B6A;">
-  <div class="design-header">
-    <span class="tag">Design C</span>
-    <h2>Offer / Need wall — everything at a glance</h2>
-    <p>Two columns side by side: what the group is offering on the left, what the group needs on the right. Categories that appear in BOTH columns light up green (offer side) or amber (need side) so the eye jumps to overlap. Search + explicit filter chips at the top; the filter join is spelled out ("filter offers AND needs by category: Housing"). Great for hosts scanning what the group has and needs at a glance.</p>
-  </div>
-  <div class="design-body">
-
-    <div class="b-search">
-      <input placeholder="Search offers and needs (people, place, skill)">
-      <div class="filters">
-        <span class="fchip on">All categories</span>
-        <span class="fchip">🏠 Housing</span>
-        <span class="fchip">🌱 Land</span>
-        <span class="fchip">💻 Software</span>
-        <span class="fchip">🌿 Gardening</span>
-        <span class="fchip">🎓 Governance</span>
-      </div>
-      <div style="width:100%;font-size:12px;color:#6B7A8D;margin-top:4px;">Filters narrow <b>both</b> columns to the picked category. "All categories" shows everything.</div>
-    </div>
-
-    <div class="b-cols">
-      <div class="b-col offer">
-        <h3>🟢 Offered by our group <span style="color:#8896A8;font-size:12px;font-weight:600;">21 offers</span></h3>
-
-        <div class="cat">
-          <h4>🏠 Housing / crash space <span class="n">4</span><span class="match-hint">2 people need this →</span></h4>
-          <div class="row matched"><span class="ph">K</span><div><div class="who">Karina</div><div class="what">A room to crash in on Capitol Hill</div></div></div>
-          <div class="row"><span class="ph">G</span><div><div class="who">Greg</div><div class="what">Guest room + sauna, Bellingham (no dogs)</div></div></div>
-          <div class="row"><span class="ph">C</span><div><div class="who">Caitlyn</div><div class="what">Big house, Bellingham (5 people, 4 dogs OK)</div></div></div>
-          <div class="row"><span class="ph">K</span><div><div class="who">Karina</div><div class="what">20 acres for camping (no infrastructure)</div></div></div>
-        </div>
-
-        <div class="cat">
-          <h4>💻 Software / prototyping <span class="n">2</span><span class="match-hint">3 people need this →</span></h4>
-          <div class="row matched"><span class="ph">L</span><div><div class="who">Lowell</div><div class="what">Helps turn ideas into working things, incl. software</div></div></div>
-          <div class="row"><span class="ph">B</span><div><div class="who">Brian</div><div class="what">Runs Human-in-the-Loop AI Prototyping Workshop</div></div></div>
-        </div>
-
-        <div class="cat">
-          <h4>🌿 Gardening / land advice <span class="n">3</span></h4>
-          <div class="row"><span class="ph">G</span><div><div class="who">Greg</div><div class="what">Garden advice</div></div></div>
-          <div class="row"><span class="ph">A</span><div><div class="who">Alecia</div><div class="what">Guerrilla gardening / planting scouting</div></div></div>
-          <div class="row"><span class="ph">K</span><div><div class="who">Kimberly</div><div class="what">Beacon Food Forest tours</div></div></div>
-        </div>
-
-        <div class="cat">
-          <h4>✏️ Editing / writing <span class="n">2</span></h4>
-          <div class="row"><span class="ph">T</span><div><div class="who">Tim</div><div class="what">Edits solarpunk writing</div></div></div>
-          <div class="row"><span class="ph">A</span><div><div class="who">Author (name TBC)</div><div class="what">Willing to co-edit</div></div></div>
-        </div>
-
-        <div class="cat">
-          <h4>🎯 Coaching / support <span class="n">2</span></h4>
-          <div class="row"><span class="ph">L</span><div><div class="who">Lowell</div><div class="what">Physical strength, joyfully</div></div></div>
-          <div class="row"><span class="ph">I</span><div><div class="who">Iris</div><div class="what">Governance help for Climate Camp gatherings</div></div></div>
-        </div>
-      </div>
-
-      <div class="b-col need">
-        <h3>🟠 Needed by our group <span style="color:#8896A8;font-size:12px;font-weight:600;">14 needs</span></h3>
-
-        <div class="cat">
-          <h4>🏠 Housing / crash space <span class="n">2</span><span class="match-hint">← 4 people offer this</span></h4>
-          <div class="row matched"><span class="ph">T</span><div><div class="who">Theresa</div><div class="what">Wants to move to Capitol Hill w/ outdoor space</div></div></div>
-          <div class="row matched"><span class="ph">M</span><div><div class="who">Monika</div><div class="what">Cap Hill or Central District, 2 adults + dog</div></div></div>
-        </div>
-
-        <div class="cat">
-          <h4>💻 Software / prototyping <span class="n">3</span><span class="match-hint">← 2 people offer this</span></h4>
-          <div class="row matched"><span class="ph">S</span><div><div class="who">Spencer</div><div class="what">Playtesters for a solarpunk city-building game</div></div></div>
-          <div class="row matched"><span class="ph">J</span><div><div class="who">Jacob</div><div class="what">Graphic novel platform for solarpunk media</div></div></div>
-          <div class="row matched"><span class="ph">K</span><div><div class="who">Karina</div><div class="what">Co-hosts for biochar events → looking for tooling help</div></div></div>
-        </div>
-
-        <div class="cat">
-          <h4>🌾 Land / volunteers <span class="n">2</span></h4>
-          <div class="row"><span class="ph">H</span><div><div class="who">Holly</div><div class="what">Volunteers to remove invasive plants (River Farm)</div></div></div>
-          <div class="row"><span class="ph">K</span><div><div class="who">Karina</div><div class="what">Co-organizers for biochar camping</div></div></div>
-        </div>
-
-        <div class="cat">
-          <h4>👥 Community / pods <span class="n">3</span></h4>
-          <div class="row"><span class="ph">M</span><div><div class="who">Monika</div><div class="what">Pod to work through a "life instruction manual"</div></div></div>
-          <div class="row"><span class="ph">G</span><div><div class="who">Greg</div><div class="what">People to do community-raising with</div></div></div>
-          <div class="row"><span class="ph">S</span><div><div class="who">Spencer</div><div class="what">Community child-raising (no bio kids)</div></div></div>
-        </div>
-
-        <div class="cat">
-          <h4>🎓 Governance / structure <span class="n">1</span></h4>
-          <div class="row"><span class="ph">I</span><div><div class="who">Iris</div><div class="what">Dynamic governance for Burien farmers-market space</div></div></div>
-        </div>
-
-        <div class="cat">
-          <h4>💼 Job / work <span class="n">1</span></h4>
-          <div class="row"><span class="ph">A</span><div><div class="who">Alecia</div><div class="what">Part-time work, willing to talk ideas</div></div></div>
-        </div>
-      </div>
-    </div>
-
-    <div style="color:#fff;text-align:center;margin-top:22px;font-size:13px;opacity:.85;">
-      <b>Match legend:</b> A category that appears in BOTH columns lights up on both sides —
-      the green/amber left border marks a specific person whose offer or need matches something across the wall.
-    </div>
-
-  </div>
-</div>
-
 <!-- ═══════════════════ DESIGN D — Personal feed ═══════════════════ -->
-<div class="design" id="design-d" style="background:#5A2E7A;">
-  <div class="design-header">
-    <span class="tag">Design D</span>
-    <h2>Personal feed — like a matchmaker's inbox</h2>
-    <p>Karina scrolls a personalized feed of match cards. Each card names one match, explains why, and offers three actions: Introduce me, Bookmark, Skip. Group-level aggregate is a one-line strip at the top that expands into the classic quadrants when she wants — otherwise the aggregate stays out of her way entirely. Great for daily-checkin usage: "what's for me today?"</p>
-  </div>
-  <div class="design-body">
-
-    <div class="c-hero">
-      <div class="avatar">K</div>
-      <div>
-        <div class="h">Karina, we found matches for you</div>
-        <h3>3 introductions ready, 2 more brewing</h3>
-        <p>Ranked by strongest overlap with what you shared. Skipped cards don't come back.</p>
-      </div>
-    </div>
-
-    <div class="c-strip">
-      <div class="stats">This group has <b>21 offers</b> and <b>14 needs</b> across 17 people. Housing is the biggest match cluster.</div>
-      <a href="#">Show group aggregate →</a>
-    </div>
-
-    <div class="feed-card strong">
-      <div class="kicker">🏠 Match · Housing on Capitol Hill · 2 people</div>
-      <div class="body">You offer <b>a room to crash in on Capitol Hill</b>. Two people said they're looking for a place there.</div>
-      <div class="who-row">
-        <div class="who"><span class="ph">T</span>Theresa · wants Cap Hill w/ outdoor space</div>
-        <div class="who"><span class="ph">M</span>Monika · Cap Hill for 2 + dog</div>
-      </div>
-      <div class="why">Both said this at CCC '26 ShareOuts. Theresa also asked about mindfulness reading; Monika mentioned a "life instruction manual" pod.</div>
-      <div class="actions">
-        <button class="btn">Introduce me to both</button>
-        <button class="btn ghost sm">Message Theresa</button>
-        <button class="btn ghost sm">Message Monika</button>
-        <button class="btn ghost sm">Skip</button>
-      </div>
-    </div>
-
-    <div class="feed-card strong">
-      <div class="kicker">🌱 Match · Biochar co-host · 1 person</div>
-      <div class="body">You want <b>co-hosts for "burning shit for the planet" biochar events</b>. Lowell said he helps turn ideas into working things and has open capacity.</div>
-      <div class="who-row">
-        <div class="who"><span class="ph">L</span>Lowell · Green Lake/Tangletown · builds ideas → real things</div>
-      </div>
-      <div class="why">Lowell noted he's specifically open to software prototyping now that AI makes it easier. Your biochar events probably need a signup + reminder flow.</div>
-      <div class="actions">
-        <button class="btn">Introduce me</button>
-        <button class="btn ghost sm">Bookmark</button>
-        <button class="btn ghost sm">Skip</button>
-      </div>
-    </div>
-
-    <div class="feed-card">
-      <div class="kicker">🌾 Match · Your 20 acres · 2 people</div>
-      <div class="body">You mentioned <b>20 acres open for camping (no infrastructure)</b>. Two people might be interested for different reasons.</div>
-      <div class="who-row">
-        <div class="who"><span class="ph">H</span>Holly · River Farm · needs volunteers to remove invasive plants</div>
-        <div class="who"><span class="ph">C</span>Caitlyn · Bellingham · offers crash space, likes doing "cool shit" together</div>
-      </div>
-      <div class="why">Holly might send a crew that would use your acres; Caitlyn's crash space could pair with a weekend up at your land.</div>
-      <div class="actions">
-        <button class="btn">Introduce me to both</button>
-        <button class="btn ghost sm">Skip</button>
-      </div>
-    </div>
-
-    <div class="feed-card">
-      <div class="kicker">💡 Brewing · Waiting for one more overlap</div>
-      <div class="body"><b>Alecia (Capitol Hill)</b> is doing guerrilla gardening and looking for planting sites. Your 20 acres is a possible fit, but she asked for close-to-home spots — better as a Bellingham/Cascadia intro if that ever surfaces.</div>
-      <div class="actions">
-        <button class="btn ghost sm">Bookmark for later</button>
-        <button class="btn ghost sm">Skip</button>
-      </div>
-    </div>
-
-    <div class="feed-card">
-      <div class="kicker">📚 Brewing · Interest overlap, no ask yet</div>
-      <div class="body">Three people in this group are pottery / watercolor / mending curious — no one has asked to organize, but if you want to host a crafting drop-in at the Capitol Hill room, we can set that up.</div>
-      <div class="actions">
-        <button class="btn ghost sm">Start an event</button>
-        <button class="btn ghost sm">Skip</button>
-      </div>
-    </div>
-
-    <details class="insights" style="background:rgba(255,255,255,.94);">
-      <summary>Show group aggregate (skills / interests / values / needs quadrants)</summary>
-      <div class="content">
-        <div class="insights-grid">
-          <div class="qbox"><h4>Skills</h4><span class="mini">Software</span><span class="mini">Editing</span><span class="mini">Gardening</span><span class="mini">Biochar</span><span class="mini">Governance</span></div>
-          <div class="qbox"><h4>Interests</h4><span class="mini">Pottery</span><span class="mini">Watercolor</span><span class="mini">Solarpunk games</span><span class="mini">Mindfulness</span></div>
-          <div class="qbox"><h4>Values</h4><span class="mini">Carbon sequestration</span><span class="mini">Community raising</span><span class="mini">Storytelling</span><span class="mini">Solar policy</span></div>
-          <div class="qbox"><h4>Needs</h4><span class="mini">Housing</span><span class="mini">Volunteers</span><span class="mini">Playtesters</span><span class="mini">Governance</span><span class="mini">Job</span></div>
-        </div>
-      </div>
-    </details>
-
-  </div>
-</div>
-
 <script>
 function pick(el, key){
   document.querySelectorAll('.picker a').forEach(function(a){ a.classList.remove('active'); });
   el.classList.add('active');
-  document.getElementById('design-'+key).scrollIntoView({behavior:'smooth', block:'start'});
+  var t = document.getElementById(key);
+  if (t) t.scrollIntoView({behavior:'smooth', block:'start'});
 }
 </script>
 
