@@ -431,21 +431,63 @@
       </div>
     </div>
 
-    <!-- Null-state fallback (what shows when a search returns nothing) -->
+    <!-- Null-state fallback (what shows when a search returns nothing) — full chip grid, Design-B style. -->
     <details class="insights" open>
       <summary>Fallback preview — what shows when a search returns 0 matches</summary>
       <div class="content" style="padding:14px 0 4px;">
-        <div style="background:#fff;border-radius:14px;padding:18px 22px;">
-          <div style="font-size:14px;margin-bottom:14px;color:#4B5A6D;">
-            <b>No exact matches for "Capitol Hill housing" in <b>offers</b>.</b>
-            Here's the whole group by category — you can browse to see if something related is being offered or asked for.
+        <div style="background:#fff;border-radius:14px;padding:18px 22px;margin-bottom:14px;">
+          <div style="font-size:14px;color:#4B5A6D;">
+            <b>No exact matches for "Capitol Hill housing" in offers.</b>
+            Here's the whole group by category — browse to see if something related is being offered or asked for.
             <a href="#" style="color:#1F699E;font-weight:700;text-decoration:none;">See everything →</a>
           </div>
-          <div class="insights-grid">
-            <div class="qbox"><h4>Skills · 42</h4><span class="mini">Software</span><span class="mini">Editing</span><span class="mini">Gardening</span><span class="mini">Biochar</span><span class="mini">Governance</span></div>
-            <div class="qbox"><h4>Interests · 28</h4><span class="mini">Pottery</span><span class="mini">Watercolor</span><span class="mini">Solarpunk games</span><span class="mini">Mindfulness</span></div>
-            <div class="qbox"><h4>Values · 33</h4><span class="mini">Carbon sequestration</span><span class="mini">Community raising</span><span class="mini">Storytelling</span></div>
-            <div class="qbox"><h4>Needs · 14</h4><span class="mini">Housing</span><span class="mini">Volunteers</span><span class="mini">Playtesters</span><span class="mini">Governance</span></div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <h3>Skills represented</h3>
+            <div class="sub">17 people · 42 skills</div>
+            <span class="chip"><span class="ph">L</span><span class="lbl">Software: prototyping</span></span>
+            <span class="chip"><span class="ph">T</span><span class="lbl">Editing: solarpunk writing</span></span>
+            <span class="chip"><span class="ph">G</span><span class="lbl">Advice: gardening</span></span>
+            <span class="chip"><span class="ph">A</span><span class="lbl">Guerrilla gardening</span></span>
+            <span class="chip"><span class="ph">K</span><span class="lbl">Biochar: on-site</span></span>
+            <span class="chip"><span class="ph">H</span><span class="lbl">Teaches: theater camp</span></span>
+            <span class="chip"><span class="ph">I</span><span class="lbl">Governance: dynamic</span></span>
+            <span class="chip"><span class="ph">R</span><span class="lbl">Movement research</span></span>
+          </div>
+
+          <div class="card">
+            <h3>Recreational interests of our group</h3>
+            <div class="sub">12 people · 28 interests</div>
+            <span class="chip"><span class="ph">K</span><span class="lbl">Pottery <span class="sub2">Fan</span></span></span>
+            <span class="chip"><span class="ph">S</span><span class="lbl">Watercolor <span class="sub2">Participant</span></span></span>
+            <span class="chip"><span class="ph">C</span><span class="lbl">Solarpunk games <span class="sub2">Coach</span></span></span>
+            <span class="chip"><span class="ph">M</span><span class="lbl">Mindfulness <span class="sub2">Participant</span></span></span>
+            <span class="chip"><span class="ph">A</span><span class="lbl">Wildflower harvesting</span></span>
+            <span class="chip"><span class="ph">R</span><span class="lbl">TTRPGs <span class="sub2">Participant</span></span></span>
+          </div>
+
+          <div class="card">
+            <h3>Values represented</h3>
+            <div class="sub">14 people · 33 values</div>
+            <span class="chip"><span class="ph">A</span><span class="lbl">Climate action</span></span>
+            <span class="chip"><span class="ph">K</span><span class="lbl">Carbon sequestration <span class="sub2">Leading</span></span></span>
+            <span class="chip"><span class="ph">S</span><span class="lbl">Solar policy <span class="sub2">Engaged</span></span></span>
+            <span class="chip"><span class="ph">C</span><span class="lbl">Community raising <span class="sub2">Exploring</span></span></span>
+            <span class="chip"><span class="ph">J</span><span class="lbl">Storytelling</span></span>
+          </div>
+
+          <div class="card">
+            <h3>What people are asking for</h3>
+            <div class="sub">9 people · 14 requests <span style="color:#1F699E;">· 3 match what you offer</span></div>
+            <span class="chip"><span class="ph">T</span><span class="lbl">Housing: Capitol Hill w/ outdoor</span></span>
+            <span class="chip"><span class="ph">M</span><span class="lbl">Housing: Capitol Hill (2 + dog)</span></span>
+            <span class="chip"><span class="ph">S</span><span class="lbl">Playtesters: solarpunk city game</span></span>
+            <span class="chip"><span class="ph">H</span><span class="lbl">Volunteers: invasive-plant removal</span></span>
+            <span class="chip"><span class="ph">I</span><span class="lbl">Governance: farmers market</span></span>
+            <span class="chip"><span class="ph">A</span><span class="lbl">Job: part-time</span></span>
+            <span class="chip"><span class="ph">M</span><span class="lbl">Pod: mindfulness + burnout</span></span>
           </div>
         </div>
       </div>
