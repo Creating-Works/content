@@ -17,14 +17,22 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <script>
 // intake.html V4.10.JU — Doug's 4-question profile redesign (Bulletin 2.5, 2026-08-22).
-// Any URL that isn't the owner's edit flow falls through to intake-legacy-2026-08-22.html so
-// existing links keep working while Doug's design is being proven.
+//
+// intake-legacy-2026-08-22.html is the FROZEN full previous page. It still runs EVERY prior flow:
+//   - event profiles (?eventId=)
+//   - potluck / "sign up list" / "I'll bring this!" (?intro=1, ?screen=potluck)
+//   - gifts, bookmarks, read-only profile viewing (?show=&me=)
+// Do NOT delete or edit the legacy file — those flows have no other home yet.
+//
+// This new page ONLY takes over the person's own profile EDIT (a clean ?id= / ?CWid= URL with none
+// of the event/potluck/gift/read signals below). Everything else redirects to the frozen legacy file
+// so no existing link breaks. Broaden LEGACY_SIGNALS, never narrow it, if you add a legacy param.
 (function(){
   var p = new URLSearchParams(window.location.search);
-  var isReadOnly = p.get('show') || p.get('intro') === '1' || p.get('screen') || p.get('eventId');
-  if (isReadOnly) {
-    var q = window.location.search || '';
-    window.location.replace('/intake-legacy-2026-08-22.html' + q + window.location.hash);
+  var LEGACY_SIGNALS = ['show', 'intro', 'screen', 'eventId', 'guest', 'potluck', 'gift', 'giftId'];
+  var goLegacy = LEGACY_SIGNALS.some(function(k){ return p.get(k); });
+  if (goLegacy) {
+    window.location.replace('/intake-legacy-2026-08-22.html' + (window.location.search || '') + window.location.hash);
   }
 })();
 </script>
