@@ -220,13 +220,13 @@
   var GS_URL = 'https://cw-api-gate.jessieupp.workers.dev';
   window._safeNavGo=function(el){try{var u=el&&el.getAttribute&&el.getAttribute('data-nav');if(u){window.location.href=u;}}catch(e){}return false;};
   var params = new URLSearchParams(window.location.search);
-  var meId = (params.get('id') || params.get('memberCard') || params.get('me') || params.get('appearId') || '').trim();
+  var meId = (params.get('id') || params.get('CWid') || params.get('appearId') || params.get('memberCard') || params.get('me') || '').trim();
 
   // Return path — group.html if we came from one, else My groups
   var backGroup = (params.get('groupId') || '').trim();
   var backName = (params.get('groupName') || '').trim();
   var _backHref = backGroup
-    ? ('https://gather.2gather.network/group.html?id=' + encodeURIComponent(backGroup) + (meId ? '&appearId=' + encodeURIComponent(meId) : ''))
+    ? ('https://gather.2gather.network/group.html?id=' + encodeURIComponent(backGroup) + (meId ? '&CWid=' + encodeURIComponent(meId) : ''))
     : 'https://gather.2gather.network/group.html';
   document.getElementById('crumb-back').setAttribute('data-nav', _backHref);
   document.getElementById('crumb-back').textContent = backGroup && backName ? ('‹ ' + backName + ' / My profile') : '‹ My profile';
