@@ -1,4 +1,15 @@
 <!doctype html>
+<!--
+  Copyright 2026 DayBalancer LLC. All rights reserved.
+
+  The code and the content here power Creating.Works, DayBalancer, Appear Network,
+  and 2Gather. They are published so they can be read, audited, and dated.
+
+  Running either as a separate offering requires a license, whether you brand it as
+  ours or as your own, and whether or not money changes hands.
+
+  hello@creating.works
+-->
 <html>
 <head>
 <meta charset="utf-8">
@@ -67,7 +78,7 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="breadcrumb"><a href="#" id="crumb-back">‹ My profile</a> / Edit</div>
+  <div class="breadcrumb"><a role="link" tabindex="0" id="crumb-back" onclick="return _safeNavGo(this)" style="cursor:pointer;color:#fff;text-decoration:none;">‹ My profile</a> / Edit</div>
 
   <!-- STEP 1: Prose intake -->
   <div id="step-1" class="step on">
@@ -105,7 +116,7 @@
       </div>
 
       <div class="actions end">
-        <a class="btn ghost" href="#" id="cancel-1">Cancel</a>
+        <a class="btn ghost" role="link" tabindex="0" id="cancel-1" onclick="return _safeNavGo(this)">Cancel</a>
         <button class="btn" data-next="2">Next: tag these</button>
       </div>
     </div>
@@ -202,23 +213,24 @@
     </div>
   </div>
 
-  <div class="foot">Creating.Works &nbsp;·&nbsp; V4.10.JU</div>
 </div>
 
 <script>
 (function(){
   var GS_URL = 'https://cw-api-gate.jessieupp.workers.dev';
+  window._safeNavGo=function(el){try{var u=el&&el.getAttribute&&el.getAttribute('data-nav');if(u){window.location.href=u;}}catch(e){}return false;};
   var params = new URLSearchParams(window.location.search);
   var meId = (params.get('id') || params.get('memberCard') || params.get('me') || params.get('appearId') || '').trim();
 
   // Return path — group.html if we came from one, else My groups
   var backGroup = (params.get('groupId') || '').trim();
   var backName = (params.get('groupName') || '').trim();
-  document.getElementById('crumb-back').href = backGroup
+  var _backHref = backGroup
     ? ('https://gather.2gather.network/group.html?id=' + encodeURIComponent(backGroup) + (meId ? '&memberCard=' + encodeURIComponent(meId) : ''))
     : 'https://gather.2gather.network/group.html';
+  document.getElementById('crumb-back').setAttribute('data-nav', _backHref);
   document.getElementById('crumb-back').textContent = backGroup && backName ? ('‹ ' + backName + ' / My profile') : '‹ My profile';
-  document.getElementById('cancel-1').href = document.getElementById('crumb-back').href;
+  document.getElementById('cancel-1').setAttribute('data-nav', _backHref);
 
   if (!meId) {
     document.querySelector('.wrap').innerHTML = '<div class="card"><h1>Sign in first.</h1><p class="lede">This page needs your Appear member card in the URL. Land here from your group\'s <b>My profile</b> link.</p></div>';
