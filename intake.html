@@ -136,7 +136,7 @@
       <div class="progress"><div class="dot on"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
       <div class="step-heading">Question 1 of 4</div>
       <h1>Tag what you need 🌱</h1>
-      <p class="lede">Pick every category that fits. Multiple are fine. Skip a phrase if none fit — it'll still show on your profile as prose.</p>
+      <p class="lede">Pick the categories that fit. Level and who it's for are optional and adding them finds better matches. Skip a phrase if none fits and it'll still show on your profile as prose.</p>
       <div id="tag-need-list"></div>
       <div class="actions">
         <button class="btn ghost" data-back="1">Back</button>
@@ -260,7 +260,7 @@
     document.querySelectorAll('.step').forEach(function(s){ s.classList.remove('on'); });
     var el = document.getElementById('step-' + n);
     if (el) { el.classList.add('on'); window.scrollTo({top:0, behavior:'smooth'}); }
-    if (n === 2) renderTagList('need', document.getElementById('p-need').value, false, false);
+    if (n === 2) renderTagList('need', document.getElementById('p-need').value, true, true, LEVELS_SK);
     if (n === 3) renderTagList('enjoy', document.getElementById('p-enjoy').value, true, false, LEVELS_REC);
     if (n === 4) renderTagList('have', document.getElementById('p-have').value, false, false);
     if (n === 5) renderTagList('skills', document.getElementById('p-skills').value, true, true, LEVELS_SK);
@@ -360,10 +360,10 @@
 
       // Audience input
       if (withAudience) {
-        var lblA = document.createElement('div'); lblA.className = 'sub-label'; lblA.textContent = 'Who is your ideal audience?';
+        var lblA = document.createElement('div'); lblA.className = 'sub-label'; lblA.textContent = (section === 'need') ? 'Who is this for?' : 'Who is your ideal audience?';
         card.appendChild(lblA);
         var input = document.createElement('input'); input.type = 'text';
-        input.placeholder = 'Examples: first-time founders, home gardeners';
+        input.placeholder = 'Examples: youth, seniors, founders, and coaches';
         input.value = item.audience || '';
         input.addEventListener('input', function(){ item.audience = input.value; });
         card.appendChild(input);
