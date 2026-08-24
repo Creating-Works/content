@@ -259,19 +259,16 @@
   }
   function loadProfile(d){
     try{
+      // A found profile is authoritative — empty fields mean empty, not the demo seed.
       _loaded={ postal:d.postal||'', retired:d.retired||'', bringType:d.bringType||'', wantsSignupList:d.wantsSignupList||'', languages:d.languages||'' };
-      var na=parseNeedsStr(d.needs||'');
-      if(na.length) NEEDS_ADDED = na.map(function(n){ return { item:n.item, type:(n.ntype==='skill'?'person':n.ntype==='space'?'space':'thing'), category:n.category||'', level:'', local:!!n.local, detail:n.detail||'' }; });
-      var ia=parseTagStr(d.interests||'','level');
-      if(ia.length) ENJOY_ADDED = ia.map(function(x){ return { t:x.item, sel:(x.level?String(x.level).split(',').map(function(s){return s.trim();}).filter(Boolean):[]) }; });
-      var sa=parseTagStr(d.skills||'','level');
-      if(sa.length) SKILLS_ADDED = sa.map(function(x){ return { t:x.item, cat:x.category||'', level:x.level||'' }; });
-      var ma=(d.methods||'').split('|').filter(Boolean); if(ma.length) SKILL_METHODS_ON = ma;
-      var va=parseTagStr(d.values||'','level'); if(va.length) VALUES_ADDED = va.map(function(x){ return { t:x.item, lvl:x.level||'' }; });
-      var dm=parseTagStr(d.domains||'','level'); if(dm.length) DOMAINS_ADDED = dm.map(function(x){ return { t:x.item, lvl:x.level||'' }; });
+      NEEDS_ADDED = parseNeedsStr(d.needs||'').map(function(n){ return { item:n.item, type:(n.ntype==='skill'?'person':n.ntype==='space'?'space':'thing'), category:n.category||'', level:'', local:!!n.local, detail:n.detail||'' }; });
+      ENJOY_ADDED = parseTagStr(d.interests||'','level').map(function(x){ return { t:x.item, sel:(x.level?String(x.level).split(',').map(function(s){return s.trim();}).filter(Boolean):[]) }; });
+      SKILLS_ADDED = parseTagStr(d.skills||'','level').map(function(x){ return { t:x.item, cat:x.category||'', level:x.level||'' }; });
+      SKILL_METHODS_ON = (d.methods||'').split('|').filter(Boolean);
+      VALUES_ADDED = parseTagStr(d.values||'','level').map(function(x){ return { t:x.item, lvl:x.level||'' }; });
+      DOMAINS_ADDED = parseTagStr(d.domains||'','level').map(function(x){ return { t:x.item, lvl:x.level||'' }; });
       var ea=(d.expression||'').split('|').filter(Boolean); EXPRESSION_ADDED = ea.length?ea:[''];
-      var ha=(d.haves||'').split('|').filter(Boolean);
-      if(ha.length) SECTIONS[4].data = ha.map(function(t){ var p=t.split(':'); return { text:p[0]||'', cats:(p.length>1?[p.slice(1).join(':')]:[]), level:'', aud:'' }; });
+      SECTIONS[4].data = (d.haves||'').split('|').filter(Boolean).map(function(t){ var p=t.split(':'); return { text:p[0]||'', cats:(p.length>1?[p.slice(1).join(':')]:[]), level:'', aud:'' }; });
     }catch(e){}
   }
 
