@@ -978,9 +978,9 @@
       added.innerHTML='';
       var by={person:[],space:[],thing:[]};
       NEEDS_ADDED.forEach(function(o){ (by[o.type]||by.person).push(o); });
-      groupRender('👤 Person', by.person);
-      groupRender('🏡 Space', by.space);
-      groupRender('📦 Thing', by.thing);
+      groupRender('People', by.person);
+      groupRender('Places', by.space);
+      groupRender('Things', by.thing);
       if(!NEEDS_ADDED.length){ var e=document.createElement('div'); e.className='ideas'; e.textContent='Nothing added yet.'; added.appendChild(e); }
     }
 
@@ -1051,7 +1051,7 @@
       +'<div class="pv-section"><div class="pv-section-label" style="margin-bottom:12px;">People I want to meet (bookmarked)</div>'
       +'<div class="pv-bm"><div class="pv-bm-av">C</div><div class="pv-bm-name">Carla</div><button class="pv-bm-x">✕</button></div></div>'
       +'</div>';
-    pv.querySelectorAll('.pv-edit').forEach(function(b){ b.onclick=function(){ showEdit(parseInt(b.getAttribute('data-step'),10)); }; });
+    pv.querySelectorAll('.pv-edit').forEach(function(b){ b.onclick=function(){ requestEdit(parseInt(b.getAttribute('data-step'),10)); }; });
   }
   function setBreadcrumb(mode){
     var bc=document.getElementById('breadcrumb');
@@ -1059,12 +1059,18 @@
     else { bc.innerHTML=''; }
   }
   function showView(){
+    harvest(); flushSave();
     document.getElementById('edit-mode').style.display='none';
     document.getElementById('profile-view').style.display='';
     setBreadcrumb('view'); renderProfileView();
     window.scrollTo({top:0,behavior:'smooth'});
   }
-  function showEdit(step){
+  // Verify identity BEFORE entering the editor. Once verified, editing is silent for 60 min.
+  function requestEdit(step){
+    if(!_id || _editToken){ enterEdit(step); return; }
+    showPinGate(document.getElementById('profile-view'), function(){ enterEdit(step); });
+  }
+  function enterEdit(step){
     document.getElementById('profile-view').style.display='none';
     document.getElementById('edit-mode').style.display='';
     setBreadcrumb('edit'); paint(step||0);
@@ -1172,7 +1178,8 @@
       haves: (SECTIONS[4].data||[]).map(function(h){ return (h.text||'')+(h.cats&&h.cats[0]?':'+h.cats[0]:''); }).filter(function(s){ return s && s.charAt(0)!==':'; }).join('|')
     };
   }
-  var _editToken='';
+  var _editToken='', _saveTimer=null, _dirty=false, _saving=false;
+  function setSaveStat(txt){ var s=document.getElementById('da-savestat'); if(s) s.textContent=txt||''; }
   function postSave(){
     var d=serialize();
     var u=GS_URL+'?action=saveIntake&appearId='+encodeURIComponent(_id)+'&secure=1&editToken='+encodeURIComponent(_editToken)
@@ -1183,32 +1190,42 @@
       +'&wantsSignupList='+encodeURIComponent(_loaded.wantsSignupList||'')+'&languages='+encodeURIComponent(_loaded.languages||'')+'&postal='+encodeURIComponent(_loaded.postal||'');
     return fetch(u).then(function(r){ return r.json(); });
   }
-  function doSave(btn){
-    if(!_id){ return; }
-    if(!_editToken){ showPinBar(btn); return; }
-    if(btn){ btn.textContent='Saving…'; btn.disabled=true; }
+  // Automatic save: debounced on any edit, flushed when leaving a step or the editor.
+  function autoSave(){
+    if(!_id || !_dirty || _saving) return;
+    if(!_editToken){ return; } // identity is verified before entering the editor
+    _saving=true; setSaveStat('Saving…');
     postSave().then(function(resp){
-      if(resp&&resp.status==='ok'){ if(btn){ btn.textContent='Saved ✓'; setTimeout(function(){ btn.textContent='Save changes'; btn.disabled=false; },1500); } }
-      else { _editToken=''; if(btn){ btn.textContent='Save changes'; btn.disabled=false; } showPinBar(btn,(resp&&resp.message)||'Session expired — request a new code.'); }
-    }).catch(function(){ if(btn){ btn.textContent='Save changes'; btn.disabled=false; } });
+      _saving=false;
+      if(resp&&resp.status==='ok'){ _dirty=false; setSaveStat('Saved ✓'); setTimeout(function(){ if(!_dirty && !_saving) setSaveStat(''); },2000); }
+      else { _editToken=''; setSaveStat(''); showPinGate(document.getElementById('edit-mode'), function(){ autoSave(); }, (resp&&resp.message)||'Session expired — verify to keep saving.'); }
+    }).catch(function(){ _saving=false; setSaveStat('Save failed — retrying…'); _saveTimer=setTimeout(function(){ scheduleSave(); }, 4000); });
   }
-  function showPinBar(btn,msg){
-    var em=document.getElementById('edit-mode');
-    var host=document.getElementById('da-pin'); if(!host){ host=document.createElement('div'); host.id='da-pin'; em.insertBefore(host, em.firstChild); }
-    host.style.cssText='background:#FFF7E6;border:1.5px solid var(--amber);border-radius:12px;padding:14px 16px;margin-bottom:14px;';
-    host.innerHTML='';
-    var t=document.createElement('div'); t.style.cssText='font-size:14px;font-weight:700;color:var(--ink);margin-bottom:10px;'; t.textContent=msg||'To save changes, verify it’s you.'; host.appendChild(t);
+  function scheduleSave(){ if(!_id) return; _dirty=true; if(_saveTimer) clearTimeout(_saveTimer); _saveTimer=setTimeout(autoSave, 900); }
+  function flushSave(){ if(_saveTimer) clearTimeout(_saveTimer); autoSave(); }
+  // Any edit inside the step list marks the profile dirty and schedules a save.
+  listEl.addEventListener('input', scheduleSave);
+  listEl.addEventListener('click', scheduleSave);
+  // The amber "verify it's you" gate. host = where it renders (profile view before entering, or the editor on expiry).
+  function showPinGate(host, onOk, msg){
+    if(!host) return;
+    var bar=document.getElementById('da-pin');
+    if(!bar){ bar=document.createElement('div'); bar.id='da-pin'; }
+    if(bar.parentNode!==host){ if(bar.parentNode) bar.parentNode.removeChild(bar); host.insertBefore(bar, host.firstChild); }
+    bar.style.cssText='background:#FFF7E6;border:1.5px solid var(--amber);border-radius:12px;padding:14px 16px;margin-bottom:14px;';
+    bar.innerHTML='';
+    var t=document.createElement('div'); t.style.cssText='font-size:14px;font-weight:700;color:var(--ink);margin-bottom:10px;'; t.textContent=msg||'To edit your profile, verify it’s you.'; bar.appendChild(t);
     var row=document.createElement('div'); row.style.cssText='display:flex;gap:8px;flex-wrap:wrap;align-items:center;';
     var send=document.createElement('button'); send.style.cssText='background:var(--brand);color:#fff;border:0;border-radius:10px;padding:10px 16px;font:inherit;font-weight:700;cursor:pointer;'; send.textContent='Email me a code';
     var inp=document.createElement('input'); inp.type='text'; inp.maxLength=6; inp.placeholder='6-digit code'; inp.style.cssText='padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font:inherit;width:120px;display:none;';
     var go=document.createElement('button'); go.style.cssText=send.style.cssText; go.textContent='Unlock'; go.style.display='none';
-    row.appendChild(send); row.appendChild(inp); row.appendChild(go); host.appendChild(row);
+    row.appendChild(send); row.appendChild(inp); row.appendChild(go); bar.appendChild(row);
     send.onclick=function(){ send.textContent='Sending…'; fetch(GS_URL+'?action=sendProfilePin&appearId='+encodeURIComponent(_id)).then(function(r){return r.json();}).then(function(resp){ send.textContent=(resp&&resp.sent)?'Code sent — check email':'No email on file'; inp.style.display=''; go.style.display=''; inp.focus(); }).catch(function(){ send.textContent='Email me a code'; }); };
-    go.onclick=function(){ var c=inp.value.trim(); if(!c) return; go.textContent='…'; fetch(GS_URL+'?action=verifyProfilePin&appearId='+encodeURIComponent(_id)+'&code='+encodeURIComponent(c)).then(function(r){return r.json();}).then(function(resp){ if(resp&&resp.status==='ok'&&resp.editToken){ _editToken=resp.editToken; host.remove(); doSave(btn); } else { go.textContent='Unlock'; t.textContent=(resp&&resp.message)||'Invalid code.'; } }).catch(function(){ go.textContent='Unlock'; }); };
-    host.scrollIntoView({behavior:'smooth',block:'center'});
+    go.onclick=function(){ var c=inp.value.trim(); if(!c) return; go.textContent='…'; fetch(GS_URL+'?action=verifyProfilePin&appearId='+encodeURIComponent(_id)+'&code='+encodeURIComponent(c)).then(function(r){return r.json();}).then(function(resp){ if(resp&&resp.status==='ok'&&resp.editToken){ _editToken=resp.editToken; bar.remove(); if(onOk) onOk(); } else { go.textContent='Unlock'; t.textContent=(resp&&resp.message)||'Invalid code.'; } }).catch(function(){ go.textContent='Unlock'; }); };
+    bar.scrollIntoView({behavior:'smooth',block:'center'});
   }
-  // Save button in the editor action bar.
-  (function(){ var acts=document.querySelector('.actions'); if(acts){ var sv=document.createElement('button'); sv.type='button'; sv.className='btn'; sv.id='save-btn'; sv.textContent='Save changes'; sv.onclick=function(){ doSave(sv); }; acts.appendChild(sv); } })();
+  // Subtle save-status line at the top of the editor.
+  (function(){ var em=document.getElementById('edit-mode'); if(em){ var s=document.createElement('div'); s.id='da-savestat'; s.style.cssText='font-size:13px;color:var(--muted);font-weight:600;text-align:right;min-height:16px;margin-bottom:6px;'; em.insertBefore(s, em.firstChild); } })();
 
   var _pRef=fetch(GS_URL+'?action=getReferenceData').then(function(r){return r.json();}).then(function(rd){ buildTreesFromRefData(rd); }).catch(function(){});
   var _pProf=_id ? fetch(GS_URL+'?action=getProfile&appearId='+encodeURIComponent(_id)).then(function(r){return r.json();}).then(function(resp){ if(resp&&resp.found&&resp.data){ _profilePhoto=resp.photo||''; _profileName=resp.name||''; loadProfile(resp.data); } }).catch(function(){}) : Promise.resolve();
