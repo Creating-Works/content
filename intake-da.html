@@ -234,6 +234,47 @@
 </div>
 
 <script>
+  // ── Phase 3.3a: load a real profile (read-only). Escaping + intake's exact parsers. ──
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function _param(k){ try{ return new URLSearchParams(location.search).get(k)||''; }catch(e){ return ''; } }
+  var _id = _param('id')||_param('show')||_param('CWid')||_param('me')||_param('memberCard')||_param('appearId')||'';
+  var _profilePhoto='', _profileName='', _loaded={};
+  var EXPRESSION_ADDED = ['My 2.5 pickleball game'];
+  function parseNeedsStr(str){
+    if(!str) return [];
+    return String(str).split('|').filter(Boolean).map(function(s){
+      var detail=''; var tio=s.indexOf('~');
+      if(tio>-1){ try{ detail=decodeURIComponent(s.slice(tio+1)); }catch(e){ detail=s.slice(tio+1); } s=s.slice(0,tio); }
+      var p=s.split(':'); var item=p[0]; var local=false, ntype='skill', category='';
+      if(p[1]==='local'){ local=true; ntype=p[2]||'skill'; category=p.slice(3).join(':'); }
+      else { ntype=p[1]||'skill'; category=p.slice(2).join(':'); }
+      return {item:item, category:category, local:local, ntype:ntype, detail:detail};
+    });
+  }
+  function parseTagStr(str,lk){
+    if(!str) return [];
+    return String(str).split('|').filter(Boolean).map(function(s){
+      var p=s.split(':'); var o={item:p[0],category:p.length>=3?p[1]:''}; o[lk]=p.length>=3?(p[2]||''):(p[1]||''); return o;
+    });
+  }
+  function loadProfile(d){
+    try{
+      _loaded={ postal:d.postal||'', retired:d.retired||'', bringType:d.bringType||'', wantsSignupList:d.wantsSignupList||'', languages:d.languages||'' };
+      var na=parseNeedsStr(d.needs||'');
+      if(na.length) NEEDS_ADDED = na.map(function(n){ return { item:n.item, type:(n.ntype==='skill'?'person':n.ntype==='space'?'space':'thing'), category:n.category||'', level:'', local:!!n.local, detail:n.detail||'' }; });
+      var ia=parseTagStr(d.interests||'','level');
+      if(ia.length) ENJOY_ADDED = ia.map(function(x){ return { t:x.item, sel:(x.level?String(x.level).split(',').map(function(s){return s.trim();}).filter(Boolean):[]) }; });
+      var sa=parseTagStr(d.skills||'','level');
+      if(sa.length) SKILLS_ADDED = sa.map(function(x){ return { t:x.item, cat:x.category||'', level:x.level||'' }; });
+      var ma=(d.methods||'').split('|').filter(Boolean); if(ma.length) SKILL_METHODS_ON = ma;
+      var va=parseTagStr(d.values||'','level'); if(va.length) VALUES_ADDED = va.map(function(x){ return { t:x.item, lvl:x.level||'' }; });
+      var dm=parseTagStr(d.domains||'','level'); if(dm.length) DOMAINS_ADDED = dm.map(function(x){ return { t:x.item, lvl:x.level||'' }; });
+      var ea=(d.expression||'').split('|').filter(Boolean); EXPRESSION_ADDED = ea.length?ea:[''];
+      var ha=(d.haves||'').split('|').filter(Boolean);
+      if(ha.length) SECTIONS[4].data = ha.map(function(t){ var p=t.split(':'); return { text:p[0]||'', cats:(p.length>1?[p.slice(1).join(':')]:[]), level:'', aud:'' }; });
+    }catch(e){}
+  }
+
   var CORE_CATS = ['Home & Transportation','Business & Finance','Skills & Services','Food & Drink'];
   var MORE_CATS = ['Nature & Outdoors','Events & Gatherings','Arts & Media','Pets & Animal Care','Health & Wellness','Education & Learning','Environment','Housing & Land'];
 
@@ -530,7 +571,8 @@
     EXPRESS.forEach(function(e){ var el=chip(e,false); el.addEventListener('click', function(){ addExpression(e); }); erow.appendChild(el); });
     var other=chip('+ Other',false,'more'); other.addEventListener('click', function(){ addExpression(''); }); erow.appendChild(other);
     // A persistent, non-removable field (no X) so there is always somewhere to type.
-    addExpression('My 2.5 pickleball game', false);
+    if(EXPRESSION_ADDED.length){ addExpression(EXPRESSION_ADDED[0]||'', false); EXPRESSION_ADDED.slice(1).filter(Boolean).forEach(function(x){ addExpression(x, true); }); }
+    else { addExpression('', false); }
   }
 
   // Skills section — mirrors the current intake "What skill pays the bills?"
@@ -981,9 +1023,9 @@
   // ── Shared profile view ("This is me") — the main screen others see ──
   function pvTag(name, opts){
     opts=opts||{};
-    var lv=opts.level?'<span class="lv">'+opts.level+'</span>':'';
-    var sb=opts.sub?'<span class="sub">'+opts.sub+'</span>':'';
-    return '<div class="pv-tag'+(opts.cls?' '+opts.cls:'')+'">'+name+lv+sb+'</div>';
+    var lv=opts.level?'<span class="lv">'+esc(opts.level)+'</span>':'';
+    var sb=opts.sub?'<span class="sub">'+esc(opts.sub)+'</span>':'';
+    return '<div class="pv-tag'+(opts.cls?' '+opts.cls:'')+'">'+esc(name)+lv+sb+'</div>';
   }
   function pvSection(label, step, tagsHtml, extra){
     return '<div class="pv-section"><div class="pv-section-header"><div class="pv-section-label">'+label+'</div>'
@@ -994,14 +1036,15 @@
     var pv=document.getElementById('profile-view');
     var seeking=NEEDS_ADDED.map(function(n){ return pvTag((n.local?'📍 ':'')+n.item, {sub:n.category||''}); }).join('');
     var enjoy=ENJOY_ADDED.map(function(it){ return pvTag(it.t, {level:(it.sel||[]).join(', ')}); }).join('');
-    var expr='<div class="pv-some"><b>This is so me:</b> My 2.5 pickleball game</div>';
+    var _ex=EXPRESSION_ADDED.filter(Boolean);
+    var expr=_ex.length?'<div class="pv-some"><b>This is so me:</b> '+esc(_ex.join(', '))+'</div>':'';
     var methods='<div class="pv-tags" style="margin-bottom:10px;">'+SKILL_METHODS_ON.map(function(m){ return pvTag(m, {cls:'m'}); }).join('')+'</div>';
     var skills='<div class="pv-tags">'+SKILLS_ADDED.map(function(s){ return pvTag(s.t, {level:s.level}); }).join('')+pvTag('English',{cls:'m'})+'</div>';
     var vals='<div class="pv-sub-h">Values</div><div class="pv-tags">'+VALUES_ADDED.map(function(v){ return pvTag(v.t,{level:v.lvl}); }).join('')+'</div>';
     var doms='<div class="pv-sub-h">Domains</div><div class="pv-tags">'+DOMAINS_ADDED.map(function(v){ return pvTag(v.t,{level:v.lvl}); }).join('')+'</div>';
     var haves=SECTIONS[4].data.map(function(h){ return pvTag(h.text||'A have', {sub:(h.cats&&h.cats[0])||''}); }).join('');
     pv.innerHTML='<div class="pv-card">'
-      +'<div class="pv-head"><h2 class="pv-title">This is me 🌱</h2><div class="pv-photo">🌱</div></div>'
+      +'<div class="pv-head"><h2 class="pv-title">'+(_profileName?('This is '+esc(String(_profileName).trim().split(' ')[0])):'This is me')+' 🌱</h2><div class="pv-photo">'+(_profilePhoto?'<img src="'+esc(_profilePhoto)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">':'🌱')+'</div></div>'
       +pvSection("What I'm seeking",0,seeking)
       +pvSection('What I enjoy',1,enjoy,expr)
       +pvSection('My skills',2,'',methods+skills)
@@ -1088,9 +1131,7 @@
       if(pt.length) PERSON_SUBS=pt;
     }catch(e){ /* keep the hardcoded fallback */ }
   }
-  fetch(GS_URL+'?action=getReferenceData')
-    .then(function(r){ return r.json(); })
-    .then(function(rd){ buildTreesFromRefData(rd); })
-    .catch(function(){})
-    .then(function(){ showView(); });
+  var _pRef=fetch(GS_URL+'?action=getReferenceData').then(function(r){return r.json();}).then(function(rd){ buildTreesFromRefData(rd); }).catch(function(){});
+  var _pProf=_id ? fetch(GS_URL+'?action=getProfile&appearId='+encodeURIComponent(_id)).then(function(r){return r.json();}).then(function(resp){ if(resp&&resp.found&&resp.data){ _profilePhoto=resp.photo||''; _profileName=resp.name||''; loadProfile(resp.data); } }).catch(function(){}) : Promise.resolve();
+  Promise.all([_pRef,_pProf]).then(function(){ showView(); });
 </script>
