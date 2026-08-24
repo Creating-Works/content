@@ -1004,6 +1004,7 @@
   }
 
   function paint(i){
+    harvest();
     curSec=i;
     stepper.querySelectorAll('.stp').forEach(function(x, j){
       var isCur=(j===i), isDone=SEC_DONE[j];
@@ -1128,6 +1129,87 @@
       if(pt.length) PERSON_SUBS=pt;
     }catch(e){ /* keep the hardcoded fallback */ }
   }
+  // ── Phase 3.3b: SAVE gated by an emailed one-time PIN. ──
+  // Edit sections render from arrays but don't sync edits back, so read the DOM back before serialize.
+  function harvest(){
+    try{
+      var sec=SECTIONS[curSec]; if(!sec) return;
+      if(sec.custom==='enjoy'){
+        var joy=[]; listEl.querySelectorAll('.practice-grid .practice-item').forEach(function(c){
+          var nm=c.querySelector('.practice-item-name'); if(!nm) return;
+          var sel=[]; c.querySelectorAll('.practice-btn.selected').forEach(function(b){ sel.push(b.textContent); });
+          joy.push({t:nm.textContent, sel:sel}); });
+        ENJOY_ADDED=joy;
+        var ex=[]; listEl.querySelectorAll('.some-input').forEach(function(i){ if(i.value.trim()) ex.push(i.value.trim()); });
+        EXPRESSION_ADDED=ex.length?ex:[''];
+      } else if(sec.custom==='skills'){
+        var sk=[]; listEl.querySelectorAll('.practice-grid .practice-item').forEach(function(c){
+          var nm=c.querySelector('.practice-item-name'); if(!nm) return;
+          var cat=c.querySelector('.practice-item-cat'), lv=c.querySelector('.practice-btn.selected');
+          sk.push({t:nm.textContent, cat:cat?cat.textContent:'', level:lv?lv.textContent:''}); });
+        SKILLS_ADDED=sk;
+        var ms=[]; listEl.querySelectorAll('.method-item.on .method-text').forEach(function(m){ ms.push(m.textContent); });
+        SKILL_METHODS_ON=ms;
+      } else if(sec.custom==='values'){
+        var vals=[],doms=[]; listEl.querySelectorAll('.practice-grid .practice-item').forEach(function(c){
+          var nm=c.querySelector('.practice-item-name'); if(!nm) return;
+          var ty=c.querySelector('.practice-item-cat'), lv=c.querySelector('.practice-btn.selected');
+          var o={t:nm.textContent, lvl:lv?lv.textContent:''}; if(ty&&ty.textContent==='Domain') doms.push(o); else vals.push(o); });
+        VALUES_ADDED=vals; DOMAINS_ADDED=doms;
+      }
+    }catch(e){}
+  }
+  function serialize(){
+    harvest();
+    return {
+      needs: NEEDS_ADDED.map(function(n){ var nt=(n.type==='person'?'skill':n.type==='space'?'space':'thing'); return n.item+(n.local?':local':'')+':'+nt+(n.category?':'+n.category:'')+(n.detail?'~'+encodeURIComponent(n.detail):''); }).join('|'),
+      interests: ENJOY_ADDED.map(function(x){ return x.t+((x.sel&&x.sel.length)?':'+x.sel.join(','):''); }).join('|'),
+      skills: SKILLS_ADDED.map(function(x){ return x.t+':'+(x.cat||'')+':'+(x.level||''); }).join('|'),
+      values: VALUES_ADDED.map(function(x){ return x.t+':Value:'+(x.lvl||''); }).join('|'),
+      domains: DOMAINS_ADDED.map(function(x){ return x.t+(x.lvl?':'+x.lvl:''); }).join('|'),
+      methods: (SKILL_METHODS_ON||[]).join('|'),
+      expression: EXPRESSION_ADDED.filter(Boolean).join('|'),
+      haves: (SECTIONS[4].data||[]).map(function(h){ return (h.text||'')+(h.cats&&h.cats[0]?':'+h.cats[0]:''); }).filter(function(s){ return s && s.charAt(0)!==':'; }).join('|')
+    };
+  }
+  var _editToken='';
+  function postSave(){
+    var d=serialize();
+    var u=GS_URL+'?action=saveIntake&appearId='+encodeURIComponent(_id)+'&secure=1&editToken='+encodeURIComponent(_editToken)
+      +'&needs='+encodeURIComponent(d.needs)+'&interests='+encodeURIComponent(d.interests)+'&skills='+encodeURIComponent(d.skills)
+      +'&values='+encodeURIComponent(d.values)+'&domains='+encodeURIComponent(d.domains)+'&methods='+encodeURIComponent(d.methods)
+      +'&expression='+encodeURIComponent(d.expression)+'&haves='+encodeURIComponent(d.haves)
+      +'&retired='+encodeURIComponent(_loaded.retired||'')+'&bringType='+encodeURIComponent(_loaded.bringType||'')
+      +'&wantsSignupList='+encodeURIComponent(_loaded.wantsSignupList||'')+'&languages='+encodeURIComponent(_loaded.languages||'')+'&postal='+encodeURIComponent(_loaded.postal||'');
+    return fetch(u).then(function(r){ return r.json(); });
+  }
+  function doSave(btn){
+    if(!_id){ return; }
+    if(!_editToken){ showPinBar(btn); return; }
+    if(btn){ btn.textContent='Saving…'; btn.disabled=true; }
+    postSave().then(function(resp){
+      if(resp&&resp.status==='ok'){ if(btn){ btn.textContent='Saved ✓'; setTimeout(function(){ btn.textContent='Save changes'; btn.disabled=false; },1500); } }
+      else { _editToken=''; if(btn){ btn.textContent='Save changes'; btn.disabled=false; } showPinBar(btn,(resp&&resp.message)||'Session expired — request a new code.'); }
+    }).catch(function(){ if(btn){ btn.textContent='Save changes'; btn.disabled=false; } });
+  }
+  function showPinBar(btn,msg){
+    var em=document.getElementById('edit-mode');
+    var host=document.getElementById('da-pin'); if(!host){ host=document.createElement('div'); host.id='da-pin'; em.insertBefore(host, em.firstChild); }
+    host.style.cssText='background:#FFF7E6;border:1.5px solid var(--amber);border-radius:12px;padding:14px 16px;margin-bottom:14px;';
+    host.innerHTML='';
+    var t=document.createElement('div'); t.style.cssText='font-size:14px;font-weight:700;color:var(--ink);margin-bottom:10px;'; t.textContent=msg||'To save changes, verify it’s you.'; host.appendChild(t);
+    var row=document.createElement('div'); row.style.cssText='display:flex;gap:8px;flex-wrap:wrap;align-items:center;';
+    var send=document.createElement('button'); send.style.cssText='background:var(--brand);color:#fff;border:0;border-radius:10px;padding:10px 16px;font:inherit;font-weight:700;cursor:pointer;'; send.textContent='Email me a code';
+    var inp=document.createElement('input'); inp.type='text'; inp.maxLength=6; inp.placeholder='6-digit code'; inp.style.cssText='padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font:inherit;width:120px;display:none;';
+    var go=document.createElement('button'); go.style.cssText=send.style.cssText; go.textContent='Unlock'; go.style.display='none';
+    row.appendChild(send); row.appendChild(inp); row.appendChild(go); host.appendChild(row);
+    send.onclick=function(){ send.textContent='Sending…'; fetch(GS_URL+'?action=sendProfilePin&appearId='+encodeURIComponent(_id)).then(function(r){return r.json();}).then(function(resp){ send.textContent=(resp&&resp.sent)?'Code sent — check email':'No email on file'; inp.style.display=''; go.style.display=''; inp.focus(); }).catch(function(){ send.textContent='Email me a code'; }); };
+    go.onclick=function(){ var c=inp.value.trim(); if(!c) return; go.textContent='…'; fetch(GS_URL+'?action=verifyProfilePin&appearId='+encodeURIComponent(_id)+'&code='+encodeURIComponent(c)).then(function(r){return r.json();}).then(function(resp){ if(resp&&resp.status==='ok'&&resp.editToken){ _editToken=resp.editToken; host.remove(); doSave(btn); } else { go.textContent='Unlock'; t.textContent=(resp&&resp.message)||'Invalid code.'; } }).catch(function(){ go.textContent='Unlock'; }); };
+    host.scrollIntoView({behavior:'smooth',block:'center'});
+  }
+  // Save button in the editor action bar.
+  (function(){ var acts=document.querySelector('.actions'); if(acts){ var sv=document.createElement('button'); sv.type='button'; sv.className='btn'; sv.id='save-btn'; sv.textContent='Save changes'; sv.onclick=function(){ doSave(sv); }; acts.appendChild(sv); } })();
+
   var _pRef=fetch(GS_URL+'?action=getReferenceData').then(function(r){return r.json();}).then(function(rd){ buildTreesFromRefData(rd); }).catch(function(){});
   var _pProf=_id ? fetch(GS_URL+'?action=getProfile&appearId='+encodeURIComponent(_id)).then(function(r){return r.json();}).then(function(resp){ if(resp&&resp.found&&resp.data){ _profilePhoto=resp.photo||''; _profileName=resp.name||''; loadProfile(resp.data); } }).catch(function(){}) : Promise.resolve();
   Promise.all([_pRef,_pProf]).then(function(){ showView(); });
