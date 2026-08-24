@@ -203,6 +203,46 @@
   .ne-actions{display:flex;gap:10px;margin-top:4px;}
   .ne-save{flex:1;background:var(--brand);color:#fff;border:0;border-radius:10px;padding:13px;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer;}
   .ne-cancel{background:#fff;border:1.5px solid var(--line);color:var(--soft);border-radius:10px;padding:13px 22px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;}
+  /* ── Manage hub (rail + detail), reachable at ?manage=1 ── */
+  .mh-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+  .mh-head h1{font-size:24px;font-weight:800;margin:0;color:var(--ink);}
+  .mh-layout{display:grid;grid-template-columns:240px 1fr;gap:16px;}
+  @media(max-width:760px){.mh-layout{grid-template-columns:1fr;}}
+  .mh-rail{background:var(--panel);border:1px solid var(--panel-line);border-radius:14px;padding:8px;height:fit-content;}
+  .mh-item{padding:11px 12px;border-radius:10px;cursor:pointer;font-size:14px;font-weight:700;color:var(--ink);}
+  .mh-item:hover{background:#EEF6FF;}
+  .mh-item.on{background:#EEF6FF;color:var(--brand);}
+  .mh-detail{background:#fff;border:1px solid var(--line);border-radius:14px;padding:24px 28px;min-height:320px;}
+  .mh-detail h2{font-size:20px;font-weight:800;margin:0 0 4px;color:var(--ink);}
+  .mh-detail .sub{font-size:14px;color:var(--soft);margin:0 0 18px;}
+  .mh-grow{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:560px){.mh-grow{grid-template-columns:1fr;}}
+  .mh-field label{display:block;font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+  .mh-field input,.mh-field textarea{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font:inherit;color:var(--ink);background:#fff;}
+  .mh-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;border-bottom:1px solid var(--line);}
+  .mh-row:last-child{border-bottom:0;}
+  .mh-row .lab{font-size:15px;font-weight:700;color:var(--ink);}
+  .mh-row .desc{font-size:13px;color:var(--soft);margin-top:2px;}
+  .mh-toggle{width:46px;height:26px;border-radius:14px;background:var(--line);border:0;position:relative;cursor:pointer;flex-shrink:0;}
+  .mh-toggle.on{background:var(--brand);}
+  .mh-toggle::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .15s;}
+  .mh-toggle.on::after{left:23px;}
+  .mh-gcard{display:flex;gap:12px;align-items:flex-start;padding:14px;border:1px solid var(--line);border-radius:12px;margin-bottom:10px;}
+  .mh-gcard .gimg{width:44px;height:44px;border-radius:10px;background:#DDE4EE;object-fit:cover;flex-shrink:0;}
+  .mh-gcard .gnm{font-size:15px;font-weight:800;color:var(--ink);}
+  .mh-gcard .gst{font-size:13px;color:var(--soft);margin-top:2px;}
+  .mh-gcard .gacts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .mh-badge{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;padding:2px 8px;border-radius:10px;margin-left:6px;}
+  .mh-badge.host{background:#E7F5EA;color:#1A5A2C;}
+  .mh-badge.cohost{background:#EEF6FF;color:#154F74;}
+  .mh-q{padding:12px 0;border-bottom:1px solid var(--line);}
+  .mh-q:last-child{border-bottom:0;}
+  .mh-q .qn{font-size:12px;font-weight:800;color:var(--brand);}
+  .mh-q .qt{font-size:15px;font-weight:700;color:var(--ink);margin:2px 0 4px;}
+  .mh-q .qa{font-size:14px;color:var(--soft);}
+  .mh-btn{background:var(--brand);color:#fff;border:0;border-radius:20px;padding:8px 14px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;}
+  .mh-btn.ghost{background:#fff;color:var(--brand);border:1.5px solid var(--panel-line);}
+  .mh-link{display:inline-block;font-size:14px;font-weight:700;color:var(--brand);cursor:pointer;text-decoration:none;}
 </style>
 
 <div class="wrap">
@@ -231,6 +271,8 @@
       <button class="btn" id="next-btn">Next: enjoy</button>
     </div>
   </div>
+
+  <div id="manage-mode" style="display:none;"></div>
 </div>
 
 <script>
@@ -1043,6 +1085,7 @@
     var haves=SECTIONS[4].data.map(function(h){ return pvTag(h.text||'A have', {sub:(h.cats&&h.cats[0])||''}); }).join('');
     pv.innerHTML='<div class="pv-card">'
       +'<div class="pv-head"><h2 class="pv-title">'+(_profileName?('This is '+esc(String(_profileName).trim().split(' ')[0])):'This is me')+' 🌱</h2><div class="pv-photo">'+(_profilePhoto?'<img src="'+esc(_profilePhoto)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">':'🌱')+'</div></div>'
+      +'<div style="display:flex;gap:16px;flex-wrap:wrap;margin:2px 0 16px;"><span class="mh-link" id="pv-manage">Manage profile</span><span class="mh-link" id="pv-groups">Groups I host</span></div>'
       +pvSection("What I'm seeking",0,seeking)
       +pvSection('What I enjoy',1,enjoy,expr)
       +pvSection('My skills',2,'',methods+skills)
@@ -1052,15 +1095,19 @@
       +'<div class="pv-bm"><div class="pv-bm-av">C</div><div class="pv-bm-name">Carla</div><button class="pv-bm-x">✕</button></div></div>'
       +'</div>';
     pv.querySelectorAll('.pv-edit').forEach(function(b){ b.onclick=function(){ requestEdit(parseInt(b.getAttribute('data-step'),10)); }; });
+    var _pm=document.getElementById('pv-manage'); if(_pm) _pm.onclick=function(){ showManage('data'); };
+    var _pg=document.getElementById('pv-groups'); if(_pg) _pg.onclick=function(){ showManage('groups'); };
   }
   function setBreadcrumb(mode){
     var bc=document.getElementById('breadcrumb');
     if(mode==='edit'){ bc.innerHTML='‹ <span class="crumb-link" id="crumb-home">My profile</span> / Edit'; var h=document.getElementById('crumb-home'); if(h) h.onclick=showView; }
+    else if(mode==='manage'){ bc.innerHTML='‹ <span class="crumb-link" id="crumb-home">My profile</span> / Manage'; var hm=document.getElementById('crumb-home'); if(hm) hm.onclick=showView; }
     else { bc.innerHTML=''; }
   }
   function showView(){
     harvest(); flushSave();
     document.getElementById('edit-mode').style.display='none';
+    var _mm=document.getElementById('manage-mode'); if(_mm) _mm.style.display='none';
     document.getElementById('profile-view').style.display='';
     setBreadcrumb('view'); renderProfileView();
     window.scrollTo({top:0,behavior:'smooth'});
@@ -1074,6 +1121,89 @@
     document.getElementById('profile-view').style.display='none';
     document.getElementById('edit-mode').style.display='';
     setBreadcrumb('edit'); paint(step||0);
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  // ── Manage hub (rail + detail). Reachable at ?manage=1 and from the profile links. ──
+  // Placeholder/draft content for review; only the profile Q&A editor behind it is wired to save.
+  var MH_GROUPS = [
+    {name:'Seattle Tech Network', role:'host', members:62, offers:102, needs:44, pending:3},
+    {name:'Climate Group', role:'host', members:38, offers:71, needs:29, pending:0},
+    {name:'Lake Ballinger Center', role:'cohost', members:18, offers:26, needs:14, pending:1}
+  ];
+  var MH_SECTIONS = [
+    {key:'groups', label:'Groups I host'},
+    {key:'permissions', label:'My permissions'},
+    {key:'data', label:'My profile data'},
+    {key:'onboarding', label:'Onboarding'},
+    {key:'intake', label:'Intake Q&A'}
+  ];
+  function mhBtn(label, cls){ return '<a class="mh-btn'+(cls?' '+cls:'')+'" href="#" onclick="return false;">'+esc(label)+'</a>'; }
+  function mhToggleRow(lab, desc, on){ return '<div class="mh-row"><div><div class="lab">'+esc(lab)+'</div><div class="desc">'+esc(desc)+'</div></div><button class="mh-toggle'+(on?' on':'')+'" onclick="this.classList.toggle(\'on\')"></button></div>'; }
+  function mhField(lab, type, val){ return '<div class="mh-field"><label>'+esc(lab)+'</label><input type="'+type+'" value="'+esc(val||'')+'"></div>'; }
+  function mhQ(n, q, a){ return '<div class="mh-q">'+(n?'<div class="qn">Q'+n+'</div>':'')+'<div class="qt">'+esc(q)+'</div><div class="qa">'+esc(a)+'</div></div>'; }
+  function mhDetail(key){
+    var d=document.getElementById('mh-detail'); if(!d) return;
+    if(key==='groups'){
+      var rows=MH_GROUPS.map(function(g){
+        return '<div class="mh-gcard"><div class="gimg"></div><div style="flex:1;min-width:0;">'
+          +'<div class="gnm">'+esc(g.name)+'<span class="mh-badge '+g.role+'">'+(g.role==='host'?'Host':'Co-host')+'</span></div>'
+          +'<div class="gst"><b>'+g.members+'</b> people · <b>'+g.offers+'</b> offers · <b>'+g.needs+'</b> needs'
+          +(g.pending?' · <b style="color:var(--brand);">'+g.pending+' pending</b>':'')+'</div>'
+          +'<div class="gacts">'+mhBtn('Open group')+mhBtn('Manage','ghost')+mhBtn('Invite people','ghost')+(g.pending?mhBtn('Requests ('+g.pending+')'):'')+'</div>'
+          +'</div></div>';
+      }).join('');
+      d.innerHTML='<h2>Groups I host</h2><p class="sub">Groups you run or co-host. Placeholder list for now, wired to your real groups next.</p>'
+        +rows+'<div style="margin-top:6px;">'+mhBtn('+ Start a new group')+'</div>';
+    } else if(key==='permissions'){
+      d.innerHTML='<h2>My permissions</h2><p class="sub">Who can see you and how your profile is used. Placeholder toggles.</p>'
+        +mhToggleRow('Public profile','Anyone with the link can view your profile.',true)
+        +mhToggleRow('Show my photo','Display your headshot on your profile and the network map.',true)
+        +mhToggleRow('Appear on the network map','Include me in the shared map of people and resources.',true)
+        +mhToggleRow('Findable in search','Let people find me by skills, interests, and needs.',true)
+        +'<div class="mh-row"><div><div class="lab">Terms accepted</div><div class="desc">You accepted the current terms.</div></div><div style="font-size:13px;color:var(--soft);">Aug 2026</div></div>';
+    } else if(key==='data'){
+      d.innerHTML='<h2>My profile data</h2><p class="sub">Your contact and basics. Not wired to save yet.</p>'
+        +'<div class="mh-grow">'
+        +mhField('Full name','text',_profileName||'')
+        +mhField('Pronouns','text','')
+        +mhField('Email','email','')
+        +mhField('Phone','tel','')
+        +mhField('Postal code','text',(_loaded.postal||''))
+        +mhField('Time zone','text','')
+        +mhField('Languages','text',(_loaded.languages||''))
+        +mhField('Website or link','url','')
+        +'</div>'
+        +'<div class="mh-field" style="margin-top:14px;"><label>Short intro</label><textarea rows="3" placeholder="One line about you."></textarea></div>';
+    } else if(key==='onboarding'){
+      d.innerHTML='<h2>Onboarding</h2><p class="sub">The four questions new people answer first. Draft wording, edit in place.</p>'
+        +mhQ(1,'What do you need?','Something you are looking for right now.')
+        +mhQ(2,'What do you enjoy?','What you love doing.')
+        +mhQ(3,'What are you skilled at?','What you are good at.')
+        +mhQ(4,'What do you have to offer?','A thing, a space, or a resource you can share.');
+    } else if(key==='intake'){
+      d.innerHTML='<h2>Intake Q&A</h2><p class="sub">Extra questions beyond the four onboarding ones and your five profile sections. Draft, edit or reorder.</p>'
+        +mhQ('','What do you care about deeply?','Your values and the domains you focus on.')
+        +mhQ('','Are you open to work or new opportunities?', _loaded.retired?('On file: '+_loaded.retired):'Yes or no.')
+        +mhQ('','What can you bring to a gathering?', _loaded.bringType?('On file: '+_loaded.bringType):'Food, a skill, a space, or nothing needed.')
+        +mhQ('','Add me to event signup lists?', _loaded.wantsSignupList?('On file: '+_loaded.wantsSignupList):'Yes or no.')
+        +mhQ('','Topics you care about','Free-text topics we can match you on.');
+    }
+  }
+  function showManage(key){
+    document.getElementById('profile-view').style.display='none';
+    document.getElementById('edit-mode').style.display='none';
+    var mm=document.getElementById('manage-mode'); if(!mm) return; mm.style.display='';
+    setBreadcrumb('manage');
+    mm.innerHTML='<div class="mh-head"><h1>My profile</h1></div>'
+      +'<div class="mh-layout"><div class="mh-rail" id="mh-rail"></div><div class="mh-detail" id="mh-detail"></div></div>';
+    var rail=document.getElementById('mh-rail');
+    MH_SECTIONS.forEach(function(s){
+      var it=document.createElement('div'); it.className='mh-item'+(s.key===key?' on':''); it.textContent=s.label;
+      it.onclick=function(){ rail.querySelectorAll('.mh-item').forEach(function(x){ x.classList.remove('on'); }); it.classList.add('on'); mhDetail(s.key); };
+      rail.appendChild(it);
+    });
+    mhDetail(key);
     window.scrollTo({top:0,behavior:'smooth'});
   }
 
@@ -1231,5 +1361,9 @@
 
   var _pRef=fetch(GS_URL+'?action=getReferenceData').then(function(r){return r.json();}).then(function(rd){ buildTreesFromRefData(rd); }).catch(function(){});
   var _pProf=_id ? fetch(GS_URL+'?action=getProfile&appearId='+encodeURIComponent(_id)).then(function(r){return r.json();}).then(function(resp){ if(resp&&resp.found&&resp.data){ _profilePhoto=resp.photo||''; _profileName=resp.name||''; loadProfile(resp.data); } }).catch(function(){}) : Promise.resolve();
-  Promise.all([_pRef,_pProf]).then(function(){ showView(); });
+  var _manageParam=_param('manage');
+  Promise.all([_pRef,_pProf]).then(function(){
+    if(_manageParam){ var _mk=(['groups','permissions','data','onboarding','intake'].indexOf(_manageParam)>-1)?_manageParam:'groups'; showManage(_mk); }
+    else { showView(); }
+  });
 </script>
