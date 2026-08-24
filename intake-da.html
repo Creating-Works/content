@@ -5,7 +5,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&display=swap">
 <style>
-  :root{--bg:#1F699E;--card:#fff;--ink:#1A2E42;--soft:#4B5A6D;--muted:#6B7A8D;--line:#DDE4EE;--panel:#F7FBFF;--panel-line:#C9DFF3;--brand:#1F699E;--done:#2E9E6B;--amber:#B36A0F;}
+  :root{--bg:#1F699E;--card:#fff;--ink:#1A2E42;--soft:#4B5A6D;--muted:#6B7A8D;--line:#DDE4EE;--panel:#F7FBFF;--panel-line:#C9DFF3;--brand:#1F699E;--done:#2E9E6B;}
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;background:var(--bg);font-family:'DM Sans','Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:var(--ink);}
   .wrap{max-width:820px;margin:0 auto;padding:24px 20px 60px;}
@@ -132,7 +132,7 @@
   .addown-btn{background:var(--brand);color:#fff;border:0;border-radius:22px;padding:11px 22px;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer;}
   .addown-cancel{background:none;border:0;color:var(--soft);font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;}
   .qlabel{font-size:16px;font-weight:800;color:var(--ink);margin:18px 0 8px;}
-  .some-h{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--amber);margin:16px 0 6px;}
+  .some-h{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--brand);margin:16px 0 6px;}
   .some-item{display:flex;align-items:center;justify-content:space-between;background:#F7F9FC;border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:15px;color:var(--ink);}
   .some-item .x{color:var(--muted);cursor:pointer;font-weight:700;}
   .some-input{flex:1;border:0;background:transparent;outline:none;font-family:inherit;font-size:15px;color:var(--ink);padding:0;}
@@ -168,7 +168,7 @@
   .pv-sub-h{font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin:14px 0 8px;}
   .pv-sub-h:first-child{margin-top:0;}
   .pv-some{margin-top:10px;text-align:right;font-size:13px;color:var(--soft);}
-  .pv-some b{text-transform:uppercase;font-size:10px;letter-spacing:.08em;color:var(--amber);font-weight:800;}
+  .pv-some b{text-transform:uppercase;font-size:10px;letter-spacing:.08em;color:var(--brand);font-weight:800;}
   .pv-bm{display:flex;align-items:center;gap:12px;padding:12px 0 0;}
   .pv-bm-av{width:44px;height:44px;border-radius:50%;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;flex-shrink:0;}
   .pv-bm-name{font-size:16px;font-weight:700;color:var(--ink);flex:1;}
@@ -1198,30 +1198,32 @@
     postSave().then(function(resp){
       _saving=false;
       if(resp&&resp.status==='ok'){ _dirty=false; setSaveStat('Saved ✓'); setTimeout(function(){ if(!_dirty && !_saving) setSaveStat(''); },2000); }
-      else { _editToken=''; setSaveStat(''); showPinGate(document.getElementById('edit-mode'), function(){ autoSave(); }, (resp&&resp.message)||'Session expired — verify to keep saving.'); }
-    }).catch(function(){ _saving=false; setSaveStat('Save failed — retrying…'); _saveTimer=setTimeout(function(){ scheduleSave(); }, 4000); });
+      else { _editToken=''; setSaveStat(''); showPinGate(document.getElementById('edit-mode'), function(){ autoSave(); }, (resp&&resp.message)||'Session expired. Verify to keep saving.'); }
+    }).catch(function(){ _saving=false; setSaveStat('Save failed. Retrying…'); _saveTimer=setTimeout(function(){ scheduleSave(); }, 4000); });
   }
   function scheduleSave(){ if(!_id) return; _dirty=true; if(_saveTimer) clearTimeout(_saveTimer); _saveTimer=setTimeout(autoSave, 900); }
   function flushSave(){ if(_saveTimer) clearTimeout(_saveTimer); autoSave(); }
   // Any edit inside the step list marks the profile dirty and schedules a save.
   listEl.addEventListener('input', scheduleSave);
   listEl.addEventListener('click', scheduleSave);
-  // The amber "verify it's you" gate. host = where it renders (profile view before entering, or the editor on expiry).
+  // The "verify it's you" gate. host = where it renders (profile view before entering, or the editor on expiry).
+  // Button labels stay short (<=3 words, no banned words); all status lives in the text line, never the button.
   function showPinGate(host, onOk, msg){
     if(!host) return;
     var bar=document.getElementById('da-pin');
     if(!bar){ bar=document.createElement('div'); bar.id='da-pin'; }
     if(bar.parentNode!==host){ if(bar.parentNode) bar.parentNode.removeChild(bar); host.insertBefore(bar, host.firstChild); }
-    bar.style.cssText='background:#FFF7E6;border:1.5px solid var(--amber);border-radius:12px;padding:14px 16px;margin-bottom:14px;';
+    bar.style.cssText='background:var(--panel);border:1.5px solid var(--panel-line);border-radius:12px;padding:14px 16px;margin-bottom:14px;';
     bar.innerHTML='';
     var t=document.createElement('div'); t.style.cssText='font-size:14px;font-weight:700;color:var(--ink);margin-bottom:10px;'; t.textContent=msg||'To edit your profile, verify it’s you.'; bar.appendChild(t);
     var row=document.createElement('div'); row.style.cssText='display:flex;gap:8px;flex-wrap:wrap;align-items:center;';
-    var send=document.createElement('button'); send.style.cssText='background:var(--brand);color:#fff;border:0;border-radius:10px;padding:10px 16px;font:inherit;font-weight:700;cursor:pointer;'; send.textContent='Email me a code';
+    var send=document.createElement('button'); send.style.cssText='background:var(--brand);color:#fff;border:0;border-radius:10px;padding:10px 16px;font:inherit;font-weight:700;cursor:pointer;'; send.textContent='Send code';
     var inp=document.createElement('input'); inp.type='text'; inp.maxLength=6; inp.placeholder='6-digit code'; inp.style.cssText='padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font:inherit;width:120px;display:none;';
-    var go=document.createElement('button'); go.style.cssText=send.style.cssText; go.textContent='Unlock'; go.style.display='none';
+    var go=document.createElement('button'); go.style.cssText=send.style.cssText; go.textContent='Verify'; go.style.display='none';
     row.appendChild(send); row.appendChild(inp); row.appendChild(go); bar.appendChild(row);
-    send.onclick=function(){ send.textContent='Sending…'; fetch(GS_URL+'?action=sendProfilePin&appearId='+encodeURIComponent(_id)).then(function(r){return r.json();}).then(function(resp){ send.textContent=(resp&&resp.sent)?'Code sent — check email':'No email on file'; inp.style.display=''; go.style.display=''; inp.focus(); }).catch(function(){ send.textContent='Email me a code'; }); };
-    go.onclick=function(){ var c=inp.value.trim(); if(!c) return; go.textContent='…'; fetch(GS_URL+'?action=verifyProfilePin&appearId='+encodeURIComponent(_id)+'&code='+encodeURIComponent(c)).then(function(r){return r.json();}).then(function(resp){ if(resp&&resp.status==='ok'&&resp.editToken){ _editToken=resp.editToken; bar.remove(); if(onOk) onOk(); } else { go.textContent='Unlock'; t.textContent=(resp&&resp.message)||'Invalid code.'; } }).catch(function(){ go.textContent='Unlock'; }); };
+    var st=document.createElement('div'); st.style.cssText='font-size:13px;color:var(--soft);margin-top:10px;min-height:16px;'; bar.appendChild(st);
+    send.onclick=function(){ st.textContent='Sending your code…'; send.disabled=true; fetch(GS_URL+'?action=sendProfilePin&appearId='+encodeURIComponent(_id)).then(function(r){return r.json();}).then(function(resp){ send.disabled=false; if(resp&&resp.sent){ send.textContent='Resend'; st.textContent='Check your email for the code.'; inp.style.display=''; go.style.display=''; inp.focus(); } else { st.textContent='No email on file for this profile.'; } }).catch(function(){ send.disabled=false; st.textContent='Could not send. Try again.'; }); };
+    go.onclick=function(){ var c=inp.value.trim(); if(!c) return; st.textContent='Checking…'; go.disabled=true; fetch(GS_URL+'?action=verifyProfilePin&appearId='+encodeURIComponent(_id)+'&code='+encodeURIComponent(c)).then(function(r){return r.json();}).then(function(resp){ if(resp&&resp.status==='ok'&&resp.editToken){ _editToken=resp.editToken; bar.remove(); if(onOk) onOk(); } else { go.disabled=false; st.textContent=(resp&&resp.message)||'Invalid code.'; } }).catch(function(){ go.disabled=false; st.textContent='Could not verify. Try again.'; }); };
     bar.scrollIntoView({behavior:'smooth',block:'center'});
   }
   // Subtle save-status line at the top of the editor.
