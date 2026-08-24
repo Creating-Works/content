@@ -1051,5 +1051,46 @@
   document.getElementById('next-btn').addEventListener('click', function(){ SEC_DONE[curSec]=true; if(curSec<SECTIONS.length-1){ paint(curSec+1); window.scrollTo({top:0,behavior:'smooth'}); } else { showView(); } });
   document.getElementById('back-btn').addEventListener('click', function(){ if(curSec>0){ paint(curSec-1); window.scrollTo({top:0,behavior:'smooth'}); } else { showView(); } });
 
-  showView();
+  // ── Phase 3.2: build the category trees from the live reference-data ──
+  // (getReferenceData), falling back to the hardcoded trees if the fetch fails.
+  var GS_URL='https://cw-api-gate.jessieupp.workers.dev';
+  function buildTreesFromRefData(rd){
+    try{
+      // Recreation → Enjoy tree (recType > category > item)
+      var recOrder=['Movement & Performance','Sports','Outdoor & Nature','Games & Strategy','Making & Collecting'];
+      var etree={};
+      (rd.recreation||[]).forEach(function(r){
+        var rt=String(r.recType||'').trim(), cat=String(r.category||'').trim(), it=String(r.item||'').trim();
+        if(!rt||!it) return;
+        if(!etree[rt]) etree[rt]={subs:{},items:[]};
+        if(cat){ if(!etree[rt].subs[cat]) etree[rt].subs[cat]=[]; if(etree[rt].subs[cat].indexOf(it)<0) etree[rt].subs[cat].push(it); }
+        else { if(etree[rt].items.indexOf(it)<0) etree[rt].items.push(it); }
+      });
+      var ecats=recOrder.filter(function(c){return etree[c];}).concat(Object.keys(etree).filter(function(c){return recOrder.indexOf(c)<0;}));
+      if(ecats.length){ ENJOY_CATS=ecats; ENJOY_TREE=etree; }
+      // Skills → per parent-category lists (16 fixed parent cats)
+      var scats=['Arts & Culture','Food & Drink','Physical Wellbeing','Mental Wellbeing','Family Wellbeing','Self-Expression & Beauty','Home & Construction','Transportation','Mechanical & Manufacturing','Business & Finance','Community & Civic','Recreation & Hobbies','Technology & Communications','Nature & Outdoors','Social Events & Gatherings','Pets & Animal Care'];
+      var stree={}, sseen={}; scats.forEach(function(c){ stree[c]=[]; sseen[c]={}; });
+      (rd.skills||[]).forEach(function(s){
+        var cat=String(s.category||'').trim(), it=String(s.item||'').trim();
+        if(stree[cat]!==undefined && it && !sseen[cat][it.toLowerCase()]){ sseen[cat][it.toLowerCase()]=1; stree[cat].push(it); }
+      });
+      SKILL_CATS=scats; SKILL_TREE=stree;
+      // Values / Domains
+      var vi=(rd.values||[]).map(function(v){return String((v&&v.item!==undefined)?v.item:v||'').trim();}).filter(Boolean);
+      var di=(rd.domains||[]).map(function(v){return String((v&&v.item!==undefined)?v.item:v||'').trim();}).filter(Boolean);
+      if(vi.length) VALUE_IDEAS=vi;
+      if(di.length) DOMAIN_IDEAS=di;
+      // Methods (display strings) and Person sub-types
+      var md=(rd.methodsDisplay||[]).map(function(m){return String(m||'').trim();}).filter(Boolean);
+      if(md.length) METHODS=md;
+      var pt=(rd.personTypes||[]).map(function(p){return String(p||'').trim();}).filter(function(p){return p && p.toLowerCase()!=='other';});
+      if(pt.length) PERSON_SUBS=pt;
+    }catch(e){ /* keep the hardcoded fallback */ }
+  }
+  fetch(GS_URL+'?action=getReferenceData')
+    .then(function(r){ return r.json(); })
+    .then(function(rd){ buildTreesFromRefData(rd); })
+    .catch(function(){})
+    .then(function(){ showView(); });
 </script>
