@@ -369,8 +369,8 @@ var _directScreen = '';
 })();
 
 // The name and tabs need nothing from the backend, so they paint immediately and the card
-// carries the wait on its own. Switching tabs then never blanks the top of the page.
-(function(){
+// carries the wait on its own. render() calls this again rather than blanking the header.
+function paintShellHeader(extraPills){
   var el=document.getElementById('app-topnav'); if(!el) return;
   var who=(_showId||_appearId||'');
   var q=who?('?CWid='+encodeURIComponent(who)):'';
@@ -390,13 +390,16 @@ var _directScreen = '';
     +' '+tab('My events','https://gather.2gather.network/myevents.html'+(who?('?id='+encodeURIComponent(who)):''))
     +' '+tab('My account',acct+(q?'&':'?')+'tab=account')
     +' '+tab('Permissions',acct+(q?'&':'?')+'tab=permissions')
+    +(extraPills||'')
     +'</div>';
+  var slot0=document.getElementById('pv-name-text');
+  if(slot0 && window._shellName) slot0.textContent=window._shellName+' 🌱';
   // A name rarely changes, so the last one seen is shown at once and only refreshed behind the
   // scenes. That keeps the heading steady on every later visit instead of blank then filled.
   var nameKey='cw-name-'+who;
   function paintName(n){
     if(!n) return;
-    _fullName=n;
+    _fullName=n; window._shellName=n;
     var slot=document.getElementById('pv-name-text');
     if(slot) slot.textContent=n+' 🌱';
   }
@@ -413,7 +416,8 @@ var _directScreen = '';
         try{ localStorage.setItem(nameKey,n); }catch(e){}
       }).catch(function(){});
   }
-})();
+}
+paintShellHeader();
 
 // ─── One privilege check for the whole profile ────────────────────────────────
 // There is a single profile renderer; what differs is what the viewer is allowed to do.
@@ -1963,7 +1967,9 @@ function render(){
       if(_pills) _pills += ' ';
       _pills += '<a onclick="doneEdit();return false;" style="cursor:pointer;'+_navPillCss+'">My profile</a>';
     }
-    _tn0.innerHTML = _pills ? ('<div style="padding:12px 6px 16px;display:flex;flex-wrap:wrap;gap:8px;">'+_pills+'</div>') : '';
+    // Repaint the name and tabs. This used to assign '' when there were no pills, which wiped
+    // the header the moment loading finished.
+    paintShellHeader(_pills ? (' '+_pills) : '');
   }
   // Wide (hub-style) layout is potluck-only, and only once its data has loaded - a wide empty
   // page during the load reads as broken. One class toggle, no per-screen undo needed.
