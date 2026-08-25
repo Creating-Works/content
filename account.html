@@ -127,7 +127,7 @@
   var D={name:'',photo:'',pageLink:'',postal:'',languages:'',email:'',phone:''};
 
   function go(url){ window.location.href=url; }
-  function groupsUrl(){ return 'https://gather.2gather.network/groups/host.html'+(meId?'?CWid='+encodeURIComponent(meId):''); }
+  function groupsUrl(){ return 'https://gather.2gather.network/mygroups.html'+(meId?'?CWid='+encodeURIComponent(meId)+'&ref=profile':'?ref=profile'); }
   function eventsUrl(){ return 'https://gather.2gather.network/myevents.html'+(meId?'?id='+encodeURIComponent(meId):''); }
 
   // The stable answers URL. Stays correct after Design A is promoted onto intake.html.

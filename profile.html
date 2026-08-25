@@ -361,7 +361,7 @@ var _directScreen = '';
     if(isOwner()) _appearId=_showId;
     return;
   }
-  // CWid is the standard "this is me" param across the ecosystem (groups/host.html, the manage
+  // CWid is the standard "this is me" param across the ecosystem (mygroups.html, the account page
   // hub, Update-my-answers links). Accept it exactly like id/memberCard.
   var urlId=params.get('id')||params.get('memberCard')||params.get('CWid');
   if(urlId){_appearId=urlId;try{localStorage.setItem('appear-id',_appearId);}catch(e){}}
@@ -386,7 +386,7 @@ function paintShellHeader(extraPills){
   el.innerHTML='<h1 id="pv-name-text" style="font-size:28px;font-weight:400;color:#fff;margin:0 0 16px;letter-spacing:-.01em;min-height:42px;"></h1>'
     +'<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:0 2px;margin:0 0 14px;">'
     +tab('My profile','')
-    +' '+tab('My groups','https://gather.2gather.network/groups/host.html'+q)
+    +' '+tab('My groups','https://gather.2gather.network/mygroups.html'+q+(q?'&':'?')+'ref=profile')
     +' '+tab('My events','https://gather.2gather.network/myevents.html'+(who?('?id='+encodeURIComponent(who)):''))
     +' '+tab('My account',acct+(q?'&':'?')+'tab=account')
     +(extraPills||'')
@@ -2565,7 +2565,7 @@ function renderProfile(el, viewerMode){
     var _meUrl='https://gather.2gather.network/myevents.html'+((_navOwn&&_navId)?('?id='+encodeURIComponent(_navId)):'');
     // One shared tab row across the profile and the account page, so the two read as one place.
     var _q=(_navOwn&&_navId)?('?CWid='+encodeURIComponent(_navId)):'';
-    var _mgUrl='https://gather.2gather.network/groups/host.html'+_q;
+    var _mgUrl='https://gather.2gather.network/mygroups.html'+_q+(_q?'&':'?')+'ref=profile';
     var _acct='https://creating.works/account.html'+_q;
     var _evUrl='https://gather.2gather.network/myevents.html'+((_navOwn&&_navId)?('?id='+encodeURIComponent(_navId)):'');
     _b+='<span style="'+_TABON+'">My profile</span> '
