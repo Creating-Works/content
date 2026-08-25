@@ -375,9 +375,9 @@
   // Location reuses the picker people already meet on the events page: region, then country, then
   // state once the country is the United States. It is held as one plain string ("Washington,
   // United States") so anything showing a profile can print it without knowing the three levels.
-  // One deliberate difference from events.html: that page starts on North America / United States
-  // because it is a filter and a wrong guess costs nothing. Here the value is a stored fact about
-  // the person, so an empty location starts empty and only says what they picked.
+  // Same starting point as events.html: North America / United States, so picking a US state is
+  // one tap. A part-made choice still stores nothing, so nobody is recorded as being in the
+  // United States until they pick a state.
   var REGIONS=['North America','South America','Europe','Asia','Africa','Oceania','Antarctica'];
   var NA_COUNTRIES=['United States','Canada','Mexico'];
   var US_STATES=["Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming","Washington D.C."];
@@ -522,6 +522,7 @@
       var d=pr.data||{};
       D.postal=d.postal||''; D.languages=d.languages||''; D.email=d.email||D.email||''; D.phone=d.phone||'';
       D.location=d.location||''; _loc=parseLoc(D.location);
+      if(!_loc.region) _loc={region:'North America',country:'United States',state:''};
       // The permission columns may not exist on the sheet yet. A missing one stays blank,
       // and a blank falls back to what the site does today rather than inventing a choice.
       ['visPublic','showPhoto','onMap','findable','ackTerms','dateAckTerms'].forEach(function(k){
