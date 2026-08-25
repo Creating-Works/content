@@ -28,17 +28,8 @@
     font-family:'DM Sans','Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;line-height:1.5;}
   .wrap{max-width:1040px;margin:0 auto;padding:24px 20px 70px;}
 
-  /* Header row: account crumb left, profile pill right */
-  .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
-  .crumb{color:#fff;font-size:14px;font-weight:600;opacity:.92;}
-  .me-pill{display:inline-flex;align-items:center;gap:10px;background:#fff;color:var(--brand);
-    font-size:15px;font-weight:700;padding:6px 18px 6px 6px;border-radius:28px;text-decoration:none;cursor:pointer;}
-  .me-av{width:28px;height:28px;border-radius:50%;background:#B7C4D6;color:#fff;display:inline-flex;
-    align-items:center;justify-content:center;font-size:13px;font-weight:800;overflow:hidden;flex-shrink:0;}
-  .me-av img{width:100%;height:100%;object-fit:cover;}
-
   /* Welcome block */
-  .hello{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:14px;}
+  .hello{margin-bottom:16px;}
   h1{font-size:28px;font-weight:800;margin:0;color:#fff;letter-spacing:-.01em;}
   .hello .sub{color:#fff;opacity:.92;font-size:15px;margin-top:6px;}
   .hello .sub a{color:#fff;font-weight:700;text-decoration:underline;cursor:pointer;}
@@ -48,7 +39,6 @@
   .btn.solid{background:var(--brand);color:#fff;}
   .btn.ghost{background:#fff;color:var(--brand);border:1.5px solid var(--panel-line);}
   .btn.sm{padding:8px 15px;font-size:13px;}
-  .pagelinks{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
 
   /* Tabs: active = white pill, inactive = translucent on blue */
   .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
@@ -82,10 +72,12 @@
   .toggle::after{content:'';position:absolute;top:3px;left:3px;width:21px;height:21px;border-radius:50%;background:#fff;transition:left .15s;}
   .toggle.on::after{left:24px;}
 
-  .answers{border-top:1px solid var(--line);margin-top:22px;padding-top:18px;}
-  .answers .note{font-size:14px;color:var(--soft);margin-bottom:12px;}
-  .answers .row{display:flex;gap:10px;flex-wrap:wrap;}
-  .answers .row .btn{flex:1;min-width:220px;text-align:center;}
+  /* Info boxes inside the white card (answers, Appear page) */
+  .infobox{background:var(--panel);border:1px solid var(--panel-line);border-radius:12px;padding:18px 20px;margin-bottom:14px;}
+  .infobox:last-child{margin-bottom:0;}
+  .infobox .t{font-size:15.5px;font-weight:800;margin-bottom:4px;}
+  .infobox .d{font-size:14px;color:var(--soft);margin-bottom:14px;}
+  .infobox .row{display:flex;gap:10px;flex-wrap:wrap;}
 
   .status{border-radius:10px;padding:12px 15px;font-size:14px;}
   .status.info{background:var(--panel);border:1px solid var(--panel-line);color:var(--soft);}
@@ -95,7 +87,6 @@
     .fieldgrid{grid-template-columns:1fr;}
     .panel{padding:20px 18px;}
     h1{font-size:24px;}
-    .answers .row .btn{min-width:0;}
   }
   @media(prefers-reduced-motion:reduce){ .toggle::after{transition:none;} }
 </style>
@@ -103,22 +94,8 @@
 <body>
 <div class="wrap">
 
-  <div class="topbar">
-    <div class="crumb">My account</div>
-    <a class="me-pill" role="link" tabindex="0" id="me-pill"><span class="me-av" id="me-av">🌱</span><span>My profile</span></a>
-  </div>
-
   <div class="hello">
-    <div>
-      <h1 id="hello-title">Welcome 🌱</h1>
-      <div class="sub">Help people get to know you. <a role="link" tabindex="0" id="lnk-know">Complete your profile</a></div>
-    </div>
-    <a class="btn" role="link" tabindex="0" id="btn-editprofile">Edit profile</a>
-  </div>
-
-  <div class="pagelinks">
-    <a class="btn line sm" role="link" tabindex="0" id="btn-viewpage">View page</a>
-    <a class="btn line sm" role="link" tabindex="0" id="btn-editpage">Edit page</a>
+    <h1 id="hello-title">Welcome 🌱</h1>
   </div>
 
   <div class="tabs" id="tabs"></div>
@@ -140,14 +117,15 @@
   var D={name:'',photo:'',pageLink:'',postal:'',languages:'',email:'',phone:''};
 
   function go(url){ window.location.href=url; }
-  function intakeUrl(){ return 'https://creating.works/intake.html'+(meId?'?CWid='+encodeURIComponent(meId):''); }
   function groupsUrl(){ return 'https://gather.2gather.network/groups/host.html'+(meId?'?CWid='+encodeURIComponent(meId):''); }
   function eventsUrl(){ return 'https://gather.2gather.network/myevents.html'+(meId?'?id='+encodeURIComponent(meId):''); }
 
+  function answersUrl(){ return 'https://creating.works/intake-da.html'+(meId?'?id='+encodeURIComponent(meId):''); }
   var TABS=[
+    {key:'me', label:'My profile'},
     {key:'groups', label:'My groups', nav:groupsUrl},
     {key:'events', label:'My events', nav:eventsUrl},
-    {key:'permissions', label:'My permissions'},
+    {key:'permissions', label:'Permissions'},
     {key:'data', label:'Profile data'}
   ];
 
@@ -161,6 +139,24 @@
 
   function renderPanel(key){
     var p=document.getElementById('panel');
+    if(key==='me'){
+      p.innerHTML=
+        '<div class="infobox">'
+        +'<div class="t">Your profile answers follow you</div>'
+        +'<div class="d">Your profile answers follow you in any event or group you join.</div>'
+        +'<div class="row"><a class="btn solid" role="link" tabindex="0" data-nav="'+esc(answersUrl())+'" onclick="return _safeNavGo(this)">Update answers</a></div>'
+        +'</div>'
+        +'<div class="infobox">'
+        +'<div class="t">Your full page lives on Appear</div>'
+        +'<div class="d">Your page is where you present the fuller picture of who you are.</div>'
+        +'<div class="row">'
+        +'<a class="btn solid" role="link" tabindex="0" id="btn-viewpage">View my page</a>'
+        +'<a class="btn ghost" role="link" tabindex="0" id="btn-editpage">Edit my page</a>'
+        +'</div></div>';
+      var vp=document.getElementById('btn-viewpage'); if(vp) vp.onclick=function(){ go(D.pageLink||APPEAR_EDIT); };
+      var ep=document.getElementById('btn-editpage'); if(ep) ep.onclick=function(){ go(APPEAR_EDIT); };
+      return;
+    }
     if(key==='permissions'){
       p.innerHTML='<h2>My permissions</h2><p class="lead">Who can see you and how your profile is used.</p>'
         +toggleRow('Public profile','Anyone with the link can view your profile.',true)
@@ -188,12 +184,7 @@
       +field('Languages','text',D.languages)
       +field('Website or link','url','')
       +'</div>'
-      +'<div class="f" style="margin-top:16px;"><label>Short intro</label><textarea rows="3" placeholder="One line about you."></textarea></div>'
-      +'<div class="answers"><div class="note">Your onboarding and intake answers live on the intake page.</div>'
-      +'<div class="row">'
-      +'<a class="btn solid" role="link" tabindex="0" data-nav="'+esc(intakeUrl())+'" onclick="return _safeNavGo(this)">Update onboarding answers</a>'
-      +'<a class="btn ghost" role="link" tabindex="0" data-nav="'+esc(intakeUrl())+'" onclick="return _safeNavGo(this)">Update intake answers</a>'
-      +'</div></div>';
+      +'<div class="f" style="margin-top:16px;"><label>Short intro</label><textarea rows="3" placeholder="One line about you."></textarea></div>';
   }
 
   function buildTabs(active){
@@ -210,39 +201,36 @@
   }
 
   function paintIdentity(){
-    var first=D.name?String(D.name).trim().split(' ')[0]:'';
-    document.getElementById('hello-title').textContent=(first?('Welcome, '+first):'Welcome')+' 🌱';
-    var av=document.getElementById('me-av');
-    if(D.photo){ av.innerHTML='<img src="'+esc(D.photo)+'" alt="">'; }
-    else if(first){ av.textContent=first.charAt(0).toUpperCase(); }
+    var nm=String(D.name||'').trim();
+    document.getElementById('hello-title').textContent=(nm||'Welcome')+' 🌱';
   }
 
-  var startTab=(['permissions','data'].indexOf(P('tab'))>-1)?P('tab'):'data';
+  var startTab=(['me','permissions','data'].indexOf(P('tab'))>-1)?P('tab'):'me';
   buildTabs(startTab);
-
-  document.getElementById('lnk-know').onclick=function(){ go(intakeUrl()); };
-  document.getElementById('btn-editprofile').onclick=function(){ go(intakeUrl()); };
-  document.getElementById('me-pill').onclick=function(){ go(intakeUrl()); };
-  document.getElementById('btn-editpage').onclick=function(){ go(APPEAR_EDIT); };
-  document.getElementById('btn-viewpage').onclick=function(){ go(D.pageLink||APPEAR_EDIT); };
 
   if(!meId){
     document.getElementById('panel').innerHTML='<div class="status err">This page needs your profile link. Open it from your group page or your profile so it knows who you are.</div>';
     return;
   }
-  fetch(GS_URL+'?action=getProfile&appearId='+encodeURIComponent(meId))
-    .then(function(r){return r.json();})
-    .then(function(resp){
-      if(resp&&resp.found){
-        D.name=resp.name||''; D.photo=resp.photo||''; D.pageLink=resp.pageLink||'';
-        var d=resp.data||{};
-        D.postal=d.postal||''; D.languages=d.languages||''; D.email=d.email||''; D.phone=d.phone||'';
-      }
-      paintIdentity(); renderPanel(startTab);
-    })
-    .catch(function(){
+  // Two reads in parallel (one round-trip of wall-clock): lookupProfile carries the name, photo,
+  // and the stored Appear page link; getProfile carries the contact fields.
+  var pLookup=fetch(GS_URL+'?action=lookupProfile&appearId='+encodeURIComponent(meId)).then(function(r){return r.json();}).catch(function(){return null;});
+  var pProfile=fetch(GS_URL+'?action=getProfile&appearId='+encodeURIComponent(meId)).then(function(r){return r.json();}).catch(function(){return null;});
+  Promise.all([pLookup,pProfile]).then(function(res){
+    var lu=res[0]||{}, pr=res[1]||{};
+    if(lu.found){ D.name=lu.name||''; D.photo=lu.photo||''; D.pageLink=lu.pageLink||''; }
+    if(pr.found){
+      if(!D.name) D.name=pr.name||'';
+      if(!D.photo) D.photo=pr.photo||'';
+      var d=pr.data||{};
+      D.postal=d.postal||''; D.languages=d.languages||''; D.email=d.email||''; D.phone=d.phone||'';
+    }
+    if(!lu.found && !pr.found){
       document.getElementById('panel').innerHTML='<div class="status err">Could not load your profile. Reload the page to try again.</div>';
-    });
+      return;
+    }
+    paintIdentity(); renderPanel(startTab);
+  });
 })();
 </script>
 </body>
