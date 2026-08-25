@@ -360,6 +360,42 @@ var _directScreen = '';
   else{try{_appearId=localStorage.getItem('appear-id');}catch(e){}}
 })();
 
+// The name and tabs need nothing from the backend, so they paint immediately and the card
+// carries the wait on its own. Switching tabs then never blanks the top of the page.
+(function(){
+  var el=document.getElementById('app-topnav'); if(!el) return;
+  var who=(_showId||_appearId||'');
+  var q=who?('?CWid='+encodeURIComponent(who)):'';
+  var base='text-decoration:none;font-size:14px;font-weight:700;padding:9px 16px;border-radius:22px;white-space:nowrap;display:inline-block;';
+  var on=base+'background:#fff;color:#1F699E;';
+  var off=base+'background:rgba(255,255,255,.16);color:#fff;cursor:pointer;';
+  function tab(label,url){
+    return url
+      ? '<a role="link" tabindex="0" data-nav="'+url+'" onclick="return _safeNavGo(this)" style="'+off+'">'+label+'</a>'
+      : '<span style="'+on+'">'+label+'</span>';
+  }
+  var acct='https://creating.works/account.html'+q;
+  el.innerHTML='<h1 id="pv-name-text" style="font-size:28px;font-weight:400;color:#fff;margin:0 0 16px;letter-spacing:-.01em;min-height:42px;"></h1>'
+    +'<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:0 2px;margin:0 0 20px;">'
+    +tab('My profile','')
+    +' '+tab('My groups','https://gather.2gather.network/groups/host.html'+q)
+    +' '+tab('My events','https://creating.works/myevents.html'+q)
+    +' '+tab('My account',acct+(q?'&':'?')+'tab=data')
+    +' '+tab('Permissions',acct+(q?'&':'?')+'tab=permissions')
+    +'</div>';
+  // The name is one small, fast read, so it does not wait behind the full profile load.
+  if(who){
+    fetch('https://cw-api-gate.jessieupp.workers.dev?action=lookupProfile&appearId='+encodeURIComponent(who))
+      .then(function(r){return r.json();})
+      .then(function(lu){
+        if(!lu||!lu.name) return;
+        _fullName=String(lu.name).trim();
+        var slot=document.getElementById('pv-name-text');
+        if(slot) slot.textContent=_fullName+' 🌱';
+      }).catch(function(){});
+  }
+})();
+
 // ─── One privilege check for the whole profile ────────────────────────────────
 // There is a single profile renderer; what differs is what the viewer is allowed to do.
 // "?id=" carries the capability, so that is always the owner. On the public "?show=" URL
