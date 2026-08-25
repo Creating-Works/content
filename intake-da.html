@@ -1109,8 +1109,8 @@
   }
   function setBreadcrumb(mode){
     var bc=document.getElementById('breadcrumb');
-    if(mode==='edit'){ bc.innerHTML='‹ <span class="crumb-link" id="crumb-home">My profile</span> / Edit'; var h=document.getElementById('crumb-home'); if(h) h.onclick=showView; }
-    else if(mode==='manage'){ bc.innerHTML='‹ <span class="crumb-link" id="crumb-home">My profile</span> / Manage'; var hm=document.getElementById('crumb-home'); if(hm) hm.onclick=showView; }
+    if(mode==='edit'){ bc.innerHTML='‹ <span class="crumb-link" id="crumb-home">My profile</span> / Edit'; var h=document.getElementById('crumb-home'); if(h) h.onclick=goHome; }
+    else if(mode==='manage'){ bc.innerHTML=''; }
     else { bc.innerHTML=''; }
   }
   function showView(){
@@ -1120,6 +1120,15 @@
     document.getElementById('profile-view').style.display='';
     setBreadcrumb('view'); renderProfileView();
     window.scrollTo({top:0,behavior:'smooth'});
+  }
+  // Leaving the editor returns to whichever screen is "home" for this viewer: your own page is
+  // the Concept A hub; someone else's is the "This is me" quick view. Always flushes the save.
+  function goHome(){
+    if(typeof _viewingSomeoneElse!=='undefined' && _viewingSomeoneElse){ showView(); return; }
+    harvest(); flushSave();
+    document.getElementById('edit-mode').style.display='none';
+    document.getElementById('profile-view').style.display='none';
+    showManage('data');
   }
   // Verify identity BEFORE entering the editor. Once verified, editing is silent for 60 min.
   function requestEdit(step){
@@ -1224,8 +1233,8 @@
   });
 
   document.getElementById('met-header').addEventListener('click', function(){ this.classList.toggle('open'); metListEl.classList.toggle('open'); });
-  document.getElementById('next-btn').addEventListener('click', function(){ SEC_DONE[curSec]=true; if(curSec<SECTIONS.length-1){ paint(curSec+1); window.scrollTo({top:0,behavior:'smooth'}); } else { showView(); } });
-  document.getElementById('back-btn').addEventListener('click', function(){ if(curSec>0){ paint(curSec-1); window.scrollTo({top:0,behavior:'smooth'}); } else { showView(); } });
+  document.getElementById('next-btn').addEventListener('click', function(){ SEC_DONE[curSec]=true; if(curSec<SECTIONS.length-1){ paint(curSec+1); window.scrollTo({top:0,behavior:'smooth'}); } else { goHome(); } });
+  document.getElementById('back-btn').addEventListener('click', function(){ if(curSec>0){ paint(curSec-1); window.scrollTo({top:0,behavior:'smooth'}); } else { goHome(); } });
 
   // ── Phase 3.2: build the category trees from the live reference-data ──
   // (getReferenceData), falling back to the hardcoded trees if the fetch fails.
@@ -1361,8 +1370,14 @@
   var _pRef=fetch(GS_URL+'?action=getReferenceData').then(function(r){return r.json();}).then(function(rd){ buildTreesFromRefData(rd); }).catch(function(){});
   var _pProf=_id ? fetch(GS_URL+'?action=getProfile&appearId='+encodeURIComponent(_id)).then(function(r){return r.json();}).then(function(resp){ if(resp&&resp.found&&resp.data){ _profilePhoto=resp.photo||''; _profileName=resp.name||''; _pageLink=resp.pageLink||''; loadProfile(resp.data); } }).catch(function(){}) : Promise.resolve();
   var _manageParam=_param('manage');
+  // Concept A: your OWN page lands on the hub (welcome + tabs). The "This is me" card is the
+  // quick view of SOMEONE ELSE, the way it appears from a bulletin board (?show=them&me=you).
+  var _meParam=(_param('me')||_param('CWid')||_param('memberCard')||'').replace(/\./g,'').toLowerCase();
+  var _showParam=(_param('show')||'').replace(/\./g,'').toLowerCase();
+  var _viewingSomeoneElse = !!(_showParam && _meParam && _showParam!==_meParam);
   Promise.all([_pRef,_pProf]).then(function(){
     if(_manageParam){ var _mk=(['groups','events','permissions','data'].indexOf(_manageParam)>-1)?_manageParam:'data'; showManage(_mk); }
-    else { showView(); }
+    else if(_viewingSomeoneElse){ showView(); }
+    else { showManage('data'); }
   });
 </script>
