@@ -152,7 +152,7 @@
   function render(){
     var p=document.getElementById('panel');
     var browseBtn='<div><a class="btn" role="link" tabindex="0" data-nav="'+esc(LINKS.browse)+'" onclick="return _safeNavGo(this)">Browse events</a></div>';
-    p.innerHTML='<h2>My events</h2><p class="lead">Events you registered for and events you host.</p>'
+    p.innerHTML='<p class="lead" style="margin-top:0;">Events you registered for and events you host.</p>'
       +'<div class="subtabs">'
       +'<button type="button" class="subtab'+(view==='attending'?' on':'')+'" data-v="attending">Attending ('+ATTENDING.length+')</button>'
       +'<button type="button" class="subtab'+(view==='hosting'?' on':'')+'" data-v="hosting">Hosting ('+HOSTING.length+')</button>'
@@ -187,11 +187,29 @@
       var prev=latest[eid];
       if(!prev || new Date(r.timestamp||0)>=new Date(prev.timestamp||0)) latest[eid]=r;
     });
+    // Recurring registrations carry a generated id (recurring-<slug>-<date>) that matches no
+    // row, so resolve them back to their rec- template and show the occurrence date.
+    var bySlug={};
+    ed.events.forEach(function(e){
+      if(e && e.id && String(e.id).indexOf('rec-')===0 && e.title){
+        bySlug[String(e.title).toLowerCase().replace(/\s+/g,'-')]=e;
+      }
+    });
+    function resolve(eid){
+      if(byId[eid]) return byId[eid];
+      if(eid.indexOf('recurring-')!==0) return null;
+      var date=eid.slice(-10), slug=eid.slice('recurring-'.length, eid.length-11);
+      var tmpl=bySlug[slug]; if(!tmpl) return null;
+      var occ={}; for(var k in tmpl){ occ[k]=tmpl[k]; }
+      occ.id=eid; occ.date=date+'T00:00:00';
+      return occ;
+    }
     Object.keys(latest).forEach(function(eid){
       var r=latest[eid];
       var cancelled=(r.cancelled===true||String(r.cancelled).toLowerCase()==='true');
       if(cancelled) return;
-      if(byId[eid]) ATTENDING.push(byId[eid]);
+      var ev=resolve(eid);
+      if(ev) ATTENDING.push(ev);
     });
     var me=nrm(meId);
     ed.events.forEach(function(e){ if(e && e.id && nrm(e.userID)===me) HOSTING.push(e); });
