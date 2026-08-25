@@ -21,10 +21,10 @@
   <style>
     :root{--bg:#1F699E;--card:#FFFFFF;--text:#1A2E42;--soft:#4A6080;--muted:#6A8FAF;--brand:#1F699E;--border:#DDE4EE;--input-bg:#F7F9FC;--hover:#185885;--ph:#B8CCDE;--sel-bg:#EBF3FA;--sel-border:#1F699E;}
     *{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padding:18px 20px 60px;color:var(--text);}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padding:24px 20px 70px;color:var(--text);}
     @keyframes spin{to{transform:rotate(360deg);}}
-    .card{background:var(--card);max-width:1040px;margin:0 auto;border-radius:16px;padding:52px;box-shadow:0 24px 64px rgba(0,0,0,0.25),0 4px 16px rgba(0,0,0,0.12);position:relative;}
-    @media(max-width:520px){.card{padding:32px 20px;}}
+    .card{background:var(--card);max-width:1040px;margin:0 auto;border-radius:16px;padding:26px 30px;box-shadow:0 24px 64px rgba(0,0,0,0.25),0 4px 16px rgba(0,0,0,0.12);position:relative;}
+    @media(max-width:760px){.card{padding:20px 18px;}}
     /* Normal (narrow) page width. Declared here rather than as an inline style attribute on the
        div, because an inline attribute beats any stylesheet rule and would block wide-mode. */
     #page-wrap{max-width:1040px;margin:0 auto;}
@@ -376,7 +376,7 @@ var _directScreen = '';
   }
   var acct='https://creating.works/account.html'+q;
   el.innerHTML='<h1 id="pv-name-text" style="font-size:28px;font-weight:400;color:#fff;margin:0 0 16px;letter-spacing:-.01em;min-height:42px;"></h1>'
-    +'<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:0 2px;margin:0 0 20px;">'
+    +'<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:0 2px;margin:0 0 14px;">'
     +tab('My profile','')
     +' '+tab('My groups','https://gather.2gather.network/groups/host.html'+q)
     +' '+tab('My events','https://creating.works/myevents.html'+q)
@@ -2516,7 +2516,7 @@ function renderProfile(el, viewerMode){
   var _hdrFull=String(_fullName||((viewerMode&&!isOwner())?_viewerName:_name)||'').trim();
   var _navButtons='<h1 id="pv-name-text" style="font-size:28px;font-weight:400;color:#fff;margin:0 0 16px;letter-spacing:-.01em;min-height:42px;">'
       +(_hdrFull?esc(_hdrFull)+' 🌱':'')+'</h1>'
-    +'<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:0 2px;margin:0 0 20px;">'+_b+'</div>';
+    +'<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:0 2px;margin:0 0 14px;">'+_b+'</div>';
   var _tnEl=document.getElementById('app-topnav'); if(_tnEl) _tnEl.innerHTML=_navButtons;
   var _photoHTML='';
   if(viewerMode&&_navOwn){
