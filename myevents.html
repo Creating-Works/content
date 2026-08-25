@@ -28,7 +28,7 @@
     font-family:'DM Sans','Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;line-height:1.5;}
   .wrap{max-width:1040px;margin:0 auto;padding:24px 20px 70px;}
   .hello{margin-bottom:16px;}
-  h1{font-size:28px;font-weight:400;margin:0;color:#fff;letter-spacing:-.01em;}
+  h1{font-size:28px;font-weight:800;margin:0;color:#fff;letter-spacing:-.01em;}
 
   .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
   .tab{background:rgba(255,255,255,.16);color:#fff;font-weight:700;font-size:14px;padding:9px 16px;
@@ -41,19 +41,19 @@
   .panel h2{font-size:21px;font-weight:800;margin:0 0 3px;}
   .panel .lead{color:var(--soft);font-size:14.5px;margin:0 0 20px;}
 
-  .subtabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+  .subtabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+  .subtabs.when{margin-bottom:20px;}
+  .subtabs.when .subtab{font-size:12.5px;padding:6px 13px;}
   .subtab{background:var(--panel);border:1px solid var(--panel-line);color:var(--ink);font:inherit;
     font-size:13.5px;font-weight:700;padding:8px 15px;border-radius:20px;cursor:pointer;}
   .subtab.on{background:var(--brand);color:#fff;border-color:var(--brand);}
   .subtab:focus-visible{outline:2px solid var(--brand);outline-offset:2px;}
 
-  .grouplbl{font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
-    color:var(--muted);margin:22px 0 10px;}
-  .grouplbl:first-child{margin-top:0;}
   .ev{display:flex;gap:14px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;
     padding:15px 17px;margin-bottom:10px;text-decoration:none;color:inherit;cursor:pointer;}
   .ev:hover{background:var(--panel);border-color:var(--panel-line);}
   .ev .thumb{width:52px;height:52px;border-radius:10px;object-fit:cover;background:#DDE4EE;flex-shrink:0;}
+  .ev .thumb.fallback{object-fit:contain;background:var(--panel);border:1px solid var(--panel-line);padding:7px;}
   .ev .nm{font-size:16px;font-weight:800;}
   .ev .when{font-size:13.5px;color:var(--soft);margin-top:3px;}
   .ev .where{font-size:13.5px;color:var(--muted);margin-top:2px;}
@@ -81,6 +81,7 @@
 <script>
 (function(){
   var GS_URL='https://cw-api-gate.jessieupp.workers.dev';
+  var LOGO='https://raw.githubusercontent.com/2Gather-Network/events/main/images/2gather_logo.png';
   window._safeNavGo=function(el){try{var u=el&&el.getAttribute&&el.getAttribute('data-nav');if(u){window.location.href=u;}}catch(e){}return false;};
   function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
   function P(k){try{return new URLSearchParams(location.search).get(k)||'';}catch(e){return '';}}
@@ -97,7 +98,7 @@
 
   (function buildTabs(){
     var t=document.getElementById('tabs');
-    [['My profile',LINKS.profile,false],['My groups',LINKS.groups,false],['My events','',true]].forEach(function(x){
+    [['My profile',LINKS.profile,false],['My events','',true]].forEach(function(x){
       var b=document.createElement('button'); b.type='button'; b.className='tab'+(x[2]?' on':''); b.textContent=x[0];
       if(!x[2]) b.onclick=function(){ go(x[1]); };
       t.appendChild(b);
@@ -128,7 +129,7 @@
     return d<today;
   }
   function card(ev){
-    var img=ev.imageUrl?'<img class="thumb" src="'+esc(ev.imageUrl)+'" alt="">':'<div class="thumb"></div>';
+    var img='<img class="thumb'+(ev.imageUrl?'':' fallback')+'" src="'+esc(ev.imageUrl||LOGO)+'" alt="">';
     var loc=ev.location||ev.venue||'';
     return '<a class="ev'+(isPast(ev)?' past':'')+'" role="link" tabindex="0" data-nav="'+esc(eventUrl(ev.id))+'" onclick="return _safeNavGo(this)">'
       +img+'<div style="flex:1;min-width:0;"><div class="nm">'+esc(ev.title||'Untitled event')+'</div>'
@@ -136,32 +137,38 @@
       +(loc?'<div class="where">📍 '+esc(loc)+'</div>':'')
       +'</div></a>';
   }
-  function listHtml(evs, emptyMsg, emptyBtn){
-    if(!evs.length) return '<div class="empty">'+esc(emptyMsg)+(emptyBtn||'')+'</div>';
+  function split(evs){
     var up=evs.filter(function(e){return !isPast(e);});
     var past=evs.filter(isPast);
     up.sort(function(a,b){ return new Date(a.date||0)-new Date(b.date||0); });
     past.sort(function(a,b){ return new Date(b.date||0)-new Date(a.date||0); });
-    var h='';
-    if(up.length){ h+='<div class="grouplbl">Upcoming</div>'+up.map(card).join(''); }
-    if(past.length){ h+='<div class="grouplbl">Past</div>'+past.map(card).join(''); }
-    return h;
+    return {upcoming:up, past:past};
   }
 
-  var ATTENDING=[], HOSTING=[], view='attending';
+  var ATTENDING=[], HOSTING=[], view='attending', when='upcoming';
   function render(){
     var p=document.getElementById('panel');
     var browseBtn='<div><a class="btn" role="link" tabindex="0" data-nav="'+esc(LINKS.browse)+'" onclick="return _safeNavGo(this)">Browse events</a></div>';
-    p.innerHTML='<p class="lead" style="margin-top:0;">Events you registered for and events you host.</p>'
-      +'<div class="subtabs">'
+    var parts=split(view==='attending'?ATTENDING:HOSTING);
+    var shown=parts[when];
+    var emptyMsg = (view==='attending')
+      ? (when==='upcoming' ? 'No upcoming events you are registered for.' : 'No past events you attended.')
+      : (when==='upcoming' ? 'No upcoming events you are hosting.' : 'No past events you hosted.');
+    p.innerHTML=
+      '<div class="subtabs">'
       +'<button type="button" class="subtab'+(view==='attending'?' on':'')+'" data-v="attending">Attending ('+ATTENDING.length+')</button>'
       +'<button type="button" class="subtab'+(view==='hosting'?' on':'')+'" data-v="hosting">Hosting ('+HOSTING.length+')</button>'
       +'</div>'
-      +(view==='attending'
-        ? listHtml(ATTENDING,'You are not registered for any events yet.',browseBtn)
-        : listHtml(HOSTING,'You are not hosting any events yet.',browseBtn));
-    p.querySelectorAll('.subtab').forEach(function(b){
+      +'<div class="subtabs when">'
+      +'<button type="button" class="subtab'+(when==='upcoming'?' on':'')+'" data-w="upcoming">Upcoming ('+parts.upcoming.length+')</button>'
+      +'<button type="button" class="subtab'+(when==='past'?' on':'')+'" data-w="past">Past ('+parts.past.length+')</button>'
+      +'</div>'
+      +(shown.length ? shown.map(card).join('') : '<div class="empty">'+esc(emptyMsg)+browseBtn+'</div>');
+    p.querySelectorAll('.subtab[data-v]').forEach(function(b){
       b.onclick=function(){ view=b.getAttribute('data-v'); render(); };
+    });
+    p.querySelectorAll('.subtab[data-w]').forEach(function(b){
+      b.onclick=function(){ when=b.getAttribute('data-w'); render(); };
     });
   }
 
@@ -211,8 +218,15 @@
       var ev=resolve(eid);
       if(ev) ATTENDING.push(ev);
     });
-    var me=nrm(meId);
-    ed.events.forEach(function(e){ if(e && e.id && nrm(e.userID)===me) HOSTING.push(e); });
+    // Hosted events are identified by the member id inside hostlink; userID is blank on these
+    // rows. Dedupe by id, since the same event can appear more than once in the sheet.
+    var me=nrm(meId), seenHost={};
+    ed.events.forEach(function(e){
+      if(!e || !e.id) return;
+      if(nrm(e.userID)!==me && nrm(e.hostlink).indexOf(me)===-1) return;
+      var k=String(e.id).trim(); if(seenHost[k]) return; seenHost[k]=1;
+      HOSTING.push(e);
+    });
     render();
   });
 })();
