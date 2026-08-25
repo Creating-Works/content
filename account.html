@@ -246,7 +246,6 @@
     setStat('Saving…');
     var u=GS_URL+'?action=saveAccount&appearId='+encodeURIComponent(meId)
       +'&secure=1&editToken='+encodeURIComponent(_editToken)
-      +'&email='+encodeURIComponent(D.email||'')
       +'&postal='+encodeURIComponent(D.postal||'')
       +'&location='+encodeURIComponent(D.location||'')
       +'&languages='+encodeURIComponent(D.languages||'')
@@ -358,7 +357,10 @@
       +'<div class="fieldgrid">'
       +readonlyField('Full name',D.name,'Your name comes from your Appear page. '
         +'<a href="https://appear.network/dl/page" style="color:var(--brand);font-weight:700;">Update it on Appear</a>.')
-      +field('email','Email','email',D.email,'you@example.com')
+      +readonlyField('Email', D.email, _editToken
+        ? 'This is where your one-time codes are sent. It comes from your account, so it is changed on '
+          +'<a href="https://appear.network/dl/page" style="color:var(--brand);font-weight:700;">Appear</a>.'
+        : 'Hidden until you verify it is you. Press Save changes to verify.')
       +field('postal','Postal code','text',D.postal,'98026')
       +'</div>'
       +'<div class="f" style="margin-top:16px;"><label>Location</label><div id="loc-box"></div></div>'
@@ -515,12 +517,12 @@
   var pProfile=fetch(GS_URL+'?action=getProfile&appearId='+encodeURIComponent(meId)).then(function(r){return r.json();}).catch(function(){return null;});
   Promise.all([pLookup,pProfile]).then(function(res){
     var lu=res[0]||{}, pr=res[1]||{};
-    if(lu.found){ D.name=lu.name||''; D.photo=lu.photo||''; D.pageLink=lu.pageLink||''; D.email=lu.email||''; }
+    if(lu.found){ D.name=lu.name||''; D.photo=lu.photo||''; D.pageLink=lu.pageLink||''; }
     if(pr.found){
       if(!D.name) D.name=pr.name||'';
       if(!D.photo) D.photo=pr.photo||'';
       var d=pr.data||{};
-      D.postal=d.postal||''; D.languages=d.languages||''; D.email=d.email||D.email||''; D.phone=d.phone||'';
+      D.postal=d.postal||''; D.languages=d.languages||''; D.phone=d.phone||'';
       D.location=d.location||''; _loc=parseLoc(D.location);
       if(!_loc.region) _loc={region:'North America',country:'United States',state:''};
       // The permission columns may not exist on the sheet yet. A missing one stays blank,
@@ -534,7 +536,25 @@
       return;
     }
     paintIdentity(); renderPanel(startTab);
+    loadEmail(startTab);
   });
+
+  // The address lives on the account, not on the profile, and it is deliberately absent from
+  // every public read so that holding somebody's link never hands you their email. It arrives
+  // only behind the same verified session that saving needs.
+  function loadEmail(tab){
+    if(!_editToken || !meId) return;
+    fetch(GS_URL+'?action=getAccount&appearId='+encodeURIComponent(meId)
+      +'&editToken='+encodeURIComponent(_editToken))
+      .then(function(r){ return r.json(); })
+      .then(function(resp){
+        if(!resp || resp.status!=='ok' || !resp.email) return;
+        D.email=resp.email;
+        // Only repaint when the person is looking at the panel that shows it.
+        var t=document.querySelector('.tab.on');
+        if(t && t.textContent==='My account') renderPanel('account');
+      }).catch(function(){});
+  }
 })();
 </script>
 </body>
