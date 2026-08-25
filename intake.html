@@ -352,7 +352,9 @@ var _directScreen = '';
     if(isOwner()) _appearId=_showId;
     return;
   }
-  var urlId=params.get('id')||params.get('memberCard');
+  // CWid is the standard "this is me" param across the ecosystem (groups/host.html, the manage
+  // hub, Update-my-answers links). Accept it exactly like id/memberCard.
+  var urlId=params.get('id')||params.get('memberCard')||params.get('CWid');
   if(urlId){_appearId=urlId;try{localStorage.setItem('appear-id',_appearId);}catch(e){}}
   else{try{_appearId=localStorage.getItem('appear-id');}catch(e){}}
 })();
@@ -2338,7 +2340,7 @@ function _wtmListHTML(){
 // "?show=" there is no viewer, so there is nobody to bookmark on behalf of - and personal UI
 // should never appear off a device's stored id alone.
 function _viewerIdParam(){
-  try{ return String(new URLSearchParams(window.location.search).get('me')||new URLSearchParams(window.location.search).get('memberCard')||'').trim(); }
+  try{ var _vp=new URLSearchParams(window.location.search); return String(_vp.get('me')||_vp.get('memberCard')||_vp.get('CWid')||'').trim(); }
   catch(e){ return ''; }
 }
 function _wtmDecorate(){
