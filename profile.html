@@ -1,0 +1,249 @@
+<!doctype html>
+<!--
+  Copyright 2026 DayBalancer LLC. All rights reserved.
+
+  The code and the content here power Creating.Works, DayBalancer, Appear Network,
+  and 2Gather. They are published so they can be read, audited, and dated.
+
+  Running either as a separate offering requires a license, whether you brand it as
+  ours or as your own, and whether or not money changes hands.
+
+  hello@creating.works
+-->
+<!-- Version: V1.00 | Date: 2026-08-24 | LAST CHANGE: clean Concept A build from the mockup -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>My profile</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
+<style>
+  :root{
+    --bg:#1F699E; --brand:#1F699E; --ink:#1A2E42; --soft:#4B5A6D; --muted:#6B7A8D;
+    --line:#DDE4EE; --panel:#F7FBFF; --panel-line:#C9DFF3; --card:#fff;
+    --done-bg:#E7F5EA; --done-ink:#1A5A2C; --err-bg:#FBE9E7; --err-line:#E8B0A5; --err-ink:#7A2410;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+    font-family:'DM Sans','Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;line-height:1.5;}
+  .wrap{max-width:1040px;margin:0 auto;padding:24px 20px 70px;}
+
+  /* Header row: account crumb left, profile pill right */
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+  .crumb{color:#fff;font-size:14px;font-weight:600;opacity:.92;}
+  .me-pill{display:inline-flex;align-items:center;gap:10px;background:#fff;color:var(--brand);
+    font-size:15px;font-weight:700;padding:6px 18px 6px 6px;border-radius:28px;text-decoration:none;cursor:pointer;}
+  .me-av{width:28px;height:28px;border-radius:50%;background:#B7C4D6;color:#fff;display:inline-flex;
+    align-items:center;justify-content:center;font-size:13px;font-weight:800;overflow:hidden;flex-shrink:0;}
+  .me-av img{width:100%;height:100%;object-fit:cover;}
+
+  /* Welcome block */
+  .hello{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:14px;}
+  h1{font-size:28px;font-weight:800;margin:0;color:#fff;letter-spacing:-.01em;}
+  .hello .sub{color:#fff;opacity:.92;font-size:15px;margin-top:6px;}
+  .hello .sub a{color:#fff;font-weight:700;text-decoration:underline;cursor:pointer;}
+  .btn{display:inline-block;background:#fff;color:var(--brand);border:0;padding:10px 18px;border-radius:24px;
+    font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;text-decoration:none;}
+  .btn.line{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.75);}
+  .btn.solid{background:var(--brand);color:#fff;}
+  .btn.ghost{background:#fff;color:var(--brand);border:1.5px solid var(--panel-line);}
+  .btn.sm{padding:8px 15px;font-size:13px;}
+  .pagelinks{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+
+  /* Tabs: active = white pill, inactive = translucent on blue */
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+  .tab{background:rgba(255,255,255,.16);color:#fff;font-weight:700;font-size:14px;padding:9px 16px;
+    border-radius:22px;cursor:pointer;border:0;font-family:inherit;}
+  .tab:hover{background:rgba(255,255,255,.26);}
+  .tab.on{background:#fff;color:var(--brand);}
+  .tab:focus-visible{outline:2px solid #fff;outline-offset:2px;}
+
+  /* Content card */
+  .panel{background:var(--card);border-radius:16px;padding:26px 30px;min-height:280px;}
+  .panel h2{font-size:21px;font-weight:800;margin:0 0 3px;}
+  .panel .lead{color:var(--soft);font-size:14.5px;margin:0 0 20px;}
+
+  .fieldgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .f label{display:block;font-size:11.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--muted);margin-bottom:6px;}
+  .f input,.f textarea{width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:10px;
+    font:inherit;color:var(--ink);background:#fff;}
+  .f input:focus,.f textarea:focus{outline:2px solid var(--panel-line);outline-offset:1px;border-color:var(--brand);}
+  .photorow{display:flex;gap:16px;align-items:center;margin-bottom:18px;}
+  .photo{width:64px;height:64px;border-radius:50%;object-fit:cover;background:#DDE4EE;flex-shrink:0;}
+
+  .prow{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:15px 0;border-bottom:1px solid var(--line);}
+  .prow:last-of-type{border-bottom:0;}
+  .prow .lab{font-size:15px;font-weight:700;}
+  .prow .desc{font-size:13px;color:var(--soft);margin-top:2px;}
+  .prow .desc a{color:inherit;}
+  .toggle{width:48px;height:27px;border-radius:14px;background:var(--line);border:0;position:relative;cursor:pointer;flex-shrink:0;}
+  .toggle.on{background:var(--brand);}
+  .toggle::after{content:'';position:absolute;top:3px;left:3px;width:21px;height:21px;border-radius:50%;background:#fff;transition:left .15s;}
+  .toggle.on::after{left:24px;}
+
+  .answers{border-top:1px solid var(--line);margin-top:22px;padding-top:18px;}
+  .answers .note{font-size:14px;color:var(--soft);margin-bottom:12px;}
+  .answers .row{display:flex;gap:10px;flex-wrap:wrap;}
+  .answers .row .btn{flex:1;min-width:220px;text-align:center;}
+
+  .status{border-radius:10px;padding:12px 15px;font-size:14px;}
+  .status.info{background:var(--panel);border:1px solid var(--panel-line);color:var(--soft);}
+  .status.err{background:var(--err-bg);border:1px solid var(--err-line);color:var(--err-ink);}
+
+  @media(max-width:760px){
+    .fieldgrid{grid-template-columns:1fr;}
+    .panel{padding:20px 18px;}
+    h1{font-size:24px;}
+    .answers .row .btn{min-width:0;}
+  }
+  @media(prefers-reduced-motion:reduce){ .toggle::after{transition:none;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="crumb">My account</div>
+    <a class="me-pill" role="link" tabindex="0" id="me-pill"><span class="me-av" id="me-av">🌱</span><span>My profile</span></a>
+  </div>
+
+  <div class="hello">
+    <div>
+      <h1 id="hello-title">Welcome 🌱</h1>
+      <div class="sub">Help people get to know you. <a role="link" tabindex="0" id="lnk-know">Complete your profile</a></div>
+    </div>
+    <a class="btn" role="link" tabindex="0" id="btn-editprofile">Edit profile</a>
+  </div>
+
+  <div class="pagelinks">
+    <a class="btn line sm" role="link" tabindex="0" id="btn-viewpage">View page</a>
+    <a class="btn line sm" role="link" tabindex="0" id="btn-editpage">Edit page</a>
+  </div>
+
+  <div class="tabs" id="tabs"></div>
+  <div class="panel" id="panel"><div class="status info">Loading your profile…</div></div>
+
+</div>
+
+<script>
+(function(){
+  var GS_URL='https://cw-api-gate.jessieupp.workers.dev';
+  var APPEAR_EDIT='https://appear.network/dl/page/';
+  // Hrefless navigation so an id-bearing URL never shows on hover. Same-tab always.
+  window._safeNavGo=function(el){try{var u=el&&el.getAttribute&&el.getAttribute('data-nav');if(u){window.location.href=u;}}catch(e){}return false;};
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function P(k){try{return new URLSearchParams(location.search).get(k)||'';}catch(e){return '';}}
+
+  // CWid is the standard "this is me" param; id/me/memberCard/appearId accepted too.
+  var meId=(P('CWid')||P('id')||P('me')||P('memberCard')||P('appearId')||'').trim();
+  var D={name:'',photo:'',pageLink:'',postal:'',languages:'',email:'',phone:''};
+
+  function go(url){ window.location.href=url; }
+  function intakeUrl(){ return 'https://creating.works/intake.html'+(meId?'?CWid='+encodeURIComponent(meId):''); }
+  function groupsUrl(){ return 'https://gather.2gather.network/groups/host.html'+(meId?'?CWid='+encodeURIComponent(meId):''); }
+  function eventsUrl(){ return 'https://gather.2gather.network/myevents.html'+(meId?'?id='+encodeURIComponent(meId):''); }
+
+  var TABS=[
+    {key:'groups', label:'My groups', nav:groupsUrl},
+    {key:'events', label:'My events', nav:eventsUrl},
+    {key:'permissions', label:'My permissions'},
+    {key:'data', label:'Profile data'}
+  ];
+
+  function field(lab,type,val,ph){
+    return '<div class="f"><label>'+esc(lab)+'</label><input type="'+type+'" value="'+esc(val||'')+'"'+(ph?' placeholder="'+esc(ph)+'"':'')+'></div>';
+  }
+  function toggleRow(lab,desc,on){
+    return '<div class="prow"><div><div class="lab">'+esc(lab)+'</div><div class="desc">'+desc+'</div></div>'
+      +'<button class="toggle'+(on?' on':'')+'" aria-pressed="'+(on?'true':'false')+'" onclick="this.classList.toggle(\'on\');this.setAttribute(\'aria-pressed\',this.classList.contains(\'on\'));"></button></div>';
+  }
+
+  function renderPanel(key){
+    var p=document.getElementById('panel');
+    if(key==='permissions'){
+      p.innerHTML='<h2>My permissions</h2><p class="lead">Who can see you and how your profile is used.</p>'
+        +toggleRow('Public profile','Anyone with the link can view your profile.',true)
+        +toggleRow('Show my photo','Display your headshot on your profile and the network map.',true)
+        +toggleRow('Appear on the network map','Include me in the shared map of people and resources.',true)
+        +toggleRow('Findable in search','Let people find me by skills, interests, and needs.',true)
+        +'<div class="prow"><div><div class="lab">Terms accepted</div><div class="desc">You accepted the '
+        +'<a href="https://creating.works/terms-of-service.html">Terms of Service</a>, '
+        +'<a href="https://creating.works/privacy-policy.html">Privacy Policy</a>, and '
+        +'<a href="https://creating.works/code-of-conduct.html">Code of Conduct</a>.</div></div>'
+        +'<div style="font-size:13px;color:var(--soft);">Aug 2026</div></div>';
+      return;
+    }
+    // Profile data
+    var ph=D.photo?'<img class="photo" src="'+esc(D.photo)+'" alt="">':'<div class="photo"></div>';
+    p.innerHTML='<h2>Profile data</h2><p class="lead">Your contact and basics.</p>'
+      +'<div class="photorow">'+ph+'<div class="f" style="flex:1;"><label>Photo link</label><input type="url" value="'+esc(D.photo)+'" placeholder="Paste an image link"></div></div>'
+      +'<div class="fieldgrid">'
+      +field('Full name','text',D.name)
+      +field('Pronouns','text','')
+      +field('Email','email',D.email)
+      +field('Phone','tel',D.phone)
+      +field('Postal code','text',D.postal)
+      +field('Time zone','text','')
+      +field('Languages','text',D.languages)
+      +field('Website or link','url','')
+      +'</div>'
+      +'<div class="f" style="margin-top:16px;"><label>Short intro</label><textarea rows="3" placeholder="One line about you."></textarea></div>'
+      +'<div class="answers"><div class="note">Your onboarding and intake answers live on the intake page.</div>'
+      +'<div class="row">'
+      +'<a class="btn solid" role="link" tabindex="0" data-nav="'+esc(intakeUrl())+'" onclick="return _safeNavGo(this)">Update onboarding answers</a>'
+      +'<a class="btn ghost" role="link" tabindex="0" data-nav="'+esc(intakeUrl())+'" onclick="return _safeNavGo(this)">Update intake answers</a>'
+      +'</div></div>';
+  }
+
+  function buildTabs(active){
+    var t=document.getElementById('tabs'); t.innerHTML='';
+    TABS.forEach(function(s){
+      var b=document.createElement('button'); b.className='tab'+(s.key===active?' on':''); b.type='button'; b.textContent=s.label;
+      b.onclick=function(){
+        if(s.nav){ go(s.nav()); return; }
+        t.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on');});
+        b.classList.add('on'); renderPanel(s.key);
+      };
+      t.appendChild(b);
+    });
+  }
+
+  function paintIdentity(){
+    var first=D.name?String(D.name).trim().split(' ')[0]:'';
+    document.getElementById('hello-title').textContent=(first?('Welcome, '+first):'Welcome')+' 🌱';
+    var av=document.getElementById('me-av');
+    if(D.photo){ av.innerHTML='<img src="'+esc(D.photo)+'" alt="">'; }
+    else if(first){ av.textContent=first.charAt(0).toUpperCase(); }
+  }
+
+  var startTab=(['permissions','data'].indexOf(P('tab'))>-1)?P('tab'):'data';
+  buildTabs(startTab);
+
+  document.getElementById('lnk-know').onclick=function(){ go(intakeUrl()); };
+  document.getElementById('btn-editprofile').onclick=function(){ go(intakeUrl()); };
+  document.getElementById('me-pill').onclick=function(){ go(intakeUrl()); };
+  document.getElementById('btn-editpage').onclick=function(){ go(APPEAR_EDIT); };
+  document.getElementById('btn-viewpage').onclick=function(){ go(D.pageLink||APPEAR_EDIT); };
+
+  if(!meId){
+    document.getElementById('panel').innerHTML='<div class="status err">This page needs your profile link. Open it from your group page or your profile so it knows who you are.</div>';
+    return;
+  }
+  fetch(GS_URL+'?action=getProfile&appearId='+encodeURIComponent(meId))
+    .then(function(r){return r.json();})
+    .then(function(resp){
+      if(resp&&resp.found){
+        D.name=resp.name||''; D.photo=resp.photo||''; D.pageLink=resp.pageLink||'';
+        var d=resp.data||{};
+        D.postal=d.postal||''; D.languages=d.languages||''; D.email=d.email||''; D.phone=d.phone||'';
+      }
+      paintIdentity(); renderPanel(startTab);
+    })
+    .catch(function(){
+      document.getElementById('panel').innerHTML='<div class="status err">Could not load your profile. Reload the page to try again.</div>';
+    });
+})();
+</script>
+</body>
+</html>
