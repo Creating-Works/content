@@ -1103,7 +1103,7 @@
       +'<div class="pv-bm"><div class="pv-bm-av">C</div><div class="pv-bm-name">Carla</div><button class="pv-bm-x">✕</button></div></div>'
       +'</div>';
     pv.querySelectorAll('.pv-edit').forEach(function(b){ b.onclick=function(){ requestEdit(parseInt(b.getAttribute('data-step'),10)); }; });
-    var _pm=document.getElementById('pv-manage'); if(_pm) _pm.onclick=function(){ showManage('data'); };
+    var _pm=document.getElementById('pv-manage'); if(_pm) _pm.onclick=function(){ window.location.href='https://creating.works/profile.html'+(_id?'?CWid='+encodeURIComponent(_id):''); };
     var _pg=document.getElementById('pv-groups'); if(_pg) _pg.onclick=function(){ showManage('groups'); };
   }
   function setBreadcrumb(mode){
@@ -1122,13 +1122,7 @@
   }
   // Leaving the editor returns to whichever screen is "home" for this viewer: your own page is
   // the Concept A hub; someone else's is the "This is me" quick view. Always flushes the save.
-  function goHome(){
-    if(typeof _viewingSomeoneElse!=='undefined' && _viewingSomeoneElse){ showView(); return; }
-    harvest(); flushSave();
-    document.getElementById('edit-mode').style.display='none';
-    document.getElementById('profile-view').style.display='none';
-    showManage('data');
-  }
+  function goHome(){ showView(); }
   // Verify identity BEFORE entering the editor. Once verified, editing is silent for 60 min.
   function requestEdit(step){
     if(!_id || _editToken){ enterEdit(step); return; }
@@ -1376,7 +1370,6 @@
   var _viewingSomeoneElse = !!(_showParam && _meParam && _showParam!==_meParam);
   Promise.all([_pRef,_pProf]).then(function(){
     if(_manageParam){ var _mk=(['groups','events','permissions','data'].indexOf(_manageParam)>-1)?_manageParam:'data'; showManage(_mk); }
-    else if(_viewingSomeoneElse){ showView(); }
-    else { showManage('data'); }
+    else { showView(); }
   });
 </script>

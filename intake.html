@@ -2434,7 +2434,8 @@ function renderProfile(el, viewerMode){
   if(!_fromHub){
     var _meUrl='https://gather.2gather.network/myevents.html'+((_navOwn&&_navId)?('?id='+encodeURIComponent(_navId)):'');
     _b+='<a role="link" tabindex="0" data-nav="'+esc(_meUrl)+'" title="Events" onclick="return _safeNavGo(this)" style="'+_WB+'">My events</a> ';
-    _b+='<a href="https://appear.network/dl/groups" title="Groups" style="'+_WB+'">My groups</a>';
+    var _mgUrl='https://gather.2gather.network/groups/host.html'+((_navOwn&&_navId)?('?CWid='+encodeURIComponent(_navId)):'');
+    _b+='<a role="link" tabindex="0" data-nav="'+esc(_mgUrl)+'" title="Groups" onclick="return _safeNavGo(this)" style="'+_WB+'">My groups</a>';
   }
   if(_eventId && _eventHasHub && !_bgH){
     var _ehUrl='https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+_mc;

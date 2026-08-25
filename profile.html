@@ -145,7 +145,8 @@
   function groupsUrl(){ return 'https://gather.2gather.network/groups/host.html'+(meId?'?CWid='+encodeURIComponent(meId):''); }
   function eventsUrl(){ return 'https://gather.2gather.network/myevents.html'+(meId?'?id='+encodeURIComponent(meId):''); }
 
-  function answersUrl(){ return 'https://creating.works/intake-da.html'+(meId?'?id='+encodeURIComponent(meId):''); }
+  // The stable answers URL. Stays correct after Design A is promoted onto intake.html.
+  function answersUrl(){ return 'https://creating.works/intake.html'+(meId?'?CWid='+encodeURIComponent(meId):''); }
   var TABS=[
     {key:'me', label:'My profile'},
     {key:'groups', label:'My groups', nav:groupsUrl},
