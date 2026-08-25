@@ -109,7 +109,7 @@
   </div>
 
   <div class="tabs" id="tabs"></div>
-  <div class="panel" id="panel"><div class="status info">Loading your profile…</div></div>
+  <div class="panel" id="panel"><div class="status info">Loading your account…</div></div>
 
 </div>
 
@@ -293,7 +293,7 @@
       D.postal=d.postal||''; D.languages=d.languages||''; D.email=d.email||''; D.phone=d.phone||'';
     }
     if(!lu.found && !pr.found){
-      document.getElementById('panel').innerHTML='<div class="status err">Could not load your profile. Reload the page to try again.</div>';
+      document.getElementById('panel').innerHTML='<div class="status err">Could not load your account. Reload the page to try again.</div>';
       return;
     }
     paintIdentity(); renderPanel(startTab);

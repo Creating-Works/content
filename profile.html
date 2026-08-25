@@ -853,7 +853,7 @@ function autoSave(){
   ).then(function(r){ return r.json(); }).then(function(resp){
     // A rejected save means the hour lapsed. Ask again rather than losing the edit silently.
     if(_editToken && resp && resp.status !== 'ok'){
-      _editToken='';
+      _editToken=''; _tokenClear();
       showPinCard('That session expired. Verify again to keep your changes.');
     }
   }).catch(function(){});
@@ -2668,7 +2668,23 @@ function buildProfilePotluckSectionInner(canEdit){
   return '<div class="profile-section" style="border-bottom:none;"><div class="profile-section-header"><div class="profile-section-label">Event contribution 🎁</div>'+actions+'</div><div class="profile-tags">'+tags+'</div></div>';
 }
 
-var _editToken='';
+// One verification covers the hour across every creating.works page, so the token lives in
+// browser storage keyed to the person rather than in a variable that dies on navigation. It is
+// dropped a minute early to avoid racing the server's own expiry, and cleared when rejected.
+var _EDIT_KEY='cw-edit-'+String(_appearId||_showId||'');
+function _tokenGet(){
+  try{
+    var raw=localStorage.getItem(_EDIT_KEY); if(!raw) return '';
+    var o=JSON.parse(raw);
+    if(!o||!o.t||!o.exp||Date.now()>(o.exp-60000)){ localStorage.removeItem(_EDIT_KEY); return ''; }
+    return o.t;
+  }catch(e){ return ''; }
+}
+function _tokenSet(t){
+  try{ localStorage.setItem(_EDIT_KEY, JSON.stringify({t:t, exp:Date.now()+60*60*1000})); }catch(e){}
+}
+function _tokenClear(){ try{ localStorage.removeItem(_EDIT_KEY); }catch(e){} }
+var _editToken=_tokenGet();
 var _pinPending=null;
 
 // Verify before editing, matching the group admin flow. The code is only sent when asked for,
@@ -2721,7 +2737,7 @@ function showPinCard(msg){
       .then(function(r){return r.json();}).then(function(resp){
         verify.disabled=false;
         if(resp&&resp.status==='ok'&&resp.editToken){
-          _editToken=resp.editToken;
+          _editToken=resp.editToken; _tokenSet(_editToken);
           var go=_pinPending; _pinPending=null;
           _editMode=true; _screen=(go===null||go===undefined)?0:go; render();
         } else { st.textContent=(resp&&resp.message)||'Invalid code.'; }
