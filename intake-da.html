@@ -242,7 +242,16 @@
   .mh-q .qa{font-size:14px;color:var(--soft);}
   .mh-btn{background:var(--brand);color:#fff;border:0;border-radius:20px;padding:8px 14px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;}
   .mh-btn.ghost{background:#fff;color:var(--brand);border:1.5px solid var(--panel-line);}
-  .mh-link{display:inline-block;font-size:14px;font-weight:700;color:var(--brand);cursor:pointer;text-decoration:none;}
+  .mh-link{display:inline-block;font-size:14px;font-weight:700;color:var(--brand);cursor:pointer;text-decoration:underline;}
+  .mh-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 16px;}
+  .mh-tab{background:var(--panel);border:1px solid var(--panel-line);color:var(--ink);font-weight:700;font-size:14px;padding:9px 15px;border-radius:20px;cursor:pointer;}
+  .mh-tab:hover{background:#EEF6FF;}
+  .mh-tab.on{background:var(--brand);color:#fff;border-color:var(--brand);}
+  .mh-welcome{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 14px;}
+  .mh-welcome h1{font-size:26px;font-weight:800;margin:0;}
+  .mh-welcome .sub{color:var(--soft);font-size:15px;margin-top:6px;}
+  .mh-pagelinks{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 18px;}
+  .mh-photo{width:56px;height:56px;border-radius:50%;object-fit:cover;background:#DDE4EE;flex-shrink:0;}
 </style>
 
 <div class="wrap">
@@ -280,7 +289,7 @@
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
   function _param(k){ try{ return new URLSearchParams(location.search).get(k)||''; }catch(e){ return ''; } }
   var _id = _param('id')||_param('show')||_param('CWid')||_param('me')||_param('memberCard')||_param('appearId')||'';
-  var _profilePhoto='', _profileName='', _loaded={};
+  var _profilePhoto='', _profileName='', _loaded={}, _pageLink='';
   var EXPRESSION_ADDED = ['My 2.5 pickleball game'];
   function parseNeedsStr(str){
     if(!str) return [];
@@ -1124,40 +1133,23 @@
     window.scrollTo({top:0,behavior:'smooth'});
   }
 
-  // ── Manage hub (rail + detail). Reachable at ?manage=1 and from the profile links. ──
-  // Placeholder/draft content for review; only the profile Q&A editor behind it is wired to save.
-  var MH_GROUPS = [
-    {name:'Seattle Tech Network', role:'host', members:62, offers:102, needs:44, pending:3},
-    {name:'Climate Group', role:'host', members:38, offers:71, needs:29, pending:0},
-    {name:'Lake Ballinger Center', role:'cohost', members:18, offers:26, needs:14, pending:1}
-  ];
+  // ── Manage hub (Concept A: top tabs). Reachable at ?manage=1 and from the profile links. ──
   // Opens our real, live "Groups I host" page (full width, real data) — not a placeholder panel.
   function openMyGroups(){ window.location.href='https://gather.2gather.network/groups/host.html'+(_id?'?CWid='+encodeURIComponent(_id):''); }
+  function openMyEvents(){ window.location.href='https://gather.2gather.network/myevents.html'+(_id?'?id='+encodeURIComponent(_id):''); }
+  function openIntake(){ window.location.href='https://creating.works/intake.html'+(_id?'?CWid='+encodeURIComponent(_id):''); }
+  // Concept A: top tabs. "My profile" is not a tab — the whole page is the profile.
   var MH_SECTIONS = [
     {key:'groups', label:'My groups'},
+    {key:'events', label:'My events'},
     {key:'permissions', label:'My permissions'},
-    {key:'data', label:'My profile data'},
-    {key:'onboarding', label:'Onboarding'},
-    {key:'intake', label:'Intake Q&A'}
+    {key:'data', label:'Profile data'}
   ];
-  function mhBtn(label, cls){ return '<a class="mh-btn'+(cls?' '+cls:'')+'" href="#" onclick="return false;">'+esc(label)+'</a>'; }
   function mhToggleRow(lab, desc, on){ return '<div class="mh-row"><div><div class="lab">'+esc(lab)+'</div><div class="desc">'+esc(desc)+'</div></div><button class="mh-toggle'+(on?' on':'')+'" onclick="this.classList.toggle(\'on\')"></button></div>'; }
   function mhField(lab, type, val){ return '<div class="mh-field"><label>'+esc(lab)+'</label><input type="'+type+'" value="'+esc(val||'')+'"></div>'; }
-  function mhQ(n, q, a){ return '<div class="mh-q">'+(n?'<div class="qn">Q'+n+'</div>':'')+'<div class="qt">'+esc(q)+'</div><div class="qa">'+esc(a)+'</div></div>'; }
   function mhDetail(key){
     var d=document.getElementById('mh-detail'); if(!d) return;
-    if(key==='groups'){
-      var rows=MH_GROUPS.map(function(g){
-        return '<div class="mh-gcard"><div class="gimg"></div><div style="flex:1;min-width:0;">'
-          +'<div class="gnm">'+esc(g.name)+'<span class="mh-badge '+g.role+'">'+(g.role==='host'?'Host':'Co-host')+'</span></div>'
-          +'<div class="gst"><b>'+g.members+'</b> people · <b>'+g.offers+'</b> offers · <b>'+g.needs+'</b> needs'
-          +(g.pending?' · <b style="color:var(--brand);">'+g.pending+' pending</b>':'')+'</div>'
-          +'<div class="gacts">'+mhBtn('Open group')+mhBtn('Manage','ghost')+mhBtn('Invite people','ghost')+(g.pending?mhBtn('Requests ('+g.pending+')'):'')+'</div>'
-          +'</div></div>';
-      }).join('');
-      d.innerHTML='<h2>Groups I host</h2><p class="sub">Groups you run or co-host. Placeholder list for now, wired to your real groups next.</p>'
-        +rows+'<div style="margin-top:6px;">'+mhBtn('+ Start a new group')+'</div>';
-    } else if(key==='permissions'){
+    if(key==='permissions'){
       d.innerHTML='<h2>My permissions</h2><p class="sub">Who can see you and how your profile is used. Placeholder toggles.</p>'
         +mhToggleRow('Public profile','Anyone with the link can view your profile.',true)
         +mhToggleRow('Show my photo','Display your headshot on your profile and the network map.',true)
@@ -1165,7 +1157,9 @@
         +mhToggleRow('Findable in search','Let people find me by skills, interests, and needs.',true)
         +'<div class="mh-row"><div><div class="lab">Terms accepted</div><div class="desc">You accepted the <a href="https://creating.works/terms-of-service.html" style="color:inherit;text-decoration:underline;">Terms of Service</a>, <a href="https://creating.works/privacy-policy.html" style="color:inherit;text-decoration:underline;">Privacy Policy</a>, and <a href="https://creating.works/code-of-conduct.html" style="color:inherit;text-decoration:underline;">Code of Conduct</a>.</div></div><div style="font-size:13px;color:var(--soft);">Aug 2026</div></div>';
     } else if(key==='data'){
-      d.innerHTML='<h2>My profile data</h2><p class="sub">Your contact and basics. Not wired to save yet.</p>'
+      var _photo = _profilePhoto ? '<img class="mh-photo" src="'+esc(_profilePhoto)+'" alt="">' : '<div class="mh-photo"></div>';
+      d.innerHTML='<h2>Profile data</h2><p class="sub">Your contact and basics. Not wired to save yet.</p>'
+        +'<div style="display:flex;gap:14px;align-items:center;margin-bottom:16px;">'+_photo+'<div class="mh-field" style="flex:1;"><label>Photo link</label><input type="url" value="'+esc(_profilePhoto||'')+'" placeholder="Paste an image link"></div></div>'
         +'<div class="mh-grow">'
         +mhField('Full name','text',_profileName||'')
         +mhField('Pronouns','text','')
@@ -1177,35 +1171,37 @@
         +mhField('Website or link','url','')
         +'</div>'
         +'<div class="mh-field" style="margin-top:14px;"><label>Short intro</label><textarea rows="3" placeholder="One line about you."></textarea></div>';
-    } else if(key==='onboarding'){
-      d.innerHTML='<h2>Onboarding</h2><p class="sub">The four questions new people answer first. Draft wording, edit in place.</p>'
-        +mhQ(1,'What do you need?','Something you are looking for right now.')
-        +mhQ(2,'What do you enjoy?','What you love doing.')
-        +mhQ(3,'What are you skilled at?','What you are good at.')
-        +mhQ(4,'What do you have to offer?','A thing, a space, or a resource you can share.');
-    } else if(key==='intake'){
-      d.innerHTML='<h2>Intake Q&A</h2><p class="sub">Extra questions beyond the four onboarding ones and your five profile sections. Draft, edit or reorder.</p>'
-        +mhQ('','What do you care about deeply?','Your values and the domains you focus on.')
-        +mhQ('','Are you open to work or new opportunities?', _loaded.retired?('On file: '+_loaded.retired):'Yes or no.')
-        +mhQ('','What can you bring to a gathering?', _loaded.bringType?('On file: '+_loaded.bringType):'Food, a skill, a space, or nothing needed.')
-        +mhQ('','Add me to event signup lists?', _loaded.wantsSignupList?('On file: '+_loaded.wantsSignupList):'Yes or no.')
-        +mhQ('','Topics you care about','Free-text topics we can match you on.');
     }
   }
   function showManage(key){
-    if(key==='groups'){ openMyGroups(); return; } // My groups opens the real live page, not a panel
+    key = key || 'data';
+    if(key==='groups'){ openMyGroups(); return; }
+    if(key==='events'){ openMyEvents(); return; }
     document.getElementById('profile-view').style.display='none';
     document.getElementById('edit-mode').style.display='none';
     var mm=document.getElementById('manage-mode'); if(!mm) return; mm.style.display='';
     setBreadcrumb('manage');
-    mm.innerHTML='<div class="mh-head"><h1>My profile</h1></div>'
-      +'<div class="mh-layout"><div class="mh-rail" id="mh-rail"></div><div class="mh-detail" id="mh-detail"></div></div>';
-    var rail=document.getElementById('mh-rail');
+    var first = _profileName ? String(_profileName).trim().split(' ')[0] : '';
+    var viewPage = _pageLink || 'https://appear.network/';
+    mm.innerHTML =
+      '<div class="mh-welcome">'
+        +'<div><h1>'+(first?('Welcome, '+esc(first)):'Welcome')+' 🌱</h1>'
+          +'<div class="sub">Help people get to know you. <a class="mh-link" role="link" tabindex="0" id="mh-getknown">Complete your profile</a></div></div>'
+        +'<a class="mh-btn" role="link" tabindex="0" id="mh-editprofile">Edit profile</a>'
+      +'</div>'
+      +'<div class="mh-pagelinks"><a class="mh-btn ghost" role="link" tabindex="0" id="mh-viewpage">View page</a><a class="mh-btn ghost" role="link" tabindex="0" id="mh-editpage">Edit page</a></div>'
+      +'<div class="mh-tabs" id="mh-tabs"></div>'
+      +'<div class="mh-detail" id="mh-detail"></div>';
+    var tabs=document.getElementById('mh-tabs');
     MH_SECTIONS.forEach(function(s){
-      var it=document.createElement('div'); it.className='mh-item'+(s.key===key?' on':''); it.textContent=s.label;
-      it.onclick=function(){ if(s.key==='groups'){ openMyGroups(); return; } rail.querySelectorAll('.mh-item').forEach(function(x){ x.classList.remove('on'); }); it.classList.add('on'); mhDetail(s.key); };
-      rail.appendChild(it);
+      var it=document.createElement('div'); it.className='mh-tab'+(s.key===key?' on':''); it.textContent=s.label;
+      it.onclick=function(){ if(s.key==='groups'){ openMyGroups(); return; } if(s.key==='events'){ openMyEvents(); return; } tabs.querySelectorAll('.mh-tab').forEach(function(x){ x.classList.remove('on'); }); it.classList.add('on'); mhDetail(s.key); };
+      tabs.appendChild(it);
     });
+    var _gk=document.getElementById('mh-getknown'); if(_gk) _gk.onclick=openIntake;
+    var _epf=document.getElementById('mh-editprofile'); if(_epf) _epf.onclick=openIntake;
+    var _vp=document.getElementById('mh-viewpage'); if(_vp) _vp.onclick=function(){ window.location.href=viewPage; };
+    var _epg=document.getElementById('mh-editpage'); if(_epg) _epg.onclick=function(){ window.location.href='https://appear.network/dl/page/'; };
     mhDetail(key);
     window.scrollTo({top:0,behavior:'smooth'});
   }
@@ -1363,10 +1359,10 @@
   (function(){ var em=document.getElementById('edit-mode'); if(em){ var s=document.createElement('div'); s.id='da-savestat'; s.style.cssText='font-size:13px;color:var(--muted);font-weight:600;text-align:right;min-height:16px;margin-bottom:6px;'; em.insertBefore(s, em.firstChild); } })();
 
   var _pRef=fetch(GS_URL+'?action=getReferenceData').then(function(r){return r.json();}).then(function(rd){ buildTreesFromRefData(rd); }).catch(function(){});
-  var _pProf=_id ? fetch(GS_URL+'?action=getProfile&appearId='+encodeURIComponent(_id)).then(function(r){return r.json();}).then(function(resp){ if(resp&&resp.found&&resp.data){ _profilePhoto=resp.photo||''; _profileName=resp.name||''; loadProfile(resp.data); } }).catch(function(){}) : Promise.resolve();
+  var _pProf=_id ? fetch(GS_URL+'?action=getProfile&appearId='+encodeURIComponent(_id)).then(function(r){return r.json();}).then(function(resp){ if(resp&&resp.found&&resp.data){ _profilePhoto=resp.photo||''; _profileName=resp.name||''; _pageLink=resp.pageLink||''; loadProfile(resp.data); } }).catch(function(){}) : Promise.resolve();
   var _manageParam=_param('manage');
   Promise.all([_pRef,_pProf]).then(function(){
-    if(_manageParam){ var _mk=(['groups','permissions','data','onboarding','intake'].indexOf(_manageParam)>-1)?_manageParam:'data'; showManage(_mk); }
+    if(_manageParam){ var _mk=(['groups','events','permissions','data'].indexOf(_manageParam)>-1)?_manageParam:'data'; showManage(_mk); }
     else { showView(); }
   });
 </script>
