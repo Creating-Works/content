@@ -29,7 +29,8 @@
   .wrap{max-width:1040px;margin:0 auto;padding:24px 20px 70px;}
 
   /* Welcome block */
-  .hello{margin-bottom:16px;}
+  .hello{margin-bottom:16px;min-height:42px;}
+  h1:empty::after{content:"\200b";}
   h1{font-size:28px;font-weight:400;margin:0;color:#fff;letter-spacing:-.01em;}
   .hello .sub{color:#fff;opacity:.92;font-size:15px;margin-top:6px;}
   .hello .sub a{color:#fff;font-weight:700;text-decoration:underline;cursor:pointer;}
@@ -120,7 +121,7 @@
 <div class="wrap">
 
   <div class="hello">
-    <h1 id="hello-title">Welcome 🌱</h1>
+    <h1 id="hello-title"></h1>
   </div>
 
   <div class="tabs" id="tabs"></div>
