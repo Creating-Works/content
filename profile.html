@@ -383,15 +383,24 @@ var _directScreen = '';
     +' '+tab('My account',acct+(q?'&':'?')+'tab=data')
     +' '+tab('Permissions',acct+(q?'&':'?')+'tab=permissions')
     +'</div>';
-  // The name is one small, fast read, so it does not wait behind the full profile load.
+  // A name rarely changes, so the last one seen is shown at once and only refreshed behind the
+  // scenes. That keeps the heading steady on every later visit instead of blank then filled.
+  var nameKey='cw-name-'+who;
+  function paintName(n){
+    if(!n) return;
+    _fullName=n;
+    var slot=document.getElementById('pv-name-text');
+    if(slot) slot.textContent=n+' 🌱';
+  }
   if(who){
+    try{ paintName(localStorage.getItem(nameKey)||''); }catch(e){}
     fetch('https://cw-api-gate.jessieupp.workers.dev?action=lookupProfile&appearId='+encodeURIComponent(who))
       .then(function(r){return r.json();})
       .then(function(lu){
         if(!lu||!lu.name) return;
-        _fullName=String(lu.name).trim();
-        var slot=document.getElementById('pv-name-text');
-        if(slot) slot.textContent=_fullName+' 🌱';
+        var n=String(lu.name).trim();
+        paintName(n);
+        try{ localStorage.setItem(nameKey,n); }catch(e){}
       }).catch(function(){});
   }
 })();

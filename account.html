@@ -277,10 +277,15 @@
     });
   }
 
+  var nameKey='cw-name-'+meId;
   function paintIdentity(){
     var nm=String(D.name||'').trim();
-    document.getElementById('hello-title').textContent=(nm||'Welcome')+' 🌱';
+    if(!nm) return;
+    document.getElementById('hello-title').textContent=nm+' 🌱';
+    try{ localStorage.setItem(nameKey,nm); }catch(e){}
   }
+  // Show the last name seen straight away; the fetch below only refreshes it.
+  (function(){ try{ var c=localStorage.getItem(nameKey); if(c) document.getElementById('hello-title').textContent=c+' 🌱'; }catch(e){} })();
 
   var startTab=(['permissions','data'].indexOf(P('tab'))>-1)?P('tab'):'data';
   buildTabs(startTab);
