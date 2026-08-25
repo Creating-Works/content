@@ -589,7 +589,7 @@ async function loadProfileAndIntake(){
         if(!lu||!lu.name) return;
         _fullName=String(lu.name).trim();
         var slot=document.getElementById('pv-name-text');
-        if(slot) slot.textContent=_fullName;
+        if(slot) slot.textContent=_fullName+' 🌱';
       }).catch(function(){});
     // The owner renders through the edit view even on "?show=", so fill both slots for them.
     if(!_viewerMode||isOwner()){_photo=resp.photo||'';_name=_first||resp.name||'';}
@@ -2420,7 +2420,10 @@ function renderProfile(el, viewerMode){
   var allNeeds=_needsSkill.concat(_needsRes);
   var _navOwn=canEdit;   // isOwner() already performs the me/localStorage test this line used to repeat
   var _navId=viewerMode?_showId:_appearId;
-  var _WB='text-decoration:none;color:#185FA5;background:#fff;font-size:14px;font-weight:600;padding:8px 15px;border-radius:20px;white-space:nowrap;';
+  var _WB='text-decoration:none;color:#185FA5;background:#fff;font-size:16px;font-weight:700;padding:9px 18px;border-radius:22px;white-space:nowrap;';
+  var _TABBASE='text-decoration:none;font-size:14px;font-weight:700;padding:9px 16px;border-radius:22px;white-space:nowrap;display:inline-block;';
+  var _TABON=_TABBASE+'background:#fff;color:#1F699E;';
+  var _TABOFF=_TABBASE+'background:rgba(255,255,255,.16);color:#fff;cursor:pointer;';
   var _mc=(_navOwn&&_navId)?('&memberCard='+encodeURIComponent(_navId)):'';
   if(_eventId && !_eventHeaderFetched){ fetchEventTitle(function(){ render(); }); }   // V6.20: learn hasHub, then re-render the nav
   // All events shows always. Event hub shows only for events marked as having a hub (hasHub). Edit / Manage are owner-only.
@@ -2443,12 +2446,16 @@ function renderProfile(el, viewerMode){
   // has a hub, because that's a lateral move within the same event context.
   if(!_fromHub){
     var _meUrl='https://gather.2gather.network/myevents.html'+((_navOwn&&_navId)?('?id='+encodeURIComponent(_navId)):'');
-    _b+='<a role="link" tabindex="0" data-nav="'+esc(_meUrl)+'" title="Events" onclick="return _safeNavGo(this)" style="'+_WB+'">My events</a> ';
-    var _mgUrl='https://gather.2gather.network/groups/host.html'+((_navOwn&&_navId)?('?CWid='+encodeURIComponent(_navId)):'');
-    _b+='<a role="link" tabindex="0" data-nav="'+esc(_mgUrl)+'" title="Groups" onclick="return _safeNavGo(this)" style="'+_WB+'">My groups</a> ';
-    // Profile data, permissions, and the Appear page links live on the account page.
-    var _acctUrl='https://creating.works/account.html'+((_navOwn&&_navId)?('?CWid='+encodeURIComponent(_navId)):'');
-    _b+='<a role="link" tabindex="0" data-nav="'+esc(_acctUrl)+'" title="Account" onclick="return _safeNavGo(this)" style="'+_WB+'">My account</a>';
+    // One shared tab row across the profile and the account page, so the two read as one place.
+    var _q=(_navOwn&&_navId)?('?CWid='+encodeURIComponent(_navId)):'';
+    var _mgUrl='https://gather.2gather.network/groups/host.html'+_q;
+    var _acct='https://creating.works/account.html'+_q;
+    var _evUrl='https://creating.works/myevents.html'+_q;
+    _b+='<span style="'+_TABON+'">My profile</span> '
+      +'<a role="link" tabindex="0" data-nav="'+esc(_mgUrl)+'" title="Groups" onclick="return _safeNavGo(this)" style="'+_TABOFF+'">My groups</a> '
+      +'<a role="link" tabindex="0" data-nav="'+esc(_evUrl)+'" title="Events" onclick="return _safeNavGo(this)" style="'+_TABOFF+'">My events</a> '
+      +'<a role="link" tabindex="0" data-nav="'+esc(_acct+(_q?'&':'?')+'tab=data')+'" title="My account" onclick="return _safeNavGo(this)" style="'+_TABOFF+'">My account</a> '
+      +'<a role="link" tabindex="0" data-nav="'+esc(_acct+(_q?'&':'?')+'tab=permissions')+'" title="Permissions" onclick="return _safeNavGo(this)" style="'+_TABOFF+'">Permissions</a>';
   }
   if(_eventId && _eventHasHub && !_bgH){
     var _ehUrl='https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+_mc;
@@ -2461,7 +2468,10 @@ function renderProfile(el, viewerMode){
     // The other pills need an event. If the URL did not carry one, go find it once.
     if(!_eventId) _fillHubFromReg();
   }
-  var _navButtons='<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:0 2px;margin:0 0 20px;">'+_b+'</div>';
+  var _hdrFull=String(_fullName||((viewerMode&&!isOwner())?_viewerName:_name)||'').trim();
+  var _navButtons='<h1 id="pv-name-text" style="font-size:28px;font-weight:400;color:#fff;margin:0 0 16px;letter-spacing:-.01em;min-height:42px;">'
+      +(_hdrFull?esc(_hdrFull)+' 🌱':'')+'</h1>'
+    +'<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:0 2px;margin:0 0 20px;">'+_b+'</div>';
   var _tnEl=document.getElementById('app-topnav'); if(_tnEl) _tnEl.innerHTML=_navButtons;
   var _photoHTML='';
   if(viewerMode&&_navOwn){
@@ -2482,14 +2492,7 @@ function renderProfile(el, viewerMode){
   // 2026-08-01 privacy: the viewer-mode "Email me" button is gone. Host email addresses are no
   // longer sent to the browser.
   var emailBtn='';
-  // The heading used to read "This is me". The person's own name carries that meaning without
-  // stating the obvious, so the name and photo sit together in a pill instead.
-  var _pillName=String(_fullName||((viewerMode&&!isOwner())?_viewerName:_name)||'').trim();
-  var _pill='<span style="display:inline-flex;align-items:center;gap:10px;background:var(--panel,#F7FBFF);'
-    +'border:1px solid var(--panel-line,#C9DFF3);border-radius:30px;padding:5px 8px 5px 16px;">'
-    +'<span id="pv-name-text" style="font-size:16px;font-weight:700;color:#1F699E;white-space:nowrap;">'+esc(_pillName)+'</span>'
-    +_photoHTML+'</span>';
-  el.innerHTML='<div style="display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-bottom:14px;">'+emailBtn+_pill+'</div>'
+  el.innerHTML=(emailBtn?('<div style="display:flex;justify-content:flex-end;margin-bottom:10px;">'+emailBtn+'</div>'):'')
     +section("What I'm seeking",allNeeds,false,'',4)
     +section('What I enjoy',_interests,true,'level',1,false,_expression?'<div style="margin-top:6px;display:flex;justify-content:flex-end;"><span style="font-size:13px;color:var(--soft);"><span style="font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:0.08em;color:#BF5700;">This is so me:</span> <span style="font-size:10px;font-weight:700;">'+esc(_expressionItems.join(', '))+'</span></span></div>':'')
     +'<div class="profile-section" style="border-bottom:none;padding-bottom:4px;">'
