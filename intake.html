@@ -23,11 +23,11 @@
     *{box-sizing:border-box;margin:0;padding:0;}
     body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padding:18px 20px 60px;color:var(--text);}
     @keyframes spin{to{transform:rotate(360deg);}}
-    .card{background:var(--card);max-width:660px;margin:0 auto;border-radius:16px;padding:52px;box-shadow:0 24px 64px rgba(0,0,0,0.25),0 4px 16px rgba(0,0,0,0.12);position:relative;}
+    .card{background:var(--card);max-width:1040px;margin:0 auto;border-radius:16px;padding:52px;box-shadow:0 24px 64px rgba(0,0,0,0.25),0 4px 16px rgba(0,0,0,0.12);position:relative;}
     @media(max-width:520px){.card{padding:32px 20px;}}
     /* Normal (narrow) page width. Declared here rather than as an inline style attribute on the
        div, because an inline attribute beats any stylesheet rule and would block wide-mode. */
-    #page-wrap{max-width:660px;margin:0 auto;}
+    #page-wrap{max-width:1040px;margin:0 auto;}
     /* Wide mode: one class on <body> turns the narrow single-card layout into a full-width
        hub-style page. Declared here (not mutated inline at render time) so there is one place
        to read and nothing for other screens to undo. Body side padding drops to the hub's 14px
