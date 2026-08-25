@@ -28,6 +28,14 @@
     /* Normal (narrow) page width. Declared here rather than as an inline style attribute on the
        div, because an inline attribute beats any stylesheet rule and would block wide-mode. */
     #page-wrap{max-width:1040px;margin:0 auto;}
+    .pl-box{background:var(--input-bg,#F7FBFF);border:1px solid #C9DFF3;border-radius:12px;padding:18px 20px;margin-bottom:14px;}
+    .pl-box:last-child{margin-bottom:0;}
+    .pl-t{font-size:15.5px;font-weight:800;color:var(--text);margin-bottom:4px;}
+    .pl-d{font-size:14px;color:var(--muted);margin-bottom:14px;}
+    .pl-row{display:flex;gap:10px;flex-wrap:wrap;}
+    .pl-btn{display:inline-block;background:var(--brand,#1F699E);color:#fff;border:0;border-radius:22px;
+      padding:9px 16px;font:inherit;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;}
+    .pl-btn.ghost{background:#fff;color:var(--brand,#1F699E);border:1.5px solid #C9DFF3;}
     /* Wide mode: one class on <body> turns the narrow single-card layout into a full-width
        hub-style page. Declared here (not mutated inline at render time) so there is one place
        to read and nothing for other screens to undo. Body side padding drops to the hub's 14px
@@ -397,7 +405,9 @@ var _directScreen = '';
     fetch('https://cw-api-gate.jessieupp.workers.dev?action=lookupProfile&appearId='+encodeURIComponent(who))
       .then(function(r){return r.json();})
       .then(function(lu){
-        if(!lu||!lu.name) return;
+        if(!lu) return;
+        if(lu.pageLink){ window._pageLink=String(lu.pageLink); }
+        if(!lu.name) return;
         var n=String(lu.name).trim();
         paintName(n);
         try{ localStorage.setItem(nameKey,n); }catch(e){}
@@ -1971,7 +1981,12 @@ function render(){
     return;
   }
   if(_screen==='intro'){ renderScreenIntro(el); return; }
-  if(_screen===0){ renderProfile(el,false); _wtmDecorate(); return; }
+  if(_screen===0){
+    // Your own profile leads with your Appear page and your answers as two choices. The Q&A only
+    // opens when you ask for it, so landing here is not a wall of tags.
+    if(!_showAnswers && !_viewerMode){ renderProfileLanding(el); return; }
+    renderProfile(el,false); _wtmDecorate(); return;
+  }
   if(_screen==='fast2'){ renderScreenFast2(el); return; }
   if(_screen==='confirm'){ renderScreenConfirm(el); return; }
   if(_screen==='1b'){ renderScreen1b(el); return; }
@@ -2427,6 +2442,26 @@ function _wtmDecorate(){
   var _old=host.querySelector('[data-wtm-wrap]'); if(_old) _old.remove();
   var target=host.firstElementChild||host;
   target.insertAdjacentHTML('beforeend', btn);
+}
+var _showAnswers = (function(){ try{ return new URLSearchParams(location.search).get('answers')==='1'; }catch(e){ return false; } })();
+function renderProfileLanding(el){
+  var page = window._pageLink || 'https://appear.network/dl/page/';
+  el.innerHTML =
+    '<div class="pl-box">'
+      +'<div class="pl-t">Profile answers</div>'
+      +'<div class="pl-d">Your profile answers follow you in any event or group you join.</div>'
+      +'<div class="pl-row"><button type="button" id="pl-answers" class="pl-btn">Update answers</button></div>'
+    +'</div>'
+    +'<div class="pl-box">'
+      +'<div class="pl-t">Appear page</div>'
+      +'<div class="pl-d">The page you share outside your groups and events. It carries its own link and QR code.</div>'
+      +'<div class="pl-row">'
+        +'<a role="link" tabindex="0" class="pl-btn" data-nav="'+esc(page)+'" onclick="return _safeNavGo(this)">View my page</a>'
+        +'<a role="link" tabindex="0" class="pl-btn ghost" data-nav="https://appear.network/dl/page/" onclick="return _safeNavGo(this)">Edit my page</a>'
+      +'</div>'
+    +'</div>';
+  var b=document.getElementById('pl-answers');
+  if(b) b.onclick=function(){ _showAnswers=true; render(); };
 }
 function renderProfile(el, viewerMode){
   // viewerMode = which URL/data source this is ("?show=" vs "?id="). canEdit = what this
