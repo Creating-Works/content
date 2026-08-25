@@ -337,6 +337,7 @@ var _introMode  = false;
 var _eventId    = '';
 var _viewerPhoto = '';
 var _viewerName  = '';
+var _fullName    = '';
 var _directScreen = '';
 
 (function(){
@@ -581,6 +582,15 @@ async function loadProfileAndIntake(){
     // level next to photo/name. Main's Name column is blank for most people.
     var _first=(resp.data&&resp.data.first)||resp.first||'';
     if(_viewerMode){_viewerPhoto=resp.photo||'';_viewerName=_first||resp.name||'';}
+    // lookupProfile is the only action that returns the full name (first + last).
+    fetch(GS_URL+'?action=lookupProfile&appearId='+encodeURIComponent(id))
+      .then(function(r){return r.json();})
+      .then(function(lu){
+        if(!lu||!lu.name) return;
+        _fullName=String(lu.name).trim();
+        var slot=document.getElementById('pv-name-text');
+        if(slot) slot.textContent=_fullName;
+      }).catch(function(){});
     // The owner renders through the edit view even on "?show=", so fill both slots for them.
     if(!_viewerMode||isOwner()){_photo=resp.photo||'';_name=_first||resp.name||'';}
     if(resp.found&&resp.data){
@@ -2469,10 +2479,14 @@ function renderProfile(el, viewerMode){
   // 2026-08-01 privacy: the viewer-mode "Email me" button is gone. Host email addresses are no
   // longer sent to the browser.
   var emailBtn='';
-  // V6.16: on someone else's profile the heading read "This is me" with their name beside it.
-  // Name the person being shown; keep "This is me" only when you are looking at your own.
-  var _hdrName=(viewerMode&&!isOwner()&&String(_viewerName||'').trim())?('This is '+esc(String(_viewerName).trim().split(' ')[0])):'This is me';
-  el.innerHTML='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;"><h2 style="margin:0;">'+_hdrName+' 🌱</h2>'+emailBtn+_photoHTML+'</div>'
+  // The heading used to read "This is me". The person's own name carries that meaning without
+  // stating the obvious, so the name and photo sit together in a pill instead.
+  var _pillName=String(_fullName||((viewerMode&&!isOwner())?_viewerName:_name)||'').trim();
+  var _pill='<span style="display:inline-flex;align-items:center;gap:10px;background:var(--panel,#F7FBFF);'
+    +'border:1px solid var(--panel-line,#C9DFF3);border-radius:30px;padding:5px 8px 5px 16px;">'
+    +'<span id="pv-name-text" style="font-size:16px;font-weight:700;color:#1F699E;white-space:nowrap;">'+esc(_pillName)+'</span>'
+    +_photoHTML+'</span>';
+  el.innerHTML='<div style="display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-bottom:14px;">'+emailBtn+_pill+'</div>'
     +section("What I'm seeking",allNeeds,false,'',4)
     +section('What I enjoy',_interests,true,'level',1,false,_expression?'<div style="margin-top:6px;display:flex;justify-content:flex-end;"><span style="font-size:13px;color:var(--soft);"><span style="font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:0.08em;color:#BF5700;">This is so me:</span> <span style="font-size:10px;font-weight:700;">'+esc(_expressionItems.join(', '))+'</span></span></div>':'')
     +'<div class="profile-section" style="border-bottom:none;padding-bottom:4px;">'
