@@ -829,7 +829,17 @@ function autoSave(){
     +'&retired='+encodeURIComponent(buildRetiredStr())
     +'&bringType='+encodeURIComponent(btStr)
     +'&wantsSignupList='+encodeURIComponent(_wantsSignupList?'true':'')
-  ).catch(function(){});
+    // The verified flag rides along only once a code has been entered. Someone completing their
+    // profile for the first time has no email on file yet and never passed through the gate, so
+    // their save stays exactly as it was — the gate guards editing an existing profile.
+    +(_editToken?('&secure=1&editToken='+encodeURIComponent(_editToken)):'')
+  ).then(function(r){ return r.json(); }).then(function(resp){
+    // A rejected save means the hour lapsed. Ask again rather than losing the edit silently.
+    if(_editToken && resp && resp.status !== 'ok'){
+      _editToken='';
+      showPinCard('That session expired. Verify again to keep your changes.');
+    }
+  }).catch(function(){});
   _hasProfile=true;
   return _p;
 }
@@ -2597,7 +2607,71 @@ function buildProfilePotluckSectionInner(canEdit){
   return '<div class="profile-section" style="border-bottom:none;"><div class="profile-section-header"><div class="profile-section-label">Event contribution 🎁</div>'+actions+'</div><div class="profile-tags">'+tags+'</div></div>';
 }
 
+var _editToken='';
+var _pinPending=null;
+
+// Verify before editing, matching the group admin flow. The code is only sent when asked for,
+// never on arrival, so nobody gets mail they did not request.
+function showPinCard(msg){
+  var el=document.getElementById('app-content'); if(!el) return;
+  var lede=msg||'We will email a one-time 6-digit code to the address on your profile. It expires in 15 minutes and can only be used once.';
+  el.innerHTML=''
+    +'<div style="max-width:520px;">'
+    +'<h1 style="font-size:24px;font-weight:800;margin:0 0 8px;color:var(--text);">Verify it is you</h1>'
+    +'<p id="pin-lede" style="font-size:15px;color:var(--muted);line-height:1.55;margin:0 0 18px;">'+esc(lede)+'</p>'
+    +'<input type="text" id="pin-input" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="Example: 428091" '
+      +'style="display:none;width:100%;max-width:220px;font-size:18px;letter-spacing:.2em;text-align:center;padding:11px 13px;'
+      +'border:1.5px solid var(--border);border-radius:10px;font-family:inherit;">'
+    +'<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;">'
+      +'<button id="pin-cancel" style="background:#fff;color:var(--brand);border:1.5px solid var(--brand);border-radius:24px;padding:10px 18px;font:inherit;font-weight:700;cursor:pointer;">Cancel</button>'
+      +'<button id="pin-send" style="background:var(--brand);color:#fff;border:0;border-radius:24px;padding:10px 18px;font:inherit;font-weight:700;cursor:pointer;">Send code</button>'
+      +'<button id="pin-verify" style="display:none;background:var(--brand);color:#fff;border:0;border-radius:24px;padding:10px 18px;font:inherit;font-weight:700;cursor:pointer;">Verify</button>'
+    +'</div>'
+    +'<div id="pin-again" style="display:none;font-size:12px;color:var(--muted);margin-top:12px;">Did not get it? <a href="#" id="pin-resend" style="color:var(--brand);font-weight:700;text-decoration:none;">Send again</a></div>'
+    +'<div id="pin-status" style="font-size:13px;color:var(--muted);margin-top:12px;min-height:18px;"></div>'
+    +'</div>';
+  var who=_appearId||_showId||'';
+  var st=document.getElementById('pin-status');
+  var inp=document.getElementById('pin-input');
+  var send=document.getElementById('pin-send');
+  var verify=document.getElementById('pin-verify');
+  function sendCode(){
+    st.textContent='Sending your code…'; send.disabled=true;
+    fetch(GS_URL+'?action=sendProfilePin&appearId='+encodeURIComponent(who))
+      .then(function(r){return r.json();}).then(function(resp){
+        send.disabled=false;
+        if(resp&&resp.sent){
+          send.textContent='Resend';
+          st.textContent='Check your email for the code.';
+          inp.style.display=''; verify.style.display='';
+          document.getElementById('pin-again').style.display='';
+          inp.focus();
+        } else { st.textContent='No email on file for this profile.'; }
+      }).catch(function(){ send.disabled=false; st.textContent='Could not send. Try again.'; });
+  }
+  send.onclick=sendCode;
+  var again=document.getElementById('pin-resend');
+  if(again) again.onclick=function(e){ e.preventDefault(); sendCode(); };
+  document.getElementById('pin-cancel').onclick=function(){ _pinPending=null; _editMode=false; _screen=0; render(); };
+  verify.onclick=function(){
+    var code=(inp.value||'').trim(); if(!code) return;
+    st.textContent='Checking…'; verify.disabled=true;
+    fetch(GS_URL+'?action=verifyProfilePin&appearId='+encodeURIComponent(who)+'&code='+encodeURIComponent(code))
+      .then(function(r){return r.json();}).then(function(resp){
+        verify.disabled=false;
+        if(resp&&resp.status==='ok'&&resp.editToken){
+          _editToken=resp.editToken;
+          var go=_pinPending; _pinPending=null;
+          _editMode=true; _screen=(go===null||go===undefined)?0:go; render();
+        } else { st.textContent=(resp&&resp.message)||'Invalid code.'; }
+      }).catch(function(){ verify.disabled=false; st.textContent='Could not verify. Try again.'; });
+  };
+  inp.addEventListener('keydown',function(e){ if(e.key==='Enter') verify.click(); });
+}
+window.showPinCard=showPinCard;
+
 window.jumpTo = function(screen){
+  if(!_editToken){ _pinPending=screen; showPinCard(); return; }
   _editMode=true; _screen=screen; render();
 };
 
