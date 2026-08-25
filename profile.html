@@ -380,7 +380,7 @@ var _directScreen = '';
     +tab('My profile','')
     +' '+tab('My groups','https://gather.2gather.network/groups/host.html'+q)
     +' '+tab('My events','https://gather.2gather.network/myevents.html'+(who?('?id='+encodeURIComponent(who)):''))
-    +' '+tab('My account',acct+(q?'&':'?')+'tab=data')
+    +' '+tab('My account',acct+(q?'&':'?')+'tab=account')
     +' '+tab('Permissions',acct+(q?'&':'?')+'tab=permissions')
     +'</div>';
   // A name rarely changes, so the last one seen is shown at once and only refreshed behind the
@@ -2509,7 +2509,7 @@ function renderProfile(el, viewerMode){
     _b+='<span style="'+_TABON+'">My profile</span> '
       +'<a role="link" tabindex="0" data-nav="'+esc(_mgUrl)+'" title="Groups" onclick="return _safeNavGo(this)" style="'+_TABOFF+'">My groups</a> '
       +'<a role="link" tabindex="0" data-nav="'+esc(_evUrl)+'" title="Events" onclick="return _safeNavGo(this)" style="'+_TABOFF+'">My events</a> '
-      +'<a role="link" tabindex="0" data-nav="'+esc(_acct+(_q?'&':'?')+'tab=data')+'" title="My account" onclick="return _safeNavGo(this)" style="'+_TABOFF+'">My account</a> '
+      +'<a role="link" tabindex="0" data-nav="'+esc(_acct+(_q?'&':'?')+'tab=account')+'" title="My account" onclick="return _safeNavGo(this)" style="'+_TABOFF+'">My account</a> '
       +'<a role="link" tabindex="0" data-nav="'+esc(_acct+(_q?'&':'?')+'tab=permissions')+'" title="Permissions" onclick="return _safeNavGo(this)" style="'+_TABOFF+'">Permissions</a>';
   }
   if(_eventId && _eventHasHub && !_bgH){
