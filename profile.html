@@ -72,6 +72,31 @@
   .toggle::after{content:'';position:absolute;top:3px;left:3px;width:21px;height:21px;border-radius:50%;background:#fff;transition:left .15s;}
   .toggle.on::after{left:24px;}
 
+  /* Permissions: one choice per circle, plus switches and read-only facts */
+  .psec{margin-bottom:26px;}
+  .psec:last-child{margin-bottom:0;}
+  .psec h3{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 4px;}
+  .psec .why{font-size:13.5px;color:var(--soft);margin:0 0 14px;}
+  .crow{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);flex-wrap:wrap;}
+  .crow:last-child{border-bottom:0;}
+  .crow .lab{font-size:15px;font-weight:700;}
+  .crow .desc{font-size:13px;color:var(--soft);margin-top:2px;max-width:46ch;}
+  .seg{display:inline-flex;background:var(--panel);border:1px solid var(--panel-line);border-radius:20px;padding:3px;flex-shrink:0;}
+  .seg button{border:0;background:transparent;font:inherit;font-size:13px;font-weight:700;color:var(--soft);
+    padding:6px 14px;border-radius:17px;cursor:pointer;}
+  .seg button.on{background:var(--brand);color:#fff;}
+  .seg button:focus-visible{outline:2px solid var(--brand);outline-offset:2px;}
+  .autobox{background:var(--panel);border:1px solid var(--panel-line);border-radius:12px;padding:16px 18px;}
+  .autorow{display:flex;gap:10px;padding:9px 0;font-size:14px;color:var(--ink);}
+  .autorow:first-of-type{padding-top:0;}
+  .autorow:last-child{padding-bottom:0;}
+  .autorow .k{font-weight:700;min-width:150px;flex-shrink:0;}
+  .autorow .v{color:var(--soft);}
+  .advbtn{background:none;border:0;font:inherit;font-size:14px;font-weight:700;color:var(--brand);
+    text-decoration:underline;cursor:pointer;padding:0;}
+  .adv{margin-top:14px;}
+  @media(max-width:640px){ .autorow{flex-direction:column;gap:2px;} .autorow .k{min-width:0;} }
+
   /* Info boxes inside the white card (answers, Appear page) */
   .infobox{background:var(--panel);border:1px solid var(--panel-line);border-radius:12px;padding:18px 20px;margin-bottom:14px;}
   .infobox:last-child{margin-bottom:0;}
@@ -137,6 +162,24 @@
       +'<button class="toggle'+(on?' on':'')+'" aria-pressed="'+(on?'true':'false')+'" onclick="this.classList.toggle(\'on\');this.setAttribute(\'aria-pressed\',this.classList.contains(\'on\'));"></button></div>';
   }
 
+  // One choice per circle: full / partial / hidden.
+  var SEG_OPTS=[['full','Full'],['partial','Partial'],['hidden','Hidden']];
+  function segRow(key,lab,desc,current){
+    var btns=SEG_OPTS.map(function(o){
+      return '<button type="button" data-seg="'+key+'" data-val="'+o[0]+'"'+(o[0]===current?' class="on"':'')+'>'+o[1]+'</button>';
+    }).join('');
+    return '<div class="crow"><div><div class="lab">'+esc(lab)+'</div><div class="desc">'+esc(desc)+'</div></div>'
+      +'<div class="seg" role="group" aria-label="'+esc(lab)+'">'+btns+'</div></div>';
+  }
+  function wireSegs(){
+    document.querySelectorAll('.seg button').forEach(function(b){
+      b.onclick=function(){
+        var g=b.getAttribute('data-seg');
+        document.querySelectorAll('.seg button[data-seg="'+g+'"]').forEach(function(x){ x.classList.remove('on'); });
+        b.classList.add('on');
+      };
+    });
+  }
   function renderPanel(key){
     var p=document.getElementById('panel');
     if(key==='me'){
@@ -158,16 +201,47 @@
       return;
     }
     if(key==='permissions'){
-      p.innerHTML='<h2>My permissions</h2><p class="lead">Who can see you and how your profile is used.</p>'
-        +toggleRow('Public profile','Anyone with the link can view your profile.',true)
-        +toggleRow('Show my photo','Display your headshot on your profile and the network map.',true)
-        +toggleRow('Appear on the network map','Include me in the shared map of people and resources.',true)
-        +toggleRow('Findable in search','Let people find me by skills, interests, and needs.',true)
-        +'<div class="prow"><div><div class="lab">Terms accepted</div><div class="desc">You accepted the '
+      p.innerHTML='<h2>Permissions</h2><p class="lead">You choose how you appear in the wider circles. The closer circles are set by joining them.</p>'
+        +'<div class="psec"><h3>How you appear</h3>'
+        +'<p class="why">Full shows your photo and full name. Partial shows your first name only. Hidden shows your initials and keeps you off lists.</p>'
+        +segRow('web','On the public web','Anyone online who is not signed in, including search engines.','hidden')
+        +segRow('network','Across the network','People signed in to Creating.Works who are not in your groups or events.','partial')
+        +segRow('groups','In groups and events','Public groups you join and events you register for.','full')
+        +'</div>'
+        +'<div class="psec"><h3>Finding you</h3>'
+        +toggleRow('Findable in search','Let people find you by skill, interest, or need.',true)
+        +toggleRow('Include me on the network map','Show me in the shared map of people and resources.',true)
+        +'</div>'
+        +'<div class="psec"><h3>Set by joining</h3>'
+        +'<p class="why">These are not settings. Joining is how you agree to them, so you know before you join.</p>'
+        +'<div class="autobox">'
+        +'<div class="autorow"><div class="k">Private groups</div><div class="v">Members see your photo and name. A private group is closed, so joining shares them.</div></div>'
+        +'<div class="autorow"><div class="k">One-to-one connections</div><div class="v">The person you connect with sees your photo, full name, and email.</div></div>'
+        +'</div>'
+        +'<div class="adv"><button type="button" class="advbtn" id="adv-toggle">Show the details</button><div id="adv-body" style="display:none;"></div></div>'
+        +'</div>'
+        +'<div class="psec"><h3>Agreements</h3>'
+        +'<div class="crow"><div><div class="lab">Terms accepted</div><div class="desc">You accepted the '
         +'<a href="https://creating.works/terms-of-service.html">Terms of Service</a>, '
         +'<a href="https://creating.works/privacy-policy.html">Privacy Policy</a>, and '
         +'<a href="https://creating.works/code-of-conduct.html">Code of Conduct</a>.</div></div>'
-        +'<div style="font-size:13px;color:var(--soft);">Aug 2026</div></div>';
+        +'<div style="font-size:13px;color:var(--soft);">Aug 2026</div></div>'
+        +'</div>';
+      wireSegs();
+      var at=document.getElementById('adv-toggle');
+      at.onclick=function(){
+        var b=document.getElementById('adv-body');
+        var open=b.style.display!=='none';
+        if(open){ b.style.display='none'; at.textContent='Show the details'; return; }
+        b.innerHTML='<div class="autobox" style="margin-top:12px;">'
+          +'<div class="autorow"><div class="k">Photo</div><div class="v">Shown in full, replaced by your initials in partial and hidden.</div></div>'
+          +'<div class="autorow"><div class="k">Name</div><div class="v">Full name, first name only, or initials.</div></div>'
+          +'<div class="autorow"><div class="k">What you offer and need</div><div class="v">Shown in full and partial, hidden when you are hidden.</div></div>'
+          +'<div class="autorow"><div class="k">Location</div><div class="v">Your postal code is never shown. People see your general area only.</div></div>'
+          +'<div class="autorow"><div class="k">Email and phone</div><div class="v">Never shown in any circle. They are shared only in a one-to-one connection.</div></div>'
+          +'</div>';
+        b.style.display=''; at.textContent='Hide the details';
+      };
       return;
     }
     // Profile data
