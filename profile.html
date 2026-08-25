@@ -405,6 +405,9 @@ function paintShellHeader(extraPills){
   }
   if(who){
     try{ paintName(localStorage.getItem(nameKey)||''); }catch(e){}
+    // render() repaints this header, so the read is fired once and never again.
+    if(window._shellLookupDone) return;
+    window._shellLookupDone = true;
     fetch('https://cw-api-gate.jessieupp.workers.dev?action=lookupProfile&appearId='+encodeURIComponent(who))
       .then(function(r){return r.json();})
       .then(function(lu){
