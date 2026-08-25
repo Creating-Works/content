@@ -138,7 +138,9 @@
     {key:'groups', label:'My groups', nav:groupsUrl},
     {key:'events', label:'My events', nav:eventsUrl},
     {key:'account', label:'My account'},
-    {key:'permissions', label:'Permissions'}
+    // Permissions is hidden until its toggles map to real fields. The panel still answers to
+    // ?tab=permissions so the work stays reachable.
+    // {key:'permissions', label:'Permissions'}
   ];
 
   function field(lab,type,val,ph){
@@ -170,7 +172,7 @@
       return;
     }
     if(key==='permissions'){
-      p.innerHTML='<h2>My permissions</h2><p class="lead">Who can see you and how your profile is used.</p>'
+      p.innerHTML='<h2>My permissions</h2>'
         +toggleRow('Public profile','Anyone with the link can view your profile.',true)
         +toggleRow('Show my photo','Display your headshot on your profile and the network map.',true)
         +toggleRow('Appear on the network map','Include me in the shared map of people and resources.',true)
