@@ -1924,9 +1924,18 @@ function renderTopRight(){
         +'<div class="btn-photo"'+photoClick+'>'+phImg+'</div></div>';
       return;
     }
-    el.innerHTML='<div style="display:inline-flex;align-items:center;gap:8px;background:#fff;border-radius:24px;padding:4px 6px 4px 14px;">'
-      +'<span style="font-size:12px;font-weight:600;color:#185FA5;white-space:nowrap;">profile</span>'
-      +'<div class="btn-photo"'+photoClick+'>'+phImg+'</div></div>';
+    // The name and photo already sit in the page header, so this pill only repeated them.
+    // Signed out there is nobody to show, so the corner offers a way in instead.
+    if(!_appearId && !_showId){
+      el.innerHTML='<div style="display:inline-flex;align-items:center;gap:8px;">'
+        +'<a role="link" tabindex="0" data-nav="https://appear.network/" onclick="return _safeNavGo(this)" '
+        +'style="background:var(--brand,#1F699E);color:#fff;border-radius:22px;padding:9px 18px;font-size:14px;font-weight:700;text-decoration:none;cursor:pointer;">Sign in</a>'
+        +'<a role="link" tabindex="0" data-nav="https://appear.network/" onclick="return _safeNavGo(this)" '
+        +'style="background:#fff;color:var(--brand,#1F699E);border:1.5px solid #C9DFF3;border-radius:22px;padding:9px 18px;font-size:14px;font-weight:700;text-decoration:none;cursor:pointer;">Sign up</a>'
+        +'</div>';
+      return;
+    }
+    el.innerHTML='';
   }
 }
 
