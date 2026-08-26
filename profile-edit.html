@@ -822,7 +822,7 @@
     }
     function renderIdeas(){
       ideasZone.innerHTML='';
-      if (!mode){ var i=document.createElement('div'); i.className='ideas'; i.textContent='Select Values or Domains above to see ideas.'; ideasZone.appendChild(i); return; }
+      if (!mode){ return; }
       var idea=document.createElement('div'); idea.className='ideas'; idea.textContent='Here are some ideas to get you started.'; ideasZone.appendChild(idea);
       var row=document.createElement('div'); row.className='cat-row';
       (mode==='values'?VALUE_IDEAS:DOMAIN_IDEAS).forEach(function(name){
