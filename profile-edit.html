@@ -268,21 +268,6 @@
       <div class="summary" id="summary"></div>
     </div>
 
-    <!-- The same question the intake gate asks, on the step that owns the answer. Chips or
-         your own words, whichever somebody prefers; the field is one line so it does not
-         compete with the chips below it. -->
-    <div id="open-q" style="display:none;margin:6px 0 18px;">
-      <div id="open-q-hint" style="font-size:13.5px;color:#6B7A8D;margin-bottom:8px;"></div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <input type="text" id="open-q-input" autocomplete="off"
-          style="flex:1;min-width:0;border:1.5px solid #DDE3EA;background:#fff;border-radius:10px;
-                 padding:10px 13px;font:inherit;font-size:14px;color:#1A2E42;">
-        <button type="button" id="open-q-add"
-          style="flex-shrink:0;background:#1F699E;color:#fff;border:0;font:inherit;font-size:14px;
-                 font-weight:700;padding:10px 18px;border-radius:10px;cursor:pointer;">Add</button>
-      </div>
-      <div id="open-q-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;"></div>
-    </div>
     <div class="list" id="list"></div>
 
     <div class="met-section" id="met-section">
@@ -671,7 +656,8 @@
   function renderSkills(){
     listEl.className='list flow'; listEl.innerHTML='';
     var eq=document.createElement('div'); eq.className='enjoy-q'; eq.textContent='What skill pays the bills?'; listEl.appendChild(eq);
-    var pill=document.createElement('div'); pill.className='lang-pill'; pill.textContent='✏️ Languages: English'; listEl.appendChild(pill);
+    var pillRow=document.createElement('div'); pillRow.style.cssText='display:flex;justify-content:flex-end;'; listEl.appendChild(pillRow);
+    var pill=document.createElement('div'); pill.className='lang-pill'; pill.textContent='✏️ Languages: English'; pillRow.appendChild(pill);
     var sub=document.createElement('div'); sub.className='enjoy-sub'; sub.textContent='Search by keywords, select chips to add, or add your own.'; listEl.appendChild(sub);
     listEl.appendChild(makeSearchBox('Search skills to add…', skillItemPool, function(h){ addSkillCard(h.name, h.cat, ''); }));
     var catzone=document.createElement('div'); listEl.appendChild(catzone);
@@ -1090,25 +1076,46 @@
   ];
   var _openQVals = {};
   function paintOpenQ(i){
-    var wrap = document.getElementById('open-q');
     var cfg = OPEN_Q[i];
-    if (!wrap || !cfg) { if (wrap) wrap.style.display='none'; return; }
-    document.getElementById('open-q-hint').textContent = cfg.hint;
-    // Sits under the question the section already asks, rather than repeating it above the card.
+    if (!cfg) return;
     var q = listEl.querySelector('.enjoy-q');
-    if (q && q.parentNode) q.parentNode.insertBefore(wrap, q.nextSibling);
-    var inp = document.getElementById('open-q-input');
-    var addBtn = document.getElementById('open-q-add');
+    if (!q || !q.parentNode) return;
+
+    // Built fresh every time. renderSection empties this list, so anything kept as a single
+    // node and moved in here vanishes the moment somebody changes step and comes back.
+    var wrap = document.createElement('div');
+    wrap.id = 'open-q';
+    wrap.style.cssText = 'margin:6px 0 18px;';
+
+    var hint = document.createElement('div');
+    hint.style.cssText = 'font-size:13.5px;color:#6B7A8D;margin-bottom:8px;';
+    hint.textContent = cfg.hint;
+    wrap.appendChild(hint);
+
+    var row = document.createElement('div');
+    row.style.cssText = 'display:flex;gap:8px;align-items:center;';
+    var inp = document.createElement('input');
+    inp.type = 'text'; inp.autocomplete = 'off'; inp.id = 'open-q-input';
     inp.placeholder = cfg.ph;
-    inp.value = '';
+    inp.style.cssText = 'flex:1;min-width:0;border:1.5px solid #DDE3EA;background:#fff;border-radius:10px;'
+      + 'padding:10px 13px;font:inherit;font-size:14px;color:#1A2E42;';
+    var addBtn = document.createElement('button');
+    addBtn.type = 'button'; addBtn.textContent = 'Add';
+    addBtn.style.cssText = 'flex-shrink:0;background:#1F699E;color:#fff;border:0;font:inherit;font-size:14px;'
+      + 'font-weight:700;padding:10px 18px;border-radius:10px;cursor:pointer;';
+    row.appendChild(inp); row.appendChild(addBtn); wrap.appendChild(row);
+
+    var box = document.createElement('div');
+    box.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;';
+    wrap.appendChild(box);
+
     // Each phrase is its own entry rather than one long sentence, so it can be removed on its
     // own and turned into a tag on its own later.
     function listOf(){ return String(_openQVals[cfg.key] || '').split('|').map(function(t){ return t.trim(); }).filter(Boolean); }
-    function store(arr){ _openQVals[cfg.key] = arr.join('|'); if (typeof scheduleSave === 'function') scheduleSave(); }
+    function store(a){ _openQVals[cfg.key] = a.join('|'); if (typeof scheduleSave === 'function') scheduleSave(); }
     function paintList(){
-      var box = document.getElementById('open-q-list');
       box.innerHTML = '';
-      listOf().forEach(function(t, i){
+      listOf().forEach(function(t, idx){
         var pill = document.createElement('span');
         pill.style.cssText = 'display:inline-flex;align-items:center;gap:7px;background:#EEF1F5;'
           + 'border:1px solid #DDE3EA;color:#1A2E42;border-radius:20px;padding:5px 8px 5px 13px;font-size:13.5px;';
@@ -1117,7 +1124,7 @@
         x.type = 'button'; x.textContent = '\u00d7';
         x.setAttribute('aria-label', 'Remove ' + t);
         x.style.cssText = 'border:0;background:transparent;color:#6B7A8D;font:inherit;font-size:16px;line-height:1;cursor:pointer;padding:0 2px;';
-        x.addEventListener('click', function(){ var a = listOf(); a.splice(i, 1); store(a); paintList(); });
+        x.addEventListener('click', function(){ var a = listOf(); a.splice(idx, 1); store(a); paintList(); });
         pill.appendChild(x);
         box.appendChild(pill);
       });
@@ -1129,14 +1136,13 @@
       if (a.map(function(t){ return t.toLowerCase(); }).indexOf(v.toLowerCase()) === -1) a.push(v);
       store(a); inp.value = ''; paintList(); inp.focus();
     }
-    inp.onkeydown = function(e){ if (e.key === 'Enter') { e.preventDefault(); addNow(); } };
-    addBtn.onclick = addNow;
-    // Typing without pressing anything is still kept, so nothing half-written is lost.
-    inp.oninput = function(){ if (typeof scheduleSave === 'function') scheduleSave(); };
-    paintList();
-    wrap.style.display = '';
-  }
+    inp.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); addNow(); } });
+    addBtn.addEventListener('click', addNow);
+    inp.addEventListener('input', function(){ if (typeof scheduleSave === 'function') scheduleSave(); });
 
+    paintList();
+    q.parentNode.insertBefore(wrap, q.nextSibling);
+  }
   function renderSection(i){
     var sec=SECTIONS[i];
     if (sec.custom==='needs'){ renderNeeds(); return; }
