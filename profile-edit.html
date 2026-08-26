@@ -1369,7 +1369,27 @@
       haves: (SECTIONS[4].data||[]).map(function(h){ return (h.text||'')+(h.cats&&h.cats[0]?':'+h.cats[0]:''); }).filter(function(s){ return s && s.charAt(0)!==':'; }).join('|')
     };
   }
-  var _editToken='', _saveTimer=null, _dirty=false, _saving=false;
+  // The verification is kept where profile.html already keeps it, under the same key and with
+  // the same shape, so verifying on either page covers both for the hour. Held only in memory
+  // before this, which is why every page load asked again.
+  var _EDIT_KEY='cw-edit-'+String(_id||'');
+  function _tokenGet(){
+    try{
+      var raw=localStorage.getItem(_EDIT_KEY); if(!raw) return '';
+      var o=JSON.parse(raw);
+      if(!o||!o.t||!o.exp||Date.now()>(o.exp-60000)){ localStorage.removeItem(_EDIT_KEY); return ''; }
+      return o.t;
+    }catch(e){ return ''; }
+  }
+  function _tokenPut(t){
+    // The token carries its own expiry after the dot, so the page never has to guess the hour.
+    try{
+      var exp=parseInt(String(t).split('.')[1],10);
+      if(!exp||exp<Date.now()) exp=Date.now()+60*60*1000;
+      localStorage.setItem(_EDIT_KEY, JSON.stringify({t:t, exp:exp}));
+    }catch(e){}
+  }
+  var _editToken=_tokenGet(), _saveTimer=null, _dirty=false, _saving=false;
   function setSaveStat(txt){ var s=document.getElementById('da-savestat'); if(s) s.textContent=txt||''; }
   function postSave(){
     var d=serialize();
@@ -1390,7 +1410,7 @@
     postSave().then(function(resp){
       _saving=false;
       if(resp&&resp.status==='ok'){ _dirty=false; setSaveStat('Saved 🌱'); setTimeout(function(){ if(!_dirty && !_saving) setSaveStat(''); },2000); }
-      else { _editToken=''; setSaveStat(''); showPinGate(document.getElementById('edit-mode'), function(){ autoSave(); }, (resp&&resp.message)||'Session expired. Verify to keep saving.'); }
+      else { _editToken=''; try{ localStorage.removeItem(_EDIT_KEY); }catch(e){} setSaveStat(''); showPinGate(document.getElementById('edit-mode'), function(){ autoSave(); }, (resp&&resp.message)||'Session expired. Verify to keep saving.'); }
     }).catch(function(){ _saving=false; setSaveStat('Save failed. Retrying…'); _saveTimer=setTimeout(function(){ scheduleSave(); }, 4000); });
   }
   function scheduleSave(){ if(!_id) return; _dirty=true; if(_saveTimer) clearTimeout(_saveTimer); _saveTimer=setTimeout(autoSave, 900); }
@@ -1415,7 +1435,7 @@
     row.appendChild(send); row.appendChild(inp); row.appendChild(go); bar.appendChild(row);
     var st=document.createElement('div'); st.style.cssText='font-size:13px;color:var(--soft);margin-top:10px;min-height:16px;'; bar.appendChild(st);
     send.onclick=function(){ st.textContent='Sending your code…'; send.disabled=true; fetch(GS_URL+'?action=sendProfilePin&appearId='+encodeURIComponent(_id)).then(function(r){return r.json();}).then(function(resp){ send.disabled=false; if(resp&&resp.sent){ send.textContent='Resend'; var _to=_maskEmail(resp.sentTo||resp.email||''); st.textContent=_to?('Check '+_to+' for the code.'):'Check your email for the code.'; inp.style.display=''; go.style.display=''; inp.focus(); } else { st.textContent='No email on file for this profile.'; } }).catch(function(){ send.disabled=false; st.textContent='Could not send. Try again.'; }); };
-    go.onclick=function(){ var c=inp.value.trim(); if(!c) return; st.textContent='Checking…'; go.disabled=true; fetch(GS_URL+'?action=verifyProfilePin&appearId='+encodeURIComponent(_id)+'&code='+encodeURIComponent(c)).then(function(r){return r.json();}).then(function(resp){ if(resp&&resp.status==='ok'&&resp.editToken){ _editToken=resp.editToken; bar.remove(); if(onOk) onOk(); } else { go.disabled=false; st.textContent=(resp&&resp.message)||'Invalid code.'; } }).catch(function(){ go.disabled=false; st.textContent='Could not verify. Try again.'; }); };
+    go.onclick=function(){ var c=inp.value.trim(); if(!c) return; st.textContent='Checking…'; go.disabled=true; fetch(GS_URL+'?action=verifyProfilePin&appearId='+encodeURIComponent(_id)+'&code='+encodeURIComponent(c)).then(function(r){return r.json();}).then(function(resp){ if(resp&&resp.status==='ok'&&resp.editToken){ _editToken=resp.editToken; _tokenPut(_editToken); bar.remove(); if(onOk) onOk(); } else { go.disabled=false; st.textContent=(resp&&resp.message)||'Invalid code.'; } }).catch(function(){ go.disabled=false; st.textContent='Could not verify. Try again.'; }); };
     bar.scrollIntoView({behavior:'smooth',block:'center'});
   }
   // Subtle save-status line at the top of the editor.
