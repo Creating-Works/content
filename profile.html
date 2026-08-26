@@ -2596,7 +2596,7 @@ function renderProfile(el, viewerMode){
       +'<a role="link" tabindex="0" data-nav="'+esc(_evUrl)+'" title="Events" onclick="return _safeNavGo(this)" style="'+_TABOFF+'">My events</a> '
       +'<a role="link" tabindex="0" data-nav="'+esc(_acct+'&tab=account')+'" title="My account" onclick="return _safeNavGo(this)" style="'+_TABOFF+'">My account</a> ';
   }
-  if(_eventId && _eventHasBB && !_bgH){
+  if(_eventId && _eventHasBB && !_bgH && !_bgG){
     var _ehUrl='https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+_mc;
     _b+='<a role="link" tabindex="0" data-nav="'+esc(_ehUrl)+'" title="'+esc(_eventTitle||'Event page')+'" onclick="return _safeNavGo(this)" style="'+_WB+'">Event attendees</a>';
   }
