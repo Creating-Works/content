@@ -1123,6 +1123,14 @@
   // Leaving the editor returns to whichever screen is "home" for this viewer: your own page is
   // the Concept A hub; someone else's is the "This is me" quick view. Always flushes the save.
   function goHome(){ showView(); }
+  // Which inbox to go and look in. Masked: anybody who reaches this page can press Send code,
+  // and the address on file is not necessarily theirs to read in full.
+  function _maskEmail(v){
+    var e=String(v||'').trim(), at=e.indexOf('@');
+    if(at<1) return '';
+    var u=e.slice(0,at), d=e.slice(at+1);
+    return u.slice(0,1)+'\u2022\u2022\u2022'+(u.length>2?u.slice(-1):'')+'@'+d;
+  }
   // Verify identity BEFORE entering the editor. Once verified, editing is silent for 60 min.
   function requestEdit(step){
     if(!_id || _editToken){ enterEdit(step); return; }
@@ -1353,7 +1361,7 @@
     var go=document.createElement('button'); go.style.cssText=send.style.cssText; go.textContent='Verify'; go.style.display='none';
     row.appendChild(send); row.appendChild(inp); row.appendChild(go); bar.appendChild(row);
     var st=document.createElement('div'); st.style.cssText='font-size:13px;color:var(--soft);margin-top:10px;min-height:16px;'; bar.appendChild(st);
-    send.onclick=function(){ st.textContent='Sending your code…'; send.disabled=true; fetch(GS_URL+'?action=sendProfilePin&appearId='+encodeURIComponent(_id)).then(function(r){return r.json();}).then(function(resp){ send.disabled=false; if(resp&&resp.sent){ send.textContent='Resend'; st.textContent='Check your email for the code.'; inp.style.display=''; go.style.display=''; inp.focus(); } else { st.textContent='No email on file for this profile.'; } }).catch(function(){ send.disabled=false; st.textContent='Could not send. Try again.'; }); };
+    send.onclick=function(){ st.textContent='Sending your code…'; send.disabled=true; fetch(GS_URL+'?action=sendProfilePin&appearId='+encodeURIComponent(_id)).then(function(r){return r.json();}).then(function(resp){ send.disabled=false; if(resp&&resp.sent){ send.textContent='Resend'; var _to=_maskEmail(resp.sentTo||resp.email||''); st.textContent=_to?('Code sent to '+_to+'. Check your email.'):'Check your email for the code.'; inp.style.display=''; go.style.display=''; inp.focus(); } else { st.textContent='No email on file for this profile.'; } }).catch(function(){ send.disabled=false; st.textContent='Could not send. Try again.'; }); };
     go.onclick=function(){ var c=inp.value.trim(); if(!c) return; st.textContent='Checking…'; go.disabled=true; fetch(GS_URL+'?action=verifyProfilePin&appearId='+encodeURIComponent(_id)+'&code='+encodeURIComponent(c)).then(function(r){return r.json();}).then(function(resp){ if(resp&&resp.status==='ok'&&resp.editToken){ _editToken=resp.editToken; bar.remove(); if(onOk) onOk(); } else { go.disabled=false; st.textContent=(resp&&resp.message)||'Invalid code.'; } }).catch(function(){ go.disabled=false; st.textContent='Could not verify. Try again.'; }); };
     bar.scrollIntoView({behavior:'smooth',block:'center'});
   }
