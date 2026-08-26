@@ -1943,7 +1943,7 @@ function renderTopRight(){
   }
 }
 
-// Fallback when the profile is opened without ?eventId=. Without an event the Event hub and
+// Fallback when the profile is opened without ?eventId=. Without an event the attendees and
 // Manage-my-experience pills cannot be built at all, so this is worth ONE non-blocking call -
 // it only ever fires when the URL left the event out, and never blocks first paint.
 var _regEventsChecked=false;
@@ -1972,7 +1972,6 @@ function render(){
   renderTopRight();
   var _tn0=document.getElementById('app-topnav');
   if(_tn0){
-    // Back-to-source pill (Back to group / Back to bulletin board) REMOVED 2026-08-21 per Jessie.
     // The URL params (&groupId, &hubEventId) still flow through and are used elsewhere; only the
     // top-of-page pill is gone. Re-enable by restoring the _bgParams / _bgUrl / _bgLabel block.
     // In edit mode (owner editing any screen other than the profile view), still show a
@@ -2457,7 +2456,7 @@ function _wtmDecorate(){
   var _bs='font-size:14px;font-weight:600;padding:9px 18px;border-radius:20px;cursor:pointer;font-family:inherit;border:1.5px solid #185FA5;background:#fff;color:#185FA5;';
   var btn='<button id="wtm-btn" data-wtm-wrap="1" onclick="wtmToggle()" style="'+_bs+'">'+(has?'✓ Bookmarked':'Bookmark to meet')+'</button>';
   // V6.16: append, do not replace. This used to set app-topnav's innerHTML to the button
-  // alone, wiping the "All events / Event hub" nav that renders there.
+  // alone, wiping the "All events / Event attendees" nav that renders there.
   // V6.24: insert INSIDE the nav-buttons flex row so the button sits on the same line as the
   // other pills instead of stacking below. Re-decorating removes any prior button first.
   var host=document.getElementById('app-topnav'); if(!host) return;
@@ -2557,7 +2556,6 @@ function renderProfile(el, viewerMode){
   var _mc=(_navOwn&&_navId)?('&memberCard='+encodeURIComponent(_navId)):'';
   if(_eventId && !_eventHeaderFetched){ fetchEventTitle(function(){ render(); }); }   // V6.20: learn hasBB, then re-render the nav
   // All events shows always. The bulletin board shows only for events marked as having one (hasBB). Edit / Manage are owner-only.
-  // Back to hub leads. Renders when the URL carries &groupId= (from group.html) or &hubEventId= (from attendees.html).
   var _bgP=new URLSearchParams(window.location.search);
   var _bgG=_bgP.get('groupId');
   var _bgH=_bgP.get('hubEventId');
@@ -2579,8 +2577,7 @@ function renderProfile(el, viewerMode){
       +'<span style="opacity:.7;"> / </span><span style="font-weight:800;">My profile</span>';
   }
   // Arriving from a group used to hide this whole row and leave nothing but a back button, so
-  // the tabs flashed on load and then vanished. Back to group now sits alongside them instead
-  // of replacing them: returning to the group is one move you might want, not the only one.
+  // the tabs flashed on load and then vanished. The way back is the breadcrumb above.
   //
   // The tabs are about the person looking, never the person being looked at, so they carry the
   // viewer's id. Reading someone else's profile and tapping My groups now shows YOUR groups,
@@ -3004,7 +3001,7 @@ function renderPotluckTopNav(){
   var b='<a role="link" tabindex="0" data-nav="'+esc(_uAll)+'" title="Events" onclick="return _safeNavGo(this)" style="'+WB+'">All events</a>';
   if(_eventId && _eventHasBB){
     var _uEh='https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+'&memberCard='+encodeURIComponent(_appearId);
-    b+='<a role="link" tabindex="0" data-nav="'+esc(_uEh)+'" title="'+esc(_eventTitle||'Event page')+'" onclick="return _safeNavGo(this)" style="'+WB+'">Event hub</a>';
+    b+='<a role="link" tabindex="0" data-nav="'+esc(_uEh)+'" title="'+esc(_eventTitle||'Event page')+'" onclick="return _safeNavGo(this)" style="'+WB+'">Event attendees</a>';
   }
   var _uEp='https://creating.works/profile.html?show='+encodeURIComponent(_appearId)+'&me='+encodeURIComponent(_appearId)+(_eventId?'&eventId='+encodeURIComponent(_eventId):'');
   b+='<a role="link" tabindex="0" data-nav="'+esc(_uEp)+'" title="'+esc(_viewerName||'My profile')+'" onclick="return _safeNavGo(this)" style="'+WB+'">Event profile</a>';
