@@ -1453,7 +1453,7 @@
   // The verification is kept where profile.html already keeps it, under the same key and with
   // the same shape, so verifying on either page covers both for the hour. Held only in memory
   // before this, which is why every page load asked again.
-  var _EDIT_KEY='cw-edit-'+String(_id||'');
+  var _EDIT_KEY='cw-edit-'+String(_id||'').split('.').join('').toLowerCase();
   function _tokenGet(){
     try{
       var raw=localStorage.getItem(_EDIT_KEY); if(!raw) return '';

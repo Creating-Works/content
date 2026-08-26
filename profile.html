@@ -2695,7 +2695,7 @@ function buildProfilePotluckSectionInner(canEdit){
 // One verification covers the hour across every creating.works page, so the token lives in
 // browser storage keyed to the person rather than in a variable that dies on navigation. It is
 // dropped a minute early to avoid racing the server's own expiry, and cleared when rejected.
-var _EDIT_KEY='cw-edit-'+String(_appearId||_showId||'');
+var _EDIT_KEY='cw-edit-'+String(_appearId||_showId||'').split('.').join('').toLowerCase();
 function _tokenGet(){
   try{
     var raw=localStorage.getItem(_EDIT_KEY); if(!raw) return '';
