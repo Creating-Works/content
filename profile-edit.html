@@ -312,6 +312,11 @@
     try{
       // A found profile is authoritative — empty fields mean empty, not the demo seed.
       _loaded={ postal:d.postal||'', retired:d.retired||'', bringType:d.bringType||'', wantsSignupList:d.wantsSignupList||'', languages:d.languages||'' };
+      // The words somebody wrote, read back the same way they were written. Without this the
+      // phrases only lived until the page was reloaded, even once the backend stored them.
+      ['introNeed','introEnjoy','introSkills','introValues','introOffer'].forEach(function(k){
+        _openQVals[k] = String(d[k] || '');
+      });
       NEEDS_ADDED = parseNeedsStr(d.needs||'').map(function(n){ return { item:n.item, type:(n.ntype==='skill'?'person':n.ntype==='space'?'space':'thing'), category:n.category||'', level:'', local:!!n.local, detail:n.detail||'' }; });
       ENJOY_ADDED = parseTagStr(d.interests||'','level').map(function(x){ return { t:x.item, sel:(x.level?String(x.level).split(',').map(function(s){return s.trim();}).filter(Boolean):[]) }; });
       SKILLS_ADDED = parseTagStr(d.skills||'','level').map(function(x){ return { t:x.item, cat:x.category||'', level:x.level||'' }; });
@@ -323,6 +328,7 @@
     }catch(e){}
   }
 
+  var _openQVals = {};
   var CORE_CATS = ['Home & Transportation','Business & Finance','Skills & Services','Food & Drink'];
   var MORE_CATS = ['Nature & Outdoors','Events & Gatherings','Arts & Media','Pets & Animal Care','Health & Wellness','Education & Learning','Environment','Housing & Land'];
 
@@ -1074,7 +1080,7 @@
       hint:'Share in your own words and then tag, or use the chips to help you.',
       ph:'A spare room in September, a truck for moving, gardening tools…' }
   ];
-  var _openQVals = {};
+
   function paintOpenQ(i){
     var cfg = OPEN_Q[i];
     if (!cfg) return;
