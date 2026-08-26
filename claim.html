@@ -1,3 +1,4 @@
+<!doctype html>
 <!--
   Copyright 2026 DayBalancer LLC. All rights reserved.
 
@@ -9,136 +10,14 @@
 
   hello@creating.works
 -->
-<!-- Version: V1.01 | Date: 2026-07-22 | LAST CHANGE: Show the person's Appear page link as a read-only clickable link (opens new tab), passed in via ?link= (from the event form / their profile), instead of an editable paste field. Pick a slug -> live checkVanity -> saveVanity writes slug + fills Main "Page link". Needs GAS checkVanity/saveVanity/vanity + the appear.network Worker. -->
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Claim your link</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
-<style>
-  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  :root{--primary:#1b6896;--dark:#1a1a2e;--muted:#6b7280;--border:#e5e7eb;--white:#fff;--ok:#0f9d58;--bad:#c0392b}
-  body{font-family:'Nunito Sans',system-ui,sans-serif;color:var(--dark);background:#f3f5f7;padding:24px;line-height:1.5}
-  .card{max-width:480px;margin:24px auto;background:var(--white);border:1.5px solid var(--border);border-radius:16px;padding:24px}
-  h1{font-size:22px;margin-bottom:6px}
-  p.sub{font-size:14px;color:var(--muted);margin-bottom:18px}
-  label{display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin:14px 0 6px}
-  input{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:11px 14px;font-size:14px;font-family:inherit;color:var(--dark);outline:none}
-  input:focus{border-color:var(--primary)}
-  .linkbox{font-size:14px;padding:11px 14px;background:#f3f5f7;border-radius:8px;word-break:break-all}
-  .linkbox a{color:var(--primary);font-weight:600;text-decoration:none}
-  .linkbox a:hover{text-decoration:underline}
-  .nolink{font-size:14px;padding:11px 14px;background:#FFF8E7;border:1px solid #F0B429;border-radius:8px;color:#7B5800}
-  .slug-row{display:flex;align-items:center;gap:0;border:1.5px solid var(--border);border-radius:8px;overflow:hidden}
-  .slug-row .pfx{background:#f3f5f7;color:var(--muted);font-size:14px;padding:11px 10px 11px 14px;white-space:nowrap;border-right:1px solid var(--border)}
-  .slug-row input{border:none;border-radius:0;padding-left:8px}
-  .hint{font-size:13px;margin-top:6px;min-height:18px}
-  .hint.ok{color:var(--ok);font-weight:600}
-  .hint.bad{color:var(--bad);font-weight:600}
-  button.claim{margin-top:20px;width:100%;background:var(--primary);color:#fff;border:none;border-radius:10px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
-  button.claim:disabled{opacity:0.5;cursor:not-allowed}
-  .done{background:#E8F2F9;border-radius:10px;padding:16px;margin-top:18px;display:none}
-  .done a{color:var(--primary);font-weight:700;text-decoration:none}
-  .copy{margin-left:8px;font-size:12px;padding:3px 10px;border-radius:12px;border:1.5px solid var(--primary);background:#fff;color:var(--primary);cursor:pointer;font-family:inherit}
-</style>
-<div class="card">
-  <h1>Claim your link</h1>
-  <p class="sub">A short, memorable web address that opens your Appear Network page — like <b>yourname.appear.network</b>.</p>
-
-  <label>Your Appear Network page</label>
-  <div class="linkbox" id="link-box" style="display:none;">Opens in a new tab: <a id="appear-link" href="#" target="_blank" rel="noopener"></a></div>
-  <div class="nolink" id="no-link" style="display:none;">Open this from your event post or your Appear page so we know which page to link.</div>
-
-  <label>Choose your link</label>
-  <div class="slug-row">
-    <span class="pfx">appear.network/</span>
-    <input id="slug" type="text" placeholder="yourname" autocomplete="off" autocapitalize="off" spellcheck="false">
-  </div>
-  <div class="hint" id="slug-hint"></div>
-
-  <button class="claim" id="claim-btn" disabled>Claim this link</button>
-
-  <div class="done" id="done">
-    Your link is live: <a id="done-link" href="#" target="_blank" rel="noopener"></a>
-    <button class="copy" id="copy-btn">Copy</button>
-  </div>
-</div>
-<script>
-var GS_URL='https://cw-api-gate.jessieupp.workers.dev';
-var RESERVED=['daybalancer','creatingworks','intake','giving','2gather','events','admin','claim','dl','api','u','r','s','page'];
-function qp(k){ try{return new URLSearchParams(location.search).get(k)||'';}catch(e){return '';} }
-var _me=(qp('id')||qp('memberCard')||qp('me')).trim();
-var _appearLink=(qp('link')||'').trim();
-var slugEl=document.getElementById('slug'), slugHint=document.getElementById('slug-hint'), btn=document.getElementById('claim-btn');
-var _linkOK=false, _slugOK=false, _checkTimer=null;
-
-function validLink(v){ return /^https?:\/\/appear\.network\//i.test(String(v||'').trim()); }
-(function initLink(){
-  if(validLink(_appearLink)){
-    var a=document.getElementById('appear-link'); a.href=_appearLink; a.textContent=_appearLink;
-    document.getElementById('link-box').style.display='block';
-    _linkOK=true;
-  } else {
-    document.getElementById('no-link').style.display='block';
-    _linkOK=false;
-  }
-})();
-
-function normSlug(v){ return String(v||'').trim().toLowerCase().replace(/[^a-z0-9-]/g,''); }
-slugEl.addEventListener('input', function(){
-  var v=normSlug(slugEl.value);
-  if(slugEl.value!==v) slugEl.value=v;
-  _slugOK=false; refresh();
-  clearTimeout(_checkTimer);
-  if(!v){ slugHint.textContent=''; slugHint.className='hint'; return; }
-  if(v.length<2){ slugHint.textContent='A bit longer, please.'; slugHint.className='hint bad'; return; }
-  if(RESERVED.indexOf(v)!==-1){ slugHint.textContent='That one is reserved — pick another.'; slugHint.className='hint bad'; return; }
-  slugHint.textContent='Checking…'; slugHint.className='hint';
-  _checkTimer=setTimeout(function(){
-    fetch(GS_URL+'?action=checkVanity&slug='+encodeURIComponent(v))
-      .then(function(r){return r.json();})
-      .then(function(d){
-        if(normSlug(slugEl.value)!==v) return;
-        if(d&&d.available){ slugHint.textContent='✓ appear.network/'+v+' is available'; slugHint.className='hint ok'; _slugOK=true; }
-        else { slugHint.textContent='Taken — try another.'; slugHint.className='hint bad'; _slugOK=false; }
-        refresh();
-      }).catch(function(){ slugHint.textContent='Could not check right now — try again.'; slugHint.className='hint bad'; });
-  },400);
-});
-
-function refresh(){
-  btn.disabled=!(_linkOK&&_slugOK&&_me);
-  if(!_me && _linkOK){ slugHint.textContent='Open this from your profile so we know it is you.'; slugHint.className='hint bad'; }
-}
-
-btn.addEventListener('click', function(){
-  if(btn.disabled) return;
-  var v=normSlug(slugEl.value);
-  btn.disabled=true; btn.textContent='Claiming…';
-  fetch(GS_URL+'?action=saveVanity&appearId='+encodeURIComponent(_me)+'&slug='+encodeURIComponent(v)+'&link='+encodeURIComponent(_appearLink))
-    .then(function(r){return r.json();})
-    .then(function(d){
-      if(d&&d.status==='ok'){
-        var full='https://appear.network/'+v;
-        var dl=document.getElementById('done-link'); dl.href=full; dl.textContent=full;
-        document.getElementById('done').style.display='block';
-        btn.textContent='Claimed ✓';
-      } else { btn.disabled=false; btn.textContent='Claim this link'; slugHint.textContent=(d&&d.message)||'Could not claim — try again.'; slugHint.className='hint bad'; }
-    }).catch(function(){ btn.disabled=false; btn.textContent='Claim this link'; });
-});
-
-document.getElementById('copy-btn').addEventListener('click', function(){
-  var t=document.getElementById('done-link').textContent;
-  try{ navigator.clipboard.writeText(t); this.textContent='Copied!'; }catch(e){}
-});
-</script>
-<!--
-  Copyright 2026 DayBalancer LLC. All rights reserved.
-
-  The code and the content here power Creating.Works, DayBalancer, Appear Network,
-  and 2Gather. They are published so they can be read, audited, and dated.
-
-  Running either as a separate offering requires a license, whether you brand it as
-  ours or as your own, and whether or not money changes hands.
-
-  hello@creating.works
--->
+<!-- This page moved to /claim/. Kept so older links keep working, and it carries the
+     query string across so identity survives the hop. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Moved</title>
+<script>location.replace('/claim/' + location.search + location.hash);</script>
+<meta http-equiv="refresh" content="0;url=/claim/">
+</head>
+<body></body>
+</html>

@@ -1,0 +1,1481 @@
+<!--
+  Copyright 2026 DayBalancer LLC. All rights reserved.
+
+  The code and the content here power Creating.Works, DayBalancer, Appear Network,
+  and 2Gather. They are published so they can be read, audited, and dated.
+
+  Running either as a separate offering requires a license, whether you brand it as
+  ours or as your own, and whether or not money changes hands.
+
+  hello@creating.works
+-->
+<!-- Version: V2.39 | LAST CHANGE: Privacy. Dropped a call to a backend action that does not exist; it cost a round trip and returned data this page never used. | Date: 2026-08-01 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ways to give to me - Creating Works</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:           #1F699E;
+      --card:         #FFFFFF;
+      --text:         #1A2E42;
+      --soft:         #4A6080;
+      --muted:        #6A8FAF;
+      --brand:        #1F699E;
+      --border:       #DDE4EE;
+      --input-bg:     #F7F9FC;
+      --hover:        #185885;
+      --green:        #E8F5E9;
+      --green-border: #A5D6A7;
+      --green-text:   #2E7D32;
+      --ph:           #B8CCDE;
+      --sel-bg:       #EBF3FA;
+      --sel-border:   #1F699E;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      padding: 40px 20px 100px;
+      color: var(--text);
+    }
+
+    .card {
+      background: var(--card);
+      max-width: 660px;
+      margin: 0 auto;
+      border-radius: 16px;
+      padding: 52px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.25), 0 4px 16px rgba(0,0,0,0.12);
+    }
+    @media (max-width: 520px) { .card { padding: 32px 20px; } }
+
+    .eyebrow { font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--brand); margin-bottom: 8px; }
+    h1 { font-size: 26px; font-weight: 700; color: var(--text); line-height: 1.3; margin-bottom: 8px; }
+    h2 { font-size: 20px; font-weight: 700; color: var(--text); line-height: 1.3; margin-bottom: 6px; }
+    .subtitle { font-size: 15px; color: var(--soft); font-weight: 300; line-height: 1.7; margin-bottom: 32px; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+    label { display: block; font-size: 14px; color: var(--muted); margin-bottom: 6px; }
+
+    input[type="text"] {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input[type="text"]:focus { border-color: var(--brand); }
+    input[type="text"]::placeholder { color: var(--ph); }
+    .field { margin-bottom: 20px; }
+
+    /* ── Top tabs ── */
+    .top-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+    .top-tab {
+      padding: 10px 18px; border-radius: 24px; border: 2px solid var(--border);
+      background: var(--input-bg); font-size: 14px; font-weight: 500; color: var(--soft);
+      cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.18s;
+    }
+    .top-tab:hover { border-color: var(--brand); color: var(--brand); }
+    .top-tab.active { background: var(--brand); border-color: var(--brand); color: white; }
+
+    /* ── Drill section ── */
+    .drill-section {
+      background: var(--input-bg); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px; margin-bottom: 16px;
+    }
+    .drill-label { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
+    .drill-sub { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .drill-sub-label { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .drill-sub-desc { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+
+    /* ── Sub tabs ── */
+    .sub-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .sub-tab {
+      padding: 8px 16px; border-radius: 20px; border: 1.5px solid var(--border);
+      background: white; font-size: 13px; font-weight: 500; color: var(--soft);
+      cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s;
+    }
+    .sub-tab:hover { border-color: var(--brand); color: var(--brand); }
+    .sub-tab.active { background: var(--brand); border-color: var(--brand); color: white; }
+
+    /* ── Chips ── */
+    .chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
+    .chip {
+      padding: 7px 14px; border-radius: 20px; border: 1.5px solid var(--border);
+      background: white; font-size: 13px; color: var(--soft); cursor: pointer;
+      font-family: 'DM Sans', sans-serif; transition: all 0.15s; user-select: none;
+    }
+    .chip:hover { border-color: var(--brand); color: var(--brand); }
+    .chip.selected { background: var(--sel-bg); border-color: var(--sel-border); color: var(--brand); font-weight: 500; }
+    .chip.other-chip { border-style: dashed; }
+
+    /* ── Skills grid ── */
+    .skills-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+    .skill-chip {
+      padding: 6px 12px; border-radius: 16px; border: 1.5px solid var(--border);
+      background: white; font-size: 12px; color: var(--soft); cursor: pointer;
+      font-family: 'DM Sans', sans-serif; transition: all 0.15s;
+    }
+    .skill-chip:hover { border-color: var(--brand); color: var(--brand); }
+    .skill-chip.selected { background: var(--sel-bg); border-color: var(--sel-border); color: var(--brand); font-weight: 500; }
+    .skill-chip.other-chip { border-style: dashed; font-size: 12px; }
+
+    /* ── Other inline input ── */
+    .other-input-wrap { display: flex; gap: 8px; margin-top: 10px; width: 100%; }
+    .other-input-wrap input { flex: 1; }
+    .btn-other-add {
+      padding: 10px 16px; background: var(--brand); color: white; border: none;
+      border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px;
+      cursor: pointer; white-space: nowrap; transition: background 0.15s;
+    }
+    .btn-other-add:hover { background: var(--hover); }
+
+    /* ── Add area ── */
+    .add-area {
+      margin-top: 16px; padding: 14px; background: white;
+      border: 1px solid var(--border); border-radius: 10px;
+    }
+    .add-area-label { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+    .add-area input { margin-bottom: 10px; }
+    .btn-add {
+      display: block; width: 100%; padding: 12px; background: var(--brand); color: white;
+      border: none; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px;
+      font-weight: 500; cursor: pointer; transition: background 0.15s;
+    }
+    .btn-add:hover { background: var(--hover); }
+    .btn-add:disabled { opacity: 0.4; cursor: default; }
+
+    /* ── FAB ── */
+    .support-fab {
+      position: fixed; top: 20px; right: 20px; left: auto; transform: none;
+      background: var(--brand); color: white; border: none; border-radius: 28px;
+      padding: 12px 20px; font-family: 'DM Sans', sans-serif; font-size: 14px;
+      font-weight: 600; cursor: pointer; box-shadow: 0 4px 16px rgba(31,105,158,0.45);
+      transition: background 0.2s; display: flex; align-items: center; gap: 8px;
+      z-index: 9999; white-space: nowrap;
+    }
+    .support-fab:hover { background: var(--hover); }
+    .badge {
+      background: white; color: var(--brand); border-radius: 12px; padding: 2px 8px;
+      font-size: 13px; font-weight: 700; min-width: 22px; text-align: center;
+    }
+
+    /* ── Modals + drawer (events.html pattern) ── */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:500; align-items:flex-start; justify-content:center; padding:12px 0 0; overscroll-behavior:none; touch-action:pan-y; }
+    .modal-overlay.open { display:flex; }
+    .modal { background:#fff; border-radius:16px; padding:32px; max-width:560px; width:100%; max-height:92vh; overflow-y:auto; -webkit-overflow-scrolling:touch; box-shadow:0 20px 60px rgba(0,0,0,.2); }
+    @media(max-width:768px) {
+      .modal-overlay { align-items:flex-start; justify-content:stretch; padding:0; }
+      .modal { border-radius:20px 20px 0 0; max-width:100%; width:100%; max-height:96vh; padding:16px 20px 32px; margin:0; margin-top:4vh; box-shadow:0 -4px 24px rgba(0,0,0,.15); overflow-y:auto; }
+      .modal::before { content:""; display:block; width:40px; height:4px; background:var(--border); border-radius:2px; margin:0 auto 16px; }
+    }
+    .modal-title { font-size:18px; font-weight:700; color:var(--text); margin-bottom:10px; }
+    .modal-body { font-size:14px; color:var(--soft); line-height:1.6; margin-bottom:24px; }
+    .modal-body a { color:var(--brand); font-weight:600; text-decoration:none; }
+
+    /* ── Drawer tabs ── */
+    .drawer-tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 20px; }
+    .drawer-tab {
+      flex: 1; padding: 10px; text-align: center; font-size: 14px; font-weight: 500;
+      color: var(--muted); cursor: pointer; border: none; background: none;
+      font-family: 'DM Sans', sans-serif; border-bottom: 2px solid transparent;
+      margin-bottom: -2px; transition: all 0.15s;
+    }
+    .drawer-tab:hover { color: var(--brand); }
+    .drawer-tab.active { color: var(--brand); border-bottom-color: var(--brand); font-weight: 600; }
+
+    /* ── Wish items ── */
+    .wish-item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+    .wish-item:last-child { border-bottom: none; }   /* V2.38: no trailing line under the last item */
+    #below-card { max-width: 660px; margin: 20px auto 0; text-align: center; }
+    .btn-below { display: inline-block; padding: 12px 26px; border: 1.5px solid rgba(255,255,255,0.75); border-radius: 10px; color: #fff; background: transparent; font-weight: 600; text-decoration: none; font-size: 15px; font-family: inherit; cursor: pointer; }
+    .btn-below:hover { background: rgba(255,255,255,0.14); }
+    .wish-item.done { opacity: 0.5; }
+    .wish-icon { font-size: 18px; flex-shrink: 0; margin-top: 2px; }
+    .wish-body { flex: 1; min-width: 0; }
+    .wish-cat { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 2px; }
+    .wish-title { font-size: 15px; font-weight: 500; color: var(--text); }
+    .wish-note { font-size: 12px; color: var(--muted); margin-top: 3px; word-break: break-word; }
+    .wish-badge { display: inline-block; margin-top: 5px; font-size: 11px; background: var(--green); color: var(--green-text); border: 1px solid var(--green-border); border-radius: 10px; padding: 2px 8px; }
+    .wish-actions { display: flex; flex-direction: row; gap: 6px; flex-shrink: 0; flex-wrap: wrap; align-items: center; }
+    .btn-sm { padding: 5px 12px; border-radius: 16px; font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; border: 1.5px solid var(--border); background: white; color: var(--soft); transition: all 0.15s; white-space: nowrap; }
+    .btn-sm.receive { border-color: var(--green-border); color: var(--green-text); }
+    .btn-sm.receive:hover { background: var(--green); }
+    .btn-sm.remove:hover { border-color: #e57373; color: #c62828; }
+
+    /* ── Progress ── */
+    .progress-wrap { margin-bottom: 20px; }
+    .progress-labels { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    .progress-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--brand); border-radius: 3px; transition: width 0.3s; }
+
+    /* ── Buttons ── */
+    .btn-primary { display: block; width: 100%; padding: 14px; background: var(--brand); color: white; border: none; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; cursor: pointer; text-align: center; transition: background 0.15s; margin-top: 20px; }
+    .btn-primary:hover { background: var(--hover); }
+    .btn-secondary { display: block; width: 100%; padding: 12px; background: transparent; color: var(--brand); border: 2px solid var(--brand); border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; cursor: pointer; text-align: center; transition: all 0.15s; margin-top: 10px; }
+    .btn-secondary:hover { background: var(--input-bg); }
+    .btn-outline { display: block; width: 100%; padding: 12px; background: transparent; color: var(--brand); border: 2px solid var(--brand); border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; cursor: pointer; text-align: center; text-decoration: none; transition: all 0.15s; }
+    .btn-outline:hover { background: var(--input-bg); }
+
+    /* ── Share box ── */
+    .share-box { margin-top: 20px; padding: 18px; background: var(--input-bg); border: 1px solid var(--border); border-radius: 10px; }
+    .share-box p { font-size: 14px; color: var(--soft); margin-bottom: 10px; }
+    .share-url { font-size: 12px; color: var(--muted); word-break: break-all; background: white; border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; margin-bottom: 10px; }
+
+    /* ── Review ── */
+    .review-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+    .review-count { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    .btn-edit { padding: 6px 14px; border-radius: 16px; border: 1.5px solid var(--border); background: white; font-size: 13px; color: var(--soft); cursor: pointer; font-family: 'DM Sans', sans-serif; }
+    .btn-edit:hover { border-color: var(--brand); color: var(--brand); }
+    .review-group { margin-bottom: 18px; }
+    .review-group-label { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+    .review-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .review-chip { padding: 6px 12px; border-radius: 16px; background: var(--input-bg); border: 1px solid var(--border); font-size: 13px; color: var(--text); }
+
+    .empty { font-size: 14px; color: var(--muted); padding: 20px 0; text-align: center; }
+
+    /* ── Toast ── */
+    .toast { position:fixed; top:24px; left:50%; transform:translateX(-50%); background:#1a1a2e; color:white; padding:10px 20px; border-radius:20px; font-size:14px; font-weight:700; opacity:0; transition:opacity 0.3s; pointer-events:none; z-index:9999; white-space:nowrap; }
+    .toast.show { opacity:1; }
+
+    .page-footer { text-align: center; margin-top: 28px; font-size: 12px; color: rgba(255,255,255,0.55); }
+    .page-footer a { color: rgba(255,255,255,0.75); text-decoration: none; }
+
+    /* ── Anonymous choice buttons ── */
+    .anon-options { display:flex; flex-direction:column; gap:10px; }
+    .btn-anon { padding:12px 16px; border-radius:10px; border:1.5px solid var(--border); background:white; font-family:'DM Sans',sans-serif; font-size:14px; color:var(--text); cursor:pointer; transition:all 0.15s; text-align:left; }
+    .btn-anon:hover { border-color:var(--brand); color:var(--brand); }
+
+    /* ── History item (Given/Received tabs) ── */
+    .history-item { display:flex; align-items:center; gap:12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .history-item:last-child { border-bottom: none; }
+    .history-photo { width:40px; height:40px; border-radius:50%; object-fit:cover; background:var(--input-bg); border:1px solid var(--border); flex-shrink:0; }
+    .history-photo-placeholder { width:40px; height:40px; border-radius:50%; background:var(--input-bg); border:1px solid var(--border); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:18px; }
+    .history-body { flex:1; min-width:0; }
+    .history-title { font-size: 14px; font-weight: 500; color: var(--text); }
+    .history-meta { font-size: 12px; color: var(--muted); margin-top: 3px; }
+    .history-meta a { color:var(--brand); text-decoration:none; }
+    .history-count { font-size:13px; color:var(--muted); margin-bottom:16px; }
+  </style>
+</head>
+<body>
+
+<div class="card" id="app"></div>
+<div id="below-card"></div>
+<div class="toast" id="toast"></div>
+<!-- Footer removed 2026-08-20 per Jessie's ask. -->
+
+<div id="debug-id" style="text-align:center;margin-top:12px;font-size:11px;color:#1F699E;user-select:all;"></div>
+
+<div class="modal-overlay" id="gift-drawer-modal" onclick="if(event.target===this)closeDrawer()">
+  <div class="modal" id="gift-drawer-inner" style="text-align:left;padding-top:32px;">
+    <div id="gift-drawer-content"></div>
+  </div>
+</div>
+
+<!-- Sign-in modal -->
+<div class="modal-overlay" id="signin-modal" onclick="if(event.target===this)closeSigninModal()">
+  <div class="modal">
+    <div class="modal-title">Add your gift list</div>
+    <div class="modal-body">Sign in or sign up to save your gift list and share it with others.<br><br><a href="https://appear.network">Go to Appear Network →</a></div>
+    <button class="btn-primary" style="margin-top:0" onclick="closeSigninModal()">Got it</button>
+  </div>
+</div>
+
+<!-- Is this you? modal -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal" style="text-align:center;">
+    <div id="confirm-photo-placeholder" style="width:72px;height:72px;border-radius:50%;margin:0 auto 16px;border:2px solid var(--border);background:var(--input-bg);display:flex;align-items:center;justify-content:center;font-size:28px;">🌱</div>
+    <img id="confirm-photo" src="" alt="" style="display:none;width:72px;height:72px;border-radius:50%;object-fit:cover;margin:0 auto 16px;border:2px solid var(--border);">
+    <div class="modal-title">Is this you?</div>
+    <div class="modal-body">We found the ID <strong id="confirm-id-display"></strong>. Is that you?</div>
+    <button class="btn-primary" style="margin-top:0" onclick="confirmIdentity()">Yes, that's me</button>
+    <button class="btn-secondary" style="margin-top:10px" onclick="denyIdentity()">No, sign in instead</button>
+  </div>
+</div>
+
+<!-- Location prompt modal -->
+<div class="modal-overlay" id="location-modal">
+  <div class="modal">
+    <div class="modal-title">Local gifts</div>
+    <div class="modal-body" style="margin-bottom:16px">You added a local request. Add your postal code so people nearby can give to you.</div>
+    <input type="text" id="postal-input" placeholder="Your postal code" style="margin-bottom:14px" oninput="locationPostal=this.value">
+    <button class="btn-primary" style="margin-top:0" onclick="saveLocationAndClose()">Save</button>
+    <button class="btn-secondary" style="margin-top:8px" onclick="closeLocationModal()">Skip for now</button>
+  </div>
+</div>
+
+<!-- Gift choice modal - sign in OR give with name -->
+<div class="modal-overlay" id="gift-signin-modal" onclick="if(event.target===this)closeGiftSigninModal()">
+  <div class="modal" style="text-align:center;">
+    <div class="modal-title">Want to give this?</div>
+    <div class="modal-body" style="margin-bottom:16px">Sign in so they know it's you, or give with just your name.</div>
+    <a href="https://appear.network/dl/giving" class="btn-primary" style="display:block;text-decoration:none;margin-bottom:10px;">Sign in to Appear</a>
+    <div style="border-top:1px solid var(--border);padding-top:16px;margin-top:6px;">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:10px;">Or give without signing in:</div>
+      <input type="text" id="gifter-name-input" placeholder="Your name" style="margin-bottom:10px;">
+      <button class="btn-primary" style="margin-top:0" onclick="giveWithName()">Give this 🎁</button>
+    </div>
+    <button class="btn-secondary" style="margin-top:10px" onclick="closeGiftSigninModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- Anonymous choice modal -->
+<div class="modal-overlay" id="anon-modal">
+  <div class="modal">
+    <div class="modal-title">How do you want to give?</div>
+    <div class="modal-body" style="margin-bottom:16px">Let them know it's from you, or give anonymously.</div>
+    <div class="anon-options">
+      <button class="btn-anon" onclick="confirmGift(false)">🙋 Let them know it's from me</button>
+      <button class="btn-anon" onclick="confirmGift(true)">🎁 Give anonymously</button>
+    </div>
+    <button class="btn-secondary" style="margin-top:14px" onclick="closeAnonModal()">Cancel</button>
+  </div>
+</div>
+
+<script>
+// ─── Registry init (must be first - init() runs before declarations below) ─
+window._chips = [];
+window._items = [];
+
+// ─── Data ──────────────────────────────────────────────────────────────────
+
+const SKILLS = [
+  'Vision/Product Direction','Strategy','Analytics','Marketing/Outreach',
+  'Research/Data Science','People Development','Project Management','Communications',
+  'Experience Design','Creative','Engineering','General Technology',
+  'HR','Operations/Systems/QA','Finance','Legal','Procurement',
+  'Governance/Policy','Safety/Security','Administration','AI',
+  'Health: Clinical','Trade Skill','Health: Mental/Emotional','Health: Physical/Movement','Labor'
+];
+
+const WORDS_SUBS = [
+  { id:'feedback', icon:'🔍', label:'Give me feedback',     presets:['Review my pitch deck','Give honest notes on my portfolio','Beta test my prototype'] },
+  { id:'say',      icon:'🗣',  label:'Say something for me', presets:['Leave a review for my work','Vouch for me to someone who matters','Speak up for my work in a room I\'m not in'] },
+  { id:'write',    icon:'✍️', label:'Write something for me', presets:['Write me a testimonial','Draft a recommendation letter','Help me write my bio'] },
+  { id:'intro',    icon:'🔗', label:'Introduce me to someone', presets:[] }
+];
+
+const SPACES_SUBS = [
+  { id:'space', icon:'🏡', label:'A space', desc:'Examples: your home, a meeting room, a venue, studio, workshop, desk' }
+];
+
+const THINGS_SUBS = [
+  { id:'physical',    icon:'📦', label:'Physical goods', desc:'Examples: a book, gear or equipment, art supplies, a tool I need' },
+  { id:'consumables', icon:'🍵', label:'Consumables',    desc:'Examples: coffee, a homemade meal, local ingredients, food for the week' },
+  { id:'money',       icon:'💎', label:'Money',          desc:'Examples: a one-time gift, a recurring contribution, a gift card, help me pay for something' },
+  { id:'living',      icon:'🪴', label:'Living things', desc:'Examples: a Persian cucumber plant, a bouquet of flowers, eggplant seeds, a clipping from your garden, ladybugs for my garden' }
+];
+
+const ACTIONS_SUBS = [
+  { id:'for-myself',   icon:'🧘', label:'For myself',               expDesc:"Examples: a massage, a spa day, a night away, a fitness class, a recording session" },
+  { id:'with-someone', icon:'🌐', label:'With someone',             expDesc:"Examples: meal out for 2-6 people at a place you choose, 4 tickets to the zoo, 2 tickets to a show" },
+  { id:'for-someone',  icon:'💛', label:'For someone I care about', expDesc:"Examples: a class, a meal, a ticket" }
+];
+
+const ACTION_CHIPS = [
+  { id:'experience', icon:'✨', label:'Experience', desc:null },
+  { id:'skills',     icon:'🛠', label:'Skills',     desc:"Examples: fix my website, haircut, fix my plumbing, help me file my taxes" },
+  { id:'words',      icon:'💬', label:'Words',      desc:"Examples: write me a testimonial, give feedback, or introduce me to someone." },
+  { id:'labor',      icon:'💪', label:'Labor',      desc:"Examples: help me move, set up for an event, garden with me, build something together" }
+];
+
+// ─── Identity ──────────────────────────────────────────────────────────────
+function getMemberId() {
+  const params = new URLSearchParams(window.location.search);
+  const urlParam = params.get('id') || params.get('memberCard');
+  if (urlParam) return urlParam;
+  try { return localStorage.getItem('appear-id'); } catch(e) { return null; }
+}
+
+let _appearId = getMemberId();
+let _pendingId = null;
+let _ownerAppearId = null; // owner of the list being viewed
+let _ownerPhoto    = '';
+let _ownerName     = '';
+
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const urlId  = params.get('id') || params.get('memberCard');
+  const listParam = params.get('list');
+
+  // Read owner from URL
+  _ownerAppearId = params.get('owner') || null;
+
+  if (urlId) {
+    // Always trust ?id= from URL (Glide passes this reliably)
+    // Never show "Is this you?" - localStorage can't be trusted across Glide sessions
+    _appearId = urlId;
+    try { localStorage.setItem('appear-id', _appearId); } catch(e) {}
+  } else if (_appearId) {
+    try { localStorage.setItem('appear-id', _appearId); } catch(e) {}
+  }
+})();
+
+const GS_URL = 'https://cw-api-gate.jessieupp.workers.dev';
+
+function updateDebug() {
+  const el = document.getElementById('debug-id');
+  if (el && _appearId) el.textContent = _appearId;
+}
+
+function openSigninModal()  { closeDrawer(); document.getElementById('signin-modal').classList.add('open'); }
+function closeSigninModal() { document.getElementById('signin-modal').classList.remove('open'); }
+
+function openConfirmModal(id) {
+  document.getElementById('confirm-id-display').textContent = id;
+  document.getElementById('confirm-photo').style.display = 'none';
+  document.getElementById('confirm-photo-placeholder').style.display = 'flex';
+  document.getElementById('confirm-modal').classList.add('open');
+  // Fetch photo
+  fetch(GS_URL + '?action=lookupProfile&appearId=' + encodeURIComponent(id))
+    .then(r => r.json())
+    .then(data => {
+      if (data.found && data.photo) {
+        const img = document.getElementById('confirm-photo');
+        img.onload = () => {
+          document.getElementById('confirm-photo-placeholder').style.display = 'none';
+          img.style.display = 'block';
+        };
+        img.src = data.photo;
+      }
+    }).catch(() => {});
+}
+function confirmIdentity() {
+  _appearId = _pendingId;
+  _pendingId = null;
+  try { localStorage.setItem('appear-id', _appearId); } catch(e) {}
+  document.getElementById('confirm-modal').classList.remove('open');
+  loadSupportList();
+  render();
+}
+function denyIdentity() {
+  _pendingId = null;
+  document.getElementById('confirm-modal').classList.remove('open');
+  openSigninModal();
+}
+
+function openLocationModal()  { document.getElementById('location-modal').classList.add('open'); }
+function closeLocationModal() { document.getElementById('location-modal').classList.remove('open'); }
+
+function togglePostalEdit() {
+  postalEditing = !postalEditing;
+  renderDrawer();
+}
+
+function savePostalSettings() {
+  const el = document.getElementById('postal-settings-input');
+  const postal = el ? el.value.trim() : '';
+  if (!postal) { toast('Add your postal code'); return; }
+  savedPostal = postal;
+  try { localStorage.setItem('giving_postal', savedPostal); } catch(e) {}
+  if (_appearId) {
+    fetch(GS_URL + '?action=saveLocation'
+      + '&appearId=' + encodeURIComponent(_appearId)
+      + '&postal='   + encodeURIComponent(postal)
+    ).catch(() => {});
+  }
+  postalEditing = false;
+  renderDrawer();
+  toast('Postal code saved');
+}
+
+function saveLocationAndClose() {
+  const postal = locationPostal.trim();
+  if (!postal) { toast('Add your postal code'); return; }
+  if (_appearId) {
+    fetch(GS_URL + '?action=saveLocation'
+      + '&appearId=' + encodeURIComponent(_appearId)
+      + '&postal='   + encodeURIComponent(postal)
+    ).catch(() => {});
+  }
+  closeLocationModal();
+  toast('Location saved');
+}
+
+function captureGPS() {
+  const btn = document.getElementById('gps-btn');
+  if (!navigator.geolocation) { toast('Location not available'); return; }
+  if (btn) btn.textContent = '📍 Getting location...';
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      locationLat = pos.coords.latitude;
+      locationLng = pos.coords.longitude;
+      if (btn) btn.textContent = '✓ Location captured';
+    },
+    () => { if (btn) btn.textContent = '📍 Use my location instead'; toast('Could not get location'); }
+  );
+}
+
+function useMyLocation() {
+  if (!navigator.geolocation) { toast('Location not available'); return; }
+  const btn = document.getElementById('use-location-btn');
+  if (btn) btn.textContent = '📍 Getting location...';
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      locationLat = pos.coords.latitude;
+      locationLng = pos.coords.longitude;
+      if (btn) btn.textContent = '✓ Location captured';
+    },
+    () => { if (btn) btn.textContent = '📍 Use my location'; toast('Could not get location'); }
+  );
+}
+
+function updateLocation(val) { locationText = val; }
+function toggleLocalRequest(checked) { isLocalRequest = checked; render(); }
+
+function closeGiftSigninModal() { document.getElementById('gift-signin-modal').classList.remove('open'); }
+function openGiftSigninModal()  { document.getElementById('gift-signin-modal').classList.add('open'); }
+
+// ─── Anonymous modal ────────────────────────────────────────────────────────
+let _pendingGiftOwner = null;
+let _pendingGiftItem  = null;
+
+function giftItem(itemTitle) {
+  const ownerForGift = _ownerAppearId || (viewerData ? viewerData.name : '');
+  if (!ownerForGift) { toast('Could not identify list owner'); return; }
+  _pendingGiftOwner = ownerForGift;
+  _pendingGiftItem  = itemTitle;
+  if (!_appearId) {
+    // Clear name input and open choice modal
+    const nameEl = document.getElementById('gifter-name-input');
+    if (nameEl) nameEl.value = '';
+    openGiftSigninModal();
+    return;
+  }
+  document.getElementById('anon-modal').classList.add('open');
+}
+
+function giftItemByIdx(idx) {
+  var id = window._items[idx];
+  if (id === undefined) return;
+  var it = (viewerData && viewerData.items || []).find(function(i) { return i.id === id; });
+  if (it) giftItem(it.title);
+}
+
+function closeAnonModal() {
+  _pendingGiftOwner = null;
+  _pendingGiftItem  = null;
+  document.getElementById('anon-modal').classList.remove('open');
+}
+
+function giveWithName() {
+  const nameEl = document.getElementById('gifter-name-input');
+  const name = nameEl ? nameEl.value.trim() : '';
+  if (!name) { toast('Please enter your name'); return; }
+  closeGiftSigninModal();
+  if (!_pendingGiftOwner || !_pendingGiftItem) return;
+  fetch(GS_URL + '?action=saveGift'
+    + '&gifterAppearId=' + encodeURIComponent('')
+    + '&gifterName='     + encodeURIComponent(name)
+    + '&ownerAppearId='  + encodeURIComponent(_pendingGiftOwner)
+    + '&item='           + encodeURIComponent(_pendingGiftItem)
+    + '&anonymous=false'
+  ).catch(() => {});
+  toast('Thank you! They will be notified this has moved to redeemed 🎁');
+  if (mode === 'viewer') {
+    const it = (viewerData.items || []).find(i => i.title === _pendingGiftItem);
+    if (it) { viewFulfilled.add(String(it.id)); saveViewer(); }
+    render();
+  }
+  _pendingGiftOwner = null;
+  _pendingGiftItem  = null;
+}
+
+function confirmGift(anonymous) {
+  document.getElementById('anon-modal').classList.remove('open');
+  if (!_pendingGiftOwner || !_pendingGiftItem) return;
+  fetch(GS_URL + '?action=saveGift'
+    + '&gifterAppearId=' + encodeURIComponent(_appearId)
+    + '&gifterName='     + encodeURIComponent('')
+    + '&ownerAppearId='  + encodeURIComponent(_pendingGiftOwner)
+    + '&item='           + encodeURIComponent(_pendingGiftItem)
+    + '&anonymous='      + encodeURIComponent(anonymous ? 'true' : 'false')
+  ).catch(() => {});
+  toast('Thank you! They will be notified this has moved to redeemed 🎁');
+  if (mode === 'viewer') {
+    const it = (viewerData.items || []).find(i => i.title === _pendingGiftItem);
+    if (it) { viewFulfilled.add(String(it.id)); saveViewer(); }
+    render();
+  }
+  _pendingGiftOwner = null;
+  _pendingGiftItem  = null;
+}
+
+// ─── State ─────────────────────────────────────────────────────────────────
+let mode          = 'builder';
+let viewerData    = null;
+let viewFulfilled = new Set();
+
+let openTopCat    = null;
+let openSpacesSub = null;
+let openThingsSub = null;
+let openActionSub  = null;
+let selectedActionChip = null;
+
+let otherSpaceOpen  = false;
+let otherSpaceText  = '';
+let otherThingOpen  = false;
+let otherThingText  = '';
+let otherExpOpen    = false;
+let otherExpText    = '';
+let otherSkillOpen  = false;
+let otherSkillText  = '';
+let otherWordsOpen  = false;
+let otherWordsText  = '';
+
+let noteText       = '';
+let locationText   = '';
+let locationLat    = null;
+let locationLng    = null;
+let isLocalRequest = false;
+let locationPostal = '';
+let savedPostal = '';
+let postalEditing = false;
+try { savedPostal = localStorage.getItem('giving_postal') || ''; } catch(e) {}
+let shareURL       = '';
+let items          = [];
+let myName         = '';
+
+// Drawer tab state
+let drawerTab = 'list'; // 'list' | 'received' | 'given'
+let giftHistory = { received: [], given: [] };
+let historyLoaded = false;
+let drawerPage = 1;
+const ITEMS_PER_PAGE = 5;
+
+// shareURL restored on boot if previously generated
+try { shareURL = localStorage.getItem('giving_shareURL') || ''; } catch(e) {}
+
+// ─── Boot ──────────────────────────────────────────────────────────────────
+(function init() {
+  const params    = new URLSearchParams(window.location.search);
+  const ownerParam = params.get('owner');
+
+  // Viewer mode: ?owner= present and no explicit ?id= matching owner
+  const explicitId = params.get('id') || params.get('memberCard');
+  if (ownerParam && (!explicitId || ownerParam !== explicitId)) {
+    _ownerAppearId = ownerParam;
+    mode = 'viewer';
+  }
+
+  if (mode === 'builder') {
+    // User-specific localStorage key - prevents cross-user cache contamination
+    const cacheKey = _appearId ? 'an_support_' + _appearId.replace(/\./g,'') : 'an_support_anon';
+    try { const s = JSON.parse(localStorage.getItem(cacheKey) || '{}'); items = s.items||[]; myName = s.name||''; } catch(_) {}
+    if (_appearId && !myName) myName = _appearId;
+    if (_appearId) loadSupportList();
+  }
+
+  if (mode === 'viewer') {
+    loadViewerList();
+  }
+
+  render();
+  if (_pendingId) openConfirmModal(_pendingId);
+})();
+
+async function loadSupportList() {
+  try {
+    const res  = await fetch(GS_URL + '?action=getSupportList&appearId=' + encodeURIComponent(_appearId));
+    const data = await res.json();
+    if (data.status === 'ok' && data.items) {
+      // Replace entirely from sheet - never merge with local cache
+      items = data.items.map(function(r) {
+        return {
+          id: uid(), topCat: r.category, subCat: r.subCategory,
+          subLabel: r.subCategory, subIcon: '🌱', title: r.item,
+          note: r.note || '', done: r.gifted === true
+        };
+      });
+      save(); render();
+    }
+  } catch(e) {}
+}
+
+async function loadViewerList() {
+  if (!_ownerAppearId) return;
+  try {
+    // Fetch profile and list in parallel
+    var profilePromise = fetch(GS_URL + '?action=lookupProfile&appearId=' + encodeURIComponent(_ownerAppearId)).then(function(r) { return r.json(); });
+    var listPromise = fetch(GS_URL + '?action=getSupportList&appearId=' + encodeURIComponent(_ownerAppearId)).then(function(r) { return r.json(); });
+    var results = await Promise.all([profilePromise, listPromise]);
+    var profileData = results[0];
+    var data = results[1];
+    if (profileData.found) {
+      _ownerPhoto = profileData.photo || '';
+      _ownerName  = profileData.name  || _ownerAppearId;
+    }
+    if (data.status === 'ok' && data.items) {
+      viewerData = {
+        name: _ownerName || _ownerAppearId,
+        items: data.items.filter(function(r) { return r.gifted !== true; }).map(function(r) {
+          return {
+            id: r.item + '_' + (r.timestamp||''),
+            topCat: r.category, subCat: r.subCategory,
+            subLabel: r.subCategory, subIcon: '🌱',
+            title: r.item, note: r.note || '', done: false
+          };
+        }),
+        created: new Date().toISOString()
+      };
+      render();
+    }
+  } catch(e) {}
+}
+
+async function loadGiftHistory() {
+  if (!_appearId) return;
+  try {
+    const res  = await fetch(GS_URL + '?action=getGiftHistory&appearId=' + encodeURIComponent(_appearId));
+    const data = await res.json();
+    if (data.status === 'ok') {
+      giftHistory = { received: data.received || [], given: data.given || [] };
+      historyLoaded = true;
+      renderDrawer();
+    }
+  } catch(e) {}
+}
+
+function save() {
+  const cacheKey = _appearId ? 'an_support_' + _appearId.replace(/\./g,'') : 'an_support_anon';
+  localStorage.setItem(cacheKey, JSON.stringify({ name: myName, items }));
+}
+function saveViewer() {
+  const encoded = new URLSearchParams(window.location.search).get('list');
+  if (!encoded) return;
+  localStorage.setItem('vf_' + encoded.slice(0,24), JSON.stringify([...viewFulfilled]));
+}
+
+// ─── Navigation ────────────────────────────────────────────────────────────
+function setTopCat(id) {
+  openTopCat = (openTopCat === id) ? null : id;
+  openSpacesSub = null; openThingsSub = null; openActionSub = null;
+  clearAll(); noteText = ''; render();
+}
+
+function setSpacesSub(id) { openSpacesSub = (openSpacesSub === id) ? null : id; clearAll(); noteText = ''; render(); }
+function setThingsSub(id) { openThingsSub = (openThingsSub === id) ? null : id; clearAll(); noteText = ''; render(); }
+function setActionSub(id) { openActionSub = (openActionSub === id) ? null : id; selectedActionChip = null; noteText = ''; render(); }
+function setActionChip(id) { selectedActionChip = (selectedActionChip === id) ? null : id; noteText = ''; render(); }
+
+function clearAll() {
+  selectedActionChip = null;
+  locationText = ''; locationLat = null; locationLng = null;
+  isLocalRequest = false; locationPostal = '';
+  otherSkillOpen = false; otherSkillText = '';
+  otherWordsOpen = false; otherWordsText = '';
+  otherSpaceOpen = false; otherSpaceText = '';
+  otherThingOpen = false; otherThingText = '';
+  otherExpOpen   = false; otherExpText   = '';
+}
+
+// ─── Chip + item registries (separate - never clear together) ──────────────
+window._chips = [];
+window._items = [];
+function regChip(val) { window._chips.push(val); return window._chips.length - 1; }
+function regItem(id)  { window._items.push(id);  return window._items.length - 1; }
+function clearChipRegistry() { window._chips = []; }   // called by render() only
+function clearItemRegistry()  { window._items = []; }   // called by renderDrawer() only
+
+function chipClick(type, idx) { const val = window._chips[idx]; if (!val) return; render(); }
+function toggle(set, val) { set.has(val) ? set.delete(val) : set.add(val); }
+
+let _editingItemId = null;
+
+function toggleDoneByIdx(idx) { const id = window._items[idx]; if (id !== undefined) toggleDone(id); }
+function removeItemByIdx(idx)  { const id = window._items[idx]; if (id !== undefined) removeItem(id); }
+
+function editItemByIdx(idx) {
+  const id = window._items[idx];
+  if (!id) return;
+  _editingItemId = (_editingItemId === id) ? null : id;
+  clearChipRegistry();
+  renderDrawer();
+}
+
+function saveEditByIdx(idx) {
+  const id = window._items[idx];
+  if (!id) return;
+  const it = items.find(i=>i.id===id);
+  if (!it) return;
+  const titleEl = document.getElementById('edit-title-' + idx);
+  const noteEl  = document.getElementById('edit-note-' + idx);
+  if (titleEl) it.title = titleEl.value.trim() || it.title;
+  if (noteEl)  it.note  = noteEl.value.trim();
+  _editingItemId = null;
+  save();
+  clearChipRegistry();
+  renderDrawer();
+  toast('Saved');
+}
+
+function toggleOther(type) {
+  render();
+  setTimeout(() => { const el = document.getElementById('other-input-'+type); if (el) el.focus(); }, 50);
+}
+function updateOther(type, val) {}
+
+function addOther(type) {
+  let text = '';
+  let set, subCat, subLabel, subIcon, topCat;
+  if (type==='skill') { text=otherSkillText; subCat='skills'; subLabel='Share skills'; subIcon='🛠'; topCat='people'; }
+  if (type==='words') { text=otherWordsText; subCat='words'; subLabel='Share words'; subIcon='💬'; topCat='people'; }
+  if (type==='space') {
+    text=otherSpaceText;
+    const sub = SPACES_SUBS.find(s=>s.id===openSpacesSub);
+    subCat=openSpacesSub; subLabel=sub?.label||'Spaces'; subIcon=sub?.icon||'🏡'; topCat='spaces';
+  }
+  if (type==='thing') {
+    text=otherThingText;
+    const sub = THINGS_SUBS.find(s=>s.id===openThingsSub);
+    subCat=openThingsSub; subLabel=sub?.label||'Things'; subIcon=sub?.icon||'📦'; topCat='things';
+  }
+  if (type==='exp') {
+    text=otherExpText;
+    const sub = ACTIONS_SUBS.find(s=>s.id===openActionSub);
+    subCat=openActionSub; subLabel=sub?.label||'Actions'; subIcon=sub?.icon||'✨'; topCat='actions';
+  }
+  text = (text||'').trim();
+  if (!text) { toast('Name it first'); return; }
+  render();
+}
+
+// ─── Note ──────────────────────────────────────────────────────────────────
+function updateNote(val) { noteText = val; }
+
+// ─── Add to list ───────────────────────────────────────────────────────────
+function addToList() {
+  if (!_appearId) { openSigninModal(); return; }
+  const note = noteText.trim();
+  let label = '', subCat = '', subLabel = '', subIcon = '', topCat = '';
+  let hasSelection = false;
+
+  if (openTopCat === 'actions') {
+    if (!openActionSub) { toast('Choose a type first'); return; }
+    if (openActionSub === 'for-myself' && !selectedActionChip) { toast('Choose skills, words, or an experience'); return; }
+    if (!note) { toast('Please share some details'); return; }
+    const sub  = ACTIONS_SUBS.find(s=>s.id===openActionSub);
+    const chip = ACTION_CHIPS.find(c=>c.id===selectedActionChip);
+    label = note;
+    subCat = openActionSub + (selectedActionChip ? '_'+selectedActionChip : '');
+    subLabel = selectedActionChip ? (chip?.label||'Action') + ' · ' + (sub?.label||'') : (sub?.label||'Actions');
+    subIcon = chip?.icon || sub?.icon || '✨'; topCat='actions'; hasSelection=true;
+  } else if (openTopCat === 'spaces') {
+    if (!openSpacesSub) { toast('Choose a space type first'); return; }
+    if (!note) { toast('Tell me what you need'); return; }
+    const sub = SPACES_SUBS.find(s=>s.id===openSpacesSub);
+    label = note; subCat=openSpacesSub; subLabel=sub?.label||'Spaces'; subIcon=sub?.icon||'🏡'; topCat='spaces'; hasSelection=true;
+  } else if (openTopCat === 'things') {
+    if (!openThingsSub) { toast('Choose a type first'); return; }
+    if (!note) { toast('Tell me what you need'); return; }
+    const sub = THINGS_SUBS.find(s=>s.id===openThingsSub);
+    label = note; subCat=openThingsSub; subLabel=sub?.label||'Things'; subIcon=sub?.icon||'📦'; topCat='things'; hasSelection=true;
+  }
+
+  if (!hasSelection) return;
+
+  const newItem = { id: uid(), topCat, subCat, subLabel, subIcon, title: label, note:'', done: false, local: isLocalRequest };
+  items.unshift(newItem);
+  openTopCat = null; openSpacesSub = null; openThingsSub = null; openActionSub = null;
+  clearAll(); noteText = '';
+  save(); render();
+  toast('Added to your list');
+  drawerTab = 'list';
+  renderDrawer();
+  document.getElementById('gift-drawer-modal').classList.add('open');
+  if (_appearId) {
+    fetch(GS_URL + '?action=saveSupportItem'
+      + '&appearId='    + encodeURIComponent(_appearId)
+      + '&category='    + encodeURIComponent(topCat)
+      + '&subCategory=' + encodeURIComponent(subCat)
+      + '&item='        + encodeURIComponent(label)
+      + '&note='        + encodeURIComponent(note)
+      + '&location='    + encodeURIComponent(locationText)
+    ).catch(() => {});
+  }
+}
+
+// ─── FAB ───────────────────────────────────────────────────────────────────
+function updateFAB() { /* FAB rendered inline in builderHTML */ }
+
+// ─── Drawer ────────────────────────────────────────────────────────────────
+function openDrawer() {
+  drawerTab = 'list';
+  historyLoaded = false;
+  clearItemRegistry();
+  renderDrawer();
+  document.getElementById('gift-drawer-modal').classList.add('open');
+}
+
+function closeDrawer() {
+  document.getElementById('gift-drawer-modal').classList.remove('open');
+}
+
+function setDrawerPage(page) { drawerPage = page; clearItemRegistry(); renderDrawer(); }
+
+function setDrawerTab(tab) {
+  drawerTab = tab;
+  drawerPage = 1;
+  if ((tab === 'received' || tab === 'given') && !historyLoaded) {
+    loadGiftHistory();
+  }
+  clearItemRegistry();
+  renderDrawer();
+}
+
+function renderDrawer() {
+  clearItemRegistry(); // items only - never touches _chips
+  const active = items.filter(i=>!i.done);
+  const done   = items.filter(i=> i.done);
+
+  // Postal code settings row
+  const postalLine = postalEditing
+    ? `<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <input type="text" id="postal-settings-input" value="${esc(savedPostal)}" placeholder="Postal code" style="flex:1;font-size:13px;padding:7px 10px;">
+        <button onclick="savePostalSettings()" style="flex-shrink:0;padding:7px 14px;background:var(--brand);color:white;border:none;border-radius:8px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;">Save</button>
+      </div>`
+    : `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:12px;color:var(--muted);">
+        <span>📍 ${savedPostal ? esc(savedPostal) : 'No postal code set'}</span>
+        <button onclick="togglePostalEdit()" style="background:none;border:none;color:var(--brand);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:underline;">${savedPostal ? 'Edit' : 'Add'}</button>
+      </div>`;
+
+  // Share link area above tabs
+  const displayURL = shareURL ? (shareURL.length > 48 ? shareURL.slice(0,48)+'...' : shareURL) : '';
+  const shareLine = shareURL
+    ? `<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <div style="flex:1;font-size:12px;color:var(--muted);background:var(--input-bg);border:1px solid var(--border);border-radius:6px;padding:7px 10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(displayURL)}</div>
+        <button onclick="copyURL()" style="flex-shrink:0;padding:7px 14px;background:var(--brand);color:white;border:none;border-radius:8px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;">Copy 🔗</button>
+      </div>`
+    : `<div style="text-align:center;margin-bottom:12px;">
+        <button onclick="generateLink()" style="padding:8px 16px;background:transparent;border:1.5px solid var(--border);border-radius:20px;font-size:13px;color:var(--soft);font-family:'DM Sans',sans-serif;cursor:pointer;">Generate link to share</button>
+      </div>`;
+
+  const tabs = `
+    <div class="drawer-tabs">
+      <button class="drawer-tab${drawerTab==='list'?' active':''}" onclick="setDrawerTab('list')">My list</button>
+      <button class="drawer-tab${drawerTab==='received'?' active':''}" onclick="setDrawerTab('received')">Received</button>
+      <button class="drawer-tab${drawerTab==='given'?' active':''}" onclick="setDrawerTab('given')">Given</button>
+    </div>`;
+
+  let body = '';
+
+  if (drawerTab === 'list') {
+    if (items.length) {
+      // Pagination
+      const totalPages = Math.ceil(active.length / ITEMS_PER_PAGE);
+      const page = Math.max(1, Math.min(drawerPage, totalPages || 1));
+      const start = (page - 1) * ITEMS_PER_PAGE;
+      const pageItems = active.slice(start, start + ITEMS_PER_PAGE);
+
+      body += pageItems.map(it=>wishItemHTML(it,'builder')).join('');
+
+      if (totalPages > 1) {
+        let pages = '';
+        for (let i = 1; i <= totalPages; i++) {
+          pages += `<button onclick="setDrawerPage(${i})" style="width:32px;height:32px;border-radius:8px;border:1.5px solid ${i===page?'var(--brand)':'var(--border)'};background:${i===page?'var(--sel-bg)':'white'};color:${i===page?'var(--brand)':'var(--soft)'};font-size:13px;font-weight:${i===page?'700':'400'};cursor:pointer;font-family:'DM Sans',sans-serif;">${i}</button>`;
+        }
+        body += `<div style="display:flex;gap:6px;justify-content:center;margin-top:16px;flex-wrap:wrap;">${pages}</div>`;
+      }
+    } else {
+      body += `<div class="empty">Nothing on your gift list yet.</div>`;
+    }
+
+  } else if (drawerTab === 'received') {
+    if (!historyLoaded) {
+      body += `<div class="empty">Loading...</div>`;
+    } else if (!giftHistory.received.length) {
+      body += `<div class="empty">No gifts received yet.</div>`;
+    } else {
+      body += `<div class="history-count">${giftHistory.received.length} received</div>`;
+      body += giftHistory.received.map(g => {
+        const photo = g.gifterPhoto || '';
+        const profileUrl = g.gifterAppearId ? 'https://appear.network/dl/page/s/e13594/r/' + g.gifterAppearId : '';
+        const photoEl = photo
+          ? `<img class="history-photo" src="${esc(photo)}" alt="">`
+          : `<div class="history-photo-placeholder">🌱</div>`;
+        const from = g.anonymous === 'true'
+          ? 'Given anonymously'
+          : profileUrl
+            ? `From <a role="link" tabindex="0" data-nav="${esc(profileUrl)}" onclick="return _safeNavGo(this)" title="${esc(g.gifterAppearId)}" style="cursor:pointer;color:inherit;text-decoration:underline;">${esc(g.gifterAppearId)}</a>`
+            : `From ${esc(g.gifterAppearId)}`;
+        const itemJson = JSON.stringify({ category: g.category||'', subCategory: g.subCategory||'', item: g.item, note: g.note||'' });
+        return `
+          <div class="history-item">
+            ${photoEl}
+            <div class="history-body">
+              <div class="history-title">${esc(g.item)}</div>
+              <div class="history-meta">${from} · ${formatDate(g.timestamp)}</div>
+              <button onclick="moveBackToList(${esc(JSON.stringify(itemJson))})" style="margin-top:6px;padding:4px 10px;background:transparent;border:1px solid var(--border);border-radius:6px;font-size:12px;color:var(--soft);cursor:pointer;font-family:'DM Sans',sans-serif;">Move back to open list</button>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+  } else if (drawerTab === 'given') {
+    if (!historyLoaded) {
+      body += `<div class="empty">Loading...</div>`;
+    } else if (!giftHistory.given.length) {
+      body += `<div class="empty">You haven't given any gifts yet.</div>`;
+    } else {
+      body += `<div class="history-count">${giftHistory.given.length} given</div>`;
+      body += giftHistory.given.map(g => {
+        const photo = g.ownerPhoto || '';
+        const profileUrl = g.ownerAppearId ? 'https://appear.network/dl/page/s/e13594/r/' + g.ownerAppearId : '';
+        const photoEl = photo
+          ? `<img class="history-photo" src="${esc(photo)}" alt="">`
+          : `<div class="history-photo-placeholder">🌱</div>`;
+        return `
+          <div class="history-item">
+            ${photoEl}
+            <div class="history-body">
+              <div class="history-title">${esc(g.item)}</div>
+              <div class="history-meta">To <a role="link" tabindex="0" data-nav="${esc(profileUrl)}" onclick="return _safeNavGo(this)" title="${esc(g.ownerAppearId)}" style="cursor:pointer;color:inherit;text-decoration:underline;">${esc(g.ownerAppearId)}</a> · ${formatDate(g.timestamp)}</div>
+            </div>
+          </div>`;
+      }).join('');
+    }
+  }
+
+  const drawerHeader = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-right:4px;">
+      <div style="font-size:18px;font-weight:700;color:var(--text);">My gift list 🎁</div>
+      <button onclick="closeDrawer()" style="background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:4px 8px;line-height:1;border-radius:8px;">✕</button>
+    </div>`;
+
+  qs('#gift-drawer-content').innerHTML = drawerHeader + (drawerTab === 'list' ? postalLine : '') + shareLine + tabs + body;
+}
+
+function formatDate(ts) {
+  if (!ts) return '';
+  try { return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); } catch(e) { return ''; }
+}
+
+function goToReview()  { mode = 'review';  render(); }
+function goToBuilder() { mode = 'builder'; render(); }
+
+function generateLink() {
+  if (!_appearId) { toast('Sign in to generate a link'); return; }
+  shareURL = location.origin + location.pathname + '?owner=' + encodeURIComponent(_appearId);
+  try { localStorage.setItem('giving_shareURL', shareURL); } catch(e) {}
+  // 2026-08-01: dropped a call to a backend action that does not exist. It returned data this
+  // page never used and cost a round trip. The share link is built and stored locally.
+  renderDrawer();
+}
+
+function genShareAndReview() {
+  generateLink();
+}
+
+function copyShareURL() { navigator.clipboard.writeText(shareURL).then(() => toast('Link copied')); }
+function copyURL()      { navigator.clipboard.writeText(shareURL).then(() => toast('Link copied')); }
+function updateName()   { myName = (qs('#b-name')||{}).value; save(); }
+
+// ─── Item actions ──────────────────────────────────────────────────────────
+function removeItem(id) {
+  const it = items.find(i=>i.id===id);
+  items = items.filter(i=>i.id!==id);
+  save();
+  renderDrawer();
+  if (_appearId && it) {
+    fetch(GS_URL + '?action=cancelSupportItem'
+      + '&appearId=' + encodeURIComponent(_appearId)
+      + '&item='     + encodeURIComponent(it.title)
+    ).catch(() => {});
+  }
+}
+
+function moveBackToList(itemJson) {
+  let data;
+  try { data = JSON.parse(itemJson); } catch(e) { toast('Could not restore item'); return; }
+  const newItem = {
+    id: uid(),
+    topCat: data.category || 'things',
+    subCat: data.subCategory || '',
+    subLabel: data.subCategory || '',
+    subIcon: '🌱',
+    title: data.item,
+    note: data.note || '',
+    done: false,
+    local: false
+  };
+  items.unshift(newItem);
+  save();
+  if (_appearId) {
+    fetch(GS_URL + '?action=saveSupportItem'
+      + '&appearId='    + encodeURIComponent(_appearId)
+      + '&category='    + encodeURIComponent(newItem.topCat)
+      + '&subCategory=' + encodeURIComponent(newItem.subCat)
+      + '&item='        + encodeURIComponent(newItem.title)
+      + '&note='        + encodeURIComponent(newItem.note)
+      + '&location='    + encodeURIComponent('')
+    ).catch(() => {});
+    fetch(GS_URL + '?action=markMovedBack'
+      + '&appearId=' + encodeURIComponent(_appearId)
+      + '&item='     + encodeURIComponent(newItem.title)
+    ).catch(() => {});
+  }
+  drawerTab = 'list';
+  historyLoaded = false;
+  clearItemRegistry();
+  renderDrawer();
+  toast('Moved back to your list');
+}
+
+function toggleDone(id) {
+  if (mode === 'builder') {
+    const it = items.find(i=>i.id===id);
+    if (!it) return;
+    it.done = !it.done;
+    save();
+    renderDrawer();
+    if (it.done) {
+      toast('Marked as gifted');
+      if (_appearId) {
+        fetch(GS_URL + '?action=saveGift'
+          + '&gifterAppearId=' + encodeURIComponent(_appearId)
+          + '&ownerAppearId='  + encodeURIComponent(_appearId)
+          + '&item='           + encodeURIComponent(it.title)
+          + '&anonymous=false'
+        ).catch(() => {});
+      }
+    }
+  } else {
+    const sid = String(id);
+    viewFulfilled.has(sid) ? viewFulfilled.delete(sid) : viewFulfilled.add(sid);
+    saveViewer(); render();
+  }
+}
+
+function normCatLabel(raw) {
+  const s = (raw||'').replace(/_/g,' ').replace(/-/g,' ').trim();
+  return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+}
+
+function parseSubCat(subCat) {
+  // Splits "for-myself_labor" into { type: "labor", context: "For myself" }
+  // Splits "physical" into { type: "physical", context: "" }
+  var sc = subCat || '';
+  var uIdx = sc.lastIndexOf('_');
+  if (uIdx > 0) {
+    var context = sc.substring(0, uIdx).replace(/-/g, ' ').replace(/_/g, ' ').trim();
+    context = context.charAt(0).toUpperCase() + context.slice(1).toLowerCase();
+    var type = sc.substring(uIdx + 1).replace(/-/g, ' ').replace(/_/g, ' ').trim();
+    type = type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
+    return { type: type, context: context };
+  }
+  return { type: normCatLabel(sc), context: '' };
+}
+
+function wishItemHTML(it, ctx) {
+  const isDone = ctx === 'builder' ? it.done : viewFulfilled.has(String(it.id));
+  const idx = regItem(it.id);
+  const parsed = parseSubCat(it.subCat || '');
+  const catDisplay = parsed.type;
+  const noteDisplay = (it.note && it.note !== it.title) ? it.note : parsed.context;
+  const isEditing = ctx === 'builder' && _editingItemId === it.id;
+
+  const editForm = isEditing ? `
+    <div style="margin-top:10px;padding:12px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Title</div>
+      <input type="text" id="edit-title-${idx}" value="${esc(it.title)}" style="margin-bottom:8px;font-size:14px;width:100%;background:white;border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-family:'DM Sans',sans-serif;">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Details</div>
+      <input type="text" id="edit-note-${idx}" value="${esc(it.note||'')}" placeholder="" style="margin-bottom:10px;font-size:14px;width:100%;background:white;border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-family:'DM Sans',sans-serif;">
+      <div style="display:flex;gap:8px;">
+        <button onclick="saveEditByIdx(${idx})" style="flex:1;padding:9px;background:var(--brand);color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;">Save</button>
+        <button onclick="editItemByIdx(${idx})" style="flex:1;padding:9px;background:white;color:var(--soft);border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;">Cancel</button>
+      </div>
+    </div>` : '';
+
+  // Action buttons - hide all except cancel when editing
+  const actionButtons = isEditing ? '' : `
+    ${isDone
+      ? `<button class="btn-sm" onclick="toggleDoneByIdx(${idx})">Undo</button>`
+      : ctx==='viewer'
+        ? `<button class="btn-sm receive" onclick="giftItemByIdx(${idx})">I'll give this 🎁</button>`
+        : `<button class="btn-sm receive" onclick="toggleDoneByIdx(${idx})">Mark as gifted</button>`}
+    ${ctx==='builder' ? `<button class="btn-sm" onclick="editItemByIdx(${idx})" style="font-size:16px;padding:4px 10px;">✏️</button>` : ''}
+    ${ctx==='builder' ? `<button class="btn-sm remove" onclick="removeItemByIdx(${idx})" style="font-size:16px;padding:4px 10px;">🗑️</button>` : ''}`;
+
+  return `
+    <div class="wish-item">
+      <div class="wish-icon">${it.subIcon||'🌱'}</div>
+      <div class="wish-body" style="min-width:0;flex:1;">
+        <div class="wish-cat">${esc(catDisplay)}</div>
+        <div class="wish-title" style="${isDone?'color:var(--muted);':''}">${esc(it.title)}</div>
+        ${noteDisplay && !isEditing ? `<div class="wish-note">${esc(noteDisplay)}</div>` : ''}
+        ${isDone ? `<div class="wish-badge">Gifted</div>` : ''}
+        ${editForm}
+      </div>
+      <div class="wish-actions" style="flex-shrink:0;display:flex;flex-direction:row;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
+        ${actionButtons}
+      </div>
+    </div>`;
+}
+
+// ─── Render ────────────────────────────────────────────────────────────────
+function render() {
+  clearChipRegistry(); // chips only - never touches _items
+  updateDebug();
+  qs('#app').innerHTML =
+    mode === 'viewer' ? viewerHTML() : builderHTML();
+  // V2.38: "Create my gift list" sits BELOW the white card, on the blue.
+  const below = qs('#below-card');
+  if (below) below.innerHTML = (mode === 'viewer')
+    ? '<a href="https://creating.works/giving" class="btn-below">Create my gift list</a>'
+    : '';
+  updateFAB();
+}
+
+// ─── Builder ───────────────────────────────────────────────────────────────
+function builderHTML() {
+  const openCount = items.filter(i=>!i.done).length;
+  const fabHTML = items.length
+    ? `<button class="support-fab" onclick="openDrawer()">My gift list 🎁 <span class="badge">${items.length}</span></button>`
+    : '';
+  return `
+    ${fabHTML}
+    <h1>Ways people can give to you 🎁</h1>
+    <p class="subtitle">When someone wants to share appreciation for you, share ways for them to give to you.</p>
+    <hr>
+    <div class="eyebrow" style="margin-bottom:12px">How can people give to you?</div>
+    <div class="top-tabs">
+      <button class="top-tab${openTopCat==='things'?' active':''}"  onclick="setTopCat('things')">📦 Things</button>
+      <button class="top-tab${openTopCat==='actions'?' active':''}" onclick="setTopCat('actions')">✨ Acts of service</button>
+      <button class="top-tab${openTopCat==='spaces'?' active':''}"  onclick="setTopCat('spaces')">🏡 Spaces</button>
+    </div>
+    ${openTopCat==='things'  ? thingsSection()  : ''}
+    ${openTopCat==='actions' ? actionsSection() : ''}
+    ${openTopCat==='spaces'  ? spacesSection()  : ''}
+  `;
+}
+
+// ─── Helpers: chip row + other + add area ──────────────────────────────────
+function chipRow(chips, type, selectedSet) {
+  const rows = chips.map(p => {
+    const idx = regChip(p);
+    return `<button class="chip${selectedSet.has(p)?' selected':''}" onclick="chipClick('${type}',${idx})">${esc(p)}</button>`;
+  }).join('');
+  const otherOpen = window['other'+cap(type)+'Open'];
+  const otherText = window['other'+cap(type)+'Text'] || '';
+  const otherBtn  = `<button class="chip other-chip${otherOpen?' selected':''}" onclick="toggleOther('${type}')">${otherOpen?'✕ Other':'+ Other'}</button>`;
+  const otherInput = otherOpen ? `
+    <div class="other-input-wrap">
+      <input type="text" id="other-input-${type}" value="${esc(otherText)}" placeholder="Have something specific in mind? (optional)"
+        oninput="updateOther('${type}',this.value)" onkeydown="if(event.key==='Enter')addOther('${type}')">
+      <button class="btn-other-add" onclick="addOther('${type}')">Add</button>
+    </div>` : '';
+  return `<div class="chip-row">${rows}${otherBtn}</div>${otherInput}`;
+}
+
+function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+function addArea(hasSelection, isAction, descText) {
+  if (!hasSelection) return '';
+  const locationField = isLocalRequest ? `
+    <div class="add-area-label" style="margin-top:14px">If applicable, reference a preferred place or two in mind:</div>
+    <input type="text" id="location-input" value="${esc(locationText)}" placeholder="" oninput="updateLocation(this.value)" style="margin-bottom:10px">` : '';
+  const labelText = descText
+    ? `Share details below. ${descText.replace(/^Examples:\s*/i, 'Examples: ')}`
+    : 'Share details below.';
+  return `
+    <div class="add-area">
+      <div class="add-area-label">${esc(labelText)} <span style="color:#c0392b">*</span></div>
+      <input type="text" value="${esc(noteText)}" placeholder="Please share some details" oninput="updateNote(this.value)" onkeydown="if(event.key==='Enter')addToList()" style="margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:${isLocalRequest?'10px':'10px'};margin-top:0;">
+        <input type="checkbox" id="local-check" ${isLocalRequest?'checked':''} onchange="toggleLocalRequest(this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:var(--brand)">
+        <label for="local-check" style="font-size:13px;color:var(--soft);cursor:pointer;">📍 This is a local request</label>
+      </div>
+      ${locationField}
+      <button class="btn-add" onclick="addToList()">Add to list</button>
+    </div>`;
+}
+
+// ─── Spaces ────────────────────────────────────────────────────────────────
+function spacesSection() {
+  const sub = SPACES_SUBS[0];
+  if (!openSpacesSub) openSpacesSub = sub.id;
+  return `<div class="drill-section">
+    <div class="drill-label">🏡 Spaces</div>
+    ${addArea(true, false, sub.desc)}
+  </div>`;
+}
+
+// ─── Things ────────────────────────────────────────────────────────────────
+function thingsSection() {
+  let html = `<div class="drill-section">
+    <div class="drill-label">📦 Things</div>
+    <div class="sub-tabs">
+      ${THINGS_SUBS.map(s=>`<button class="sub-tab${openThingsSub===s.id?' active':''}" onclick="setThingsSub('${s.id}')">${s.icon} ${s.label}</button>`).join('')}
+    </div>`;
+  const sub = THINGS_SUBS.find(s=>s.id===openThingsSub);
+  if (sub) {
+    html += `<div class="drill-sub">
+      <div class="drill-sub-label">${sub.icon} ${sub.label}</div>
+      ${addArea(true, false, sub.desc)}
+    </div>`;
+  }
+  html += `</div>`;
+  return html;
+}
+
+// ─── Actions ──────────────────────────────────────────────────────────────
+function actionsSection() {
+  const sub  = ACTIONS_SUBS.find(s=>s.id===openActionSub);
+  const chip = ACTION_CHIPS.find(c=>c.id===selectedActionChip);
+  const isForMyself = openActionSub === 'for-myself';
+
+  let chipDesc = '';
+  if (chip && isForMyself) {
+    chipDesc = chip.id === 'experience' ? sub.expDesc : chip.desc;
+  }
+
+  let html = `<div class="drill-section">
+    <div class="drill-label">✨ Acts of service</div>
+    <div class="sub-tabs">
+      ${ACTIONS_SUBS.map(s=>`<button class="sub-tab${openActionSub===s.id?' active':''}" onclick="setActionSub('${s.id}')">${s.icon} ${s.label}</button>`).join('')}
+    </div>`;
+
+  if (sub) {
+    html += `<div class="drill-sub">
+      <div class="drill-sub-label">${sub.icon} ${sub.label}</div>`;
+    if (isForMyself) {
+      html += `<div class="chip-row" style="margin-bottom:12px">
+        ${ACTION_CHIPS.map(c=>`<button class="chip${selectedActionChip===c.id?' selected':''}" onclick="setActionChip('${c.id}')">${c.icon} ${c.label}</button>`).join('')}
+      </div>`;
+      if (chip) {
+        html += addArea(true, true, chipDesc);
+      }
+    } else {
+      html += addArea(true, true, sub.expDesc);
+    }
+    html += `</div>`;
+  }
+  html += `</div>`;
+  return html;
+}
+
+// ─── Review ────────────────────────────────────────────────────────────────
+function reviewHTML() {
+  const grouped = {};
+  for (const it of items) {
+    if (!grouped[it.subCat]) grouped[it.subCat] = { label: it.subLabel, icon: it.subIcon, items:[] };
+    grouped[it.subCat].items.push(it);
+  }
+  const catCount = Object.keys(grouped).length;
+  const total    = items.length;
+  return `
+    <div class="eyebrow">Review your gift list</div>
+    <button onclick="goToBuilder()" style="background:none;border:none;color:var(--brand);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;padding:0;margin-bottom:16px;">← Back</button>
+    <div class="review-header">
+      <div><h2>Looks good?</h2><p class="review-count">${total} item${total!==1?'s':''} across ${catCount} categor${catCount!==1?'ies':'y'}</p></div>
+      <button class="btn-edit" onclick="goToBuilder()">← Edit</button>
+    </div>
+    ${Object.values(grouped).map(g=>`
+      <div class="review-group">
+        <div class="review-group-label">${g.icon} ${(g.label||"").replace(/_/g," ").replace(/-/g," ")}</div>
+        <div class="review-chips">
+          ${g.items.map(it=>`<div class="review-chip">${esc(it.title)}${it.note?`<span style="color:var(--muted);font-size:12px;margin-left:6px">· ${esc(it.note)}</span>`:''}</div>`).join('')}
+        </div>
+      </div>`).join('')}
+    <hr>
+    <div id="share-area-review"></div>
+    <button class="btn-primary" id="share-btn-review" onclick="genShareInline()">🔗 Copy link</button>`;
+}
+
+// ─── Viewer ────────────────────────────────────────────────────────────────
+function viewerHTML() {
+  const vItems = viewerData.items || [];
+  const name   = viewerData.name  || 'Someone';
+  const photoHTML = _ownerPhoto
+    ? '<img src="' + esc(_ownerPhoto) + '" alt="" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:1.5px solid var(--border);">'
+    : '<div style="width:48px;height:48px;border-radius:50%;background:var(--input-bg);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;">🌱</div>';
+  return `
+    <div style="display:flex;justify-content:flex-end;margin-bottom:-32px;">${photoHTML}</div>
+    <h1 style="text-align:center;margin-bottom:6px">Ways to give to me</h1>
+    <p class="subtitle" style="text-align:center">If you're curious how to give to me, here are some possibilities.</p>
+    ${vItems.length ? `<div class="eyebrow" style="margin-bottom:12px">Still open</div>${vItems.map(it=>wishItemHTML(it,'viewer')).join('')}` : `<div class="empty">Well supported right now, everything has been offered.</div>`}`;
+}
+
+// ─── Helpers ───────────────────────────────────────────────────────────────
+function qs(sel)  { return document.querySelector(sel); }
+function uid()    { return Date.now() + '_' + Math.random().toString(36).slice(2); }
+function esc(s)   { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+// Hover-URL leak protection — same pattern as intake.html + the 4 live pages.
+window._safeNavGo=function(el){try{var u=el&&el.getAttribute&&el.getAttribute('data-nav');if(u){window.location.href=u;}}catch(e){}return false;};
+document.addEventListener('keydown',function(e){if(e.key!=='Enter'&&e.key!==' ')return;var t=e.target;if(t&&t.tagName==='A'&&!t.hasAttribute('href')&&t.hasAttribute('data-nav')){e.preventDefault();_safeNavGo(t);}});
+function toast(msg) {
+  const el = qs('#toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 2400);
+}
+
+// ─── Window assignments (required for inline onclick access) ───────────────
+window.toggleDoneByIdx     = toggleDoneByIdx;
+window.removeItemByIdx     = removeItemByIdx;
+window.editItemByIdx       = editItemByIdx;
+window.saveEditByIdx       = saveEditByIdx;
+window.setDrawerTab        = setDrawerTab;
+window.setDrawerPage       = setDrawerPage;
+window.openDrawer          = openDrawer;
+window.closeDrawer         = closeDrawer;
+window.copyURL             = copyURL;
+window.generateLink        = generateLink;
+window.giftItem            = giftItem;
+window.giftItemByIdx       = giftItemByIdx;
+window.confirmGift         = confirmGift;
+window.giveWithName        = giveWithName;
+window.closeGiftSigninModal = closeGiftSigninModal;
+window.closeAnonModal      = closeAnonModal;
+window.toggleDone          = toggleDone;
+window.setTopCat           = setTopCat;
+window.setThingsSub        = setThingsSub;
+window.setActionSub        = setActionSub;
+window.setActionChip       = setActionChip;
+window.setSpacesSub        = setSpacesSub;
+window.addToList           = addToList;
+window.updateNote          = updateNote;
+window.updateLocation      = updateLocation;
+window.toggleLocalRequest  = toggleLocalRequest;
+window.chipClick           = chipClick;
+window.toggleOther         = toggleOther;
+window.addOther            = addOther;
+window.updateOther         = updateOther;
+window.confirmIdentity     = confirmIdentity;
+window.denyIdentity        = denyIdentity;
+window.closeSigninModal    = closeSigninModal;
+window.closeLocationModal  = closeLocationModal;
+window.saveLocationAndClose = saveLocationAndClose;
+window.captureGPS          = captureGPS;
+window.copyShareURL        = copyShareURL;
+window.togglePostalEdit    = togglePostalEdit;
+window.savePostalSettings  = savePostalSettings;
+window.moveBackToList      = moveBackToList;
+</script>
+</body>
+<!--
+  Copyright 2026 DayBalancer LLC. All rights reserved.
+
+  The code and the content here power Creating.Works, DayBalancer, Appear Network,
+  and 2Gather. They are published so they can be read, audited, and dated.
+
+  Running either as a separate offering requires a license, whether you brand it as
+  ours or as your own, and whether or not money changes hands.
+
+  hello@creating.works
+-->
+</html>
+<!-- V2.37 -->
