@@ -270,11 +270,10 @@
     <!-- The same question the intake gate asks, on the step that owns the answer. Chips or
          your own words, whichever somebody prefers; the field is one line so it does not
          compete with the chips below it. -->
-    <div id="open-q" style="display:none;margin:0 0 18px;">
-      <div id="open-q-title" style="font-size:15px;font-weight:800;color:#1A2E42;margin-bottom:2px;"></div>
-      <div id="open-q-hint" style="font-size:13px;color:#6B7A8D;margin-bottom:8px;"></div>
+    <div id="open-q" style="display:none;margin:6px 0 18px;">
+      <div id="open-q-hint" style="font-size:13.5px;color:#6B7A8D;margin-bottom:8px;"></div>
       <input type="text" id="open-q-input" autocomplete="off"
-        style="width:100%;border:1.5px solid #DDE3EA;background:#F7FBFF;border-radius:10px;
+        style="width:100%;border:1.5px solid #DDE3EA;background:#fff;border-radius:10px;
                padding:10px 13px;font:inherit;font-size:14px;color:#1A2E42;">
       <div id="open-q-note" style="font-size:12px;color:#6B7A8D;margin-top:6px;"></div>
     </div>
@@ -1056,19 +1055,19 @@
   // instead of them. Nothing here is required; the chips remain what matching runs on.
   var OPEN_Q = [
     { key:'introNeed',   q:'What do you need?',
-      hint:'In your own words. Add chips below as well, or instead.',
+      hint:'Share in your own words and then tag, or use the chips to help you.',
       ph:'A cat sitter for late September, a massage therapist local to Seattle…' },
     { key:'introEnjoy',  q:'What do you enjoy?',
-      hint:'In your own words. Add chips below as well, or instead.',
+      hint:'Share in your own words and then tag, or use the chips to help you.',
       ph:'Pickleball, kayaking, anything on the water…' },
     { key:'introSkills', q:'What skills pay the bills and/or how do you like helping others?',
-      hint:'In your own words. Add chips below as well, or instead.',
+      hint:'Share in your own words and then tag, or use the chips to help you.',
       ph:'Facilitating a room full of people who disagree. Experience design…' },
     { key:'introValues', q:'What do you care about?',
-      hint:'In your own words. Add chips below as well, or instead.',
+      hint:'Share in your own words and then tag, or use the chips to help you.',
       ph:'Housing, food security, keeping the lake swimmable…' },
     { key:'introOffer',  q:'What do you have to offer?',
-      hint:'In your own words. Add chips below as well, or instead.',
+      hint:'Share in your own words and then tag, or use the chips to help you.',
       ph:'A spare room in September, a truck for moving, gardening tools…' }
   ];
   var _openQVals = {};
@@ -1076,8 +1075,10 @@
     var wrap = document.getElementById('open-q');
     var cfg = OPEN_Q[i];
     if (!wrap || !cfg) { if (wrap) wrap.style.display='none'; return; }
-    document.getElementById('open-q-title').textContent = cfg.q;
     document.getElementById('open-q-hint').textContent = cfg.hint;
+    // Sits under the question the section already asks, rather than repeating it above the card.
+    var q = listEl.querySelector('.enjoy-q');
+    if (q && q.parentNode) q.parentNode.insertBefore(wrap, q.nextSibling);
     var inp = document.getElementById('open-q-input');
     inp.placeholder = cfg.ph;
     inp.value = _openQVals[cfg.key] || '';
@@ -1115,8 +1116,8 @@
     });
     var nb=document.getElementById('next-btn');
     if (nb) nb.textContent = (i < SECTIONS.length-1) ? ('Next: ' + SECTIONS[i+1].tab.toLowerCase()) : 'Done';
-    paintOpenQ(i);
     renderSection(i);
+    paintOpenQ(i);
     updateSummary();
   }
 
