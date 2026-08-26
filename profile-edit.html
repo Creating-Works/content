@@ -312,11 +312,6 @@
     try{
       // A found profile is authoritative — empty fields mean empty, not the demo seed.
       _loaded={ postal:d.postal||'', retired:d.retired||'', bringType:d.bringType||'', wantsSignupList:d.wantsSignupList||'', languages:d.languages||'' };
-      // The words somebody wrote, read back the same way they were written. Without this the
-      // phrases only lived until the page was reloaded, even once the backend stored them.
-      ['introNeed','introEnjoy','introSkills','introValues','introOffer'].forEach(function(k){
-        _openQVals[k] = String(d[k] || '');
-      });
       NEEDS_ADDED = parseNeedsStr(d.needs||'').map(function(n){ return { item:n.item, type:(n.ntype==='skill'?'person':n.ntype==='space'?'space':'thing'), category:n.category||'', level:'', local:!!n.local, detail:n.detail||'' }; });
       ENJOY_ADDED = parseTagStr(d.interests||'','level').map(function(x){ return { t:x.item, sel:(x.level?String(x.level).split(',').map(function(s){return s.trim();}).filter(Boolean):[]) }; });
       SKILLS_ADDED = parseTagStr(d.skills||'','level').map(function(x){ return { t:x.item, cat:x.category||'', level:x.level||'' }; });
@@ -328,7 +323,6 @@
     }catch(e){}
   }
 
-  var _openQVals = {};
   var CORE_CATS = ['Home & Transportation','Business & Finance','Skills & Services','Food & Drink'];
   var MORE_CATS = ['Nature & Outdoors','Events & Gatherings','Arts & Media','Pets & Animal Care','Health & Wellness','Education & Learning','Environment','Housing & Land'];
 
@@ -1061,94 +1055,6 @@
     renderFlow(); renderAdded();
   }
 
-  // One question per step, in the person's own words, saved beside the chips rather than
-  // instead of them. Nothing here is required; the chips remain what matching runs on.
-  var OPEN_Q = [
-    { key:'introNeed',   q:'What do you need?',
-      hint:'Share in your own words and then tag, or use the chips to help you.',
-      ph:'A cat sitter for late September, a massage therapist local to Seattle…' },
-    { key:'introEnjoy',  q:'What do you enjoy?',
-      hint:'Share in your own words and then tag, or use the chips to help you.',
-      ph:'Pickleball, kayaking, anything on the water…' },
-    { key:'introSkills', q:'What skills pay the bills and/or how do you like helping others?',
-      hint:'Share in your own words and then tag, or use the chips to help you.',
-      ph:'Facilitating a room full of people who disagree. Experience design…' },
-    { key:'introValues', q:'What do you care about?',
-      hint:'Share in your own words and then tag, or use the chips to help you.',
-      ph:'Housing, food security, keeping the lake swimmable…' },
-    { key:'introOffer',  q:'What do you have to offer?',
-      hint:'Share in your own words and then tag, or use the chips to help you.',
-      ph:'A spare room in September, a truck for moving, gardening tools…' }
-  ];
-
-  function paintOpenQ(i){
-    var cfg = OPEN_Q[i];
-    if (!cfg) return;
-    var q = listEl.querySelector('.enjoy-q');
-    if (!q || !q.parentNode) return;
-
-    // Built fresh every time. renderSection empties this list, so anything kept as a single
-    // node and moved in here vanishes the moment somebody changes step and comes back.
-    var wrap = document.createElement('div');
-    wrap.id = 'open-q';
-    wrap.style.cssText = 'margin:6px 0 18px;';
-
-    var hint = document.createElement('div');
-    hint.style.cssText = 'font-size:13.5px;color:#6B7A8D;margin-bottom:8px;';
-    hint.textContent = cfg.hint;
-    wrap.appendChild(hint);
-
-    var row = document.createElement('div');
-    row.style.cssText = 'display:flex;gap:8px;align-items:center;';
-    var inp = document.createElement('input');
-    inp.type = 'text'; inp.autocomplete = 'off'; inp.id = 'open-q-input';
-    inp.placeholder = cfg.ph;
-    inp.style.cssText = 'flex:1;min-width:0;border:1.5px solid #DDE3EA;background:#fff;border-radius:10px;'
-      + 'padding:10px 13px;font:inherit;font-size:14px;color:#1A2E42;';
-    var addBtn = document.createElement('button');
-    addBtn.type = 'button'; addBtn.textContent = 'Add';
-    addBtn.style.cssText = 'flex-shrink:0;background:#1F699E;color:#fff;border:0;font:inherit;font-size:14px;'
-      + 'font-weight:700;padding:10px 18px;border-radius:10px;cursor:pointer;';
-    row.appendChild(inp); row.appendChild(addBtn); wrap.appendChild(row);
-
-    var box = document.createElement('div');
-    box.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;';
-    wrap.appendChild(box);
-
-    // Each phrase is its own entry rather than one long sentence, so it can be removed on its
-    // own and turned into a tag on its own later.
-    function listOf(){ return String(_openQVals[cfg.key] || '').split('|').map(function(t){ return t.trim(); }).filter(Boolean); }
-    function store(a){ _openQVals[cfg.key] = a.join('|'); if (typeof scheduleSave === 'function') scheduleSave(); }
-    function paintList(){
-      box.innerHTML = '';
-      listOf().forEach(function(t, idx){
-        var pill = document.createElement('span');
-        pill.style.cssText = 'display:inline-flex;align-items:center;gap:7px;background:#EEF1F5;'
-          + 'border:1px solid #DDE3EA;color:#1A2E42;border-radius:20px;padding:5px 8px 5px 13px;font-size:13.5px;';
-        pill.appendChild(document.createTextNode(t));
-        var x = document.createElement('button');
-        x.type = 'button'; x.textContent = '\u00d7';
-        x.setAttribute('aria-label', 'Remove ' + t);
-        x.style.cssText = 'border:0;background:transparent;color:#6B7A8D;font:inherit;font-size:16px;line-height:1;cursor:pointer;padding:0 2px;';
-        x.addEventListener('click', function(){ var a = listOf(); a.splice(idx, 1); store(a); paintList(); });
-        pill.appendChild(x);
-        box.appendChild(pill);
-      });
-    }
-    function addNow(){
-      var v = String(inp.value || '').trim();
-      if (!v) return;
-      var a = listOf();
-      if (a.map(function(t){ return t.toLowerCase(); }).indexOf(v.toLowerCase()) === -1) a.push(v);
-      store(a); inp.value = ''; paintList(); inp.focus();
-    }
-    inp.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); addNow(); } });
-    addBtn.addEventListener('click', addNow);
-    inp.addEventListener('input', function(){ if (typeof scheduleSave === 'function') scheduleSave(); });
-
-    paintList();
-    q.parentNode.insertBefore(wrap, q.nextSibling);
-  }
   function renderSection(i){
     var sec=SECTIONS[i];
     if (sec.custom==='needs'){ renderNeeds(); return; }
@@ -1173,7 +1079,6 @@
     var nb=document.getElementById('next-btn');
     if (nb) nb.textContent = (i < SECTIONS.length-1) ? ('Next: ' + SECTIONS[i+1].tab.toLowerCase()) : 'Done';
     renderSection(i);
-    paintOpenQ(i);
     updateSummary();
   }
 
@@ -1481,12 +1386,7 @@
   function postSave(){
     var d=serialize();
     var u=GS_URL+'?action=saveIntake&appearId='+encodeURIComponent(_id)+'&secure=1&editToken='+encodeURIComponent(_editToken)
-      + OPEN_Q.map(function(q){
-          var v = String(_openQVals[q.key] || '');
-          var live = (curSec === OPEN_Q.indexOf(q)) ? String((document.getElementById('open-q-input')||{}).value || '').trim() : '';
-          if (live && v.split('|').map(function(t){ return t.trim().toLowerCase(); }).indexOf(live.toLowerCase()) === -1) v = v ? (v + '|' + live) : live;
-          return '&'+q.key+'='+encodeURIComponent(v);
-        }).join('')
+
       +'&needs='+encodeURIComponent(d.needs)+'&interests='+encodeURIComponent(d.interests)+'&skills='+encodeURIComponent(d.skills)
       +'&values='+encodeURIComponent(d.values)+'&domains='+encodeURIComponent(d.domains)+'&methods='+encodeURIComponent(d.methods)
       +'&expression='+encodeURIComponent(d.expression)+'&haves='+encodeURIComponent(d.haves)
