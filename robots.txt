@@ -1,0 +1,10 @@
+# Creating.Works. Everything here belongs to a person, so none of it is for search.
+User-agent: *
+Disallow: /profile
+Disallow: /profile-edit
+Disallow: /account
+Disallow: /giving
+Disallow: /claim
+Disallow: /intake-da
+Disallow: /intake.html
+Allow: /
