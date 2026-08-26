@@ -2564,12 +2564,19 @@ function renderProfile(el, viewerMode){
   var _fromHub=!!(_bgG||_bgH);
   var _bgM=_bgP.get('me');
   var _b='';
+  // Coming from a group is a trail, not a button. It was a breadcrumb before, and a pill
+  // reading "Back to group" turned a place you can name into an instruction.
+  var _crumb='';
+  var _CRA='color:#fff;text-decoration:none;font-weight:800;cursor:pointer;';
   if(_bgG){
     var _bgU='https://gather.2gather.network/group.html?id='+encodeURIComponent(_bgG)+(_bgM?'&memberCard='+encodeURIComponent(_bgM):'');
-    _b+='<a role="link" tabindex="0" data-nav="'+esc(_bgU)+'" title="Back to group" onclick="return _safeNavGo(this)" style="'+_WB+'">Back to group</a>';
+    var _bgName=(_bgP.get('groupName')||'').trim();
+    _crumb='<a role="link" tabindex="0" data-nav="'+esc(_bgU)+'" onclick="return _safeNavGo(this)" style="'+_CRA+'">\u2039 '+esc(_bgName||'Group')+'</a>'
+      +'<span style="opacity:.7;"> / </span><span style="font-weight:800;">My profile</span>';
   } else if(_bgH){
     var _bgU='https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_bgH)+(_bgM?'&memberCard='+encodeURIComponent(_bgM):'');
-    _b+='<a role="link" tabindex="0" data-nav="'+esc(_bgU)+'" title="'+esc(_eventTitle||'Back to bulletin board')+'" onclick="return _safeNavGo(this)" style="'+_WB+'">Back to bulletin board</a>';
+    _crumb='<a role="link" tabindex="0" data-nav="'+esc(_bgU)+'" onclick="return _safeNavGo(this)" style="'+_CRA+'">\u2039 '+esc(_eventTitle||'Event')+'</a>'
+      +'<span style="opacity:.7;"> / </span><span style="font-weight:800;">My profile</span>';
   }
   // Arriving from a group used to hide this whole row and leave nothing but a back button, so
   // the tabs flashed on load and then vanished. Back to group now sits alongside them instead
@@ -2594,7 +2601,7 @@ function renderProfile(el, viewerMode){
   }
   if(_eventId && _eventHasBB && !_bgH){
     var _ehUrl='https://gather.2gather.network/attendees.html?id='+encodeURIComponent(_eventId)+_mc;
-    _b+='<a role="link" tabindex="0" data-nav="'+esc(_ehUrl)+'" title="'+esc(_eventTitle||'Event page')+'" onclick="return _safeNavGo(this)" style="'+_WB+'">Event hub</a>';
+    _b+='<a role="link" tabindex="0" data-nav="'+esc(_ehUrl)+'" title="'+esc(_eventTitle||'Event page')+'" onclick="return _safeNavGo(this)" style="'+_WB+'">Event attendees</a>';
   }
   if(_navOwn&&_navId){
     // No "Event profile" or "Manage my experience" pill here — the profile page already IS
@@ -2604,7 +2611,8 @@ function renderProfile(el, viewerMode){
     if(!_eventId) _fillHubFromReg();
   }
   var _hdrFull=String(_fullName||((viewerMode&&!isOwner())?_viewerName:_name)||'').trim();
-  var _navButtons='<h1 id="pv-name-text" style="font-size:28px;font-weight:400;color:#fff;margin:0 0 16px;letter-spacing:-.01em;min-height:42px;">'
+  var _navButtons=(_crumb?'<div style="color:#fff;font-size:14px;font-weight:600;margin:0 0 12px;opacity:.95;">'+_crumb+'</div>':'')
+    +'<h1 id="pv-name-text" style="font-size:28px;font-weight:400;color:#fff;margin:0 0 16px;letter-spacing:-.01em;min-height:42px;">'
       +(_hdrFull?esc(_hdrFull)+' 🌱':'')+'</h1>'
     +'<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:0 2px;margin:0 0 14px;">'+_b+'</div>';
   var _tnEl=document.getElementById('app-topnav'); if(_tnEl) _tnEl.innerHTML=_navButtons;
