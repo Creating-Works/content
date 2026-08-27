@@ -391,8 +391,8 @@ function paintShellHeader(extraPills){
   el.innerHTML='<h1 id="pv-name-text" style="font-size:28px;font-weight:400;color:#fff;margin:0 0 16px;letter-spacing:-.01em;min-height:42px;"></h1>'
     +'<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:0 2px;margin:0 0 14px;">'
     +tab('My profile','')
-    +' '+tab('My groups','https://gather.2gather.network/mygroups'+q+(q?'&':'?')+'ref=profile')
-    +' '+tab('My events','https://gather.2gather.network/myevents'+(meTab?('?id='+encodeURIComponent(meTab)):''))
+    +' '+tab('My groups','https://2gather.network/mygroups'+q+(q?'&':'?')+'ref=profile')
+    +' '+tab('My events','https://2gather.network/myevents'+(meTab?('?id='+encodeURIComponent(meTab)):''))
     +' '+tab('My account',acct+(q?'&':'?')+'tab=account')
     +(extraPills||'')
     +'</div>';
@@ -2302,7 +2302,7 @@ function renderScreenConfirm(el){
   // always offered. Most people arrive without an event at all, and the old copy promised them a
   // hub and suggested people that were never going to appear. The hub is now an extra, shown only
   // for an event carrying hasBB - the same test the bulletin-board pill in the nav already applies.
-  var hub=(_eventId&&_eventHasBB)?('https://gather.2gather.network/attendees?id='+encodeURIComponent(_eventId)+(_appearId?'&memberCard='+encodeURIComponent(_appearId):'')):'';
+  var hub=(_eventId&&_eventHasBB)?('https://2gather.network/attendees?id='+encodeURIComponent(_eventId)+(_appearId?'&memberCard='+encodeURIComponent(_appearId):'')):'';
   cont.innerHTML=fastStepHTML(3)
     +'<h2 style="margin-bottom:18px;">You\'re in! 🎉</h2>'
     +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
@@ -2424,7 +2424,7 @@ window.wtmRemove=function(id){
 // "(on the bulletin board)" - a link when we know which event's bulletin board to send them to, plain text otherwise.
 function _wtmHubLink(){
   if(!_eventId) return '(on the bulletin board)';
-  var url='https://gather.2gather.network/attendees?id='+encodeURIComponent(_eventId)+(_appearId?'&memberCard='+encodeURIComponent(_appearId):'');
+  var url='https://2gather.network/attendees?id='+encodeURIComponent(_eventId)+(_appearId?'&memberCard='+encodeURIComponent(_appearId):'');
   return '<a role="link" tabindex="0" data-nav="'+esc(url)+'" title="'+esc(_eventTitle||'Bulletin board')+'" onclick="return _safeNavGo(this)" style="color:var(--brand);font-weight:600;">(on the bulletin board)</a>';
 }
 function _wtmListHTML(){
@@ -2568,12 +2568,12 @@ function renderProfile(el, viewerMode){
   var _crumb='';
   var _CRA='color:#fff;text-decoration:none;font-weight:800;cursor:pointer;';
   if(_bgG){
-    var _bgU='https://gather.2gather.network/group?id='+encodeURIComponent(_bgG)+(_bgM?'&memberCard='+encodeURIComponent(_bgM):'');
+    var _bgU='https://2gather.network/group?id='+encodeURIComponent(_bgG)+(_bgM?'&memberCard='+encodeURIComponent(_bgM):'');
     var _bgName=(_bgP.get('groupName')||'').trim();
     _crumb='<a role="link" tabindex="0" data-nav="'+esc(_bgU)+'" onclick="return _safeNavGo(this)" style="'+_CRA+'">\u2039 '+esc(_bgName||'Group')+'</a>'
       +'<span style="opacity:.7;"> / </span><span style="font-weight:800;">My profile</span>';
   } else if(_bgH){
-    var _bgU='https://gather.2gather.network/attendees?id='+encodeURIComponent(_bgH)+(_bgM?'&memberCard='+encodeURIComponent(_bgM):'');
+    var _bgU='https://2gather.network/attendees?id='+encodeURIComponent(_bgH)+(_bgM?'&memberCard='+encodeURIComponent(_bgM):'');
     _crumb='<a role="link" tabindex="0" data-nav="'+esc(_bgU)+'" onclick="return _safeNavGo(this)" style="'+_CRA+'">\u2039 '+esc(_eventTitle||'Event')+'</a>'
       +'<span style="opacity:.7;"> / </span><span style="font-weight:800;">My profile</span>';
   }
@@ -2586,9 +2586,9 @@ function renderProfile(el, viewerMode){
   var _meForTabs=String(_appearId||_bgM||'').trim();
   if(_meForTabs){
     var _q='?CWid='+encodeURIComponent(_meForTabs);
-    var _mgUrl='https://gather.2gather.network/mygroups'+_q+'&ref=profile';
+    var _mgUrl='https://2gather.network/mygroups'+_q+'&ref=profile';
     var _acct='https://creating.works/account'+_q;
-    var _evUrl='https://gather.2gather.network/myevents?id='+encodeURIComponent(_meForTabs);
+    var _evUrl='https://2gather.network/myevents?id='+encodeURIComponent(_meForTabs);
     var _onOwn=!!(_navOwn&&_navId&&String(_navId).trim()===_meForTabs);
     _b+=(_onOwn
         ? '<span style="'+_TABON+'">My profile</span> '
@@ -2598,7 +2598,7 @@ function renderProfile(el, viewerMode){
       +'<a role="link" tabindex="0" data-nav="'+esc(_acct+'&tab=account')+'" title="My account" onclick="return _safeNavGo(this)" style="'+_TABOFF+'">My account</a> ';
   }
   if(_eventId && _eventHasBB && !_bgH && !_bgG){
-    var _ehUrl='https://gather.2gather.network/attendees?id='+encodeURIComponent(_eventId)+_mc;
+    var _ehUrl='https://2gather.network/attendees?id='+encodeURIComponent(_eventId)+_mc;
     _b+='<a role="link" tabindex="0" data-nav="'+esc(_ehUrl)+'" title="'+esc(_eventTitle||'Event page')+'" onclick="return _safeNavGo(this)" style="'+_WB+'">Event attendees</a>';
   }
   if(_navOwn&&_navId){
@@ -2616,7 +2616,7 @@ function renderProfile(el, viewerMode){
   var _tnEl=document.getElementById('app-topnav'); if(_tnEl) _tnEl.innerHTML=_navButtons;
   var _photoHTML='';
   if(viewerMode&&_navOwn){
-    var _matchUrl='https://gather.2gather.network/match?me='+encodeURIComponent(_navId);
+    var _matchUrl='https://2gather.network/match?me='+encodeURIComponent(_navId);
     _photoHTML='<a role="link" tabindex="0" data-nav="'+esc(_matchUrl)+'" title="Show your 1:1 match code" onclick="return _safeNavGo(this)" style="text-decoration:none;text-align:center;flex-shrink:0;">'
       +'<span style="position:relative;display:inline-block;width:44px;height:44px;">'
       +'<img src="'+esc(_viewerPhoto||('https://ui-avatars.com/api/?name='+encodeURIComponent(_navId)+'&size=44&background=1F699E&color=fff'))+'" alt="" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid #fff;box-shadow:0 0 0 1px var(--border);">'
@@ -2998,16 +2998,16 @@ function loadPotluck(cb){
 function renderPotluckTopNav(){
   var tn=document.getElementById('app-topnav'); if(!tn) return;
   var WB='text-decoration:none;color:#185FA5;background:#fff;font-size:14px;font-weight:600;padding:8px 15px;border-radius:20px;white-space:nowrap;';
-  var _uAll='https://gather.2gather.network/events?memberCard='+encodeURIComponent(_appearId);
+  var _uAll='https://2gather.network/events?memberCard='+encodeURIComponent(_appearId);
   var b='<a role="link" tabindex="0" data-nav="'+esc(_uAll)+'" title="Events" onclick="return _safeNavGo(this)" style="'+WB+'">All events</a>';
   if(_eventId && _eventHasBB){
-    var _uEh='https://gather.2gather.network/attendees?id='+encodeURIComponent(_eventId)+'&memberCard='+encodeURIComponent(_appearId);
+    var _uEh='https://2gather.network/attendees?id='+encodeURIComponent(_eventId)+'&memberCard='+encodeURIComponent(_appearId);
     b+='<a role="link" tabindex="0" data-nav="'+esc(_uEh)+'" title="'+esc(_eventTitle||'Event page')+'" onclick="return _safeNavGo(this)" style="'+WB+'">Event attendees</a>';
   }
   var _uEp='https://creating.works/profile?show='+encodeURIComponent(_appearId)+'&me='+encodeURIComponent(_appearId)+(_eventId?'&eventId='+encodeURIComponent(_eventId):'');
   b+='<a role="link" tabindex="0" data-nav="'+esc(_uEp)+'" title="'+esc(_viewerName||'My profile')+'" onclick="return _safeNavGo(this)" style="'+WB+'">Event profile</a>';
   if(_eventId){
-    var _uMm='https://gather.2gather.network/myevents?id='+encodeURIComponent(_appearId)+'&event='+encodeURIComponent(_eventId);
+    var _uMm='https://2gather.network/myevents?id='+encodeURIComponent(_appearId)+'&event='+encodeURIComponent(_eventId);
     b+='<a role="link" tabindex="0" data-nav="'+esc(_uMm)+'" title="Manage my experience" onclick="return _safeNavGo(this)" style="'+WB+'">Manage my experience</a>';
   }
   tn.innerHTML='<div style="display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px;">'+b+'</div>';
@@ -3162,7 +3162,7 @@ function seedBlockHTML(){
 }
 // "Add another" is always available; "Done" takes them to the hub to see it land.
 function seedFooterHTML(BTN,BTN_O,primaryDone){
-  var hubUrl=_eventId?('https://gather.2gather.network/attendees?id='+encodeURIComponent(_eventId)+(_appearId?'&memberCard='+encodeURIComponent(_appearId):'')):'';
+  var hubUrl=_eventId?('https://2gather.network/attendees?id='+encodeURIComponent(_eventId)+(_appearId?'&memberCard='+encodeURIComponent(_appearId):'')):'';
   return '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">'
     +'<button onclick="seedAddAnother()" style="'+(primaryDone?BTN_O:BTN_O)+'">Add another</button>'
     +(hubUrl?'<button onclick="window.location.href=\''+hubUrl+'\'" style="'+(primaryDone?BTN:BTN_O)+'">Done</button>':'')
@@ -3396,7 +3396,7 @@ function inviteUrl(){
   // lakeballingerhub.com 301s to the Glide page and reads better in a message than the /dl/ path.
   return (_eventId==='m97sjwa3')
     ? 'lakeballingerhub.com'
-    : 'https://gather.2gather.network/event?id='+encodeURIComponent(_eventId||'');
+    : 'https://2gather.network/event?id='+encodeURIComponent(_eventId||'');
 }
 function inviteMsgFor(item){
   var when=_eventDate?(' on '+fmtEventDate(_eventDate)):'';
@@ -3441,7 +3441,7 @@ window.copyEventInvite=function(btn){
   // event has no Glide page, so its own event page is the right landing.
   var url=(_eventId==='m97sjwa3')
     ? 'https://2gather.network/dl/lakeballingerhubevent'
-    : 'https://gather.2gather.network/event?id='+encodeURIComponent(_eventId||'');
+    : 'https://2gather.network/event?id='+encodeURIComponent(_eventId||'');
   var when=_eventDate?(' on '+fmtEventDate(_eventDate)):'';
   var where=(_eventVenue||_eventLocationAddr)?(' at '+[_eventVenue,_eventLocationAddr].filter(Boolean).join(', ')):'';
   var msg='I am going to '+(_eventTitle||'this event')+when+where+'. Come and bring something you love doing. '+url;
@@ -3736,7 +3736,7 @@ window.submitClaim=function(i){
 function renderScreenShare(el){
   var cont=document.getElementById('app-content'); if(!cont) return;
   var pageUrl=_appearId?'https://creating.works/profile?show='+encodeURIComponent(_appearId):'';
-  var eventShareUrl=_eventId&&_appearId?'https://gather.2gather.network/event?id='+encodeURIComponent(_eventId)+'&memberCard='+encodeURIComponent(_appearId):'';
+  var eventShareUrl=_eventId&&_appearId?'https://2gather.network/event?id='+encodeURIComponent(_eventId)+'&memberCard='+encodeURIComponent(_appearId):'';
   var eventTitle=_eventId?(_eventTitle||'Event community'):'';
   var html='<div style="padding:20px 0;">'
     +(_eventId?'<h2 style="margin-bottom:20px;" id="event-share-title">'+esc(eventTitle)+'</h2>':'<h2 style="margin-bottom:20px;">Share your page</h2>')
@@ -4196,7 +4196,7 @@ window.goNext = function(){
     _screen='confirm'; render(); return;
   }
   if(_screen==='confirm'){
-    if(_eventId&&_appearId){ window.location.href='https://gather.2gather.network/attendees?id='+encodeURIComponent(_eventId)+'&memberCard='+encodeURIComponent(_appearId); return; }
+    if(_eventId&&_appearId){ window.location.href='https://2gather.network/attendees?id='+encodeURIComponent(_eventId)+'&memberCard='+encodeURIComponent(_appearId); return; }
     _screen=0; render(); return;
   }
   if(_screen===2&&!_editMode&&_screen2step==='lang'){
@@ -4259,7 +4259,7 @@ window.goNext = function(){
   if(_screen==='share'){
     // Complete intake — event visitors go to attendees page, others go home
     if(_eventId&&_appearId){
-      window.location.href='https://gather.2gather.network/attendees?id='+encodeURIComponent(_eventId)+'&memberCard='+encodeURIComponent(_appearId);
+      window.location.href='https://2gather.network/attendees?id='+encodeURIComponent(_eventId)+'&memberCard='+encodeURIComponent(_appearId);
     } else {
       _screen=0; render();
     }

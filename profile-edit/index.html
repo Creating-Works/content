@@ -1145,8 +1145,8 @@
       + (nm ? (nm + ' \u{1F331}') : '') + '</h1>'
       + '<div style="display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px;">'
       + pill('My profile', 'https://creating.works/profile?show=' + q + '&me=' + q, true)
-      + pill('My groups', 'https://gather.2gather.network/mygroups?CWid=' + q, false)
-      + pill('My events', 'https://gather.2gather.network/myevents?id=' + q, false)
+      + pill('My groups', 'https://2gather.network/mygroups?CWid=' + q, false)
+      + pill('My events', 'https://2gather.network/myevents?id=' + q, false)
       + pill('My account', 'https://creating.works/account?CWid=' + q + '&tab=account', false)
       + '</div>';
   }
@@ -1190,8 +1190,8 @@
 
   // ── Manage hub (Concept A: top tabs). Reachable at ?manage=1 and from the profile links. ──
   // Opens our real, live "Groups I host" page (full width, real data) — not a placeholder panel.
-  function openMyGroups(){ window.location.href='https://gather.2gather.network/mygroups'+(_id?'?CWid='+encodeURIComponent(_id):''); }
-  function openMyEvents(){ window.location.href='https://gather.2gather.network/myevents'+(_id?'?id='+encodeURIComponent(_id):''); }
+  function openMyGroups(){ window.location.href='https://2gather.network/mygroups'+(_id?'?CWid='+encodeURIComponent(_id):''); }
+  function openMyEvents(){ window.location.href='https://2gather.network/myevents'+(_id?'?id='+encodeURIComponent(_id):''); }
   function openIntake(){ window.location.href='https://creating.works/profile'+(_id?'?CWid='+encodeURIComponent(_id):''); }
   // Concept A: top tabs. "My profile" is not a tab — the whole page is the profile.
   var MH_SECTIONS = [
