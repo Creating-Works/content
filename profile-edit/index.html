@@ -347,6 +347,7 @@
   var listEl = document.getElementById('list');
   var metListEl = document.getElementById('met-list');
   var curSec = 0;
+  var _pendingStep = 0;   // which section the verify card opens once it is satisfied
   var SEC_DONE = [false,false,false,false,false];
 
   var addtile = document.createElement('button'); addtile.type='button'; addtile.className='addtile';
@@ -1188,11 +1189,20 @@
     // mints lives in that domain's storage and this page is on creating.works, which
     // cannot read it, so the door opened and closed on the same step. Until the session
     // moves somewhere both sites can see, asking here is the only way in that works.
+    //
+    // Which section to open once they are through. Every Edit button on the profile calls
+    // this, and the profile is now drawn behind the card, so pressing one while a code is
+    // already on its way used to build the card a second time. That wiped the line naming
+    // their inbox and the box the code goes in, and it looked for all the world like the
+    // code had never sent. The card is built once and only its destination changes.
+    _pendingStep = (typeof step === 'number' && step >= 0) ? step : 0;
+    var _openGate = document.getElementById('da-pin');
+    if(_openGate){ _openGate.scrollIntoView({behavior:'smooth',block:'center'}); return; }
     // Draw the page before asking. Without this the card floated on an empty background,
     // with no name, no photo and nothing saying whose profile was about to be opened.
     // renderProfileView only paints, where showView would also harvest and save.
     setBreadcrumb('view'); renderProfileView();
-    showPinGate(document.getElementById('profile-view'), function(){ enterEdit(step); },
+    showPinGate(document.getElementById('profile-view'), function(){ enterEdit(_pendingStep); },
                 'This is your profile. To change anything, verify it is you.');
   }
   function enterEdit(step){
@@ -1454,7 +1464,7 @@
     var go=document.createElement('button'); go.style.cssText=send.style.cssText; go.textContent='Verify'; go.style.display='none';
     row.appendChild(send); row.appendChild(inp); row.appendChild(go); bar.appendChild(row);
     var st=document.createElement('div'); st.style.cssText='font-size:13px;color:var(--soft);margin-top:10px;min-height:16px;'; bar.appendChild(st);
-    send.onclick=function(){ st.textContent='Sending your code…'; send.disabled=true; fetch(GS_URL+'?action=sendProfilePin&appearId='+encodeURIComponent(_id)).then(function(r){return r.json();}).then(function(resp){ send.disabled=false; if(resp&&resp.sent){ send.textContent='Resend'; var _to=_maskEmail(resp.sentTo||resp.email||''); st.textContent=_to?('Check '+_to+' for the code.'):'Check your email for the code.'; inp.style.display=''; go.style.display=''; inp.focus(); } else { st.textContent='No email on file for this profile.'; } }).catch(function(){ send.disabled=false; st.textContent='Could not send. Try again.'; }); };
+    send.onclick=function(){ st.textContent='Sending your code. This can take up to a minute.'; send.disabled=true; fetch(GS_URL+'?action=sendProfilePin&appearId='+encodeURIComponent(_id)).then(function(r){return r.json();}).then(function(resp){ send.disabled=false; if(resp&&resp.sent){ send.textContent='Resend'; var _to=_maskEmail(resp.sentTo||resp.email||''); st.textContent=_to?('Check '+_to+' for the code.'):'Check your email for the code.'; inp.style.display=''; go.style.display=''; inp.focus(); } else { st.textContent='No email on file for this profile.'; } }).catch(function(){ send.disabled=false; st.textContent='Could not send. Try again.'; }); };
     go.onclick=function(){ var c=inp.value.trim(); if(!c) return; st.textContent='Checking…'; go.disabled=true; fetch(GS_URL+'?action=verifyProfilePin&appearId='+encodeURIComponent(_id)+'&code='+encodeURIComponent(c)).then(function(r){return r.json();}).then(function(resp){ if(resp&&resp.status==='ok'&&resp.editToken){ _editToken=resp.editToken; _tokenPut(_editToken); bar.remove(); if(onOk) onOk(); } else { go.disabled=false; st.textContent=(resp&&resp.message)||'Invalid code.'; } }).catch(function(){ go.disabled=false; st.textContent='Could not verify. Try again.'; }); };
     bar.scrollIntoView({behavior:'smooth',block:'center'});
   }
