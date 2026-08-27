@@ -1183,8 +1183,10 @@
     // back here, rather than asking for a code of its own. The inline gate below is
     // kept for a session that runs out mid-edit, where being thrown out would lose
     // somebody's place.
-    var back = window.location.pathname + (_id ? '?CWid=' + encodeURIComponent(_id) : '');
-    window.location.href = 'https://2gather.network/signin/?next=' + encodeURIComponent(back);
+    // The path only. Sign-in puts the person back on the end itself, so the id
+    // never travels in a link we build.
+    window.location.href = 'https://2gather.network/signin/?next=' +
+      encodeURIComponent(window.location.pathname);
   }
   function enterEdit(step){
     document.getElementById('profile-view').style.display='none';
@@ -1373,10 +1375,23 @@
   var _EDIT_KEY='cw-edit-'+String(_id||'').split('.').join('').toLowerCase();
   function _tokenGet(){
     try{
-      var raw=localStorage.getItem(_EDIT_KEY); if(!raw) return '';
-      var o=JSON.parse(raw);
-      if(!o||!o.t||!o.exp||Date.now()>(o.exp-60000)){ localStorage.removeItem(_EDIT_KEY); return ''; }
-      return o.t;
+      var raw=localStorage.getItem(_EDIT_KEY);
+      if(raw){
+        var o=JSON.parse(raw);
+        if(o&&o.t&&o.exp&&Date.now()<=(o.exp-60000)) return o.t;
+        localStorage.removeItem(_EDIT_KEY);
+      }
+      // Signing in at 2gather.network/signin mints exactly this session and keeps it
+      // under its own key. Somebody who has just signed in is not asked again here.
+      var t2=localStorage.getItem('cw-token')||'';
+      var who=String(localStorage.getItem('cw-id')||'').split('.').join('').toLowerCase();
+      var mine=String(_id||'').split('.').join('').toLowerCase();
+      if(t2 && who && who===mine){
+        var exp2=parseInt(String(t2).split('.')[1],10);
+        if(exp2 && Date.now()<=(exp2-60000)) return t2;
+        localStorage.removeItem('cw-token');
+      }
+      return '';
     }catch(e){ return ''; }
   }
   function _tokenPut(t){
