@@ -290,6 +290,11 @@
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
   function _param(k){ try{ return new URLSearchParams(location.search).get(k)||''; }catch(e){ return ''; } }
   var _id = _param('id')||_param('show')||_param('CWid')||_param('me')||_param('memberCard')||_param('appearId')||'';
+  // Ids are stripped from the address now, so arriving with a clean one is normal rather than
+  // exceptional. profile/ has always fallen back to what the device remembers and this page
+  // never did, which is why a clean address landed on the placeholder content built into this
+  // file instead of on somebody's own profile.
+  if(!_id){ try{ _id = String(localStorage.getItem('appear-id')||localStorage.getItem('cw-id')||'').trim(); }catch(e){ _id=''; } }
   var _profilePhoto='', _profileName='', _loaded={}, _pageLink='';
   var EXPRESSION_ADDED = ['My 2.5 pickleball game'];
   function parseNeedsStr(str){
@@ -1179,14 +1184,16 @@
   // Verify identity BEFORE entering the editor. Once verified, editing is silent for 60 min.
   function requestEdit(step){
     if(!_id || _editToken){ enterEdit(step); return; }
-    // Nobody signs in twice. Without a session this goes to the front door and comes
-    // back here, rather than asking for a code of its own. The inline gate below is
-    // kept for a session that runs out mid-edit, where being thrown out would lose
-    // somebody's place.
-    // The path only. Sign-in puts the person back on the end itself, so the id
-    // never travels in a link we build.
-    window.location.href = 'https://2gather.network/signin/?next=' +
-      encodeURIComponent(window.location.pathname);
+    // Sending somebody to 2gather.network/signin cannot work from here. The session it
+    // mints lives in that domain's storage and this page is on creating.works, which
+    // cannot read it, so the door opened and closed on the same step. Until the session
+    // moves somewhere both sites can see, asking here is the only way in that works.
+    // Draw the page before asking. Without this the card floated on an empty background,
+    // with no name, no photo and nothing saying whose profile was about to be opened.
+    // renderProfileView only paints, where showView would also harvest and save.
+    setBreadcrumb('view'); renderProfileView();
+    showPinGate(document.getElementById('profile-view'), function(){ enterEdit(step); },
+                'This is your profile. To change anything, verify it is you.');
   }
   function enterEdit(step){
     document.getElementById('profile-view').style.display='none';
