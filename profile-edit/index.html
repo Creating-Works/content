@@ -1179,7 +1179,12 @@
   // Verify identity BEFORE entering the editor. Once verified, editing is silent for 60 min.
   function requestEdit(step){
     if(!_id || _editToken){ enterEdit(step); return; }
-    showPinGate(document.getElementById('profile-view'), function(){ enterEdit(step); });
+    // Nobody signs in twice. Without a session this goes to the front door and comes
+    // back here, rather than asking for a code of its own. The inline gate below is
+    // kept for a session that runs out mid-edit, where being thrown out would lose
+    // somebody's place.
+    var back = window.location.pathname + (_id ? '?CWid=' + encodeURIComponent(_id) : '');
+    window.location.href = 'https://2gather.network/signin/?next=' + encodeURIComponent(back);
   }
   function enterEdit(step){
     document.getElementById('profile-view').style.display='none';
