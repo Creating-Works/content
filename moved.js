@@ -16,11 +16,18 @@
 (function () {
   if (window.location.hostname !== 'creating.works') { return; }
 
+  // Each of these is answered by 2gather through the apex Worker, checked before it was added
+  // here. A path 2gather does not answer for must never be on this list: it would hand somebody
+  // a 404 rather than a page, and three of these are linked from the sign-up form.
   var MOVED = [
-    '/profile-edit'
-    // Waiting on PROXY_PATHS in the apex Worker, then each of these joins the list:
-    // '/account', '/profile', '/terms-of-service.html', '/privacy-policy.html',
-    // '/code-of-conduct.html', '/giving', '/claim'
+    '/profile-edit',
+    '/account',
+    '/profile',
+    '/giving',
+    '/claim',
+    '/terms-of-service.html',
+    '/privacy-policy.html',
+    '/code-of-conduct.html'
   ];
 
   var here = window.location.pathname.replace(/\/index\.html$/, '/');
