@@ -723,9 +723,60 @@
     listEl.className='list flow'; listEl.innerHTML='';
     var eq=document.createElement('div'); eq.className='enjoy-q'; eq.textContent='What skill pays the bills?'; listEl.appendChild(eq);
     var pillRow=document.createElement('div'); pillRow.style.cssText='display:flex;justify-content:flex-end;'; listEl.appendChild(pillRow);
-    var _lang=String((_loaded&&_loaded.languages)||'').split(/[|,]/).map(function(x){ return x.trim(); }).filter(Boolean).join(', ');
-    var pill=document.createElement('div'); pill.className='lang-pill';
-    pill.textContent='✏️ Languages: '+(_lang||'none yet'); pillRow.appendChild(pill);
+    var pill=document.createElement('div'); pill.className='lang-pill'; pill.style.cursor='pointer';
+    pillRow.appendChild(pill);
+    var langZone=document.createElement('div'); listEl.appendChild(langZone);
+    function langList(){ return String((_loaded&&_loaded.languages)||'').split(/[|,]/).map(function(x){ return x.trim(); }).filter(Boolean); }
+    function paintPill(){ var l=langList(); pill.textContent='✏️ Languages: '+(l.length?l.join(', '):'none yet'); }
+    function setLangs(arr){
+      var seen={}, out=[];
+      arr.forEach(function(x){ var k=String(x).trim(); if(!k) return; var lk=k.toLowerCase(); if(seen[lk]) return; seen[lk]=1; out.push(k); });
+      _loaded.languages=out.join(', ');
+      paintPill(); scheduleSave();
+    }
+    function toggleLang(name){
+      var have=langList(), lk=String(name).toLowerCase();
+      var at=-1; have.forEach(function(x,i){ if(String(x).toLowerCase()===lk) at=i; });
+      if(at>-1) have.splice(at,1); else have.push(name);
+      setLangs(have); renderLangPicker();
+    }
+    function renderLangPicker(){
+      langZone.innerHTML='';
+      if(!langZone._open) return;
+      var have=langList().map(function(x){ return x.toLowerCase(); });
+      var pool=LANG_LIST.slice();
+      langList().forEach(function(x){ if(pool.map(function(p){return p.toLowerCase();}).indexOf(x.toLowerCase())===-1) pool.push(x); });
+      if(!pool.length) pool=langList();
+      var shown=pool.filter(function(l,i){ return i<8 || have.indexOf(l.toLowerCase())>-1; });
+      var rest=pool.filter(function(l){ return shown.indexOf(l)===-1; });
+      var row=document.createElement('div'); row.className='cat-row';
+      function addChip(l){
+        var el=chip(l, have.indexOf(l.toLowerCase())>-1);
+        el.addEventListener('click', function(){ toggleLang(l); });
+        row.appendChild(el);
+      }
+      shown.forEach(addChip);
+      if(rest.length){
+        var more=chip('More\u2026',false,'more');
+        more.addEventListener('click', function(){ more.remove(); rest.forEach(addChip); row.appendChild(other); });
+        row.appendChild(more);
+      }
+      var other=chip('+ Other',false,'more');
+      other.addEventListener('click', function(){
+        var line=document.createElement('div'); line.className='addown-line'; line.style.marginTop='10px';
+        var inp=document.createElement('input'); inp.type='text'; inp.className='need-own'; inp.placeholder='Which language?';
+        var add=document.createElement('button'); add.className='addown-btn'; add.textContent='Add';
+        function commit(){ var v=inp.value.trim(); if(!v) return; var h=langList(); h.push(v); setLangs(h); renderLangPicker(); }
+        add.onclick=commit;
+        inp.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); commit(); } });
+        line.appendChild(inp); line.appendChild(add); langZone.appendChild(line); inp.focus();
+        other.style.display='none';
+      });
+      row.appendChild(other);
+      langZone.appendChild(row);
+    }
+    pill.addEventListener('click', function(){ langZone._open=!langZone._open; renderLangPicker(); });
+    paintPill();
     var sub=document.createElement('div'); sub.className='enjoy-sub'; sub.textContent='Search by keywords, select chips to add, or add your own.'; listEl.appendChild(sub);
     listEl.appendChild(makeSearchBox('Search skills to add…', skillItemPool,
       function(h){ addSkillCard(h.name, h.cat, ''); },
@@ -1414,8 +1465,14 @@
   // ── Phase 3.2: build the category trees from the live reference-data ──
   // (getReferenceData), falling back to the hardcoded trees if the fetch fails.
   var GS_URL='https://cw-api-gate.jessieupp.workers.dev';
+  var LANG_LIST=['English','Mandarin','Cantonese','Hindi','Spanish','Arabic','Bengali','Portuguese','French','Urdu',
+    'Russian','Indonesian','German','Japanese','Swahili','Marathi','Telugu','Turkish','Tamil','Vietnamese','Korean',
+    'Italian','Thai','Persian (Farsi)','Polish','Pashto','Punjabi','Ukrainian','Malayalam','Kannada','Romanian','Dutch',
+    'Greek','Czech','Hungarian','Gujarati','Somali','Swedish','Norwegian','Hebrew','Danish','Finnish','Albanian',
+    'Croatian','Lithuanian','Nepali','Khmer (Cambodian)','Hmong','Estonian','Laotian','Sign Language'];
   function buildTreesFromRefData(rd){
     try{
+      LANG_LIST=(rd.languages||[]).map(function(x){ return String(x).trim(); }).filter(Boolean);
       // Recreation → Enjoy tree (recType > category > item)
       var recOrder=['Movement & Performance','Sports','Outdoor & Nature','Games & Strategy','Making & Collecting'];
       var etree={};
