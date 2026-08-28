@@ -160,7 +160,7 @@
   .pv-card{background:#fff;border-radius:14px;padding:8px 24px 18px;}
   .pv-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px 0 4px;}
   .pv-title{font-size:24px;font-weight:800;color:var(--ink);margin:0;}
-  .pv-photo{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--panel);border:1.5px solid var(--panel-line);font-size:24px;flex-shrink:0;overflow:hidden;}
+  .pv-photo{cursor:pointer;width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--panel);border:1.5px solid var(--panel-line);font-size:24px;flex-shrink:0;overflow:hidden;}
   .pv-section{padding:18px 0;border-bottom:1px solid var(--line);}
   .pv-section:last-child{border-bottom:none;}
   .pv-section-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;}
@@ -326,7 +326,9 @@
   function loadProfile(d){
     try{
       // A found profile is authoritative — empty fields mean empty, not the demo seed.
-      _loaded={ postal:d.postal||'', retired:d.retired||'', bringType:d.bringType||'', wantsSignupList:d.wantsSignupList||'', languages:d.languages||'' };
+      _loaded={ postal:d.postal||'', retired:d.retired||'', bringType:d.bringType||'', wantsSignupList:d.wantsSignupList||'', languages:d.languages||'', photoURL:d.photoURL||'' };
+      // Glide owns Main.Image and always wins; ours is what a person without a Glide row has.
+      if(!_profilePhoto && d.photoURL) _profilePhoto=String(d.photoURL);
       _said={ need:String(d.introNeed||'').trim(), enjoy:String(d.introEnjoy||'').trim(),
               skills:String(d.introSkills||'').trim(), values:String(d.introValues||'').trim(),
               offer:String(d.introOffer||'').trim() };
@@ -1252,6 +1254,58 @@
     var sb=opts.sub?'<span class="sub">'+esc(opts.sub)+'</span>':'';
     return '<div class="pv-tag'+(opts.cls?' '+opts.cls:'')+'">'+esc(name)+lv+sb+'</div>';
   }
+  // Somebody who signed up through our own door has no Glide row, so there is nowhere for a
+  // picture to come from and no way to make one. This gives them one.
+  //
+  // The shrinking happens here rather than on a server: a phone photo is four megabytes and a
+  // round avatar is never more than six hundred pixels, so the browser does the only work that
+  // was ever needed and about a hundred kilobytes leaves the device.
+  var PHOTO_URL = 'https://cw-photos.jessieupp.workers.dev';
+  function photoStat(msg){ var el=document.getElementById('pv-photo-stat'); if(el) el.textContent=msg||''; }
+  function choosePhoto(){
+    if(!_id){ return; }
+    if(!_editToken){ requestEdit(0); return; }
+    var inp=document.createElement('input');
+    inp.type='file'; inp.accept='image/*';
+    inp.onchange=function(){ var f=inp.files&&inp.files[0]; if(f) shrinkPhoto(f); };
+    inp.click();
+  }
+  function shrinkPhoto(file){
+    photoStat('Getting it ready…');
+    var img=new Image();
+    img.onload=function(){
+      try{
+        // Square from the middle, which is the crop a round frame makes anyway.
+        var side=Math.min(img.width, img.height);
+        var c=document.createElement('canvas'); c.width=600; c.height=600;
+        c.getContext('2d').drawImage(img,(img.width-side)/2,(img.height-side)/2,side,side,0,0,600,600);
+        c.toBlob(function(blob){
+          if(!blob){ photoStat('That picture could not be read.'); return; }
+          sendPhoto(blob);
+        },'image/jpeg',0.85);
+      }catch(e){ photoStat('That picture could not be read.'); }
+      finally { try{ URL.revokeObjectURL(img.src); }catch(e){} }
+    };
+    img.onerror=function(){ photoStat('That picture could not be read.'); };
+    img.src=URL.createObjectURL(file);
+  }
+  function sendPhoto(blob){
+    photoStat('Sending…');
+    fetch(PHOTO_URL+'/upload?id='+encodeURIComponent(_id), {
+      method:'POST',
+      headers:{ 'Content-Type':'image/jpeg', 'x-cw-token':_editToken },
+      body:blob
+    }).then(function(r){ return r.json(); }).then(function(d){
+      if(!d || d.status!=='ok' || !d.url){ photoStat((d&&d.message)||'That did not go through.'); return; }
+      // Cache-busted so the new face shows at once rather than after the edge forgets the old one.
+      _profilePhoto = d.url + '?v=' + Date.now();
+      _loaded.photoURL = d.url;
+      photoStat('');
+      scheduleSave();
+      renderProfileView();
+    }).catch(function(){ photoStat('That did not go through.'); });
+  }
+
   function pvSection(label, step, tagsHtml, extra){
     return '<div class="pv-section"><div class="pv-section-header"><div class="pv-section-label">'+label+'</div>'
       +'<button class="pv-edit" data-step="'+step+'">✏️ Edit</button></div>'
@@ -1272,7 +1326,11 @@
     var doms='<div class="pv-sub-h">Domains</div><div class="pv-tags">'+DOMAINS_ADDED.map(function(v){ return pvTag(v.t,{level:v.lvl}); }).join('')+'</div>';
     var haves=SECTIONS[4].data.map(function(h){ return pvTag(h.text||'A have', {sub:(h.cats&&h.cats[0])||''}); }).join('');
     pv.innerHTML='<div class="pv-card">'
-      +'<div class="pv-head"><h2 class="pv-title">'+(_profileName?('This is '+esc(String(_profileName).trim().split(' ')[0])):'This is me')+' 🌱</h2><div class="pv-photo">'+(_profilePhoto?'<img src="'+esc(_profilePhoto)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">':'🌱')+'</div></div>'
+      +'<div class="pv-head"><h2 class="pv-title">'+(_profileName?('This is '+esc(String(_profileName).trim().split(' ')[0])):'This is me')+' 🌱</h2><div class="pv-photo" id="pv-photo" title="Change your photo">'+(_profilePhoto?'<img src="'+esc(_profilePhoto)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">':'📷')+'</div></div>'
+      +'<div style="display:flex;justify-content:flex-end;align-items:center;gap:8px;margin:-6px 0 10px;">'
+        +'<span id="pv-photo-stat" style="font-size:12.5px;color:var(--soft);"></span>'
+        +'<button class="pv-edit" id="pv-photo-btn">'+(_profilePhoto?'Change photo':'Add a photo')+'</button>'
+      +'</div>'
 
       +pvSection("What I'm seeking",0,seeking,pvSaid('need'))
       +pvSection('What I enjoy',1,enjoy,pvSaid('enjoy')+expr)
@@ -1280,7 +1338,9 @@
       +pvSection('What I care about',3,'',vals+doms+pvSaid('values'))
       +pvSection('My haves',4,haves,pvSaid('offer'))
       +'</div>';
-    pv.querySelectorAll('.pv-edit').forEach(function(b){ b.onclick=function(){ requestEdit(parseInt(b.getAttribute('data-step'),10)); }; });
+    pv.querySelectorAll('.pv-edit').forEach(function(b){ if(b.id==='pv-photo-btn') return; b.onclick=function(){ requestEdit(parseInt(b.getAttribute('data-step'),10)); }; });
+    var _pb=document.getElementById('pv-photo-btn'); if(_pb) _pb.onclick=choosePhoto;
+    var _pp=document.getElementById('pv-photo'); if(_pp) _pp.onclick=choosePhoto;
     var _pm=document.getElementById('pv-manage'); if(_pm) _pm.onclick=function(){ window.location.href='https://creating.works/profile'+(_id?'?CWid='+encodeURIComponent(_id):''); };
     var _pg=document.getElementById('pv-groups'); if(_pg) _pg.onclick=function(){ showManage('groups'); };
   }
@@ -1591,7 +1651,8 @@
       +'&values='+encodeURIComponent(d.values)+'&domains='+encodeURIComponent(d.domains)+'&methods='+encodeURIComponent(d.methods)
       +'&expression='+encodeURIComponent(d.expression)+'&haves='+encodeURIComponent(d.haves)
       +'&retired='+encodeURIComponent(_loaded.retired||'')+'&bringType='+encodeURIComponent(_loaded.bringType||'')
-      +'&wantsSignupList='+encodeURIComponent(_loaded.wantsSignupList||'')+'&languages='+encodeURIComponent(_loaded.languages||'')+'&postal='+encodeURIComponent(_loaded.postal||'');
+      +'&wantsSignupList='+encodeURIComponent(_loaded.wantsSignupList||'')+'&languages='+encodeURIComponent(_loaded.languages||'')+'&postal='+encodeURIComponent(_loaded.postal||'')
+      +'&photoURL='+encodeURIComponent(_loaded.photoURL||'');
     return fetch(u).then(function(r){ return r.json(); });
   }
   // Automatic save: debounced on any edit, flushed when leaving a step or the editor.
