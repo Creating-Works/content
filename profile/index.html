@@ -2025,9 +2025,11 @@ function render(){
   }
   if(_screen==='intro'){ renderScreenIntro(el); return; }
   if(_screen===0){
-    // Your own profile leads with your Appear page and your answers as two choices. The Q&A only
-    // opens when you ask for it, so landing here is not a wall of tags.
-    if(!_showAnswers && !_viewerMode){ renderProfileLanding(el); return; }
+    // This page led with two buttons and hid the profile behind one of them, from the days when
+    // the Appear page was the other choice. The Appear page has gone and editing lives in the
+    // five circles now, so the only thing left was a door in front of the room. My profile shows
+    // the profile. ?landing=1 still opens the old screen.
+    if(_landingWanted() && !_viewerMode){ renderProfileLanding(el); return; }
     renderProfile(el,false); _wtmDecorate(); return;
   }
   if(_screen==='fast2'){ renderScreenFast2(el); return; }
@@ -2492,6 +2494,7 @@ function _wtmDecorate(){
   var target=host.firstElementChild||host;
   target.insertAdjacentHTML('beforeend', btn);
 }
+function _landingWanted(){ try{ return new URLSearchParams(location.search).get('landing')==='1'; }catch(e){ return false; } }
 var _showAnswers = (function(){ try{ return new URLSearchParams(location.search).get('answers')==='1'; }catch(e){ return false; } })();
 function renderProfileLanding(el){
   var page = window._pageLink || 'https://appear.network/dl/page/';
