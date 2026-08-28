@@ -1395,7 +1395,7 @@
     var dot=document.createElement('div'); dot.className='dot'; dot.textContent=(i+1);
     var lbl=document.createElement('div'); lbl.className='lbl'; lbl.textContent=s.tab;
     st.appendChild(dot); st.appendChild(lbl);
-    st.addEventListener('click', function(){ paint(i); window.scrollTo({top:0,behavior:'smooth'}); });
+    st.addEventListener('click', function(){ harvest(); flushSave(); paint(i); window.scrollTo({top:0,behavior:'smooth'}); });
     stepper.appendChild(st);
   });
 
@@ -1408,8 +1408,8 @@
   });
 
   document.getElementById('met-header').addEventListener('click', function(){ this.classList.toggle('open'); metListEl.classList.toggle('open'); });
-  document.getElementById('next-btn').addEventListener('click', function(){ SEC_DONE[curSec]=true; if(curSec<SECTIONS.length-1){ paint(curSec+1); window.scrollTo({top:0,behavior:'smooth'}); } else { goHome(); } });
-  document.getElementById('back-btn').addEventListener('click', function(){ if(curSec>0){ paint(curSec-1); window.scrollTo({top:0,behavior:'smooth'}); } else { goHome(); } });
+  document.getElementById('next-btn').addEventListener('click', function(){ harvest(); flushSave(); SEC_DONE[curSec]=true; if(curSec<SECTIONS.length-1){ paint(curSec+1); window.scrollTo({top:0,behavior:'smooth'}); } else { goHome(); } });
+  document.getElementById('back-btn').addEventListener('click', function(){ harvest(); flushSave(); if(curSec>0){ paint(curSec-1); window.scrollTo({top:0,behavior:'smooth'}); } else { goHome(); } });
 
   // ── Phase 3.2: build the category trees from the live reference-data ──
   // (getReferenceData), falling back to the hardcoded trees if the fetch fails.
