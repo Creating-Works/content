@@ -368,7 +368,13 @@ var _directScreen = '';
   // hub, Update-my-answers links). Accept it exactly like id/memberCard.
   var urlId=params.get('id')||params.get('memberCard')||params.get('CWid');
   if(urlId){_appearId=urlId;try{localStorage.setItem('appear-id',_appearId);}catch(e){}}
-  else{try{_appearId=localStorage.getItem('appear-id');}catch(e){}}
+  else{
+    // Who is being looked at comes from the identity module, so View as reaches this page as
+    // well. Reading the device straight off meant the amber bar named one person while the
+    // page underneath drew another, with that other person's Edit buttons on it.
+    try{_appearId=(window.CW&&CW.me)?String(CW.me().id||'').trim():'';}catch(e){_appearId='';}
+    if(!_appearId){try{_appearId=localStorage.getItem('appear-id');}catch(e){}}
+  }
 })();
 
 // The name and tabs need nothing from the backend, so they paint immediately and the card
@@ -434,6 +440,9 @@ paintShellHeader();
 // the owner is recognised by "&me=" or by the appear-id this device already stores - the
 // same test the nav pills have always used, now applied to the pencils and saves too.
 function isOwner(){
+  // Looking as somebody else never writes, on any page. The bar says so and this is what
+  // makes it true, so every Edit disappears for as long as View as is on.
+  try{ if(window.CW&&CW.me&&CW.me().viewing) return false; }catch(e){}
   if(!_viewerMode) return !!_appearId;
   var target=String(_showId||'').replace(/\./g,'').toLowerCase();
   if(!target) return false;
