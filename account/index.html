@@ -14,6 +14,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<script src="https://2gather.network/nav/identity.js?v=4"></script>
 <script src="/moved.js?v=2"></script>
 <meta name="robots" content="noindex, nofollow">
 <title>My account</title>
@@ -130,8 +131,8 @@
   function P(k){try{return new URLSearchParams(location.search).get(k)||'';}catch(e){return '';}}
 
   // CWid is the standard "this is me" param; id/me/memberCard/appearId accepted too.
-  var meId=(P('CWid')||P('id')||P('me')||P('memberCard')||P('appearId')||'').trim();
-  var D={name:'',photo:'',pageLink:'',postal:'',location:'',languages:'',email:'',phone:'',
+  var meId=(window.CW&&CW.me)?CW.me().id:(P('CWid')||P('id')||P('me')||P('memberCard')||P('appearId')||'').trim();
+  var D={name:'',firstName:'',lastName:'',photo:'',pageLink:'',postal:'',location:'',languages:'',email:'',phone:'',
        visPublic:'',showPhoto:'',onMap:'',findable:'',ackTerms:'',dateAckTerms:''};
 
   function go(url){ window.location.href=url; }
@@ -251,6 +252,8 @@
       +'&postal='+encodeURIComponent(D.postal||'')
       +'&location='+encodeURIComponent(D.location||'')
       +'&languages='+encodeURIComponent(D.languages||'')
+      +'&firstName='+encodeURIComponent(D.firstName||'')
+      +'&lastName='+encodeURIComponent(D.lastName||'')
       +'&visPublic='+(permOn('visPublic')?'true':'false')
       +'&showPhoto='+(permOn('showPhoto')?'true':'false')
       +'&onMap='+(permOn('onMap')?'true':'false')
@@ -357,8 +360,8 @@
         +'<a href="https://appear.network/dl/page" style="color:var(--brand);font-weight:700;">Update it on Appear</a>.</div></div>'
       +'</div>'
       +'<div class="fieldgrid">'
-      +readonlyField('Full name',D.name,'Your name comes from your Appear page. '
-        +'<a href="https://appear.network/dl/page" style="color:var(--brand);font-weight:700;">Update it on Appear</a>.')
+      +field('firstName','First name','text',D.firstName,'')
+      +field('lastName','Last name','text',D.lastName,'')
       +readonlyField('Email', D.email, _editToken
         ? 'This is where your one-time codes are sent. It comes from your account, so it is changed on '
           +'<a href="https://appear.network/dl/page" style="color:var(--brand);font-weight:700;">Appear</a>.'
@@ -510,7 +513,7 @@
   buildTabs(startTab);
 
   if(!meId){
-    document.getElementById('panel').innerHTML='<div class="status err">This page needs your profile link. Open it from your group page or your profile so it knows who you are.</div>';
+    document.getElementById('panel').innerHTML='<div class="status err">This device does not know who you are yet. <a href="https://2gather.network/signin/?next=%2Faccount%2F" style="color:#1F699E;font-weight:700;">Sign in</a> and you will land back here.</div>';
     return;
   }
   // Two reads in parallel (one round-trip of wall-clock): lookupProfile carries the name, photo,
@@ -520,6 +523,11 @@
   Promise.all([pLookup,pProfile]).then(function(res){
     var lu=res[0]||{}, pr=res[1]||{};
     if(lu.found){ D.name=lu.name||''; D.photo=lu.photo||''; D.pageLink=lu.pageLink||''; }
+    if(D.name && !D.firstName && !D.lastName){
+      var _bits=String(D.name).trim().split(/\s+/);
+      D.lastName=_bits.length>1?_bits.pop():'';
+      D.firstName=_bits.join(' ');
+    }
     if(pr.found){
       if(!D.name) D.name=pr.name||'';
       if(!D.photo) D.photo=pr.photo||'';
