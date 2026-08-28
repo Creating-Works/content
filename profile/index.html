@@ -4359,8 +4359,20 @@ window.goBack = function(){
   // Q&A, so it waits until Update answers is pressed rather than holding up every visit.
   if(!_introMode && !_directScreen && !_showAnswers){
     _screen=0;
-    render();
-    loadRefData();
+    render();                                    // name and photo, which are already in hand
+    // The answers used to wait for Update answers to be pressed, from the days when this page
+    // was a landing screen with two buttons on it. It is the reader now, and the sections it
+    // draws were coming up empty for everybody, their own profile included. They load in the
+    // background and the page repaints when they arrive, so nothing waits on them.
+    loadRefData()
+      .then(function(){ return loadProfileAndIntake(); })
+      .then(function(){
+        _profileLoaded=true;
+        if(_hasProfile) _completed=true;         // never pushes somebody into the editor
+        _screen=0;
+        render();
+      })
+      .catch(function(){});
     return;
   }
   var _bootEl=document.getElementById('app-content');
@@ -4389,7 +4401,7 @@ window.goBack = function(){
   render();
 })();
 </script>
-<script src="https://2gather.network/nav/topbar.js?v=5.54" defer></script>
+<script src="https://2gather.network/nav/topbar.js?v=5.55" defer></script>
 </body>
 <!--
   Copyright 2026 DayBalancer LLC. All rights reserved.
