@@ -14,6 +14,7 @@
 <html lang="en">
 <head>
 <script src="/moved.js?v=2"></script>
+<script src="https://2gather.network/nav/identity.js?v=4"></script>
   <meta charset="UTF-8">
 <meta name="robots" content="noindex, nofollow">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -436,10 +437,14 @@ function isOwner(){
   if(!_viewerMode) return !!_appearId;
   var target=String(_showId||'').replace(/\./g,'').toLowerCase();
   if(!target) return false;
-  var viaParam='',viaDevice='';
+  var viaParam='',viaDevice='',viaSignIn='';
   try{ viaParam=String(new URLSearchParams(window.location.search).get('me')||'').replace(/\./g,'').toLowerCase(); }catch(e){}
   try{ viaDevice=String(localStorage.getItem('appear-id')||'').replace(/\./g,'').toLowerCase(); }catch(e){}
-  return !!((viaParam&&viaParam===target)||(viaDevice&&viaDevice===target));
+  // Signing in is how somebody says who they are now, and this never asked. Anybody who arrived
+  // on a link without `me` on it could edit the whole page while every save quietly did nothing,
+  // because autoSave stops here first. That is worse than refusing to edit.
+  try{ viaSignIn=(window.CW&&CW.me)?String(CW.me().id||'').replace(/\./g,'').toLowerCase():''; }catch(e){}
+  return !!((viaParam&&viaParam===target)||(viaDevice&&viaDevice===target)||(viaSignIn&&viaSignIn===target));
 }
 
 var GS_URL='https://cw-api-gate.jessieupp.workers.dev';
@@ -2308,7 +2313,7 @@ function renderScreenConfirm(el){
     +'<h2 style="margin-bottom:18px;">You\'re in! 🎉</h2>'
     +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
     +'<button onclick="goToProfile()" style="'+BTN+'cursor:pointer;">View event profile</button>'
-    +(hub?'<a href="'+hub+'" style="'+BTN_O+'">View event bulletin board</a>':'')
+    +(hub?'<a href="'+hub+'" style="'+BTN_O+'">View the event</a>':'')
     +'</div>';
   // hasBB arrives from getEventById. If this screen is the first to need it, fetch once and
   // redraw, otherwise a hub event would land here with the hub button missing.
@@ -2320,7 +2325,7 @@ function renderScreenFast2(el){
   var INP='width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;box-sizing:border-box;';
   cont.innerHTML=fastStepHTML(2)
     +'<h2>A little about you</h2>'
-    +'<p style="font-size:13px;color:var(--soft);margin:0 0 18px;">These five answers are what puts you on the event bulletin board, where people can find you. You are welcome to add more to your profile afterwards.</p>'
+    +'<p style="font-size:13px;color:var(--soft);margin:0 0 18px;">These five answers are what puts you in front of the people at the event. You are welcome to add more to your profile afterwards.</p>'
     +'<div style="margin-bottom:18px;">'
       +'<div style="font-weight:700;font-size:15px;color:var(--text);margin-bottom:6px;">Postal code</div>'
       +'<input type="text" id="fast-postal" placeholder="Your postal code" value="'+esc(_postal)+'" style="'+INP+'">'
@@ -2424,9 +2429,9 @@ window.wtmRemove=function(id){
 };
 // "(on the bulletin board)" - a link when we know which event's bulletin board to send them to, plain text otherwise.
 function _wtmHubLink(){
-  if(!_eventId) return '(on the bulletin board)';
+  if(!_eventId) return '';
   var url='https://2gather.network/attendees?id='+encodeURIComponent(_eventId)+(_appearId?'&memberCard='+encodeURIComponent(_appearId):'');
-  return '<a role="link" tabindex="0" data-nav="'+esc(url)+'" title="'+esc(_eventTitle||'Bulletin board')+'" onclick="return _safeNavGo(this)" style="color:var(--brand);font-weight:600;">(on the bulletin board)</a>';
+  return '<a role="link" tabindex="0" data-nav="'+esc(url)+'" title="'+esc(_eventTitle||'Bulletin board')+'" onclick="return _safeNavGo(this)" style="color:var(--brand);font-weight:600;">(at the event)</a>';
 }
 function _wtmListHTML(){
   var a=_wtmData||[];
@@ -4190,7 +4195,7 @@ window.goNext = function(){
     var notice=document.getElementById('fast-notice');
     // First tap names what is still open and what it means; a second tap continues anyway.
     if(miss.length&&notice&&!notice.innerHTML){
-      notice.innerHTML='<div class="reminder-msg">Still open: '+esc(miss.join(', '))+'. You are welcome to continue. Your profile appears on the event bulletin board once these are filled in, and you can come back to them from your profile at any time.</div>';
+      notice.innerHTML='<div class="reminder-msg">Still open: '+esc(miss.join(', '))+'. You are welcome to continue. Your profile appears at the event once these are filled in, and you can come back to them from your profile at any time.</div>';
       return;
     }
     _completed=true; _hasProfile=true;

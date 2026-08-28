@@ -1339,6 +1339,8 @@
     var haves=SECTIONS[4].data.map(function(h){ return pvTag(h.text||'A have', {sub:(h.cats&&h.cats[0])||''}); }).join('');
     pv.innerHTML='<div class="pv-card">'
       +'<div class="pv-head"><h2 class="pv-title">'+(_profileName?('This is '+esc(String(_profileName).trim().split(' ')[0])):'This is me')+' 🌱</h2><div class="pv-photo" id="pv-photo"'+(_viewingSomeoneElse?'':' title="Change your photo"')+'>'+(_profilePhoto?'<img src="'+esc(_profilePhoto)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">':'📷')+'</div></div>'
+      +(_viewingSomeoneElse?('<div style="display:flex;justify-content:flex-end;margin:-6px 0 10px;">'
+        +'<button class="pv-edit" id="pv-bookmark">\u{1F516} Bookmark to meet</button></div>'):'')
       +(_viewingSomeoneElse?'':'<div style="display:flex;justify-content:flex-end;align-items:center;gap:8px;margin:-6px 0 10px;">'
         +'<span id="pv-photo-stat" style="font-size:12.5px;color:var(--soft);"></span>'
         +'<button class="pv-edit" id="pv-photo-btn">'+(_profilePhoto?'Change photo':'Add a photo')+'</button>'
@@ -1350,7 +1352,17 @@
       +pvSection('What I care about',3,'',vals+doms+pvSaid('values'))
       +pvSection('My haves',4,haves,pvSaid('offer'))
       +'</div>';
-    pv.querySelectorAll('.pv-edit').forEach(function(b){ if(b.id==='pv-photo-btn') return; b.onclick=function(){ requestEdit(parseInt(b.getAttribute('data-step'),10)); }; });
+    pv.querySelectorAll('.pv-edit').forEach(function(b){ if(b.id==='pv-photo-btn'||b.id==='pv-bookmark') return; b.onclick=function(){ requestEdit(parseInt(b.getAttribute('data-step'),10)); }; });
+    var _bm=document.getElementById('pv-bookmark');
+    if(_bm) _bm.onclick=function(){
+      var mine=''; try{ mine=(window.CW&&CW.realMe)?String(CW.realMe().id||''):''; }catch(e){}
+      if(!mine){ _bm.textContent='Sign in to bookmark'; return; }
+      _bm.disabled=true; _bm.textContent='Saving\u2026';
+      fetch(GS_URL+'?action=saveBookmark&from='+encodeURIComponent(mine)+'&to='+encodeURIComponent(_id))
+        .then(function(r){ return r.json(); })
+        .then(function(){ _bm.textContent='\u{1F516} Bookmarked'; })
+        .catch(function(){ _bm.disabled=false; _bm.textContent='That did not save. Try again.'; });
+    };
     var _pb=document.getElementById('pv-photo-btn'); if(_pb) _pb.onclick=choosePhoto;
     var _pp=document.getElementById('pv-photo'); if(_pp) _pp.onclick=choosePhoto;
     var _pm=document.getElementById('pv-manage'); if(_pm) _pm.onclick=function(){ window.location.href='https://creating.works/profile'+(_id?'?CWid='+encodeURIComponent(_id):''); };
