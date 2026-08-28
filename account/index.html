@@ -338,15 +338,7 @@
         +'<div class="d">Your profile answers follow you in any event or group you join.</div>'
         +'<div class="row"><a class="btn solid" role="link" tabindex="0" data-nav="'+esc(answersUrl())+'" onclick="return _safeNavGo(this)">Update answers</a></div>'
         +'</div>'
-        +'<div class="infobox">'
-        +'<div class="t">Appear page</div>'
-        +'<div class="d">The page you share outside your groups and events. It carries its own link and QR code.</div>'
-        +'<div class="row">'
-        +'<a class="btn solid" role="link" tabindex="0" id="btn-viewpage">View my page</a>'
-        +'<a class="btn ghost" role="link" tabindex="0" id="btn-editpage">Edit my page</a>'
-        +'</div></div>';
-      var vp=document.getElementById('btn-viewpage'); if(vp) vp.onclick=function(){ go(D.pageLink||APPEAR_EDIT); };
-      var ep=document.getElementById('btn-editpage'); if(ep) ep.onclick=function(){ go(APPEAR_EDIT); };
+        ;
       return;
     }
     if(key==='permissions'){

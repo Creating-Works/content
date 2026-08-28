@@ -2483,14 +2483,7 @@ function renderProfileLanding(el){
         +'<a role="link" tabindex="0" class="pl-btn ghost" data-nav="https://creating.works/giving'
         +(_appearId?('?id='+encodeURIComponent(_appearId)):'')+'" onclick="return _safeNavGo(this)">My gift list</a></div>'
     +'</div>'
-    +'<div class="pl-box">'
-      +'<div class="pl-t">Appear page</div>'
-      +'<div class="pl-d">The page you share outside your groups and events. It carries its own link and QR code.</div>'
-      +'<div class="pl-row">'
-        +'<a role="link" tabindex="0" class="pl-btn" data-nav="'+esc(page)+'" onclick="return _safeNavGo(this)">View my page</a>'
-        +'<a role="link" tabindex="0" class="pl-btn ghost" data-nav="https://appear.network/dl/page/" onclick="return _safeNavGo(this)">Edit my page</a>'
-      +'</div>'
-    +'</div>';
+    ;
   var b=document.getElementById('pl-answers');
   if(b) b.onclick=function(){
     _showAnswers=true;
