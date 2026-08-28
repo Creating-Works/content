@@ -563,8 +563,16 @@
       +'&editToken='+encodeURIComponent(_editToken))
       .then(function(r){ return r.json(); })
       .then(function(resp){
-        if(!resp || resp.status!=='ok' || !resp.email) return;
-        D.email=resp.email;
+        if(!resp || resp.status!=='ok') return;
+        if(resp.email) D.email=resp.email;
+        // The two name columns come back from the account now. The page used to hold only one
+        // joined name and rebuild both boxes by splitting it, calling the last word the surname,
+        // so a two-word surname could never survive a reload. Anything typed since the page
+        // opened wins, so a slow answer cannot wipe an edit in progress.
+        if(!_dirty && (resp.firstName || resp.lastName)){
+          D.firstName=String(resp.firstName||'');
+          D.lastName=String(resp.lastName||'');
+        }
         // Only repaint when the person is looking at the panel that shows it.
         var t=document.querySelector('.tab.on');
         if(t && t.textContent==='My account') renderPanel('account');
