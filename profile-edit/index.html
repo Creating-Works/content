@@ -970,7 +970,7 @@
     var ownInp=document.createElement('input'); ownInp.type='text'; ownInp.className='need-own'; ownInp.placeholder='Write it in your own words';
     var ownBtn=document.createElement('button'); ownBtn.className='addown-btn'; ownBtn.textContent='Add';
     ownLine.appendChild(ownInp); ownLine.appendChild(ownBtn); listEl.appendChild(ownLine);
-    function ownCommit(){ var v=ownInp.value.trim(); if(!v) return; ownInp.value=''; openAddEditor({item:v,type:'person',category:'',level:'',detail:'',local:true}); }
+    function ownCommit(){ var v=ownInp.value.trim(); if(!v) return; ownInp.value=''; openAddEditor({item:'',type:'person',category:'',level:'',detail:v,local:true}); }
     ownBtn.onclick=ownCommit;
     ownInp.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); ownCommit(); } });
     var orSub=document.createElement('div'); orSub.className='enjoy-sub'; orSub.textContent='Or browse by what kind of thing it is.'; listEl.appendChild(orSub);
@@ -1082,7 +1082,7 @@
     function buildNeedEditor(src, onSave, onCancel){
       var d={item:src.item||'',type:src.type||'person',category:src.category||'',level:src.level||'',detail:src.detail||'',local:!!src.local};
       var box=document.createElement('div'); box.className='need-editor';
-      var itemInp=document.createElement('input'); itemInp.type='text'; itemInp.placeholder='Name'; itemInp.value=d.item; box.appendChild(itemInp);
+      var itemInp=document.createElement('input'); itemInp.type='text'; itemInp.placeholder='Name it (optional)'; itemInp.value=d.item; box.appendChild(itemInp);
       var typeSel=document.createElement('select');
       [['person','👤 Person'],['space','🏡 Space'],['thing','📦 Thing']].forEach(function(p){ var o=document.createElement('option'); o.value=p[0]; o.textContent=p[1]; typeSel.appendChild(o); });
       typeSel.value=d.type; box.appendChild(typeSel);
@@ -1102,7 +1102,7 @@
       var save=document.createElement('button'); save.className='ne-save'; save.textContent='Save';
       var cancel=document.createElement('button'); cancel.className='ne-cancel'; cancel.textContent='Cancel';
       acts.appendChild(save); acts.appendChild(cancel); box.appendChild(acts);
-      save.onclick=function(){ d.item=itemInp.value.trim()||d.item; d.type=typeSel.value; d.category=(typeSel.value==='space')?'':catSel.value; d.detail=detailInp.value.trim(); d.local=ck.checked; onSave(d); };
+      save.onclick=function(){ d.item=itemInp.value.trim(); d.type=typeSel.value; d.category=(typeSel.value==='space')?'':catSel.value; d.detail=detailInp.value.trim(); d.local=ck.checked; onSave(d); };
       cancel.onclick=function(){ onCancel(); };
       return box;
     }
@@ -1115,9 +1115,9 @@
     function needCard(obj){
       var card=document.createElement('div'); card.className='need-item';
       var left=document.createElement('div'); left.className='need-item-left';
-      var nm=document.createElement('div'); nm.className='need-item-name'; nm.textContent=obj.item; left.appendChild(nm);
+      var nm=document.createElement('div'); nm.className='need-item-name'; nm.textContent=obj.item||obj.detail||'Untitled'; left.appendChild(nm);
       if(obj.category){ var cat=document.createElement('div'); cat.className='need-item-cat'; cat.textContent=obj.category; left.appendChild(cat); }
-      if(obj.detail){ var detEl=document.createElement('div'); detEl.className='need-item-detail'; detEl.textContent='Seeking: '+obj.detail; left.appendChild(detEl); }
+      if(obj.detail&&obj.item){ var detEl=document.createElement('div'); detEl.className='need-item-detail'; detEl.textContent='Seeking: '+obj.detail; left.appendChild(detEl); }
       card.appendChild(left);
       var right=document.createElement('div'); right.className='need-item-right';
       var edit=document.createElement('button'); edit.className='need-icon-btn'; edit.title='Edit'; edit.textContent='✏️';
