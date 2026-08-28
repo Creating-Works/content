@@ -1063,7 +1063,6 @@
       done.onclick=function(){ panel.remove(); };
     }
 
-    var TYPE_LABEL={person:'Person',space:'Space',thing:'Thing'};
     function addNeed(obj){ NEEDS_ADDED.unshift(obj); renderAdded(); }
     // Person adds go through the confirm editor first (ask local / level / more context).
     function openAddPerson(item, category){ openAddEditor({item:item,type:'person',category:category||'',level:'',detail:'',local:true}); }
@@ -1108,7 +1107,7 @@
     function needCard(obj){
       var card=document.createElement('div'); card.className='need-item';
       var left=document.createElement('div'); left.className='need-item-left';
-      var nm=document.createElement('div'); nm.className='need-item-name'; nm.textContent=TYPE_LABEL[obj.type]+': '+obj.item; left.appendChild(nm);
+      var nm=document.createElement('div'); nm.className='need-item-name'; nm.textContent=obj.item; left.appendChild(nm);
       if(obj.category){ var cat=document.createElement('div'); cat.className='need-item-cat'; cat.textContent=obj.category; left.appendChild(cat); }
       if(obj.detail){ var detEl=document.createElement('div'); detEl.className='need-item-detail'; detEl.textContent='Seeking: '+obj.detail; left.appendChild(detEl); }
       card.appendChild(left);
