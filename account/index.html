@@ -200,10 +200,23 @@
   // editable. A save carries the same one-time-code token the profile page mints, so an account
   // cannot be changed by whoever merely holds the link. The token sits under the same browser key
   // profile.html uses, so verifying once covers both pages for the hour.
-  var _EDIT_KEY='cw-edit-'+String(meId||'');
+  var _EDIT_KEY='cw-edit-'+String(meId||'').split('.').join('').toLowerCase();
   function _tokenGet(){
     try{
-      var raw=localStorage.getItem(_EDIT_KEY); if(!raw) return '';
+      var raw=localStorage.getItem(_EDIT_KEY);
+      if(!raw){
+        // Signing in mints exactly this session and keeps it under its own name. Somebody who
+        // has just signed in is not asked again here.
+        var t2=localStorage.getItem('cw-token')||'';
+        var who=String(localStorage.getItem('cw-id')||'').split('.').join('').toLowerCase();
+        var mine=String(meId||'').split('.').join('').toLowerCase();
+        if(t2 && who && who===mine){
+          var exp2=parseInt(String(t2).split('.')[1],10);
+          if(exp2 && Date.now()<=(exp2-60000)) return t2;
+          localStorage.removeItem('cw-token');
+        }
+        return '';
+      }
       var o=JSON.parse(raw);
       if(!o||!o.t||!o.exp||Date.now()>(o.exp-60000)){ localStorage.removeItem(_EDIT_KEY); return ''; }
       return o.t;
