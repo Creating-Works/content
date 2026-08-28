@@ -1,5 +1,6 @@
 <!-- Design A profile — live profile answers page (linked from profile.html "Update answers").
      Freeze of the pre-Design-A intake.html: The-New-Build-Repository/design/frozen/intake-V6.23-preDesignA-2026-08-24.html -->
+<meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
 <title>Edit my profile</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -32,9 +33,9 @@
   .list.flow{display:block;background:#fff;border-radius:14px;padding:20px 22px;}
   .needcard{background:#fff;border:1px solid var(--panel-line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;}
   .needcard .cardtitle{background:var(--brand);color:#fff;font-size:15px;font-weight:600;padding:12px 16px;line-height:1.3;}
-  .needcard .cardtitle input{width:100%;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.45);border-radius:8px;outline:none;color:#fff;font-family:inherit;font-size:15px;font-weight:600;padding:8px 11px;}
-  .needcard .cardtitle input:focus{background:rgba(255,255,255,.24);border-color:#fff;}
-  .needcard .cardtitle input::placeholder{color:rgba(255,255,255,.6);}
+  .needcard .cardtitle input{width:100%;background:#fff;border:1px solid rgba(255,255,255,.55);border-radius:8px;outline:none;color:var(--ink);font-family:inherit;font-size:15px;font-weight:600;padding:8px 11px;}
+  .needcard .cardtitle input:focus{border-color:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.35);}
+  .needcard .cardtitle input::placeholder{color:var(--soft);font-weight:500;}
   .needcard .body{padding:14px 16px;display:flex;flex-direction:column;}
   .sub-label{font-size:13px;font-weight:700;color:var(--soft);margin:14px 0 6px;}
   .sub-label:first-of-type{margin-top:0;}
@@ -117,6 +118,11 @@
   .ideas{color:var(--soft);font-style:italic;font-size:14px;margin:0 0 12px;}
   .addown{background:var(--panel);border:1px solid var(--panel-line);border-radius:12px;padding:16px;margin:10px 0;}
   .addown input{width:100%;background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-family:inherit;font-size:15px;color:var(--ink);}
+  .addown-line{display:flex;align-items:center;gap:10px;}
+  .need-own{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-family:inherit;font-size:15px;color:var(--ink);outline:none;}
+  .need-own:focus{border-color:var(--brand);}
+  .addown-line input{flex:1;min-width:0;}
+  .addown-line .addown-btn{flex-shrink:0;padding:11px 20px;}
   .addown-label{font-size:14px;font-weight:700;color:var(--ink);margin:12px 0 8px;}
   .addown-results{margin-top:10px;display:flex;flex-direction:column;gap:6px;}
   .addown-note{font-size:12px;font-weight:600;color:var(--soft);}
@@ -372,27 +378,39 @@
     });
   }
   // Live search box (icon + input + results dropdown), mirroring the intake search.
-  function wireSearch(inp, results, poolFn, onPick){
+  // A heading in a list is a real word somebody will type, so the search offers it as a way in
+  // rather than pretending it does not exist. Picking a heading opens that level; picking an
+  // item adds it. And whatever was typed can always be kept as Other, so a phrase the list has
+  // no name for is not simply lost.
+  function wireSearch(inp, results, poolFn, onPick, onOther){
     inp.addEventListener('input', function(){
       results.innerHTML='';
-      var q=inp.value.trim().toLowerCase();
+      var raw=inp.value.trim();
+      var q=raw.toLowerCase();
       if(q.length<2){ results.style.display='none'; return; }
-      var seen={}, hits=[];
-      poolFn().forEach(function(p){ var n=p.name.toLowerCase(); if(n.indexOf(q)===-1||seen[n]) return; seen[n]=1; hits.push(p); });
+      var seen={}, hits=[], exact=false;
+      poolFn().forEach(function(p){ var n=p.name.toLowerCase(); if(n===q) exact=true; if(n.indexOf(q)===-1||seen[n]) return; seen[n]=1; hits.push(p); });
       hits=hits.slice(0,10);
-      if(!hits.length){ results.style.display='none'; return; }
+      if(!hits.length && (!onOther || exact)){ results.style.display='none'; return; }
       results.style.display='block';
-      hits.forEach(function(h){ var row=document.createElement('div'); row.className='search-hit'; var nm=document.createElement('div'); nm.className='sh-name'; nm.textContent=h.name; row.appendChild(nm); if(h.tag){ var tg=document.createElement('div'); tg.className='sh-tag'; tg.textContent=h.tag; row.appendChild(tg); } row.onclick=function(){ onPick(h); inp.value=''; results.innerHTML=''; results.style.display='none'; }; results.appendChild(row); });
+      hits.forEach(function(h){ var row=document.createElement('div'); row.className='search-hit'; var nm=document.createElement('div'); nm.className='sh-name'; nm.textContent=h.name+(h.drill?' \u203A':''); row.appendChild(nm); if(h.tag){ var tg=document.createElement('div'); tg.className='sh-tag'; tg.textContent=h.tag+(h.drill?' \u00b7 open this list':''); row.appendChild(tg); } row.onclick=function(){ onPick(h); if(!h.drill) inp.value=''; results.innerHTML=''; results.style.display='none'; }; results.appendChild(row); });
+      if(onOther && !exact){
+        var orow=document.createElement('div'); orow.className='search-hit';
+        var onm=document.createElement('div'); onm.className='sh-name'; onm.textContent='Add \u201C'+raw+'\u201D'; orow.appendChild(onm);
+        var otg=document.createElement('div'); otg.className='sh-tag'; otg.textContent='Other'; orow.appendChild(otg);
+        orow.onclick=function(){ onOther(raw); inp.value=''; results.innerHTML=''; results.style.display='none'; };
+        results.appendChild(orow);
+      }
     });
   }
-  function makeSearchBox(placeholder, poolFn, onPick){
+  function makeSearchBox(placeholder, poolFn, onPick, onOther){
     var wrap=document.createElement('div');
     var sb=document.createElement('div'); sb.className='enjoy-search';
     sb.appendChild(document.createTextNode('🔍 '));
     var inp=document.createElement('input'); inp.type='text'; inp.placeholder=placeholder; sb.appendChild(inp);
     wrap.appendChild(sb);
     var results=document.createElement('div'); results.className='search-results'; wrap.appendChild(results);
-    wireSearch(inp, results, poolFn, onPick);
+    wireSearch(inp, results, poolFn, onPick, onOther);
     return wrap;
   }
 
@@ -475,7 +493,13 @@
     titleWrap.appendChild(ni); card.appendChild(titleWrap);
     var body=document.createElement('div'); body.className='body';
     if (sec.cats){
-      body.appendChild(label('Category','sub-label'));
+      // Category is a follow-up to your words, not a gate in front of them: it stays out of the
+      // way until there is something to categorise.
+      var catWrap=document.createElement('div');
+      function showCats(){ catWrap.style.display = (ni.value||'').trim() ? '' : 'none'; }
+      body.appendChild(catWrap);
+      catWrap.appendChild(label('Category','sub-label'));
+      ni.addEventListener('input', showCats);
       var row=document.createElement('div'); row.className='cat-row';
       var extras=document.createElement('div'); extras.className='extras';
       function mkCat(c, host){ var el=chip(c, p.cats.indexOf(c)!==-1); el.addEventListener('click', function(){ var k=p.cats.indexOf(c); if(k===-1){ p.cats.push(c); el.classList.add('on'); } else { p.cats.splice(k,1); el.classList.remove('on'); } }); host.appendChild(el); }
@@ -483,7 +507,8 @@
       allCats.slice(0,4).forEach(function(c){ mkCat(c,row); });
       var more=chip('More…',false,'more'); allCats.slice(4).forEach(function(c){ mkCat(c,extras); });
       more.addEventListener('click', function(){ extras.classList.toggle('on'); more.style.display='none'; });
-      row.appendChild(more); body.appendChild(row); body.appendChild(extras);
+      row.appendChild(more); catWrap.appendChild(row); catWrap.appendChild(extras);
+      showCats();
     }
     if (sec.levels){
       body.appendChild(label(sec.levelLabel||'Level','sub-label'));
@@ -527,7 +552,9 @@
     listEl.className='list flow'; listEl.innerHTML='';
     var eq=document.createElement('div'); eq.className='enjoy-q'; eq.textContent='What do you enjoy doing?'; listEl.appendChild(eq);
     var sub=document.createElement('div'); sub.className='enjoy-sub'; sub.textContent='Search by keywords, select chips to add, or add your own.'; listEl.appendChild(sub);
-    listEl.appendChild(makeSearchBox('Search to add…', enjoyItemPool, function(h){ addJoyCard(h.name, [], true); }));
+    listEl.appendChild(makeSearchBox('Search to add…', enjoyItemPool,
+      function(h){ if(h.drill){ renderNav(h.drill); catzone.scrollIntoView({behavior:'smooth',block:'nearest'}); return; } addJoyCard(h.name, [], true); },
+      function(v){ addJoyCard(v, [], true); }));
     var catzone=document.createElement('div'); listEl.appendChild(catzone);
 
     var hdr=document.createElement('div'); hdr.className='added-header-row';
@@ -536,42 +563,68 @@
     hdr.appendChild(lbl); hdr.appendChild(right); listEl.appendChild(hdr);
     var grid=document.createElement('div'); grid.className='practice-grid'; listEl.appendChild(grid);
     function refreshCount(){ lbl.textContent='Joy added ('+grid.querySelectorAll('.practice-item').length+')'; }
+    // A lit chip means "this is in my list". It used to be switched on and never off, so the
+    // picker read as though everything had been chosen. It now follows the list itself.
+    var JOY_ON={};
+    function syncJoyChips(){
+      catzone.querySelectorAll('.cat').forEach(function(el){
+        if(el.classList.contains('more')) return;
+        if(JOY_ON[el.textContent.trim().toLowerCase()]) el.classList.add('on'); else el.classList.remove('on');
+      });
+    }
     function addJoyCard(name, sel, hasLevels){
+      var key=String(name).trim().toLowerCase();
+      if(JOY_ON[key]) return;
+      JOY_ON[key]=1;
       var card=document.createElement('div'); card.className='practice-item';
       var head=document.createElement('div'); head.className='practice-item-header';
       var nm=document.createElement('div'); nm.className='practice-item-name'; nm.textContent=name;
-      var x=document.createElement('button'); x.className='practice-item-x'; x.innerHTML='&times;'; x.onclick=function(){ card.remove(); refreshCount(); };
+      var x=document.createElement('button'); x.className='practice-item-x'; x.innerHTML='&times;'; x.onclick=function(){ delete JOY_ON[key]; card.remove(); refreshCount(); syncJoyChips(); };
       head.appendChild(nm); head.appendChild(x); card.appendChild(head);
       if (hasLevels){
         var opts=document.createElement('div'); opts.className='practice-options';
         ['Fan','Participant','Coach'].forEach(function(lv){ var b=document.createElement('button'); b.className='practice-btn'+((sel&&sel.indexOf(lv)>-1)?' selected':''); b.textContent=lv; b.onclick=function(){ b.classList.toggle('selected'); }; opts.appendChild(b); });
         card.appendChild(opts);
       }
-      grid.appendChild(card); refreshCount();
+      grid.appendChild(card); refreshCount(); syncJoyChips();
     }
     ENJOY_ADDED.forEach(function(it){ addJoyCard(it.t, it.sel, it.levels!==false); });
     hdr.addEventListener('click', function(e){ if(e.target.classList.contains('level-help-btn')) return; var open=grid.style.display!=='none'; grid.style.display=open?'none':'grid'; document.getElementById('joy-arrow').textContent=open?'▼':'▲'; });
 
+    // Headings are in the pool so typing "music" finds Music Making, but they carry drill and
+    // are opened rather than added. Top categories stay out entirely: no parent categories.
     function enjoyItemPool(){
       var out=[];
-      ENJOY_CATS.forEach(function(c){ var n=ENJOY_TREE[c]||{subs:{},items:[]}; Object.keys(n.subs||{}).forEach(function(sc){ (n.subs[sc]||[]).forEach(function(l){ out.push({name:l, tag:c+' › '+sc}); }); }); (n.items||[]).forEach(function(it){ out.push({name:it, tag:c}); }); });
+      ENJOY_CATS.forEach(function(c){
+        var n=ENJOY_TREE[c]||{subs:{},items:[]};
+        Object.keys(n.subs||{}).forEach(function(sc){
+          out.push({name:sc, tag:c, drill:[c,sc]});
+          (n.subs[sc]||[]).forEach(function(l){ out.push({name:l, tag:c+' › '+sc}); });
+        });
+        (n.items||[]).forEach(function(it){ out.push({name:it, tag:c}); });
+      });
       return out;
     }
+    // Add sits beside what is being typed, and the panel stays open so several things can go in
+    // at this level one after another. Done closes it.
     function showAddOwn(path){
       var ex=catzone.querySelector('.addown'); if(ex) ex.remove();
       var panel=document.createElement('div'); panel.className='addown';
+      var line=document.createElement('div'); line.className='addown-line';
       var inp=document.createElement('input'); inp.type='text'; inp.placeholder='What would you like to add?';
+      var add=document.createElement('button'); add.className='addown-btn'; add.textContent='Add';
+      line.appendChild(inp); line.appendChild(add);
       var results=document.createElement('div'); results.className='addown-results';
-      var lbl=document.createElement('div'); lbl.className='addown-label'; lbl.textContent='Add your own to '+(path[0]||'your list')+':';
       var acts=document.createElement('div'); acts.className='addown-actions';
-      var add=document.createElement('button'); add.className='addown-btn'; add.textContent='Add to my list';
-      var cancel=document.createElement('button'); cancel.className='addown-cancel'; cancel.textContent='Cancel';
-      acts.appendChild(add); acts.appendChild(cancel);
-      panel.appendChild(inp); panel.appendChild(results); panel.appendChild(lbl); panel.appendChild(acts);
+      var done=document.createElement('button'); done.className='addown-cancel'; done.textContent='Done';
+      acts.appendChild(done);
+      panel.appendChild(line); panel.appendChild(results); panel.appendChild(acts);
       catzone.appendChild(panel); inp.focus();
-      matchExisting(inp, results, enjoyItemPool, function(hit){ addJoyCard(hit.name, [], true); panel.remove(); });
-      add.onclick=function(){ var v=inp.value.trim(); if(v) addJoyCard(v, [], true); panel.remove(); };
-      cancel.onclick=function(){ panel.remove(); };
+      matchExisting(inp, results, enjoyItemPool, function(hit){ if(hit.drill){ panel.remove(); renderNav(hit.drill); return; } addJoyCard(hit.name, [], true); inp.value=''; results.innerHTML=''; inp.focus(); });
+      function commit(){ var v=inp.value.trim(); if(!v) return; addJoyCard(v, [], true); inp.value=''; results.innerHTML=''; inp.focus(); }
+      add.onclick=commit;
+      inp.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); commit(); } });
+      done.onclick=function(){ panel.remove(); };
     }
     function itemsAt(path){
       if (path.length===0) return sortAlpha(ENJOY_CATS).map(function(c){ return {name:c, drill:true}; });
@@ -601,8 +654,8 @@
       if (path.length && hasLeaves){ var idea=document.createElement('div'); idea.className='ideas'; idea.textContent='Here are some ideas to get you started.'; catzone.appendChild(idea); }
       var row=document.createElement('div'); row.className='cat-row';
       items.forEach(function(it){
-        var el=chip(it.name,false);
-        el.addEventListener('click', function(){ if(it.drill){ renderNav(path.concat(it.name)); } else { if(el.classList.contains('on')) return; el.classList.add('on'); addJoyCard(it.name, [], true); } });
+        var el=chip(it.name, !it.drill && !!JOY_ON[String(it.name).trim().toLowerCase()]);
+        el.addEventListener('click', function(){ if(it.drill){ renderNav(path.concat(it.name)); } else { addJoyCard(it.name, [], true); } });
         row.appendChild(el);
       });
       if (path.length){ var other=chip('+ Other',false,'more'); other.addEventListener('click', function(){ showAddOwn(path); }); row.appendChild(other); }
@@ -614,7 +667,7 @@
     var erow=document.createElement('div'); erow.className='cat-row'; listEl.appendChild(erow);
     var sh=document.createElement('div'); sh.className='some-h'; listEl.appendChild(sh);
     var someList=document.createElement('div'); listEl.appendChild(someList);
-    function refreshSome(){ var c=0; someList.querySelectorAll('.some-input').forEach(function(i){ if(i.value.trim()) c++; }); sh.textContent='This is so me ('+c+')'; }
+    function refreshSome(){ sh.textContent='Other:'; }
     function addExpression(text, removable){
       var it=document.createElement('div'); it.className='some-item';
       var inp=document.createElement('input'); inp.type='text'; inp.className='some-input'; inp.value=text||''; if(!text) inp.placeholder='What expresses you the most?';
@@ -666,7 +719,9 @@
     var pillRow=document.createElement('div'); pillRow.style.cssText='display:flex;justify-content:flex-end;'; listEl.appendChild(pillRow);
     var pill=document.createElement('div'); pill.className='lang-pill'; pill.textContent='✏️ Languages: English'; pillRow.appendChild(pill);
     var sub=document.createElement('div'); sub.className='enjoy-sub'; sub.textContent='Search by keywords, select chips to add, or add your own.'; listEl.appendChild(sub);
-    listEl.appendChild(makeSearchBox('Search skills to add…', skillItemPool, function(h){ addSkillCard(h.name, h.cat, ''); }));
+    listEl.appendChild(makeSearchBox('Search skills to add…', skillItemPool,
+      function(h){ addSkillCard(h.name, h.cat, ''); },
+      function(v){ addSkillCard(v, '', ''); }));
     var catzone=document.createElement('div'); listEl.appendChild(catzone);
 
     var hdr=document.createElement('div'); hdr.className='added-header-row';
@@ -675,11 +730,21 @@
     hdr.appendChild(lbl); hdr.appendChild(right); listEl.appendChild(hdr);
     var grid=document.createElement('div'); grid.className='practice-grid'; listEl.appendChild(grid);
     function refreshCount(){ lbl.textContent='Skills added ('+grid.querySelectorAll('.practice-item').length+')'; }
+    var SKILL_ON={};
+    function syncSkillChips(){
+      catzone.querySelectorAll('.cat').forEach(function(el){
+        if(el.classList.contains('more')) return;
+        if(SKILL_ON[el.textContent.trim().toLowerCase()]) el.classList.add('on'); else el.classList.remove('on');
+      });
+    }
     function addSkillCard(name, cat, level){
+      var key=String(name).trim().toLowerCase();
+      if(SKILL_ON[key]) return;
+      SKILL_ON[key]=1;
       var card=document.createElement('div'); card.className='practice-item';
       var head=document.createElement('div'); head.className='practice-item-header';
       var nm=document.createElement('div'); nm.className='practice-item-name'; nm.textContent=name;
-      var x=document.createElement('button'); x.className='practice-item-x'; x.innerHTML='&times;'; x.onclick=function(){ card.remove(); refreshCount(); };
+      var x=document.createElement('button'); x.className='practice-item-x'; x.innerHTML='&times;'; x.onclick=function(){ delete SKILL_ON[key]; card.remove(); refreshCount(); syncSkillChips(); };
       head.appendChild(nm); head.appendChild(x); card.appendChild(head);
       var catWrap=document.createElement('div');
       function renderCat(){
@@ -698,7 +763,7 @@
       var opts=document.createElement('div'); opts.className='practice-options';
       ['Entry Level','Mid Level','Expert Level'].forEach(function(lv){ var b=document.createElement('button'); b.className='practice-btn'+(level===lv?' selected':''); b.textContent=lv; b.onclick=function(){ var was=b.classList.contains('selected'); opts.querySelectorAll('.practice-btn').forEach(function(z){z.classList.remove('selected');}); if(!was){ b.classList.add('selected'); level=lv; } else { level=''; } }; opts.appendChild(b); });
       card.appendChild(opts);
-      grid.appendChild(card); refreshCount();
+      grid.appendChild(card); refreshCount(); syncSkillChips();
     }
     SKILLS_ADDED.forEach(function(it){ addSkillCard(it.t, it.cat, it.level); });
     hdr.addEventListener('click', function(e){ if(e.target.classList.contains('level-help-btn')) return; var open=grid.style.display!=='none'; grid.style.display=open?'none':'grid'; document.getElementById('skill-arrow').textContent=open?'▼':'▲'; });
@@ -707,18 +772,21 @@
     function showAddOwn(path){
       var ex=catzone.querySelector('.addown'); if(ex) ex.remove();
       var panel=document.createElement('div'); panel.className='addown';
+      var line=document.createElement('div'); line.className='addown-line';
       var inp=document.createElement('input'); inp.type='text'; inp.placeholder='What would you like to add?';
+      var add=document.createElement('button'); add.className='addown-btn'; add.textContent='Add';
+      line.appendChild(inp); line.appendChild(add);
       var results=document.createElement('div'); results.className='addown-results';
-      var lbl=document.createElement('div'); lbl.className='addown-label'; lbl.textContent='Add your own to '+(path[0]||'your list')+':';
       var acts=document.createElement('div'); acts.className='addown-actions';
-      var add=document.createElement('button'); add.className='addown-btn'; add.textContent='Add to my list';
-      var cancel=document.createElement('button'); cancel.className='addown-cancel'; cancel.textContent='Cancel';
-      acts.appendChild(add); acts.appendChild(cancel);
-      panel.appendChild(inp); panel.appendChild(results); panel.appendChild(lbl); panel.appendChild(acts);
+      var done=document.createElement('button'); done.className='addown-cancel'; done.textContent='Done';
+      acts.appendChild(done);
+      panel.appendChild(line); panel.appendChild(results); panel.appendChild(acts);
       catzone.appendChild(panel); inp.focus();
-      matchExisting(inp, results, skillItemPool, function(hit){ addSkillCard(hit.name, hit.cat, ''); panel.remove(); });
-      add.onclick=function(){ var v=inp.value.trim(); if(v) addSkillCard(v, path[0]||'', ''); panel.remove(); };
-      cancel.onclick=function(){ panel.remove(); };
+      matchExisting(inp, results, skillItemPool, function(hit){ addSkillCard(hit.name, hit.cat, ''); inp.value=''; results.innerHTML=''; inp.focus(); });
+      function commit(){ var v=inp.value.trim(); if(!v) return; addSkillCard(v, path[0]||'', ''); inp.value=''; results.innerHTML=''; inp.focus(); }
+      add.onclick=commit;
+      inp.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); commit(); } });
+      done.onclick=function(){ panel.remove(); };
     }
     function itemsAt(path){
       if (path.length===0) return sortAlpha(SKILL_CATS).map(function(c){ return {name:c, drill:true}; });
@@ -741,8 +809,8 @@
       if (path.length && hasLeaves){ var idea=document.createElement('div'); idea.className='ideas'; idea.textContent='Here are some ideas to get you started.'; catzone.appendChild(idea); }
       var row=document.createElement('div'); row.className='cat-row';
       items.forEach(function(it){
-        var el=chip(it.name,false);
-        el.addEventListener('click', function(){ if(it.drill){ renderNav(path.concat(it.name)); } else { if(el.classList.contains('on')) return; el.classList.add('on'); addSkillCard(it.name, path[0], ''); } });
+        var el=chip(it.name, !it.drill && !!SKILL_ON[String(it.name).trim().toLowerCase()]);
+        el.addEventListener('click', function(){ if(it.drill){ renderNav(path.concat(it.name)); } else { addSkillCard(it.name, path[0], ''); } });
         row.appendChild(el);
       });
       if (path.length){ var other=chip('+ Other',false,'more'); other.addEventListener('click', function(){ showAddOwn(path); }); row.appendChild(other); }
@@ -776,7 +844,8 @@
     var sub=document.createElement('div'); sub.className='enjoy-sub'; sub.textContent='Search by keywords, select chips to add, or add your own.'; listEl.appendChild(sub);
     listEl.appendChild(makeSearchBox('Search to add…',
       function(){ return VALUE_IDEAS.map(function(n){return {name:n,tag:'Value'};}).concat(DOMAIN_IDEAS.map(function(n){return {name:n,tag:'Domain'};})); },
-      function(h){ if(h.tag==='Value') addCard(vSec,h.name,'Value',''); else addCard(dSec,h.name,'Domain',''); }));
+      function(h){ if(h.tag==='Value') addCard(vSec,h.name,'Value',''); else addCard(dSec,h.name,'Domain',''); },
+      function(v){ if(mode==='domains') addCard(dSec,v,'Domain',''); else addCard(vSec,v,'Value',''); }));
 
     var mode='';
     var toggle=document.createElement('div'); toggle.className='cat-row'; listEl.appendChild(toggle);
@@ -792,17 +861,29 @@
       hdr.addEventListener('click', function(e){ if(e.target.classList.contains('level-help-btn')) return; var open=grid.style.display!=='none'; grid.style.display=open?'none':'grid'; document.getElementById(arrowId).textContent=open?'▼':'▲'; });
       return {grid:grid, refresh:refresh};
     }
+    // Same rule as the other pickers: a lit idea means it is in the list, and it goes out again
+    // when the card does.
+    var VAL_ON={};
+    function syncValChips(){
+      ideasZone.querySelectorAll('.cat').forEach(function(el){
+        if(el.classList.contains('more')) return;
+        if(VAL_ON[el.textContent.trim().toLowerCase()]) el.classList.add('on'); else el.classList.remove('on');
+      });
+    }
     function addCard(sectn, name, typeLabel, level){
+      var key=String(name).trim().toLowerCase();
+      if(VAL_ON[key]) return;
+      VAL_ON[key]=1;
       var card=document.createElement('div'); card.className='practice-item';
       var head=document.createElement('div'); head.className='practice-item-header';
       var nm=document.createElement('div'); nm.className='practice-item-name'; nm.textContent=name;
-      var x=document.createElement('button'); x.className='practice-item-x'; x.innerHTML='&times;'; x.onclick=function(){ card.remove(); sectn.refresh(); };
+      var x=document.createElement('button'); x.className='practice-item-x'; x.innerHTML='&times;'; x.onclick=function(){ delete VAL_ON[key]; card.remove(); sectn.refresh(); syncValChips(); };
       head.appendChild(nm); head.appendChild(x); card.appendChild(head);
       var cat=document.createElement('div'); cat.className='practice-item-cat'; cat.textContent=typeLabel; card.appendChild(cat);
       var opts=document.createElement('div'); opts.className='practice-options';
       ['Exploring','Engaged','Leading'].forEach(function(lv){ var b=document.createElement('button'); b.className='practice-btn'+(level===lv?' selected':''); b.textContent=lv; b.onclick=function(){ var was=b.classList.contains('selected'); opts.querySelectorAll('.practice-btn').forEach(function(z){z.classList.remove('selected');}); if(!was){ b.classList.add('selected'); level=lv; } else { level=''; } }; opts.appendChild(b); });
       card.appendChild(opts);
-      sectn.grid.appendChild(card); sectn.refresh();
+      sectn.grid.appendChild(card); sectn.refresh(); syncValChips();
     }
 
     var vSec=addedSection('Added values','val-arrow');
@@ -814,18 +895,22 @@
     function showAddOwn(){
       var ex=ideasZone.querySelector('.addown'); if(ex) ex.remove();
       var panel=document.createElement('div'); panel.className='addown';
+      var line=document.createElement('div'); line.className='addown-line';
       var inp=document.createElement('input'); inp.type='text'; inp.placeholder='What would you like to add?';
+      var add=document.createElement('button'); add.className='addown-btn'; add.textContent='Add';
+      line.appendChild(inp); line.appendChild(add);
       var results=document.createElement('div'); results.className='addown-results';
-      var lbl=document.createElement('div'); lbl.className='addown-label'; lbl.textContent='Add your own '+(mode==='values'?'value':'domain')+':';
       var acts=document.createElement('div'); acts.className='addown-actions';
-      var add=document.createElement('button'); add.className='addown-btn'; add.textContent='Add to my list';
-      var cancel=document.createElement('button'); cancel.className='addown-cancel'; cancel.textContent='Cancel';
-      acts.appendChild(add); acts.appendChild(cancel);
-      panel.appendChild(inp); panel.appendChild(results); panel.appendChild(lbl); panel.appendChild(acts);
+      var done=document.createElement('button'); done.className='addown-cancel'; done.textContent='Done';
+      acts.appendChild(done);
+      panel.appendChild(line); panel.appendChild(results); panel.appendChild(acts);
       ideasZone.appendChild(panel); inp.focus();
-      matchExisting(inp, results, valueIdeaPool, function(hit){ if(mode==='values') addCard(vSec, hit.name, 'Value', ''); else addCard(dSec, hit.name, 'Domain', ''); panel.remove(); });
-      add.onclick=function(){ var v=inp.value.trim(); if(v){ if(mode==='values') addCard(vSec, v, 'Value', ''); else addCard(dSec, v, 'Domain', ''); } panel.remove(); };
-      cancel.onclick=function(){ panel.remove(); };
+      function put(v){ if(mode==='domains') addCard(dSec, v, 'Domain', ''); else addCard(vSec, v, 'Value', ''); }
+      matchExisting(inp, results, valueIdeaPool, function(hit){ put(hit.name); inp.value=''; results.innerHTML=''; inp.focus(); });
+      function commit(){ var v=inp.value.trim(); if(!v) return; put(v); inp.value=''; results.innerHTML=''; inp.focus(); }
+      add.onclick=commit;
+      inp.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); commit(); } });
+      done.onclick=function(){ panel.remove(); };
     }
     function renderIdeas(){
       ideasZone.innerHTML='';
@@ -833,8 +918,8 @@
       var idea=document.createElement('div'); idea.className='ideas'; idea.textContent='Here are some ideas to get you started.'; ideasZone.appendChild(idea);
       var row=document.createElement('div'); row.className='cat-row';
       (mode==='values'?VALUE_IDEAS:DOMAIN_IDEAS).forEach(function(name){
-        var el=chip(name,false);
-        el.addEventListener('click', function(){ if(el.classList.contains('on')) return; el.classList.add('on'); if(mode==='values') addCard(vSec, name, 'Value', ''); else addCard(dSec, name, 'Domain', ''); });
+        var el=chip(name, !!VAL_ON[String(name).trim().toLowerCase()]);
+        el.addEventListener('click', function(){ if(mode==='values') addCard(vSec, name, 'Value', ''); else addCard(dSec, name, 'Domain', ''); });
         row.appendChild(el);
       });
       var other=chip('+ Other',false,'more'); other.addEventListener('click', function(){ showAddOwn(); }); row.appendChild(other);
@@ -871,6 +956,16 @@
   function renderNeeds(){
     listEl.className='list flow'; listEl.innerHTML='';
     var eq=document.createElement('div'); eq.className='enjoy-q'; eq.textContent='What are you seeking right now?'; listEl.appendChild(eq);
+    // Your own words come first. What kind of thing it is, and which category it sits in, are
+    // asked after it has a name rather than before you are allowed to say anything.
+    var ownLine=document.createElement('div'); ownLine.className='addown-line'; ownLine.style.margin='4px 0 6px';
+    var ownInp=document.createElement('input'); ownInp.type='text'; ownInp.className='need-own'; ownInp.placeholder='Write it in your own words';
+    var ownBtn=document.createElement('button'); ownBtn.className='addown-btn'; ownBtn.textContent='Add';
+    ownLine.appendChild(ownInp); ownLine.appendChild(ownBtn); listEl.appendChild(ownLine);
+    function ownCommit(){ var v=ownInp.value.trim(); if(!v) return; ownInp.value=''; openAddEditor({item:v,type:'person',category:'',level:'',detail:'',local:true}); }
+    ownBtn.onclick=ownCommit;
+    ownInp.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); ownCommit(); } });
+    var orSub=document.createElement('div'); orSub.className='enjoy-sub'; orSub.textContent='Or browse by what kind of thing it is.'; listEl.appendChild(orSub);
     var typeRow=document.createElement('div'); typeRow.className='cat-row'; typeRow.style.margin='4px 0 8px'; listEl.appendChild(typeRow);
     var flow=document.createElement('div'); listEl.appendChild(flow);
     var added=document.createElement('div'); added.style.marginTop='22px'; listEl.appendChild(added);
@@ -941,7 +1036,7 @@
         zone.innerHTML='';
         if(path.length){ var idea=document.createElement('div'); idea.className='ideas'; idea.textContent='Here are some ideas to get you started.'; zone.appendChild(idea); }
         var row=document.createElement('div'); row.className='cat-row';
-        items(path).forEach(function(it){ var el=chip(it.name,false); el.onclick=function(){ if(it.drill){ nav(path.concat(it.name)); } else { if(el.classList.contains('on'))return; el.classList.add('on'); openAddPerson(it.name, path[0], ''); } }; row.appendChild(el); });
+        items(path).forEach(function(it){ var el=chip(it.name,false); el.onclick=function(){ if(it.drill){ nav(path.concat(it.name)); } else { openAddPerson(it.name, path[0], ''); } }; row.appendChild(el); });
         var other=chip('+ Other',false,'more'); other.onclick=function(){ showNeedAddOwn(host, function(v){ openAddPerson(v, path[0]||'', ''); }, path[0]||'your list'); }; row.appendChild(other);
         zone.appendChild(row);
       }
@@ -951,18 +1046,21 @@
     function showNeedAddOwn(host, onAdd, where){
       var ex=host.querySelector('.addown'); if(ex) ex.remove();
       var panel=document.createElement('div'); panel.className='addown';
+      var line=document.createElement('div'); line.className='addown-line';
       var inp=document.createElement('input'); inp.type='text'; inp.placeholder='What would you like to add?';
+      var add=document.createElement('button'); add.className='addown-btn'; add.textContent='Add';
+      line.appendChild(inp); line.appendChild(add);
       var results=document.createElement('div'); results.className='addown-results';
-      var lbl=document.createElement('div'); lbl.className='addown-label'; lbl.textContent='Add your own to '+where+':';
       var acts=document.createElement('div'); acts.className='addown-actions';
-      var add=document.createElement('button'); add.className='addown-btn'; add.textContent='Add to my list';
-      var cancel=document.createElement('button'); cancel.className='addown-cancel'; cancel.textContent='Cancel';
-      acts.appendChild(add); acts.appendChild(cancel);
-      panel.appendChild(inp); panel.appendChild(results); panel.appendChild(lbl); panel.appendChild(acts);
+      var done=document.createElement('button'); done.className='addown-cancel'; done.textContent='Done';
+      acts.appendChild(done);
+      panel.appendChild(line); panel.appendChild(results); panel.appendChild(acts);
       host.appendChild(panel); inp.focus();
-      matchExisting(inp, results, function(){ var out=[]; SKILL_CATS.forEach(function(c){ (SKILL_TREE[c]||[]).forEach(function(it){ out.push({name:it, tag:c}); }); }); return out; }, function(hit){ onAdd(hit.name); panel.remove(); });
-      add.onclick=function(){ var v=inp.value.trim(); if(v) onAdd(v); panel.remove(); };
-      cancel.onclick=function(){ panel.remove(); };
+      matchExisting(inp, results, function(){ var out=[]; SKILL_CATS.forEach(function(c){ (SKILL_TREE[c]||[]).forEach(function(it){ out.push({name:it, tag:c}); }); }); return out; }, function(hit){ panel.remove(); onAdd(hit.name); });
+      function commit(){ var v=inp.value.trim(); if(!v) return; panel.remove(); onAdd(v); }
+      add.onclick=commit;
+      inp.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); commit(); } });
+      done.onclick=function(){ panel.remove(); };
     }
 
     var TYPE_LABEL={person:'Person',space:'Space',thing:'Thing'};
@@ -1107,7 +1205,7 @@
     var seeking=NEEDS_ADDED.map(function(n){ return pvTag((n.local?'📍 ':'')+n.item, {sub:n.category||''}); }).join('');
     var enjoy=ENJOY_ADDED.map(function(it){ return pvTag(it.t, {level:(it.sel||[]).join(', ')}); }).join('');
     var _ex=EXPRESSION_ADDED.filter(Boolean);
-    var expr=_ex.length?'<div class="pv-some"><b>This is so me:</b> '+esc(_ex.join(', '))+'</div>':'';
+    var expr=_ex.length?'<div class="pv-some"><b>Other:</b> '+esc(_ex.join(', '))+'</div>':'';
     var methods='<div class="pv-tags" style="margin-bottom:10px;">'+SKILL_METHODS_ON.map(function(m){ return pvTag(m, {cls:'m'}); }).join('')+'</div>';
     var skills='<div class="pv-tags">'+SKILLS_ADDED.map(function(s){ return pvTag(s.t, {level:s.level}); }).join('')+pvTag('English',{cls:'m'})+'</div>';
     var vals='<div class="pv-sub-h">Values</div><div class="pv-tags">'+VALUES_ADDED.map(function(v){ return pvTag(v.t,{level:v.lvl}); }).join('')+'</div>';
