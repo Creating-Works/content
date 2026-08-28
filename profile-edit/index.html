@@ -1,6 +1,7 @@
 <!-- Design A profile — live profile answers page (linked from profile.html "Update answers").
      Freeze of the pre-Design-A intake.html: The-New-Build-Repository/design/frozen/intake-V6.23-preDesignA-2026-08-24.html -->
 <meta charset="utf-8">
+<script src="https://2gather.network/nav/identity.js?v=4"></script>
 <meta name="robots" content="noindex, nofollow">
 <title>Edit my profile</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -302,6 +303,15 @@
   // never did, which is why a clean address landed on the placeholder content built into this
   // file instead of on somebody's own profile.
   if(!_id){ try{ _id = String(localStorage.getItem('appear-id')||localStorage.getItem('cw-id')||'').trim(); }catch(e){ _id=''; } }
+  // Somebody running the site can stand in another person's shoes to see what they see. It is
+  // a look and never a write: nothing on this page saves while it is on.
+  var _viewing = false;
+  try {
+    if (window.CW && CW.me) {
+      var _who = CW.me();
+      if (_who.viewing && _who.id) { _id = _who.id; _viewing = true; }
+    }
+  } catch(e){}
   var _profilePhoto='', _profileName='', _loaded={}, _pageLink='', _said={};
   // What a person wrote in their own words, shown under the heading it answers.
   function pvSaid(key){ var v=_said&&_said[key]; return v?'<div class="pv-said">'+esc(v)+'</div>':''; }
@@ -1263,6 +1273,7 @@
   var PHOTO_URL = 'https://cw-photos.jessieupp.workers.dev';
   function photoStat(msg){ var el=document.getElementById('pv-photo-stat'); if(el) el.textContent=msg||''; }
   function choosePhoto(){
+    if(_viewing){ photoStat('Looking, not editing.'); return; }
     if(!_id){ return; }
     if(!_editToken){ requestEdit(0); return; }
     var inp=document.createElement('input');
@@ -1657,6 +1668,7 @@
   }
   // Automatic save: debounced on any edit, flushed when leaving a step or the editor.
   function autoSave(){
+    if(_viewing){ setSaveStat('Looking, not editing.'); return; }
     if(!_id || !_dirty || _saving) return;
     if(!_editToken){ return; } // identity is verified before entering the editor
     _saving=true; setSaveStat('Saving…');
@@ -1713,4 +1725,4 @@
     else { showView(); }
   });
 </script>
-<script src="https://2gather.network/nav/topbar.js?v=5.30" defer></script>
+<script src="https://2gather.network/nav/topbar.js?v=5.51" defer></script>
