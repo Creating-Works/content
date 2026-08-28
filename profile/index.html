@@ -1987,7 +1987,8 @@ function render(){
     var _pills='';
     if(_editMode && _appearId){
       if(_pills) _pills += ' ';
-      _pills += '<a onclick="doneEdit();return false;" style="cursor:pointer;'+_navPillCss+'">My profile</a>';
+      // The second My profile pill was a way back out of editing on this page. Editing is not
+      // on this page any more, and two pills with the same name was its own small confusion.
     }
     // Repaint the name and tabs. This used to assign '' when there were no pills, which wiped
     // the header the moment loading finished.
@@ -2779,8 +2780,8 @@ function showPinCard(msg){
 window.showPinCard=showPinCard;
 
 window.jumpTo = function(screen){
-  if(!_editToken){ _pinPending=screen; showPinCard(); return; }
-  _editMode=true; _screen=screen; render();
+  var step = (typeof screen === 'number' && screen >= 0 && screen <= 4) ? screen : 0;
+  window.location.href = 'https://2gather.network/profile-edit/?step=' + step;
 };
 
 window.doneEdit = function(){ autoSave(); _editMode=false; _screen=0; render(); };

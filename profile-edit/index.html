@@ -1413,7 +1413,8 @@
   }
   // Leaving the editor returns to whichever screen is "home" for this viewer: your own page is
   // the Concept A hub; someone else's is the "This is me" quick view. Always flushes the save.
-  function goHome(){ showView(); }
+  // Finishing an edit puts somebody back where they were looking.
+  function goHome(){ window.location.href = 'https://2gather.network/profile/'; }
   // Which inbox to go and look in. Masked: anybody who reaches this page can press Send code,
   // and the address on file is not necessarily theirs to read in full.
   function _maskEmail(v){
@@ -1734,12 +1735,13 @@
   var _viewingSomeoneElse = !!(_showParam && _showParam !== (_meNow || _meParam));
   Promise.all([_pRef,_pProf]).then(function(){
     if(_manageParam){ var _mk=(['groups','events','permissions','data'].indexOf(_manageParam)>-1)?_manageParam:'data'; showManage(_mk); }
-    // My profile shows the profile. Landing in step one of a five step editor answered a
-    // question nobody had asked yet, and the read-only screen now carries an Edit beside every
-    // section, so changing something is still one press and it is the right section.
-    // ?edit=1 or ?step=N opens the editor directly, which is what the Edit buttons use, and
-    // looking at somebody else's profile never opens an editor.
-    else if(!_viewingSomeoneElse && _id && (_param('edit')==='1' || _param('step'))){ requestEdit(_stepParam || 0); }
+    // One page reads a profile and one page changes it. This is the one that changes it, so it
+    // opens the circles and nothing else. Somebody else's profile is not editable by definition,
+    // so a link naming one belongs on the reading page instead.
+    else if(_viewingSomeoneElse && _showParam){
+      window.location.replace('https://2gather.network/profile/?show=' + encodeURIComponent(_param('show')));
+    }
+    else if(_id){ requestEdit(_stepParam || 0); }
     else { showView(); }
   });
 </script>
