@@ -2609,6 +2609,19 @@ function renderProfile(el, viewerMode){
     _crumb='<a role="link" tabindex="0" data-nav="'+esc(_bgU)+'" onclick="return _safeNavGo(this)" style="'+_CRA+'">\u2039 '+esc(_eventTitle||'Event')+'</a>'
       +'<span style="opacity:.7;"> / </span><span style="font-weight:800;">My profile</span>';
   }
+  // Opening somebody from a face was a dead end. The breadcrumb only appears when the link
+  // happened to carry a group, and most routes in do not carry one, so there was nothing at
+  // all. A plain Back covers every route, including the ones we have not built. The named
+  // breadcrumb still wins wherever we actually know where somebody came from.
+  if(!_crumb && viewerMode && !isOwner()){
+    var _canBack=false;
+    try{ _canBack = (window.history && window.history.length > 1); }catch(e){}
+    if(_canBack){
+      _crumb='<a role="link" tabindex="0" onclick="history.back();return false;"'
+        +' onkeydown="if(event.key===\'Enter\'){history.back();return false;}"'
+        +' style="'+_CRA+'">Back</a>';
+    }
+  }
   // Arriving from a group used to hide this whole row and leave nothing but a back button, so
   // the tabs flashed on load and then vanished. The way back is the breadcrumb above.
   //
