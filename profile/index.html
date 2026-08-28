@@ -449,6 +449,20 @@ function isOwner(){
 
 var GS_URL='https://cw-api-gate.jessieupp.workers.dev';
 
+// Read once, then out of the address bar. Nobody needs to see somebody's id to read their page,
+// and a link copied out of the bar should not carry one. It waits for load so every part of the
+// page has already taken what it needs from the address; _showId is captured once at start.
+window.addEventListener('load', function(){
+  try{
+    var u=new URL(window.location.href);
+    if(!u.searchParams.has('show')) return;
+    if(!window.history||!window.history.replaceState) return;
+    u.searchParams.delete('show'); u.searchParams.delete('me');
+    var q=u.searchParams.toString();
+    window.history.replaceState({}, '', u.pathname+(q?'?'+q:'')+u.hash);
+  }catch(e){}
+});
+
 // PARENT_CATS loads from reference-data sheet via getCategories; this is the fallback if that load fails
 var PARENT_CATS=[
   'Arts & Culture','Food & Drink','Physical Wellbeing','Mental Wellbeing',
@@ -2449,8 +2463,14 @@ function _wtmListHTML(){
 // "?show=" there is no viewer, so there is nobody to bookmark on behalf of - and personal UI
 // should never appear off a device's stored id alone.
 function _viewerIdParam(){
-  try{ var _vp=new URLSearchParams(window.location.search); return String(_vp.get('me')||_vp.get('memberCard')||_vp.get('CWid')||'').trim(); }
-  catch(e){ return ''; }
+  try{
+    var _vp=new URLSearchParams(window.location.search);
+    var fromUrl=String(_vp.get('me')||_vp.get('memberCard')||_vp.get('CWid')||'').trim();
+    if(fromUrl) return fromUrl;
+    // The device knows who is looking. Requiring it in the address meant a link from a group,
+    // which names only the person being looked at, had nobody to bookmark them as.
+    return (window.CW&&CW.realMe)?String(CW.realMe().id||'').trim():'';
+  }catch(e){ return ''; }
 }
 function _wtmDecorate(){
   var el=document.getElementById('app-content'); if(!el) return;
