@@ -1718,11 +1718,12 @@
   var _viewingSomeoneElse = !!(_showParam && _meParam && _showParam!==_meParam);
   Promise.all([_pRef,_pProf]).then(function(){
     if(_manageParam){ var _mk=(['groups','events','permissions','data'].indexOf(_manageParam)>-1)?_manageParam:'data'; showManage(_mk); }
-    // This page is the editor now; profile.html is where a profile is read. Landing on a second
-    // view with a second Edit button made changing something a two-step journey from a button
-    // that already said Edit. ?view=1 still opens the read-only screen, and looking at somebody
-    // else's profile never opens an editor.
-    else if(!_viewingSomeoneElse && _id && _param('view')!=='1'){ requestEdit(_stepParam || 0); }
+    // My profile shows the profile. Landing in step one of a five step editor answered a
+    // question nobody had asked yet, and the read-only screen now carries an Edit beside every
+    // section, so changing something is still one press and it is the right section.
+    // ?edit=1 or ?step=N opens the editor directly, which is what the Edit buttons use, and
+    // looking at somebody else's profile never opens an editor.
+    else if(!_viewingSomeoneElse && _id && (_param('edit')==='1' || _param('step'))){ requestEdit(_stepParam || 0); }
     else { showView(); }
   });
 </script>
