@@ -2425,7 +2425,15 @@ function screenSearchHTML(s, placeholder, hideHelper){
 // filled by ONE non-blocking getBookmarks read on load; toggles write through fire-and-forget.
 var _wtmData=null, _wtmLoaded=false, _wtmLoading=false;
 function _wtmNorm(id){ return String(id||'').replace(/\./g,'').toLowerCase(); }
-function _wtmMyId(){ return _viewerIdParam() || (isOwner() ? String(_appearId||'') : ''); }
+function _wtmMyId(){
+  // Bookmarking is done BY whoever is signed in, not by whoever the address names. It used to
+  // read the address, and the address is stripped on load, so on somebody else's profile it
+  // asked a question whose answer had already been taken away and the control disappeared.
+  // Looking as somebody else still bookmarks nothing, because View as never writes.
+  try{ if(window.CW&&CW.me&&CW.me().viewing) return ''; }catch(e){}
+  try{ if(window.CW&&CW.realMe){ var r=String(CW.realMe().id||'').trim(); if(r) return r; } }catch(e){}
+  return _viewerIdParam() || (isOwner() ? String(_appearId||'') : '');
+}
 function _wtmHas(id){ var n=_wtmNorm(id); return (_wtmData||[]).some(function(p){return _wtmNorm(p.id)===n;}); }
 function _wtmLoad(){
   var me=_wtmMyId();
@@ -4414,7 +4422,7 @@ window.goBack = function(){
   render();
 })();
 </script>
-<script src="https://2gather.network/nav/topbar.js?v=5.59" defer></script>
+<script src="https://2gather.network/nav/topbar.js?v=5.60" defer></script>
 </body>
 <!--
   Copyright 2026 DayBalancer LLC. All rights reserved.
