@@ -1733,7 +1733,21 @@
   // The device already knows who is looking, so it is asked rather than the address.
   var _meNow = (function(){ try { return (window.CW && CW.me) ? String(CW.me().id||'').replace(/\./g,'').toLowerCase() : ''; } catch(e){ return ''; } })();
   var _viewingSomeoneElse = !!(_showParam && _showParam !== (_meNow || _meParam));
+  // Nothing at all was drawn until both calls came back, and those calls are slow: measured on
+  // 2026-08-29 at 9 seconds for the reference data and 39 for the profile. So this page sat
+  // completely blank for the best part of a minute and read as broken rather than as loading.
+  // It says what it is doing now, and a call that fails leaves a sentence rather than a void.
+  var _bootNote = document.createElement('div');
+  _bootNote.id = 'pe-booting';
+  _bootNote.style.cssText = 'padding:56px 20px;text-align:center;color:#4B5A6D;font-size:15px;';
+  _bootNote.textContent = 'Loading your profile…';
+  (document.getElementById('pe-shell') || document.body).appendChild(_bootNote);
+  function _bootDone(){
+    var n = document.getElementById('pe-booting');
+    if (n && n.parentNode) { n.parentNode.removeChild(n); }
+  }
   Promise.all([_pRef,_pProf]).then(function(){
+    _bootDone();
     if(_manageParam){ var _mk=(['groups','events','permissions','data'].indexOf(_manageParam)>-1)?_manageParam:'data'; showManage(_mk); }
     // One page reads a profile and one page changes it. This is the one that changes it, so it
     // opens the circles and nothing else. Somebody else's profile is not editable by definition,
@@ -1743,6 +1757,9 @@
     }
     else if(_id){ requestEdit(_stepParam || 0); }
     else { showView(); }
+  }).catch(function(){
+    var n = document.getElementById('pe-booting');
+    if (n) { n.textContent = 'Your profile could not be loaded. Reload the page to try again.'; }
   });
 </script>
 <script src="https://2gather.network/nav/topbar.js?v=5.57" defer></script>
