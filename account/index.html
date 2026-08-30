@@ -368,8 +368,7 @@
       +field('firstName','First name','text',D.firstName,'')
       +field('lastName','Last name','text',D.lastName,'')
       +readonlyField('Email', D.email, _editToken
-        ? 'This is where your one-time codes are sent. It comes from your account, so it is changed on '
-          +'<a href="https://appear.network/dl/page" style="color:var(--brand);font-weight:700;">Appear</a>.'
+        ? ''
         : 'Hidden until you verify it is you. Press Save changes to verify.')
       +field('postal','Postal code','text',D.postal,'98026')
       +'</div>'
