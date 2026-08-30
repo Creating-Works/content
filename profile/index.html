@@ -2508,7 +2508,9 @@ function _wtmDecorate(){
   // other pills instead of stacking below. Re-decorating removes any prior button first.
   var host=document.getElementById('app-topnav'); if(!host) return;
   var _old=host.querySelector('[data-wtm-wrap]'); if(_old) _old.remove();
-  var target=host.firstElementChild||host;
+  // 2026-08-30. firstElementChild is the breadcrumb whenever there is one, so the button landed
+  // on top of Back. The pill row is the last child, and it is the row this belongs in.
+  var target=host.lastElementChild||host;
   target.insertAdjacentHTML('beforeend', btn);
 }
 function _landingWanted(){ try{ return new URLSearchParams(location.search).get('landing')==='1'; }catch(e){ return false; } }
@@ -2652,7 +2654,9 @@ function renderProfile(el, viewerMode){
   }
   if(_eventId && _eventHasBB && !_bgH && !_bgG){
     var _ehUrl='https://2gather.network/attendees?id='+encodeURIComponent(_eventId)+_mc;
-    _b+='<a role="link" tabindex="0" data-nav="'+esc(_ehUrl)+'" title="'+esc(_eventTitle||'Event page')+'" onclick="return _safeNavGo(this)" style="'+_WB+'">Event attendees</a>';
+    // Event attendees removed 2026-08-30. It appeared with nothing to say where it came from,
+    // because the event id survives from an earlier visit. The way to a venue is the event.
+    void _ehUrl;
   }
   if(_navOwn&&_navId){
     // No "Event profile" or "Manage my experience" pill here — the profile page already IS
@@ -2663,8 +2667,9 @@ function renderProfile(el, viewerMode){
   }
   var _hdrFull=String(_fullName||((viewerMode&&!isOwner())?_viewerName:_name)||'').trim();
   var _navButtons=(_crumb?'<div style="color:#fff;font-size:14px;font-weight:600;margin:0 0 12px;opacity:.95;">'+_crumb+'</div>':'')
-    +'<h1 id="pv-name-text" style="font-size:28px;font-weight:400;color:#fff;margin:0 0 16px;letter-spacing:-.01em;min-height:42px;">'
-      +(_hdrFull?esc(_hdrFull)+' 🌱':'')+'</h1>'
+    +'<h1 id="pv-name-text" style="font-size:28px;font-weight:400;color:#fff;margin:0 0 16px;letter-spacing:-.01em;'
+      + ((_hdrFull && isOwner()) ? 'min-height:42px;' : 'display:none;') + '">'
+      +((_hdrFull && isOwner())?esc(_hdrFull)+' 🌱':'')+'</h1>'
     +'<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:0 2px;margin:0 0 14px;">'+_b+'</div>';
   var _tnEl=document.getElementById('app-topnav'); if(_tnEl) _tnEl.innerHTML=_navButtons;
   var _photoHTML='';
@@ -3055,7 +3060,8 @@ function renderPotluckTopNav(){
   var b='<a role="link" tabindex="0" data-nav="'+esc(_uAll)+'" title="Events" onclick="return _safeNavGo(this)" style="'+WB+'">All events</a>';
   if(_eventId && _eventHasBB){
     var _uEh='https://2gather.network/attendees?id='+encodeURIComponent(_eventId)+'&memberCard='+encodeURIComponent(_appearId);
-    b+='<a role="link" tabindex="0" data-nav="'+esc(_uEh)+'" title="'+esc(_eventTitle||'Event page')+'" onclick="return _safeNavGo(this)" style="'+WB+'">Event attendees</a>';
+    // Event attendees removed 2026-08-30, same reason as the other one.
+    void _uEh;
   }
   var _uEp='https://creating.works/profile?show='+encodeURIComponent(_appearId)+'&me='+encodeURIComponent(_appearId)+(_eventId?'&eventId='+encodeURIComponent(_eventId):'');
   b+='<a role="link" tabindex="0" data-nav="'+esc(_uEp)+'" title="'+esc(_viewerName||'My profile')+'" onclick="return _safeNavGo(this)" style="'+WB+'">Event profile</a>';

@@ -360,9 +360,9 @@
     p.innerHTML='<h2>My account</h2>'
       +'<div class="photorow">'+ph
         +'<div><button type="button" id="photo-upload" class="btn ghost" style="font-size:14px;padding:9px 16px;">Upload new</button>'
-        +'<div id="photo-note" style="display:none;font-size:13.5px;color:var(--soft);margin-top:8px;max-width:44ch;">'
-        +'Your photo comes from your Appear page. '
-        +'<a href="https://appear.network/dl/page" style="color:var(--brand);font-weight:700;">Update it on Appear</a>.</div></div>'
+        // 2026-08-30. This said the photo comes from Appear, next to an Upload new button that
+        // now genuinely works. Uploading here is the way to change it, so the sentence went.
+        +'<div id="photo-note" style="display:none;font-size:13.5px;color:var(--soft);margin-top:8px;max-width:44ch;"></div></div>'
       +'</div>'
       +'<div class="fieldgrid">'
       +field('firstName','First name','text',D.firstName,'')
