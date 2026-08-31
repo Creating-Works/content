@@ -75,6 +75,29 @@
     </div>
   </div>
 
+  <div class="card hide" id="pboard">
+    <h2>People</h2>
+    <div class="tot" id="ptot"></div>
+    <div class="row" style="margin-bottom:12px;">
+      <input id="q" placeholder="Find a name or address" style="max-width:320px;">
+      <label style="font-weight:400;font-size:14px;color:var(--muted);display:flex;align-items:center;gap:7px;margin:0;">
+        <input type="checkbox" id="showTest" style="width:auto;"> show test accounts
+      </label>
+    </div>
+    <div class="scroll"><table id="ptbl">
+      <thead><tr>
+        <th data-k="name">Name</th>
+        <th data-k="email">Address</th>
+        <th data-k="stage">Stage</th>
+        <th data-k="groups" class="num">Groups</th>
+        <th data-k="made">Signed up</th>
+        <th data-k="lastSeen">Last seen</th>
+      </tr></thead>
+      <tbody></tbody>
+    </table></div>
+    <p style="color:var(--muted);font-size:13px;margin:14px 0 0;" id="pmore"></p>
+  </div>
+
   <div class="card hide" id="board">
     <h2>Groups</h2>
     <div class="tot" id="tot"></div>
@@ -98,6 +121,7 @@
   var token='';
   var rows=[];
   var sortK='members', sortDown=true;
+  var people=[], pSortK='made', pSortDown=true, SHOW=200;
 
   var $=function(id){ return document.getElementById(id); };
   var say=function(el,msg,bad){ var n=$(el); n.textContent=msg||''; n.className='say'+(bad?' bad':''); };
@@ -162,7 +186,73 @@
         paint();
       })
       .catch(function(){});
+
+    fetch(GS+'?action=getOpsPeople&appearId='+encodeURIComponent(me)
+          +'&sessionToken='+encodeURIComponent(token)+'&t='+Date.now())
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if(!d||d.status!=='ok'){ return; }
+        people=d.people||[];
+        var now=new Date(), m=now.toISOString().slice(0,7);
+        var thisMonth=people.filter(function(p){ return String(p.made).slice(0,7)===m; }).length;
+        var by={};
+        people.forEach(function(p){ by[p.stage]=(by[p.stage]||0)+1; });
+        $('ptot').innerHTML=
+          '<div><b>'+people.length+'</b>people</div>'+
+          '<div><b>'+thisMonth+'</b>joined this month</div>'+
+          '<div><b>'+(by['signed up']||0)+'</b>signed up only</div>'+
+          '<div><b>'+(by['answered']||0)+'</b>answered</div>'+
+          '<div><b>'+(by['in a group']||0)+'</b>in a group</div>'+
+          '<div><b>'+(by['hosting']||0)+'</b>hosting</div>';
+        $('pboard').classList.remove('hide');
+        ppaint();
+      })
+      .catch(function(){});
   }
+
+  function ppaint(){
+    var q=($('q').value||'').trim().toLowerCase();
+    var wantTest=$('showTest').checked;
+    var list=people.filter(function(p){
+      if(!wantTest && p.test) return false;
+      if(!q) return true;
+      return (String(p.name)+' '+String(p.email)).toLowerCase().indexOf(q)>-1;
+    });
+    list.sort(function(a,b){
+      var x=a[pSortK], y=b[pSortK];
+      if(typeof x==='number'&&typeof y==='number'){ return pSortDown? y-x : x-y; }
+      x=String(x||'').toLowerCase(); y=String(y||'').toLowerCase();
+      return pSortDown? (x<y?1:x>y?-1:0) : (x>y?1:x<y?-1:0);
+    });
+    var b=document.querySelector('#ptbl tbody');
+    b.innerHTML='';
+    list.slice(0,SHOW).forEach(function(p){
+      var tr=document.createElement('tr');
+      for(var i=0;i<6;i++){ tr.appendChild(document.createElement('td')); }
+      tr.children[0].textContent=p.name||'(no name)';
+      tr.children[1].textContent=p.email||'';
+      tr.children[2].textContent=p.stage;
+      tr.children[3].textContent=p.groups; tr.children[3].className='num';
+      tr.children[4].textContent=p.made? String(p.made).slice(0,10) : '';
+      tr.children[5].textContent=p.lastSeen? String(p.lastSeen).slice(0,10) : '';
+      if(!p.name){ var s2=document.createElement('span'); s2.className='flag'; s2.textContent='no name';
+                   tr.children[0].textContent=''; tr.children[0].appendChild(s2); }
+      b.appendChild(tr);
+    });
+    $('pmore').textContent = list.length>SHOW
+      ? ('Showing the first '+SHOW+' of '+list.length+'. Narrow it with the box above.')
+      : (list.length+' shown.');
+  }
+
+  $('q').addEventListener('input', ppaint);
+  $('showTest').addEventListener('change', ppaint);
+  Array.prototype.forEach.call(document.querySelectorAll('#ptbl th'), function(th){
+    th.addEventListener('click', function(){
+      var k=th.getAttribute('data-k');
+      if(k===pSortK){ pSortDown=!pSortDown; } else { pSortK=k; pSortDown=true; }
+      ppaint();
+    });
+  });
 
   function paint(){
     rows.sort(function(a,b){
