@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Operations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://2gather.network/nav/identity.js?v=6"></script>
+<style>
+  :root{
+    --bg:#1F5C86; --card:#fff; --text:#1B2733; --muted:#5B6B7C;
+    --brand:#1F699E; --line:#E3E9EF; --warn:#B4451F; --warnbg:#FCEFE9;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);
+       padding:28px 20px 80px;min-height:100vh;}
+  .wrap{max-width:1040px;margin:0 auto;}
+  h1{font-size:22px;margin:0 0 4px;color:#fff;}
+  .sub{color:#CBDCEA;font-size:14px;margin:0 0 22px;}
+  .card{background:var(--card);border-radius:14px;padding:22px;margin-bottom:18px;}
+  h2{font-size:17px;margin:0 0 14px;}
+  p{line-height:1.55;}
+  label{display:block;font-size:13px;font-weight:700;margin-bottom:6px;}
+  input{width:100%;max-width:280px;border:1px solid var(--line);border-radius:8px;
+        padding:11px 13px;font-family:inherit;font-size:15px;color:var(--text);outline:none;}
+  input:focus{border-color:var(--brand);}
+  .btn{background:var(--brand);color:#fff;border:0;border-radius:22px;padding:11px 22px;
+       font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;}
+  .btn:disabled{opacity:.5;cursor:default;}
+  .row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;}
+  .say{font-size:14px;color:var(--muted);margin-top:12px;min-height:20px;}
+  .say.bad{color:var(--warn);}
+  .hide{display:none;}
+  .scroll{overflow-x:auto;}
+  table{border-collapse:collapse;width:100%;font-size:14px;}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);
+     cursor:pointer;user-select:none;}
+  th:hover{color:var(--brand);}
+  td.num,th.num{text-align:right;}
+  .flag{background:var(--warnbg);color:var(--warn);border-radius:11px;padding:2px 9px;
+        font-size:12px;font-weight:700;}
+  .tot{display:flex;gap:26px;flex-wrap:wrap;margin-bottom:16px;}
+  .tot div{font-size:13px;color:var(--muted);}
+  .tot b{display:block;font-size:26px;color:var(--text);font-weight:700;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Operations</h1>
+  <p class="sub">Platform and member data. Operators only.</p>
+
+  <!-- Nothing is claimed before it is known: no table, no numbers, no "0 groups" until the
+       server has answered. A default written into the HTML is a claim. -->
+  <div class="card" id="gate">
+    <h2>Sign in</h2>
+    <p id="who" style="color:var(--muted);font-size:14px;margin:0 0 16px;">Checking who you are...</p>
+
+    <div id="askCode" class="hide">
+      <div class="row">
+        <button class="btn" id="send">Email me a code</button>
+      </div>
+      <div class="say" id="s1"></div>
+    </div>
+
+    <div id="askPin" class="hide" style="margin-top:16px;">
+      <label for="pin">The six digit code</label>
+      <div class="row">
+        <input id="pin" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000">
+        <button class="btn" id="go">Open</button>
+      </div>
+      <div class="say" id="s2"></div>
+    </div>
+  </div>
+
+  <div class="card hide" id="board">
+    <h2>Groups</h2>
+    <div class="tot" id="tot"></div>
+    <div class="scroll"><table id="tbl">
+      <thead><tr>
+        <th data-k="name">Group</th>
+        <th data-k="members" class="num">Members</th>
+        <th data-k="created">Created</th>
+        <th data-k="hostName">Host</th>
+        <th data-k="passcode">Passcode</th>
+      </tr></thead>
+      <tbody></tbody>
+    </table></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var GS='https://cw-api-gate.jessieupp.workers.dev';
+  var me=(window.CW_ID||'').trim();
+  var token='';
+  var rows=[];
+  var sortK='members', sortDown=true;
+
+  var $=function(id){ return document.getElementById(id); };
+  var say=function(el,msg,bad){ var n=$(el); n.textContent=msg||''; n.className='say'+(bad?' bad':''); };
+
+  if(!me){
+    $('who').textContent='You are not signed in. Sign in on 2gather.network first, then come back.';
+    return;
+  }
+  $('who').textContent='Signed in. A code goes to the address on your account.';
+  $('askCode').classList.remove('hide');
+
+  $('send').addEventListener('click', function(){
+    $('send').disabled=true;
+    say('s1','Sending...');
+    fetch(GS+'?action=sendOpsPin&appearId='+encodeURIComponent(me)+'&t='+Date.now())
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        // Says the same thing whether or not you are an operator, so this page cannot be used
+        // to find out who is one.
+        say('s1','If that account can open this page, a code is on its way.');
+        $('askPin').classList.remove('hide');
+        $('pin').focus();
+      })
+      .catch(function(){ $('send').disabled=false; say('s1','Could not reach the server. Try again in a moment.',true); });
+  });
+
+  $('go').addEventListener('click', function(){
+    var code=($('pin').value||'').replace(/\s/g,'');
+    if(!code){ say('s2','Type the code from your email.',true); return; }
+    $('go').disabled=true;
+    say('s2','Checking...');
+    fetch(GS+'?action=verifyOpsPin&appearId='+encodeURIComponent(me)+'&code='+encodeURIComponent(code)+'&t='+Date.now())
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if(!d||d.status!=='ok'||!d.sessionToken){
+          $('go').disabled=false;
+          say('s2',(d&&d.message)||'That code does not match.',true);
+          return;
+        }
+        token=d.sessionToken;
+        say('s2','');
+        $('gate').classList.add('hide');
+        load();
+      })
+      .catch(function(){ $('go').disabled=false; say('s2','Could not reach the server.',true); });
+  });
+
+  function load(){
+    fetch(GS+'?action=getOpsGroups&appearId='+encodeURIComponent(me)
+          +'&sessionToken='+encodeURIComponent(token)+'&t='+Date.now())
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if(!d||d.status!=='ok'){ return; }
+        rows=d.groups||[];
+        var people=0; rows.forEach(function(g){ people+=g.members||0; });
+        var noCode=rows.filter(function(g){ return g.passcode!=='set'; }).length;
+        $('tot').innerHTML=
+          '<div><b>'+rows.length+'</b>groups</div>'+
+          '<div><b>'+people+'</b>memberships</div>'+
+          '<div><b>'+noCode+'</b>without a passcode</div>';
+        $('board').classList.remove('hide');
+        paint();
+      })
+      .catch(function(){});
+  }
+
+  function paint(){
+    rows.sort(function(a,b){
+      var x=a[sortK], y=b[sortK];
+      if(typeof x==='number'&&typeof y==='number'){ return sortDown? y-x : x-y; }
+      x=String(x||'').toLowerCase(); y=String(y||'').toLowerCase();
+      return sortDown? (x<y?1:x>y?-1:0) : (x>y?1:x<y?-1:0);
+    });
+    var b=document.querySelector('#tbl tbody');
+    b.innerHTML='';
+    rows.forEach(function(g){
+      var tr=document.createElement('tr');
+      var when=g.created? String(g.created).slice(0,10) : '';
+      tr.innerHTML='<td></td><td class="num">'+(g.members||0)+'</td><td>'+when+'</td><td></td><td></td>';
+      tr.children[0].textContent=g.name||'(no name)';
+      tr.children[3].textContent=g.hostName||'';
+      if(g.passcode==='set'){ tr.children[4].textContent='set'; }
+      else { var s=document.createElement('span'); s.className='flag'; s.textContent='missing'; tr.children[4].appendChild(s); }
+      b.appendChild(tr);
+    });
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('#tbl th'), function(th){
+    th.addEventListener('click', function(){
+      var k=th.getAttribute('data-k');
+      if(k===sortK){ sortDown=!sortDown; } else { sortK=k; sortDown=true; }
+      paint();
+    });
+  });
+})();
+</script>
+</body>
+</html>
