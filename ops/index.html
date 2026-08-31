@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Operations</title>
+<title>Ops</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
@@ -53,9 +53,14 @@
 <div class="wrap">
   <!-- The page draws nothing until the server says this person may see it. Not a hidden panel,
        not an empty table: nothing. Anybody else gets a blank page and learns nothing from it. -->
-  <div class="card hide" id="gate">
+  <!-- An unlabelled box and a globe. Nothing here says what the page is, so somebody who finds
+       the address learns nothing from it. -->
+  <div class="card" id="gate">
     <div class="row">
-      <button class="btn globe" id="send" title="Send me a code">&#127760;</button>
+      <input id="who" type="email" autocomplete="email" placeholder=" " style="max-width:250px;">
+      <button class="btn globe" id="send" title="Send a code">&#127760;</button>
+    </div>
+    <div class="row hide" id="pinRow" style="margin-top:12px;">
       <input id="pin" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000">
       <button class="btn" id="go">Open</button>
     </div>
@@ -113,27 +118,23 @@
   var $=function(id){ return document.getElementById(id); };
   var say=function(el,msg,bad){ var n=$(el); n.textContent=msg||''; n.className='say'+(bad?' bad':''); };
 
-  // Nobody signed in, nobody home. No message, because there is nothing here to explain.
-  if(!me){ return; }
+  // Signed in on this domain? Then the address is already known and does not need typing.
+  if(me){ $('who').value=''; }
 
-  fetch(GS+'?action=opsWhoAmI&appearId='+encodeURIComponent(me)+'&t='+Date.now())
-    .then(function(r){ return r.json(); })
-    .then(function(d){
-      if(!d||d.status!=='ok'||!d.operator){ return; }   // stays blank
-      $('gate').classList.remove('hide');
-      $('pin').focus();
-    })
-    .catch(function(){});
+  var addr=function(){ return ($('who').value||'').trim(); };
 
   $('send').addEventListener('click', function(){
+    if(!addr() && !me){ $('who').focus(); return; }
     $('send').disabled=true;
     say('s2','');
-    fetch(GS+'?action=sendOpsPin&appearId='+encodeURIComponent(me)+'&t='+Date.now())
+    fetch(GS+'?action=sendOpsPin&email='+encodeURIComponent(addr())
+          +'&appearId='+encodeURIComponent(addr()?'':me)+'&t='+Date.now())
       .then(function(r){ return r.json(); })
-      .then(function(d){
+      .then(function(){
+        // Advances the same way whatever the answer, so this cannot be used to find out who is
+        // an operator. Only a server that could not be reached is worth saying out loud.
         $('send').disabled=false;
-        // Only says something when it could not send. A code that arrived speaks for itself.
-        if(!d||!d.sent){ say('s2','That code could not be sent. '+((d&&d.why)||''),true); }
+        $('pinRow').classList.remove('hide');
         $('pin').focus();
       })
       .catch(function(){ $('send').disabled=false; say('s2','Could not reach the server.',true); });
@@ -144,7 +145,8 @@
     if(!code){ say('s2','Type the code from your email.',true); return; }
     $('go').disabled=true;
     say('s2','Checking...');
-    fetch(GS+'?action=verifyOpsPin&appearId='+encodeURIComponent(me)+'&code='+encodeURIComponent(code)+'&t='+Date.now())
+    fetch(GS+'?action=verifyOpsPin&email='+encodeURIComponent(addr())
+          +'&appearId='+encodeURIComponent(addr()?'':me)+'&code='+encodeURIComponent(code)+'&t='+Date.now())
       .then(function(r){ return r.json(); })
       .then(function(d){
         if(!d||d.status!=='ok'||!d.sessionToken){
@@ -153,9 +155,10 @@
           return;
         }
         token=d.sessionToken;
+        if(d.id){ me=d.id; }
         say('s2','');
         $('gate').classList.add('hide');
-        document.title='Operations';
+        document.title='Ops';
         load();
       })
       .catch(function(){ $('go').disabled=false; say('s2','Could not reach the server.',true); });
