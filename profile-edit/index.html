@@ -1045,7 +1045,11 @@
     var ownInp=document.createElement('input'); ownInp.type='text'; ownInp.className='need-own'; ownInp.placeholder='Write it in your own words';
     var ownBtn=document.createElement('button'); ownBtn.className='addown-btn'; ownBtn.textContent='Add';
     ownLine.appendChild(ownInp); ownLine.appendChild(ownBtn); listEl.appendChild(ownLine);
-    function ownCommit(){ var v=ownInp.value.trim(); if(!v) return; ownInp.value=''; openAddEditor({item:'',type:'person',category:'',level:'',detail:v,local:true}); }
+    // What you write IS the thing you are seeking, so it goes in as the name. It used to be put
+    // in `detail` with the name left empty: the card showed it, because the card falls back to
+    // detail, and the save wrote the name, which was blank. Jessie typed "test add", saw it on
+    // the screen, and the sheet received a need with no name at all. 2026-09-01.
+    function ownCommit(){ var v=ownInp.value.trim(); if(!v) return; ownInp.value=''; openAddEditor({item:v,type:'person',category:'',level:'',detail:'',local:true}); }
     ownBtn.onclick=ownCommit;
     ownInp.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); ownCommit(); } });
     var orSub=document.createElement('div'); orSub.className='enjoy-sub'; orSub.textContent='Or browse by what kind of thing it is.'; listEl.appendChild(orSub);
@@ -1680,7 +1684,15 @@
   function serialize(){
     harvest();
     return {
-      needs: NEEDS_ADDED.map(function(n){ var nt=(n.type==='person'?'skill':n.type==='space'?'space':'thing'); return n.item+(n.local?':local':'')+':'+nt+(n.category?':'+n.category:'')+(n.detail?'~'+encodeURIComponent(n.detail):''); }).join('|'),
+      // A need with no name is not a need. Falls back to the person's own words if the name is
+      // somehow empty, and drops the row entirely rather than writing a nameless one.
+      needs: NEEDS_ADDED.map(function(n){
+        var nm = String(n.item||'').trim() || String(n.detail||'').trim();
+        if(!nm) return '';
+        var nt=(n.type==='person'?'skill':n.type==='space'?'space':'thing');
+        var extra = (String(n.item||'').trim() && n.detail) ? '~'+encodeURIComponent(n.detail) : '';
+        return nm+(n.local?':local':'')+':'+nt+(n.category?':'+n.category:'')+extra;
+      }).filter(Boolean).join('|'),
       interests: ENJOY_ADDED.map(function(x){ return x.t+((x.sel&&x.sel.length)?':'+x.sel.join(','):''); }).join('|'),
       skills: SKILLS_ADDED.map(function(x){ return x.t+':'+(x.cat||'')+':'+(x.level||''); }).join('|'),
       values: VALUES_ADDED.map(function(x){ return x.t+':Value:'+(x.lvl||''); }).join('|'),
