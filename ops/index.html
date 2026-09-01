@@ -60,6 +60,9 @@
   .globe{font-size:19px;line-height:1;padding:10px 16px;}
   #pin{max-width:130px;letter-spacing:.18em;text-align:center;}
   .loading{color:#CBDCEA;font-size:15px;margin:6px 0 0;}
+  .pin{margin:0 0 14px;font-size:14px;}
+  .pin a{color:#CBDCEA;text-decoration:none;border-bottom:1px solid rgba(203,220,234,.35);}
+  .pin a:hover{color:#fff;border-color:#fff;}
   .fold{background:none;border:0;font:inherit;color:inherit;cursor:pointer;padding:0;}
   .fold::before{content:'\25BE ';font-size:.8em;color:var(--muted);}
   .fold.shut::before{content:'\25B8 ';}
@@ -90,6 +93,9 @@
        not an empty table: nothing. Anybody else gets a blank page and learns nothing from it. -->
   <!-- An unlabelled box and a globe. Nothing here says what the page is, so somebody who finds
        the address learns nothing from it. -->
+  <!-- Pinned, so the licensed list is one click from the numbers rather than a URL to remember. -->
+  <p class="pin hide" id="pin"><a href="https://creating.works/license/">What a license includes &#8250;</a></p>
+
   <div class="card" id="gate">
     <div class="row">
       <input id="who" type="email" autocomplete="email" placeholder=" " style="max-width:250px;">
@@ -231,6 +237,7 @@
   if(back){
     me=back.id; token=back.tok;
     $('gate').classList.add('hide');
+    $('pin').classList.remove('hide');
     load();
   }
 
@@ -279,6 +286,7 @@
         remember(me, token);
         say('s2','');
         $('gate').classList.add('hide');
+        $('pin').classList.remove('hide');
         document.title='Ops';
         load();
       })
