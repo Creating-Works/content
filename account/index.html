@@ -597,7 +597,15 @@
       +'&editToken='+encodeURIComponent(_editToken))
       .then(function(r){ return r.json(); })
       .then(function(resp){
-        if(!resp || resp.status!=='ok') return;
+        if(!resp || resp.status!=='ok'){
+          // A token the server will not accept is not a token. Holding onto it meant the page
+          // showed an empty Email box and hid the line explaining why, because it believed it
+          // was verified. Jessie's id changed and her old token stopped matching. 2026-09-01.
+          _editToken='';
+          try{ localStorage.removeItem('cw-edit-'+meId); }catch(e){}
+          try{ renderPanel('account'); }catch(e){}
+          return;
+        }
         if(resp.email) D.email=resp.email;
         // The two name columns come back from the account now. The page used to hold only one
         // joined name and rebuild both boxes by splitting it, calling the last word the surname,
