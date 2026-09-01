@@ -1733,6 +1733,7 @@
   function setSaveStat(txt){ var s=document.getElementById('da-savestat'); if(s) s.textContent=txt||''; }
   function saveUrl(){
     var d=serialize();
+    _lastSaved = d;                    // what the profile page will be handed
     var u=GS_URL+'?action=saveIntake&appearId='+encodeURIComponent(_id)+'&secure=1&editToken='+encodeURIComponent(_editToken)
 
       +'&needs='+encodeURIComponent(d.needs)+'&interests='+encodeURIComponent(d.interests)+'&skills='+encodeURIComponent(d.skills)
@@ -1743,8 +1744,10 @@
       +'&photoURL='+encodeURIComponent(_loaded.photoURL||'');
     return u;
   }
+  var _lastSaved = null;
   function postSave(){
-    return fetch(saveUrl()).then(function(r){ return r.json(); });
+    var u = saveUrl();
+    return fetch(u).then(function(r){ return r.json(); });
   }
   // A save that survives the page closing. `keepalive` tells the browser to finish the request
   // even though the document is going away; a plain fetch is cancelled the instant you navigate,
@@ -1762,7 +1765,19 @@
     _saving=true; setSaveStat('Saving…');
     postSave().then(function(resp){
       _saving=false;
-      if(resp&&resp.status==='ok'){ _dirty=false; setSaveStat('Saved 🌱'); setTimeout(function(){ if(!_dirty && !_saving) setSaveStat(''); },2000); }
+      if(resp&&resp.status==='ok'){
+        _dirty=false; setSaveStat('Saved 🌱'); setTimeout(function(){ if(!_dirty && !_saving) setSaveStat(''); },2000);
+        // Hand what was just saved to the profile page, so the person who did the work is not the
+        // one who waits. Saving clears their cached copy at the gate, on purpose, so their next
+        // read is a cold fetch: measured 2026-09-01 at five to seven seconds, and thirty-six when
+        // Apps Script was struggling. Everybody else's profile came back instantly. This carries
+        // the answer across rather than asking for it again.
+        try {
+          sessionStorage.setItem('cw-just-saved-profile', JSON.stringify({
+            at: Date.now(), id: String(_id||''), data: _lastSaved
+          }));
+        } catch (e) {}
+      }
       else { _editToken=''; try{ localStorage.removeItem(_EDIT_KEY); }catch(e){} setSaveStat(''); showPinGate(document.getElementById('edit-mode'), function(){ autoSave(); }, (resp&&resp.message)||'Session expired. Verify to keep saving.'); }
     }).catch(function(){ _saving=false; setSaveStat('Save failed. Retrying…'); _saveTimer=setTimeout(function(){ scheduleSave(); }, 4000); });
   }

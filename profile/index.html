@@ -724,8 +724,36 @@ async function loadProfileAndIntake(){
   var _mainP = fetch(GS_URL+'?action=getMainProfile&appearId='+encodeURIComponent(id))
                  .then(function(r){return r.json();}).catch(function(){return null;});
   try{
+    // If the editor has just saved, it left the answer here rather than making this page ask for
+    // it again. Saving clears the cached copy at the gate, on purpose, so the next read is a cold
+    // fetch: measured at five to seven seconds, and thirty-six when Apps Script was struggling.
+    // Everybody who had NOT edited got their profile instantly. The person who did the work was
+    // the only one who waited, which is backwards. 2026-09-01.
+    //
+    // Two minutes, their own id only, and the network call still runs behind it, so this can only
+    // ever be the same answer arriving sooner.
+    var _handoff = null;
+    try {
+      var _raw = sessionStorage.getItem('cw-just-saved-profile');
+      if (_raw) {
+        var _h = JSON.parse(_raw);
+        var _norm2 = function (x) { return String(x || '').split('.').join('').toLowerCase(); };
+        if (_h && _h.data && _norm2(_h.id) === _norm2(id) && (Date.now() - _h.at) < 120000) {
+          _handoff = _h.data;
+        }
+        sessionStorage.removeItem('cw-just-saved-profile');   // used once, never stale twice
+      }
+    } catch (e) {}
+
     var res=await fetch(GS_URL+'?action=getProfile&appearId='+encodeURIComponent(id));
     var resp=await res.json();
+    // What they just saved wins over what came back, for the fields they actually edited. The
+    // fetch is still authoritative for everything else: name, photo, and anything the editor
+    // does not touch.
+    if (_handoff && resp && resp.data) {
+      ['needs','interests','skills','values','domains','methods','expression','haves']
+        .forEach(function (f) { if (_handoff[f] !== undefined) resp.data[f] = _handoff[f]; });
+    }
     // "first" is a column on the ikigai row, so it arrives inside resp.data - not at the top
     // level next to photo/name. Main's Name column is blank for most people.
     var _first=(resp.data&&resp.data.first)||resp.first||'';
