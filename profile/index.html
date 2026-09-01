@@ -684,8 +684,13 @@ function getSkillSubCats(parentCat){
 
 // ─── Data loading ─────────────────────────────────────────────────────────────
 async function loadRefData(){
-  try{var res=await fetch(GS_URL+'?action=getReferenceData');_refData=await res.json();}
-  catch(e){_refData={languages:[],skills:[],values:[],domains:[],recreation:[],resources:[]};}
+  // Both of these leave at once now. They used to go one after the other, and each costs three
+  // seconds, so the page spent six seconds on two things that never needed to wait for each
+  // other. Jessie, 2026-09-01: "profile takes 15 seconds of time to load".
+  var _refP = fetch(GS_URL+'?action=getReferenceData').then(function(r){return r.json();}).catch(function(){return null;});
+  var _catP = fetch(GS_URL+'?action=getCategories').then(function(r){return r.json();}).catch(function(){return null;});
+  try{_refData=await _refP;}catch(e){_refData=null;}
+  if(!_refData){_refData={languages:[],skills:[],values:[],domains:[],recreation:[],resources:[]};}
   // Ensure personTypes always exists — falls back to sheet Person column values
   if(!_refData.personTypes||!_refData.personTypes.length){
     _refData.personTypes=['Skills/services','Recreation buddy','Accountability buddy'];
@@ -695,8 +700,7 @@ async function loadRefData(){
     _refData.potluckTypes=['Skill','Experience','Thing'];
   }  // Load parent categories from the reference-data sheet so the list never drifts from the sheet
   try{
-    var cres=await fetch(GS_URL+'?action=getCategories');
-    var cdata=await cres.json();
+    var cdata=await _catP;
     if(cdata&&cdata.categories&&cdata.categories.length){
       PARENT_CATS=cdata.categories.map(function(c){return c.label;}).filter(Boolean);
     }
@@ -707,6 +711,10 @@ async function loadRefData(){
 var _profileLoaded=false;
 async function loadProfileAndIntake(){
   var id=_viewerMode?_showId:_appearId; if(!id) return;
+  // Main leaves at the same moment as the profile rather than four seconds behind it. It is
+  // awaited further down, exactly where it was, so nothing reads it before it has arrived.
+  var _mainP = fetch(GS_URL+'?action=getMainProfile&appearId='+encodeURIComponent(id))
+                 .then(function(r){return r.json();}).catch(function(){return null;});
   try{
     var res=await fetch(GS_URL+'?action=getProfile&appearId='+encodeURIComponent(id));
     var resp=await res.json();
@@ -751,9 +759,8 @@ async function loadProfileAndIntake(){
   // sources surfaces; duplicates prefer ikigai (has sub-levels like level, role, category, detail).
   // Fields with no direct Main equivalent (postal, methods, bringType, expression) stay ikigai-driven.
   try{
-    var mres=await fetch(GS_URL+'?action=getMainProfile&appearId='+encodeURIComponent(id));
-    var mresp=await mres.json();
-    if(mresp.found&&mresp.data){
+    var mresp=await _mainP;
+    if(mresp&&mresp.found&&mresp.data){
       var md=mresp.data;
       var mainInterests=md.interests?parseTagStr(md.interests,'level'):[];
       var mainSkills   =md.skills   ?parseTagStr(md.skills,'level')   :[];
@@ -4440,8 +4447,13 @@ window.goBack = function(){
   }
   var _bootEl=document.getElementById('app-content');
   if(_bootEl) _bootEl.innerHTML='<div style="text-align:center;padding:60px 20px;"><div style="width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--brand);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px;"></div><p style="color:var(--muted);font-size:14px;margin:0;">Loading your profile...</p></div>';
-  await loadRefData();                           // cached + fast — needed to render the flow options
-  await loadProfileAndIntake();                  // wait for the real profile before the first paint - avoids the blank-then-jump flash
+  // Four calls, all in the air at once. The profile used to queue behind the reference data even
+  // though it does not need a word of it to be fetched, only to be drawn. Both are still awaited
+  // before the first paint, so there is no blank-then-jump flash.
+  var _refReady = loadRefData();
+  var _meReady  = loadProfileAndIntake();
+  await _refReady;                               // needed to render the flow options
+  await _meReady;                                // the real profile, before the first paint
   _profileLoaded=true;
   if(_hasProfile){
     _completed=true;
