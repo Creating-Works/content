@@ -693,9 +693,19 @@ function getSkillSubCats(parentCat){
 //
 // Anything the first paint does not need waits here until it has happened. Nothing is dropped,
 // it just goes second.
-var _paintedGo, _painted = new Promise(function (r) { _paintedGo = r; });
-function afterPaint(fn) { _painted.then(function () { try { fn(); } catch (e) {} }); }
-window._paintDone = function () { try { _paintedGo(); } catch (e) {} };
+// Built on first use rather than on this line. The shell paints the header name before this
+// point in the file is ever reached, so afterPaint was being called while `_painted` was still
+// undefined, which threw and took the whole script down with it: the page sat on "Loading
+// preferences..." for ever. Jessie caught it within minutes. 2026-09-01.
+var _paintedGo = null, _painted = null;
+function _paintGate() {
+  if (!_painted) { _painted = new Promise(function (r) { _paintedGo = r; }); }
+  return _painted;
+}
+function afterPaint(fn) {
+  _paintGate().then(function () { try { fn(); } catch (e) {} });
+}
+window._paintDone = function () { _paintGate(); try { if (_paintedGo) _paintedGo(); } catch (e) {} };
 
 // ─── Data loading ─────────────────────────────────────────────────────────────
 async function loadRefData(){
@@ -2038,7 +2048,7 @@ var _regEventsChecked=false;
 async function _fillHubFromReg(){
   if(_regEventsChecked) return; _regEventsChecked=true;
   var who=_showId||_appearId; if(!who) return;
-  await _painted;                       // the profile draws first; this only fills a pill
+  await _paintGate();                   // the profile draws first; this only fills a pill
   try{
     var res=await fetch(GS_URL+'?action=getRegistrations&appearId='+encodeURIComponent(who));
     var d=await res.json();
@@ -2596,7 +2606,7 @@ function renderProfileLanding(el){
     loadRefData()
       .then(function(){ return loadProfileAndIntake(); })
       .then(function(){
-        _profileLoaded=true; window._paintDone(); window._paintDone();
+        _profileLoaded=true; window._paintDone();
         if(_hasProfile){ _completed=true; _screen=0; }
         else { _screen='fast2'; _fastPath=true; if(!_languages.length) _languages=['English']; }
         render();
@@ -4499,7 +4509,7 @@ setTimeout(function(){ try { window._paintDone(); } catch (e) {} }, 12000);
     loadRefData()
       .then(function(){ return loadProfileAndIntake(); })
       .then(function(){
-        _profileLoaded=true; window._paintDone(); window._paintDone();
+        _profileLoaded=true; window._paintDone();
         if(_hasProfile) _completed=true;         // never pushes somebody into the editor
         _screen=0;
         render();
