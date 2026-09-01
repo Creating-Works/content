@@ -461,58 +461,22 @@ function isOwner(){
 
 var GS_URL='https://cw-api-gate.jessieupp.workers.dev';
 
-// Your own record skips the cache for twenty seconds after you save, and not otherwise.
+// The cache is trusted now, and nothing here skips it.
 //
-// The original of this, 2026-08-30, skipped the cache on EVERY read about you, because a save
-// cleared nothing at the gate and a profile could show pre-save answers for up to six hours.
-// That was the right call then and it cost you the whole wait, every single visit: everybody
-// else's profile came back in a fraction of a second and yours took ten to twenty seconds.
+// History, because this line has moved twice in three days. On 2026-08-30 the page began adding
+// nocache=1 to every read about you, since a save cleared nothing at the gate and a profile could
+// show pre-save answers for six hours. That cost the whole wait on every visit. On 2026-09-01 the
+// gate learned to clear a person's cached reads the moment they write, so the bypass was cut down
+// to twenty seconds after a save.
 //
-// The gate was changed on 2026-09-01 so that a write clears that person's cached reads at once,
-// and their own records are held for thirty seconds and served instantly while being refreshed
-// behind the request. So the permanent bypass is no longer needed.
+// Twenty seconds was still wrong, and Jessie found it within minutes: the editor autosaves, so
+// every save restamped the clock and kept her in the slow path the entire time she was editing,
+// and for twenty seconds after every keystroke that triggered a save. She saved, moved pages, came
+// back, and everything took five seconds again.
 //
-// Twenty seconds is kept as belt and braces. The gate's purge rebuilds each key from `appearId`
-// alone, so a read carrying an extra parameter would not be matched by it, and this covers that
-// gap for the one person who would notice: the one who just pressed Save.
-var CW_READS = ['getProfile','getMainProfile','getIntake','lookupProfile','getAccount',
-  'getBookmarks','getRegistrations','getMyGroups','getReferenceData','getCategories',
-  'getGroupBundle','getGroupMembers','getEventById','getPotluckList','getAttendees',
-  'getEventProfiles','findPeople','getMyInvites','getPairMatch','getSupportList',
-  'getGiftHistory','getShortCode','getReadMessages','getInitials','eventBundle','feedUpcoming'];
-
-(function () {
-  var _f = window.fetch;
-  window.fetch = function (input, init) {
-    try {
-      var u = (typeof input === 'string') ? input : (input && input.url) || '';
-      if (u.indexOf(GS_URL) === 0 && u.indexOf('nocache=') === -1) {
-        // Anything that is not a plain read counts as a save, and stamps the clock.
-        var _act = (u.split('action=')[1] || '').split('&')[0];
-        if (_act && CW_READS.indexOf(_act) === -1) {
-          try { localStorage.setItem('cw-just-saved', String(Date.now())); } catch (e) {}
-        }
-        var _saved = 0;
-        try { _saved = parseInt(localStorage.getItem('cw-just-saved') || '0', 10) || 0; } catch (e) {}
-        var _recent = _saved && (Date.now() - _saved) < 20000;
-        var me = _recent ? ((window.CW && CW.me && CW.me().key) || '') : '';
-        if (me) {
-          var norm = function (s) { return String(s || '').split('.').join('').toLowerCase(); };
-          var carries = false;
-          var q = u.split('?')[1] || '';
-          q.split('&').forEach(function (pair) {
-            var bits = pair.split('=');
-            var k = bits[0];
-            if (k !== 'appearId' && k !== 'id' && k !== 'me' && k !== 'CWid' && k !== 'from' && k !== 'memberCard') return;
-            if (norm(decodeURIComponent(bits[1] || '')) === norm(me)) carries = true;
-          });
-          if (carries) { input = (typeof input === 'string') ? (u + '&nocache=1') : new Request(u + '&nocache=1', input); }
-        }
-      }
-    } catch (e) {}
-    return _f.call(this, input, init);
-  };
-})();
+// It is gone. Every read this page makes carries appearId and nothing else, which is exactly the
+// key the gate's purge rebuilds, so a save clears them all and the next read is fresh. The thirty
+// second life on those entries is the backstop if a purge ever misses.
 
 
 // Read once, then out of the address bar. Nobody needs to see somebody's id to read their page,
