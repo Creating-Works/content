@@ -1562,22 +1562,41 @@
   // (getReferenceData), falling back to the hardcoded trees if the fetch fails.
   var GS_URL='https://cw-api-gate.jessieupp.workers.dev';
 
-// Your own record is never served from cache. Added 2026-08-30, after a profile showed the
-// answers from before a save for up to six hours. The gate caches getIntake, getProfile,
-// lookupProfile, getAccount, getBookmarks and getRegistrations, and a write clears none of them:
-// its purge only ever touches the events feed. `nocache` is a switch the gate already has, so
-// this asks for a fresh answer rather than changing how the cache works.
+// Your own record skips the cache for twenty seconds after you save, and not otherwise.
 //
-// Somebody else's profile stays cached and stays fast. Only a read about YOU skips it, which is
-// the only case where a stale answer is ever wrong. Wrapped here rather than added to each call,
-// because there are six of them today and a list like that drifts the moment a seventh is added.
+// The original of this, 2026-08-30, skipped the cache on EVERY read about you, because a save
+// cleared nothing at the gate and a profile could show pre-save answers for up to six hours.
+// That was the right call then and it cost you the whole wait, every single visit: everybody
+// else's profile came back in a fraction of a second and yours took ten to twenty seconds.
+//
+// The gate was changed on 2026-09-01 so that a write clears that person's cached reads at once,
+// and their own records are held for thirty seconds and served instantly while being refreshed
+// behind the request. So the permanent bypass is no longer needed.
+//
+// Twenty seconds is kept as belt and braces. The gate's purge rebuilds each key from `appearId`
+// alone, so a read carrying an extra parameter would not be matched by it, and this covers that
+// gap for the one person who would notice: the one who just pressed Save.
+var CW_READS = ['getProfile','getMainProfile','getIntake','lookupProfile','getAccount',
+  'getBookmarks','getRegistrations','getMyGroups','getReferenceData','getCategories',
+  'getGroupBundle','getGroupMembers','getEventById','getPotluckList','getAttendees',
+  'getEventProfiles','findPeople','getMyInvites','getPairMatch','getSupportList',
+  'getGiftHistory','getShortCode','getReadMessages','getInitials','eventBundle','feedUpcoming'];
+
 (function () {
   var _f = window.fetch;
   window.fetch = function (input, init) {
     try {
       var u = (typeof input === 'string') ? input : (input && input.url) || '';
       if (u.indexOf(GS_URL) === 0 && u.indexOf('nocache=') === -1) {
-        var me = (window.CW && CW.me && CW.me().key) || '';
+        // Anything that is not a plain read counts as a save, and stamps the clock.
+        var _act = (u.split('action=')[1] || '').split('&')[0];
+        if (_act && CW_READS.indexOf(_act) === -1) {
+          try { localStorage.setItem('cw-just-saved', String(Date.now())); } catch (e) {}
+        }
+        var _saved = 0;
+        try { _saved = parseInt(localStorage.getItem('cw-just-saved') || '0', 10) || 0; } catch (e) {}
+        var _recent = _saved && (Date.now() - _saved) < 20000;
+        var me = _recent ? ((window.CW && CW.me && CW.me().key) || '') : '';
         if (me) {
           var norm = function (s) { return String(s || '').split('.').join('').toLowerCase(); };
           var carries = false;
