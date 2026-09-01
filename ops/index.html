@@ -48,6 +48,10 @@
   .globe{font-size:19px;line-height:1;padding:10px 16px;}
   #pin{max-width:130px;letter-spacing:.18em;text-align:center;}
   .loading{color:#CBDCEA;font-size:15px;margin:6px 0 0;}
+  .tot .tile{cursor:pointer;border-radius:8px;padding:4px 8px;margin:-4px -8px;}
+  .tot .tile:hover{background:#F1F5F9;}
+  .tot .tile.on{background:var(--brand);color:#fff;}
+  .tot .tile.on b{color:#fff;}
   .chips{display:flex;flex-wrap:wrap;gap:4px;max-width:230px;}
   .chips button{background:#fff;border:1px solid var(--line);border-radius:12px;
                 padding:3px 9px;font-family:inherit;font-size:12px;color:var(--muted);
@@ -176,7 +180,7 @@
   var token='';
   var rows=[];
   var sortK='members', sortDown=true;
-  var people=[], pSortK='made', pSortDown=true, SHOW=200;
+  var people=[], pSortK='made', pSortDown=true, SHOW=200, pDays=0;
 
   var $=function(id){ return document.getElementById(id); };
   var say=function(el,msg,bad){ var n=$(el); n.textContent=msg||''; n.className='say'+(bad?' bad':''); };
@@ -289,17 +293,43 @@
       .then(function(d){
         if(!d||d.status!=='ok'){ return; }
         people=d.people||[];
-        var now=new Date(), m=now.toISOString().slice(0,7);
-        var thisMonth=people.filter(function(p){ return String(p.made).slice(0,7)===m; }).length;
+        // Counted from the stage names the server actually sends. These read zero for a while
+        // because the tiles still counted the old names after the stages were renamed. 2026-09-01.
         var by={};
         people.forEach(function(p){ by[p.stage]=(by[p.stage]||0)+1; });
+        var since=function(days){
+          var cut=new Date(Date.now()-days*86400000).toISOString();
+          return people.filter(function(p){ return String(p.made) >= cut; }).length;
+        };
+        var tile=function(n, label, act, val){
+          return '<div class="tile" data-act="'+act+'" data-val="'+val+'"><b>'+n+'</b>'+label+'</div>';
+        };
         $('ptot').innerHTML=
-          '<div><b>'+people.length+'</b>people</div>'+
-          '<div><b>'+thisMonth+'</b>joined this month</div>'+
-          '<div><b>'+(by['signed up']||0)+'</b>signed up only</div>'+
-          '<div><b>'+(by['answered']||0)+'</b>answered</div>'+
-          '<div><b>'+(by['in a group']||0)+'</b>in a group</div>'+
-          '<div><b>'+(by['hosting']||0)+'</b>hosting</div>';
+          tile(people.length,'people','all','')+
+          tile(since(7),'joined in 7 days','days','7')+
+          tile(since(30),'joined in 30 days','days','30')+
+          tile(by['created account']||0,'created account','stage','created account')+
+          tile(by['completed intro']||0,'completed intro','stage','completed intro')+
+          tile(by['joined group']||0,'joined group','stage','joined group')+
+          tile(by['created group']||0,'created group','stage','created group');
+
+        // Every tile is a filter. Clicking one shows exactly the people it counted.
+        Array.prototype.forEach.call($('ptot').querySelectorAll('.tile'), function(t){
+          t.addEventListener('click', function(){
+            var act=t.getAttribute('data-act'), val=t.getAttribute('data-val');
+            if(act==='all'){ resetFilters('#ptbl', function(){}); pDays=0; }
+            else if(act==='days'){ pDays=Number(val); }
+            else {
+              pDays=0;
+              Array.prototype.forEach.call(document.querySelectorAll('#ptbl .chips[data-f="stage"] button'), function(b){
+                b.classList.toggle('on', b.getAttribute('data-v')===val);
+              });
+            }
+            Array.prototype.forEach.call($('ptot').querySelectorAll('.tile'), function(x){ x.classList.remove('on'); });
+            if(act!=='all') t.classList.add('on');
+            ppaint();
+          });
+        });
         $('pboard').classList.remove('hide');
         ppaint();
         settled();
@@ -357,6 +387,10 @@
       // Ticked means show only test accounts. Unticked hides them.
       if(onlyTest ? !p.test : p.test) return false;
       // The box searches everything on the person's row, not only name and address.
+      if(pDays){
+        var cut=new Date(Date.now()-pDays*86400000).toISOString();
+        if(String(p.made) < cut) return false;
+      }
       if(q && String(p.blob||'').indexOf(q)===-1
            && (String(p.name)+' '+String(p.email)).toLowerCase().indexOf(q)===-1) return false;
       return passes(p, f);
@@ -430,7 +464,11 @@
     $('gmore').textContent=shown.length+' shown.';
   }
 
-  $('preset').addEventListener('click', function(){ $('q').value=''; $('onlyTest').checked=false; resetFilters('#ptbl', ppaint); });
+  $('preset').addEventListener('click', function(){
+    $('q').value=''; $('onlyTest').checked=false; pDays=0;
+    Array.prototype.forEach.call($('ptot').querySelectorAll('.tile'), function(x){ x.classList.remove('on'); });
+    resetFilters('#ptbl', ppaint);
+  });
   $('greset').addEventListener('click', function(){ $('gq').value=''; resetFilters('#tbl', paint); });
   Array.prototype.forEach.call(document.querySelectorAll('tr.filters .chips button'), function(b){
     b.addEventListener('click', function(){
