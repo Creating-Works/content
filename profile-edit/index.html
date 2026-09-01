@@ -1146,7 +1146,11 @@
       done.onclick=function(){ panel.remove(); };
     }
 
-    function addNeed(obj){ NEEDS_ADDED.unshift(obj); renderAdded(); }
+    // scheduleSave marks the page changed and saves shortly after. Without it, adding a need
+    // drew on the screen and was never written: autoSave and Done both return early unless the
+    // page is marked changed, so Jessie added a sixth need, saw it, left, and it was gone.
+    // Every one of these four touches the list, so every one of them has to say so. 2026-09-01.
+    function addNeed(obj){ NEEDS_ADDED.unshift(obj); renderAdded(); scheduleSave(); }
     // Person adds go through the confirm editor first (ask local / level / more context).
     function openAddPerson(item, category){ openAddEditor({item:item,type:'person',category:category||'',level:'',detail:'',local:true}); }
     function addSpace(detail, local){ addNeed({item:detail,type:'space',category:'',level:'',local:!!local,detail:''}); }
@@ -1196,10 +1200,10 @@
       card.appendChild(left);
       var right=document.createElement('div'); right.className='need-item-right';
       var edit=document.createElement('button'); edit.className='need-icon-btn'; edit.title='Edit'; edit.textContent='✏️';
-      edit.onclick=function(){ var editor=buildNeedEditor(obj, function(d){ obj.item=d.item; obj.type=d.type; obj.category=d.category; obj.level=d.level; obj.detail=d.detail; obj.local=d.local; renderAdded(); }, function(){ renderAdded(); }); card.replaceWith(editor); };
+      edit.onclick=function(){ var editor=buildNeedEditor(obj, function(d){ obj.item=d.item; obj.type=d.type; obj.category=d.category; obj.level=d.level; obj.detail=d.detail; obj.local=d.local; renderAdded(); scheduleSave(); }, function(){ renderAdded(); }); card.replaceWith(editor); };
       var lt=document.createElement('label'); lt.className='local-toggle'+(obj.local?' active':''); var lck=document.createElement('input'); lck.type='checkbox'; lck.checked=!!obj.local; lt.appendChild(lck); lt.appendChild(document.createTextNode(' 📍 Local'));
-      lck.onchange=function(){ obj.local=lck.checked; lt.classList.toggle('active', lck.checked); };
-      var x=document.createElement('button'); x.className='need-x'; x.innerHTML='&times;'; x.onclick=function(){ var k=NEEDS_ADDED.indexOf(obj); if(k>-1) NEEDS_ADDED.splice(k,1); renderAdded(); };
+      lck.onchange=function(){ obj.local=lck.checked; lt.classList.toggle('active', lck.checked); scheduleSave(); };
+      var x=document.createElement('button'); x.className='need-x'; x.innerHTML='&times;'; x.onclick=function(){ var k=NEEDS_ADDED.indexOf(obj); if(k>-1) NEEDS_ADDED.splice(k,1); renderAdded(); scheduleSave(); };
       right.appendChild(edit); right.appendChild(lt); right.appendChild(x);
       card.appendChild(right);
       return card;
