@@ -47,6 +47,11 @@
   .tot b{display:block;font-size:26px;color:var(--text);font-weight:700;}
   .globe{font-size:19px;line-height:1;padding:10px 16px;}
   #pin{max-width:130px;letter-spacing:.18em;text-align:center;}
+  .loading{color:#CBDCEA;font-size:15px;margin:6px 0 0;}
+  .reset{background:none;border:0;color:var(--muted);font-size:13px;cursor:pointer;
+         padding:4px 6px;font-family:inherit;}
+  .reset:hover{color:var(--brand);text-decoration:underline;}
+  .headrow{display:flex;align-items:baseline;justify-content:space-between;gap:12px;}
   .key{font-size:13px;color:var(--muted);margin:0 0 14px;line-height:1.7;}
   .key b{color:var(--text);font-weight:700;}
   tr.filters td{padding:4px 8px 10px;border-bottom:1px solid var(--line);}
@@ -62,7 +67,7 @@
        the address learns nothing from it. -->
   <div class="card" id="gate">
     <div class="row">
-      <input id="who" type="email" autocomplete="email" placeholder="email" style="max-width:250px;">
+      <input id="who" type="email" autocomplete="email" placeholder=" " style="max-width:250px;">
       <button class="btn globe" id="send" title="Send a code">&#127760;</button>
     </div>
     <div class="row hide" id="pinRow" style="margin-top:12px;">
@@ -72,14 +77,15 @@
     <div class="say" id="s2"></div>
   </div>
 
+  <p class="loading hide" id="loading">Loading data...</p>
+
   <div class="card hide" id="pboard">
-    <h2>People</h2>
+    <div class="headrow"><h2>People</h2><button class="reset" id="preset">reset</button></div>
     <div class="tot" id="ptot"></div>
     <p class="key">
-      <b>signed up</b> an account and nothing else &nbsp;·&nbsp;
-      <b>answered</b> has said what they enjoy, are good at or care about &nbsp;·&nbsp;
-      <b>in a group</b> a member somewhere &nbsp;·&nbsp;
-      <b>hosting</b> runs a group
+      <b>created account</b> &nbsp;·&nbsp; <b>completed intro</b> &nbsp;·&nbsp;
+      <b>joined group</b> &nbsp;·&nbsp; <b>created group</b>
+      <br><span style="opacity:.8">The event stages come next and need the registration data.</span>
     </p>
     <div class="row" style="margin-bottom:12px;">
       <input id="q" placeholder="Search everything on a person's row" style="max-width:340px;">
@@ -91,6 +97,7 @@
       <thead>
         <tr>
           <th data-k="name">Name</th>
+          <th data-k="cwid">ID</th>
           <th data-k="email">Address</th>
           <th data-k="stage">Stage</th>
           <th data-k="roles">Roles</th>
@@ -100,9 +107,18 @@
         </tr>
         <tr class="filters">
           <td><input data-f="name" placeholder="filter"></td>
+          <td><input data-f="cwid" placeholder="filter"></td>
           <td><input data-f="email" placeholder="filter"></td>
           <td><input data-f="stage" placeholder="filter"></td>
-          <td><input data-f="roles" placeholder="filter"></td>
+          <td><select data-f="roles" multiple size="4">
+                <option value="superAdmin">superAdmin</option>
+                <option value="admin">admin</option>
+                <option value="partner">partner</option>
+                <option value="guest">guest</option>
+                <option value="member">member</option>
+                <option value="groupHost">groupHost</option>
+                <option value="groupCoHost">groupCoHost</option>
+              </select></td>
           <td><input data-f="groups" placeholder="filter"></td>
           <td><input data-f="made" placeholder="filter"></td>
           <td><input data-f="lastSeen" placeholder="filter"></td>
@@ -114,7 +130,7 @@
   </div>
 
   <div class="card hide" id="board">
-    <h2>Groups</h2>
+    <div class="headrow"><h2>Groups</h2><button class="reset" id="greset">reset</button></div>
     <div class="tot" id="tot"></div>
     <div class="row" style="margin-bottom:12px;">
       <input id="gq" placeholder="Search everything on a group's row" style="max-width:340px;">
@@ -126,7 +142,6 @@
           <th data-k="members" class="num">Members</th>
           <th data-k="created">Created</th>
           <th data-k="hostName">Host</th>
-          <th data-k="source">Lives in</th>
           <th data-k="passcode">Passcode</th>
         </tr>
         <tr class="filters">
@@ -134,7 +149,6 @@
           <td><input data-f="members" placeholder="filter"></td>
           <td><input data-f="created" placeholder="filter"></td>
           <td><input data-f="hostName" placeholder="filter"></td>
-          <td><input data-f="source" placeholder="filter"></td>
           <td><input data-f="passcode" placeholder="filter"></td>
         </tr>
       </thead>
@@ -187,7 +201,7 @@
 
   $('send').addEventListener('click', function(){
     // An empty box used to do nothing at all and say nothing, which reads as a broken page.
-    if(!addr() && !me){ $('who').focus(); say('s2','Type the address on your account.'); return; }
+    if(!addr() && !me){ $('who').focus(); return; }
     $('send').disabled=true;
     say('s2','');
     fetch(GS+'?action=sendOpsPin&email='+encodeURIComponent(addr())
@@ -198,7 +212,6 @@
         // an operator. Only a server that could not be reached is worth saying out loud.
         $('send').disabled=false;
         try{ localStorage.setItem('cw-ops-who', addr()); }catch(e){}
-        say('s2','Code sent. It expires in fifteen minutes.');
         $('pinRow').classList.remove('hide');
         $('pin').focus();
       })
@@ -231,6 +244,9 @@
   });
 
   function load(){
+    $('loading').classList.remove('hide');
+    var done=0;
+    var settled=function(){ if(++done>=2) $('loading').classList.add('hide'); };
     fetch(GS+'?action=getOpsGroups&appearId='+encodeURIComponent(me)
           +'&sessionToken='+encodeURIComponent(token)+'&t='+Date.now())
       .then(function(r){ return r.json(); })
@@ -247,13 +263,14 @@
         // Two different things. Memberships counts a person once per group they are in; people
         // counts each person once however many groups they are in.
         $('tot').innerHTML=
-          '<div><b>'+rows.length+'</b>groups, '+(d.ours||0)+' in our sheet</div>'+
+          '<div><b>'+rows.length+'</b>groups</div>'+
           '<div><b>'+people+'</b>memberships, one per person per group</div>'+
           '<div><b>'+(d.uniquePeople||0)+'</b>people in at least one group</div>';
         $('board').classList.remove('hide');
         paint();
+        settled();
       })
-      .catch(function(){});
+      .catch(function(){ settled(); });
 
     fetch(GS+'?action=getOpsPeople&appearId='+encodeURIComponent(me)
           +'&sessionToken='+encodeURIComponent(token)+'&t='+Date.now())
@@ -274,8 +291,9 @@
           '<div><b>'+(by['hosting']||0)+'</b>hosting</div>';
         $('pboard').classList.remove('hide');
         ppaint();
+        settled();
       })
-      .catch(function(){});
+      .catch(function(){ settled(); });
   }
 
   function colFilters(sel){
@@ -284,11 +302,30 @@
       var v=(i.value||'').trim().toLowerCase();
       if(v) out[i.getAttribute('data-f')]=v;
     });
+    // A dropdown you can pick several from: member AND groupHost means somebody who is both.
+    Array.prototype.forEach.call(document.querySelectorAll(sel+' tr.filters select'), function(sl){
+      var picked=[];
+      Array.prototype.forEach.call(sl.options, function(o){ if(o.selected) picked.push(o.value.toLowerCase()); });
+      if(picked.length) out[sl.getAttribute('data-f')]=picked;
+    });
     return out;
   }
   function passes(row, f){
-    for(var k in f){ if(String(row[k]==null?'':row[k]).toLowerCase().indexOf(f[k])===-1) return false; }
+    for(var k in f){
+      var have=String(row[k]==null?'':row[k]).toLowerCase();
+      var want=f[k];
+      if(Object.prototype.toString.call(want)==='[object Array]'){
+        for(var i=0;i<want.length;i++){ if(have.indexOf(want[i])===-1) return false; }
+      } else if(have.indexOf(want)===-1){ return false; }
+    }
     return true;
+  }
+  function resetFilters(sel, repaint){
+    Array.prototype.forEach.call(document.querySelectorAll(sel+' tr.filters input'), function(i){ i.value=''; });
+    Array.prototype.forEach.call(document.querySelectorAll(sel+' tr.filters select'), function(sl){
+      Array.prototype.forEach.call(sl.options, function(o){ o.selected=false; });
+    });
+    repaint();
   }
 
   function ppaint(){
@@ -313,14 +350,16 @@
     b.innerHTML='';
     list.slice(0,SHOW).forEach(function(p){
       var tr=document.createElement('tr');
-      for(var i=0;i<7;i++){ tr.appendChild(document.createElement('td')); }
+      for(var i=0;i<8;i++){ tr.appendChild(document.createElement('td')); }
       tr.children[0].textContent=p.name||'(no name)';
-      tr.children[1].textContent=p.email||'';
-      tr.children[2].textContent=p.stage;
-      tr.children[3].textContent=p.roles||'';
-      tr.children[4].textContent=p.groups; tr.children[4].className='num';
-      tr.children[5].textContent=p.made? String(p.made).slice(0,10) : '';
-      tr.children[6].textContent=p.lastSeen? String(p.lastSeen).slice(0,10) : '';
+      tr.children[1].textContent=p.cwid||'';
+      tr.children[1].style.cssText='font-size:12px;color:var(--muted);';
+      tr.children[2].textContent=p.email||'';
+      tr.children[3].textContent=p.stage;
+      tr.children[4].textContent=p.roles||'';
+      tr.children[5].textContent=p.groups; tr.children[5].className='num';
+      tr.children[6].textContent=p.made? String(p.made).slice(0,10) : '';
+      tr.children[7].textContent=p.lastSeen? String(p.lastSeen).slice(0,10) : '';
       if(!p.name){ var s2=document.createElement('span'); s2.className='flag'; s2.textContent='no name';
                    tr.children[0].textContent=''; tr.children[0].appendChild(s2); }
       b.appendChild(tr);
@@ -358,19 +397,23 @@
     });
     shown.forEach(function(g){
       var tr=document.createElement('tr');
-      for(var i=0;i<6;i++){ tr.appendChild(document.createElement('td')); }
+      for(var i=0;i<5;i++){ tr.appendChild(document.createElement('td')); }
       tr.children[0].textContent=g.name||'(no name)';
       tr.children[1].textContent=g.members||0; tr.children[1].className='num';
       tr.children[2].textContent=g.created? String(g.created).slice(0,10) : '';
       tr.children[3].textContent=g.hostName||'';
-      tr.children[4].textContent=g.source||'';
-      if(g.passcode==='set'){ tr.children[5].textContent='set'; }
-      else { var s=document.createElement('span'); s.className='flag'; s.textContent='missing'; tr.children[5].appendChild(s); }
+      if(g.passcode==='set'){ tr.children[4].textContent='set'; }
+      else { var s=document.createElement('span'); s.className='flag'; s.textContent='missing'; tr.children[4].appendChild(s); }
       b.appendChild(tr);
     });
     $('gmore').textContent=shown.length+' shown.';
   }
 
+  $('preset').addEventListener('click', function(){ $('q').value=''; $('onlyTest').checked=false; resetFilters('#ptbl', ppaint); });
+  $('greset').addEventListener('click', function(){ $('gq').value=''; resetFilters('#tbl', paint); });
+  Array.prototype.forEach.call(document.querySelectorAll('tr.filters select'), function(sl){
+    sl.addEventListener('change', function(){ (sl.closest('#ptbl') ? ppaint : paint)(); });
+  });
   $('gq').addEventListener('input', paint);
   Array.prototype.forEach.call(document.querySelectorAll('#tbl tr.filters input'), function(i){
     i.addEventListener('input', paint);
