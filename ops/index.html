@@ -62,7 +62,7 @@
        the address learns nothing from it. -->
   <div class="card" id="gate">
     <div class="row">
-      <input id="who" type="email" autocomplete="email" placeholder=" " style="max-width:250px;">
+      <input id="who" type="email" autocomplete="email" placeholder="email" style="max-width:250px;">
       <button class="btn globe" id="send" title="Send a code">&#127760;</button>
     </div>
     <div class="row hide" id="pinRow" style="margin-top:12px;">
@@ -178,13 +178,16 @@
     load();
   }
 
-  // Signed in on this domain? Then the address is already known and does not need typing.
-  if(me && !back){ $('who').value=''; }
+  // The address, typed once and kept, so signing in again is the globe and the code.
+  if(!back){
+    try{ var w=localStorage.getItem('cw-ops-who'); if(w) $('who').value=w; }catch(e){}
+  }
 
   var addr=function(){ return ($('who').value||'').trim(); };
 
   $('send').addEventListener('click', function(){
-    if(!addr() && !me){ $('who').focus(); return; }
+    // An empty box used to do nothing at all and say nothing, which reads as a broken page.
+    if(!addr() && !me){ $('who').focus(); say('s2','Type the address on your account.'); return; }
     $('send').disabled=true;
     say('s2','');
     fetch(GS+'?action=sendOpsPin&email='+encodeURIComponent(addr())
@@ -194,6 +197,8 @@
         // Advances the same way whatever the answer, so this cannot be used to find out who is
         // an operator. Only a server that could not be reached is worth saying out loud.
         $('send').disabled=false;
+        try{ localStorage.setItem('cw-ops-who', addr()); }catch(e){}
+        say('s2','Code sent. It expires in fifteen minutes.');
         $('pinRow').classList.remove('hide');
         $('pin').focus();
       })
