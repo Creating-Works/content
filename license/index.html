@@ -8,50 +8,62 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-  :root{ --bg:#1F5C86; --card:#fff; --text:#1B2733; --muted:#5B6B7C; --brand:#1F699E; --line:#E3E9EF; }
+  :root{
+    --bg:#1F5C86; --card:#fff; --text:#1B2733; --muted:#5B6B7C;
+    --brand:#1F699E; --line:#E3E9EF; --tick:#2E7D5B; --soft:#F5F8FB;
+  }
   *{box-sizing:border-box;}
   body{margin:0;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);
-       padding:34px 20px 80px;min-height:100vh;}
-  .wrap{max-width:720px;margin:0 auto;}
-  h1{font-size:26px;margin:0 0 6px;color:#fff;}
-  .sub{color:#CBDCEA;font-size:15px;margin:0 0 26px;line-height:1.6;}
-  .card{background:var(--card);border-radius:14px;padding:26px;margin-bottom:18px;}
-  h2{font-size:18px;margin:0 0 14px;}
-  p{line-height:1.65;margin:0 0 14px;}
-  ul{margin:0;padding-left:20px;}
-  li{line-height:1.65;margin-bottom:14px;}
-  li b{display:block;}
-  .note{color:var(--muted);font-size:14px;}
-  a{color:var(--brand);}
+       padding:28px 20px 80px;min-height:100vh;}
   .hide{display:none;}
+  .wrap{max-width:1000px;margin:0 auto;}
+  h1{font-size:24px;margin:0 0 4px;color:#fff;}
+  .sub{color:#CBDCEA;font-size:15px;margin:0 0 24px;line-height:1.6;}
+  .cols{display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;}
+
+  .rail{background:var(--card);border-radius:14px;padding:12px;width:220px;flex:0 0 220px;}
+  .rail button{display:block;width:100%;text-align:left;background:none;border:0;
+               font-family:inherit;font-size:15px;font-weight:700;color:var(--text);
+               padding:12px 14px;border-radius:10px;cursor:pointer;margin-bottom:4px;}
+  .rail button span{display:block;font-weight:400;font-size:12.5px;color:var(--muted);
+                    margin-top:3px;line-height:1.45;}
+  .rail button:hover{background:var(--soft);}
+  .rail button.on{background:var(--brand);color:#fff;}
+  .rail button.on span{color:#D6E6F2;}
+
+  .panel{background:var(--card);border-radius:14px;padding:26px;flex:1 1 420px;min-width:320px;}
+  h2{font-size:19px;margin:0 0 4px;}
+  .what{color:var(--muted);font-size:14px;line-height:1.6;margin:0 0 20px;}
+
+  table{border-collapse:collapse;width:100%;font-size:14.5px;}
+  th,td{text-align:left;padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:top;}
+  th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);
+     border-bottom:1.5px solid var(--line);}
+  th.mid,td.mid{text-align:center;width:96px;}
+  .tick{color:var(--tick);font-weight:700;}
+  .dash{color:#C3CDD8;}
+  td .note{display:block;color:var(--muted);font-size:12.5px;margin-top:3px;line-height:1.5;}
+  .empty{color:var(--muted);font-size:14.5px;line-height:1.7;background:var(--soft);
+         border-radius:10px;padding:18px;}
+  @media (max-width:720px){ .rail{width:100%;flex:1 1 100%;} }
 </style>
 </head>
 <body>
 <div class="wrap hide" id="page">
   <h1>License</h1>
-  <p class="sub">Everything a group needs is free. A license adds what a larger group asks for.</p>
+  <p class="sub">What each tool gives away, and what a license adds. Operators only, until the lists are right.</p>
 
-  <div class="card">
-    <h2>What a license includes</h2>
-    <ul>
-      <li><b>Screen people before they join</b>
-        Ask a few questions when somebody asks to join, and read their answers before deciding.
-        Without a license, anyone holding the passcode comes straight in.</li>
-    </ul>
-    <p class="note" style="margin-top:20px;">More is being added to this list.</p>
-  </div>
-
-  <div class="card">
-    <h2>What stays free</h2>
-    <p>Creating a group, its passcode, members, introductions, events and the bulletin board.
-       Nothing that works today moves behind a license.</p>
+  <div class="cols">
+    <div class="rail" id="rail"></div>
+    <div class="panel" id="panel"></div>
   </div>
 </div>
+
 <script>
 (function(){
   // Not public. Nothing is drawn unless the server confirms a live operator session, and the
   // session is the one from creating.works/ops. Jessie 2026-09-01: private until the list is
-  // right. Somebody else gets a blank page and learns nothing from it.
+  // right. Anybody else gets a blank page and learns nothing from it.
   var GS='https://cw-api-gate.jessieupp.workers.dev';
   var v=null;
   try{ v=JSON.parse(localStorage.getItem('cw-ops-session')||'null'); }catch(e){}
@@ -59,8 +71,78 @@
   fetch(GS+'?action=opsCheck&appearId='+encodeURIComponent(v.id)
         +'&sessionToken='+encodeURIComponent(v.tok)+'&t='+Date.now())
     .then(function(r){ return r.json(); })
-    .then(function(d){ if(d&&d.status==='ok'&&d.ok){ document.getElementById('page').classList.remove('hide'); } })
+    .then(function(d){ if(d&&d.status==='ok'&&d.ok){ document.getElementById('page').classList.remove('hide'); draw(); } })
     .catch(function(){});
+
+  // Only what can be checked in the code is written down as free. Nothing here is invented:
+  // an empty list says it is empty rather than filling itself with plausible rows.
+  var TOOLS=[
+    { key:'2gather', name:'2Gather', blurb:'Groups, events and the bulletin board',
+      what:'Where a group gathers: its people, its introductions and its events.',
+      rows:[
+        ['Create a group', 1, 1],
+        ['A passcode on every group', 1, 1, 'Everybody asks for one. It is what settles joining.'],
+        ['Members, with photos and what they offer', 1, 1],
+        ['Introductions between members', 1, 1],
+        ['Events and the bulletin board', 1, 1],
+        ['Members can invite people', 1, 1, 'The host decides whether they may.'],
+        ['Hand the group to a new host', 1, 1, 'Offered and accepted, never taken.'],
+        ['Screen people before they join', 0, 1, 'Ask a few questions when somebody asks to join, and read the answers before deciding.']
+      ] },
+    { key:'appear', name:'Appear', blurb:'Profiles and the network',
+      what:'A person, what they offer and what they need, and how they find each other.',
+      rows:[] },
+    { key:'daybalancer', name:'DayBalancer', blurb:'',
+      what:'', rows:[] }
+  ];
+
+  var rail=document.getElementById('rail'), panel=document.getElementById('panel'), at=0;
+
+  function draw(){
+    rail.innerHTML='';
+    TOOLS.forEach(function(t,i){
+      var b=document.createElement('button');
+      b.className = (i===at ? 'on' : '');
+      b.appendChild(document.createTextNode(t.name));
+      if(t.blurb){ var s=document.createElement('span'); s.textContent=t.blurb; b.appendChild(s); }
+      b.addEventListener('click', function(){ at=i; draw(); });
+      rail.appendChild(b);
+    });
+
+    var t=TOOLS[at];
+    panel.innerHTML='';
+    var h=document.createElement('h2'); h.textContent=t.name; panel.appendChild(h);
+    if(t.what){ var w=document.createElement('p'); w.className='what'; w.textContent=t.what; panel.appendChild(w); }
+
+    if(!t.rows.length){
+      var e=document.createElement('div'); e.className='empty';
+      e.textContent='Nothing is written down for ' + t.name + ' yet. Tell me what is free and what a '
+                  + 'license adds, and it goes here. An empty list is better than a plausible one.';
+      panel.appendChild(e);
+      return;
+    }
+
+    var tbl=document.createElement('table');
+    var thead=document.createElement('thead');
+    thead.innerHTML='<tr><th>What you get</th><th class="mid">Free</th><th class="mid">Licensed</th></tr>';
+    tbl.appendChild(thead);
+    var tb=document.createElement('tbody');
+    t.rows.forEach(function(r){
+      var tr=document.createElement('tr');
+      var td=document.createElement('td');
+      td.appendChild(document.createTextNode(r[0]));
+      if(r[3]){ var n=document.createElement('span'); n.className='note'; n.textContent=r[3]; td.appendChild(n); }
+      tr.appendChild(td);
+      [r[1],r[2]].forEach(function(on){
+        var c=document.createElement('td'); c.className='mid';
+        c.innerHTML = on ? '<span class="tick">&#10003;</span>' : '<span class="dash">&mdash;</span>';
+        tr.appendChild(c);
+      });
+      tb.appendChild(tr);
+    });
+    tbl.appendChild(tb);
+    panel.appendChild(tbl);
+  }
 })();
 </script>
 </body>
