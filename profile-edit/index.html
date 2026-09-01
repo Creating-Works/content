@@ -1433,23 +1433,17 @@
   // Leaving the editor returns to whichever screen is "home" for this viewer: your own page is
   // the Concept A hub; someone else's is the "This is me" quick view. Always flushes the save.
   // Finishing an edit puts somebody back where they were looking.
-  // Leaving by the breadcrumb used to navigate on the spot, so anything typed in the last
-  // nine tenths of a second went nowhere: the debounce had not fired and the request died with
-  // the page. Jessie added a need, removed another, pressed My profile, and both were gone.
-  // 2026-09-01.
+  // Leave at once, and let the save follow you out.
+  //
+  // The first version of this waited for the save to land before navigating, up to six seconds.
+  // Apps Script was answering in thirty-six that afternoon, so the breadcrumb read as a dead
+  // button: Jessie pressed it, nothing happened, she pressed it again. Waiting was never
+  // necessary. `keepalive` already tells the browser to finish the request after the page has
+  // gone, which is the whole point of it. 2026-09-01.
   function goHome(){
-    var go = function(){ window.location.href = 'https://2gather.network/profile/'; };
     try { harvest(); } catch (e) {}
-    flushSave();
-    if (!_dirty && !_saving) { go(); return; }
-    // Say what is happening rather than appearing to ignore the click, and never hang: after six
-    // seconds go anyway, with the keepalive send below as the safety net.
-    setSaveStat('Saving before we go…');
-    var waited = 0;
-    var t = setInterval(function () {
-      waited += 100;
-      if ((!_dirty && !_saving) || waited > 6000) { clearInterval(t); go(); }
-    }, 100);
+    saveOnTheWayOut();
+    window.location.href = 'https://2gather.network/profile/';
   }
 
   // Every other way out of the page: the back button, closing the tab, the top menu, a link we
