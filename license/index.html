@@ -23,10 +23,11 @@
   li b{display:block;}
   .note{color:var(--muted);font-size:14px;}
   a{color:var(--brand);}
+  .hide{display:none;}
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="wrap hide" id="page">
   <h1>License</h1>
   <p class="sub">Everything a group needs is free. A license adds what a larger group asks for.</p>
 
@@ -46,5 +47,21 @@
        Nothing that works today moves behind a license.</p>
   </div>
 </div>
+<script>
+(function(){
+  // Not public. Nothing is drawn unless the server confirms a live operator session, and the
+  // session is the one from creating.works/ops. Jessie 2026-09-01: private until the list is
+  // right. Somebody else gets a blank page and learns nothing from it.
+  var GS='https://cw-api-gate.jessieupp.workers.dev';
+  var v=null;
+  try{ v=JSON.parse(localStorage.getItem('cw-ops-session')||'null'); }catch(e){}
+  if(!v||!v.tok||!v.id||!(v.until>Date.now())) return;
+  fetch(GS+'?action=opsCheck&appearId='+encodeURIComponent(v.id)
+        +'&sessionToken='+encodeURIComponent(v.tok)+'&t='+Date.now())
+    .then(function(r){ return r.json(); })
+    .then(function(d){ if(d&&d.status==='ok'&&d.ok){ document.getElementById('page').classList.remove('hide'); } })
+    .catch(function(){});
+})();
+</script>
 </body>
 </html>
