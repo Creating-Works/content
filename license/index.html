@@ -28,6 +28,12 @@
   body{margin:0;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);
        padding:28px 20px 80px;min-height:100vh;}
   .hide{display:none;}
+  input{border:1px solid var(--line);border-radius:8px;padding:11px 13px;font-family:inherit;
+        font-size:15px;color:var(--text);outline:none;width:100%;}
+  input:focus{border-color:var(--brand);}
+  .globe{background:var(--brand);color:#fff;border:0;border-radius:22px;padding:10px 18px;
+         font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;}
+  .row{display:flex;}
   .wrap{max-width:1000px;margin:0 auto;}
   h1{font-size:24px;margin:0 0 4px;color:#fff;}
   .sub{color:#CBDCEA;font-size:15px;margin:0 0 24px;line-height:1.6;}
@@ -61,6 +67,24 @@
 </style>
 </head>
 <body>
+<!-- The same small way in as the operations page. Without it this page was blank whenever the
+     hour had passed, and blank is indistinguishable from broken. A stranger still sees an
+     unlabelled box and learns nothing. Jessie 2026-09-01. -->
+<div class="wrap hide" id="gate">
+  <div class="card" style="max-width:420px;">
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+      <input id="who" type="email" autocomplete="email" placeholder=" " style="max-width:230px;">
+      <button class="globe" id="send" title="Send a code">&#127760;</button>
+    </div>
+    <div class="row hide" id="pinRow" style="display:none;gap:10px;margin-top:12px;">
+      <input id="pin" inputmode="numeric" maxlength="6" placeholder="000000"
+             style="max-width:130px;letter-spacing:.18em;text-align:center;">
+      <button class="globe" id="go">Open</button>
+    </div>
+    <div id="say" style="font-size:14px;color:var(--muted);margin-top:12px;min-height:20px;"></div>
+  </div>
+</div>
+
 <div class="wrap hide" id="page">
   <h1>License</h1>
   <p class="sub">What each tool gives away, and what a license adds. Operators only, until the lists are right.</p>
@@ -79,12 +103,51 @@
   var GS='https://cw-api-gate.jessieupp.workers.dev';
   var v=null;
   try{ v=JSON.parse(localStorage.getItem('cw-ops-session')||'null'); }catch(e){}
-  if(!v||!v.tok||!v.id||!(v.until>Date.now())) return;
-  fetch(GS+'?action=opsCheck&appearId='+encodeURIComponent(v.id)
-        +'&sessionToken='+encodeURIComponent(v.tok)+'&t='+Date.now())
-    .then(function(r){ return r.json(); })
-    .then(function(d){ if(d&&d.status==='ok'&&d.ok){ document.getElementById('page').classList.remove('hide'); draw(); } })
-    .catch(function(){});
+  var $=function(id){ return document.getElementById(id); };
+  var me='', token='';
+
+  function open_(){ $('gate').classList.add('hide'); $('page').classList.remove('hide'); draw(); }
+  function askForOne(){ $('gate').classList.remove('hide'); try{ var w=localStorage.getItem('cw-ops-who'); if(w) $('who').value=w; }catch(e){} }
+
+  if(v&&v.tok&&v.id&&v.until>Date.now()){
+    me=v.id; token=v.tok;
+    fetch(GS+'?action=opsCheck&appearId='+encodeURIComponent(me)
+          +'&sessionToken='+encodeURIComponent(token)+'&t='+Date.now())
+      .then(function(r){ return r.json(); })
+      .then(function(d){ if(d&&d.status==='ok'&&d.ok){ open_(); } else { askForOne(); } })
+      .catch(function(){ askForOne(); });
+  } else { askForOne(); }
+
+  document.addEventListener('click', function(ev){
+    var t=ev.target;
+    if(t&&t.id==='send'){
+      var addr=($('who').value||'').trim();
+      if(!addr){ $('who').focus(); return; }
+      t.disabled=true; $('say').textContent='';
+      fetch(GS+'?action=sendOpsPin&email='+encodeURIComponent(addr)+'&t='+Date.now())
+        .then(function(r){ return r.json(); })
+        .then(function(){ t.disabled=false;
+          try{ localStorage.setItem('cw-ops-who', addr); }catch(e){}
+          $('pinRow').style.display='flex'; $('pin').focus(); })
+        .catch(function(){ t.disabled=false; $('say').textContent='Could not reach the server.'; });
+    }
+    if(t&&t.id==='go'){
+      var code=($('pin').value||'').replace(/\D/g,'');
+      if(!code){ $('pin').focus(); return; }
+      t.disabled=true; $('say').textContent='Checking...';
+      fetch(GS+'?action=verifyOpsPin&email='+encodeURIComponent(($('who').value||'').trim())
+            +'&code='+encodeURIComponent(code)+'&t='+Date.now())
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+          t.disabled=false;
+          if(!d||d.status!=='ok'||!d.sessionToken){ $('say').textContent=(d&&d.message)||'That code does not match.'; return; }
+          me=d.id||me; token=d.sessionToken; $('say').textContent='';
+          try{ localStorage.setItem('cw-ops-session', JSON.stringify({id:me,tok:token,until:Date.now()+55*60*1000})); }catch(e){}
+          open_();
+        })
+        .catch(function(){ t.disabled=false; $('say').textContent='Could not reach the server.'; });
+    }
+  });
 
   // Only what can be checked in the code is written down as free. Nothing here is invented:
   // an empty list says it is empty rather than filling itself with plausible rows.
