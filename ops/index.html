@@ -156,8 +156,30 @@
   var $=function(id){ return document.getElementById(id); };
   var say=function(el,msg,bad){ var n=$(el); n.textContent=msg||''; n.className='say'+(bad?' bad':''); };
 
+  // An hour's session, kept so a refresh does not ask again. The server decides when it expires;
+  // this only remembers what it already handed out. Cleared the moment it stops working.
+  var KEY='cw-ops-session';
+  function remember(id,tok){
+    try{ localStorage.setItem(KEY, JSON.stringify({id:id,tok:tok,until:Date.now()+55*60*1000})); }catch(e){}
+  }
+  function forget(){ try{ localStorage.removeItem(KEY); }catch(e){} }
+  function recall(){
+    try{
+      var v=JSON.parse(localStorage.getItem(KEY)||'null');
+      if(v && v.tok && v.until>Date.now()) return v;
+    }catch(e){}
+    return null;
+  }
+
+  var back=recall();
+  if(back){
+    me=back.id; token=back.tok;
+    $('gate').classList.add('hide');
+    load();
+  }
+
   // Signed in on this domain? Then the address is already known and does not need typing.
-  if(me){ $('who').value=''; }
+  if(me && !back){ $('who').value=''; }
 
   var addr=function(){ return ($('who').value||'').trim(); };
 
@@ -194,6 +216,7 @@
         }
         token=d.sessionToken;
         if(d.id){ me=d.id; }
+        remember(me, token);
         say('s2','');
         $('gate').classList.add('hide');
         document.title='Ops';
@@ -207,7 +230,13 @@
           +'&sessionToken='+encodeURIComponent(token)+'&t='+Date.now())
       .then(function(r){ return r.json(); })
       .then(function(d){
-        if(!d||d.status!=='ok'){ return; }
+        if(!d||d.status!=='ok'){
+          // The hour is up. Say so and ask, rather than show an empty page.
+          forget(); token='';
+          $('gate').classList.remove('hide');
+          say('s2','That session has expired. Ask for another code.');
+          return;
+        }
         rows=d.groups||[];
         var people=0; rows.forEach(function(g){ people+=g.members||0; });
         // Two different things. Memberships counts a person once per group they are in; people
