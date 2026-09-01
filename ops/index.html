@@ -48,6 +48,9 @@
   .globe{font-size:19px;line-height:1;padding:10px 16px;}
   #pin{max-width:130px;letter-spacing:.18em;text-align:center;}
   .loading{color:#CBDCEA;font-size:15px;margin:6px 0 0;}
+  .fold{background:none;border:0;font:inherit;color:inherit;cursor:pointer;padding:0;}
+  .fold::before{content:'\25BE ';font-size:.8em;color:var(--muted);}
+  .fold.shut::before{content:'\25B8 ';}
   .tot .tile{cursor:pointer;border-radius:8px;padding:4px 8px;margin:-4px -8px;}
   .tot .tile:hover{background:#F1F5F9;}
   .tot .tile.on{background:var(--brand);color:#fff;}
@@ -90,9 +93,14 @@
   <p class="loading hide" id="loading">Loading data...</p>
 
   <div class="card hide" id="pboard">
-    <div class="headrow"><h2>People</h2><button class="reset" id="preset">reset</button></div>
+    <div class="headrow">
+      <h2><button class="fold" id="pfold" title="Hide or show">People</button></h2>
+      <button class="reset" id="preset">reset</button>
+    </div>
+    <div id="pbody">
     <div class="tot" id="ptot"></div>
     <p class="key">
+      <b>knocked</b> gave an address and never came in &nbsp;·&nbsp;
       <b>created account</b> &nbsp;·&nbsp; <b>completed intro</b> &nbsp;·&nbsp;
       <b>joined group</b> &nbsp;·&nbsp; <b>created group</b>
       <br><span style="opacity:.8">The event stages come next and need the registration data.</span>
@@ -120,6 +128,7 @@
           <td><input data-f="cwid" placeholder="filter"></td>
           <td><input data-f="email" placeholder="filter"></td>
           <td><div class="chips" data-f="stage">
+                <button type="button" data-v="knocked">knocked</button>
                 <button type="button" data-v="created account">created account</button>
                 <button type="button" data-v="completed intro">completed intro</button>
                 <button type="button" data-v="joined group">joined group</button>
@@ -142,10 +151,15 @@
       <tbody></tbody>
     </table></div>
     <p style="color:var(--muted);font-size:13px;margin:14px 0 0;" id="pmore"></p>
+    </div>
   </div>
 
   <div class="card hide" id="board">
-    <div class="headrow"><h2>Groups</h2><button class="reset" id="greset">reset</button></div>
+    <div class="headrow">
+      <h2><button class="fold" id="gfold" title="Hide or show">Groups</button></h2>
+      <button class="reset" id="greset">reset</button>
+    </div>
+    <div id="gbody">
     <div class="tot" id="tot"></div>
     <div class="row" style="margin-bottom:12px;">
       <input id="gq" placeholder="Search everything on a group's row" style="max-width:340px;">
@@ -170,6 +184,7 @@
       <tbody></tbody>
     </table></div>
     <p style="color:var(--muted);font-size:13px;margin:14px 0 0;" id="gmore"></p>
+    </div>
   </div>
 </div>
 
@@ -279,8 +294,9 @@
         // counts each person once however many groups they are in.
         $('tot').innerHTML=
           '<div><b>'+rows.length+'</b>groups</div>'+
-          '<div><b>'+people+'</b>memberships, one per person per group</div>'+
-          '<div><b>'+(d.uniquePeople||0)+'</b>people in at least one group</div>';
+          '<div><b>'+(d.uniquePeople||0)+'</b>people belong to a group</div>'+
+          '<div><b>'+people+'</b>joins in total, counting somebody once per group</div>'+
+          '<div><b>'+(rows.length? Math.round(people/rows.length):0)+'</b>members in the average group</div>';
         $('board').classList.remove('hide');
         paint();
         settled();
@@ -308,6 +324,7 @@
           tile(people.length,'people','all','')+
           tile(since(7),'joined in 7 days','days','7')+
           tile(since(30),'joined in 30 days','days','30')+
+          tile(by['knocked']||0,'knocked','stage','knocked')+
           tile(by['created account']||0,'created account','stage','created account')+
           tile(by['completed intro']||0,'completed intro','stage','completed intro')+
           tile(by['joined group']||0,'joined group','stage','joined group')+
@@ -463,6 +480,15 @@
     });
     $('gmore').textContent=shown.length+' shown.';
   }
+
+  var fold=function(btn, body){
+    $(btn).addEventListener('click', function(){
+      var shut=$(body).classList.toggle('hide');
+      $(btn).classList.toggle('shut', shut);
+    });
+  };
+  fold('pfold','pbody');
+  fold('gfold','gbody');
 
   $('preset').addEventListener('click', function(){
     $('q').value=''; $('onlyTest').checked=false; pDays=0;
