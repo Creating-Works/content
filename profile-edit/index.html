@@ -1429,7 +1429,31 @@
   // Leaving the editor returns to whichever screen is "home" for this viewer: your own page is
   // the Concept A hub; someone else's is the "This is me" quick view. Always flushes the save.
   // Finishing an edit puts somebody back where they were looking.
-  function goHome(){ window.location.href = 'https://2gather.network/profile/'; }
+  // Leaving by the breadcrumb used to navigate on the spot, so anything typed in the last
+  // nine tenths of a second went nowhere: the debounce had not fired and the request died with
+  // the page. Jessie added a need, removed another, pressed My profile, and both were gone.
+  // 2026-09-01.
+  function goHome(){
+    var go = function(){ window.location.href = 'https://2gather.network/profile/'; };
+    try { harvest(); } catch (e) {}
+    flushSave();
+    if (!_dirty && !_saving) { go(); return; }
+    // Say what is happening rather than appearing to ignore the click, and never hang: after six
+    // seconds go anyway, with the keepalive send below as the safety net.
+    setSaveStat('Saving before we go…');
+    var waited = 0;
+    var t = setInterval(function () {
+      waited += 100;
+      if ((!_dirty && !_saving) || waited > 6000) { clearInterval(t); go(); }
+    }, 100);
+  }
+
+  // Every other way out of the page: the back button, closing the tab, the top menu, a link we
+  // do not control. pagehide fires for all of them.
+  window.addEventListener('pagehide', saveOnTheWayOut);
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) saveOnTheWayOut();
+  });
   // Which inbox to go and look in. Masked: anybody who reaches this page can press Send code,
   // and the address on file is not necessarily theirs to read in full.
   function _maskEmail(v){
@@ -1701,7 +1725,7 @@
   }
   var _editToken=_tokenGet(), _saveTimer=null, _dirty=false, _saving=false;
   function setSaveStat(txt){ var s=document.getElementById('da-savestat'); if(s) s.textContent=txt||''; }
-  function postSave(){
+  function saveUrl(){
     var d=serialize();
     var u=GS_URL+'?action=saveIntake&appearId='+encodeURIComponent(_id)+'&secure=1&editToken='+encodeURIComponent(_editToken)
 
@@ -1711,7 +1735,18 @@
       +'&retired='+encodeURIComponent(_loaded.retired||'')+'&bringType='+encodeURIComponent(_loaded.bringType||'')
       +'&wantsSignupList='+encodeURIComponent(_loaded.wantsSignupList||'')+'&languages='+encodeURIComponent(_loaded.languages||'')+'&postal='+encodeURIComponent(_loaded.postal||'')
       +'&photoURL='+encodeURIComponent(_loaded.photoURL||'');
-    return fetch(u).then(function(r){ return r.json(); });
+    return u;
+  }
+  function postSave(){
+    return fetch(saveUrl()).then(function(r){ return r.json(); });
+  }
+  // A save that survives the page closing. `keepalive` tells the browser to finish the request
+  // even though the document is going away; a plain fetch is cancelled the instant you navigate,
+  // which is how Jessie's edits reached nothing at all. Nothing reads the answer, on purpose:
+  // there is no page left to tell.
+  function saveOnTheWayOut(){
+    if(_viewing || !_id || !_dirty || !_editToken) return;
+    try { fetch(saveUrl(), { keepalive: true }); _dirty = false; } catch (e) {}
   }
   // Automatic save: debounced on any edit, flushed when leaving a step or the editor.
   function autoSave(){
