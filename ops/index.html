@@ -48,6 +48,12 @@
   .globe{font-size:19px;line-height:1;padding:10px 16px;}
   #pin{max-width:130px;letter-spacing:.18em;text-align:center;}
   .loading{color:#CBDCEA;font-size:15px;margin:6px 0 0;}
+  .chips{display:flex;flex-wrap:wrap;gap:4px;max-width:230px;}
+  .chips button{background:#fff;border:1px solid var(--line);border-radius:12px;
+                padding:3px 9px;font-family:inherit;font-size:12px;color:var(--muted);
+                cursor:pointer;white-space:nowrap;}
+  .chips button:hover{border-color:var(--brand);color:var(--brand);}
+  .chips button.on{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:700;}
   .reset{background:none;border:0;color:var(--muted);font-size:13px;cursor:pointer;
          padding:4px 6px;font-family:inherit;}
   .reset:hover{color:var(--brand);text-decoration:underline;}
@@ -109,16 +115,21 @@
           <td><input data-f="name" placeholder="filter"></td>
           <td><input data-f="cwid" placeholder="filter"></td>
           <td><input data-f="email" placeholder="filter"></td>
-          <td><input data-f="stage" placeholder="filter"></td>
-          <td><select data-f="roles" multiple size="4">
-                <option value="superAdmin">superAdmin</option>
-                <option value="admin">admin</option>
-                <option value="partner">partner</option>
-                <option value="guest">guest</option>
-                <option value="member">member</option>
-                <option value="groupHost">groupHost</option>
-                <option value="groupCoHost">groupCoHost</option>
-              </select></td>
+          <td><div class="chips" data-f="stage">
+                <button type="button" data-v="created account">created account</button>
+                <button type="button" data-v="completed intro">completed intro</button>
+                <button type="button" data-v="joined group">joined group</button>
+                <button type="button" data-v="created group">created group</button>
+              </div></td>
+          <td><div class="chips" data-f="roles">
+                <button type="button" data-v="superAdmin">superAdmin</button>
+                <button type="button" data-v="admin">admin</button>
+                <button type="button" data-v="partner">partner</button>
+                <button type="button" data-v="guest">guest</button>
+                <button type="button" data-v="member">member</button>
+                <button type="button" data-v="groupHost">host</button>
+                <button type="button" data-v="groupCoHost">co-host</button>
+              </div></td>
           <td><input data-f="groups" placeholder="filter"></td>
           <td><input data-f="made" placeholder="filter"></td>
           <td><input data-f="lastSeen" placeholder="filter"></td>
@@ -302,11 +313,17 @@
       var v=(i.value||'').trim().toLowerCase();
       if(v) out[i.getAttribute('data-f')]=v;
     });
-    // A dropdown you can pick several from: member AND groupHost means somebody who is both.
-    Array.prototype.forEach.call(document.querySelectorAll(sel+' tr.filters select'), function(sl){
+    // Chips you click on and off. Picking member and host means somebody who is both. Picking
+    // two stages means either, since nobody is at two stages at once.
+    Array.prototype.forEach.call(document.querySelectorAll(sel+' tr.filters .chips'), function(box){
       var picked=[];
-      Array.prototype.forEach.call(sl.options, function(o){ if(o.selected) picked.push(o.value.toLowerCase()); });
-      if(picked.length) out[sl.getAttribute('data-f')]=picked;
+      Array.prototype.forEach.call(box.querySelectorAll('button.on'), function(b){
+        picked.push(String(b.getAttribute('data-v')).toLowerCase());
+      });
+      if(picked.length){
+        var f=box.getAttribute('data-f');
+        out[f]= (f==='stage') ? {any:picked} : picked;
+      }
     });
     return out;
   }
@@ -314,7 +331,11 @@
     for(var k in f){
       var have=String(row[k]==null?'':row[k]).toLowerCase();
       var want=f[k];
-      if(Object.prototype.toString.call(want)==='[object Array]'){
+      if(want && want.any){
+        var hit=false;
+        for(var j=0;j<want.any.length;j++){ if(have===want.any[j]){ hit=true; break; } }
+        if(!hit) return false;
+      } else if(Object.prototype.toString.call(want)==='[object Array]'){
         for(var i=0;i<want.length;i++){ if(have.indexOf(want[i])===-1) return false; }
       } else if(have.indexOf(want)===-1){ return false; }
     }
@@ -322,8 +343,8 @@
   }
   function resetFilters(sel, repaint){
     Array.prototype.forEach.call(document.querySelectorAll(sel+' tr.filters input'), function(i){ i.value=''; });
-    Array.prototype.forEach.call(document.querySelectorAll(sel+' tr.filters select'), function(sl){
-      Array.prototype.forEach.call(sl.options, function(o){ o.selected=false; });
+    Array.prototype.forEach.call(document.querySelectorAll(sel+' tr.filters .chips button'), function(b){
+      b.classList.remove('on');
     });
     repaint();
   }
@@ -352,7 +373,7 @@
       var tr=document.createElement('tr');
       for(var i=0;i<8;i++){ tr.appendChild(document.createElement('td')); }
       tr.children[0].textContent=p.name||'(no name)';
-      tr.children[1].textContent=p.cwid||'';
+      tr.children[1].textContent=p.ids||p.cwid||'';
       tr.children[1].style.cssText='font-size:12px;color:var(--muted);';
       tr.children[2].textContent=p.email||'';
       tr.children[3].textContent=p.stage;
@@ -411,8 +432,11 @@
 
   $('preset').addEventListener('click', function(){ $('q').value=''; $('onlyTest').checked=false; resetFilters('#ptbl', ppaint); });
   $('greset').addEventListener('click', function(){ $('gq').value=''; resetFilters('#tbl', paint); });
-  Array.prototype.forEach.call(document.querySelectorAll('tr.filters select'), function(sl){
-    sl.addEventListener('change', function(){ (sl.closest('#ptbl') ? ppaint : paint)(); });
+  Array.prototype.forEach.call(document.querySelectorAll('tr.filters .chips button'), function(b){
+    b.addEventListener('click', function(){
+      b.classList.toggle('on');                       // click again to unpick it
+      (b.closest('#ptbl') ? ppaint : paint)();
+    });
   });
   $('gq').addEventListener('input', paint);
   Array.prototype.forEach.call(document.querySelectorAll('#tbl tr.filters input'), function(i){
