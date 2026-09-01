@@ -4409,6 +4409,46 @@ window.goBack = function(){
   _screen--; render();
 };
 
+// ?timing=1 prints how long each call to the backend actually took, in the order they finished.
+// It is a switch on this page rather than a page of its own, and it comes off once it has
+// answered. Added 2026-09-01 because the page is measurably four seconds from here and fifteen
+// from Jessie's chair, and only her browser can settle which.
+if (new URLSearchParams(location.search).get('timing') === '1') {
+  (function () {
+    var box = document.createElement('div');
+    box.setAttribute('style', 'position:fixed;left:10px;bottom:10px;z-index:99999;background:#fff;'
+      + 'border:2px solid #1F699E;border-radius:10px;padding:12px 14px;font:13px/1.7 monospace;'
+      + 'color:#1A2E42;max-width:92vw;max-height:60vh;overflow:auto;');
+    box.appendChild(document.createTextNode('call timings'));
+    document.body.appendChild(box);
+    var t0 = Date.now(), n = 0;
+    var real = window.fetch;
+    window.fetch = function (u) {
+      var started = Date.now(), name = String(u).split('action=')[1] || String(u);
+      name = name.split('&')[0];
+      n++;
+      var row = document.createElement('div');
+      row.textContent = name + ' ... going';
+      box.appendChild(row);
+      return real.apply(this, arguments).then(function (r) {
+        row.textContent = name + '  took ' + ((Date.now() - started) / 1000).toFixed(1)
+                        + 's, ended ' + ((Date.now() - t0) / 1000).toFixed(1) + 's after load';
+        return r;
+      }, function (e) {
+        row.textContent = name + '  FAILED after ' + ((Date.now() - started) / 1000).toFixed(1) + 's';
+        throw e;
+      });
+    };
+    var done = document.createElement('div');
+    done.setAttribute('style', 'margin-top:8px;font-weight:800;');
+    box.appendChild(done);
+    var tick = setInterval(function () {
+      done.textContent = 'page has been up ' + ((Date.now() - t0) / 1000).toFixed(0) + 's';
+    }, 500);
+    setTimeout(function () { clearInterval(tick); done.textContent += '  (stopped counting)'; }, 60000);
+  })();
+}
+
 // ─── Boot ─────────────────────────────────────────────────────────────────────
 (async function init(){
   if(_viewerMode){
