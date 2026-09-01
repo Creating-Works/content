@@ -421,6 +421,7 @@ function paintShellHeader(extraPills){
     // render() repaints this header, so the read is fired once and never again.
     if(window._shellLookupDone) return;
     window._shellLookupDone = true;
+    afterPaint(function(){
     fetch('https://cw-api-gate.jessieupp.workers.dev?action=lookupProfile&appearId='+encodeURIComponent(who))
       .then(function(r){return r.json();})
       .then(function(lu){
@@ -431,6 +432,7 @@ function paintShellHeader(extraPills){
         paintName(n);
         try{ localStorage.setItem(nameKey,n); }catch(e){}
       }).catch(function(){});
+    });
   }
 }
 paintShellHeader();
@@ -681,6 +683,19 @@ function getSkillSubCats(parentCat){
     .forEach(function(r){if(r.subCategory) s[r.subCategory]=1;});
   return sortAlpha(Object.keys(s));
 }
+
+// ─── Waiting your turn ────────────────────────────────────────────────────────
+// Apps Script runs our calls ONE AT A TIME. Measured 2026-09-01: four fired together took 9.9
+// seconds, which is the sum of them, not the longest. So a call described as "non-blocking"
+// blocks anyway; it just queues at the server instead of in the browser. Jessie's timing panel
+// showed getBookmarks finishing 35 seconds after load and getProfile 34, because five other
+// calls were in the queue with them.
+//
+// Anything the first paint does not need waits here until it has happened. Nothing is dropped,
+// it just goes second.
+var _paintedGo, _painted = new Promise(function (r) { _paintedGo = r; });
+function afterPaint(fn) { _painted.then(function () { try { fn(); } catch (e) {} }); }
+window._paintDone = function () { try { _paintedGo(); } catch (e) {} };
 
 // ─── Data loading ─────────────────────────────────────────────────────────────
 async function loadRefData(){
@@ -2023,6 +2038,7 @@ var _regEventsChecked=false;
 async function _fillHubFromReg(){
   if(_regEventsChecked) return; _regEventsChecked=true;
   var who=_showId||_appearId; if(!who) return;
+  await _painted;                       // the profile draws first; this only fills a pill
   try{
     var res=await fetch(GS_URL+'?action=getRegistrations&appearId='+encodeURIComponent(who));
     var d=await res.json();
@@ -2482,11 +2498,13 @@ function _wtmLoad(){
   var me=_wtmMyId();
   if(_wtmLoaded||_wtmLoading||!me) return;
   _wtmLoading=true;
+  afterPaint(function(){
   fetch(GS_URL+'?action=getBookmarks&appearId='+encodeURIComponent(me))
     .then(function(r){return r.json();})
     .then(function(d){ _wtmData=((d&&d.bookmarks)||[]).map(function(b){return {id:b.appearId, name:b.name||'', photo:b.photo||''};}); })
     .catch(function(){ if(!_wtmData) _wtmData=[]; })
     .then(function(){ _wtmLoaded=true; _wtmLoading=false; render(); });
+  });
 }
 window.wtmToggle=function(){
   var me=_viewerIdParam(), them=_showId;
@@ -2578,7 +2596,7 @@ function renderProfileLanding(el){
     loadRefData()
       .then(function(){ return loadProfileAndIntake(); })
       .then(function(){
-        _profileLoaded=true;
+        _profileLoaded=true; window._paintDone(); window._paintDone();
         if(_hasProfile){ _completed=true; _screen=0; }
         else { _screen='fast2'; _fastPath=true; if(!_languages.length) _languages=['English']; }
         render();
@@ -4449,11 +4467,15 @@ if (new URLSearchParams(location.search).get('timing') === '1') {
   })();
 }
 
+// Nothing may be stranded. If the profile never loads at all, the second wave still goes,
+// twelve seconds in, rather than waiting for a paint that is not coming.
+setTimeout(function(){ try { window._paintDone(); } catch (e) {} }, 12000);
+
 // ─── Boot ─────────────────────────────────────────────────────────────────────
 (async function init(){
   if(_viewerMode){
     await loadProfileAndIntake();                // ONE combined call (getIntake + lookupProfile)
-  _profileLoaded=true;
+  _profileLoaded=true; window._paintDone();
     // The owner opening their own public link lands on the same editable profile the
     // "?id=" door leads to, rather than a read-only copy of themselves.
     if(isOwner()){ _completed=_hasProfile; _screen=_hasProfile?0:(_introMode?'intro':'fast2'); if(!_hasProfile){ _fastPath=true; if(!_languages.length) _languages=['English']; } }
@@ -4477,7 +4499,7 @@ if (new URLSearchParams(location.search).get('timing') === '1') {
     loadRefData()
       .then(function(){ return loadProfileAndIntake(); })
       .then(function(){
-        _profileLoaded=true;
+        _profileLoaded=true; window._paintDone(); window._paintDone();
         if(_hasProfile) _completed=true;         // never pushes somebody into the editor
         _screen=0;
         render();
@@ -4494,7 +4516,7 @@ if (new URLSearchParams(location.search).get('timing') === '1') {
   var _meReady  = loadProfileAndIntake();
   await _refReady;                               // needed to render the flow options
   await _meReady;                                // the real profile, before the first paint
-  _profileLoaded=true;
+  _profileLoaded=true; window._paintDone();
   if(_hasProfile){
     _completed=true;
     if(_directScreen==='potluck'){ _screen='potluck'; render(); return; }   // direct link from the hub's "Sign up list" pill
