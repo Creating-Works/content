@@ -96,7 +96,12 @@
   <!-- An unlabelled box and a globe. Nothing here says what the page is, so somebody who finds
        the address learns nothing from it. -->
   <!-- Pinned, so the licensed list is one click from the numbers rather than a URL to remember. -->
-  <p class="pin hide" id="pin"><a href="https://creating.works/license/">What a license includes &#8250;</a></p>
+  <!-- id was "pin", the same as the code box below it. getElementById returns the first match, so
+       every read of the code box was reading THIS paragraph instead: .value came back undefined,
+       the code looked empty, and a correct code was answered with "Type the code from your email".
+       Nobody could get in. Renamed 2026-09-02, and it is the same two-things-one-name fault as the
+       rest of that day. -->
+  <p class="pin hide" id="licenseNote"><a href="https://creating.works/license/">What a license includes &#8250;</a></p>
 
   <div class="card" id="gate">
     <div class="row">
@@ -288,7 +293,7 @@
         remember(me, token);
         say('s2','');
         $('gate').classList.add('hide');
-        $('pin').classList.remove('hide');
+        $('licenseNote').classList.remove('hide');
         document.title='Ops';
         load();
       })
