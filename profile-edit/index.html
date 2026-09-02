@@ -327,7 +327,7 @@
   var _profilePhoto='', _profileName='', _loaded={}, _pageLink='', _said={};
   // What a person wrote in their own words, shown under the heading it answers.
   function pvSaid(key){ var v=_said&&_said[key]; return v?'<div class="pv-said">'+esc(v)+'</div>':''; }
-  var EXPRESSION_ADDED = ['My 2.5 pickleball game'];
+  var EXPRESSION_ADDED = [''];
   function parseNeedsStr(str){
     if(!str) return [];
     return String(str).split('|').filter(Boolean).map(function(s){
@@ -346,6 +346,11 @@
     });
   }
   function loadProfile(d){
+    // Blank first. This whole function is one try/catch, so a single line throwing used to leave
+    // every later field holding whatever it held before. Starting empty means a partial load
+    // shows nothing rather than showing somebody else's answers.
+    NEEDS_ADDED = []; ENJOY_ADDED = []; SKILLS_ADDED = []; SKILL_METHODS_ON = [];
+    VALUES_ADDED = []; DOMAINS_ADDED = []; EXPRESSION_ADDED = ['']; SECTIONS[4].data = [];
     try{
       // A found profile is authoritative — empty fields mean empty, not the demo seed.
       _loaded={ postal:d.postal||'', retired:d.retired||'', bringType:d.bringType||'', wantsSignupList:d.wantsSignupList||'', languages:d.languages||'', photoURL:d.photoURL||'' };
@@ -375,8 +380,7 @@
     { tab:'Values', base:'My values', custom:'values', data:[] },
     { tab:'Haves', base:'My haves', item:'have', addLabel:'Add a have', prompt:'What do you have to offer?',
       cats:true, levels:null, audience:false, met:false,
-      data:[{text:'20 acres open for camping',cats:['Nature & Outdoors'],level:'',aud:''},
-            {text:'A truck I can lend on weekends',cats:['Home & Transportation'],level:'',aud:''}] }
+      data:[] }
   ];
 
   var stepper = document.getElementById('stepper');
@@ -571,11 +575,7 @@
     'Games & Strategy':{subs:{}, items:['Chess','Card Games','Strategy Board Games','Fantasy Sports','eSports','Tabletop RPG','Trivia','Puzzles']},
     'Making & Collecting':{subs:{'Visual Art':['Painting','Drawing','Illustration','Printmaking','Calligraphy','Sculpture','Ceramics','Pottery'], 'Textile & Fiber':['Knitting','Crochet','Sewing','Quilting','Weaving','Embroidery','Macramé'], 'Wood, Metal & Jewelry':['Woodworking','Carpentry','Furniture Making','Whittling','Metalworking','Jewelry Making'], 'Paper & Books':['Scrapbooking','Origami','Bookbinding','Card Making','Zine Making'], 'Music Making':['Singing','Guitar','Piano','Drums','Violin','Ukulele','Songwriting'], 'Photo, Film & Digital':['Photography','Videography','Digital Art','Graphic Design','Animation','Podcasting'], 'Collecting':['Coins','Stamps','Trading Cards','Vinyl Records','Antiques','Model Building']}, items:[]}
   };
-  var ENJOY_ADDED = [
-    {t:'Singing',sel:['Participant']},{t:'Ping Pong',sel:['Participant']},{t:'Camping',sel:['Participant']},
-    {t:'Pickleball',sel:['Participant']},{t:'Flute',sel:['Participant']},{t:'Craft Drinks',sel:['Fan']},
-    {t:'Kayaking',sel:['Participant','Fan']}
-  ];
+  var ENJOY_ADDED = [];
   var EXPRESS = ['My kitchen','My car','My bike','My garden','My wardrobe','My friends'];
 
   function renderEnjoy(){
@@ -735,13 +735,8 @@
     'Pets & Animal Care':['Pet Sitter','Veterinarian','Animal Behaviorist','Cat Sitter','Dog Sitter']
   };
   var METHODS = ["🗂 Organizing and planning","🔧 Repairing and fixing","📚 Demonstrating what I know","🧭 Consulting and advising","🌀 Facilitating and coaching","🎨 Making and designing","🌿 Caring and healing"];
-  var SKILLS_ADDED = [
-    {t:'Project Manager',cat:'',level:'Expert Level'},
-    {t:'Life Coach',cat:'',level:'Expert Level'},
-    {t:'Experience Design',cat:'',level:''},
-    {t:'Graphic Designer',cat:'Arts & Culture',level:'Mid Level'}
-  ];
-  var SKILL_METHODS_ON = ['🌀 Facilitating and coaching','🎨 Making and designing','🌿 Caring and healing'];
+  var SKILLS_ADDED = [];
+  var SKILL_METHODS_ON = [];
 
   function renderSkills(){
     listEl.className='list flow'; listEl.innerHTML='';
@@ -918,8 +913,8 @@
   // separate lists (Added values / Added domains). Ideas pulled from reference-data.
   var VALUE_IDEAS = ['Clean Air','Clean Water','Clean Soil','Clean Food','Clean Energy','Biodiversity','Climate Stability','Animal Welfare','Water Security','Food Security','Safety and Peace','Housing and Shelter','Urgent Medical Care','Clothing and Supplies','Support needed','Physical Wellbeing','Mental Wellbeing','Empowerment and Resilience','Freedom and Autonomy','Personal Expression','Economic Opportunity','Local Economic Vitality','Eco Values','Wealth Equity','Quality Goods and Services','Information Access','Social and Civic Engagement','Community Health','Cultural Vitality','Shared Community Resources','Transportation Access','Reliable Utilities','Digital Connectivity','Land Security'];
   var DOMAIN_IDEAS = ['Aerospace','Agriculture and Food','Arts and Entertainment','Building and Construction','Ecology and Nature','Education and Learning','Energy and Utilities','Financial','Government and Policy','Hospitality','Manufacturing','Media','Medical','Real Estate','Retail','Security and Defense','Technology','Telecommunications','Transportation','Wellness and Fitness'];
-  var VALUES_ADDED = [{t:'Clean Water',lvl:'Leading'},{t:'Biodiversity',lvl:'Engaged'},{t:'Community Health',lvl:'Exploring'},{t:'Local Economic Vitality',lvl:'Leading'}];
-  var DOMAINS_ADDED = [{t:'Ecology and Nature',lvl:'Engaged'},{t:'Education and Learning',lvl:'Leading'},{t:'Wellness and Fitness',lvl:'Leading'}];
+  var VALUES_ADDED = [];
+  var DOMAINS_ADDED = [];
 
   function renderValues(){
     listEl.className='list flow'; listEl.innerHTML='';
@@ -1026,13 +1021,12 @@
     'Money':{emoji:'💙',placeholder:'Examples: help with medical, rent, household bills, funding a project'},
     'Living things':{emoji:'🪴',placeholder:'Examples: a cucumber plant, a bouquet of flowers, a clipping from your garden'}
   };
-  var NEEDS_ADDED = [
-    {item:'Cooking',type:'person',category:'Food & Drink',level:'',local:true,detail:'Cooking demos at our event'},
-    {item:'Financial Advisor',type:'person',category:'Business & Finance',level:'',local:true,detail:''},
-    {item:'Caterer',type:'person',category:'Food & Drink',level:'',local:true,detail:''},
-    {item:'Cat Sitter',type:'person',category:'Pets & Animal Care',level:'',local:true,detail:''},
-    {item:'Collaboration',type:'person',category:'Technology & Communications',level:'',local:true,detail:'Software developers'}
-  ];
+  // Nobody's profile starts as somebody else's. Every one of these arrays used to hold the
+  // mockup's persona: Cooking, Collaboration, 20 acres open for camping, a truck to lend, a 2.5
+  // pickleball game. That fiction showed on screen whenever a real profile had not loaded, and
+  // pressing Save would have written it into that person's row as though they had typed it.
+  // Jessie saw her own page offering Karina's truck. 2026-09-01.
+  var NEEDS_ADDED = [];
 
   function recFlatPool(){ var out=[]; ENJOY_CATS.forEach(function(c){ var n=ENJOY_TREE[c]||{subs:{},items:[]}; Object.keys(n.subs||{}).forEach(function(sc){ (n.subs[sc]||[]).forEach(function(l){ out.push(l); }); }); (n.items||[]).forEach(function(it){ out.push(it); }); }); return out; }
 
