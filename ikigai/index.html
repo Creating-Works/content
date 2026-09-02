@@ -359,6 +359,7 @@
     });
   }
   function loadProfile(d){
+    window._profRaw = d; window._profFound = true;
     // Blank first. This whole function is one try/catch, so a single line throwing used to leave
     // every later field holding whatever it held before. Starting empty means a partial load
     // shows nothing rather than showing somebody else's answers.
@@ -380,7 +381,13 @@
       DOMAINS_ADDED = parseTagStr(d.domains||'','level').map(function(x){ return { t:x.item, lvl:x.level||'' }; });
       var ea=(d.expression||'').split('|').filter(Boolean); EXPRESSION_ADDED = ea.length?ea:[''];
       SECTIONS[4].data = (d.haves||'').split('|').filter(Boolean).map(function(t){ var p=t.split(':'); return { text:p[0]||'', cats:(p.length>1?[p.slice(1).join(':')]:[]), level:'', aud:'' }; });
-    }catch(e){}
+    }catch(e){
+      // Never silent again. The demo data used to stand in for whatever this failed to load, so
+      // a broken load looked like a full profile. With the demo gone it looks like an empty one,
+      // which is honest but still says nothing about why. 2026-09-01.
+      window._loadError = String((e && e.stack) || e);
+      try { console.error('loadProfile failed:', e); } catch (e2) {}
+    }
   }
 
   var CORE_CATS = ['Home & Transportation','Business & Finance','Skills & Services','Food & Drink'];
@@ -1821,6 +1828,32 @@
     var d = document.getElementById('ik-done');
     if (d) d.addEventListener('click', function(){ goHome(); });
   })();
+  // ?why=1 prints what the server returned and what the page managed to read out of it. Built
+  // because the load fails silently and there is no other way to see which step gave up.
+  if (new URLSearchParams(location.search).get('why') === '1') {
+    setTimeout(function () {
+      var box = document.createElement('div');
+      box.setAttribute('style', 'position:fixed;left:12px;bottom:12px;right:12px;z-index:99999;'
+        + 'background:#fff;border:2px solid #1F699E;border-radius:10px;padding:14px 16px;'
+        + 'font:13px/1.7 ui-monospace,Menlo,monospace;color:#1A2E42;max-height:55vh;overflow:auto;');
+      [
+        'id the page is using: ' + String(_id || '(none)'),
+        'server said found: ' + String(window._profFound),
+        'needs the server sent: ' + String(window._profRaw && window._profRaw.needs || '(none)').slice(0, 90),
+        'NEEDS_ADDED after load: ' + (NEEDS_ADDED ? NEEDS_ADDED.length : 'undefined'),
+        'ENJOY_ADDED: ' + (ENJOY_ADDED ? ENJOY_ADDED.length : 'undefined'),
+        'SKILLS_ADDED: ' + (SKILLS_ADDED ? SKILLS_ADDED.length : 'undefined'),
+        'VALUES_ADDED: ' + (VALUES_ADDED ? VALUES_ADDED.length : 'undefined'),
+        'haves: ' + (SECTIONS[4].data ? SECTIONS[4].data.length : 'undefined'),
+        'loadProfile threw: ' + (window._loadError || 'no'),
+        'sections drawn: ' + IK_DRAWN.join(',')
+      ].forEach(function (line) {
+        var d = document.createElement('div'); d.textContent = line; box.appendChild(d);
+      });
+      document.body.appendChild(box);
+    }, 4000);
+  }
+
   window.paintAll = function () {
     for (var i = 0; i < SECTIONS.length; i++) {
       useSection(i);
