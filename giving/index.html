@@ -416,13 +416,21 @@ let _ownerName     = '';
   // Read owner from URL
   _ownerAppearId = params.get('owner') || null;
 
+  // BOTH keys, or neither. These three lines wrote appear-id alone and left cw-id holding
+  // somebody else, so which page found you depended on which key it read first. That is how a
+  // browser ended up carrying appear-id=w.hss and cw-id=zz-kind-test at the same time.
+  // 2026-09-03.
+  function _rememberBoth(id) {
+    try { localStorage.setItem('appear-id', id); } catch(e) {}
+    try { localStorage.setItem('cw-id', id); } catch(e) {}
+  }
   if (urlId) {
     // Always trust ?id= from URL (Glide passes this reliably)
     // Never show "Is this you?" - localStorage can't be trusted across Glide sessions
     _appearId = urlId;
-    try { localStorage.setItem('appear-id', _appearId); } catch(e) {}
+    _rememberBoth(_appearId);
   } else if (_appearId) {
-    try { localStorage.setItem('appear-id', _appearId); } catch(e) {}
+    _rememberBoth(_appearId);
   }
 })();
 
@@ -458,7 +466,7 @@ function openConfirmModal(id) {
 function confirmIdentity() {
   _appearId = _pendingId;
   _pendingId = null;
-  try { localStorage.setItem('appear-id', _appearId); } catch(e) {}
+  _rememberBoth(_appearId);
   document.getElementById('confirm-modal').classList.remove('open');
   loadSupportList();
   render();
