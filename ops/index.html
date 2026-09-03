@@ -57,6 +57,7 @@
   .flag{background:var(--warnbg);color:var(--warn);border-radius:11px;padding:2px 9px;
         font-size:12px;font-weight:700;}
   .tot{display:flex;gap:26px;flex-wrap:wrap;margin-bottom:16px;}
+  .tot-note{color:#8A3A3A;font-size:14px;line-height:1.5;}
   .tot div{font-size:13px;color:var(--muted);}
   .tot b{display:block;font-size:26px;color:var(--text);font-weight:700;}
   .globe{font-size:19px;line-height:1;padding:10px 16px;}
@@ -224,6 +225,9 @@
 
   var $=function(id){ return document.getElementById(id); };
   var say=function(el,msg,bad){ var n=$(el); n.textContent=msg||''; n.className='say'+(bad?' bad':''); };
+  // A server message is text somebody else wrote, so it is escaped before it goes into innerHTML.
+  var esc=function(v){ return String(v==null?'':v)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
 
   // An hour's session, kept so a refresh does not ask again. The server decides when it expires;
   // this only remembers what it already handed out. Cleared the moment it stops working.
@@ -334,7 +338,18 @@
           +'&sessionToken='+encodeURIComponent(token)+'&t='+Date.now())
       .then(function(r){ return r.json(); })
       .then(function(d){
-        if(!d||d.status!=='ok'){ return; }
+        // SAY WHY. This returned silently, so a failure and an empty answer looked identical:
+        // the People card stayed hidden, nothing was drawn and nothing was said, and the page
+        // read as though only the Groups section existed. Jessie, 2026-09-03: "onlly loads
+        // groups section not the sectino above". A page that cannot say what happened cannot be
+        // diagnosed without guessing, which is the recurring fault in start-here.
+        if(!d||d.status!=='ok'){
+          $('pboard').classList.remove('hide');
+          $('ptot').innerHTML='<div class="tot-note">People did not load. '
+            + esc((d&&d.message)||'The server gave no reason.') + '</div>';
+          settled();
+          return;
+        }
         people=d.people||[];
         // Counted from the stage names the server actually sends. These read zero for a while
         // because the tiles still counted the old names after the stages were renamed. 2026-09-01.
@@ -378,7 +393,12 @@
         ppaint();
         settled();
       })
-      .catch(function(){ settled(); });
+      .catch(function(err){
+        $('pboard').classList.remove('hide');
+        $('ptot').innerHTML='<div class="tot-note">People did not load. '
+          + esc(String(err && err.message || err)) + '</div>';
+        settled();
+      });
   }
 
   function colFilters(sel){
