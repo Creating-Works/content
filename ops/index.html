@@ -521,7 +521,12 @@
       tr.children[1].textContent=g.members||0; tr.children[1].className='num';
       tr.children[2].textContent=g.created? String(g.created).slice(0,10) : '';
       tr.children[3].textContent=g.hostName||'';
-      if(g.passcode==='set'){ tr.children[4].textContent='set'; }
+      // A tick rather than the word "set". Jessie, 2026-09-03: remove the passcode column off of
+      // group, put a check box. The code itself has never been sent to this page, only whether
+      // there is one, and every group has one, so the word was a column of the same word.
+      // Not a real checkbox: nothing here can be ticked or unticked, and a control that does
+      // nothing when pressed is worse than a mark that is plainly a mark.
+      if(g.passcode==='set'){ tr.children[4].textContent='\u2713'; tr.children[4].title='This group has a passcode'; }
       else { var s=document.createElement('span'); s.className='flag'; s.textContent='missing'; tr.children[4].appendChild(s); }
       b.appendChild(tr);
     });
