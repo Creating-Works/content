@@ -111,12 +111,13 @@
 <body>
 
 <div class="wrap">
-  <h1>Field registry</h1>
+  <h1 class="hide" id="h1">Field registry</h1>
   <p class="lede hide" id="lede">Our own fields: which tool each lives in, the pages that read or write it, and whether it is Glide's, ours, or both. Operators only.</p>
 
+  <!-- Nothing but a box and a globe until somebody is in. No heading, no explanation of what the
+       page is, and no mention of the operations page: every one of those tells a stranger
+       something. Jessie, 2026-09-03. -->
   <div class="gate card" id="gate">
-    <h2>Sign in</h2>
-    <p>The same code as the <a href="https://creating.works/ops/">operations page</a>. If you are already signed in there, this opens on its own.</p>
     <div class="row">
       <input id="who" type="email" autocomplete="email" placeholder="your address">
       <button class="btn globe" id="send" title="Send a code">&#127760;</button>
@@ -300,6 +301,7 @@
     // describes itself to a stranger has told them what it holds. Jessie, 2026-09-03: it is
     // supposed to be blank.
     $('gate').classList.add('hide');
+    $('h1').classList.remove('hide');
     $('lede').classList.remove('hide');
     $('srcnote').classList.remove('hide');
     $('board').classList.remove('hide');
