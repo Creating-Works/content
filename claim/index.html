@@ -47,6 +47,7 @@
 
   <label>Your Appear Network page</label>
   <div class="linkbox" id="link-box" style="display:none;">Opens in a new tab: <a id="appear-link" href="#" target="_blank" rel="noopener"></a></div>
+  <div class="nolink" id="looking" style="display:none;">Finding your page…</div>
   <div class="nolink" id="no-link" style="display:none;">Open this from your event post or your Appear page so we know which page to link.</div>
 
   <label>Choose your link</label>
@@ -69,20 +70,45 @@ var GS_URL='https://cw-api-gate.jessieupp.workers.dev';
 var RESERVED=['daybalancer','creatingworks','intake','giving','2gather','events','admin','claim','dl','api','u','r','s','page'];
 function qp(k){ try{return new URLSearchParams(location.search).get(k)||'';}catch(e){return '';} }
 var _me=(qp('id')||qp('memberCard')||qp('me')).trim();
+// The address in the URL is optional now. Info.appearLink holds everybody's page after the
+// normalisation on 2026-09-03, so this page asks rather than needing to be handed it. Before
+// that, arriving here without ?link= left the Claim button greyed out for ever, and the only way
+// in was a link built somewhere else. Jessie, 2026-09-03: "buttin is greeyed out".
 var _appearLink=(qp('link')||'').trim();
+// And who you are, from what this device remembers when the address does not say. Same order as
+// /ikigai/ and /profile-edit/ read it, appear-id before cw-id, because a device can hold both
+// with different values and the two pages disagreeing is a known and separate problem.
+if(!_me){ try{ _me=String(localStorage.getItem('appear-id')||localStorage.getItem('cw-id')||'').trim(); }catch(e){ _me=''; } }
 var slugEl=document.getElementById('slug'), slugHint=document.getElementById('slug-hint'), btn=document.getElementById('claim-btn');
 var _linkOK=false, _slugOK=false, _checkTimer=null;
 
 function validLink(v){ return /^https?:\/\/appear\.network\//i.test(String(v||'').trim()); }
+function showLink(v){
+  var a=document.getElementById('appear-link'); a.href=v; a.textContent=v;
+  document.getElementById('link-box').style.display='block';
+  document.getElementById('looking').style.display='none';
+  document.getElementById('no-link').style.display='none';
+  _linkOK=true; refresh();
+}
+function showNoLink(){
+  document.getElementById('looking').style.display='none';
+  document.getElementById('no-link').style.display='block';
+  _linkOK=false; refresh();
+}
 (function initLink(){
-  if(validLink(_appearLink)){
-    var a=document.getElementById('appear-link'); a.href=_appearLink; a.textContent=_appearLink;
-    document.getElementById('link-box').style.display='block';
-    _linkOK=true;
-  } else {
-    document.getElementById('no-link').style.display='block';
-    _linkOK=false;
-  }
+  if(validLink(_appearLink)){ showLink(_appearLink); return; }
+  if(!_me){ showNoLink(); return; }
+  // Say we are looking rather than saying we could not find it. The backend answers in anything
+  // from two to forty seconds, and a page that asserts the wrong thing for the first half minute
+  // reads as broken.
+  document.getElementById('looking').style.display='block';
+  fetch(GS_URL+'?action=getProfile&appearId='+encodeURIComponent(_me))
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      var v=String((d&&d.data&&d.data.appearLink)||'').trim();
+      if(validLink(v)){ _appearLink=v; showLink(v); } else { showNoLink(); }
+    })
+    .catch(function(){ showNoLink(); });
 })();
 
 function normSlug(v){ return String(v||'').trim().toLowerCase().replace(/[^a-z0-9-]/g,''); }
