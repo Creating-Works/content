@@ -1,0 +1,356 @@
+<!doctype html>
+<!--
+  Copyright 2026 DayBalancer LLC. All rights reserved.
+
+  The code and the content here power Creating.Works, DayBalancer, Appear Network,
+  and 2Gather. They are published so they can be read, audited, and dated.
+
+  hello@creating.works
+-->
+<!-- Version: V1.00 | Date: 2026-09-03 | LAST CHANGE: the field registry as a live page, behind the ops sign-in -->
+<!--
+  ONE SIGN-IN, TWO PAGES. This uses the SAME session key as /ops/, cw-ops-session, and it is on the
+  same origin, so an operator who signed in there is already signed in here. Signing out of either
+  signs out of both, which is the behaviour Jessie asked for: "available to all superadmins who
+  signed in already".
+
+  WHAT THE GATE IS AND IS NOT. It keeps the registry out of casual sight and it is the same door
+  the operations page uses. It is NOT protection for the data, because the rows are in this file:
+  anybody with the address can read the source. That is fine for field names and which page reads
+  them, and it would not be fine for anything about a person. If this ever needs to hold something
+  real, the rows move behind the token the way getOpsPeople does. Said plainly rather than left to
+  be discovered.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Field registry</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&display=swap">
+<style>
+  :root{
+    --bg:#1F699E; --ink:#1A2E42; --soft:#4B5A6D; --muted:#6B7A8D; --line:#DDE4EE;
+    --panel:#F7FBFF; --panel-line:#C9DFF3; --brand:#1F699E;
+    --read:#2E9E6B; --write:#B36A0F;
+    --glide:#7C3AED; --ours:#0F766E; --both:#1F699E;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);
+    font-family:'DM Sans','Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:var(--ink);}
+  .wrap{max-width:1320px;margin:0 auto;padding:24px 18px 70px;}
+  h1{color:#fff;font-size:26px;font-weight:800;margin:0 0 4px;}
+  .lede{color:rgba(255,255,255,.85);font-size:14px;margin:0 0 14px;line-height:1.5;}
+  .lede a{color:#fff;}
+  .pin{color:rgba(255,255,255,.9);font-size:13px;margin:0 0 14px;}
+  .pin a{color:#fff;}
+  .hide{display:none !important;}
+
+  .gate{background:#fff;border-radius:14px;padding:18px 20px;margin-bottom:18px;}
+  .gate h2{margin:0 0 4px;font-size:17px;font-weight:800;}
+  .gate p{margin:0 0 12px;font-size:13px;color:var(--soft);line-height:1.5;}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  .gate input{border:1.5px solid var(--line);border-radius:10px;padding:9px 12px;
+    font-family:inherit;font-size:14px;color:var(--ink);min-width:200px;}
+  .gate input:focus-visible{outline:2px solid var(--brand);outline-offset:1px;}
+  .btn{background:var(--brand);color:#fff;border:0;border-radius:20px;padding:9px 17px;
+    font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;}
+  .btn:hover{filter:brightness(1.08);}
+  .btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px;}
+  .globe{font-size:16px;line-height:1;padding:8px 13px;}
+  .say{margin-top:9px;font-size:13px;color:var(--soft);min-height:18px;line-height:1.5;}
+  .say.bad{color:#B33A3A;font-weight:600;}
+
+  .card{background:#fff;border-radius:14px;padding:16px 16px 8px;}
+  .headrow{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px;}
+  .headrow h2{margin:0;font-size:18px;font-weight:800;}
+  .count{font-size:13px;color:var(--muted);font-weight:700;}
+  .reset{background:none;border:0;color:var(--brand);font-family:inherit;font-size:13px;
+    font-weight:700;cursor:pointer;padding:2px 4px;}
+  .reset:focus-visible{outline:2px solid var(--brand);outline-offset:2px;}
+  #search{border:1.5px solid var(--line);border-radius:20px;padding:9px 14px;
+    font-family:inherit;font-size:13.5px;color:var(--ink);min-width:280px;}
+  #search:focus-visible{outline:2px solid var(--brand);outline-offset:1px;}
+
+  .tablewrap{overflow-x:auto;}
+  table{border-collapse:collapse;width:100%;min-width:1000px;}
+  th{text-align:left;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;
+    color:var(--muted);padding:0 10px 6px;border-bottom:1.5px solid var(--line);white-space:nowrap;}
+  td{padding:11px 10px;border-bottom:1px solid #EFF3F8;font-size:13px;vertical-align:top;line-height:1.5;}
+  tr:last-child td{border-bottom:0;}
+  tbody tr:hover td{background:#F7FBFF;}
+  td.name{font-weight:800;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;}
+  td.notes{color:var(--soft);min-width:260px;}
+
+  /* The filter row lives under the headers, the way the operations page does it. */
+  tr.filters td{padding:6px 10px 12px;border-bottom:1.5px solid var(--line);}
+  tr.filters input{width:100%;border:1.5px solid var(--line);border-radius:8px;padding:6px 9px;
+    font-family:inherit;font-size:12.5px;color:var(--ink);}
+  tr.filters input:focus-visible{outline:2px solid var(--brand);outline-offset:1px;}
+  tr.filters select{width:100%;border:1.5px solid var(--line);border-radius:8px;padding:6px 7px;
+    font-family:inherit;font-size:12.5px;color:var(--ink);background:#fff;}
+
+  .chip{display:inline-block;border-radius:9px;padding:2px 8px;font-size:11.5px;font-weight:700;
+    margin:0 4px 4px 0;background:#F1F5F9;color:var(--soft);}
+  .chip.read{background:#EAF7F0;color:var(--read);}
+  .chip.write{background:#FFF7ED;color:var(--write);}
+  .where{display:inline-block;border-radius:9px;padding:2px 9px;font-size:11px;font-weight:800;
+    text-transform:uppercase;letter-spacing:.05em;color:#fff;}
+  .where.glide{background:var(--glide);}
+  .where.ours{background:var(--ours);}
+  .where.both{background:var(--both);}
+  .empty{padding:26px 10px;color:var(--muted);font-size:13.5px;}
+  .note{color:rgba(255,255,255,.82);font-size:12px;margin-top:18px;line-height:1.6;}
+  .note a{color:#fff;}
+  code{background:rgba(255,255,255,.15);padding:1px 5px;border-radius:5px;}
+  @media(max-width:640px){ .wrap{padding:16px 12px 50px;} h1{font-size:22px;} }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <h1>Field registry</h1>
+  <p class="lede">Our own fields: which tool each lives in, the pages that read or write it, and whether it is Glide's, ours, or both. Operators only.</p>
+
+  <div class="gate card" id="gate">
+    <h2>Sign in</h2>
+    <p>The same code as the <a href="https://creating.works/ops/">operations page</a>. If you are already signed in there, this opens on its own.</p>
+    <div class="row">
+      <input id="who" type="email" autocomplete="email" placeholder="your address">
+      <button class="btn globe" id="send" title="Send a code">&#127760;</button>
+    </div>
+    <div class="row hide" id="pinRow" style="margin-top:10px;">
+      <input id="pin" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000">
+      <button class="btn" id="go">Open</button>
+    </div>
+    <div class="say" id="s2"></div>
+  </div>
+
+  <div class="card hide" id="board">
+    <div class="headrow">
+      <h2>Fields <span class="count" id="count"></span></h2>
+      <div class="row">
+        <input id="search" type="text" placeholder="Search everything on a field's row">
+        <button class="reset" id="reset">reset</button>
+      </div>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Field</th><th>Tool</th><th>Table / sheet</th><th>Exists in</th>
+            <th>Reads</th><th>Writes</th><th>Notes</th>
+          </tr>
+          <tr class="filters">
+            <td><input data-f="field" placeholder="filter"></td>
+            <td><input data-f="tool" placeholder="filter"></td>
+            <td><input data-f="table" placeholder="filter"></td>
+            <td><select data-f="existsIn"><option value="">any</option><option>Glide</option><option>Ours</option><option>Both</option></select></td>
+            <td><input data-f="reads" placeholder="filter"></td>
+            <td><input data-f="writes" placeholder="filter"></td>
+            <td><input data-f="notes" placeholder="filter"></td>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <div class="empty hide" id="empty">Nothing matches those filters.</div>
+  </div>
+
+  <p class="note">Source: <code>fields/index.html</code> in the <code>Creating-Works/content</code> repository. The written spec is <a href="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/design/fields/field-registry.md">field-registry.md</a>. To add a field, add a row to the <code>FIELDS</code> array in this file.</p>
+</div>
+
+<script src="https://2gather.network/nav/identity.js?v=12"></script>
+<script>
+(function(){
+  var GS = 'https://cw-api-gate.jessieupp.workers.dev';
+  function $(id){ return document.getElementById(id); }
+  function esc(v){ return String(v==null?'':v)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function say(el,msg,bad){ var n=$(el); n.textContent=msg||''; n.className='say'+(bad?' bad':''); }
+
+  // ── The registry ────────────────────────────────────────────────────────────
+  // Ours only. We do not catalogue every Glide column; we list the fields WE use, each flagged
+  // Glide, Ours, or Both.
+  var FIELDS = [
+    {field:'Full name', tool:'Creating.Works', table:'Users · Main · CW/Info', existsIn:'Both',
+      reads:['Kumu map','group.html matches','attendees.html'],
+      writes:['intake.html save (queued)'],
+      notes:'Core identity. Glide owns Main; our writes target CW/Info.'},
+    {field:'email', tool:'Creating.Works', table:'Users · CW/Info', existsIn:'Both',
+      reads:['admin.html member list','attendees.html'],
+      writes:['intake.html save (queued)'],
+      notes:'Login and invite key. Never return it on a public read.'},
+    {field:'Image', tool:'Creating.Works', table:'Main', existsIn:'Glide',
+      reads:['Kumu map','group.html cards','attendees.html'],
+      writes:['Glide app only'],
+      notes:'Main.Image is Glide-owned and we do not write it. Guest photos use our own fields below. As of 2026-09-03 nothing on our side reads it either.'},
+    {field:'guestPhotoURL', tool:'Creating.Works', table:'CW/Info', existsIn:'Ours',
+      reads:['attendees.html','group.html','lookupProfile','getPresence','getGiftHistory','getBookmarks'],
+      writes:['photo backfill'],
+      notes:'Our photo URL, separate from Main.Image. An uploaded photo on ikigai.photoURL wins over it.'},
+    {field:'noHeadshot', tool:'Creating.Works', table:'CW/Info', existsIn:'Ours',
+      reads:['findPeople','Kumu consent gate (queued)'],
+      writes:['intake.html save (queued)'],
+      notes:'It means the picture somebody has is not a professional one. It is NOT a consent flag, and reading it as one hid five people from their own group on 2026-09-01.'},
+    {field:'findable', tool:'Creating.Works', table:'CW/Info', existsIn:'Ours',
+      reads:['findPeople'],
+      writes:['saveAccount'],
+      notes:'Only an explicit false hides somebody, and an operator sees everyone regardless. Nothing read this column until 2026-09-03, so setting it changed nothing.'},
+    {field:'appearLink', tool:'Creating.Works', table:'CW/Info', existsIn:'Ours',
+      reads:['lookupProfile','getGroupBundle','claim page'],
+      writes:['saveVanity','n27 normalise'],
+      notes:'A person’s Appear page address. Normalised on 2026-09-03 to https://appear.network/dl/page/s/<org>/r/<suffix>. Only an address containing /dl/page/ is ever served as a page link.'},
+    {field:'vanity', tool:'Creating.Works', table:'CW/Info', existsIn:'Ours',
+      reads:['checkVanity','vanity'],
+      writes:['saveVanity'],
+      notes:'The short name claimed at creating.works/claim/. Added 2026-09-03, empty for everybody but Jessie.'},
+    {field:'postal', tool:'Creating.Works', table:'CW/Info', existsIn:'Both',
+      reads:['getIntake'],
+      writes:['saveLocation','saveAccount'],
+      notes:'OURS IS THE TRUTH. Glide’s postal column is number-formatted and destroyed every postcode with a letter, a hyphen or a leading zero: 07666 became 7666. Of 31 disagreements, 28 are ours being right.'},
+    {field:'languages', tool:'Creating.Works', table:'CW/Info', existsIn:'Both',
+      reads:['getIntake','getGroupBundle'],
+      writes:['saveAccount'],
+      notes:'Written on our side since 2026-09-03. Info also has a second column spelled Languages, and the code reads both, so it works by accident.'},
+    {field:'rolesCW', tool:'Creating.Works', table:'CW/Info', existsIn:'Ours',
+      reads:['_grantedRolesFor_','getOpsPeople','_isSuperAdmin_'],
+      writes:['n38 apply'],
+      notes:'Pipe-separated granted roles. superAdmin here is what opens the operations page and this one.'},
+    {field:'groupId', tool:'2Gather', table:'events sheet · presence', existsIn:'Ours',
+      reads:['group.html','attendees.html'],
+      writes:['create.html','admin.html'],
+      notes:'Added on the APP_ID events sheet and the presence tab.'},
+    {field:'passcode', tool:'2Gather', table:'Groups', existsIn:'Ours',
+      reads:['group.html join'],
+      writes:['create.html','admin.html'],
+      notes:'Every group has one. Public and Private is only visibility, not whether a passcode exists.'},
+    {field:'Groups joined', tool:'2Gather', table:'Main', existsIn:'Glide',
+      reads:['nothing, since 2026-09-03'],
+      writes:['nothing, since 2026-09-03'],
+      notes:'Glide’s membership column. cw.memberships is the one answer now. Measured first: Glide knew 0 memberships we did not.'},
+    {field:'businessCardURL', tool:'Appear', table:'Appear Contacts', existsIn:'Glide',
+      reads:['contact card'],
+      writes:['add / edit contact'],
+      notes:'Photo of a business card or face from the capture flow. Becomes ours when the contact tracker ships.'}
+  ];
+
+  // ── The same door as /ops/ ──────────────────────────────────────────────────
+  // Same key, same origin, so signing in on either page signs you in on both.
+  var KEY='cw-ops-session';
+  var me=(window.CW_ID||'').trim(), token='';
+  function remember(id,tok){
+    try{ localStorage.setItem(KEY, JSON.stringify({id:id,tok:tok,until:Date.now()+55*60*1000})); }catch(e){}
+  }
+  function forget(){ try{ localStorage.removeItem(KEY); }catch(e){} }
+  function recall(){
+    try{
+      var v=JSON.parse(localStorage.getItem(KEY)||'null');
+      if(v && v.tok && v.until>Date.now()) return v;
+    }catch(e){}
+    return null;
+  }
+  function addr(){ return ($('who').value||'').trim(); }
+
+  $('send').addEventListener('click', function(){
+    if(!addr()){ say('s2','Put your address in first.',true); return; }
+    say('s2','Sending a code…');
+    try{ localStorage.setItem('cw-ops-who', addr()); }catch(e){}
+    fetch(GS+'?action=sendOpsPin&email='+encodeURIComponent(addr())+'&t='+Date.now())
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        // Always the same words, whether or not the address is known. Telling them apart would
+        // let anybody discover who is in the database.
+        $('pinRow').classList.remove('hide');
+        say('s2','If that address can open this, a code is on its way. It lasts fifteen minutes.');
+        $('pin').focus();
+      })
+      .catch(function(){ say('s2','Could not reach the server. Try again.',true); });
+  });
+
+  $('go').addEventListener('click', function(){
+    var pin=($('pin').value||'').trim();
+    if(pin.length<6){ say('s2','Six digits.',true); return; }
+    $('go').disabled=true; say('s2','Checking…');
+    fetch(GS+'?action=verifyOpsPin&email='+encodeURIComponent(addr())
+          +'&pin='+encodeURIComponent(pin)+'&t='+Date.now())
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        $('go').disabled=false;
+        if(!d||d.status!=='ok'||!d.sessionToken){
+          say('s2',(d&&d.message)||'That code did not work.',true); return;
+        }
+        me=d.appearId||me; token=d.sessionToken;
+        remember(me, token);
+        open_();
+      })
+      .catch(function(){ $('go').disabled=false; say('s2','Could not reach the server.',true); });
+  });
+
+  function open_(){
+    $('gate').classList.add('hide');
+    $('board').classList.remove('hide');
+    document.title='Field registry';
+    render();
+  }
+
+  var back=recall();
+  if(back){ me=back.id; token=back.tok; open_(); }
+  else { try{ var w=localStorage.getItem('cw-ops-who'); if(w) $('who').value=w; }catch(e){} }
+
+  // ── The table ───────────────────────────────────────────────────────────────
+  function chips(list, cls){
+    if(!list || !list.length) return '<span class="chip">—</span>';
+    return list.map(function(x){ return '<span class="chip '+cls+'">'+esc(x)+'</span>'; }).join('');
+  }
+  function textOf(d){
+    return [d.field,d.tool,d.table,d.existsIn,(d.reads||[]).join(' '),(d.writes||[]).join(' '),d.notes]
+      .join(' ').toLowerCase();
+  }
+  function render(){
+    var q=($('search').value||'').trim().toLowerCase();
+    var f={};
+    document.querySelectorAll('tr.filters [data-f]').forEach(function(el){
+      var v=(el.value||'').trim().toLowerCase();
+      if(v) f[el.getAttribute('data-f')]=v;
+    });
+    var rows=FIELDS.filter(function(d){
+      if(q && textOf(d).indexOf(q)===-1) return false;
+      for(var k in f){
+        var cell = Array.isArray(d[k]) ? d[k].join(' ') : (d[k]||'');
+        if(String(cell).toLowerCase().indexOf(f[k])===-1) return false;
+      }
+      return true;
+    });
+    $('count').textContent = rows.length===FIELDS.length
+      ? '('+FIELDS.length+')' : '('+rows.length+' of '+FIELDS.length+')';
+    $('rows').innerHTML = rows.map(function(d){
+      var w=String(d.existsIn||'').toLowerCase();
+      return '<tr>'
+        + '<td class="name">'+esc(d.field)+'</td>'
+        + '<td>'+esc(d.tool)+'</td>'
+        + '<td>'+esc(d.table)+'</td>'
+        + '<td><span class="where '+w+'">'+esc(d.existsIn)+'</span></td>'
+        + '<td>'+chips(d.reads,'read')+'</td>'
+        + '<td>'+chips(d.writes,'write')+'</td>'
+        + '<td class="notes">'+esc(d.notes)+'</td>'
+        + '</tr>';
+    }).join('');
+    $('empty').classList.toggle('hide', rows.length>0);
+  }
+  $('search').addEventListener('input', render);
+  document.querySelectorAll('tr.filters [data-f]').forEach(function(el){
+    el.addEventListener('input', render);
+    el.addEventListener('change', render);
+  });
+  $('reset').addEventListener('click', function(){
+    $('search').value='';
+    document.querySelectorAll('tr.filters [data-f]').forEach(function(el){ el.value=''; });
+    render();
+  });
+})();
+</script>
+</body>
+</html>
