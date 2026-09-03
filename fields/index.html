@@ -112,7 +112,7 @@
 
 <div class="wrap">
   <h1>Field registry</h1>
-  <p class="lede">Our own fields: which tool each lives in, the pages that read or write it, and whether it is Glide's, ours, or both. Operators only.</p>
+  <p class="lede hide" id="lede">Our own fields: which tool each lives in, the pages that read or write it, and whether it is Glide's, ours, or both. Operators only.</p>
 
   <div class="gate card" id="gate">
     <h2>Sign in</h2>
@@ -159,7 +159,7 @@
     <div class="empty hide" id="empty">Nothing matches those filters.</div>
   </div>
 
-  <p class="note">Source: <code>fields/index.html</code> in the <code>Creating-Works/content</code> repository. The written spec is <a href="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/design/fields/field-registry.md">field-registry.md</a>. To add a field, add a row to the <code>FIELDS</code> array in this file.</p>
+  <p class="note hide" id="srcnote">Source: <code>fields/index.html</code> in the <code>Creating-Works/content</code> repository. The written spec is <a href="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/design/fields/field-registry.md">field-registry.md</a>. To add a field, add a row to the <code>FIELDS</code> array in this file.</p>
 </div>
 
 <script src="https://2gather.network/nav/identity.js?v=12"></script>
@@ -290,7 +290,12 @@
   });
 
   function open_(){
+    // Nothing but the sign-in until somebody is in, the same as the operations page. A page that
+    // describes itself to a stranger has told them what it holds. Jessie, 2026-09-03: it is
+    // supposed to be blank.
     $('gate').classList.add('hide');
+    $('lede').classList.remove('hide');
+    $('srcnote').classList.remove('hide');
     $('board').classList.remove('hide');
     document.title='Field registry';
     render();
