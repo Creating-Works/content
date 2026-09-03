@@ -304,13 +304,62 @@
       .catch(function(){ $('go').disabled=false; say('s2','Could not reach the server.',true); });
   });
 
+  // ── ?why=1 ────────────────────────────────────────────────────────────────
+  // A switch on the page that already exists, never a page of its own. It does nothing at all
+  // unless the parameter is there.
+  //
+  // Added 2026-09-03 after two guesses in a row. The People section answered "did not load" and
+  // I theorised about identity, then about speed, and the second attempt changed the error from
+  // a 524 timeout to an HTML page, which is a different fault. Jessie: look at what we learned in
+  // start here to stop troubleshooting.
+  //
+  // So this prints what the server actually said: which call, how long it took, the HTTP status,
+  // the content type, and the first 300 characters of the body when it is not JSON. The token is
+  // never printed.
+  var WHY = (function(){ try { return new URLSearchParams(location.search).get('why')==='1'; } catch(e){ return false; } })();
+  var whyPanel=null;
+  function whySay(line){
+    if(!WHY) return;
+    if(!whyPanel){
+      whyPanel=document.createElement('div');
+      whyPanel.setAttribute('style','position:fixed;left:10px;right:10px;top:10px;z-index:99999;'
+        +'background:#fff;border:2px solid #1F699E;border-radius:12px;padding:14px 16px;'
+        +'font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;color:#1A2E42;'
+        +'max-height:70vh;overflow:auto;white-space:pre-wrap;');
+      whyPanel.textContent='Ops: what the server said\n';
+      document.body.appendChild(whyPanel);
+    }
+    whyPanel.textContent += line + '\n';
+  }
+  // One fetch for both calls, so what is reported is exactly what was sent.
+  function ask(action, url){
+    var t0=Date.now();
+    whySay('\n' + action + '  asking...');
+    return fetch(url).then(function(r){
+      var ms=Date.now()-t0;
+      var ct=r.headers.get('content-type')||'(none)';
+      return r.text().then(function(body){
+        whySay(action + '  ' + r.status + ' ' + (r.statusText||'') + '  ' + ms + 'ms  ' + ct);
+        var d=null, bad=null;
+        try { d=JSON.parse(body); } catch(e){ bad=e; }
+        if(bad){
+          whySay(action + '  NOT JSON. The first 300 characters:');
+          whySay('  ' + body.slice(0,300).replace(/\s+/g,' '));
+          throw new Error(bad.message);
+        }
+        whySay(action + '  ok, status field = ' + (d && d.status) + (d && d.people ? ', ' + d.people.length + ' people' : '')
+               + (d && d.groups ? ', ' + d.groups.length + ' groups' : ''));
+        return d;
+      });
+    });
+  }
+
   function load(){
     $('loading').classList.remove('hide');
     var done=0;
     var settled=function(){ if(++done>=2) $('loading').classList.add('hide'); };
-    fetch(GS+'?action=getOpsGroups&appearId='+encodeURIComponent(me)
+    ask('getOpsGroups', GS+'?action=getOpsGroups&appearId='+encodeURIComponent(me)
           +'&sessionToken='+encodeURIComponent(token)+'&t='+Date.now())
-      .then(function(r){ return r.json(); })
       .then(function(d){
         if(!d||d.status!=='ok'){
           // The hour is up. Say so and ask, rather than show an empty page.
@@ -334,9 +383,8 @@
       })
       .catch(function(){ settled(); });
 
-    fetch(GS+'?action=getOpsPeople&appearId='+encodeURIComponent(me)
+    ask('getOpsPeople', GS+'?action=getOpsPeople&appearId='+encodeURIComponent(me)
           +'&sessionToken='+encodeURIComponent(token)+'&t='+Date.now())
-      .then(function(r){ return r.json(); })
       .then(function(d){
         // SAY WHY. This returned silently, so a failure and an empty answer looked identical:
         // the People card stayed hidden, nothing was drawn and nothing was said, and the page
