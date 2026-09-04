@@ -116,6 +116,31 @@
     <div class="say" id="s2"></div>
   </div>
 
+  <!-- The build documents, so the operational page is one click from the north star and the open
+       decisions rather than a set of URLs somebody has to keep. Added 2026-09-04. -->
+  <div class="card hide" id="docs">
+    <div class="headrow">
+      <h2><button class="fold" id="dfold" title="Hide or show">Build documents</button></h2>
+    </div>
+    <div id="docsBody">
+      <p><a href="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/docs/0-Main-combined-draft.md">North Star, the current draft</a><br>
+      <span class="say">What we are, in one page. Doug's words, Jessie's formatting, every decision applied.</span></p>
+      <p><a href="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/collaboration/decisions-to-be-made-2026-09-02.md">Decisions to be made</a><br>
+      <span class="say">Every open question, what was deliberated, and where two things said cannot both hold.</span></p>
+      <p><a href="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/collaboration/standing-questions-for-doug.md">Standing questions for Doug</a><br>
+      <span class="say">The questions that are his, in context, question, action form.</span></p>
+      <p><a href="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/01-contributor-enrollment-story.md#the-people-we-are-seeking">The people we are seeking</a><br>
+      <span class="say">Every role, when it runs, and who is the point of contact.</span></p>
+      <p><a href="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/collaboration/roles-and-what-is-left.md">Roles, and what is left</a><br>
+      <span class="say">What has already been built against each role, so nobody re-costs finished work.</span></p>
+      <p><a href="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/05-master-development-plan.md">Master development plan</a><br>
+      <span class="say">The eight phases, the budget, and the re-estimate that is still pending.</span></p>
+      <p><a href="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/Reference-Materials/writing-style.md">Writing style guide</a><br>
+      <span class="say">The rules every reader-facing document is checked against.</span></p>
+      <p><a href="https://github.com/Creating-Works/The-New-Build-Repository/blob/main">The whole repository</a></p>
+    </div>
+  </div>
+
   <p class="loading hide" id="loading">Loading data...</p>
 
   <div class="card hide" id="pboard">
@@ -298,6 +323,7 @@
         say('s2','');
         $('gate').classList.add('hide');
         $('licenseNote').classList.remove('hide');
+        $('docs').classList.remove('hide');
         document.title='Ops';
         load();
       })
@@ -541,6 +567,7 @@
   };
   fold('pfold','pbody');
   fold('gfold','gbody');
+  fold('dfold','docsBody');
 
   $('preset').addEventListener('click', function(){
     $('q').value=''; $('onlyTest').checked=false; pDays=0;
