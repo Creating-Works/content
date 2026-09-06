@@ -342,6 +342,17 @@
         $('empty').classList.remove('hide');
         return;
       }
+      // The top bar draws "N support tickets waiting" from this key. The support page used to
+      // write it, as a side effect of drawing a list that no longer belongs there, so it moved
+      // here with the list. A number written by whichever page happens to know it is a number
+      // that goes stale the moment nobody visits that page.
+      try {
+        var _open = ROWS.filter(function (r) {
+          return r.type === 'Member request' && r.state !== 'Resolved' && r.state !== 'Closed';
+        }).length;
+        localStorage.setItem('cw-tickets', String(_open));
+      } catch (e) {}
+
       $('empty').textContent = ROWS.length ? 'Nothing matches those filters.' : 'Nothing has been reported yet.';
       draw();
     });
