@@ -1,0 +1,356 @@
+<!doctype html>
+<!--
+  Copyright 2026 DayBalancer LLC. All rights reserved.
+
+  The code and the content here power Creating.Works, DayBalancer, Appear Network,
+  and 2Gather. They are published so they can be read, audited, and dated.
+
+  hello@creating.works
+-->
+<!-- Version: V1.00 | Date: 2026-09-05 | LAST CHANGE: first build, the service desk -->
+<!--
+  ONE SIGN-IN, THREE PAGES. Same session key as /ops/ and /fields/, cw-ops-session, on the same
+  origin, so an operator already signed in on either is already signed in here.
+
+  WHAT IS DIFFERENT ABOUT THIS PAGE, and it matters. /fields/ holds its rows in the file, which is
+  fine for field names. This page holds PEOPLE'S MESSAGES, so nothing is in the file: every row
+  arrives from the backend, and getSupportTickets answers a stranger with an EMPTY LIST rather than
+  a refusal, because a refusal tells them the door is real.
+
+  TWO SOURCES, ONE TABLE:
+    cw.helpdesk  ->  a member request. Somebody wrote in.
+    cw.status    ->  a bug. Something we know is broken, whether or not anybody reported it.
+  Member requests sort to the top on arrival, always, because a person is waiting on those and
+  nobody is waiting on our own list.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%25' stop-color='%2310B981'/><stop offset='33%25' stop-color='%233B82F6'/><stop offset='66%25' stop-color='%238B5CF6'/><stop offset='100%25' stop-color='%23F43F5E'/></linearGradient></defs><circle cx='18' cy='18' r='16' fill='transparent' stroke='url(%23g)' stroke-width='3'/></svg>">
+<title>Service desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&display=swap">
+<style>
+  :root{
+    --bg:#1F699E; --ink:#1A2E42; --soft:#4B5A6D; --muted:#6B7A8D; --line:#DDE4EE;
+    --panel:#F7FBFF; --panel-line:#C9DFF3; --brand:#1F699E;
+    --member:#B33A3A; --bug:#7C3AED;
+    --open:#B36A0F; --assigned:#1F699E; --resolved:#2E9E6B; --closed:#6B7A8D;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);
+    font-family:'DM Sans','Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:var(--ink);}
+  .wrap{max-width:1320px;margin:0 auto;padding:24px 18px 70px;}
+  h1{color:#fff;font-size:26px;font-weight:800;margin:0 0 4px;}
+  .lede{color:rgba(255,255,255,.85);font-size:14px;margin:0 0 14px;line-height:1.5;}
+  .lede a{color:#fff;}
+  .hide{display:none !important;}
+
+  .gate{background:#fff;border-radius:14px;padding:18px 20px;margin-bottom:18px;}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  .gate input{border:1.5px solid var(--line);border-radius:10px;padding:9px 12px;
+    font-family:inherit;font-size:14px;color:var(--ink);min-width:200px;}
+  .gate input:focus-visible{outline:2px solid var(--brand);outline-offset:1px;}
+  .btn{background:var(--brand);color:#fff;border:0;border-radius:20px;padding:9px 17px;
+    font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;}
+  .btn:hover{filter:brightness(1.08);}
+  .btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px;}
+  .globe{font-size:16px;line-height:1;padding:8px 13px;}
+  .say{margin-top:9px;font-size:13px;color:var(--soft);min-height:18px;line-height:1.5;}
+  .say.bad{color:#B33A3A;font-weight:600;}
+
+  .card{background:#fff;border-radius:14px;padding:16px 16px 8px;}
+  .headrow{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px;}
+  .headrow h2{margin:0;font-size:18px;font-weight:800;}
+  .count{font-size:13px;color:var(--muted);font-weight:700;}
+  .reset{background:none;border:0;color:var(--brand);font-family:inherit;font-size:13px;
+    font-weight:700;cursor:pointer;padding:2px 4px;}
+  #search{border:1.5px solid var(--line);border-radius:20px;padding:9px 14px;
+    font-family:inherit;font-size:13.5px;color:var(--ink);min-width:280px;}
+  #search:focus-visible{outline:2px solid var(--brand);outline-offset:1px;}
+
+  .tablewrap{overflow-x:auto;}
+  table{border-collapse:collapse;width:100%;min-width:1040px;}
+  th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);
+     border-bottom:1.5px solid var(--line);padding:8px 10px;white-space:nowrap;}
+  td{border-bottom:1px solid var(--line);padding:10px;font-size:13.5px;vertical-align:top;line-height:1.5;}
+  tr.filters td{padding:6px 10px 10px;}
+  tr.filters input,tr.filters select{width:100%;border:1.5px solid var(--line);border-radius:8px;
+    padding:6px 8px;font-family:inherit;font-size:12.5px;color:var(--ink);background:#fff;}
+  tbody tr:hover{background:var(--panel);}
+  .tag{display:inline-block;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
+       color:#fff;border-radius:9px;padding:2px 8px;white-space:nowrap;}
+  .tag.member{background:var(--member);}
+  .tag.bug{background:var(--bug);}
+  .st{display:inline-block;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
+      border-radius:9px;padding:2px 8px;white-space:nowrap;color:#fff;}
+  .st.open{background:var(--open);}
+  .st.assigned{background:var(--assigned);}
+  .st.resolved{background:var(--resolved);}
+  .st.closed{background:var(--closed);}
+  .who{font-weight:700;}
+  .who .mail{display:block;font-weight:400;font-size:12.5px;color:var(--muted);word-break:break-all;}
+  .msg{max-width:460px;color:var(--soft);}
+  .when{white-space:nowrap;color:var(--muted);font-weight:600;font-size:12.5px;}
+  .empty{padding:22px 10px;color:var(--soft);font-size:14px;}
+  .note{color:rgba(255,255,255,.82);font-size:12.5px;margin-top:16px;line-height:1.6;}
+  .note code{background:rgba(255,255,255,.15);padding:1px 5px;border-radius:5px;}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <h1 class="hide" id="h1">Service desk</h1>
+  <p class="lede hide" id="lede">What people have asked us, and what we know is broken. Member requests first.</p>
+
+  <!-- Nothing but a box and a globe until somebody is in. No heading, no explanation of what this
+       page is, and no mention of the other operator pages. Each of those tells a stranger
+       something. Same shape as /fields/, Jessie 2026-09-03. -->
+  <div class="gate card" id="gate">
+    <div class="row">
+      <input id="who" type="email" autocomplete="email" placeholder="your address">
+      <button class="btn globe" id="send" title="Send a code">&#127760;</button>
+    </div>
+    <div class="row hide" id="pinRow" style="margin-top:10px;">
+      <input id="pin" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000">
+      <button class="btn" id="go">Open</button>
+    </div>
+    <div class="say" id="s2"></div>
+  </div>
+
+  <div class="card hide" id="board">
+    <div class="headrow">
+      <h2>Requests and bugs <span class="count" id="count"></span></h2>
+      <div class="row">
+        <input id="search" type="text" placeholder="Search everything on a row">
+        <button class="reset" id="reset">reset</button>
+      </div>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Type</th><th>What</th><th>Area</th><th>State</th><th>Who</th><th>When</th>
+          </tr>
+          <tr class="filters">
+            <td><select data-f="type"><option value="">any</option><option>Member request</option><option>Bug</option></select></td>
+            <td><input data-f="what" placeholder="filter"></td>
+            <td><input data-f="area" placeholder="filter"></td>
+            <td><select data-f="state"><option value="">any</option><option>Open</option><option>Assigned</option><option>Resolved</option><option>Closed</option></select></td>
+            <td><input data-f="who" placeholder="filter"></td>
+            <td><input data-f="when" placeholder="filter"></td>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <div class="empty hide" id="empty">Nothing matches those filters.</div>
+  </div>
+
+  <p class="note hide" id="srcnote">Member requests come from <code>cw.helpdesk</code>, written when
+    somebody sends the <a href="https://2gather.network/support/" style="color:#fff;">support form</a>.
+    Bugs come from <code>cw.status</code>, which is also what
+    <a href="https://2gather.network/status/" style="color:#fff;">the public status page</a> reads.
+    Nothing on this page is stored in this file.</p>
+</div>
+
+<script src="https://2gather.network/nav/identity.js?v=12"></script>
+<script>
+(function () {
+  var GS = 'https://cw-api-gate.jessieupp.workers.dev';
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (v) { return String(v == null ? '' : v)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); };
+  function say(id, t, bad) { var el = $(id); el.textContent = t || ''; el.className = 'say' + (bad ? ' bad' : ''); }
+
+  // ── The same door as /ops/ and /fields/ ────────────────────────────────────
+  var KEY = 'cw-ops-session';
+  var me = (window.CW_ID || '').trim(), token = '';
+  function remember(id, tok) {
+    try { localStorage.setItem(KEY, JSON.stringify({ id: id, tok: tok, until: Date.now() + 55 * 60 * 1000 })); } catch (e) {}
+  }
+  function recall() {
+    try { var v = JSON.parse(localStorage.getItem(KEY) || 'null'); if (v && v.tok && v.until > Date.now()) return v; } catch (e) {}
+    return null;
+  }
+  function addr() { return ($('who').value || '').trim(); }
+
+  $('send').addEventListener('click', function () {
+    if (!addr()) { say('s2', 'Put your address in first.', true); return; }
+    say('s2', 'Sending a code\u2026');
+    try { localStorage.setItem('cw-ops-who', addr()); } catch (e) {}
+    fetch(GS + '?action=sendOpsPin&email=' + encodeURIComponent(addr())
+          + '&appearId=' + encodeURIComponent(addr() ? '' : me) + '&t=' + Date.now())
+      .then(function (r) { return r.json(); })
+      .then(function () {
+        // The same words whichever address it was, so nobody can discover who is an operator.
+        $('pinRow').classList.remove('hide');
+        say('s2', 'If that address can open this, a code is on its way. It lasts fifteen minutes.');
+        $('pin').focus();
+      })
+      .catch(function () { say('s2', 'Could not reach the server. Try again.', true); });
+  });
+
+  $('go').addEventListener('click', function () {
+    var pin = ($('pin').value || '').trim();
+    if (pin.length < 6) { say('s2', 'Six digits.', true); return; }
+    $('go').disabled = true; say('s2', 'Checking\u2026');
+    // `code`, not `pin`. The backend reads e.parameter.code; sending `pin` burns a try every press.
+    fetch(GS + '?action=verifyOpsPin&email=' + encodeURIComponent(addr())
+          + '&appearId=' + encodeURIComponent(addr() ? '' : me)
+          + '&code=' + encodeURIComponent(pin) + '&t=' + Date.now())
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        $('go').disabled = false;
+        if (!d || d.status !== 'ok' || !d.sessionToken) { say('s2', (d && d.message) || 'That code did not work.', true); return; }
+        me = d.appearId || me; token = d.sessionToken;
+        remember(me, token);
+        open_();
+      })
+      .catch(function () { $('go').disabled = false; say('s2', 'Could not reach the server.', true); });
+  });
+
+  // ── The rows ───────────────────────────────────────────────────────────────
+  var ROWS = [], filters = {}, text = '';
+
+  function stateOf(raw) {
+    var s = String(raw || '').trim().toLowerCase();
+    if (!s || s === 'open')      return 'Open';
+    if (s === 'assigned')        return 'Assigned';
+    if (s === 'resolved' || s === 'fixed') return 'Resolved';
+    if (s === 'closed')          return 'Closed';
+    if (s === 'looking' || s === 'found') return 'Open';
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  }
+
+  function when(v) {
+    if (!v) return '';
+    var t = String(v).trim();
+    var d = new Date(/^\d{4}-\d{2}-\d{2}$/.test(t) ? t + 'T00:00:00' : t);
+    if (isNaN(d.getTime())) return t;
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+  function sortKey(v) {
+    var d = new Date(String(v || '').trim());
+    return isNaN(d.getTime()) ? 0 : d.getTime();
+  }
+
+  function draw() {
+    var list = ROWS.filter(function (r) {
+      for (var k in filters) {
+        if (!filters[k]) continue;
+        if (String(r[k] || '').toLowerCase().indexOf(filters[k].toLowerCase()) === -1) return false;
+      }
+      if (text && (r.type + ' ' + r.what + ' ' + r.area + ' ' + r.state + ' ' + r.who + ' ' + r.detail)
+            .toLowerCase().indexOf(text) === -1) return false;
+      return true;
+    });
+
+    // Member requests first, ALWAYS, because a person is waiting on one of those and nobody is
+    // waiting on our own list. Newest first inside each group.
+    list.sort(function (a, b) {
+      if (a.type !== b.type) return a.type === 'Member request' ? -1 : 1;
+      return b.sort - a.sort;
+    });
+
+    $('count').textContent = list.length === ROWS.length
+      ? ROWS.length + ' in total'
+      : list.length + ' of ' + ROWS.length;
+
+    $('rows').innerHTML = list.map(function (r) {
+      return '<tr>'
+        + '<td><span class="tag ' + (r.type === 'Member request' ? 'member' : 'bug') + '">'
+          + (r.type === 'Member request' ? 'Member' : 'Bug') + '</span></td>'
+        + '<td><div style="font-weight:700;">' + esc(r.what) + '</div>'
+          + (r.detail ? '<div class="msg">' + esc(r.detail) + '</div>' : '') + '</td>'
+        + '<td>' + esc(r.area || '') + '</td>'
+        + '<td><span class="st ' + r.state.toLowerCase() + '">' + esc(r.state) + '</span></td>'
+        + '<td class="who">' + esc(r.who || '') + (r.mail ? '<span class="mail">' + esc(r.mail) + '</span>' : '') + '</td>'
+        + '<td class="when">' + esc(r.when) + '</td>'
+        + '</tr>';
+    }).join('');
+    $('empty').classList.toggle('hide', list.length > 0);
+  }
+
+  document.querySelectorAll('tr.filters [data-f]').forEach(function (el) {
+    el.addEventListener('input', function () { filters[el.getAttribute('data-f')] = el.value.trim(); draw(); });
+    el.addEventListener('change', function () { filters[el.getAttribute('data-f')] = el.value.trim(); draw(); });
+  });
+  $('search').addEventListener('input', function () { text = this.value.trim().toLowerCase(); draw(); });
+  $('reset').addEventListener('click', function () {
+    document.querySelectorAll('tr.filters [data-f]').forEach(function (el) { el.value = ''; });
+    $('search').value = ''; filters = {}; text = ''; draw();
+  });
+
+  function open_() {
+    $('gate').classList.add('hide');
+    $('h1').classList.remove('hide');
+    $('lede').classList.remove('hide');
+    $('board').classList.remove('hide');
+    $('srcnote').classList.remove('hide');
+    $('count').textContent = 'reading\u2026';
+
+    // Two calls, fired together because they are different actions on the same slow backend and
+    // neither waits on the other. Apps Script runs them one at a time, so this is two waits either
+    // way; firing them together only stops the second one starting late.
+    var tickets = fetch(GS + '?action=getSupportTickets&appearId=' + encodeURIComponent(me) + '&t=' + Date.now())
+      .then(function (r) { return r.json(); }).catch(function () { return null; });
+    var bugs = fetch(GS + '?action=getStatusItems&t=' + Date.now())
+      .then(function (r) { return r.json(); }).catch(function () { return null; });
+
+    Promise.all([tickets, bugs]).then(function (both) {
+      var t = both[0], b = both[1];
+      ROWS = [];
+
+      if (t && t.status === 'ok') {
+        (t.tickets || []).forEach(function (x) {
+          ROWS.push({
+            type: 'Member request',
+            what: x.kind || 'Feedback',
+            detail: x.message || '',
+            area: x.page || '',
+            state: stateOf(x.status),
+            who: x.name || '',
+            mail: x.email || '',
+            when: when(x.date),
+            sort: sortKey(x.date)
+          });
+        });
+      }
+      if (b && b.status === 'ok') {
+        (b.items || []).forEach(function (x) {
+          ROWS.push({
+            type: 'Bug',
+            what: x.title || '',
+            detail: x.what || '',
+            area: x.area || '',
+            state: stateOf(x.state),
+            who: '', mail: '',
+            when: when(x.updated || x.started),
+            sort: sortKey(x.updated || x.started)
+          });
+        });
+      }
+
+      // Says what it does not know rather than drawing an empty table that looks like good news.
+      if (!t && !b) {
+        $('count').textContent = '';
+        $('empty').textContent = 'Neither list could be read. That is this page failing, not an empty desk.';
+        $('empty').classList.remove('hide');
+        return;
+      }
+      $('empty').textContent = ROWS.length ? 'Nothing matches those filters.' : 'Nothing has been reported yet.';
+      draw();
+    });
+  }
+
+  var back = recall();
+  if (back) { me = back.id; token = back.tok; open_(); }
+  else { try { var w = localStorage.getItem('cw-ops-who'); if (w) $('who').value = w; } catch (e) {} }
+})();
+</script>
+</body>
+</html>
