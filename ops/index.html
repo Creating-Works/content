@@ -411,10 +411,25 @@
           +'&sessionToken='+encodeURIComponent(token)+'&t='+Date.now())
       .then(function(d){
         if(!d||d.status!=='ok'){
-          // The hour is up. Say so and ask, rather than show an empty page.
+          // SAY WHICH OF THE THREE IT IS. This said "That session has expired" for every failure
+          // there is, including having no session at all, which is what actually happened on
+          // 2026-09-06 and sent two people looking at session lengths for an hour. The token
+          // carries its own expiry, so the page can tell the difference instead of guessing.
+          // Jessie: make it say what is true.
+          var why = 'Something went wrong signing you in.';
+          var hadToken = !!token, expired = false;
+          try {
+            var dot = String(token || '').lastIndexOf('.');
+            if (dot > -1) { var xp = parseInt(String(token).slice(dot + 1), 10); expired = !!xp && xp <= Date.now(); }
+          } catch(e){}
+          if (!hadToken) why = 'You are not signed in. Ask for a code.';
+          else if (expired) why = 'Your session has expired. Ask for another code.';
+          else if (d && d.message) why = 'The server said: ' + d.message;
+          else if (d) why = 'The server refused, and gave no reason.';
+          else why = 'The server did not answer.';
           forget(); token='';
           $('gate').classList.remove('hide');
-          say('s2','That session has expired. Ask for another code.');
+          say('s2', why);
           return;
         }
         rows=d.groups||[];
