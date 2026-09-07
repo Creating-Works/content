@@ -91,6 +91,8 @@
   .st.assigned{background:var(--assigned);}
   .st.resolved{background:var(--resolved);}
   .st.closed{background:var(--closed);}
+  .head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+  .head a{font-size:13px;font-weight:700;white-space:nowrap;}
   .who{font-weight:700;}
   .who .mail{display:block;font-weight:400;font-size:12.5px;color:var(--muted);word-break:break-all;}
   .msg{max-width:460px;color:var(--soft);}
@@ -103,8 +105,14 @@
 <body>
 
 <div class="wrap">
-  <h1 class="hide" id="h1">Service desk</h1>
-  <p class="lede hide" id="lede">What people have asked us, and what we know is broken. Member requests first.</p>
+  <!-- The title and the way back to the page people actually write on, which is public and is the
+       other half of this one. Jessie, 2026-09-06: "link to the public afcing support page ... on
+       top right". It hides with the heading, so a stranger still sees nothing but the box. -->
+  <div class="head hide" id="head">
+    <h1 id="h1">Service desk</h1>
+    <a id="publiclink" href="https://2gather.network/support/">The page people write on</a>
+  </div>
+  <p class="lede hide" id="lede">What people have asked us and what we know is broken. Member requests first.</p>
 
   <!-- Nothing but a box and a globe until somebody is in. No heading, no explanation of what this
        page is, and no mention of the other operator pages. Each of those tells a stranger
@@ -287,7 +295,7 @@
 
   function open_() {
     $('gate').classList.add('hide');
-    $('h1').classList.remove('hide');
+    $('head').classList.remove('hide');   // the heading and the link to the public page, together
     $('lede').classList.remove('hide');
     $('board').classList.remove('hide');
     $('srcnote').classList.remove('hide');
@@ -328,7 +336,12 @@
             detail: x.what || '',
             area: x.area || '',
             state: stateOf(x.state),
-            who: '', mail: '',
+            // OURS, so the column says so rather than sitting empty. Every row on the status tab
+            // was written by this build session. Jessie, 2026-09-06: "if you wrote the supprot
+            // ticket, say Claude in the who". The tab carries no author column, so this is the
+            // page saying what is true of every row on it today rather than reading a value; the
+            // day somebody else writes one, that tab needs a column of its own.
+            who: 'Claude', mail: '',
             when: when(x.updated || x.started),
             sort: sortKey(x.updated || x.started)
           });
