@@ -47,6 +47,12 @@
   .say{font-size:14px;color:var(--muted);margin-top:12px;min-height:20px;}
   .say.bad{color:var(--warn);}
   .hide{display:none;}
+  /* AN INLINE display BEATS .hide. This row carried style="display:flex" and therefore showed to
+     every stranger at the sign-in box, naming three pages they cannot open and should not know
+     about. The layout lives in a class now so the hide can win. Jessie saw it on 2026-09-06.
+     Same fault, same day, as the filter bar menus that all drew at once. */
+  #adminlinks{display:flex;gap:18px;flex-wrap:wrap;align-items:center;}
+  #adminlinks.hide{display:none;}
   .scroll{overflow-x:auto;}
   table{border-collapse:collapse;width:100%;font-size:14px;}
   th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);white-space:nowrap;}
@@ -183,7 +189,7 @@
   <!-- The other pages a super admin can open. Jessie, 2026-09-06: "link to the 3 pages that super
        admin opens on top of ops page". It appears with the board, so a stranger sitting at the
        code box still learns nothing about what is behind it. -->
-  <div class="card hide" id="adminlinks" style="display:flex;gap:18px;flex-wrap:wrap;align-items:center;">
+  <div class="card hide" id="adminlinks">
     <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6B7A8D;">Super admin pages</span>
     <a href="https://creating.works/ops/">Operations</a>
     <a href="https://creating.works/service/">Service desk</a>
