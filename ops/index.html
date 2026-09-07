@@ -254,6 +254,7 @@
     return null;
   }
 
+  setTimeout(function(){ try{ whySession(); }catch(e){} }, 0);   // speaks even when no load happens
   var back=recall();
   if(back){
     me=back.id; token=back.tok;
@@ -341,6 +342,37 @@
     }
     whyPanel.textContent += line + '\n';
   }
+
+  // WHAT THE SESSION ACTUALLY IS, printed before any call is made.
+  //
+  // Added 2026-09-06. ?why=1 only spoke from inside a data call, so somebody sitting at the code
+  // box with no session saw an empty screen from the one tool built to tell them why. The step
+  // that was failing was the step it could not describe.
+  //
+  // The token carries its own expiry after the dot, in milliseconds, put there by the SERVER when
+  // it was minted. The browser also keeps its own guess, fifty-five minutes from when it stored
+  // it. Those are two different numbers and only the first one decides anything, so both are
+  // printed and the difference between them is the answer when a session dies early.
+  function whySession(){
+    if(!WHY) return;
+    var raw=null;
+    try{ raw=localStorage.getItem(KEY); }catch(e){ whySay('session: localStorage cannot be read here'); return; }
+    if(!raw){ whySay('session: none stored in this browser. Nothing has been signed in, or it was cleared.'); return; }
+    var v=null;
+    try{ v=JSON.parse(raw); }catch(e){ whySay('session: stored but unreadable'); return; }
+    whySay('session: stored for id ' + (v && v.id ? v.id : '(none)'));
+    var browserLeft = (v && v.until) ? Math.round((v.until - Date.now())/60000) : null;
+    whySay('  the browser thinks it has ' + (browserLeft===null ? '(no until)' : browserLeft + ' minutes left'));
+    var tok = (v && v.tok) || '';
+    var dot = tok.lastIndexOf('.');
+    if(dot === -1){ whySay('  the token carries no expiry, which should never happen'); return; }
+    var exp = parseInt(tok.slice(dot+1), 10);
+    if(!exp){ whySay('  the expiry on the token is unreadable'); return; }
+    var serverLeft = Math.round((exp - Date.now())/60000);
+    whySay('  the TOKEN says ' + new Date(exp).toISOString() + ', which is ' + serverLeft + ' minutes from now');
+    if(serverLeft <= 0) whySay('  SO IT IS GENUINELY EXPIRED. Ask for another code.');
+    else whySay('  SO IT IS STILL VALID. A refusal now is the server saying no for another reason, not the clock.');
+  }
   // One fetch for both calls, so what is reported is exactly what was sent.
   function ask(action, url){
     var t0=Date.now();
@@ -365,6 +397,7 @@
   }
 
   function load(){
+    whySession();
     $('loading').classList.remove('hide');
     var done=0;
     var settled=function(){ if(++done>=2) $('loading').classList.add('hide'); };
