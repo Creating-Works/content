@@ -194,9 +194,11 @@
           + '&appearId=' + encodeURIComponent(addr() ? '' : me) + '&t=' + Date.now())
       .then(function (r) { return r.json(); })
       .then(function () {
-        // The same words whichever address it was, so nobody can discover who is an operator.
+        // NO SENTENCE. The code box appearing IS the answer, and it appears whatever the address
+        // was, so nobody can discover who is an operator by watching what the page says. Jessie,
+        // 2026-09-06: "remove If that address can open this, a code is on its way."
         $('pinRow').classList.remove('hide');
-        say('s2', 'If that address can open this, a code is on its way. It lasts fifteen minutes.');
+        say('s2', '');
         $('pin').focus();
       })
       .catch(function () { say('s2', 'Could not reach the server. Try again.', true); });
