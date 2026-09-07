@@ -236,12 +236,21 @@
     return s.charAt(0).toUpperCase() + s.slice(1);
   }
 
+  // DATE AND TIME WHEN THERE IS A TIME, date alone when there is not.
+  //
+  // A member request arrives at a particular minute and that minute is worth seeing. A bug is
+  // recorded against a DAY: statusStartedDate holds 2026-09-04 and nothing else, so printing
+  // "12:00 AM" beside it would assert a time nobody gave. The value decides, not the column.
+  // Jessie, 2026-09-06: "add date time in filter here to test".
   function when(v) {
     if (!v) return '';
     var t = String(v).trim();
-    var d = new Date(/^\d{4}-\d{2}-\d{2}$/.test(t) ? t + 'T00:00:00' : t);
+    var dayOnly = /^\d{4}-\d{2}-\d{2}$/.test(t);
+    var d = new Date(dayOnly ? t + 'T00:00:00' : t);
     if (isNaN(d.getTime())) return t;
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    var day = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    if (dayOnly || (!d.getHours() && !d.getMinutes() && !d.getSeconds())) return day;
+    return day + ' ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
   }
   function sortKey(v) {
     var d = new Date(String(v || '').trim());
