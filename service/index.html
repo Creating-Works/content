@@ -174,6 +174,42 @@
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); };
   function say(id, t, bad) { var el = $(id); el.textContent = t || ''; el.className = 'say' + (bad ? ' bad' : ''); }
 
+  // ── ?why=1 ────────────────────────────────────────────────────────────────
+  // Added 2026-09-06. Jessie signed in here, opened /ops/, and its own switch said no session was
+  // stored in that browser at all. This page had no way to say what it did with the one it was
+  // handed, so the step that fails is the step nothing can describe. Two guesses had already been
+  // spent, which is where guessing stops and a measurement starts.
+  //
+  // It prints what is in storage, what the sign-in handed back, whether writing to storage worked,
+  // and what each call answered. It never prints the token itself.
+  var WHY = (function(){ try { return new URLSearchParams(location.search).get('why') === '1'; } catch(e){ return false; } })();
+  var whyPanel = null;
+  function whySay(line) {
+    if (!WHY) return;
+    if (!whyPanel) {
+      whyPanel = document.createElement('div');
+      whyPanel.setAttribute('style','position:fixed;left:10px;right:10px;top:10px;z-index:99999;'
+        + 'background:#fff;border:2px solid #154F74;border-radius:10px;padding:10px 12px;'
+        + 'font:12px/1.5 ui-monospace,Menlo,monospace;white-space:pre-wrap;max-height:60vh;overflow:auto;');
+      whyPanel.textContent = 'Service desk: what actually happened\n';
+      document.body.appendChild(whyPanel);
+    }
+    whyPanel.textContent += line + '\n';
+  }
+  function whyStorage(when) {
+    if (!WHY) return;
+    var raw = null;
+    try { raw = localStorage.getItem('cw-ops-session'); }
+    catch (e) { whySay(when + ' storage: CANNOT BE READ in this browser. ' + e); return; }
+    if (!raw) { whySay(when + ' storage: nothing stored under cw-ops-session'); return; }
+    var v = null;
+    try { v = JSON.parse(raw); } catch (e) { whySay(when + ' storage: stored but unreadable'); return; }
+    var dot = String(v && v.tok || '').lastIndexOf('.');
+    var exp = dot > -1 ? parseInt(String(v.tok).slice(dot + 1), 10) : 0;
+    whySay(when + ' storage: id ' + (v && v.id ? v.id : '(none)')
+      + ', token expires ' + (exp ? new Date(exp).toISOString() + ' (' + Math.round((exp - Date.now()) / 60000) + ' min from now)' : 'unreadable'));
+  }
+
   // ── The same door as /ops/ and /fields/ ────────────────────────────────────
   var KEY = 'cw-ops-session';
   var me = (window.CW_ID || '').trim(), token = '';
@@ -217,7 +253,10 @@
         $('go').disabled = false;
         if (!d || d.status !== 'ok' || !d.sessionToken) { say('s2', (d && d.message) || 'That code did not work.', true); return; }
         me = d.appearId || me; token = d.sessionToken;
+        whySay('the code was accepted. the server says you are ' + me);
+        whyStorage('before remember,');
         remember(me, token);
+        whyStorage('after remember, ');
         open_();
       })
       .catch(function () { $('go').disabled = false; say('s2', 'Could not reach the server.', true); });
@@ -315,6 +354,7 @@
     // Two calls, fired together because they are different actions on the same slow backend and
     // neither waits on the other. Apps Script runs them one at a time, so this is two waits either
     // way; firing them together only stops the second one starting late.
+    whySay('asking for tickets as ' + (me || '(no id)') + (token ? ' with a token' : ' WITH NO TOKEN'));
     var tickets = fetch(GS + '?action=getSupportTickets&appearId=' + encodeURIComponent(me) + '&t=' + Date.now())
       .then(function (r) { return r.json(); }).catch(function () { return null; });
     var bugs = fetch(GS + '?action=getStatusItems&t=' + Date.now())
@@ -382,6 +422,7 @@
     });
   }
 
+  whyStorage('at load,    ');
   var back = recall();
   if (back) { me = back.id; token = back.tok; open_(); }
   else { try { var w = localStorage.getItem('cw-ops-who'); if (w) $('who').value = w; } catch (e) {} }
