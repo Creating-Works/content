@@ -156,7 +156,7 @@
 
   function go(url){ window.location.href=url; }
   function groupsUrl(){ return 'https://2gather.network/mygroups'+(meId?'?CWid='+encodeURIComponent(meId)+'&ref=profile':'?ref=profile'); }
-  function eventsUrl(){ return 'https://2gather.network/myevents'+(meId?'?id='+encodeURIComponent(meId):''); }
+  function eventsUrl(){ return 'https://2gather.network/manage/'; }   // My events is the manage page since 2026-09-08
 
   // The stable answers URL. Stays correct after Design A is promoted onto intake.html.
   function answersUrl(){ return 'https://creating.works/profile'+(meId?'?CWid='+encodeURIComponent(meId):''); }
@@ -697,7 +697,7 @@
   }
 })();
 </script>
-<script src="https://2gather.network/nav/topbar.js?v=5.83" defer></script>
+<script src="https://2gather.network/nav/topbar.js?v=5.84" defer></script>
 </body>
 <!--
   Copyright 2026 DayBalancer LLC. All rights reserved.
