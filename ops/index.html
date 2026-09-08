@@ -306,6 +306,20 @@
     if(!addr() && !me){ $('who').focus(); return; }
     $('send').disabled=true;
     say('s2','');
+    // THE BOX APPEARS ON THE PRESS. Jessie, 2026-09-08: "sent email receigve passcode. not being
+    // given passcode field ot enter", then "passcode field finally showed."
+    //
+    // It waited for sendOpsPin to answer before showing the field. That call is Apps Script
+    // sending an email and measures tens of seconds, so the code landed in her inbox before the
+    // box to type it into existed - and a page with no field looks broken rather than slow.
+    //
+    // Nothing about the field depends on the answer: the email is on its way either way, and this
+    // advances identically whatever comes back, so that nobody can learn from it who is an
+    // operator.
+    try{ localStorage.setItem('cw-ops-who', addr()); }catch(e){}
+    $('pinRow').classList.remove('hide');
+    $('pin').focus();
+    say('s2','Sending your code. It can take a moment.');
     fetch(GS+'?action=sendOpsPin&email='+encodeURIComponent(addr())
           +'&appearId='+encodeURIComponent(addr()?'':me)+'&t='+Date.now())
       .then(function(r){ return r.json(); })
@@ -313,9 +327,7 @@
         // Advances the same way whatever the answer, so this cannot be used to find out who is
         // an operator. Only a server that could not be reached is worth saying out loud.
         $('send').disabled=false;
-        try{ localStorage.setItem('cw-ops-who', addr()); }catch(e){}
-        $('pinRow').classList.remove('hide');
-        $('pin').focus();
+        say('s2','');
       })
       .catch(function(){ $('send').disabled=false; say('s2','Could not reach the server.',true); });
   });
