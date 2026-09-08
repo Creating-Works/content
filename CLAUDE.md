@@ -11,6 +11,10 @@ Read this first. It overrides default behaviour.
 - **Propose, wait, then build.** Three separate steps. Never fuse describing with doing.
 - **When she names a change, that includes pushing it.** Never ask her to push something she has
   already asked for, and never put a push in the open-questions list.
+- **A change to the create form is a change to the edit form.** Both, in the same push, without
+  being asked. A field the create form writes and the edit form never loads comes back empty and
+  overwrites the real value the next time anybody saves, so half of this is a data loss rather than
+  an inconsistency. Checked on 2026-09-07 and three were already open on the event form.
 - **She is not a coder.** Ask plain-English questions and make the technical calls yourself. Say the
   user-facing effect, not the function name.
 - **Code changes come as FIND and REPLACE blocks**, complete and verbatim. Never "click before the
@@ -36,6 +40,11 @@ Read this first. It overrides default behaviour.
   do it. Only what genuinely cannot be done from your side goes to her: a spreadsheet edit, pressing
   Run, a Cloudflare deploy, a decision. Giving her twenty rows to delete by hand when a one-off could
   do it is the failure, and she should not have to ask.
+- **One test at a time is a practice, not a rule.** Her correction, 2026-09-07: *"this wasn't a
+  rule but I like it as a practice. Sometimes I like to test a whole bunch of things that you just
+  shipped, and I don't need you to keep on waiting."* So: when a batch has just shipped, hand her
+  the batch. When the work is still building up, one at a time and wait. Read which of the two it
+  is rather than defaulting.
 - **Always name what happens next and who owns it**: you, her, or both.
 - **No sign-offs**, no wrapping up, no remarks about the time of day.
 - **She runs several chats at once.** Pull and re-read before editing anything.

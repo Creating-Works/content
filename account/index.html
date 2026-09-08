@@ -273,6 +273,85 @@
   function markDirty(){ _dirty=true; setStat('Not saved yet.'); }
   function bindSave(){ var b=document.getElementById('acct-save'); if(b) b.onclick=function(){ saveAccount(); }; }
 
+  // ── The photo ──────────────────────────────────────────────────────────────────────────────
+  // Upload new revealed a note and did nothing else, so the one page named after changing your
+  // details could not change the first thing on it. Jessie, 2026-09-07: "upload new doesn't work
+  // when i click on it". It was not broken. It was never built.
+  //
+  // Lifted from the profile page, which has done this correctly since the photo work: pick, shrink
+  // to a 600px square because a round frame crops to one anyway, send to cw-photos, then write the
+  // address back. The address is cache-busted on screen so the new face appears at once rather than
+  // when the edge forgets the old one, and the SAVED address is the clean one.
+  var PHOTO_URL='https://cw-photos.jessieupp.workers.dev';
+  function photoStat(msg){ var n=document.getElementById('photo-note'); if(!n) return; n.textContent=msg||''; n.style.display=msg?'':'none'; }
+
+  function choosePhoto(){
+    if(!meId) return;
+    if(!_editToken){ showPinBar(function(){ choosePhoto(); },'Verify it is you, then choose a picture.'); return; }
+    var inp=document.createElement('input');
+    inp.type='file'; inp.accept='image/*';
+    inp.onchange=function(){ var f=inp.files&&inp.files[0]; if(f) shrinkPhoto(f); };
+    inp.click();
+  }
+
+  function shrinkPhoto(file){
+    photoStat('Getting it ready…');
+    var img=new Image();
+    img.onload=function(){
+      try{
+        var side=Math.min(img.width,img.height);
+        var c=document.createElement('canvas'); c.width=600; c.height=600;
+        c.getContext('2d').drawImage(img,(img.width-side)/2,(img.height-side)/2,side,side,0,0,600,600);
+        c.toBlob(function(blob){
+          if(!blob){ photoStat('That picture could not be read.'); return; }
+          sendPhoto(blob);
+        },'image/jpeg',0.85);
+      }catch(e){ photoStat('That picture could not be read.'); }
+      finally{ try{ URL.revokeObjectURL(img.src); }catch(e){} }
+    };
+    img.onerror=function(){ photoStat('That picture could not be read.'); };
+    img.src=URL.createObjectURL(file);
+  }
+
+  function sendPhoto(blob){
+    photoStat('Sending…');
+    fetch(PHOTO_URL+'/upload?id='+encodeURIComponent(meId),{
+      method:'POST',
+      headers:{'Content-Type':'image/jpeg','x-cw-token':_editToken},
+      body:blob
+    }).then(function(r){ return r.json(); }).then(function(d){
+      if(!d||d.status!=='ok'||!d.url){ photoStat((d&&d.message)||'That did not go through.'); return; }
+      D.photo=d.url;
+      var im=document.querySelector('img.photo');
+      if(im){ im.src=d.url+'?v='+Date.now(); }
+      else{
+        var box=document.querySelector('.photorow .photo');
+        if(box&&box.parentNode){
+          var ni=document.createElement('img');
+          ni.className='photo'; ni.alt=''; ni.src=d.url+'?v='+Date.now();
+          box.parentNode.replaceChild(ni,box);
+        }
+      }
+      photoStat('Saving…');
+      savePhotoUrl(d.url);
+    }).catch(function(){ photoStat('That did not go through.'); });
+  }
+
+  // Written on its own rather than through saveAccount, so a picture never carries the rest of the
+  // form with it and a half-filled form cannot be saved by choosing a photo.
+  function savePhotoUrl(url){
+    fetch(GS_URL+'?action=saveAccount&appearId='+encodeURIComponent(meId)
+      +'&secure=1&editToken='+encodeURIComponent(_editToken)
+      +'&guestPhotoURL='+encodeURIComponent(url))
+      .then(function(r){ return r.json(); })
+      .then(function(resp){
+        if(resp&&resp.status==='ok'){ photoStat('Photo saved 🌱'); setTimeout(function(){ photoStat(''); },2500); return; }
+        _editToken=''; _tokenClear();
+        showPinBar(function(){ savePhotoUrl(url); },(resp&&resp.message)||'Your hour ran out. Verify again to save the photo.');
+      })
+      .catch(function(){ photoStat('The picture went up but did not save. Try again.'); });
+  }
+
   function saveAccount(){
     if(!meId) return;
     harvestAccount();
@@ -395,7 +474,7 @@
       +'<div class="f" style="margin-top:16px;"><label>Languages</label><div id="lang-box"></div></div>'
       +saveRow();
     var up=document.getElementById('photo-upload');
-    if(up) up.onclick=function(){ var n=document.getElementById('photo-note'); if(n) n.style.display=''; };
+    if(up) up.onclick=choosePhoto;
     renderLoc();
     renderLangs();
     bindSave();
