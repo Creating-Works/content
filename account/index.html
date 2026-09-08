@@ -166,6 +166,11 @@
     {key:'groups', label:'My groups', nav:groupsUrl},
     {key:'events', label:'My events', nav:eventsUrl},
     {key:'account', label:'My account'},
+      // SUPPORT AND SIGN OUT LIVE HERE NOW. Jessie, 2026-09-08: "add support to button to top of
+      // sub buttons, to the right of my account" and "add signout can go under my acdount".
+      // The top bar lost its menus the same day, and the More menu was the only door to both.
+    {key:'support', label:'Support', nav:function(){ return 'https://2gather.network/support?from=' + encodeURIComponent(location.pathname); }},
+    {key:'signout', label:'Sign out', out:true},
     // Permissions is hidden until its toggles map to real fields. The panel still answers to
     // ?tab=permissions so the work stays reachable.
     // {key:'permissions', label:'Permissions'}
@@ -591,6 +596,13 @@
     TABS.forEach(function(s){
       var b=document.createElement('button'); b.className='tab'+(s.key===active?' on':''); b.type='button'; b.textContent=s.label;
       b.onclick=function(){
+        // The same sign-out the top bar's More menu used to offer, which went with the menus on
+        // 2026-09-08. It forgets the device first, then goes to the front door.
+        if(s.out){
+          try{ if(window.CW && window.CW.forget){ window.CW.forget(); } }catch(e){}
+          window.location.href='https://2gather.network/signin/?out=1';
+          return;
+        }
         if(s.nav){ go(s.nav()); return; }
         t.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on');});
         b.classList.add('on'); renderPanel(s.key);
@@ -685,7 +697,7 @@
   }
 })();
 </script>
-<script src="https://2gather.network/nav/topbar.js?v=5.81" defer></script>
+<script src="https://2gather.network/nav/topbar.js?v=5.82" defer></script>
 </body>
 <!--
   Copyright 2026 DayBalancer LLC. All rights reserved.
