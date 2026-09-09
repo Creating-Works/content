@@ -149,6 +149,24 @@
 
   <p class="loading hide" id="loading">Loading data...</p>
 
+  <!-- WHAT PEOPLE HAVE BEEN DOING. Jessie, 2026-09-09: "can we have a way to see this engagement on
+       our backend? How to best build this? Research other platforms like LinkedIn and Luma."
+       What both of those do is split it: mail the rare thing that might need somebody to act, show
+       the volume on a page. This is the page half. Three things, and the third is the only one
+       scrolling the sheet cannot give her: who signed up and has done nothing since. -->
+  <div class="card hide" id="aboard">
+    <div class="headrow">
+      <h2><button class="fold" id="afold" title="Hide or show">Engagement</button></h2>
+    </div>
+    <div id="abody">
+      <div class="tot" id="atot"></div>
+      <h3 style="font-size:14px;font-weight:800;margin:18px 0 6px;">Latest</h3>
+      <div id="arecent"></div>
+      <h3 style="font-size:14px;font-weight:800;margin:18px 0 6px;">Signed up and not seen since</h3>
+      <div id="aquiet"></div>
+    </div>
+  </div>
+
   <div class="card hide" id="pboard">
     <div class="headrow">
       <h2><button class="fold" id="pfold" title="Hide or show">People</button></h2>
@@ -482,6 +500,57 @@
         $('adminlinks').classList.remove('hide');   // shown with the board, never before it
         $('board').classList.remove('hide');
         paint();
+        settled();
+      })
+      .catch(function(){ settled(); });
+
+    // Asked alongside the other two rather than after them. This backend runs one call at a time,
+    // so a third question asked in sequence is a third wait; asked together it queues behind them
+    // and the page fills in as each lands.
+    ask('getOpsActivity', GS+'?action=getOpsActivity&appearId='+encodeURIComponent(me)
+          +'&sessionToken='+encodeURIComponent(token)+'&t='+Date.now())
+      .then(function(d){
+        if(!d||d.status!=='ok'){
+          $('aboard').classList.remove('hide');
+          $('atot').innerHTML='<div class="tot-note">Engagement did not load. '
+            + esc((d&&d.message)||'The server gave no reason.') + '</div>';
+          settled();
+          return;
+        }
+        var counts=d.counts||{}, keys=Object.keys(counts).sort(function(a,b){return counts[b]-counts[a];});
+        // A WEEK, AND IT SAYS SO. A bare number is a number about nothing.
+        $('atot').innerHTML = keys.length
+          ? keys.map(function(k){ return '<div><b>'+counts[k]+'</b>'+esc(k)+', past 7 days</div>'; }).join('')
+            + '<div><b>'+(d.total||0)+'</b>recorded in all</div>'
+          : '<div class="tot-note">Nothing recorded in the past seven days.</div>';
+
+        var rec=d.recent||[];
+        $('arecent').innerHTML = rec.length
+          ? rec.map(function(r){
+              var when='';
+              try { when=new Date(r.at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}); } catch(e){}
+              return '<div class="row"><div class="who"><div class="name">'+esc(r.name)+'</div>'
+                   + '<div class="sub">'+esc(r.kind)+(r.detail?' \u00b7 '+esc(r.detail):'')
+                   + (r.email?' \u00b7 '+esc(r.email):'')+'</div></div>'
+                   + '<div class="sub" style="white-space:nowrap;">'+esc(when)+'</div></div>';
+            }).join('')
+          : '<div class="tot-note">Nothing yet.</div>';
+
+        // NAMES, NOT A NUMBER. A count here is something to feel bad about; a name is somebody to
+        // reach. Oldest first, because the person who arrived longest ago and never came back is
+        // the one most worth a message.
+        var q=d.quiet||[];
+        $('aquiet').innerHTML = q.length
+          ? q.map(function(r){
+              var since='';
+              try { since=new Date(r.since).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); } catch(e){}
+              return '<div class="row"><div class="who"><div class="name">'+esc(r.name)+'</div>'
+                   + '<div class="sub">'+esc(r.email)+'</div></div>'
+                   + '<div class="sub" style="white-space:nowrap;">joined '+esc(since)+'</div></div>';
+            }).join('')
+          : '<div class="tot-note">Everybody who signed up has come back at least once.</div>';
+
+        $('aboard').classList.remove('hide');
         settled();
       })
       .catch(function(){ settled(); });
