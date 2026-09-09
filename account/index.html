@@ -57,7 +57,11 @@
      all six look pressable rather than only the chosen one. Selected is filled blue with white
      lettering and nothing else marks it - no tick, which would say what the colour already says
      and shift every label sideways by a character as you move down the list. */
-  .tabs{display:flex;flex-direction:column;gap:6px;}
+  /* The rail is a white card, the same one My events and the editing page use, and it is what
+     makes the chosen pill readable: filled blue on the blue ground disappeared into it. A button
+     sitting on the blue is white with brand-blue lettering, never a blue fill. */
+  .tabs{background:#fff;border-radius:14px;padding:12px;height:fit-content;
+    display:flex;flex-direction:column;gap:6px;}
   .tab{display:block;width:100%;text-align:left;background:#fff;color:var(--brand);
     border:1.5px solid #C9D6E2;border-radius:9px;font-family:inherit;font-size:14px;
     font-weight:700;padding:11px 14px;cursor:pointer;line-height:1.25;}
