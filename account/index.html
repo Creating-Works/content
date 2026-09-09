@@ -30,7 +30,12 @@
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
     font-family:'DM Sans','Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;line-height:1.5;}
-  .wrap{max-width:1040px;margin:0 auto;padding:24px 20px 70px;}
+  /* THE PAGE TEMPLATE. 1200 wide, a 340 rail, an 18px gap, one column below 860.
+     design/component-library/page-template.md. This page was the last one carrying its own
+     width - 1040, no rail, folding at 760 - which made it read as a different product from
+     My groups, My events and the editing page sitting beside it in the same navigation. */
+  .wrap{max-width:1200px;margin:0 auto;padding:24px 20px 60px;}
+  .layout{display:grid;grid-template-columns:340px minmax(0,1fr);gap:18px;align-items:start;}
 
   /* Welcome block */
   .hello{margin-bottom:16px;min-height:42px;}
@@ -45,16 +50,33 @@
   .btn.ghost{background:#fff;color:var(--brand);border:1.5px solid var(--panel-line);}
   .btn.sm{padding:8px 15px;font-size:13px;}
 
-  /* Tabs: active = white pill, inactive = translucent on blue */
-  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
-  .tab{background:rgba(255,255,255,.16);color:#fff;font-weight:700;font-size:14px;padding:9px 16px;
-    border-radius:22px;cursor:pointer;border:0;font-family:inherit;}
-  .tab:hover{background:rgba(255,255,255,.26);}
-  .tab.on{background:#fff;color:var(--brand);}
+  /* THE RAIL. The six pills that ran across the top are the list down the left now, which is
+     where every other page in this navigation puts them, and the panel holds whatever is open.
+
+     Separate white buttons with their own borders, never one box holding a pressed control, so
+     all six look pressable rather than only the chosen one. Selected is filled blue with white
+     lettering and nothing else marks it - no tick, which would say what the colour already says
+     and shift every label sideways by a character as you move down the list. */
+  .tabs{display:flex;flex-direction:column;gap:6px;}
+  .tab{display:block;width:100%;text-align:left;background:#fff;color:var(--brand);
+    border:1.5px solid #C9D6E2;border-radius:9px;font-family:inherit;font-size:14px;
+    font-weight:700;padding:11px 14px;cursor:pointer;line-height:1.25;}
+  .tab:hover{background:var(--panel);}
+  .tab.on{background:var(--brand);color:#fff;border-color:var(--brand);}
+  .tab.on:hover{background:var(--brand);}
   .tab:focus-visible{outline:2px solid #fff;outline-offset:2px;}
 
+  /* WAITING IS THE BLINKING PILL, not a spinner and not a grey box saying "Loading your
+     account...". The backend answers in anywhere between nine and thirty-nine seconds and a
+     spinner beside that reads as something being wrong. It sits in the panel, because the rail
+     draws at once and only the panel is waiting on an answer. */
+  .cw-loading{display:inline-flex;align-items:center;gap:8px;background:#1F699E;color:#fff;
+    font-size:13px;font-weight:700;padding:8px 16px;border-radius:20px;white-space:nowrap;
+    animation:cw-breathe 1.6s ease-in-out infinite;}
+  @keyframes cw-breathe{0%,100%{opacity:1}50%{opacity:.62}}
+
   /* Content card */
-  .panel{background:var(--card);border-radius:16px;padding:26px 30px;min-height:280px;}
+  .panel{background:var(--card);border-radius:14px;padding:26px 30px;min-height:280px;}
   .panel h2{font-size:21px;font-weight:800;margin:0 0 3px;}
   .panel .lead{color:var(--soft);font-size:14.5px;margin:0 0 20px;}
 
@@ -72,8 +94,9 @@
   .photorow{display:flex;gap:16px;align-items:center;margin-bottom:18px;}
   .photo{width:64px;height:64px;border-radius:50%;object-fit:cover;background:#DDE4EE;flex-shrink:0;}
 
-  .prow{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:15px 0;border-bottom:1px solid var(--line);}
-  .prow:last-of-type{border-bottom:0;}
+  /* Space does the separating, never a rule. A line between every row draws a grid nobody
+     asked for. Jessie, 2026-09-08: "no horiziontal lines anywhere". */
+  .prow{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 0;}
   .prow .lab{font-size:15px;font-weight:700;}
   .prow .desc{font-size:13px;color:var(--soft);margin-top:2px;}
   .prow .desc a{color:inherit;}
@@ -102,6 +125,13 @@
   .status.info{background:var(--panel);border:1px solid var(--panel-line);color:var(--soft);}
   .status.err{background:var(--err-bg);border:1px solid var(--err-line);color:var(--err-ink);}
 
+  @media(max-width:860px){
+    .layout{grid-template-columns:1fr;}
+    /* Six buttons stacked down a phone is most of a screen before the panel starts, so below the
+       fold the rail lies back down and wraps. */
+    .tabs{flex-direction:row;flex-wrap:wrap;}
+    .tab{width:auto;}
+  }
   @media(max-width:760px){
     .fieldgrid{grid-template-columns:1fr;}
     .panel{padding:20px 18px;}
@@ -117,8 +147,10 @@
     <h1 id="hello-title"></h1>
   </div>
 
-  <div class="tabs" id="tabs"></div>
-  <div class="panel" id="panel"><div class="status info">Loading your account…</div></div>
+  <div class="layout">
+    <div class="tabs" id="tabs"></div>
+    <div class="panel" id="panel"><span class="cw-loading">Loading your account</span></div>
+  </div>
 
 </div>
 
