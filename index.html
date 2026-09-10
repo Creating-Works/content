@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <!--
   Copyright 2026 DayBalancer LLC. All rights reserved.
 
@@ -10,773 +10,447 @@
 
   hello@creating.works
 -->
+<!-- Version: V1.0 | Date: 2026-09-10 | LAST CHANGE: The home page of creating.works. Jessie's approved track changes, Impact written as Values-aligned, and What you bring before What you need. -->
+<!-- Previous: V0.3 | Date: 2026-09-10 | LAST CHANGE: Passing time became Enjoying my time, and Social and Impact joined the reasons for work. -->
+<!-- Previous: V0.2 | Date: 2026-09-10 | LAST CHANGE: A second path, Finding work, for one person who needs a job. The first screen asks which. -->
+<!-- Previous: V0.1 | Date: 2026-09-10 | LAST CHANGE: First pass, the constituency inquiry from the conversation with Duck -->
 <html lang="en">
-<!-- 
-  LAST CHANGE: 2Gather button deep orange→peach; tagline and link colored deep orange; arrow changed to →
-  Version: V36 | Date: 2026-06-15
--->
 <head>
-<script src="/moved.js?v=2"></script>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Creating Works</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%25' stop-color='%2310B981'/><stop offset='33%25' stop-color='%233B82F6'/><stop offset='66%25' stop-color='%238B5CF6'/><stop offset='100%25' stop-color='%23F43F5E'/></linearGradient></defs><circle cx='18' cy='18' r='16' fill='transparent' stroke='url(%23g)' stroke-width='3'/></svg>">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --bg:       #0B0F1A;
-      --surface:  #141924;
-      --surface2: #1C2333;
-      --border:   #252D3D;
-      --text:     #FFFFFF;
-      --muted:    #94A3B8;
-      --green:    #059669;
-      --blue:     #3B82F6;
-      --purple:   #8B5CF6;
-      --pink:     #F43F5E;
-      --grad: linear-gradient(90deg, #10B981, #3B82F6, #8B5CF6, #F43F5E);
-    }
-    html { scroll-behavior: smooth; }
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 300;
-      -webkit-font-smoothing: antialiased;
-    }
+<meta charset="utf-8">
+<meta http-equiv="Cache-Control" content="no-store, max-age=0">
+<!-- THE HOME PAGE. Jessie, 2026-09-10: "this is to push to creating.works home page - and the
+     current home page can be an about". The page that was here is at /vision/ now. -->
+<title>Creating.Works</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
+<style>
+  :root{
+    --bg:#1F699E; --brand:#1F699E; --ink:#1A2E42; --soft:#4B5A6D; --muted:#6B7A8D;
+    --line:#DDE4EE; --panel:#F7FBFF; --panel-line:#C9DFF3; --card:#fff;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+    font-family:'DM Sans','Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;line-height:1.5;}
 
-    /* ---- NAV ---- */
-    nav {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 40px;
-      height: 64px;
-      background: rgba(11,15,26,0.85);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-    }
-    .nav-logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
-    }
-    .logo-icon {
-      width: 36px;
-      height: 36px;
-      position: relative;
-    }
-    .logo-ring {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      border: 2.5px solid transparent;
-      background: linear-gradient(var(--bg), var(--bg)) padding-box,
-                  linear-gradient(135deg, #10B981 0%, #3B82F6 100%) border-box;
-    }
-    .logo-arrows {
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      animation: spin 6s linear infinite;
-    }
-    @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
-    .nav-wordmark {
-      font-size: 18px;
-      font-weight: 500;
-      color: var(--text);
-      letter-spacing: -0.01em;
-    }
-    .nav-links {
-      display: flex;
-      align-items: center;
-      gap: 32px;
-      list-style: none;
-    }
-    .nav-links a {
-      font-size: 14px;
-      font-weight: 400;
-      color: var(--muted);
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-    .nav-links a:hover { color: var(--text); }
-    .nav-cta {
-      background: var(--text);
-      color: var(--bg);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 14px;
-      font-weight: 500;
-      border: none;
-      border-radius: 40px;
-      padding: 10px 20px;
-      cursor: pointer;
-      text-decoration: none;
-      transition: opacity 0.2s;
-    }
-    .nav-cta:hover { opacity: 0.85; }
+  /* THE PAGE TEMPLATE, the one My groups, My events and the editing page share. 1200 wide, a
+     340 rail, an 18px gap, one column below 860. design/component-library/page-template.md. */
+  .wrap{max-width:1200px;margin:0 auto;padding:24px 20px 60px;}
+  .layout{display:grid;grid-template-columns:340px minmax(0,1fr);gap:18px;align-items:start;}
 
-    /* ---- HERO ---- */
-    .hero {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 120px 24px 80px;
-    }
-    .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(16,185,129,0.12);
-      border: 1px solid rgba(16,185,129,0.3);
-      border-radius: 40px;
-      padding: 6px 16px;
-      font-size: 13px;
-      font-weight: 400;
-      color: var(--green);
-      margin-bottom: 40px;
-    }
-    .badge-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--green);
-      animation: pulse 2s ease infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(0.8); }
-    }
-    .hero h1 {
-      font-size: clamp(48px, 8vw, 88px);
-      font-weight: 700;
-      line-height: 1.05;
-      letter-spacing: -0.03em;
-      margin-bottom: 8px;
-    }
-    .hero h1 .grad-text {
-      background: var(--grad);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .hero-sub {
-      max-width: 620px;
-      font-size: 18px;
-      font-weight: 300;
-      color: var(--muted);
-      line-height: 1.7;
-      margin: 32px auto 48px;
-    }
-    .rotator {
-      display: inline-block;
-      font-weight: 700;
-      color: var(--text);
-      transition: opacity .2s ease;
-    }
-    .rotator.out { opacity: 0; }
-    @media (prefers-reduced-motion: reduce) { .rotator { transition: none; } }
-    .hero-sub a { color: var(--blue); text-decoration: none; border-bottom: 1px solid rgba(59,130,246,0.4); }
-    .hero-sub a:hover { border-color: var(--blue); }
-    .hero-btns {
-      display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    .btn-primary {
-      background: var(--green);
-      color: #fff;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 16px;
-      font-weight: 500;
-      border: none;
-      border-radius: 12px;
-      padding: 14px 28px;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      transition: background 0.2s, transform 0.1s;
-    }
-    .btn-primary:hover { background: #047857; transform: translateY(-1px); }
-    .btn-rainbow {
-      background: var(--grad);
-      color: #fff;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 16px;
-      font-weight: 500;
-      border: none;
-      border-radius: 12px;
-      padding: 14px 28px;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      transition: opacity 0.2s, transform 0.1s;
-    }
-    .btn-rainbow:hover { opacity: 0.88; transform: translateY(-1px); }
-    .btn-outline {
-      background: transparent;
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 16px;
-      font-weight: 400;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px 28px;
-      cursor: pointer;
-      text-decoration: none;
-      transition: border-color 0.2s;
-    }
-    .btn-outline:hover { border-color: var(--muted); }
+  .head{margin-bottom:16px;}
+  h1{font-size:26px;font-weight:800;margin:0;color:#fff;}
+  .head .sub{color:#fff;opacity:.92;font-size:15px;margin-top:6px;max-width:62ch;}
 
-    /* ---- SECTION WRAPPER ---- */
-    .section { padding: 56px 24px; }
-    .section-inner { max-width: 1100px; margin: 0 auto; }
-    .circle-section .section-label { color: #1F699E; }
-    .section-label {
-      font-size: 11px;
-      font-weight: 500;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--muted);
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .section-title {
-      font-size: clamp(28px, 4vw, 44px);
-      font-weight: 700;
-      text-align: center;
-      line-height: 1.1;
-      letter-spacing: -0.02em;
-      margin-bottom: 16px;
-    }
-    .section-sub {
-      font-size: 17px;
-      color: var(--muted);
-      text-align: center;
-      max-width: 600px;
-      margin: 0 auto 56px;
-      line-height: 1.7;
-    }
+  .btn{display:inline-block;background:#fff;color:var(--brand);border:0;padding:11px 20px;border-radius:26px;
+    font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;text-decoration:none;}
+  .btn.solid{background:var(--brand);color:#fff;}
+  .btn.ghost{background:#fff;color:var(--brand);border:1.5px solid var(--panel-line);}
 
-    /* ---- CIRCLE OF MUTUAL DEPENDENCE ---- */
-    .circle-section {
-      background: #FFFFFF;
-      border-radius: 24px;
-      padding: 56px 40px;
-      margin: 0 24px;
-    }
-    .circle-scroll {
-      display: flex;
-      align-items: center;
-      gap: 0;
-      overflow-x: auto;
-      padding-bottom: 8px;
-      scrollbar-width: none;
-    }
-    .circle-scroll::-webkit-scrollbar { display: none; }
-    .circle-card {
-      background: #FFFFFF;
-      border: 1.5px solid #1A2E42;
-      border-radius: 16px;
-      padding: 28px 24px;
-      min-width: 150px;
-      max-width: 180px;
-      flex: 1;
-      text-align: center;
-      flex-shrink: 0;
-    }
-    .circle-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 16px;
-      font-size: 22px;
-    }
-    .circle-card h3 {
-      font-size: 15px;
-      font-weight: 700;
-      margin-bottom: 4px;
-      color: #0F172A;
-    }
-    .circle-card p {
-      font-size: 12px;
-      color: #475569;
-    }
-    .circle-arrow {
-      color: #6A8FAF;
-      font-size: 20px;
-      padding: 0 12px;
-      flex-shrink: 0;
-    }
+  /* THE RAIL. Separate white buttons with their own borders so every part looks pressable.
+     Chosen is filled blue with white lettering and nothing else marks it. The count under a
+     part appears only once there is something to count. */
+  .tabs{background:#fff;border-radius:14px;padding:12px;height:fit-content;
+    display:flex;flex-direction:column;gap:6px;}
+  .tab{display:block;width:100%;text-align:left;background:#fff;color:var(--brand);
+    border:1.5px solid #C9D6E2;border-radius:9px;font-family:inherit;font-size:14px;
+    font-weight:700;padding:11px 14px;cursor:pointer;line-height:1.25;}
+  .tab:hover{background:var(--panel);}
+  .tab.on{background:var(--brand);color:#fff;border-color:var(--brand);}
+  .tab.on:hover{background:var(--brand);}
+  .tab:focus-visible{outline:2px solid var(--brand);outline-offset:2px;}
+  .tab span{display:block;font-size:12px;font-weight:600;opacity:.75;margin-top:2px;}
 
-    /* ---- PRODUCT CARDS ---- */
-    .products-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
-    }
-    .product-card {
-      background: #FFFFFF;
-      border: 1px solid #E8EEF4;
-      border-radius: 20px;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-    .product-card-top {
-      padding: 28px 28px 24px;
-      display: flex;
-      flex-direction: column;
-    }
-    .product-tend {
-      font-size: 22px;
-      font-weight: 800;
-      color: #1A2E42;
-      margin-bottom: 6px;
-      line-height: 1.2;
-    }
-    .product-tagline {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.11em;
-      text-transform: uppercase;
-      margin-bottom: 16px;
-    }
-    .product-card-body {
-      padding: 0 28px 28px;
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-    }
-    .product-tool-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 14px;
-    }
-    .product-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
-      flex-shrink: 0;
-      overflow: hidden;
-    }
-    .product-icon img { width:100%;height:100%;object-fit:cover; }
-    .product-tool-name {
-      font-size: 14px;
-      font-weight: 700;
-      color: #1A2E42;
-      letter-spacing: 0.01em;
-    }
-    .product-card p {
-      font-size: 14px;
-      color: #4A6080;
-      line-height: 1.65;
-      flex: 1;
-      margin-bottom: 24px;
-    }
-    .product-link {
-      font-size: 13px;
-      font-weight: 600;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: gap 0.2s;
-    }
-    .product-link:hover { gap: 10px; }
-    .product-btn {
-      display: inline-block;
-      padding: 11px 18px;
-      border-radius: 10px;
-      color: #fff;
-      font-size: 13px;
-      font-weight: 600;
-      text-decoration: none;
-      transition: opacity 0.2s;
-      margin-top: auto;
-    }
-    .product-btn:hover { opacity: 0.88; }
-    .product-card-divider {
-      height: 3px;
-      width: 100%;
-    }
+  /* The panel's first line sits level with the rail's first pill: both start 12px down. */
+  .panel{background:var(--card);border-radius:14px;padding:12px 30px 28px;min-height:280px;}
+  .panel h2{font-size:22px;font-weight:800;margin:6px 0 3px;}
+  .panel .lead{color:var(--soft);font-size:14.5px;margin:0 0 22px;max-width:64ch;}
 
+  /* A form label carries no colon, and its help line sits between the label and the field. */
+  .f{margin-bottom:22px;}
+  .f label,.f .lab{display:block;font-size:15px;font-weight:800;color:var(--ink);margin-bottom:2px;}
+  .f .help{font-size:13.5px;color:var(--soft);margin-bottom:8px;max-width:64ch;}
+  .f input[type=text],.f textarea{width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:10px;
+    font:inherit;color:var(--ink);background:#fff;}
+  .f textarea{min-height:84px;resize:vertical;}
+  .f input:focus,.f textarea:focus{outline:2px solid var(--panel-line);outline-offset:1px;border-color:var(--brand);}
 
-    /* ---- ETHOS ---- */
-    .ethos-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 48px;
-      align-items: start;
-    }
-    .ethos-badge {
-      display: inline-block;
-      background: rgba(190,18,60,0.1);
-      color: #BE123C;
-      font-size: 11px;
-      font-weight: 500;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 5px 12px;
-      border-radius: 4px;
-      margin-bottom: 20px;
-    }
-    .ethos-grid h2 {
-      font-size: clamp(28px, 4vw, 40px);
-      font-weight: 700;
-      line-height: 1.15;
-      letter-spacing: -0.02em;
-      margin-bottom: 20px;
-      color: #0F172A;
-    }
-    .ethos-grid p {
-      font-size: 16px;
-      color: #4A5568;
-      line-height: 1.75;
-      margin-bottom: 20px;
-    }
-    .quote-block {
-      background: #F8FAFC;
-      border: 1px solid #E2E8F0;
-      border-radius: 12px;
-      padding: 24px 28px;
-    }
-    .quote-block p {
-      font-size: 16px;
-      font-style: italic;
-      color: #1A202C;
-      line-height: 1.7;
-      margin-bottom: 16px;
-    }
-    .quote-attr {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .quote-attr strong { font-size: 14px; font-weight: 700; color: #1A202C; }
-    .quote-attr span { font-size: 13px; color: #718096; }
-    .attr-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--muted); }
-    .founder-card {
-      background: #FFFFFF;
-      border: 1px solid #E2E8F0;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-      border-radius: 20px;
-      padding: 36px;
-      text-align: center;
-    }
-    .founder-photo {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 3px solid var(--green);
-      margin: 0 auto 16px;
-      display: block;
-    }
-    .founder-name {
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-    .founder-title {
-      font-size: 13px;
-      color: #718096;
-      margin-bottom: 24px;
-    }
-    .founder-points {
-      list-style: none;
-      text-align: left;
-    }
-    .founder-points li {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 14px;
-      color: #4A5568;
-      padding: 8px 0;
-      border-bottom: 1px solid #E2E8F0;
-    }
-    .founder-points li:last-child { border-bottom: none; }
-    .check { color: var(--green); font-size: 16px; flex-shrink: 0; }
-    .ethos-points { margin-top: 4px; }
-    .founder-card .quote-block { text-align: left; }
-    .founder-card .quote-block p { margin-bottom: 0; }
+  .choice{display:flex;gap:8px;flex-wrap:wrap;}
+  .choice button{background:#fff;color:var(--brand);border:1.5px solid #C9D6E2;border-radius:9px;
+    font:inherit;font-size:14px;font-weight:700;padding:9px 16px;cursor:pointer;}
+  .choice button.on{background:var(--brand);color:#fff;border-color:var(--brand);}
 
-    /* ---- FOOTER ---- */
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 32px 40px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 16px;
-    }
-    .footer-left {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-    .footer-wordmark {
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--text);
-    }
-    .footer-sep { color: var(--border); }
-    .footer-tagline { font-size: 13px; color: var(--muted); }
-    .footer-links { display: flex; gap: 24px; }
-    .footer-links a { font-size: 13px; color: var(--muted); text-decoration: none; transition: color 0.2s; }
-    .footer-links a:hover { color: var(--text); }
-    .footer-copy { font-size: 12px; color: var(--muted); }
+  .addrow{display:flex;gap:10px;flex-wrap:wrap;}
+  .addrow input{flex:1 1 240px;}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+  .chip{display:inline-flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--panel-line);
+    border-radius:16px;padding:6px 8px 6px 14px;font-size:14px;font-weight:700;color:var(--brand);}
+  .chip button{background:none;border:0;color:var(--muted);font-size:17px;line-height:1;cursor:pointer;padding:0 2px;}
+  .none{font-size:13.5px;color:var(--muted);}
 
-    /* ---- RESPONSIVE ---- */
-    @media (max-width: 768px) {
-      nav { padding: 0 20px; }
-      .nav-links { display: none; }
-      .products-grid { grid-template-columns: 1fr; }
-      .ethos-grid { grid-template-columns: 1fr; }
-      .form-step { padding: 28px 20px; }
-      .circle-section { margin: 0; padding: 40px 20px; }
-      footer { flex-direction: column; align-items: flex-start; }
-      .footer-links { flex-wrap: wrap; gap: 16px; }
-    }
+  .acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;}
 
-    /* ---- QA POPUP ---- */
-  </style>
+  /* The review. Space does the separating, never a rule. */
+  .rv{margin-bottom:22px;}
+  .rv .t{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+  .rv .q{font-size:14px;font-weight:700;color:var(--ink);}
+  .rv .a{font-size:14.5px;color:var(--soft);margin:2px 0 12px;white-space:pre-wrap;}
+  .rv .a.empty{color:var(--muted);font-style:italic;}
+  .infobox{background:var(--panel);border:1px solid var(--panel-line);border-radius:12px;padding:18px 20px;margin-bottom:14px;}
+  .infobox .t{font-size:15.5px;font-weight:800;margin-bottom:4px;}
+  .infobox .d{font-size:14px;color:var(--soft);}
+
+  @media(max-width:860px){
+    .layout{grid-template-columns:1fr;}
+    /* Four buttons stacked down a phone is most of a screen, so the rail lies down and wraps. */
+    .tabs{flex-direction:row;flex-wrap:wrap;}
+    .tab{width:auto;flex:1 1 40%;}
+  }
+  @media(max-width:760px){
+    .panel{padding:12px 18px 22px;}
+    h1{font-size:24px;}
+  }
+</style>
 </head>
 <body>
+<div class="wrap">
 
-  <!-- NAV -->
-  <nav>
-    <a href="/" class="nav-logo">
-      <div class="logo-icon">
-        <div class="logo-ring"></div>
-        <svg class="logo-arrows" width="18" height="18" viewBox="0 0 18 18" fill="none">
-          <!-- top: curved right arrow -->
-          <path d="M3.5 7 Q3.5 3.5 7 3.5 H11" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-          <path d="M9.5 2 L11.5 3.5 L9.5 5" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-          <!-- right: curved down arrow -->
-          <path d="M11 3.5 Q14.5 3.5 14.5 7 V11" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-          <path d="M13 9.5 L14.5 11.5 L16 9.5" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-          <!-- bottom: curved left arrow -->
-          <path d="M14.5 11 Q14.5 14.5 11 14.5 H7" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-          <path d="M8.5 13 L6.5 14.5 L8.5 16" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-          <!-- left: curved up arrow -->
-          <path d="M7 14.5 Q3.5 14.5 3.5 11 V7" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-          <path d="M5 8.5 L3.5 6.5 L2 8.5" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
-      <span class="nav-wordmark">Creating Works</span>
-    </a>
-    <ul class="nav-links">
-      <li><a href="#ethos">Our ethos</a></li>
-    </ul>
-  </nav>
+  <div class="head">
+    <h1>Start a conversation</h1>
+    <div class="sub">Answer what you can and we will take it from there together.</div>
+  </div>
 
-  <!-- HERO -->
-  <section class="hero" style="padding-bottom:0;">
-    <h1>One profile.<br><span class="grad-text">Three tools to create.</span></h1>
-        <p class="hero-sub" style="max-width:640px;margin:22px auto 0;text-align:center;">Tools that help people discover <span class="rotator" id="rot">purpose</span><br>on arrival, in service to your community at large.</p>
-    <div style="display:flex;justify-content:center;margin:24px 0 0;">
-      <div class="hero-badge">
-        <div class="badge-dot"></div>
-        700+ people already circulating in the commons
-      </div>
-    </div>
-    <div style="position:relative;width:100%;max-width:1060px;margin:28px auto 0;background:#0D1117;border-radius:20px;overflow:hidden;padding:28px 28px 0;">
-      <img src="https://raw.githubusercontent.com/Circulate-Network/circulate/refs/heads/main/images/Infographic%20for%20Circulate%20with%20Jessie%20Upp.png"
-        alt="Circulate infographic"
-        style="width:100%;display:block;border-radius:12px 12px 0 0;">
-    </div>
-    <p class="hero-sub" style="max-width:700px;margin:36px auto 0;text-align:center;">
-      The wellness coach needs an accountant. The accountant needs an arborist. The arborist needs a doctor. The doctor needs an architect. The architect needs a wellness coach. They're all 1 or 2 degrees from each other - and most of them don't know it yet.
-    </p>
+  <div class="layout">
+    <div class="tabs" id="tabs"></div>
+    <div class="panel" id="panel"></div>
+  </div>
 
-  </section>
+</div>
 
- 
-
-
-  <!-- PRODUCT CARDS -->
-  <section class="section" id="ecosystem">
-    <div class="section-inner">
-      <p class="section-label">One profile, start anywhere</p>
-      <h2 class="section-title">Infrastructure for healthy circulation</h2>
-      <p class="section-sub">What people share in one place shapes what reaches them in all three.</p>
-      <div class="products-grid">
-
-        <!-- DAYBALANCER -->
-        <div class="product-card">
-          <div class="product-card-divider" style="background:var(--green);"></div>
-          <div class="product-card-top">
-            <div class="product-tend">Tend to yourself</div>
-            <div class="product-tagline" style="color:var(--green);">We ask questions. People discover answers.</div>
-          </div>
-          <div class="product-card-body">
-            <div class="product-tool-row">
-              <div class="product-icon"><img src="https://res.cloudinary.com/glide/image/fetch/f_auto,h_150,c_limit/https%3A%2F%2Ffirebasestorage.googleapis.com%2Fv0%2Fb%2Fglide-prod.appspot.com%2Fo%2Ficon-images%252Fanonymous-05255043-007d-48b6-84bf-b7f21cb2ac56.png%3Falt%3Dmedia%26token%3D227af714-e2d8-45df-958b-ff364f6fdc2f" alt="DayBalancer"></div>
-              <span class="product-tool-name">DayBalancer</span>
-            </div>
-            <p>Members explore what they love, what they are good at, and where they get their energy. They say what lights them up and what they need, guided by their values.</p>
-            <a href="https://app.daybalancer.com/" target="_blank" class="product-btn" style="background:linear-gradient(135deg,#10B981,#3B82F6);">Explore your ikigai</a>
-          </div>
-        </div>
-
-        <!-- APPEAR NETWORK -->
-        <div class="product-card">
-          <div class="product-card-divider" style="background:#1D4ED8;"></div>
-          <div class="product-card-top">
-            <div class="product-tend">Tend to your network</div>
-            <div class="product-tagline" style="color:#1D4ED8;">Find compatible people and opportunities.</div>
-          </div>
-          <div class="product-card-body">
-            <div class="product-tool-row">
-              <div class="product-icon"><img src="https://res.cloudinary.com/glide/image/fetch/f_auto,h_150,c_limit/https%3A%2F%2Ffirebasestorage.googleapis.com%2Fv0%2Fb%2Fglide-prod.appspot.com%2Fo%2Ficon-images%252Fanonymous-e3926802-d398-43a2-a0cc-48dfb527f428.png%3Falt%3Dmedia%26token%3Db1489e31-7a71-43de-9feb-3d927592d4a9" alt="Appear Network"></div>
-              <span class="product-tool-name">Appear Network</span>
-            </div>
-            <p>People show up as themselves. Compatible people, resources, and opportunities surface within their groups and network. This is where people give and receive based on what they have and what they need.</p>
-            <a href="https://appear.network/" target="_blank" class="product-btn" style="background:linear-gradient(135deg,#3B82F6,#8B5CF6);">Appear in your network</a>
-          </div>
-        </div>
-
-        <!-- 2GATHER -->
-        <div class="product-card">
-          <div class="product-card-divider" style="background:#BE123C;"></div>
-          <div class="product-card-top">
-            <div class="product-tend">Tend to community</div>
-            <div class="product-tagline" style="color:#EA580C;">Show up in community.</div>
-          </div>
-          <div class="product-card-body">
-            <div class="product-tool-row">
-              <div class="product-icon"><img src="https://res.cloudinary.com/glide/image/fetch/f_auto,h_150,c_limit/https%3A%2F%2Ffirebasestorage.googleapis.com%2Fv0%2Fb%2Fglide-prod.appspot.com%2Fo%2Ficon-images%252Fanonymous-3cb9285e-93c0-4086-939b-1964597ed61e.png%3Falt%3Dmedia%26token%3Da1b97cec-85be-4978-8595-4d7e1393c050" alt="2Gather"></div>
-              <span class="product-tool-name">2Gather</span>
-            </div>
-            <p>Member-led gatherings in person and online where people create community together. Mutual support becomes possible when people gather.</p>
-            <a href="https://creating.works/2gather/event-hosting.html" style="display:block;margin-bottom:10px;font-size:13px;font-weight:600;color:#EA580C;text-decoration:none;">Host a Networking Event →</a>
-            <a href="https://2gather.network/" target="_blank" class="product-btn" style="background:linear-gradient(135deg,#EA580C,#FDBA74);">Find events made for you</a>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- MAP - hidden 2026-08-01, kept for when the embed comes back.
-       The old embed published more about each person than it drew on screen, including precise
-       home coordinates, so the section is hidden and the iframe has no src.
-
-       To bring it back: (1) confirm the new embed's own data feed, not just what the map draws,
-       (2) put the new embed URL in the iframe src below, (3) delete the display:none here and
-       restore the "Circulation map" nav link near the top of this file. -->
-  <section class="section" id="map" style="display:none;padding-top:48px;padding-bottom:24px;">
-    <div class="section-inner">
-      <h2 style="font-size:clamp(28px,4vw,40px);font-weight:700;letter-spacing:-0.02em;margin-bottom:16px;">Circulation map</h2>
-      <p style="font-size:16px;font-weight:300;color:var(--muted);margin-bottom:32px;max-width:600px;line-height:1.7;">See how people, skills, and needs connect across the network.</p>
-      <div style="position:relative;width:100%;padding-bottom:56.25%;height:0;border-radius:12px;overflow:hidden;">
-        <iframe
-          style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;"
-          allowfullscreen></iframe>
-      </div>
-    </div>
-  </section>
-
-  <!-- ETHOS -->
-  <section class="section" id="ethos" style="background:#FFFFFF;margin:0 24px 40px;border-radius:20px;overflow:hidden;">
-    <div class="section-inner">
-      <div class="ethos-grid">
-        <div>
-          <span class="ethos-badge">Co-creator ethos</span>
-          <h2>The vision behind Creating Works</h2>
-          <p>We measure success by what circulates between people: resources, time, skill, care, and presence. It starts with one person, then grows through relationships, groups, and communities.</p>
-          <ul class="founder-points ethos-points">
-            <li><span class="check">✓</span> One profile across all three tools</li>
-            <li><span class="check">✓</span> 700+ people already circulating</li>
-          </ul>
-        </div>
-        <div>
-          <div class="founder-card">
-            <img src="https://images.squarespace-cdn.com/content/61737ed17b50983cebb2dcc2/1779563823155-46R330FG6ZYQRKV4EC5X/jessie+upp.jpg?content-type=image%2Fjpeg"
-                 alt="Jessie Upp" class="founder-photo">
-            <div class="founder-name"><a href="https://appear.network/dl/page/s/e13594/r/w.hssQR.Q7CnpNDnVJ6DwQ" target="_blank" style="color:#0F172A;text-decoration:none;">Jessie Upp</a></div>
-            <div class="founder-title">Founding Co-Creator &nbsp;·&nbsp; <a href="https://appear.network/dl/groups/m/a6bc49/r/7LXDK-P.R7KAimhUCBBHOQ" target="_blank" style="color:var(--green);text-decoration:none;font-weight:600;">Co-Creating Team</a></div>
-            <div class="quote-block">
-              <p>"With the help of others, this is what we're building toward: a place where people tend to themselves, each other, and the community in which they belong."</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- FOOTER -->
-  <footer>
-    <div class="footer-left">
-      <span class="footer-wordmark">Creating Works</span>
-    </div>
-    <div class="footer-links">
-      <a href="https://app.daybalancer.com/" target="_blank">DayBalancer</a>
-      <a href="https://appear.network/" target="_blank">Appear Network</a>
-      <a href="https://2gather.network/" target="_blank">2Gather</a>
-      <a href="/privacy-policy.html">Privacy policy</a>
-    </div>
-    <span class="footer-copy">© 2026 Creating Works</span>
-  </footer>
-
-
-  <!-- 
-  LAST CHANGE: 2Gather button deep orange→peach; tagline and link colored deep orange; arrow changed to →
-  Version: V36 | Date: 2026-06-15
--->
 <script>
-(function () {
-  var words = ['purpose','ikigai','ideas','people','gifts','needs','skills',
-               'projects','events','resources','values','belonging'];
-  var el = document.getElementById('rot');
-  if (!el) return;
-  // Rotating text is a migraine and vestibular trigger, so anyone whose system
-  // asks for reduced motion keeps the first word and nothing moves.
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  var i = 0;
-  var timer = null;
-  function step() {
-    el.classList.add('out');
-    setTimeout(function () {
-      i = (i + 1) % words.length;
-      el.textContent = words[i];
-      el.classList.remove('out');
-    }, 200);
+(function(){
+  // THE CONSTITUENCY INQUIRY. From Jessie's conversation with Duck on 2026-09-09: hear the big
+  // picture, list every constituency, then name what would support all of them. Taking each
+  // constituency on its own (needs, wants, what they give, what circulates back) happens in the
+  // conversation afterward, not on this form. Jessie, 2026-09-10: "collect Parts 1, 2 and 4 and
+  // save Part 3 for the conversation afterward".
+  //
+  // FINDING WORK, the second path. Jessie, 2026-09-10: "add another one for an individual for a
+  // need for a job too", from a second conversation with Duck. The point of it is to step out of
+  // the noun as fast as possible: somebody arrives saying they need a job, and the questions open
+  // up what they need it for, what they bring, where it fits and what would suit them. The word
+  // job never appears. Answering is the work, because it shapes what comes to meet them.
+  //
+  // Nothing is sent anywhere yet. The answers are kept in this browser only, so a reload does not
+  // lose them, and the review says plainly that sending is not built.
+
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function P(k){try{return new URLSearchParams(location.search).get(k)||'';}catch(e){return '';}}
+
+  var KEY='cw-inquiry-draft';
+  var A={path:'',
+         building:'',forWhom:'',serves:'',asking:'',orgDoes:'',first:'',who:[],person:'',group:'',gather:'',
+         needFor:[],needMore:'',offer:'',values:'',how:'',setting:'',scale:'',conditions:'',tools:'',want:'',enjoy:'',contribution:''};
+  try{ var saved=JSON.parse(localStorage.getItem(KEY)||'null'); if(saved) for(var k in A){ if(saved[k]!=null) A[k]=saved[k]; } }catch(e){}
+  if(!Array.isArray(A.who)) A.who=[];
+  if(!Array.isArray(A.needFor)) A.needFor=[];
+  A.needFor=A.needFor.map(function(n){ return n==='Passing time' ? 'Enjoying my time' : (n==='Impact' ? 'Values-aligned' : n); });
+  function keep(){ try{ localStorage.setItem(KEY,JSON.stringify(A)); }catch(e){} }
+
+  // The rail holds Start and, once somebody has picked, that path's parts. Nothing of a path is
+  // drawn before it is chosen.
+  var PATHS={
+    build:[
+      {key:'picture', label:'The big picture'},
+      {key:'who',     label:'Who you serve'},
+      {key:'help',    label:'What would help'},
+      {key:'review',  label:'Your answers'}
+    ],
+    work:[
+      // What you bring comes first: gifts before needs. Jessie approved the order 2026-09-10.
+      {key:'bring',   label:'What you bring'},
+      {key:'need',    label:'What you need'},
+      {key:'fits',    label:'Where it fits'},
+      {key:'suits',   label:'What suits you'},
+      {key:'review',  label:'Your answers'}
+    ]
+  };
+  function parts(){ return [{key:'start',label:'Start'}].concat(PATHS[A.path]||[]); }
+  // Jessie, 2026-09-10: "Passing time to Enjoying my time", and Social and Impact join them, Impact
+  // written as Values-aligned.
+  var NEEDS=['Money','Consistency','Resources','Fun','Enjoying my time','Social','Values-aligned'];
+  // Two or three choices read as a sentence. Four or more take a slash, because a sentence of that
+  // many ands is too much. Jessie, 2026-09-10.
+  function joinChoices(l){
+    if(l.length<2) return l.join('');
+    if(l.length===2) return l[0]+' and '+l[1];
+    if(l.length===3) return l[0]+', '+l[1]+', and '+l[2];
+    return l.join(' / ');
   }
-  // iOS freezes timers on a backgrounded tab and often restores the page from a
-  // snapshot where the interval never restarts, so the word sat still on return.
-  // Restarting on visibilitychange fixes that, and pageshow catches the iOS
-  // back-forward cache. Stopping while hidden also saves battery.
-  function start() { if (!timer) timer = setInterval(step, 1000); }
-  function stop()  { clearInterval(timer); timer = null; }
-  document.addEventListener('visibilitychange', function () {
-    if (document.hidden) { stop(); } else { start(); }
-  });
-  window.addEventListener('pageshow', start);
-  start();
+
+  // Each question is label, help line, field, in that order.
+  function area(key,lab,help,ph){
+    return '<div class="f"><label for="q-'+key+'">'+esc(lab)+'</label>'
+      +'<div class="help">'+esc(help)+'</div>'
+      +'<textarea id="q-'+key+'" data-a="'+key+'" placeholder="'+esc(ph)+'">'+esc(A[key])+'</textarea></div>';
+  }
+  function acts(back,next){
+    return '<div class="acts">'
+      +(back?'<button type="button" class="btn ghost" data-go="'+back+'">Back</button>':'')
+      +(next?'<button type="button" class="btn solid" data-go="'+next+'">Next</button>':'')
+      +'</div>';
+  }
+
+  function renderPanel(key){
+    var p=document.getElementById('panel');
+
+    if(key==='start'){
+      p.innerHTML='<h2>What brings you here?</h2>'
+        +'<p class="lead">Pick the one closest to where you are and change it whenever you like.</p>'
+        +'<div class="choice" style="margin-bottom:8px;">'
+          +'<button type="button" data-path="build"'+(A.path==='build'?' class="on"':'')+'>Building something</button>'
+          +'<button type="button" data-path="work"'+(A.path==='work'?' class="on"':'')+'>Finding work</button>'
+        +'</div>';
+      p.querySelectorAll('[data-path]').forEach(function(b){
+        b.onclick=function(){ A.path=b.getAttribute('data-path'); keep(); show(PATHS[A.path][0].key); };
+      });
+      return;
+    }
+
+    else if(key==='need'){
+      p.innerHTML='<h2>What you need</h2>'
+        +'<p class="lead">Tell us what you need right now and put it your own way.</p>'
+        +'<div class="f"><div class="lab">What would work give you?</div>'
+          +'<div class="help">Pick as many as fit and add your own below.</div>'
+          +'<div class="choice">'+NEEDS.map(function(n){
+            return '<button type="button" data-need="'+esc(n)+'"'+(A.needFor.indexOf(n)>-1?' class="on"':'')+'>'+esc(n)+'</button>';
+          }).join('')+'</div></div>'
+        +area('needMore','Anything else','Say it in your own words, as much or as little as you like.',
+              'Example: Steady income while I figure out what comes next')
+        +acts('bring','fits');
+      p.querySelectorAll('[data-need]').forEach(function(b){
+        b.onclick=function(){
+          var n=b.getAttribute('data-need'), i=A.needFor.indexOf(n);
+          if(i>-1) A.needFor.splice(i,1); else A.needFor.push(n);
+          b.classList.toggle('on',i<0); keep();
+        };
+      });
+    }
+
+    else if(key==='bring'){
+      p.innerHTML='<h2>What you bring</h2>'
+        +'<p class="lead">Start with what you have to offer - somebody paying you means you have something to provide.</p>'
+        +area('offer','What do you have to offer?','Name your superpowers - the ones people already seek out.',
+              'Example: I can calm a room and get people talking')
+        +area('values','What do you value?','Tell us what matters to you when you picture a good day.',
+              'Example: Kindness, time outdoors, and work that helps somebody')
+        +area('how','How do you like to give it?','Think about the ways of working that bring out your best.',
+              'Example: One to one, with time to prepare')
+        +acts('start','need');
+    }
+
+    else if(key==='fits'){
+      p.innerHTML='<h2>Where it fits</h2>'
+        +'<p class="lead">Picture the place where what you offer lands.</p>'
+        +area('setting','In what setting?','Describe the place you picture and the people who share it.',
+              'Example: A small team in my own neighborhood')
+        +area('scale','At what scale?','Say how big you picture it, whether a handful of people or a whole organization.',
+              'Example: A handful of people I see every week')
+        +area('conditions','Under what conditions?','Name any limits you have or say there are none.',
+              'Example: Mornings only and close to a bus line')
+        +area('tools','Using what tools?','List the tools and instruments you like using.',
+              'Example: A laptop, a kitchen, or a camera')
+        +acts('need','suits');
+    }
+
+    else if(key==='suits'){
+      p.innerHTML='<h2>What suits you</h2>'
+        +'<p class="lead">Set need aside for a moment and imagine what would suit you.</p>'
+        +area('want','What would you want?','Describe what you would choose if the choice were fully yours.',
+              'Example: Work where I set my own hours and learn something new')
+        +area('enjoy','What would you enjoy?','Think about the moments in a day that feel good.',
+              'Example: Teaching, cooking for people, and being outside')
+        +area('contribution','What would bring out your greatest contribution?','Name what would let you give everything you have.',
+              'Example: Bringing strangers together until they feel like neighbors')
+        +acts('fits','review');
+    }
+
+    else if(key==='picture'){
+      p.innerHTML='<h2>The big picture</h2>'
+        +'<p class="lead">Start by telling it your way.</p>'
+        +area('building','What are you building?','It can be anything you are starting, standing up, or offering.',
+              'Example: A leadership program for people working anywhere in our county')
+        +area('forWhom','Who do you picture using it?','Include the people it serves as well as the ones using it.',
+              'Example: Emerging leaders from business, government, and nonprofits')
+        +area('serves','What does it serve?','A purpose names what you are making, who it serves, and the higher contribution it makes.',
+              'Example: A county where leaders in every sector know each other well')
+        +'<div class="f"><div class="lab">Who is asking?</div>'
+          +'<div class="help">One person and an organization answer the same questions.</div>'
+          +'<div class="choice" id="asking">'
+            +'<button type="button" data-ask="org"'+(A.asking==='org'?' class="on"':'')+'>An organization</button>'
+            +'<button type="button" data-ask="me"'+(A.asking==='me'?' class="on"':'')+'>Myself</button>'
+          +'</div></div>'
+        +'<div id="org-q">'+(A.asking==='org'
+          ? area('orgDoes','What does your organization do?','Say who you serve and how you serve them.',
+                 'Example: We run a leadership program for the whole county, across industry and government')
+          : '')+'</div>'
+        +area('first','What do you picture it doing first?','List the first few things you would want it to do.',
+              'Example: Keep each cohort connected after graduation')
+        +acts('start','who');
+      bindAsking();
+    }
+
+    else if(key==='who'){
+      p.innerHTML='<h2>Who you serve</h2>'
+        +'<p class="lead">A constituency is any group of people or organizations your work touches. List every one you can name.</p>'
+        +'<div class="f"><label for="who-in">Add a constituency</label>'
+          +'<div class="help">Think about where each person comes from, which organization sent them, and what drives them.</div>'
+          +'<div class="addrow"><input type="text" id="who-in" placeholder="Example: Alumni of the program">'
+          +'<button type="button" class="btn solid" id="who-add">Add</button></div>'
+          +'<div class="chips" id="who-list"></div></div>'
+        +'<p class="lead" style="margin-top:-6px;">Each one sets its own context and we take them one at a time when we talk.</p>'
+        +acts('picture','help');
+      renderWho();
+      var inp=document.getElementById('who-in');
+      document.getElementById('who-add').onclick=addWho;
+      inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); addWho(); } });
+    }
+
+    else if(key==='help'){
+      p.innerHTML='<h2>What would help</h2>'
+        +'<p class="lead">What would you like every person in every constituency to have?</p>'
+        +area('person','For each person on their own','Start with what one person needs to take part and to give back.',
+              'Example: A profile that shows what they offer and what they are looking for')
+        +area('group','For their group or peers','Picture a cohort, a team, or a circle of peers and what they need together.',
+              'Example: A private alumni group where needs and offers find each other')
+        +area('gather','When they gather','Include their meetings, convenings, and conferences.',
+              'Example: One place to sign up for the annual conference and see who is coming')
+        +acts('who','review');
+    }
+
+    else {
+      var rows=function(list){
+        return list.map(function(r){
+          var v=String(r[1]||'').trim();
+          return '<div class="q">'+esc(r[0])+'</div><div class="a'+(v?'':' empty')+'">'+(v?esc(v):'Not answered yet')+'</div>';
+        }).join('');
+      };
+      if(A.path==='work'){
+        p.innerHTML='<h2>Your answers</h2>'
+          +'<p class="lead">Every answer you gave is gathered here and any part on the left opens again to change it.</p>'
+          +'<div class="rv"><div class="t">What you bring</div>'+rows([
+              ['What do you have to offer?',A.offer],['What do you value?',A.values],['How do you like to give it?',A.how]])+'</div>'
+          +'<div class="rv"><div class="t">What you need</div>'+rows([
+              ['What would work give you?',joinChoices(A.needFor)],['Anything else',A.needMore]])+'</div>'
+          +'<div class="rv"><div class="t">Where it fits</div>'+rows([
+              ['In what setting?',A.setting],['At what scale?',A.scale],['Under what conditions?',A.conditions],['Using what tools?',A.tools]])+'</div>'
+          +'<div class="rv"><div class="t">What suits you</div>'+rows([
+              ['What would you want?',A.want],['What would you enjoy?',A.enjoy],['What would bring out your greatest contribution?',A.contribution]])+'</div>'
+          +'<div class="infobox"><div class="t">What happens next</div>'
+            +'<div class="d">A person reads every answer. Then we look together for what fits the person you described.</div></div>'
+          +'<div class="infobox"><div class="t">Sending is not built yet</div>'
+            +'<div class="d">This page is a preview. Your answers stay in this browser until sending is added.</div></div>'
+          +acts('suits','');
+        bindCommon(p); return;
+      }
+      var pic=[['What are you building?',A.building],['Who do you picture using it?',A.forWhom],['What does it serve?',A.serves],
+               ['Who is asking?',A.asking==='org'?'An organization':(A.asking==='me'?'Myself':'')]];
+      if(A.asking==='org') pic.push(['What does your organization do?',A.orgDoes]);
+      pic.push(['What do you picture it doing first?',A.first]);
+      p.innerHTML='<h2>Your answers</h2>'
+        +'<p class="lead">Every answer you gave is gathered here and any part on the left opens again to change it.</p>'
+        +'<div class="rv"><div class="t">The big picture</div>'+rows(pic)+'</div>'
+        +'<div class="rv"><div class="t">Who you serve</div>'
+          +(A.who.length
+            ? '<div class="chips" style="margin-top:0;">'+A.who.map(function(w){ return '<span class="chip" style="padding-right:14px;">'+esc(w)+'</span>'; }).join('')+'</div>'
+            : '<div class="a empty">None listed yet</div>')
+        +'</div>'
+        +'<div class="rv"><div class="t">What would help</div>'+rows([
+            ['For each person on their own',A.person],['For their group or peers',A.group],['When they gather',A.gather]])+'</div>'
+        +'<div class="infobox"><div class="t">What happens next</div>'
+          +'<div class="d">A person reads every answer. Then we meet and take each constituency separately. '
+          +'For each one we ask what they need and want, what they give, and what circulates back.</div></div>'
+        +'<div class="infobox"><div class="t">Sending is not built yet</div>'
+          +'<div class="d">This page is a preview. Your answers stay in this browser until sending is added.</div></div>'
+        +acts('help','');
+    }
+
+    bindCommon(p);
+  }
+  function bindCommon(p){
+    p.querySelectorAll('[data-a]').forEach(function(el){
+      el.addEventListener('input',function(){ A[el.getAttribute('data-a')]=el.value; keep(); });
+    });
+    p.querySelectorAll('[data-go]').forEach(function(b){
+      b.onclick=function(){ show(b.getAttribute('data-go')); window.scrollTo(0,0); };
+    });
+  }
+
+  function bindAsking(){
+    document.querySelectorAll('[data-ask]').forEach(function(b){
+      b.onclick=function(){
+        var v=b.getAttribute('data-ask');
+        A.asking=(A.asking===v)?'':v; keep();
+        document.querySelectorAll('[data-ask]').forEach(function(x){ x.classList.toggle('on',x.getAttribute('data-ask')===A.asking); });
+        var box=document.getElementById('org-q');
+        box.innerHTML=A.asking==='org'
+          ? area('orgDoes','What does your organization do?','Say who you serve and how you serve them.',
+                 'Example: We run a leadership program for the whole county, across industry and government')
+          : '';
+        var t=box.querySelector('[data-a]');
+        if(t) t.addEventListener('input',function(){ A.orgDoes=t.value; keep(); });
+      };
+    });
+  }
+
+  function addWho(){
+    var inp=document.getElementById('who-in'); if(!inp) return;
+    var v=inp.value.trim(); if(!v) return;
+    var dup=A.who.some(function(w){ return w.toLowerCase()===v.toLowerCase(); });
+    if(!dup){ A.who.push(v); keep(); }
+    inp.value=''; inp.focus();
+    renderWho(); buildTabs(current);
+  }
+  function renderWho(){
+    var box=document.getElementById('who-list'); if(!box) return;
+    box.innerHTML=A.who.length
+      ? A.who.map(function(w,i){
+          return '<span class="chip">'+esc(w)+'<button type="button" data-drop="'+i+'" aria-label="Remove '+esc(w)+'">&times;</button></span>';
+        }).join('')
+      : '<span class="none">None listed yet.</span>';
+    box.querySelectorAll('[data-drop]').forEach(function(b){
+      b.onclick=function(){ A.who.splice(parseInt(b.getAttribute('data-drop'),10),1); keep(); renderWho(); buildTabs(current); };
+    });
+  }
+
+  var current='start';
+  function buildTabs(active){
+    var t=document.getElementById('tabs'); t.innerHTML='';
+    parts().forEach(function(s){
+      var b=document.createElement('button'); b.type='button';
+      b.className='tab'+(s.key===active?' on':'');
+      b.textContent=s.label;
+      if(s.key==='who' && A.who.length){
+        var c=document.createElement('span'); c.textContent=A.who.length+' listed'; b.appendChild(c);
+      }
+      b.onclick=function(){ show(s.key); };
+      t.appendChild(b);
+    });
+  }
+  function show(key){
+    current=key; buildTabs(key); renderPanel(key);
+    // The address names the part, so a link can open straight onto it.
+    try{
+      var u=new URL(location.href); u.searchParams.set('part',key);
+      if(A.path) u.searchParams.set('path',A.path); else u.searchParams.delete('path');
+      history.replaceState(null,'',u);
+    }catch(e){}
+  }
+
+  // ?path=work or ?path=build opens a path straight away, and ?part= a part of it.
+  var askPath=P('path'); if(PATHS[askPath]){ A.path=askPath; keep(); }
+  var start=P('part');
+  if(parts().some(function(s){ return s.key===start; })) show(start);
+  else show(A.path && askPath ? PATHS[A.path][0].key : 'start');
 })();
 </script>
 </body>
