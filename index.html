@@ -10,7 +10,8 @@
 
   hello@creating.works
 -->
-<!-- Version: V1.0 | Date: 2026-09-10 | LAST CHANGE: The home page of creating.works. Jessie's approved track changes, Impact written as Values-aligned, and What you bring before What you need. -->
+<!-- Version: V1.1 | Date: 2026-09-10 | LAST CHANGE: Sign in or sign up on the page after choosing a path, before any part of the form opens. Drafts are kept per person on the device. -->
+<!-- Previous: V1.0 | Date: 2026-09-10 | LAST CHANGE: The home page of creating.works. Jessie's approved track changes, Impact written as Values-aligned, and What you bring before What you need. -->
 <!-- Previous: V0.3 | Date: 2026-09-10 | LAST CHANGE: Passing time became Enjoying my time, and Social and Impact joined the reasons for work. -->
 <!-- Previous: V0.2 | Date: 2026-09-10 | LAST CHANGE: A second path, Finding work, for one person who needs a job. The first screen asks which. -->
 <!-- Previous: V0.1 | Date: 2026-09-10 | LAST CHANGE: First pass, the constituency inquiry from the conversation with Duck -->
@@ -21,6 +22,9 @@
 <!-- THE HOME PAGE. Jessie, 2026-09-10: "this is to push to creating.works home page - and the
      current home page can be an about". The page that was here is at /vision/ now. -->
 <title>Creating.Works</title>
+<!-- Who is signed in on this device. It reads creating.works's own storage, which is why signing
+     in happens on this page and never by a trip to 2gather.network and back. -->
+<script src="https://2gather.network/nav/identity.js?v=14"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
 <style>
@@ -69,7 +73,7 @@
   .f{margin-bottom:22px;}
   .f label,.f .lab{display:block;font-size:15px;font-weight:800;color:var(--ink);margin-bottom:2px;}
   .f .help{font-size:13.5px;color:var(--soft);margin-bottom:8px;max-width:64ch;}
-  .f input[type=text],.f textarea{width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:10px;
+  .f input[type=text],.f input[type=email],.f textarea{width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:10px;
     font:inherit;color:var(--ink);background:#fff;}
   .f textarea{min-height:84px;resize:vertical;}
   .f input:focus,.f textarea:focus{outline:2px solid var(--panel-line);outline-offset:1px;border-color:var(--brand);}
@@ -98,6 +102,19 @@
   .infobox{background:var(--panel);border:1px solid var(--panel-line);border-radius:12px;padding:18px 20px;margin-bottom:14px;}
   .infobox .t{font-size:15.5px;font-weight:800;margin-bottom:4px;}
   .infobox .d{font-size:14px;color:var(--soft);}
+  /* WAITING IS THE BREATHING PILL. Sending and checking a code each take one trip to the backend. */
+  .cw-loading{display:inline-flex;align-items:center;gap:8px;background:#1F699E;color:#fff;
+    font-size:13px;font-weight:700;padding:8px 16px;border-radius:20px;white-space:nowrap;
+    animation:cw-breathe 1.6s ease-in-out infinite;}
+  @keyframes cw-breathe{0%,100%{opacity:1}50%{opacity:.62}}
+  .tick{display:flex;gap:10px;align-items:flex-start;font-size:14px;color:var(--ink);margin:0 0 12px;cursor:pointer;}
+  .tick input{width:18px;height:18px;flex-shrink:0;margin:2px 0 0;accent-color:var(--brand);}
+  .tick a{color:var(--brand);font-weight:700;}
+  .say{font-size:14px;margin-top:12px;}
+  .say.bad{color:#7A2410;}
+  .say.ok{color:var(--soft);}
+  .quiet{font-size:13.5px;color:var(--muted);margin-top:18px;}
+  .quiet a{color:var(--brand);font-weight:700;cursor:pointer;}
 
   @media(max-width:860px){
     .layout{grid-template-columns:1fr;}
@@ -140,21 +157,54 @@
   // up what they need it for, what they bring, where it fits and what would suit them. The word
   // job never appears. Answering is the work, because it shapes what comes to meet them.
   //
-  // Nothing is sent anywhere yet. The answers are kept in this browser only, so a reload does not
-  // lose them, and the review says plainly that sending is not built.
+  // SIGN IN BEFORE THE FORM. Jessie, 2026-09-10: "I shouldn't be able to start the form without
+  // logging in first. So after they choose building something or finding work, then ask to sign in
+  // or sign up so that you can save answers." It happens here, on the page, with the same two
+  // backend steps 2gather.network's sign-in and sign-up use (sendSigninPin, verifySigninPin). A
+  // trip to 2gather.network and back cannot work: each site keeps its own storage, so somebody
+  // signed in there is a stranger here, and the sign-in page refuses a next= on another site.
+  //
+  // Nothing is sent to an account yet. Answers are kept on this device under the signed-in person's
+  // own key, so two people sharing a computer never see each other's drafts. Saving to the account
+  // is the next step, and the page says so rather than promising it.
 
   function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
   function P(k){try{return new URLSearchParams(location.search).get(k)||'';}catch(e){return '';}}
 
-  var KEY='cw-inquiry-draft';
+  var GS_URL='https://cw-api-gate.jessieupp.workers.dev';
+  // The person who writes is whoever is signed in, never somebody being viewed on their behalf.
+  var signedId='';
+  function whoId(){
+    if(signedId) return signedId;
+    try{ if(window.CW&&CW.realMe){ var r=CW.realMe(); return r.known?r.id:''; } }catch(e){}
+    return '';
+  }
+  function signed(){ return !!whoId(); }
+  function norm(id){ return String(id||'').split('.').join('').toLowerCase(); }
+  function draftKey(){ return 'cw-inquiry-draft-'+norm(whoId()); }
+  // The first version kept one draft for the whole device. It is dropped rather than handed to
+  // whoever signs in next.
+  try{ localStorage.removeItem('cw-inquiry-draft'); }catch(e){}
   var A={path:'',
          building:'',forWhom:'',serves:'',asking:'',orgDoes:'',first:'',who:[],person:'',group:'',gather:'',
          needFor:[],needMore:'',offer:'',values:'',how:'',setting:'',scale:'',conditions:'',tools:'',want:'',enjoy:'',contribution:''};
-  try{ var saved=JSON.parse(localStorage.getItem(KEY)||'null'); if(saved) for(var k in A){ if(saved[k]!=null) A[k]=saved[k]; } }catch(e){}
-  if(!Array.isArray(A.who)) A.who=[];
-  if(!Array.isArray(A.needFor)) A.needFor=[];
-  A.needFor=A.needFor.map(function(n){ return n==='Passing time' ? 'Enjoying my time' : (n==='Impact' ? 'Values-aligned' : n); });
-  function keep(){ try{ localStorage.setItem(KEY,JSON.stringify(A)); }catch(e){} }
+  var BLANK=JSON.stringify(A);
+  // Reads this person's draft. The path somebody picked before signing in wins over the stored one,
+  // because it is what they just chose.
+  function loadDraft(){
+    var chosen=A.path;
+    A=JSON.parse(BLANK);
+    if(signed()){
+      try{ var saved=JSON.parse(localStorage.getItem(draftKey())||'null'); if(saved) for(var k in A){ if(saved[k]!=null) A[k]=saved[k]; } }catch(e){}
+    }
+    if(chosen) A.path=chosen;
+    if(!Array.isArray(A.who)) A.who=[];
+    if(!Array.isArray(A.needFor)) A.needFor=[];
+    A.needFor=A.needFor.map(function(n){ return n==='Passing time' ? 'Enjoying my time' : (n==='Impact' ? 'Values-aligned' : n); });
+  }
+  loadDraft();
+  // Nothing is kept for somebody not signed in: there is no draft to keep before the form opens.
+  function keep(){ if(!signed()) return; try{ localStorage.setItem(draftKey(),JSON.stringify(A)); }catch(e){} }
 
   // The rail holds Start and, once somebody has picked, that path's parts. Nothing of a path is
   // drawn before it is chosen.
@@ -174,7 +224,9 @@
       {key:'review',  label:'Your answers'}
     ]
   };
-  function parts(){ return [{key:'start',label:'Start'}].concat(PATHS[A.path]||[]); }
+  // Only Start until somebody is signed in, so no part of the form is drawn before they can use it.
+  function parts(){ return [{key:'start',label:'Start'}].concat(signed()?(PATHS[A.path]||[]):[]); }
+  function firstPart(){ return A.path&&PATHS[A.path] ? PATHS[A.path][0].key : 'start'; }
   // Jessie, 2026-09-10: "Passing time to Enjoying my time", and Social and Impact join them, Impact
   // written as Values-aligned.
   var NEEDS=['Money','Consistency','Resources','Fun','Enjoying my time','Social','Values-aligned'];
@@ -209,12 +261,20 @@
         +'<div class="choice" style="margin-bottom:8px;">'
           +'<button type="button" data-path="build"'+(A.path==='build'?' class="on"':'')+'>Building something</button>'
           +'<button type="button" data-path="work"'+(A.path==='work'?' class="on"':'')+'>Finding work</button>'
-        +'</div>';
+        +'</div>'
+        +(signed()?'<p class="quiet">Not you? <a role="link" tabindex="0" id="sign-out">Sign out.</a></p>':'');
       p.querySelectorAll('[data-path]').forEach(function(b){
-        b.onclick=function(){ A.path=b.getAttribute('data-path'); keep(); show(PATHS[A.path][0].key); };
+        b.onclick=function(){ A.path=b.getAttribute('data-path'); keep(); show(firstPart()); };
       });
+      var so=document.getElementById('sign-out');
+      if(so) so.onclick=function(){
+        try{ if(window.CW&&CW.forget) CW.forget(); }catch(e){}
+        signedId=''; A=JSON.parse(BLANK); auth={mode:'in',step:1,email:'',first:'',last:''}; show('start');
+      };
       return;
     }
+
+    else if(key==='signin'){ renderSignin(p); return; }
 
     else if(key==='need'){
       p.innerHTML='<h2>What you need</h2>'
@@ -347,8 +407,8 @@
               ['What would you want?',A.want],['What would you enjoy?',A.enjoy],['What would bring out your greatest contribution?',A.contribution]])+'</div>'
           +'<div class="infobox"><div class="t">What happens next</div>'
             +'<div class="d">A person reads every answer. Then we look together for what fits the person you described.</div></div>'
-          +'<div class="infobox"><div class="t">Sending is not built yet</div>'
-            +'<div class="d">This page is a preview. Your answers stay in this browser until sending is added.</div></div>'
+          +'<div class="infobox"><div class="t">Saving to your account comes next</div>'
+            +'<div class="d">Your answers stay on this device until that step is ready.</div></div>'
           +acts('suits','');
         bindCommon(p); return;
       }
@@ -369,8 +429,8 @@
         +'<div class="infobox"><div class="t">What happens next</div>'
           +'<div class="d">A person reads every answer. Then we meet and take each constituency separately. '
           +'For each one we ask what they need and want, what they give, and what circulates back.</div></div>'
-        +'<div class="infobox"><div class="t">Sending is not built yet</div>'
-          +'<div class="d">This page is a preview. Your answers stay in this browser until sending is added.</div></div>'
+        +'<div class="infobox"><div class="t">Saving to your account comes next</div>'
+          +'<div class="d">Your answers stay on this device until that step is ready.</div></div>'
         +acts('help','');
     }
 
@@ -422,12 +482,135 @@
     });
   }
 
+  // ── SIGN IN OR SIGN UP ────────────────────────────────────────────────────────────────────
+  var auth={mode:'in',step:1,email:'',first:'',last:''};
+  function field1(id,lab,type,val,ac){
+    return '<div class="f"><label for="'+id+'">'+esc(lab)+'</label>'
+      +'<input type="'+(type||'text')+'" id="'+id+'" value="'+esc(val||'')+'"'+(ac?' autocomplete="'+ac+'"':'')+'></div>';
+  }
+  function renderSignin(p){
+    var h='<h2>Sign in to begin</h2>'
+      +'<p class="lead">Your answers stay on this device for now and saving them to your account comes next.</p>';
+    if(auth.step===1){
+      h+='<div class="choice" style="margin-bottom:22px;">'
+        +'<button type="button" data-mode="in"'+(auth.mode==='in'?' class="on"':'')+'>Sign in</button>'
+        +'<button type="button" data-mode="up"'+(auth.mode==='up'?' class="on"':'')+'>Sign up</button></div>';
+      if(auth.mode==='up'){
+        h+=field1('au-first','Your first name','text',auth.first,'given-name')
+          +field1('au-last','Your last name','text',auth.last,'family-name');
+      }
+      h+=field1('au-email','Your email','email',auth.email,'email');
+      if(auth.mode==='up'){
+        h+='<label class="tick"><input id="au-agree" type="checkbox"><span>I agree to the '
+          +'<a role="link" tabindex="0" data-nav="https://2gather.network/terms-of-service.html" onclick="event.stopPropagation();return _safeNavGo(this)">Terms of Service</a>, '
+          +'<a role="link" tabindex="0" data-nav="https://2gather.network/privacy-policy.html" onclick="event.stopPropagation();return _safeNavGo(this)">Privacy Policy</a>, and '
+          +'<a role="link" tabindex="0" data-nav="https://2gather.network/code-of-conduct.html" onclick="event.stopPropagation();return _safeNavGo(this)">Code of Conduct</a>.</span></label>'
+          +'<label class="tick"><input id="au-18" type="checkbox"><span>I confirm that I am 18 or older.</span></label>';
+      }
+      h+='<div class="acts"><button type="button" class="btn ghost" data-go="start">Back</button>'
+        +'<button type="button" class="btn solid" id="au-send">Send my code</button></div>'
+        +'<div class="say" id="au-say"></div>';
+    } else {
+      h+='<div id="au-sent" style="margin-bottom:18px;"><span class="cw-loading">Sending your code</span></div>'
+        +'<div class="f"><label for="au-code">Your code</label>'
+        +'<input type="text" id="au-code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="Example: 428091" style="max-width:220px;letter-spacing:.16em;"></div>'
+        +'<div class="acts"><button type="button" class="btn ghost" id="au-back">Back</button>'
+        +'<button type="button" class="btn ghost" id="au-again">Send another</button>'
+        +'<button type="button" class="btn solid" id="au-verify">Sign me in</button></div>'
+        +'<div class="say" id="au-say"></div>';
+    }
+    p.innerHTML=h;
+    p.querySelectorAll('[data-mode]').forEach(function(b){
+      b.onclick=function(){ harvest(); auth.mode=b.getAttribute('data-mode'); renderSignin(p); };
+    });
+    p.querySelectorAll('[data-go]').forEach(function(b){ b.onclick=function(){ show(b.getAttribute('data-go')); }; });
+    var send=document.getElementById('au-send'); if(send) send.onclick=sendCode;
+    var em=document.getElementById('au-email'); if(em) em.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); sendCode(); } });
+    var v=document.getElementById('au-verify'); if(v) v.onclick=verifyCode;
+    var c=document.getElementById('au-code'); if(c){ c.focus(); c.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); verifyCode(); } }); }
+    var ag=document.getElementById('au-again'); if(ag) ag.onclick=function(){ auth.step=2; renderSignin(p); fireSend(); };
+    var bk=document.getElementById('au-back'); if(bk) bk.onclick=function(){ auth.step=1; renderSignin(p); };
+  }
+  function say(msg,good){ var el=document.getElementById('au-say'); if(!el) return; el.className='say '+(good?'ok':'bad'); el.textContent=msg||''; }
+  function harvest(){
+    var f=document.getElementById('au-first'), l=document.getElementById('au-last'), e=document.getElementById('au-email');
+    if(f) auth.first=f.value.trim(); if(l) auth.last=l.value.trim(); if(e) auth.email=e.value.trim();
+  }
+  function sendCode(){
+    harvest();
+    if(auth.mode==='up'){
+      if(!auth.first){ say('Put in the first name you would like people to see.'); return; }
+      if(!auth.last){ say('Put in your last name.'); return; }
+    }
+    if(!auth.email||auth.email.indexOf('@')<0){ say('Put in the email you use here.'); return; }
+    if(auth.mode==='up'){
+      if(!document.getElementById('au-agree').checked){ say('Tick the box to agree to the terms.'); return; }
+      if(!document.getElementById('au-18').checked){ say('An account here is for people 18 or older.'); return; }
+    }
+    auth.step=2; renderSignin(document.getElementById('panel')); fireSend();
+  }
+  // The code box shows at once, the way the sign-in page does, and the pill says the email is on
+  // its way until the backend answers.
+  function fireSend(){
+    var u=GS_URL+'?action=sendSigninPin'
+      +(auth.mode==='up'?'&signup=1&terms=1&age=1&first='+encodeURIComponent(auth.first)+'&last='+encodeURIComponent(auth.last):'')
+      +'&email='+encodeURIComponent(auth.email);
+    fetch(u).then(function(r){ return r.json(); }).then(function(){
+      var s=document.getElementById('au-sent');
+      if(s){ s.className='lead'; s.textContent='We sent a six digit code to '+auth.email+'. It expires in fifteen minutes.'; }
+    }).catch(function(){
+      auth.step=1; renderSignin(document.getElementById('panel'));
+      say('The code did not send and your connection is the first thing to check.');
+    });
+  }
+  function verifyCode(){
+    var c=(document.getElementById('au-code').value||'').trim();
+    if(c.length<6){ say('The code is six digits.'); return; }
+    var b=document.getElementById('au-verify'); b.disabled=true;
+    say('');
+    var s=document.getElementById('au-sent'); if(s){ s.className=''; s.innerHTML='<span class="cw-loading">Checking your code</span>'; }
+    fetch(GS_URL+'?action=verifySigninPin&email='+encodeURIComponent(auth.email)+'&code='+encodeURIComponent(c))
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if(d&&d.status==='ok'&&d.appearId){
+          // The same things the sign-in page keeps, so the profile and account pages on this site
+          // know them too and do not ask for a second code.
+          try{
+            if(window.CW&&CW.remember) CW.remember(d.appearId);
+            localStorage.setItem('cw-id',d.appearId);
+            localStorage.setItem('appear-id',d.appearId);
+            if(auth.mode==='up'&&auth.first) localStorage.setItem('cw-first',auth.first);
+            if(d.editToken){
+              localStorage.setItem('cw-token',d.editToken);
+              var exp=parseInt(String(d.editToken).split('.')[1],10);
+              if(!exp||exp<Date.now()) exp=Date.now()+60*60*1000;
+              localStorage.setItem('cw-edit-'+norm(d.appearId),JSON.stringify({t:d.editToken,exp:exp}));
+            }
+          }catch(e){}
+          signedId=d.appearId;
+          loadDraft(); keep();
+          auth={mode:'in',step:1,email:'',first:'',last:''};
+          show(firstPart());
+          return;
+        }
+        b.disabled=false;
+        if(s){ s.className='lead'; s.textContent='We sent a six digit code to '+auth.email+'. It expires in fifteen minutes.'; }
+        say((d&&d.message)||'That code did not match and Send another brings a fresh one.');
+      })
+      .catch(function(){
+        b.disabled=false;
+        if(s){ s.className='lead'; s.textContent='We sent a six digit code to '+auth.email+'. It expires in fifteen minutes.'; }
+        say('The code did not check and your connection is the first thing to look at.');
+      });
+  }
+  window._safeNavGo=window._safeNavGo||function(el){try{var u=el&&el.getAttribute&&el.getAttribute('data-nav');if(u){window.location.href=u;}}catch(e){}return false;};
+
   var current='start';
   function buildTabs(active){
     var t=document.getElementById('tabs'); t.innerHTML='';
     parts().forEach(function(s){
       var b=document.createElement('button'); b.type='button';
-      b.className='tab'+(s.key===active?' on':'');
+      b.className='tab'+((s.key===active||(active==='signin'&&s.key==='start'))?' on':'');
       b.textContent=s.label;
       if(s.key==='who' && A.who.length){
         var c=document.createElement('span'); c.textContent=A.who.length+' listed'; b.appendChild(c);
@@ -437,6 +620,8 @@
     });
   }
   function show(key){
+    // Every part of the form waits behind sign-in, including a link straight to one.
+    if(key!=='start' && key!=='signin' && !signed()) key = A.path ? 'signin' : 'start';
     current=key; buildTabs(key); renderPanel(key);
     // The address names the part, so a link can open straight onto it.
     try{
