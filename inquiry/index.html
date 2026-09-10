@@ -10,7 +10,8 @@
 
   hello@creating.works
 -->
-<!-- Version: V0.2 | Date: 2026-09-10 | LAST CHANGE: A second path, Finding work, for one person who needs a job. The first screen asks which. -->
+<!-- Version: V0.3 | Date: 2026-09-10 | LAST CHANGE: Passing time became Enjoying my time, and Social and Impact joined the reasons for work. -->
+<!-- Previous: V0.2 | Date: 2026-09-10 | LAST CHANGE: A second path, Finding work, for one person who needs a job. The first screen asks which. -->
 <!-- Previous: V0.1 | Date: 2026-09-10 | LAST CHANGE: First pass, the constituency inquiry from the conversation with Duck -->
 <html lang="en">
 <head>
@@ -152,6 +153,7 @@
   try{ var saved=JSON.parse(localStorage.getItem(KEY)||'null'); if(saved) for(var k in A){ if(saved[k]!=null) A[k]=saved[k]; } }catch(e){}
   if(!Array.isArray(A.who)) A.who=[];
   if(!Array.isArray(A.needFor)) A.needFor=[];
+  A.needFor=A.needFor.map(function(n){ return n==='Passing time' ? 'Enjoying my time' : n; });
   function keep(){ try{ localStorage.setItem(KEY,JSON.stringify(A)); }catch(e){} }
 
   // The rail holds Start and, once somebody has picked, that path's parts. Nothing of a path is
@@ -172,7 +174,8 @@
     ]
   };
   function parts(){ return [{key:'start',label:'Start'}].concat(PATHS[A.path]||[]); }
-  var NEEDS=['Money','Consistency','Resources','Fun','Passing time'];
+  // Jessie, 2026-09-10: "Passing time to Enjoying my time", and add Social and Impact.
+  var NEEDS=['Money','Consistency','Resources','Fun','Enjoying my time','Social','Impact'];
 
   // Each question is label, help line, field, in that order.
   function area(key,lab,help,ph){
