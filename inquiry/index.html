@@ -10,7 +10,8 @@
 
   hello@creating.works
 -->
-<!-- Version: V0.1 | Date: 2026-09-10 | LAST CHANGE: First pass, the constituency inquiry from the conversation with Duck -->
+<!-- Version: V0.2 | Date: 2026-09-10 | LAST CHANGE: A second path, Finding work, for one person who needs a job. The first screen asks which. -->
+<!-- Previous: V0.1 | Date: 2026-09-10 | LAST CHANGE: First pass, the constituency inquiry from the conversation with Duck -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -114,7 +115,7 @@
 
   <div class="head">
     <h1>Start a conversation</h1>
-    <div class="sub">It has three short parts. Answer what you can and we will take it from there together.</div>
+    <div class="sub">Answer what you can and we will take it from there together.</div>
   </div>
 
   <div class="layout">
@@ -132,6 +133,12 @@
   // conversation afterward, not on this form. Jessie, 2026-09-10: "collect Parts 1, 2 and 4 and
   // save Part 3 for the conversation afterward".
   //
+  // FINDING WORK, the second path. Jessie, 2026-09-10: "add another one for an individual for a
+  // need for a job too", from a second conversation with Duck. The point of it is to step out of
+  // the noun as fast as possible: somebody arrives saying they need a job, and the questions open
+  // up what they need it for, what they bring, where it fits and what would suit them. The word
+  // job never appears. Answering is the work, because it shapes what comes to meet them.
+  //
   // Nothing is sent anywhere yet. The answers are kept in this browser only, so a reload does not
   // lose them, and the review says plainly that sending is not built.
 
@@ -139,17 +146,33 @@
   function P(k){try{return new URLSearchParams(location.search).get(k)||'';}catch(e){return '';}}
 
   var KEY='cw-inquiry-draft';
-  var A={building:'',forWhom:'',serves:'',asking:'',orgDoes:'',first:'',who:[],person:'',group:'',gather:''};
+  var A={path:'',
+         building:'',forWhom:'',serves:'',asking:'',orgDoes:'',first:'',who:[],person:'',group:'',gather:'',
+         needFor:[],needMore:'',offer:'',values:'',how:'',setting:'',scale:'',conditions:'',tools:'',want:'',enjoy:'',contribution:''};
   try{ var saved=JSON.parse(localStorage.getItem(KEY)||'null'); if(saved) for(var k in A){ if(saved[k]!=null) A[k]=saved[k]; } }catch(e){}
   if(!Array.isArray(A.who)) A.who=[];
+  if(!Array.isArray(A.needFor)) A.needFor=[];
   function keep(){ try{ localStorage.setItem(KEY,JSON.stringify(A)); }catch(e){} }
 
-  var PARTS=[
-    {key:'picture', label:'The big picture'},
-    {key:'who',     label:'Who you serve'},
-    {key:'help',    label:'What would help'},
-    {key:'review',  label:'Your answers'}
-  ];
+  // The rail holds Start and, once somebody has picked, that path's parts. Nothing of a path is
+  // drawn before it is chosen.
+  var PATHS={
+    build:[
+      {key:'picture', label:'The big picture'},
+      {key:'who',     label:'Who you serve'},
+      {key:'help',    label:'What would help'},
+      {key:'review',  label:'Your answers'}
+    ],
+    work:[
+      {key:'need',    label:'What you need'},
+      {key:'bring',   label:'What you bring'},
+      {key:'fits',    label:'Where it fits'},
+      {key:'suits',   label:'What suits you'},
+      {key:'review',  label:'Your answers'}
+    ]
+  };
+  function parts(){ return [{key:'start',label:'Start'}].concat(PATHS[A.path]||[]); }
+  var NEEDS=['Money','Consistency','Resources','Fun','Passing time'];
 
   // Each question is label, help line, field, in that order.
   function area(key,lab,help,ph){
@@ -167,7 +190,78 @@
   function renderPanel(key){
     var p=document.getElementById('panel');
 
-    if(key==='picture'){
+    if(key==='start'){
+      p.innerHTML='<h2>What brings you here?</h2>'
+        +'<p class="lead">Pick the one closest to where you are and you can change it at any time.</p>'
+        +'<div class="choice" style="margin-bottom:8px;">'
+          +'<button type="button" data-path="build"'+(A.path==='build'?' class="on"':'')+'>Building something</button>'
+          +'<button type="button" data-path="work"'+(A.path==='work'?' class="on"':'')+'>Finding work</button>'
+        +'</div>';
+      p.querySelectorAll('[data-path]').forEach(function(b){
+        b.onclick=function(){ A.path=b.getAttribute('data-path'); keep(); show(PATHS[A.path][0].key); };
+      });
+      return;
+    }
+
+    else if(key==='need'){
+      p.innerHTML='<h2>What you need</h2>'
+        +'<p class="lead">Start with what you need right now, in your own words.</p>'
+        +'<div class="f"><div class="lab">What do you need work for?</div>'
+          +'<div class="help">Pick as many as fit and add your own below.</div>'
+          +'<div class="choice">'+NEEDS.map(function(n){
+            return '<button type="button" data-need="'+esc(n)+'"'+(A.needFor.indexOf(n)>-1?' class="on"':'')+'>'+esc(n)+'</button>';
+          }).join('')+'</div></div>'
+        +area('needMore','Anything else','Say it in your own words, as much or as little as you like.',
+              'Example: Steady income while I figure out what comes next')
+        +acts('start','bring');
+      p.querySelectorAll('[data-need]').forEach(function(b){
+        b.onclick=function(){
+          var n=b.getAttribute('data-need'), i=A.needFor.indexOf(n);
+          if(i>-1) A.needFor.splice(i,1); else A.needFor.push(n);
+          b.classList.toggle('on',i<0); keep();
+        };
+      });
+    }
+
+    else if(key==='bring'){
+      p.innerHTML='<h2>What you bring</h2>'
+        +'<p class="lead">Somebody paying you means you have something to provide and that is where we start.</p>'
+        +area('offer','What do you have to offer?','Name your superpowers, the things people already come to you for.',
+              'Example: I can calm a room and get people talking')
+        +area('values','What do you value?','Tell us what matters to you in how you spend your days.',
+              'Example: Honesty, time outdoors and work that helps somebody')
+        +area('how','How do you like to give it?','Think about the ways of working that bring out your best.',
+              'Example: One to one, with time to prepare')
+        +acts('need','fits');
+    }
+
+    else if(key==='fits'){
+      p.innerHTML='<h2>Where it fits</h2>'
+        +'<p class="lead">Picture the place where what you offer lands.</p>'
+        +area('setting','In what setting?','Describe the kind of place you want to be part of and the people in it.',
+              'Example: A small team in my own neighborhood')
+        +area('scale','At what scale?','Say whether you picture a few people, a whole organization or something in between.',
+              'Example: A handful of people I see every week')
+        +area('conditions','Under what conditions?','Include any limits you work within, or say there are none.',
+              'Example: Mornings only and close to a bus line')
+        +area('tools','Using what tools?','List the tools and instruments you like to work with.',
+              'Example: A laptop, a kitchen or a camera')
+        +acts('bring','suits');
+    }
+
+    else if(key==='suits'){
+      p.innerHTML='<h2>What suits you</h2>'
+        +'<p class="lead">Set need aside for a moment and imagine what would suit you.</p>'
+        +area('want','What would you want?','Describe what you would choose if the choice were fully yours.',
+              'Example: Work where I set my own hours and learn something new')
+        +area('enjoy','What would you enjoy?','Think about the moments in a day that feel good to you.',
+              'Example: Teaching, cooking for people and being outside')
+        +area('contribution','What would bring out your greatest contribution?','Name what would let you give the most of what you have.',
+              'Example: Bringing strangers together until they feel like neighbors')
+        +acts('fits','review');
+    }
+
+    else if(key==='picture'){
       p.innerHTML='<h2>The big picture</h2>'
         +'<p class="lead">Start with the whole of it, in your own words.</p>'
         +area('building','What are you building?','It can be something you are starting, standing up or giving to the world.',
@@ -188,7 +282,7 @@
           : '')+'</div>'
         +area('first','What do you picture it doing first?','List the first few things you would want it to do.',
               'Example: Keep each cohort connected after graduation')
-        +acts('','who');
+        +acts('start','who');
       bindAsking();
     }
 
@@ -227,6 +321,24 @@
           return '<div class="q">'+esc(r[0])+'</div><div class="a'+(v?'':' empty')+'">'+(v?esc(v):'Not answered yet')+'</div>';
         }).join('');
       };
+      if(A.path==='work'){
+        p.innerHTML='<h2>Your answers</h2>'
+          +'<p class="lead">Every answer you gave is gathered here and any part on the left opens again to change it.</p>'
+          +'<div class="rv"><div class="t">What you need</div>'+rows([
+              ['What do you need work for?',A.needFor.join(', ')],['Anything else',A.needMore]])+'</div>'
+          +'<div class="rv"><div class="t">What you bring</div>'+rows([
+              ['What do you have to offer?',A.offer],['What do you value?',A.values],['How do you like to give it?',A.how]])+'</div>'
+          +'<div class="rv"><div class="t">Where it fits</div>'+rows([
+              ['In what setting?',A.setting],['At what scale?',A.scale],['Under what conditions?',A.conditions],['Using what tools?',A.tools]])+'</div>'
+          +'<div class="rv"><div class="t">What suits you</div>'+rows([
+              ['What would you want?',A.want],['What would you enjoy?',A.enjoy],['What would bring out your greatest contribution?',A.contribution]])+'</div>'
+          +'<div class="infobox"><div class="t">What happens next</div>'
+            +'<div class="d">A person reads every answer. Then we look together for what fits the person you described.</div></div>'
+          +'<div class="infobox"><div class="t">Sending is not built yet</div>'
+            +'<div class="d">This page is a preview. Your answers stay in this browser until sending is added.</div></div>'
+          +acts('suits','');
+        bindCommon(p); return;
+      }
       var pic=[['What are you building?',A.building],['Who is it for?',A.forWhom],['What does it serve?',A.serves],
                ['Who is asking?',A.asking==='org'?'An organization':(A.asking==='me'?'Myself':'')]];
       if(A.asking==='org') pic.push(['What does your organization do?',A.orgDoes]);
@@ -249,6 +361,9 @@
         +acts('help','');
     }
 
+    bindCommon(p);
+  }
+  function bindCommon(p){
     p.querySelectorAll('[data-a]').forEach(function(el){
       el.addEventListener('input',function(){ A[el.getAttribute('data-a')]=el.value; keep(); });
     });
@@ -294,10 +409,10 @@
     });
   }
 
-  var current='picture';
+  var current='start';
   function buildTabs(active){
     var t=document.getElementById('tabs'); t.innerHTML='';
-    PARTS.forEach(function(s){
+    parts().forEach(function(s){
       var b=document.createElement('button'); b.type='button';
       b.className='tab'+(s.key===active?' on':'');
       b.textContent=s.label;
@@ -311,11 +426,18 @@
   function show(key){
     current=key; buildTabs(key); renderPanel(key);
     // The address names the part, so a link can open straight onto it.
-    try{ var u=new URL(location.href); u.searchParams.set('part',key); history.replaceState(null,'',u); }catch(e){}
+    try{
+      var u=new URL(location.href); u.searchParams.set('part',key);
+      if(A.path) u.searchParams.set('path',A.path); else u.searchParams.delete('path');
+      history.replaceState(null,'',u);
+    }catch(e){}
   }
 
+  // ?path=work or ?path=build opens a path straight away, and ?part= a part of it.
+  var askPath=P('path'); if(PATHS[askPath]){ A.path=askPath; keep(); }
   var start=P('part');
-  show(PARTS.some(function(s){ return s.key===start; }) ? start : 'picture');
+  if(parts().some(function(s){ return s.key===start; })) show(start);
+  else show(A.path && askPath ? PATHS[A.path][0].key : 'start');
 })();
 </script>
 </body>
