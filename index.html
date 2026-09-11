@@ -10,7 +10,8 @@
 
   hello@creating.works
 -->
-<!-- Version: V1.1 | Date: 2026-09-10 | LAST CHANGE: Sign in or sign up on the page after choosing a path, before any part of the form opens. Drafts are kept per person on the device. -->
+<!-- Version: V1.2 | Date: 2026-09-10 | LAST CHANGE: checking the sign-in code says it came from creating.works too (from=creatingworks), so the sign-in email to operators reads "signed in to Creating Works". Jessie: "also make this share how it was a creating works sign in to differneitate?" -->
+<!-- Previous: V1.1 | Date: 2026-09-10 | LAST CHANGE: Sign in or sign up on the page after choosing a path, before any part of the form opens. Drafts are kept per person on the device. -->
 <!-- Previous: V1.0 | Date: 2026-09-10 | LAST CHANGE: The home page of creating.works. Jessie's approved track changes, Impact written as Values-aligned, and What you bring before What you need. -->
 <!-- Previous: V0.3 | Date: 2026-09-10 | LAST CHANGE: Passing time became Enjoying my time, and Social and Impact joined the reasons for work. -->
 <!-- Previous: V0.2 | Date: 2026-09-10 | LAST CHANGE: A second path, Finding work, for one person who needs a job. The first screen asks which. -->
@@ -571,7 +572,7 @@
     var b=document.getElementById('au-verify'); b.disabled=true;
     say('');
     var s=document.getElementById('au-sent'); if(s){ s.className=''; s.innerHTML='<span class="cw-loading">Checking your code</span>'; }
-    fetch(GS_URL+'?action=verifySigninPin&email='+encodeURIComponent(auth.email)+'&code='+encodeURIComponent(c))
+    fetch(GS_URL+'?action=verifySigninPin&from=creatingworks&email='+encodeURIComponent(auth.email)+'&code='+encodeURIComponent(c))
       .then(function(r){ return r.json(); })
       .then(function(d){
         if(d&&d.status==='ok'&&d.appearId){
