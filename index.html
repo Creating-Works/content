@@ -10,7 +10,8 @@
 
   hello@creating.works
 -->
-<!-- Version: V1.9 | Date: 2026-09-11 | LAST CHANGE: The name comes back with the sign-in code, so "Signed in as" shows at once. Jessie: "1 yes". -->
+<!-- Version: V1.10 | Date: 2026-09-11 | LAST CHANGE: "Loading your answers", and Saved is a two-second note on the press with no Saving before it. Jessie: "just say Saved when clicking button and make it disappear". -->
+<!-- Previous: V1.9 | Date: 2026-09-11 | LAST CHANGE: The name comes back with the sign-in code, so "Signed in as" shows at once. Jessie: "1 yes". -->
 <!-- Previous: V1.8 | Date: 2026-09-11 | LAST CHANGE: The "What would work give you?" choices come from reference-data.needFor with the saved answers instead of being written into the page. Jessie: "3 yes". -->
 <!-- Previous: V1.7 | Date: 2026-09-11 | LAST CHANGE: Building something's What happens next names who reaches out, and answers typed before saving existed are saved at the next step. Jessie: "2 go 3 yes". -->
 <!-- Previous: V1.6 | Date: 2026-09-11 | LAST CHANGE: Finding work's What happens next reads "The person who invited you or someone from Creating.Works will reach out and look at this together." Jessie: "combine both". No Sent box; the button reads Sent once sent and turns back into Send when an answer changes. Jessie: "Remove: Sent ..." and "Make button say sent not send again". -->
@@ -513,7 +514,13 @@
   var loaded={}, loading=false, dirty=false, saving=false, again=false, againSend=false, saveText='';
   function isForm(k){ return k!=='start' && k!=='signin'; }
   function changed(){ dirty=true; if(A['sent_'+A.path]) A['edited_'+A.path]='1'; keep(); }
-  function setSave(t){ saveText=t||''; var el=document.getElementById('save-stat'); if(el) el.textContent=saveText; }
+  function setSave(t){ clearTimeout(flashT); saveText=t||''; var el=document.getElementById('save-stat'); if(el) el.textContent=saveText; }
+  // SAVED IS A BRIEF NOTE, SHOWN ON THE PRESS. Jessie, 2026-09-11: "Saving takes a very long time -
+  // so just say Saved when clicking button and make it disappear - just a brief notification" and
+  // "remove Saved after since we know". The save carries on in the background. If it fails, the
+  // reason replaces the note and stays until the next step saves.
+  var flashT=null;
+  function flash(t){ setSave(t); flashT=setTimeout(function(){ if(saveText===t) setSave(''); },2000); }
 
   // The session the sign-in code minted, from wherever this site keeps it.
   function token(){
@@ -554,7 +561,7 @@
     var tk=token(); if(!tk){ needCode(); return; }
     loading=true;
     var path=A.path, id=whoId();
-    document.getElementById('panel').innerHTML='<span class="cw-loading">Looking for your saved answers</span>';
+    document.getElementById('panel').innerHTML='<span class="cw-loading">Loading your answers</span>';
     fetch(GS_URL+'?action=getInquiry&appearId='+encodeURIComponent(id)+'&editToken='+encodeURIComponent(tk)+'&path='+encodeURIComponent(path))
       .then(function(r){ return r.json(); })
       .then(function(d){
@@ -594,7 +601,7 @@
     if(!signed()||!A.path||!loaded[A.path]) return;
     if(saving){ again=true; if(send) againSend=true; return; }
     var tk=token(); if(!tk){ needCode(); return; }
-    saving=true; dirty=false; setSave('Saving');
+    saving=true; dirty=false; flash('Saved');
     var path=A.path, F=FIELDS[path];
     var u=GS_URL+'?action=saveInquiry&appearId='+encodeURIComponent(whoId())+'&editToken='+encodeURIComponent(tk)
       +'&path='+encodeURIComponent(path)+(send?'&send=1':'');
@@ -606,8 +613,7 @@
       saving=false;
       if(d&&d.code==='signin'){ dirty=true; setSave(''); needCode(); return; }
       if(!d||d.status!=='ok'){ dirty=true; setSave('Your answers did not save this time and they stay here until your next step saves them.'); return; }
-      setSave('Saved');
-      if(send && d.sentAt){ A['sent_'+path]=d.sentAt; A['edited_'+path]=''; keep(); if(current==='review') renderPanel('review'); setSave('Saved'); }
+      if(send && d.sentAt){ A['sent_'+path]=d.sentAt; A['edited_'+path]=''; keep(); if(current==='review') renderPanel('review'); }
       if(again){ var s=againSend; again=false; againSend=false; save(s); }
     }).catch(function(){
       saving=false; dirty=true;
