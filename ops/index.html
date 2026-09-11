@@ -128,27 +128,21 @@
     <div class="headrow">
       <h2><button class="fold" id="dfold" title="Hide or show">Build documents</button></h2>
     </div>
+    <!-- A DROPDOWN, NOT A LIST. Jessie, 2026-09-11: "make build docs a drop down to select from instead
+         of a list". Choosing one opens it in the same tab. -->
     <div id="docsBody">
-      <!-- THE QUEUE, first, because it is the one thing here that is worked from rather than read.
-           Jessie, 2026-09-09: "Link this page from ops board". Every open item, what it needs from
-           her, and where the work lives, sortable and filterable. -->
-      <p><a href="https://claude.ai/code/artifact/e1825deb-d464-4464-ba2a-e4251fab9c5f">Open items, the queue</a><br>
-      <span class="say">Every open item with its urgency, why it matters, and the one thing it needs from you. Sorted by where the work lives.</span></p>
-      <p><a href="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/docs/0-Main-combined-draft.md">North Star, the current draft</a><br>
-      <span class="say">What we are, in one page. Doug's words, Jessie's formatting, every decision applied.</span></p>
-      <p><a href="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/collaboration/decisions-to-be-made-2026-09-02.md">Decisions to be made</a><br>
-      <span class="say">Every open question, what was deliberated, and where two things said cannot both hold.</span></p>
-      <p><a href="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/collaboration/standing-questions-for-doug.md">Standing questions for Doug</a><br>
-      <span class="say">The questions that are his, in context, question, action form.</span></p>
-      <p><a href="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/01-contributor-enrollment-story.md#the-people-we-are-seeking">The people we are seeking</a><br>
-      <span class="say">Every role, when it runs, and who is the point of contact.</span></p>
-      <p><a href="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/collaboration/roles-and-what-is-left.md">Roles, and what is left</a><br>
-      <span class="say">What has already been built against each role, so nobody re-costs finished work.</span></p>
-      <p><a href="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/05-master-development-plan.md">Master development plan</a><br>
-      <span class="say">The eight phases, the budget, and the re-estimate that is still pending.</span></p>
-      <p><a href="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/Reference-Materials/writing-style.md">Writing style guide</a><br>
-      <span class="say">The rules every reader-facing document is checked against.</span></p>
-      <p><a href="https://github.com/Creating-Works/The-New-Build-Repository/blob/main">The whole repository</a></p>
+      <select id="docPick" aria-label="Open a build document" style="max-width:420px;">
+        <option value="">Choose a document</option>
+        <option value="https://claude.ai/code/artifact/e1825deb-d464-4464-ba2a-e4251fab9c5f">Open items, the queue</option>
+        <option value="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/docs/0-Main-combined-draft.md">North Star, the current draft</option>
+        <option value="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/collaboration/decisions-to-be-made-2026-09-02.md">Decisions to be made</option>
+        <option value="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/collaboration/standing-questions-for-doug.md">Standing questions for Doug</option>
+        <option value="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/01-contributor-enrollment-story.md#the-people-we-are-seeking">The people we are seeking</option>
+        <option value="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/collaboration/roles-and-what-is-left.md">Roles, and what is left</option>
+        <option value="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/05-master-development-plan.md">Master development plan</option>
+        <option value="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/Reference-Materials/writing-style.md">Writing style guide</option>
+        <option value="https://github.com/Creating-Works/The-New-Build-Repository/blob/main">The whole repository</option>
+      </select>
     </div>
   </div>
 
@@ -167,7 +161,7 @@
       <div class="tot" id="atot"></div>
       <h3 style="font-size:14px;font-weight:800;margin:18px 0 6px;">Latest</h3>
       <div id="arecent"></div>
-      <h3 style="font-size:14px;font-weight:800;margin:18px 0 6px;">Signed up and not seen since</h3>
+      <h3 style="font-size:14px;font-weight:800;margin:18px 0 6px;">Recent sign-ups not seen since</h3>
       <div id="aquiet"></div>
     </div>
   </div>
@@ -352,18 +346,28 @@
         $('send').disabled=false;
         say('s2','');
       })
-      .catch(function(){ $('send').disabled=false; say('s2','Could not reach the server.',true); });
+      // A LATE ANSWER IS NOT "COULD NOT REACH". Jessie, 2026-09-11: "said checking for a while and then
+      // couldn't reach server", then "3 yes". The email often goes even when the answer comes back
+      // too late, and once a code check has started this must not write over it.
+      .catch(function(){
+        $('send').disabled=false;
+        if(checking) return;
+        say('s2','The server was slow to answer and your code may still arrive. If nothing comes within a minute, press the globe again.',true);
+      });
   });
+  var checking=false;
 
   $('go').addEventListener('click', function(){
     var code=($('pin').value||'').replace(/\s/g,'');
     if(!code){ say('s2','Type the code from your email.',true); return; }
     $('go').disabled=true;
+    checking=true;
     say('s2','Checking...');
     fetch(GS+'?action=verifyOpsPin&email='+encodeURIComponent(addr())
           +'&appearId='+encodeURIComponent(addr()?'':me)+'&code='+encodeURIComponent(code)+'&t='+Date.now())
       .then(function(r){ return r.json(); })
       .then(function(d){
+        checking=false;
         if(!d||d.status!=='ok'||!d.sessionToken){
           $('go').disabled=false;
           say('s2',(d&&d.message)||'That code does not match.',true);
@@ -379,7 +383,10 @@
         document.title='Ops';
         load();
       })
-      .catch(function(){ $('go').disabled=false; say('s2','Could not reach the server.',true); });
+      .catch(function(){
+        checking=false; $('go').disabled=false;
+        say('s2','This is taking longer than usual. Press Open again and ask for a new code if it says this one expired.',true);
+      });
   });
 
   // ── ?why=1 ────────────────────────────────────────────────────────────────
@@ -553,7 +560,10 @@
                    + '<div class="sub">'+esc(r.email)+'</div></div>'
                    + '<div class="sub" style="white-space:nowrap;">joined '+esc(since)+'</div></div>';
             }).join('')
-          : '<div class="tot-note">Everybody who signed up has come back at least once.</div>';
+          // NOT EVERYBODY. Jessie, 2026-09-11: "Not sure what this means bcz it's NOT true for all 800
+          // people". This list reads the activity tab, which only began recording sign-ups in
+          // September, so it can speak for the people who signed up since then and nobody else.
+          : '<div class="tot-note">Everybody who signed up since the activity log began came back at least once.</div>';
 
         $('aboard').classList.remove('hide');
         settled();
@@ -700,7 +710,8 @@
       tr.children[1].style.cssText='font-size:12px;color:var(--muted);';
       tr.children[2].textContent=p.email||'';
       tr.children[3].textContent=p.stage;
-      tr.children[4].textContent=p.roles||'';
+      // COMMAS, since a person holds several. Jessie, 2026-09-11: "make stage/roles show things in commas".
+      tr.children[4].textContent=String(p.roles||'').split('|').map(function(x){ return x.trim(); }).filter(Boolean).join(', ');
       tr.children[5].textContent=p.groups; tr.children[5].className='num';
       tr.children[6].textContent=p.made? String(p.made).slice(0,10) : '';
       tr.children[7].textContent=p.lastSeen? String(p.lastSeen).slice(0,10) : '';
@@ -767,6 +778,9 @@
   fold('pfold','pbody');
   fold('gfold','gbody');
   fold('dfold','docsBody');
+  fold('afold','abody');   // Engagement had a fold button and nothing listening to it. 2026-09-11.
+
+  $('docPick').addEventListener('change', function(){ var u=this.value; if(u) window.location.href=u; });
 
   $('preset').addEventListener('click', function(){
     $('q').value=''; $('onlyTest').checked=false; pDays=0;
