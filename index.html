@@ -10,7 +10,8 @@
 
   hello@creating.works
 -->
-<!-- Version: V1.5 | Date: 2026-09-11 | LAST CHANGE: "How do you like to give it?" became "What ways of working bring out your best?" with a new help line. Jessie: "1d". -->
+<!-- Version: V1.6 | Date: 2026-09-11 | LAST CHANGE: Finding work's What happens next reads "The person who invited you or someone from Creating.Works will reach out and look at this together." Jessie: "combine both". No Sent box; the button reads Sent once sent and turns back into Send when an answer changes. Jessie: "Remove: Sent ..." and "Make button say sent not send again". -->
+<!-- Previous: V1.5 | Date: 2026-09-11 | LAST CHANGE: "How do you like to give it?" became "What ways of working bring out your best?" with a new help line. Jessie: "1d". -->
 <!-- Previous: V1.4 | Date: 2026-09-11 | LAST CHANGE: Answers save to the inquiry tab on Creating Works Data as people move between parts, are read back before any part opens, and Send tells the operators. Jessie: "2 go" and "3a". -->
 <!-- Previous: V1.3 | Date: 2026-09-10 | LAST CHANGE: Sign in and Sign up start unfilled and show their fields only once pressed, and the first screen names who is signed in. Jessie: "4 show q's only if they sign up or in" and "5a". -->
 <!-- Previous: V1.2 | Date: 2026-09-10 | LAST CHANGE: checking the sign-in code says it came from creating.works too (from=creatingworks), so the sign-in email to operators reads "signed in to Creating Works". Jessie: "also make this share how it was a creating works sign in to differneitate?" -->
@@ -190,7 +191,7 @@
   // The first version kept one draft for the whole device. It is dropped rather than handed to
   // whoever signs in next.
   try{ localStorage.removeItem('cw-inquiry-draft'); }catch(e){}
-  var A={path:'',sent_build:'',sent_work:'',
+  var A={path:'',sent_build:'',sent_work:'',edited_build:'',edited_work:'',
          building:'',forWhom:'',serves:'',asking:'',orgDoes:'',first:'',who:[],person:'',group:'',gather:'',
          needFor:[],needMore:'',offer:'',values:'',how:'',setting:'',scale:'',conditions:'',tools:'',want:'',enjoy:'',contribution:''};
   var BLANK=JSON.stringify(A);
@@ -411,8 +412,7 @@
           +'<div class="rv"><div class="t">What suits you</div>'+rows([
               ['What would you want?',A.want],['What would you enjoy?',A.enjoy],['What would bring out your greatest contribution?',A.contribution]])+'</div>'
           +'<div class="infobox"><div class="t">What happens next</div>'
-            +'<div class="d">A person reads every answer. Then we look together for what fits the person you described.</div></div>'
-          +sentBox()
+            +'<div class="d">The person who invited you or someone from Creating.Works will reach out and look at this together.</div></div>'
           +acts('suits','',sendButton());
         bindCommon(p); return;
       }
@@ -433,7 +433,6 @@
         +'<div class="infobox"><div class="t">What happens next</div>'
           +'<div class="d">A person reads every answer. Then we meet and take each constituency separately. '
           +'For each one we ask what they need and want, what they give, and what circulates back.</div></div>'
-        +sentBox()
         +acts('help','',sendButton());
     }
 
@@ -446,7 +445,7 @@
     p.querySelectorAll('[data-go]').forEach(function(b){
       b.onclick=function(){ show(b.getAttribute('data-go')); window.scrollTo(0,0); };
     });
-    var sb=document.getElementById('send-go'); if(sb) sb.onclick=function(){ sb.disabled=true; save(true); };
+    var sb=document.getElementById('send-go'); if(sb && !isSent()) sb.onclick=function(){ sb.disabled=true; save(true); };
   }
 
   function bindAsking(){
@@ -501,7 +500,7 @@
   var LISTS={who:1,needFor:1};           // kept as a list on the page and with | between on the sheet
   var loaded={}, loading=false, dirty=false, saving=false, again=false, againSend=false, saveText='';
   function isForm(k){ return k!=='start' && k!=='signin'; }
-  function changed(){ dirty=true; keep(); }
+  function changed(){ dirty=true; if(A['sent_'+A.path]) A['edited_'+A.path]='1'; keep(); }
   function setSave(t){ saveText=t||''; var el=document.getElementById('save-stat'); if(el) el.textContent=saveText; }
 
   // The session the sign-in code minted, from wherever this site keeps it.
@@ -527,12 +526,15 @@
     auth={mode:'in',step:1,email:'',first:'',last:'',note:'Your sign-in ran out and a new code lets you keep going.'};
     current='signin'; buildTabs('signin'); renderPanel('signin');
   }
-  function sentBox(){
-    var at=A['sent_'+A.path];
-    return at ? '<div class="infobox"><div class="t">Sent</div><div class="d">Your answers are with us and a person reads every one.</div></div>' : '';
-  }
+  // SENT IS A STATE, NOT A SECOND SEND. Jessie, 2026-09-11: "Remove: Sent / Your answers are with us
+  // and a person reads every one" and "Make button say sent not send again". Once sent the button
+  // reads Sent and does nothing. Changing any answer afterwards turns it back into Send, so new
+  // answers can still reach a person.
+  function isSent(){ return !!A['sent_'+A.path] && !A['edited_'+A.path]; }
   function sendButton(){
-    return '<button type="button" class="btn solid" id="send-go">'+(A['sent_'+A.path]?'Send again':'Send')+'</button>';
+    return isSent()
+      ? '<button type="button" class="btn solid" id="send-go" disabled style="opacity:.6;cursor:default;">Sent</button>'
+      : '<button type="button" class="btn solid" id="send-go">Send</button>';
   }
 
   function loadThen(key){
@@ -554,6 +556,7 @@
             A[F[col]] = LISTS[F[col]] ? v.split('|').map(function(x){ return x.trim(); }).filter(Boolean) : v;
           });
           A['sent_'+path]=d.sentAt||'';
+          A['edited_'+path]=(d.sentAt && d.savedAt && String(d.savedAt)>String(d.sentAt)) ? '1' : '';
           A.needFor=A.needFor.map(function(n){ return n==='Passing time' ? 'Enjoying my time' : (n==='Impact' ? 'Values-aligned' : n); });
         }
         loaded[path]=true; dirty=false; keep();
@@ -585,7 +588,7 @@
       if(d&&d.code==='signin'){ dirty=true; setSave(''); needCode(); return; }
       if(!d||d.status!=='ok'){ dirty=true; setSave('Your answers did not save this time and they stay here until your next step saves them.'); return; }
       setSave('Saved');
-      if(d.sentAt && d.sentAt!==A['sent_'+path]){ A['sent_'+path]=d.sentAt; keep(); if(current==='review') renderPanel('review'); setSave('Saved'); }
+      if(send && d.sentAt){ A['sent_'+path]=d.sentAt; A['edited_'+path]=''; keep(); if(current==='review') renderPanel('review'); setSave('Saved'); }
       if(again){ var s=againSend; again=false; againSend=false; save(s); }
     }).catch(function(){
       saving=false; dirty=true;
