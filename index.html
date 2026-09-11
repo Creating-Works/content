@@ -10,7 +10,8 @@
 
   hello@creating.works
 -->
-<!-- Version: V1.2 | Date: 2026-09-10 | LAST CHANGE: checking the sign-in code says it came from creating.works too (from=creatingworks), so the sign-in email to operators reads "signed in to Creating Works". Jessie: "also make this share how it was a creating works sign in to differneitate?" -->
+<!-- Version: V1.3 | Date: 2026-09-10 | LAST CHANGE: Sign in and Sign up start unfilled and show their fields only once pressed, and the first screen names who is signed in. Jessie: "4 show q's only if they sign up or in" and "5a". -->
+<!-- Previous: V1.2 | Date: 2026-09-10 | LAST CHANGE: checking the sign-in code says it came from creating.works too (from=creatingworks), so the sign-in email to operators reads "signed in to Creating Works". Jessie: "also make this share how it was a creating works sign in to differneitate?" -->
 <!-- Previous: V1.1 | Date: 2026-09-10 | LAST CHANGE: Sign in or sign up on the page after choosing a path, before any part of the form opens. Drafts are kept per person on the device. -->
 <!-- Previous: V1.0 | Date: 2026-09-10 | LAST CHANGE: The home page of creating.works. Jessie's approved track changes, Impact written as Values-aligned, and What you bring before What you need. -->
 <!-- Previous: V0.3 | Date: 2026-09-10 | LAST CHANGE: Passing time became Enjoying my time, and Social and Impact joined the reasons for work. -->
@@ -263,15 +264,12 @@
           +'<button type="button" data-path="build"'+(A.path==='build'?' class="on"':'')+'>Building something</button>'
           +'<button type="button" data-path="work"'+(A.path==='work'?' class="on"':'')+'>Finding work</button>'
         +'</div>'
-        +(signed()?'<p class="quiet">Not you? <a role="link" tabindex="0" id="sign-out">Sign out.</a></p>':'');
+        +(signed()?'<p class="quiet" id="who-line">'+whoLine()+'</p>':'');
       p.querySelectorAll('[data-path]').forEach(function(b){
         b.onclick=function(){ A.path=b.getAttribute('data-path'); keep(); show(firstPart()); };
       });
-      var so=document.getElementById('sign-out');
-      if(so) so.onclick=function(){
-        try{ if(window.CW&&CW.forget) CW.forget(); }catch(e){}
-        signedId=''; A=JSON.parse(BLANK); auth={mode:'in',step:1,email:'',first:'',last:''}; show('start');
-      };
+      if(signed() && !knownName()) fetchName();
+      bindSignOut();
       return;
     }
 
@@ -484,7 +482,9 @@
   }
 
   // ── SIGN IN OR SIGN UP ────────────────────────────────────────────────────────────────────
-  var auth={mode:'in',step:1,email:'',first:'',last:''};
+  // NOTHING IS CHOSEN FOR THEM. Jessie, 2026-09-10: "show q's only if they sign up or in". Both
+  // buttons start unfilled and no field shows until one is pressed.
+  var auth={mode:'',step:1,email:'',first:'',last:''};
   function field1(id,lab,type,val,ac){
     return '<div class="f"><label for="'+id+'">'+esc(lab)+'</label>'
       +'<input type="'+(type||'text')+'" id="'+id+'" value="'+esc(val||'')+'"'+(ac?' autocomplete="'+ac+'"':'')+'></div>';
@@ -500,7 +500,7 @@
         h+=field1('au-first','Your first name','text',auth.first,'given-name')
           +field1('au-last','Your last name','text',auth.last,'family-name');
       }
-      h+=field1('au-email','Your email','email',auth.email,'email');
+      if(auth.mode) h+=field1('au-email','Your email','email',auth.email,'email');
       if(auth.mode==='up'){
         h+='<label class="tick"><input id="au-agree" type="checkbox"><span>I agree to the '
           +'<a role="link" tabindex="0" data-nav="https://2gather.network/terms-of-service.html" onclick="event.stopPropagation();return _safeNavGo(this)">Terms of Service</a>, '
@@ -509,7 +509,7 @@
           +'<label class="tick"><input id="au-18" type="checkbox"><span>I confirm that I am 18 or older.</span></label>';
       }
       h+='<div class="acts"><button type="button" class="btn ghost" data-go="start">Back</button>'
-        +'<button type="button" class="btn solid" id="au-send">Send my code</button></div>'
+        +(auth.mode?'<button type="button" class="btn solid" id="au-send">Send my code</button>':'')+'</div>'
         +'<div class="say" id="au-say"></div>';
     } else {
       h+='<div id="au-sent" style="margin-bottom:18px;"><span class="cw-loading">Sending your code</span></div>'
@@ -582,7 +582,10 @@
             if(window.CW&&CW.remember) CW.remember(d.appearId);
             localStorage.setItem('cw-id',d.appearId);
             localStorage.setItem('appear-id',d.appearId);
-            if(auth.mode==='up'&&auth.first) localStorage.setItem('cw-first',auth.first);
+            if(auth.mode==='up'&&auth.first){
+              localStorage.setItem('cw-first',auth.first);
+              localStorage.setItem('cw-name-'+d.appearId,(auth.first+' '+auth.last).trim());
+            }
             if(d.editToken){
               localStorage.setItem('cw-token',d.editToken);
               var exp=parseInt(String(d.editToken).split('.')[1],10);
@@ -592,7 +595,7 @@
           }catch(e){}
           signedId=d.appearId;
           loadDraft(); keep();
-          auth={mode:'in',step:1,email:'',first:'',last:''};
+          auth={mode:'',step:1,email:'',first:'',last:''};
           show(firstPart());
           return;
         }
@@ -605,6 +608,36 @@
         if(s){ s.className='lead'; s.textContent='We sent a six digit code to '+auth.email+'. It expires in fifteen minutes.'; }
         say('The code did not check and your connection is the first thing to look at.');
       });
+  }
+  // WHO IS SIGNED IN. Jessie, 2026-09-10: "say who it is maybe?", then "5a". The name comes from
+  // lookupProfile, the read My account makes, and is kept under the same key My account keeps it
+  // (cw-name-<id>), so after the first visit it shows at once. Until it arrives the line names
+  // nobody rather than a wrong or empty name.
+  function nameKey(){ return 'cw-name-'+whoId(); }
+  function knownName(){ try{ return String(localStorage.getItem(nameKey())||'').trim(); }catch(e){ return ''; } }
+  function whoLine(){
+    var n=knownName();
+    return (n?'Signed in as '+esc(n)+'. ':'')+'Not you? <a role="link" tabindex="0" id="sign-out">Sign out.</a>';
+  }
+  var _nameAsked=false;
+  function fetchName(){
+    if(_nameAsked) return; _nameAsked=true;
+    var id=whoId(); if(!id) return;
+    fetch(GS_URL+'?action=lookupProfile&appearId='+encodeURIComponent(id))
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        var n=String((d&&d.found&&d.name)||'').trim();
+        if(!n || whoId()!==id) return;
+        try{ localStorage.setItem('cw-name-'+id,n); }catch(e){}
+        if(current==='start'){ var el=document.getElementById('who-line'); if(el){ el.innerHTML=whoLine(); bindSignOut(); } }
+      }).catch(function(){});
+  }
+  function bindSignOut(){
+    var so=document.getElementById('sign-out');
+    if(so) so.onclick=function(){
+      try{ if(window.CW&&CW.forget) CW.forget(); }catch(e){}
+      signedId=''; _nameAsked=false; A=JSON.parse(BLANK); auth={mode:'',step:1,email:'',first:'',last:''}; show('start');
+    };
   }
   window._safeNavGo=window._safeNavGo||function(el){try{var u=el&&el.getAttribute&&el.getAttribute('data-nav');if(u){window.location.href=u;}}catch(e){}return false;};
 
