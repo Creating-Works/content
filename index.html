@@ -10,7 +10,8 @@
 
   hello@creating.works
 -->
-<!-- Version: V1.8 | Date: 2026-09-11 | LAST CHANGE: The "What would work give you?" choices come from reference-data.needFor with the saved answers instead of being written into the page. Jessie: "3 yes". -->
+<!-- Version: V1.9 | Date: 2026-09-11 | LAST CHANGE: The name comes back with the sign-in code, so "Signed in as" shows at once. Jessie: "1 yes". -->
+<!-- Previous: V1.8 | Date: 2026-09-11 | LAST CHANGE: The "What would work give you?" choices come from reference-data.needFor with the saved answers instead of being written into the page. Jessie: "3 yes". -->
 <!-- Previous: V1.7 | Date: 2026-09-11 | LAST CHANGE: Building something's What happens next names who reaches out, and answers typed before saving existed are saved at the next step. Jessie: "2 go 3 yes". -->
 <!-- Previous: V1.6 | Date: 2026-09-11 | LAST CHANGE: Finding work's What happens next reads "The person who invited you or someone from Creating.Works will reach out and look at this together." Jessie: "combine both". No Sent box; the button reads Sent once sent and turns back into Send when an answer changes. Jessie: "Remove: Sent ..." and "Make button say sent not send again". -->
 <!-- Previous: V1.5 | Date: 2026-09-11 | LAST CHANGE: "How do you like to give it?" became "What ways of working bring out your best?" with a new help line. Jessie: "1d". -->
@@ -720,6 +721,9 @@
               localStorage.setItem('cw-first',auth.first);
               localStorage.setItem('cw-name-'+d.appearId,(auth.first+' '+auth.last).trim());
             }
+            // The sign-in answer carries the name now, so "Signed in as" shows at once. Jessie,
+            // 2026-09-11: "1 yes". Before that deploy it is absent and the lookup still fills it.
+            if(d.name) localStorage.setItem('cw-name-'+d.appearId,String(d.name).trim());
             if(d.editToken){
               localStorage.setItem('cw-token',d.editToken);
               var exp=parseInt(String(d.editToken).split('.')[1],10);
