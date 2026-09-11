@@ -10,7 +10,8 @@
 
   hello@creating.works
 -->
-<!-- Version: V1.3 | Date: 2026-09-10 | LAST CHANGE: Sign in and Sign up start unfilled and show their fields only once pressed, and the first screen names who is signed in. Jessie: "4 show q's only if they sign up or in" and "5a". -->
+<!-- Version: V1.4 | Date: 2026-09-11 | LAST CHANGE: Answers save to the inquiry tab on Creating Works Data as people move between parts, are read back before any part opens, and Send tells the operators. Jessie: "2 go" and "3a". -->
+<!-- Previous: V1.3 | Date: 2026-09-10 | LAST CHANGE: Sign in and Sign up start unfilled and show their fields only once pressed, and the first screen names who is signed in. Jessie: "4 show q's only if they sign up or in" and "5a". -->
 <!-- Previous: V1.2 | Date: 2026-09-10 | LAST CHANGE: checking the sign-in code says it came from creating.works too (from=creatingworks), so the sign-in email to operators reads "signed in to Creating Works". Jessie: "also make this share how it was a creating works sign in to differneitate?" -->
 <!-- Previous: V1.1 | Date: 2026-09-10 | LAST CHANGE: Sign in or sign up on the page after choosing a path, before any part of the form opens. Drafts are kept per person on the device. -->
 <!-- Previous: V1.0 | Date: 2026-09-10 | LAST CHANGE: The home page of creating.works. Jessie's approved track changes, Impact written as Values-aligned, and What you bring before What you need. -->
@@ -116,6 +117,7 @@
   .say.bad{color:#7A2410;}
   .say.ok{color:var(--soft);}
   .quiet{font-size:13.5px;color:var(--muted);margin-top:18px;}
+  .savestat{font-size:13.5px;color:var(--muted);font-weight:600;}
   .quiet a{color:var(--brand);font-weight:700;cursor:pointer;}
 
   @media(max-width:860px){
@@ -187,7 +189,7 @@
   // The first version kept one draft for the whole device. It is dropped rather than handed to
   // whoever signs in next.
   try{ localStorage.removeItem('cw-inquiry-draft'); }catch(e){}
-  var A={path:'',
+  var A={path:'',sent_build:'',sent_work:'',
          building:'',forWhom:'',serves:'',asking:'',orgDoes:'',first:'',who:[],person:'',group:'',gather:'',
          needFor:[],needMore:'',offer:'',values:'',how:'',setting:'',scale:'',conditions:'',tools:'',want:'',enjoy:'',contribution:''};
   var BLANK=JSON.stringify(A);
@@ -247,10 +249,12 @@
       +'<div class="help">'+esc(help)+'</div>'
       +'<textarea id="q-'+key+'" data-a="'+key+'" placeholder="'+esc(ph)+'">'+esc(A[key])+'</textarea></div>';
   }
-  function acts(back,next){
-    return '<div class="acts">'
+  function acts(back,next,extra){
+    return '<div class="acts" style="align-items:center;">'
       +(back?'<button type="button" class="btn ghost" data-go="'+back+'">Back</button>':'')
       +(next?'<button type="button" class="btn solid" data-go="'+next+'">Next</button>':'')
+      +(extra||'')
+      +'<span class="savestat" id="save-stat">'+esc(saveText)+'</span>'
       +'</div>';
   }
 
@@ -290,6 +294,7 @@
         b.onclick=function(){
           var n=b.getAttribute('data-need'), i=A.needFor.indexOf(n);
           if(i>-1) A.needFor.splice(i,1); else A.needFor.push(n);
+          changed();
           b.classList.toggle('on',i<0); keep();
         };
       });
@@ -406,9 +411,8 @@
               ['What would you want?',A.want],['What would you enjoy?',A.enjoy],['What would bring out your greatest contribution?',A.contribution]])+'</div>'
           +'<div class="infobox"><div class="t">What happens next</div>'
             +'<div class="d">A person reads every answer. Then we look together for what fits the person you described.</div></div>'
-          +'<div class="infobox"><div class="t">Saving to your account comes next</div>'
-            +'<div class="d">Your answers stay on this device until that step is ready.</div></div>'
-          +acts('suits','');
+          +sentBox()
+          +acts('suits','',sendButton());
         bindCommon(p); return;
       }
       var pic=[['What are you building?',A.building],['Who do you picture using it?',A.forWhom],['What does it serve?',A.serves],
@@ -428,27 +432,27 @@
         +'<div class="infobox"><div class="t">What happens next</div>'
           +'<div class="d">A person reads every answer. Then we meet and take each constituency separately. '
           +'For each one we ask what they need and want, what they give, and what circulates back.</div></div>'
-        +'<div class="infobox"><div class="t">Saving to your account comes next</div>'
-          +'<div class="d">Your answers stay on this device until that step is ready.</div></div>'
-        +acts('help','');
+        +sentBox()
+        +acts('help','',sendButton());
     }
 
     bindCommon(p);
   }
   function bindCommon(p){
     p.querySelectorAll('[data-a]').forEach(function(el){
-      el.addEventListener('input',function(){ A[el.getAttribute('data-a')]=el.value; keep(); });
+      el.addEventListener('input',function(){ A[el.getAttribute('data-a')]=el.value; changed(); });
     });
     p.querySelectorAll('[data-go]').forEach(function(b){
       b.onclick=function(){ show(b.getAttribute('data-go')); window.scrollTo(0,0); };
     });
+    var sb=document.getElementById('send-go'); if(sb) sb.onclick=function(){ sb.disabled=true; save(true); };
   }
 
   function bindAsking(){
     document.querySelectorAll('[data-ask]').forEach(function(b){
       b.onclick=function(){
         var v=b.getAttribute('data-ask');
-        A.asking=(A.asking===v)?'':v; keep();
+        A.asking=(A.asking===v)?'':v; changed();
         document.querySelectorAll('[data-ask]').forEach(function(x){ x.classList.toggle('on',x.getAttribute('data-ask')===A.asking); });
         var box=document.getElementById('org-q');
         box.innerHTML=A.asking==='org'
@@ -456,7 +460,7 @@
                  'Example: We run a leadership program for the whole county, across industry and government')
           : '';
         var t=box.querySelector('[data-a]');
-        if(t) t.addEventListener('input',function(){ A.orgDoes=t.value; keep(); });
+        if(t) t.addEventListener('input',function(){ A.orgDoes=t.value; changed(); });
       };
     });
   }
@@ -465,7 +469,7 @@
     var inp=document.getElementById('who-in'); if(!inp) return;
     var v=inp.value.trim(); if(!v) return;
     var dup=A.who.some(function(w){ return w.toLowerCase()===v.toLowerCase(); });
-    if(!dup){ A.who.push(v); keep(); }
+    if(!dup){ A.who.push(v); changed(); }
     inp.value=''; inp.focus();
     renderWho(); buildTabs(current);
   }
@@ -477,7 +481,115 @@
         }).join('')
       : '<span class="none">None listed yet.</span>';
     box.querySelectorAll('[data-drop]').forEach(function(b){
-      b.onclick=function(){ A.who.splice(parseInt(b.getAttribute('data-drop'),10),1); keep(); renderWho(); buildTabs(current); };
+      b.onclick=function(){ A.who.splice(parseInt(b.getAttribute('data-drop'),10),1); changed(); renderWho(); buildTabs(current); };
+    });
+  }
+
+  // ── SAVING TO THE ACCOUNT ─────────────────────────────────────────────────────────────────
+  // Jessie, 2026-09-10: "2 go" and "3a". Answers live on the inquiry tab of Creating Works Data,
+  // one row per person per path, through getInquiry and saveInquiry. The page reads the row before
+  // any part opens, so a second device starts from what was saved and can never wipe it with blank
+  // boxes. It saves when somebody moves between parts, never on every keystroke, because each save
+  // is one trip to the backend. Send saves and tells the operators.
+  var FIELDS={
+    build:{building:'building',forWhom:'forWhom',serves:'serves',asking:'asking',orgDoes:'orgDoes',
+           firstSteps:'first',constituencies:'who',personSupport:'person',groupSupport:'group',gatherSupport:'gather'},
+    work:{offer:'offer',values:'values',how:'how',needFor:'needFor',needMore:'needMore',setting:'setting',
+          scale:'scale',conditions:'conditions',tools:'tools',want:'want',enjoy:'enjoy',contribution:'contribution'}
+  };
+  var LISTS={who:1,needFor:1};           // kept as a list on the page and with | between on the sheet
+  var loaded={}, loading=false, dirty=false, saving=false, again=false, againSend=false, saveText='';
+  function isForm(k){ return k!=='start' && k!=='signin'; }
+  function changed(){ dirty=true; keep(); }
+  function setSave(t){ saveText=t||''; var el=document.getElementById('save-stat'); if(el) el.textContent=saveText; }
+
+  // The session the sign-in code minted, from wherever this site keeps it.
+  function token(){
+    var id=whoId(); if(!id) return '';
+    try{
+      var o=JSON.parse(localStorage.getItem('cw-edit-'+norm(id))||'null');
+      if(o&&o.t&&o.exp&&Date.now()<o.exp-60000) return o.t;
+    }catch(e){}
+    try{
+      var t=localStorage.getItem('cw-token')||'';
+      if(t && norm(localStorage.getItem('cw-id'))===norm(id)){
+        var exp=parseInt(String(t).split('.')[1],10);
+        if(exp && Date.now()<exp-60000) return t;
+      }
+    }catch(e){}
+    return '';
+  }
+  // A sign-in the backend will not accept goes back to the code, with the reason on the screen and
+  // the answers left exactly where they are.
+  function needCode(){
+    try{ localStorage.removeItem('cw-edit-'+norm(whoId())); localStorage.removeItem('cw-token'); }catch(e){}
+    auth={mode:'in',step:1,email:'',first:'',last:'',note:'Your sign-in ran out and a new code lets you keep going.'};
+    current='signin'; buildTabs('signin'); renderPanel('signin');
+  }
+  function sentBox(){
+    var at=A['sent_'+A.path];
+    return at ? '<div class="infobox"><div class="t">Sent</div><div class="d">Your answers are with us and a person reads every one.</div></div>' : '';
+  }
+  function sendButton(){
+    return '<button type="button" class="btn solid" id="send-go">'+(A['sent_'+A.path]?'Send again':'Send')+'</button>';
+  }
+
+  function loadThen(key){
+    if(loading) return;
+    var tk=token(); if(!tk){ needCode(); return; }
+    loading=true;
+    var path=A.path, id=whoId();
+    document.getElementById('panel').innerHTML='<span class="cw-loading">Looking for your saved answers</span>';
+    fetch(GS_URL+'?action=getInquiry&appearId='+encodeURIComponent(id)+'&editToken='+encodeURIComponent(tk)+'&path='+encodeURIComponent(path))
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        loading=false;
+        if(d&&d.code==='signin'){ needCode(); return; }
+        if(!d||d.status!=='ok'){ loadFailed(key); return; }
+        if(d.found&&d.data){
+          var F=FIELDS[path];
+          Object.keys(F).forEach(function(col){
+            var v=String(d.data[col]==null?'':d.data[col]);
+            A[F[col]] = LISTS[F[col]] ? v.split('|').map(function(x){ return x.trim(); }).filter(Boolean) : v;
+          });
+          A['sent_'+path]=d.sentAt||'';
+          A.needFor=A.needFor.map(function(n){ return n==='Passing time' ? 'Enjoying my time' : (n==='Impact' ? 'Values-aligned' : n); });
+        }
+        loaded[path]=true; dirty=false; keep();
+        show(key);
+      })
+      .catch(function(){ loading=false; loadFailed(key); });
+  }
+  function loadFailed(key){
+    document.getElementById('panel').innerHTML='<h2>Your saved answers</h2>'
+      +'<p class="lead">Your saved answers did not load and nothing opens until they do.</p>'
+      +'<div class="acts"><button type="button" class="btn solid" id="load-again">Look again</button></div>';
+    document.getElementById('load-again').onclick=function(){ loadThen(key); };
+  }
+
+  function save(send){
+    if(!signed()||!A.path||!loaded[A.path]) return;
+    if(saving){ again=true; if(send) againSend=true; return; }
+    var tk=token(); if(!tk){ needCode(); return; }
+    saving=true; dirty=false; setSave('Saving');
+    var path=A.path, F=FIELDS[path];
+    var u=GS_URL+'?action=saveInquiry&appearId='+encodeURIComponent(whoId())+'&editToken='+encodeURIComponent(tk)
+      +'&path='+encodeURIComponent(path)+(send?'&send=1':'');
+    Object.keys(F).forEach(function(col){
+      var v=A[F[col]]; if(LISTS[F[col]]) v=(v||[]).join('|');
+      u+='&'+col+'='+encodeURIComponent(v==null?'':v);
+    });
+    fetch(u).then(function(r){ return r.json(); }).then(function(d){
+      saving=false;
+      if(d&&d.code==='signin'){ dirty=true; setSave(''); needCode(); return; }
+      if(!d||d.status!=='ok'){ dirty=true; setSave('Your answers did not save this time and they stay here until your next step saves them.'); return; }
+      setSave('Saved');
+      if(d.sentAt && d.sentAt!==A['sent_'+path]){ A['sent_'+path]=d.sentAt; keep(); if(current==='review') renderPanel('review'); setSave('Saved'); }
+      if(again){ var s=againSend; again=false; againSend=false; save(s); }
+    }).catch(function(){
+      saving=false; dirty=true;
+      setSave('Your answers did not save this time and they stay here until your next step saves them.');
+      var sb=document.getElementById('send-go'); if(sb) sb.disabled=false;
     });
   }
 
@@ -491,7 +603,7 @@
   }
   function renderSignin(p){
     var h='<h2>Sign in to begin</h2>'
-      +'<p class="lead">Your answers stay on this device for now and saving them to your account comes next.</p>';
+      +'<p class="lead">'+(auth.note?esc(auth.note):'Your answers are saved to your account and wait for you whenever you come back.')+'</p>';
     if(auth.step===1){
       h+='<div class="choice" style="margin-bottom:22px;">'
         +'<button type="button" data-mode="in"'+(auth.mode==='in'?' class="on"':'')+'>Sign in</button>'
@@ -596,7 +708,7 @@
           signedId=d.appearId;
           loadDraft(); keep();
           auth={mode:'',step:1,email:'',first:'',last:''};
-          show(firstPart());
+          show(current&&isForm(current)&&current!=='signin'?current:firstPart());
           return;
         }
         b.disabled=false;
@@ -636,7 +748,7 @@
     var so=document.getElementById('sign-out');
     if(so) so.onclick=function(){
       try{ if(window.CW&&CW.forget) CW.forget(); }catch(e){}
-      signedId=''; _nameAsked=false; A=JSON.parse(BLANK); auth={mode:'',step:1,email:'',first:'',last:''}; show('start');
+      signedId=''; _nameAsked=false; loaded={}; dirty=false; setSave(''); A=JSON.parse(BLANK); auth={mode:'',step:1,email:'',first:'',last:''}; show('start');
     };
   }
   window._safeNavGo=window._safeNavGo||function(el){try{var u=el&&el.getAttribute&&el.getAttribute('data-nav');if(u){window.location.href=u;}}catch(e){}return false;};
@@ -658,6 +770,9 @@
   function show(key){
     // Every part of the form waits behind sign-in, including a link straight to one.
     if(key!=='start' && key!=='signin' && !signed()) key = A.path ? 'signin' : 'start';
+    // Leaving a part saves it, and nothing of a path opens until its saved answers have been read.
+    if(dirty && isForm(current)) save(false);
+    if(isForm(key) && !loaded[A.path]){ current=key; buildTabs(key); loadThen(key); return; }
     current=key; buildTabs(key); renderPanel(key);
     // The address names the part, so a link can open straight onto it.
     try{
