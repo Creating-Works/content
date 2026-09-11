@@ -10,7 +10,8 @@
 
   hello@creating.works
 -->
-<!-- Version: V1.10 | Date: 2026-09-11 | LAST CHANGE: "Loading your answers", and Saved is a two-second note on the press with no Saving before it. Jessie: "just say Saved when clicking button and make it disappear". -->
+<!-- Version: V1.11 | Date: 2026-09-11 | LAST CHANGE: Each part is its own step for the back arrow, and a copy the back arrow restores reloads itself. Jessie: "2 yes". -->
+<!-- Previous: V1.10 | Date: 2026-09-11 | LAST CHANGE: "Loading your answers", and Saved is a two-second note on the press with no Saving before it. Jessie: "just say Saved when clicking button and make it disappear". -->
 <!-- Previous: V1.9 | Date: 2026-09-11 | LAST CHANGE: The name comes back with the sign-in code, so "Signed in as" shows at once. Jessie: "1 yes". -->
 <!-- Previous: V1.8 | Date: 2026-09-11 | LAST CHANGE: The "What would work give you?" choices come from reference-data.needFor with the saved answers instead of being written into the page. Jessie: "3 yes". -->
 <!-- Previous: V1.7 | Date: 2026-09-11 | LAST CHANGE: Building something's What happens next names who reaches out, and answers typed before saving existed are saved at the next step. Jessie: "2 go 3 yes". -->
@@ -806,19 +807,37 @@
     if(dirty && isForm(current)) save(false);
     if(isForm(key) && !loaded[A.path]){ current=key; buildTabs(key); loadThen(key); return; }
     current=key; buildTabs(key); renderPanel(key);
-    // The address names the part, so a link can open straight onto it.
+    // The address names the part, so a link can open straight onto it. EACH PART IS ITS OWN STEP.
+    // Jessie, 2026-09-11: "2 yes". Moving to another part adds a step, so the browser's back arrow
+    // goes to the part before instead of leaving the form. The first draw and a return through the
+    // back arrow only rewrite the address.
     try{
-      var u=new URL(location.href); u.searchParams.set('part',key);
+      var u=new URL(location.href);
+      var same=(u.searchParams.get('part')||'')===key && (u.searchParams.get('path')||'')===(A.path||'');
+      u.searchParams.set('part',key);
       if(A.path) u.searchParams.set('path',A.path); else u.searchParams.delete('path');
-      history.replaceState(null,'',u);
+      if(_navQuiet || same) history.replaceState(null,'',u); else history.pushState(null,'',u);
     }catch(e){}
   }
+  var _navQuiet=true;
+  window.addEventListener('popstate',function(){
+    var pp=P('path'); if(PATHS[pp]) A.path=pp;
+    var k=P('part')||'start';
+    if(k==='signin' && signed()) k='start';
+    if(k!=='signin' && !parts().some(function(s){ return s.key===k; })) k='start';
+    _navQuiet=true; show(k); _navQuiet=false;
+  });
+  // AN OLD COPY RELOADS ITSELF. The back arrow can bring the page back exactly as it was when it was
+  // left, older code and all, which is how a tab showed wording replaced hours before. A page the
+  // browser restores that way is reloaded, so it is always the current one.
+  window.addEventListener('pageshow',function(e){ if(e.persisted) location.reload(); });
 
   // ?path=work or ?path=build opens a path straight away, and ?part= a part of it.
   var askPath=P('path'); if(PATHS[askPath]){ A.path=askPath; keep(); }
   var start=P('part');
   if(parts().some(function(s){ return s.key===start; })) show(start);
   else show(A.path && askPath ? PATHS[A.path][0].key : 'start');
+  _navQuiet=false;
 })();
 </script>
 </body>
