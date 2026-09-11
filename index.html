@@ -552,7 +552,9 @@
   // The code box shows at once, the way the sign-in page does, and the pill says the email is on
   // its way until the backend answers.
   function fireSend(){
-    var u=GS_URL+'?action=sendSigninPin'
+    // from=creatingworks is how the email knows to say Creating Works in its subject. 2gather.network's
+    // sign-in never sends it, so its email is unchanged. Jessie, 2026-09-10.
+    var u=GS_URL+'?action=sendSigninPin&from=creatingworks'
       +(auth.mode==='up'?'&signup=1&terms=1&age=1&first='+encodeURIComponent(auth.first)+'&last='+encodeURIComponent(auth.last):'')
       +'&email='+encodeURIComponent(auth.email);
     fetch(u).then(function(r){ return r.json(); }).then(function(){
