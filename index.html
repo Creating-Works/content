@@ -10,7 +10,8 @@
 
   hello@creating.works
 -->
-<!-- Version: V1.7 | Date: 2026-09-11 | LAST CHANGE: Building something's What happens next names who reaches out, and answers typed before saving existed are saved at the next step. Jessie: "2 go 3 yes". -->
+<!-- Version: V1.8 | Date: 2026-09-11 | LAST CHANGE: The "What would work give you?" choices come from reference-data.needFor with the saved answers instead of being written into the page. Jessie: "3 yes". -->
+<!-- Previous: V1.7 | Date: 2026-09-11 | LAST CHANGE: Building something's What happens next names who reaches out, and answers typed before saving existed are saved at the next step. Jessie: "2 go 3 yes". -->
 <!-- Previous: V1.6 | Date: 2026-09-11 | LAST CHANGE: Finding work's What happens next reads "The person who invited you or someone from Creating.Works will reach out and look at this together." Jessie: "combine both". No Sent box; the button reads Sent once sent and turns back into Send when an answer changes. Jessie: "Remove: Sent ..." and "Make button say sent not send again". -->
 <!-- Previous: V1.5 | Date: 2026-09-11 | LAST CHANGE: "How do you like to give it?" became "What ways of working bring out your best?" with a new help line. Jessie: "1d". -->
 <!-- Previous: V1.4 | Date: 2026-09-11 | LAST CHANGE: Answers save to the inquiry tab on Creating Works Data as people move between parts, are read back before any part opens, and Send tells the operators. Jessie: "2 go" and "3a". -->
@@ -234,9 +235,16 @@
   // Only Start until somebody is signed in, so no part of the form is drawn before they can use it.
   function parts(){ return [{key:'start',label:'Start'}].concat(signed()?(PATHS[A.path]||[]):[]); }
   function firstPart(){ return A.path&&PATHS[A.path] ? PATHS[A.path][0].key : 'start'; }
-  // Jessie, 2026-09-10: "Passing time to Enjoying my time", and Social and Impact join them, Impact
-  // written as Values-aligned.
-  var NEEDS=['Money','Consistency','Resources','Fun','Enjoying my time','Social','Values-aligned'];
+  // THE CHOICES LIVE ON THE SHEET. Jessie, 2026-09-11: "3 yes" to moving them off the page. They are
+  // reference-data.needFor on Creating Works Data, and they arrive with the saved answers, so
+  // changing one is a row rather than a push and costs no extra trip. A choice somebody already
+  // picked is still shown if the list drops it, so nobody loses an answer to an edit on the sheet.
+  var needChoices=[];
+  function needOptions(){
+    var l=needChoices.slice();
+    A.needFor.forEach(function(n){ if(l.indexOf(n)<0) l.push(n); });
+    return l;
+  }
   // Two or three choices read as a sentence. Four or more take a slash, because a sentence of that
   // many ands is too much. Jessie, 2026-09-10.
   function joinChoices(l){
@@ -285,11 +293,13 @@
     else if(key==='need'){
       p.innerHTML='<h2>What you need</h2>'
         +'<p class="lead">Tell us what you need right now and put it your own way.</p>'
-        +'<div class="f"><div class="lab">What would work give you?</div>'
-          +'<div class="help">Pick as many as fit and add your own below.</div>'
-          +'<div class="choice">'+NEEDS.map(function(n){
-            return '<button type="button" data-need="'+esc(n)+'"'+(A.needFor.indexOf(n)>-1?' class="on"':'')+'>'+esc(n)+'</button>';
-          }).join('')+'</div></div>'
+        +(needOptions().length
+          ? '<div class="f"><div class="lab">What would work give you?</div>'
+            +'<div class="help">Pick as many as fit and add your own below.</div>'
+            +'<div class="choice">'+needOptions().map(function(n){
+              return '<button type="button" data-need="'+esc(n)+'"'+(A.needFor.indexOf(n)>-1?' class="on"':'')+'>'+esc(n)+'</button>';
+            }).join('')+'</div></div>'
+          : '')
         +area('needMore','Anything else','Say it in your own words, as much or as little as you like.',
               'Example: Steady income while I figure out what comes next')
         +acts('bring','fits');
@@ -566,6 +576,7 @@
         var hasAny=!d.found && Object.keys(FIELDS[path]).some(function(col){
           var v=A[FIELDS[path][col]]; return Array.isArray(v) ? v.length>0 : !!String(v||'').trim();
         });
+        if(Array.isArray(d.needChoices)) needChoices=d.needChoices;
         loaded[path]=true; dirty=hasAny; keep();
         show(key);
       })
