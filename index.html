@@ -10,7 +10,8 @@
 
   hello@creating.works
 -->
-<!-- Version: V1.6 | Date: 2026-09-11 | LAST CHANGE: Finding work's What happens next reads "The person who invited you or someone from Creating.Works will reach out and look at this together." Jessie: "combine both". No Sent box; the button reads Sent once sent and turns back into Send when an answer changes. Jessie: "Remove: Sent ..." and "Make button say sent not send again". -->
+<!-- Version: V1.7 | Date: 2026-09-11 | LAST CHANGE: Building something's What happens next names who reaches out, and answers typed before saving existed are saved at the next step. Jessie: "2 go 3 yes". -->
+<!-- Previous: V1.6 | Date: 2026-09-11 | LAST CHANGE: Finding work's What happens next reads "The person who invited you or someone from Creating.Works will reach out and look at this together." Jessie: "combine both". No Sent box; the button reads Sent once sent and turns back into Send when an answer changes. Jessie: "Remove: Sent ..." and "Make button say sent not send again". -->
 <!-- Previous: V1.5 | Date: 2026-09-11 | LAST CHANGE: "How do you like to give it?" became "What ways of working bring out your best?" with a new help line. Jessie: "1d". -->
 <!-- Previous: V1.4 | Date: 2026-09-11 | LAST CHANGE: Answers save to the inquiry tab on Creating Works Data as people move between parts, are read back before any part opens, and Send tells the operators. Jessie: "2 go" and "3a". -->
 <!-- Previous: V1.3 | Date: 2026-09-10 | LAST CHANGE: Sign in and Sign up start unfilled and show their fields only once pressed, and the first screen names who is signed in. Jessie: "4 show q's only if they sign up or in" and "5a". -->
@@ -431,8 +432,8 @@
         +'<div class="rv"><div class="t">What would help</div>'+rows([
             ['For each person on their own',A.person],['For their group or peers',A.group],['When they gather',A.gather]])+'</div>'
         +'<div class="infobox"><div class="t">What happens next</div>'
-          +'<div class="d">A person reads every answer. Then we meet and take each constituency separately. '
-          +'For each one we ask what they need and want, what they give, and what circulates back.</div></div>'
+          +'<div class="d">The person who invited you or someone from Creating.Works will reach out and look at this together. '
+          +'For each constituency we ask what they need and want, what they give, and what circulates back.</div></div>'
         +acts('help','',sendButton());
     }
 
@@ -559,7 +560,13 @@
           A['edited_'+path]=(d.sentAt && d.savedAt && String(d.savedAt)>String(d.sentAt)) ? '1' : '';
           A.needFor=A.needFor.map(function(n){ return n==='Passing time' ? 'Enjoying my time' : (n==='Impact' ? 'Values-aligned' : n); });
         }
-        loaded[path]=true; dirty=false; keep();
+        // ANSWERS FROM BEFORE SAVING EXISTED. Jessie, 2026-09-11: "3 yes". Somebody who typed before
+        // 1:33 on 2026-09-11 has answers in this browser and none on the sheet. Nothing saved means
+        // they are unsaved, so the next step saves them instead of leaving them on screen looking kept.
+        var hasAny=!d.found && Object.keys(FIELDS[path]).some(function(col){
+          var v=A[FIELDS[path][col]]; return Array.isArray(v) ? v.length>0 : !!String(v||'').trim();
+        });
+        loaded[path]=true; dirty=hasAny; keep();
         show(key);
       })
       .catch(function(){ loading=false; loadFailed(key); });
