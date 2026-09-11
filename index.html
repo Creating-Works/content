@@ -10,7 +10,8 @@
 
   hello@creating.works
 -->
-<!-- Version: V1.4 | Date: 2026-09-11 | LAST CHANGE: Answers save to the inquiry tab on Creating Works Data as people move between parts, are read back before any part opens, and Send tells the operators. Jessie: "2 go" and "3a". -->
+<!-- Version: V1.5 | Date: 2026-09-11 | LAST CHANGE: "How do you like to give it?" became "What ways of working bring out your best?" with a new help line. Jessie: "1d". -->
+<!-- Previous: V1.4 | Date: 2026-09-11 | LAST CHANGE: Answers save to the inquiry tab on Creating Works Data as people move between parts, are read back before any part opens, and Send tells the operators. Jessie: "2 go" and "3a". -->
 <!-- Previous: V1.3 | Date: 2026-09-10 | LAST CHANGE: Sign in and Sign up start unfilled and show their fields only once pressed, and the first screen names who is signed in. Jessie: "4 show q's only if they sign up or in" and "5a". -->
 <!-- Previous: V1.2 | Date: 2026-09-10 | LAST CHANGE: checking the sign-in code says it came from creating.works too (from=creatingworks), so the sign-in email to operators reads "signed in to Creating Works". Jessie: "also make this share how it was a creating works sign in to differneitate?" -->
 <!-- Previous: V1.1 | Date: 2026-09-10 | LAST CHANGE: Sign in or sign up on the page after choosing a path, before any part of the form opens. Drafts are kept per person on the device. -->
@@ -307,7 +308,7 @@
               'Example: I can calm a room and get people talking')
         +area('values','What do you value?','Tell us what matters to you when you picture a good day.',
               'Example: Kindness, time outdoors, and work that helps somebody')
-        +area('how','How do you like to give it?','Think about the ways of working that bring out your best.',
+        +area('how','What ways of working bring out your best?','Think about your pace, your setting, and the company you keep.',
               'Example: One to one, with time to prepare')
         +acts('start','need');
     }
@@ -402,7 +403,7 @@
         p.innerHTML='<h2>Your answers</h2>'
           +'<p class="lead">Every answer you gave is gathered here and any part on the left opens again to change it.</p>'
           +'<div class="rv"><div class="t">What you bring</div>'+rows([
-              ['What do you have to offer?',A.offer],['What do you value?',A.values],['How do you like to give it?',A.how]])+'</div>'
+              ['What do you have to offer?',A.offer],['What do you value?',A.values],['What ways of working bring out your best?',A.how]])+'</div>'
           +'<div class="rv"><div class="t">What you need</div>'+rows([
               ['What would work give you?',joinChoices(A.needFor)],['Anything else',A.needMore]])+'</div>'
           +'<div class="rv"><div class="t">Where it fits</div>'+rows([
