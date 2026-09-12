@@ -100,6 +100,11 @@
   .fold.shut::before{content:'\25B8';}
   .tot .tile{cursor:pointer;border-radius:8px;padding:4px 8px;margin:-4px -8px;}
   .tot .tile:hover{background:#F1F5F9;}
+  /* A number you can press looks like a link. */
+  #ptot .tile b{color:var(--brand);text-decoration:underline;text-underline-offset:3px;}
+  .sortbtn{background:#fff;border:1px solid var(--line);border-radius:12px;font:inherit;font-size:12px;
+           padding:3px 10px;cursor:pointer;color:var(--brand);font-weight:700;white-space:nowrap;}
+  .sortbtn.on{background:var(--brand);color:#fff;border-color:var(--brand);}
   .tot .tile.on{background:var(--brand);color:#fff;}
   .tot .tile.on b{color:#fff;}
   .chips{display:flex;flex-wrap:wrap;gap:4px;max-width:230px;}
@@ -153,18 +158,24 @@
     <!-- A DROPDOWN, NOT A LIST. Jessie, 2026-09-11: "make build docs a drop down to select from instead
          of a list". Choosing one opens it in the same tab. -->
     <div id="docsBody">
-      <select id="docPick" aria-label="Open a build document" style="max-width:420px;">
-        <option value="">Choose a document</option>
-        <option value="https://creating.works/license/">What a license includes</option>
-        <option value="https://claude.ai/code/artifact/e1825deb-d464-4464-ba2a-e4251fab9c5f">Open items, the queue</option>
-        <option value="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/docs/0-Main-combined-draft.md">North Star, the current draft</option>
+      <!-- IN HER ORDER, WITH THE SUPER ADMIN PAGES IN IT. Jessie, 2026-09-12: "Put Super admin pages on
+           the drop-down menu at the top and remove the section below for super admin pages put in this
+           order: queue, service desk, field registry, Northstar, writing style guide, decisions to be
+           made standing questions for Doug and then the rest and finally what a license includes". -->
+      <select id="docPick" aria-label="Open a page or document">
+        <option value="">Choose a page</option>
+        <option value="https://claude.ai/code/artifact/e1825deb-d464-4464-ba2a-e4251fab9c5f">Queue</option>
+        <option value="https://creating.works/service/">Service desk</option>
+        <option value="https://creating.works/fields/">Field registry</option>
+        <option value="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/docs/0-Main-combined-draft.md">North Star</option>
+        <option value="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/Reference-Materials/writing-style.md">Writing style guide</option>
         <option value="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/collaboration/decisions-to-be-made-2026-09-02.md">Decisions to be made</option>
         <option value="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/collaboration/standing-questions-for-doug.md">Standing questions for Doug</option>
         <option value="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/01-contributor-enrollment-story.md#the-people-we-are-seeking">The people we are seeking</option>
         <option value="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/collaboration/roles-and-what-is-left.md">Roles, and what is left</option>
         <option value="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/05-master-development-plan.md">Master development plan</option>
-        <option value="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/Reference-Materials/writing-style.md">Writing style guide</option>
         <option value="https://github.com/Creating-Works/The-New-Build-Repository/blob/main">The whole repository</option>
+        <option value="https://creating.works/license/">What a license includes</option>
       </select>
     </div>
   </div>
@@ -191,8 +202,6 @@
         </label>
       </div>
       <div id="arecent"></div>
-      <h3 style="font-size:14px;font-weight:800;margin:18px 0 6px;">Recent sign-ups not seen since</h3>
-      <div id="aquiet"></div>
     </div>
   </div>
 
@@ -220,26 +229,21 @@
     <div class="scroll"><table id="ptbl">
       <thead>
         <tr>
+          <!-- Roles third and ID last. Jessie, 2026-09-12: "Make ID last column" and "Role third column". -->
           <th data-k="name">Name</th>
-          <th data-k="cwid">ID</th>
           <th data-k="email">Address</th>
-          <th data-k="stage">Stage</th>
           <th data-k="roles">Roles</th>
+          <th data-k="stage">Stage</th>
           <th data-k="groups" class="num">Groups</th>
           <th data-k="made">Signed up</th>
           <th data-k="lastSeen">Last seen</th>
+          <th data-k="cwid">ID</th>
         </tr>
         <tr class="filters">
+          <!-- Signed up and Last seen sort rather than search. Jessie, 2026-09-12: "Signed up and Last
+               seen should be sort instead of search". -->
           <td><input data-f="name" placeholder="filter"></td>
-          <td><input data-f="cwid" placeholder="filter"></td>
           <td><input data-f="email" placeholder="filter"></td>
-          <td><div class="chips" data-f="stage">
-                <button type="button" data-v="knocked">knocked</button>
-                <button type="button" data-v="created account">created account</button>
-                <button type="button" data-v="completed intro">completed intro</button>
-                <button type="button" data-v="joined group">joined group</button>
-                <button type="button" data-v="created group">created group</button>
-              </div></td>
           <td><div class="chips" data-f="roles">
                 <button type="button" data-v="superAdmin">superAdmin</button>
                 <button type="button" data-v="admin">admin</button>
@@ -249,9 +253,17 @@
                 <button type="button" data-v="groupHost">host</button>
                 <button type="button" data-v="groupCoHost">co-host</button>
               </div></td>
+          <td><div class="chips" data-f="stage">
+                <button type="button" data-v="knocked">knocked</button>
+                <button type="button" data-v="created account">created account</button>
+                <button type="button" data-v="completed intro">completed intro</button>
+                <button type="button" data-v="joined group">joined group</button>
+                <button type="button" data-v="created group">created group</button>
+              </div></td>
           <td><input data-f="groups" placeholder="filter"></td>
-          <td><input data-f="made" placeholder="filter"></td>
-          <td><input data-f="lastSeen" placeholder="filter"></td>
+          <td><button type="button" class="sortbtn" data-sort="made">Newest first</button></td>
+          <td><button type="button" class="sortbtn" data-sort="lastSeen">Sort</button></td>
+          <td><input data-f="cwid" placeholder="filter"></td>
         </tr>
       </thead>
       <tbody></tbody>
@@ -260,15 +272,6 @@
     </div>
   </div>
 
-  <!-- The other pages a super admin can open. Jessie, 2026-09-06: "link to the 3 pages that super
-       admin opens on top of ops page". It appears with the board, so a stranger sitting at the
-       code box still learns nothing about what is behind it. -->
-  <div class="card hide" id="adminlinks">
-    <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6B7A8D;">Super admin pages</span>
-    <a href="https://creating.works/ops/">Operations</a>
-    <a href="https://creating.works/service/">Service desk</a>
-    <a href="https://creating.works/fields/">Field registry</a>
-  </div>
 
   <div class="card hide" id="board">
     <div class="headrow">
@@ -585,7 +588,6 @@
           '<div><b>'+(d.uniquePeople||0)+'</b>people belong to a group</div>'+
           '<div><b>'+people+'</b>joins in total, counting somebody once per group</div>'+
           '<div><b>'+(rows.length? Math.round(people/rows.length):0)+'</b>members in the average group</div>';
-        $('adminlinks').classList.remove('hide');   // shown with the board, never before it
         $('board').classList.remove('hide');
         paint();
         done_('groups');
@@ -612,22 +614,8 @@
 
         aRecent=d.recent||[];
         paintRecent();
-        // NAMES, NOT A NUMBER. A count here is something to feel bad about; a name is somebody to
-        // reach. Oldest first, because the person who arrived longest ago and never came back is
-        // the one most worth a message.
-        var q=d.quiet||[];
-        $('aquiet').innerHTML = q.length
-          ? q.map(function(r){
-              var since='';
-              try { since=new Date(r.since).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); } catch(e){}
-              return '<div class="row"><div class="who"><div class="name">'+esc(r.name)+'</div>'
-                   + '<div class="sub">'+esc(r.email)+'</div></div>'
-                   + '<div class="sub" style="white-space:nowrap;">joined '+esc(since)+'</div></div>';
-            }).join('')
-          // NOT EVERYBODY. Jessie, 2026-09-11: "Not sure what this means bcz it's NOT true for all 800
-          // people". This list reads the activity tab, which only began recording sign-ups in
-          // September, so it can speak for the people who signed up since then and nobody else.
-          : '<div class="tot-note">Everybody who signed up since the activity log began came back at least once.</div>';
+        // The quiet list went on 2026-09-12. Jessie: "This doesn't really give me any data that I want".
+
 
         $('aboard').classList.remove('hide');
         done_('activity');
@@ -688,6 +676,9 @@
             Array.prototype.forEach.call($('ptot').querySelectorAll('.tile'), function(x){ x.classList.remove('on'); });
             if(act!=='all') t.classList.add('on');
             ppaint();
+            // SHOW WHO. Jessie, 2026-09-12: "Can we link the number ... to show who this is". The tile
+            // already filtered the table; now it takes you there.
+            try{ $('ptbl').scrollIntoView({behavior:'smooth', block:'start'}); }catch(e){}
           });
         });
         $('pboard').classList.remove('hide');
@@ -733,7 +724,6 @@
     // three sections, each waiting for its own Load. The documents used to appear only right after a
     // code was typed, so a return visit never showed them.
     $('docs').classList.remove('hide');
-    $('adminlinks').classList.remove('hide');
     ['aboard','pboard','board'].forEach(function(id){ $(id).classList.remove('hide'); });
   }
   Array.prototype.forEach.call(document.querySelectorAll('.loadbtn'), function(b){
@@ -817,16 +807,16 @@
       var tr=document.createElement('tr');
       for(var i=0;i<8;i++){ tr.appendChild(document.createElement('td')); }
       tr.children[0].textContent=p.name||'(no name)';
-      tr.children[1].textContent=p.ids||p.cwid||'';
-      tr.children[1].style.cssText='font-size:12px;color:var(--muted);';
-      tr.children[2].textContent=p.email||'';
+      tr.children[1].textContent=p.email||'';
+      // COMMAS, since a person holds several. Jessie, 2026-09-11: "make stage/roles show things in commas".
+      tr.children[2].textContent=String(p.roles||'').split('|').map(function(x){ return x.trim(); }).filter(Boolean).join(', ');
       // EVERY STEP REACHED. Jessie, 2026-09-11: "6 yes".
       tr.children[3].textContent=(p.stages||[p.stage]).join(', ');
-      // COMMAS, since a person holds several. Jessie, 2026-09-11: "make stage/roles show things in commas".
-      tr.children[4].textContent=String(p.roles||'').split('|').map(function(x){ return x.trim(); }).filter(Boolean).join(', ');
-      tr.children[5].textContent=p.groups; tr.children[5].className='num';
-      tr.children[6].textContent=p.made? String(p.made).slice(0,10) : '';
-      tr.children[7].textContent=p.lastSeen? String(p.lastSeen).slice(0,10) : '';
+      tr.children[4].textContent=p.groups; tr.children[4].className='num';
+      tr.children[5].textContent=p.made? String(p.made).slice(0,10) : '';
+      tr.children[6].textContent=p.lastSeen? String(p.lastSeen).slice(0,10) : '';
+      tr.children[7].textContent=p.ids||p.cwid||'';
+      tr.children[7].style.cssText='font-size:12px;color:var(--muted);';
       if(!p.name){ var s2=document.createElement('span'); s2.className='flag'; s2.textContent='no name';
                    tr.children[0].textContent=''; tr.children[0].appendChild(s2); }
       b.appendChild(tr);
@@ -842,7 +832,23 @@
     th.addEventListener('click', function(){
       var k=th.getAttribute('data-k');
       if(k===pSortK){ pSortDown=!pSortDown; } else { pSortK=k; pSortDown=true; }
-      ppaint();
+      sortWords(); ppaint();
+    });
+  });
+  // The two date columns sort from a button that says what it is doing: Newest first or Oldest first
+  // on the one in use, Sort on the other.
+  function sortWords(){
+    Array.prototype.forEach.call(document.querySelectorAll('#ptbl .sortbtn'), function(b){
+      var k=b.getAttribute('data-sort');
+      b.textContent = (k===pSortK) ? (pSortDown ? 'Newest first' : 'Oldest first') : 'Sort';
+      b.classList.toggle('on', k===pSortK);
+    });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('#ptbl .sortbtn'), function(b){
+    b.addEventListener('click', function(){
+      var k=b.getAttribute('data-sort');
+      if(k===pSortK){ pSortDown=!pSortDown; } else { pSortK=k; pSortDown=true; }
+      sortWords(); ppaint();
     });
   });
 
