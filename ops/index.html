@@ -531,7 +531,12 @@
         if(bad){
           whySay(action + '  NOT JSON. The first 300 characters:');
           whySay('  ' + body.slice(0,300).replace(/\s+/g,' '));
-          throw new Error(bad.message);
+          // SAY WHICH IT WAS, IN WORDS. Jessie, 2026-09-12, looking at "Unexpected token '<',
+          // "<!DOCTYPE "... is not valid JSON". A 524 is Cloudflare giving up after a hundred seconds,
+          // which with Load buttons usually means another section was loading at the same time.
+          throw new Error(r.status===524
+            ? 'The server took longer than 100 seconds to answer, which usually means another section was loading at the same time. Press Load again once it finishes.'
+            : 'The server sent back an error page instead of an answer. Press Load again and open this page with ?why=1 if it keeps happening.');
         }
         whySay(action + '  ok, status field = ' + (d && d.status) + (d && d.people ? ', ' + d.people.length + ' people' : '')
                + (d && d.groups ? ', ' + d.groups.length + ' groups' : ''));
@@ -561,7 +566,7 @@
   }
   function fail_(key, err){
     var s=SECTIONS[key]; if(!s) return;
-    var b=$(s.board).querySelector('.loadbtn'); if(b){ b.disabled=false; b.textContent='Try again'; }
+    var b=$(s.board).querySelector('.loadbtn'); if(b){ b.disabled=false; b.textContent='Load again'; }
     $(s.say).innerHTML='<div class="tot-note">The '+s.label+' did not load. '
       + esc(String((err && err.message) || 'The server took too long to answer.')) + '</div>';
   }
