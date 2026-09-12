@@ -10,7 +10,8 @@
 
   hello@creating.works
 -->
-<!-- Version: V1.12 | Date: 2026-09-12 | LAST CHANGE: clean addresses, /build/picture and /work/bring, with /answers as the last part; 404.html hands them here and old ?path= links still work. Jessie: "4 go". -->
+<!-- Version: V1.13 | Date: 2026-09-12 | LAST CHANGE: the waiting pill says "Loading information", because "Loading your answers" claimed answers before the page knew there were any. Jessie: "say loading information instead of loading your answers because I don't even have any answers maybe". -->
+<!-- Previous: V1.12 | Date: 2026-09-12 | LAST CHANGE: clean addresses, /build/picture and /work/bring, with /answers as the last part; 404.html hands them here and old ?path= links still work. Jessie: "4 go". -->
 <!-- Previous: V1.11 | Date: 2026-09-11 | LAST CHANGE: Each part is its own step for the back arrow, and a copy the back arrow restores reloads itself. Jessie: "2 yes". -->
 <!-- Previous: V1.10 | Date: 2026-09-11 | LAST CHANGE: "Loading your answers", and Saved is a two-second note on the press with no Saving before it. Jessie: "just say Saved when clicking button and make it disappear". -->
 <!-- Previous: V1.9 | Date: 2026-09-11 | LAST CHANGE: The name comes back with the sign-in code, so "Signed in as" shows at once. Jessie: "1 yes". -->
@@ -563,7 +564,7 @@
     var tk=token(); if(!tk){ needCode(); return; }
     loading=true;
     var path=A.path, id=whoId();
-    document.getElementById('panel').innerHTML='<span class="cw-loading">Loading your answers</span>';
+    document.getElementById('panel').innerHTML='<span class="cw-loading">Loading information</span>';
     fetch(GS_URL+'?action=getInquiry&appearId='+encodeURIComponent(id)+'&editToken='+encodeURIComponent(tk)+'&path='+encodeURIComponent(path))
       .then(function(r){ return r.json(); })
       .then(function(d){
