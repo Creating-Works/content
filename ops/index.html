@@ -53,6 +53,14 @@
      Same fault, same day, as the filter bar menus that all drew at once. */
   #adminlinks{display:flex;gap:18px;flex-wrap:wrap;align-items:center;}
   #adminlinks.hide{display:none;}
+  /* The Engagement table: small, tight, five rows before it scrolls. */
+  .atbl-wrap{max-height:172px;overflow-y:auto;}
+  .atbl{width:100%;border-collapse:collapse;font-size:12.5px;}
+  .atbl th{position:sticky;top:0;background:#fff;text-align:left;font-size:11.5px;font-weight:700;
+           text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:4px 8px;}
+  .atbl td{padding:4px 8px;color:var(--text);vertical-align:top;border:0;}
+  .atbl tr.more td{color:var(--muted);padding-top:0;padding-bottom:8px;}
+  .dots{background:none;border:0;font:inherit;font-size:15px;line-height:1;color:var(--muted);cursor:pointer;padding:0 4px;}
   /* Waiting is the breathing pill. */
   .cw-loading{display:inline-flex;align-items:center;gap:8px;background:#1F699E;color:#fff;
     font-size:13px;font-weight:700;padding:8px 16px;border-radius:20px;white-space:nowrap;
@@ -173,7 +181,12 @@
     <div id="asay"></div>
     <div id="abody" class="hide">
       <div class="tot" id="atot"></div>
-      <h3 style="font-size:14px;font-weight:800;margin:18px 0 6px;">Latest</h3>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin:18px 0 6px;">
+        <h3 style="font-size:14px;font-weight:800;margin:0;">Latest</h3>
+        <label style="font-weight:400;font-size:13px;color:var(--muted);display:flex;align-items:center;gap:7px;margin:0;">
+          <input type="checkbox" id="aSuper" checked style="width:auto;"> Include super admins
+        </label>
+      </div>
       <div id="arecent"></div>
       <h3 style="font-size:14px;font-weight:800;margin:18px 0 6px;">Recent sign-ups not seen since</h3>
       <div id="aquiet"></div>
@@ -308,9 +321,30 @@
   // An hour's session, kept so a refresh does not ask again. The server decides when it expires;
   // this only remembers what it already handed out. Cleared the moment it stops working.
   var KEY='cw-ops-session';
+  function tokExp(t){ var d=String(t||'').lastIndexOf('.'); var x=d>-1?parseInt(String(t).slice(d+1),10):0; return x||0; }
   function remember(id,tok){
-    try{ localStorage.setItem(KEY, JSON.stringify({id:id,tok:tok,until:Date.now()+55*60*1000})); }catch(e){}
+    var until = tokExp(tok) ? tokExp(tok)-60*1000 : Date.now()+55*60*1000;
+    try{ localStorage.setItem(KEY, JSON.stringify({id:id,tok:tok,until:until})); }catch(e){}
   }
+  // SIGNED IN UNTIL AN HOUR OF NOTHING. Jessie, 2026-09-11: "keep me logged UNLESS i have 60 minutes of
+  // no activity". While somebody clicks, types or scrolls, the session is swapped for a fresh hour at
+  // most every ten minutes. Reading without touching anything for an hour lets it end, as asked.
+  var lastRenew=Date.now(), renewing=false;
+  function renew(){
+    if(!token || renewing || Date.now()-lastRenew < 10*60*1000) return;
+    renewing=true;
+    fetch(GS+'?action=refreshOpsSession&appearId='+encodeURIComponent(me)
+          +'&sessionToken='+encodeURIComponent(token)+'&t='+Date.now())
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        renewing=false; lastRenew=Date.now();
+        if(d && d.status==='ok' && d.sessionToken){ token=d.sessionToken; remember(me, token); }
+      })
+      .catch(function(){ renewing=false; lastRenew=Date.now(); });
+  }
+  ['click','keydown','scroll','mousemove','touchstart'].forEach(function(ev){
+    window.addEventListener(ev, renew, {passive:true});
+  });
   function forget(){ try{ localStorage.removeItem(KEY); }catch(e){} }
   function recall(){
     try{
@@ -573,18 +607,8 @@
             + '<div><b>'+(d.total||0)+'</b>recorded in all</div>'
           : '<div class="tot-note">Nothing recorded in the past seven days.</div>';
 
-        var rec=d.recent||[];
-        $('arecent').innerHTML = rec.length
-          ? rec.map(function(r){
-              var when='';
-              try { when=new Date(r.at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}); } catch(e){}
-              return '<div class="row"><div class="who"><div class="name">'+esc(r.name)+'</div>'
-                   + '<div class="sub">'+esc(r.kind)+(r.detail?' \u00b7 '+esc(r.detail):'')
-                   + (r.email?' \u00b7 '+esc(r.email):'')+'</div></div>'
-                   + '<div class="sub" style="white-space:nowrap;">'+esc(when)+'</div></div>';
-            }).join('')
-          : '<div class="tot-note">Nothing yet.</div>';
-
+        aRecent=d.recent||[];
+        paintRecent();
         // NAMES, NOT A NUMBER. A count here is something to feel bad about; a name is somebody to
         // reach. Oldest first, because the person who arrived longest ago and never came back is
         // the one most worth a message.
@@ -627,7 +651,8 @@
         // Counted from the stage names the server actually sends. These read zero for a while
         // because the tiles still counted the old names after the stages were renamed. 2026-09-01.
         var by={};
-        people.forEach(function(p){ by[p.stage]=(by[p.stage]||0)+1; });
+        // Each tile counts everybody who reached that step, which is what its filter shows.
+        people.forEach(function(p){ (p.stages||[p.stage]).forEach(function(s){ by[s]=(by[s]||0)+1; }); });
         var since=function(days){
           var cut=new Date(Date.now()-days*86400000).toISOString();
           return people.filter(function(p){ return String(p.made) >= cut; }).length;
@@ -674,6 +699,31 @@
       });
   }
   var LOADERS={groups:loadGroups, activity:loadActivity, people:loadPeople};
+
+  // THE ENGAGEMENT TABLE. Jessie, 2026-09-11: "Make engagement section into a table and small font like
+  // the header descriptions and tight with a scroll after displaying 5 rows - add a toggle of include
+  // super admin and default on", "put 3 dots at end of each row and add more info like ID" and "2 full".
+  // No lines between rows: space does the separating.
+  var aRecent=[];
+  function paintRecent(){
+    var withSuper=$('aSuper').checked;
+    var rows=aRecent.filter(function(r){ return withSuper || !r.superAdmin; });
+    if(!rows.length){ $('arecent').innerHTML='<div class="tot-note">Nothing yet.</div>'; return; }
+    var html='<div class="atbl-wrap"><table class="atbl"><thead><tr><th>When</th><th>Who</th><th>What</th><th>Detail</th><th></th></tr></thead><tbody>';
+    rows.forEach(function(r, i){
+      var when='';
+      try { when=new Date(r.at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}); } catch(e){}
+      html+='<tr><td style="white-space:nowrap;">'+esc(when)+'</td><td>'+esc(r.name)+'</td><td>'+esc(r.kind)+'</td>'
+          +'<td>'+esc(r.detail||'')+'</td><td style="text-align:right;"><button type="button" class="dots" data-i="'+i+'" aria-label="More">&middot;&middot;&middot;</button></td></tr>'
+          +'<tr class="more hide" id="amore'+i+'"><td colspan="5">'
+          +'ID '+esc(r.id||'not sent yet')+' &nbsp;&middot;&nbsp; '+esc(r.emailFull||r.email||'')+'</td></tr>';
+    });
+    $('arecent').innerHTML=html+'</tbody></table></div>';
+    Array.prototype.forEach.call($('arecent').querySelectorAll('.dots'), function(b){
+      b.addEventListener('click', function(){ $('amore'+b.getAttribute('data-i')).classList.toggle('hide'); });
+    });
+  }
+  $('aSuper').addEventListener('change', paintRecent);
   function load(){
     whySession();
     // Signed in, so the doors behind the code box show: the documents, the other pages, and the
@@ -718,7 +768,9 @@
       var want=f[k];
       if(want && want.any){
         var hit=false;
-        for(var j=0;j<want.any.length;j++){ if(have===want.any[j]){ hit=true; break; } }
+        // Stage matches any step the person reached, not only the furthest.
+        var haves=(k==='stage' && row.stages) ? row.stages.map(function(x){ return String(x).toLowerCase(); }) : [have];
+        for(var j=0;j<want.any.length;j++){ if(haves.indexOf(want.any[j])>-1){ hit=true; break; } }
         if(!hit) return false;
       } else if(Object.prototype.toString.call(want)==='[object Array]'){
         for(var i=0;i<want.length;i++){ if(have.indexOf(want[i])===-1) return false; }
@@ -765,7 +817,8 @@
       tr.children[1].textContent=p.ids||p.cwid||'';
       tr.children[1].style.cssText='font-size:12px;color:var(--muted);';
       tr.children[2].textContent=p.email||'';
-      tr.children[3].textContent=p.stage;
+      // EVERY STEP REACHED. Jessie, 2026-09-11: "6 yes".
+      tr.children[3].textContent=(p.stages||[p.stage]).join(', ');
       // COMMAS, since a person holds several. Jessie, 2026-09-11: "make stage/roles show things in commas".
       tr.children[4].textContent=String(p.roles||'').split('|').map(function(x){ return x.trim(); }).filter(Boolean).join(', ');
       tr.children[5].textContent=p.groups; tr.children[5].className='num';
