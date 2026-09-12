@@ -10,7 +10,8 @@
 
   hello@creating.works
 -->
-<!-- Version: V1.20 | Date: 2026-09-12 | LAST CHANGE: once the answers are sent, Your answers invites people on to their 2Gather profile and to the calendar (Finding work) or starting a group (Building something), each with Yes and Not now. Jessie: "go", in her words, and "go" to the line under the profile one. -->
+<!-- Version: V1.21 | Date: 2026-09-12 | LAST CHANGE: the first screen says what each choice covers in a gray line beside it, and the line above starts "Each one asks its own questions." Jessie: "Yes publish this part - without the third set". -->
+<!-- Previous: V1.20 | Date: 2026-09-12 | LAST CHANGE: once the answers are sent, Your answers invites people on to their 2Gather profile and to the calendar (Finding work) or starting a group (Building something), each with Yes and Not now. Jessie: "go", in her words, and "go" to the line under the profile one. -->
 <!-- Previous: V1.19 | Date: 2026-09-12 | LAST CHANGE: Sign in and Sign up are blue buttons, and once one is pressed the choice steps aside until Back; the whole sign-in is centered; while Google signs somebody in, the two buttons step aside. Jessie: "remove sig in/up buttons when google is signing in", "make these blue buttons for sign in/up", "center all", and "remove the sign in /up button when they are in hte sign in/up process". -->
 <!-- Previous: V1.18 | Date: 2026-09-12 | LAST CHANGE: Continue with Google on the sign-in, and Google signs in by itself somebody who has said yes to Creating Works before. Previous: V1.17: a path this device has opened before shows at once and checks the saved version behind it; saves carry their version and a refused one takes the newer answers; the sign-in hands the bar your face and name. Jessie: "1 a and b", "2 yes". -->
 <!-- Previous: V1.16 | Date: 2026-09-12 | LAST CHANGE: viewing as somebody shows their answers read-only, with a line saying whose they are. Jessie: "when i viewed as doug it showed my info", then "1 yes". -->
@@ -101,6 +102,15 @@
     font:inherit;font-size:14px;font-weight:700;padding:9px 16px;cursor:pointer;}
   .choice button.on{background:var(--brand);color:#fff;border-color:var(--brand);}
 
+  /* THE FIRST SCREEN'S CHOICES, each with a gray line saying what it covers. Beside it on a computer,
+     under it on a phone. Chosen is filled blue like every other choice. */
+  .picks{display:flex;flex-direction:column;gap:16px;margin-bottom:8px;}
+  .pick{display:grid;grid-template-columns:200px minmax(0,1fr);gap:16px;align-items:start;}
+  .pick button{background:#fff;color:var(--brand);border:1.5px solid #C9D6E2;border-radius:9px;
+    font:inherit;font-size:14px;font-weight:700;padding:11px 16px;text-align:left;cursor:pointer;}
+  .pick button.on{background:var(--brand);color:#fff;border-color:var(--brand);}
+  .pick button:focus-visible{outline:2px solid var(--brand);outline-offset:2px;}
+  .pick .gray{font-size:13.5px;color:var(--muted);padding-top:2px;max-width:60ch;}
   .addrow{display:flex;gap:10px;flex-wrap:wrap;}
   .addrow input{flex:1 1 240px;}
   .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
@@ -153,6 +163,7 @@
     /* Four buttons stacked down a phone is most of a screen, so the rail lies down and wraps. */
     .tabs{flex-direction:row;flex-wrap:wrap;}
     .tab{width:auto;flex:1 1 40%;}
+    .pick{grid-template-columns:1fr;gap:6px;}
   }
   @media(max-width:760px){
     .panel{padding:12px 18px 22px;}
@@ -307,10 +318,16 @@
 
     if(key==='start'){
       p.innerHTML='<h2>What brings you here?</h2>'
-        +'<p class="lead">Pick the one closest to where you are and change it whenever you like.</p>'
-        +'<div class="choice" style="margin-bottom:8px;">'
-          +'<button type="button" data-path="build"'+(A.path==='build'?' class="on"':'')+'>Building something</button>'
-          +'<button type="button" data-path="work"'+(A.path==='work'?' class="on"':'')+'>Finding work</button>'
+        // WHAT EACH ONE COVERS, BEFORE THE CLICK. Jessie, 2026-09-12: "put in some content context in little
+        // gray writing" so people know "building something requires different answers and questions" before
+        // they click, then "Yes publish this part - without the third set". Helping out joins once its
+        // questions are built (design/features/home-page-questions-2026-09-12.md).
+        +'<p class="lead">Each one asks its own questions. Pick the one closest to where you are and change it whenever you like.</p>'
+        +'<div class="picks">'
+          +'<div class="pick"><button type="button" data-path="build"'+(A.path==='build'?' class="on"':'')+'>Building something</button>'
+            +'<div class="gray">It can be a business, a project, or a nonprofit. The questions are about what you are building and the people it serves.</div></div>'
+          +'<div class="pick"><button type="button" data-path="work"'+(A.path==='work'?' class="on"':'')+'>Finding work</button>'
+            +'<div class="gray">It can be full-time or part-time work, gigs, or your own clients and customers. The questions are about you and the work that would suit you.</div></div>'
         +'</div>'
         +(signed()?'<p class="quiet" id="who-line">'+whoLine()+'</p>':'');
       p.querySelectorAll('[data-path]').forEach(function(b){
