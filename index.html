@@ -10,7 +10,8 @@
 
   hello@creating.works
 -->
-<!-- Version: V1.13 | Date: 2026-09-12 | LAST CHANGE: the waiting pill says "Loading information", because "Loading your answers" claimed answers before the page knew there were any. Jessie: "say loading information instead of loading your answers because I don't even have any answers maybe". -->
+<!-- Version: V1.14 | Date: 2026-09-12 | LAST CHANGE: the clean address is written the moment a part is chosen, not after its answers load, so an old ?part= address never sits in the bar during the wait. -->
+<!-- Previous: V1.13 | Date: 2026-09-12 | LAST CHANGE: the waiting pill says "Loading information", because "Loading your answers" claimed answers before the page knew there were any. Jessie: "say loading information instead of loading your answers because I don't even have any answers maybe". -->
 <!-- Previous: V1.12 | Date: 2026-09-12 | LAST CHANGE: clean addresses, /build/picture and /work/bring, with /answers as the last part; 404.html hands them here and old ?path= links still work. Jessie: "4 go". -->
 <!-- Previous: V1.11 | Date: 2026-09-11 | LAST CHANGE: Each part is its own step for the back arrow, and a copy the back arrow restores reloads itself. Jessie: "2 yes". -->
 <!-- Previous: V1.10 | Date: 2026-09-11 | LAST CHANGE: "Loading your answers", and Saved is a two-second note on the press with no Saving before it. Jessie: "just say Saved when clicking button and make it disappear". -->
@@ -807,6 +808,10 @@
     if(key!=='start' && key!=='signin' && !signed()) key = A.path ? 'signin' : 'start';
     // Leaving a part saves it, and nothing of a path opens until its saved answers have been read.
     if(dirty && isForm(current)) save(false);
+    // THE ADDRESS FIRST, before any waiting. Jessie, 2026-09-12, looking at creating.works/?part=picture
+    // under "Loading information": "shouldnt there be a path and a part?". It was only written after the
+    // answers arrived, so an old address sat in the bar for the whole wait.
+    setAddress(key);
     if(isForm(key) && !loaded[A.path]){ current=key; buildTabs(key); loadThen(key); return; }
     current=key; buildTabs(key); renderPanel(key);
     // The address names the part, so a link can open straight onto it. EACH PART IS ITS OWN STEP.
@@ -818,6 +823,8 @@
     // "4 go". The address is /build/picture or /work/bring, and the last part of each path is
     // /answers. Somebody arriving at one of these is sent here by 404.html, which only knows the
     // home page, and this puts the clean address back.
+  }
+  function setAddress(key){
     try{
       var target=urlFor(key);
       var same=location.pathname===target && !location.search;
