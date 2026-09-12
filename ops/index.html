@@ -53,6 +53,10 @@
      Same fault, same day, as the filter bar menus that all drew at once. */
   #adminlinks{display:flex;gap:18px;flex-wrap:wrap;align-items:center;}
   #adminlinks.hide{display:none;}
+  /* The documents dropdown sits on the right of the blue, shown only after sign-in. */
+  #docs{display:flex;justify-content:flex-end;margin:0 0 16px;}
+  #docs.hide{display:none;}
+  #docPick{background:#fff;color:var(--brand);font-weight:700;border:0;border-radius:22px;padding:9px 14px;}
   .scroll{overflow-x:auto;}
   table{border-collapse:collapse;width:100%;font-size:14px;}
   th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);white-space:nowrap;}
@@ -108,7 +112,6 @@
        the code looked empty, and a correct code was answered with "Type the code from your email".
        Nobody could get in. Renamed 2026-09-02, and it is the same two-things-one-name fault as the
        rest of that day. -->
-  <p class="pin hide" id="licenseNote"><a href="https://creating.works/license/">What a license includes &#8250;</a></p>
 
   <div class="card" id="gate">
     <div class="row">
@@ -124,15 +127,16 @@
 
   <!-- The build documents, so the operational page is one click from the north star and the open
        decisions rather than a set of URLs somebody has to keep. Added 2026-09-04. -->
-  <div class="card hide" id="docs">
-    <div class="headrow">
-      <h2><button class="fold" id="dfold" title="Hide or show">Build documents</button></h2>
-    </div>
+  <!-- ON THE RIGHT, NO HEADING, NO FOLD. Jessie, 2026-09-11: "What a license includes belongs on the
+       drop down menu in build docs", "right justify drop down and remove build documents header" and
+       "remove collapse on build docs/groups". -->
+  <div class="hide" id="docs">
     <!-- A DROPDOWN, NOT A LIST. Jessie, 2026-09-11: "make build docs a drop down to select from instead
          of a list". Choosing one opens it in the same tab. -->
     <div id="docsBody">
       <select id="docPick" aria-label="Open a build document" style="max-width:420px;">
         <option value="">Choose a document</option>
+        <option value="https://creating.works/license/">What a license includes</option>
         <option value="https://claude.ai/code/artifact/e1825deb-d464-4464-ba2a-e4251fab9c5f">Open items, the queue</option>
         <option value="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/docs/0-Main-combined-draft.md">North Star, the current draft</option>
         <option value="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/collaboration/decisions-to-be-made-2026-09-02.md">Decisions to be made</option>
@@ -240,7 +244,7 @@
 
   <div class="card hide" id="board">
     <div class="headrow">
-      <h2><button class="fold" id="gfold" title="Hide or show">Groups</button></h2>
+      <h2>Groups</h2>
       <button class="reset" id="greset">reset</button>
     </div>
     <div id="gbody">
@@ -378,7 +382,6 @@
         remember(me, token);
         say('s2','');
         $('gate').classList.add('hide');
-        $('licenseNote').classList.remove('hide');
         $('docs').classList.remove('hide');
         document.title='Ops';
         load();
@@ -776,8 +779,6 @@
     });
   };
   fold('pfold','pbody');
-  fold('gfold','gbody');
-  fold('dfold','docsBody');
   fold('afold','abody');   // Engagement had a fold button and nothing listening to it. 2026-09-11.
 
   $('docPick').addEventListener('change', function(){ var u=this.value; if(u) window.location.href=u; });
