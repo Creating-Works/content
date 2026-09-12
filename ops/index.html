@@ -53,6 +53,12 @@
      Same fault, same day, as the filter bar menus that all drew at once. */
   #adminlinks{display:flex;gap:18px;flex-wrap:wrap;align-items:center;}
   #adminlinks.hide{display:none;}
+  /* Waiting is the breathing pill. */
+  .cw-loading{display:inline-flex;align-items:center;gap:8px;background:#1F699E;color:#fff;
+    font-size:13px;font-weight:700;padding:8px 16px;border-radius:20px;white-space:nowrap;
+    animation:cw-breathe 1.6s ease-in-out infinite;margin:6px 0 4px;}
+  @keyframes cw-breathe{0%,100%{opacity:1}50%{opacity:.62}}
+  .loadbtn{padding:7px 16px;font-size:13.5px;}
   /* The documents dropdown sits on the right of the blue, shown only after sign-in. */
   #docs{display:flex;justify-content:flex-end;margin:0 0 16px;}
   #docs.hide{display:none;}
@@ -160,8 +166,10 @@
   <div class="card hide" id="aboard">
     <div class="headrow">
       <h2><button class="fold" id="afold" title="Hide or show">Engagement</button></h2>
+      <button type="button" class="btn loadbtn" data-load="activity">Load</button>
     </div>
-    <div id="abody">
+    <div id="asay"></div>
+    <div id="abody" class="hide">
       <div class="tot" id="atot"></div>
       <h3 style="font-size:14px;font-weight:800;margin:18px 0 6px;">Latest</h3>
       <div id="arecent"></div>
@@ -173,9 +181,11 @@
   <div class="card hide" id="pboard">
     <div class="headrow">
       <h2><button class="fold" id="pfold" title="Hide or show">People</button></h2>
-      <button class="reset" id="preset">reset</button>
+      <span style="display:flex;gap:10px;align-items:center;"><button class="reset" id="preset">reset</button>
+      <button type="button" class="btn loadbtn" data-load="people">Load</button></span>
     </div>
-    <div id="pbody">
+    <div id="psay"></div>
+    <div id="pbody" class="hide">
     <div class="tot" id="ptot"></div>
     <p class="key">
       <b>knocked</b> gave an address and never came in &nbsp;·&nbsp;
@@ -245,9 +255,11 @@
   <div class="card hide" id="board">
     <div class="headrow">
       <h2>Groups</h2>
-      <button class="reset" id="greset">reset</button>
+      <span style="display:flex;gap:10px;align-items:center;"><button class="reset" id="greset">reset</button>
+      <button type="button" class="btn loadbtn" data-load="groups">Load</button></span>
     </div>
-    <div id="gbody">
+    <div id="gsay"></div>
+    <div id="gbody" class="hide">
     <div class="tot" id="tot"></div>
     <div class="row" style="margin-bottom:12px;">
       <input id="gq" placeholder="Search everything on a group's row" style="max-width:340px;">
@@ -473,11 +485,32 @@
     });
   }
 
-  function load(){
-    whySession();
-    $('loading').classList.remove('hide');
-    var done=0;
-    var settled=function(){ if(++done>=2) $('loading').classList.add('hide'); };
+  // LOAD BUTTONS, ONE SECTION AT A TIME. Jessie, 2026-09-11: "is failed response timeout bcz too much
+  // is being called on right away? how about buttons to call in info instead so it's not all at
+  // once?", then "2 go". Signing in used to ask for Groups, Engagement and People together. Each is a
+  // heavy read, the backend answers them one after another, and the last one could wait past the
+  // hundred seconds a connection is allowed and come back as nothing at all, drawn as nothing at
+  // all. Now signing in asks for nothing: each section has its own Load button, says it is waiting
+  // while it waits, and says what went wrong with a Try again when it fails.
+  var SECTIONS={
+    groups:  {board:'board',  body:'gbody', say:'gsay', label:'groups'},
+    activity:{board:'aboard', body:'abody', say:'asay', label:'engagement'},
+    people:  {board:'pboard', body:'pbody', say:'psay', label:'people'}
+  };
+  function done_(key){
+    var s=SECTIONS[key]; if(!s) return;
+    var b=$(s.board).querySelector('.loadbtn'); if(b){ b.disabled=false; b.textContent='Load again'; }
+    $(s.say).innerHTML='';
+    $(s.body).classList.remove('hide');
+    $(s.board).setAttribute('data-loaded','1');
+  }
+  function fail_(key, err){
+    var s=SECTIONS[key]; if(!s) return;
+    var b=$(s.board).querySelector('.loadbtn'); if(b){ b.disabled=false; b.textContent='Try again'; }
+    $(s.say).innerHTML='<div class="tot-note">The '+s.label+' did not load. '
+      + esc(String((err && err.message) || 'The server took too long to answer.')) + '</div>';
+  }
+  function loadGroups(){
     ask('getOpsGroups', GS+'?action=getOpsGroups&appearId='+encodeURIComponent(me)
           +'&sessionToken='+encodeURIComponent(token)+'&t='+Date.now())
       .then(function(d){
@@ -501,6 +534,7 @@
           forget(); token='';
           $('gate').classList.remove('hide');
           say('s2', why);
+          fail_('groups', {message: why});
           return;
         }
         rows=d.groups||[];
@@ -515,13 +549,11 @@
         $('adminlinks').classList.remove('hide');   // shown with the board, never before it
         $('board').classList.remove('hide');
         paint();
-        settled();
+        done_('groups');
       })
-      .catch(function(){ settled(); });
-
-    // Asked alongside the other two rather than after them. This backend runs one call at a time,
-    // so a third question asked in sequence is a third wait; asked together it queues behind them
-    // and the page fills in as each lands.
+      .catch(function(err){ fail_('groups', err); });
+  }
+  function loadActivity(){
     ask('getOpsActivity', GS+'?action=getOpsActivity&appearId='+encodeURIComponent(me)
           +'&sessionToken='+encodeURIComponent(token)+'&t='+Date.now())
       .then(function(d){
@@ -529,7 +561,7 @@
           $('aboard').classList.remove('hide');
           $('atot').innerHTML='<div class="tot-note">Engagement did not load. '
             + esc((d&&d.message)||'The server gave no reason.') + '</div>';
-          settled();
+          done_('activity');
           return;
         }
         var counts=d.counts||{}, keys=Object.keys(counts).sort(function(a,b){return counts[b]-counts[a];});
@@ -569,10 +601,11 @@
           : '<div class="tot-note">Everybody who signed up since the activity log began came back at least once.</div>';
 
         $('aboard').classList.remove('hide');
-        settled();
+        done_('activity');
       })
-      .catch(function(){ settled(); });
-
+      .catch(function(err){ fail_('activity', err); });
+  }
+  function loadPeople(){
     ask('getOpsPeople', GS+'?action=getOpsPeople&appearId='+encodeURIComponent(me)
           +'&sessionToken='+encodeURIComponent(token)+'&t='+Date.now())
       .then(function(d){
@@ -585,7 +618,7 @@
           $('pboard').classList.remove('hide');
           $('ptot').innerHTML='<div class="tot-note">People did not load. '
             + esc((d&&d.message)||'The server gave no reason.') + '</div>';
-          settled();
+          done_('people');
           return;
         }
         people=d.people||[];
@@ -629,15 +662,33 @@
         });
         $('pboard').classList.remove('hide');
         ppaint();
-        settled();
+        done_('people');
       })
       .catch(function(err){
         $('pboard').classList.remove('hide');
         $('ptot').innerHTML='<div class="tot-note">People did not load. '
           + esc(String(err && err.message || err)) + '</div>';
-        settled();
+        done_('people');
       });
   }
+  var LOADERS={groups:loadGroups, activity:loadActivity, people:loadPeople};
+  function load(){
+    whySession();
+    // Signed in, so the doors behind the code box show: the documents, the other pages, and the
+    // three sections, each waiting for its own Load. The documents used to appear only right after a
+    // code was typed, so a return visit never showed them.
+    $('docs').classList.remove('hide');
+    $('adminlinks').classList.remove('hide');
+    ['aboard','pboard','board'].forEach(function(id){ $(id).classList.remove('hide'); });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.loadbtn'), function(b){
+    b.addEventListener('click', function(){
+      var key=b.getAttribute('data-load'), s=SECTIONS[key];
+      b.disabled=true;
+      $(s.say).innerHTML='<span class="cw-loading">Loading '+s.label+'</span>';
+      LOADERS[key]();
+    });
+  });
 
   function colFilters(sel){
     var out={};
@@ -774,6 +825,8 @@
 
   var fold=function(btn, body){
     $(btn).addEventListener('click', function(){
+      var card=$(body).closest('.card');
+      if(card && !card.getAttribute('data-loaded')) return;   // nothing to fold until it is loaded
       var shut=$(body).classList.toggle('hide');
       $(btn).classList.toggle('shut', shut);
     });
