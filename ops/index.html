@@ -83,8 +83,10 @@
   .pin a{color:#CBDCEA;text-decoration:none;border-bottom:1px solid rgba(203,220,234,.35);}
   .pin a:hover{color:#fff;border-color:#fff;}
   .fold{background:none;border:0;font:inherit;color:inherit;cursor:pointer;padding:0;}
-  .fold::before{content:'\25BE ';font-size:.8em;color:var(--muted);}
-  .fold.shut::before{content:'\25B8 ';}
+  /* A BIGGER ARROW, FURTHER FROM THE WORD. Jessie, 2026-09-11: "make collapse icon bigger and farther
+     away from the header". */
+  .fold::before{content:'\25BE';display:inline-block;width:1em;margin-right:12px;font-size:1.25em;color:var(--muted);}
+  .fold.shut::before{content:'\25B8';}
   .tot .tile{cursor:pointer;border-radius:8px;padding:4px 8px;margin:-4px -8px;}
   .tot .tile:hover{background:#F1F5F9;}
   .tot .tile.on{background:var(--brand);color:#fff;}
