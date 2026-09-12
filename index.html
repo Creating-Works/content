@@ -10,7 +10,8 @@
 
   hello@creating.works
 -->
-<!-- Version: V1.18 | Date: 2026-09-12 | LAST CHANGE: Continue with Google on the sign-in, and Google signs in by itself somebody who has said yes to Creating Works before. Previous: V1.17: a path this device has opened before shows at once and checks the saved version behind it; saves carry their version and a refused one takes the newer answers; the sign-in hands the bar your face and name. Jessie: "1 a and b", "2 yes". -->
+<!-- Version: V1.19 | Date: 2026-09-12 | LAST CHANGE: Sign in and Sign up are blue buttons, and once one is pressed the choice steps aside until Back; the whole sign-in is centered; while Google signs somebody in, the two buttons step aside. Jessie: "remove sig in/up buttons when google is signing in", "make these blue buttons for sign in/up", "center all", and "remove the sign in /up button when they are in hte sign in/up process". -->
+<!-- Previous: V1.18 | Date: 2026-09-12 | LAST CHANGE: Continue with Google on the sign-in, and Google signs in by itself somebody who has said yes to Creating Works before. Previous: V1.17: a path this device has opened before shows at once and checks the saved version behind it; saves carry their version and a refused one takes the newer answers; the sign-in hands the bar your face and name. Jessie: "1 a and b", "2 yes". -->
 <!-- Previous: V1.16 | Date: 2026-09-12 | LAST CHANGE: viewing as somebody shows their answers read-only, with a line saying whose they are. Jessie: "when i viewed as doug it showed my info", then "1 yes". -->
 <!-- Previous: V1.15 | Date: 2026-09-12 | LAST CHANGE: one early read for both paths as soon as a signed-in person opens the page, so a path usually opens without waiting. Jessie: "2 A and B". -->
 <!-- Previous: V1.14 | Date: 2026-09-12 | LAST CHANGE: the clean address is written the moment a part is chosen, not after its answers load, so an old ?part= address never sits in the bar during the wait. -->
@@ -133,6 +134,13 @@
   .au-gwait[hidden]{display:none;}
   .au-gor{display:flex;align-items:center;gap:10px;color:#8A97A6;font-size:13px;margin:16px 0 18px;}
   .au-gor::before,.au-gor::after{content:"";flex:1;height:1px;background:#DDE3EA;}
+  /* THE SIGN-IN, CENTERED. Jessie, 2026-09-12: "center all". One column as wide as Continue with Google,
+     with every line and button centered in it. A field keeps its label on the left so it reads as a form. */
+  .au-col{max-width:440px;margin:0 auto;text-align:center;}
+  .au-col .acts{justify-content:center;}
+  .au-col .f,.au-col .tick{text-align:left;}
+  .au-col .f.au-mid{text-align:center;}
+  .au-col .f.au-mid input{margin:0 auto;}
   .say.bad{color:#7A2410;}
   .say.ok{color:var(--soft);}
   .quiet{font-size:13.5px;color:var(--muted);margin-top:18px;}
@@ -720,22 +728,28 @@
   }
 
   // ── SIGN IN OR SIGN UP ────────────────────────────────────────────────────────────────────
-  // NOTHING IS CHOSEN FOR THEM. Jessie, 2026-09-10: "show q's only if they sign up or in". Both
-  // buttons start unfilled and no field shows until one is pressed.
+  // NOTHING IS CHOSEN FOR THEM. Jessie, 2026-09-10: "show q's only if they sign up or in". No field
+  // shows until one of the two buttons is pressed.
   var auth={mode:'',step:1,email:'',first:'',last:''};
   function field1(id,lab,type,val,ac){
     return '<div class="f"><label for="'+id+'">'+esc(lab)+'</label>'
       +'<input type="'+(type||'text')+'" id="'+id+'" value="'+esc(val||'')+'"'+(ac?' autocomplete="'+ac+'"':'')+'></div>';
   }
   function renderSignin(p){
-    var h='<h2>Sign in to begin</h2>'
+    var h='<h2>'+(auth.mode==='up'?'Sign up to begin':'Sign in to begin')+'</h2>'
       +'<p class="lead">'+(auth.note?esc(auth.note):'Your answers are saved to your account and wait for you whenever you come back.')+'</p>';
     if(auth.step===1){
-      // CONTINUE WITH GOOGLE, first (see SIGN IN WITH GOOGLE below).
-      h+='<div id="au-google" class="au-g"></div><div id="au-gwait" class="au-gwait" hidden><span class="cw-loading">Signing you in...</span></div><div class="au-gor">or</div>';
-      h+='<div class="choice" style="margin-bottom:22px;">'
-        +'<button type="button" data-mode="in"'+(auth.mode==='in'?' class="on"':'')+'>Sign in</button>'
-        +'<button type="button" data-mode="up"'+(auth.mode==='up'?' class="on"':'')+'>Sign up</button></div>';
+      // THE CHOICE STEPS ASIDE ONCE MADE. Jessie, 2026-09-12: "make these blue buttons for sign in/up",
+      // then "remove the sign in /up button when they are in hte sign in/up process". Google and the two
+      // blue buttons show until one is pressed. After that only that one's fields show, the heading says
+      // which it is, and Back brings the choice back.
+      if(!auth.mode){
+        // CONTINUE WITH GOOGLE, first (see SIGN IN WITH GOOGLE below).
+        h+='<div id="au-google" class="au-g"></div><div id="au-gwait" class="au-gwait" hidden><span class="cw-loading">Signing you in...</span></div><div class="au-gor">or</div>';
+        h+='<div class="acts" id="au-modes" style="margin:0 0 22px;">'
+          +'<button type="button" class="btn solid" data-mode="in">Sign in</button>'
+          +'<button type="button" class="btn solid" data-mode="up">Sign up</button></div>';
+      }
       if(auth.mode==='up'){
         h+=field1('au-first','Your first name','text',auth.first,'given-name')
           +field1('au-last','Your last name','text',auth.last,'family-name');
@@ -748,23 +762,24 @@
           +'<a role="link" tabindex="0" data-nav="https://2gather.network/code-of-conduct.html" onclick="event.stopPropagation();return _safeNavGo(this)">Code of Conduct</a>.</span></label>'
           +'<label class="tick"><input id="au-18" type="checkbox"><span>I confirm that I am 18 or older.</span></label>';
       }
-      h+='<div class="acts"><button type="button" class="btn ghost" data-go="start">Back</button>'
+      h+='<div class="acts"><button type="button" class="btn ghost" '+(auth.mode?'id="au-choose"':'data-go="start"')+'>Back</button>'
         +(auth.mode?'<button type="button" class="btn solid" id="au-send">Send my code</button>':'')+'</div>'
         +'<div class="say" id="au-say"></div>';
     } else {
       h+='<div id="au-sent" style="margin-bottom:18px;"><span class="cw-loading">Sending your code</span></div>'
-        +'<div class="f"><label for="au-code">Your code</label>'
+        +'<div class="f au-mid"><label for="au-code">Your code</label>'
         +'<input type="text" id="au-code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="Example: 428091" style="max-width:220px;letter-spacing:.16em;"></div>'
         +'<div class="acts"><button type="button" class="btn ghost" id="au-back">Back</button>'
         +'<button type="button" class="btn ghost" id="au-again">Send another</button>'
         +'<button type="button" class="btn solid" id="au-verify">Sign me in</button></div>'
         +'<div class="say" id="au-say"></div>';
     }
-    p.innerHTML=h;
+    p.innerHTML='<div class="au-col">'+h+'</div>';
     p.querySelectorAll('[data-mode]').forEach(function(b){
       b.onclick=function(){ harvest(); auth.mode=b.getAttribute('data-mode'); renderSignin(p); };
     });
     p.querySelectorAll('[data-go]').forEach(function(b){ b.onclick=function(){ show(b.getAttribute('data-go')); }; });
+    var ch=document.getElementById('au-choose'); if(ch) ch.onclick=function(){ harvest(); auth.mode=''; auth.note=''; renderSignin(p); };
     var send=document.getElementById('au-send'); if(send) send.onclick=sendCode;
     var em=document.getElementById('au-email'); if(em) em.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); sendCode(); } });
     var v=document.getElementById('au-verify'); if(v) v.onclick=verifyCode;
@@ -806,6 +821,10 @@
   function gWait(on){
     var w=document.getElementById('au-gwait'); if(w) w.hidden=!on;
     var b=document.getElementById('au-google'); if(b) b.style.opacity=on?'.5':'';
+    // Sign in and Sign up step aside while Google signs somebody in. Jessie, 2026-09-12: "remove sig in/up
+    // buttons when google is signing in". They come back if Google does not go through.
+    var m=document.getElementById('au-modes'); if(m) m.style.display=on?'none':'';
+    var o=document.querySelector('.au-gor'); if(o) o.style.display=on?'none':'';
     if(on) say('');
   }
   function gAsk(action,extra){
