@@ -10,7 +10,8 @@
 
   hello@creating.works
 -->
-<!-- Version: V1.11 | Date: 2026-09-11 | LAST CHANGE: Each part is its own step for the back arrow, and a copy the back arrow restores reloads itself. Jessie: "2 yes". -->
+<!-- Version: V1.12 | Date: 2026-09-12 | LAST CHANGE: clean addresses, /build/picture and /work/bring, with /answers as the last part; 404.html hands them here and old ?path= links still work. Jessie: "4 go". -->
+<!-- Previous: V1.11 | Date: 2026-09-11 | LAST CHANGE: Each part is its own step for the back arrow, and a copy the back arrow restores reloads itself. Jessie: "2 yes". -->
 <!-- Previous: V1.10 | Date: 2026-09-11 | LAST CHANGE: "Loading your answers", and Saved is a two-second note on the press with no Saving before it. Jessie: "just say Saved when clicking button and make it disappear". -->
 <!-- Previous: V1.9 | Date: 2026-09-11 | LAST CHANGE: The name comes back with the sign-in code, so "Signed in as" shows at once. Jessie: "1 yes". -->
 <!-- Previous: V1.8 | Date: 2026-09-11 | LAST CHANGE: The "What would work give you?" choices come from reference-data.needFor with the saved answers instead of being written into the page. Jessie: "3 yes". -->
@@ -811,18 +812,34 @@
     // Jessie, 2026-09-11: "2 yes". Moving to another part adds a step, so the browser's back arrow
     // goes to the part before instead of leaving the form. The first draw and a return through the
     // back arrow only rewrite the address.
+    //
+    // CLEAN ADDRESSES. Jessie, 2026-09-11: "https://creating.works/build then build/picture" and
+    // "4 go". The address is /build/picture or /work/bring, and the last part of each path is
+    // /answers. Somebody arriving at one of these is sent here by 404.html, which only knows the
+    // home page, and this puts the clean address back.
     try{
-      var u=new URL(location.href);
-      var same=(u.searchParams.get('part')||'')===key && (u.searchParams.get('path')||'')===(A.path||'');
-      u.searchParams.set('part',key);
-      if(A.path) u.searchParams.set('path',A.path); else u.searchParams.delete('path');
-      if(_navQuiet || same) history.replaceState(null,'',u); else history.pushState(null,'',u);
+      var target=urlFor(key);
+      var same=location.pathname===target && !location.search;
+      if(_navQuiet || same) history.replaceState(null,'',target); else history.pushState(null,'',target);
     }catch(e){}
+  }
+  function slugOf(k){ return k==='review' ? 'answers' : k; }
+  function keyOf(s){ return s==='answers' ? 'review' : s; }
+  function urlFor(key){ return (key==='start' || !A.path) ? '/' : '/'+A.path+'/'+slugOf(key); }
+  // Where the address says to go: /work/bring, /build, the ?to= that 404.html hands over, or the old
+  // ?path= and ?part= links, which keep working.
+  function readRoute(){
+    var p=P('to') || location.pathname;
+    var m=String(p).match(/^\/(build|work)(?:\/([a-z]+))?\/?$/);
+    if(m) return { path:m[1], part: m[2] ? keyOf(m[2]) : '' };
+    var lp=P('path'), lk=P('part');
+    return { path: PATHS[lp] ? lp : '', part: lk ? keyOf(lk) : '' };
   }
   var _navQuiet=true;
   window.addEventListener('popstate',function(){
-    var pp=P('path'); if(PATHS[pp]) A.path=pp;
-    var k=P('part')||'start';
+    var r=readRoute();
+    if(PATHS[r.path]) A.path=r.path;
+    var k=r.part || (r.path ? firstPart() : 'start');
     if(k==='signin' && signed()) k='start';
     if(k!=='signin' && !parts().some(function(s){ return s.key===k; })) k='start';
     _navQuiet=true; show(k); _navQuiet=false;
@@ -832,9 +849,10 @@
   // browser restores that way is reloaded, so it is always the current one.
   window.addEventListener('pageshow',function(e){ if(e.persisted) location.reload(); });
 
-  // ?path=work or ?path=build opens a path straight away, and ?part= a part of it.
-  var askPath=P('path'); if(PATHS[askPath]){ A.path=askPath; keep(); }
-  var start=P('part');
+  // /work opens Finding work straight away, and /work/need a part of it.
+  var route=readRoute();
+  var askPath=route.path; if(PATHS[askPath]){ A.path=askPath; keep(); }
+  var start=route.part;
   if(parts().some(function(s){ return s.key===start; })) show(start);
   else show(A.path && askPath ? PATHS[A.path][0].key : 'start');
   _navQuiet=false;
