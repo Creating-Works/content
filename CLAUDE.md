@@ -38,7 +38,8 @@ Read this first. It overrides default behaviour.
   ago.
 - **Offer to do it yourself, first.** Before handing her a task, say what you can do on her behalf and
   do it. Only what genuinely cannot be done from your side goes to her: a spreadsheet edit, pressing
-  Run, a Cloudflare deploy, a decision. Giving her twenty rows to delete by hand when a one-off could
+  Run, a decision. Cloudflare deploys are yours once she has said go (2026-09-11), after the checks in
+  `design/gate-worker.md`. Giving her twenty rows to delete by hand when a one-off could
   do it is the failure, and she should not have to ask.
 - **One test at a time is a practice, not a rule.** Her correction, 2026-09-07: *"this wasn't a
   rule but I like it as a practice. Sometimes I like to test a whole bunch of things that you just
