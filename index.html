@@ -10,7 +10,8 @@
 
   hello@creating.works
 -->
-<!-- Version: V1.16 | Date: 2026-09-12 | LAST CHANGE: viewing as somebody shows their answers read-only, with a line saying whose they are. Jessie: "when i viewed as doug it showed my info", then "1 yes". -->
+<!-- Version: V1.17 | Date: 2026-09-12 | LAST CHANGE: a path this device has opened before shows at once and checks the saved version behind it; saves carry their version and a refused one takes the newer answers; the sign-in hands the bar your face and name. Jessie: "1 a and b", "2 yes". -->
+<!-- Previous: V1.16 | Date: 2026-09-12 | LAST CHANGE: viewing as somebody shows their answers read-only, with a line saying whose they are. Jessie: "when i viewed as doug it showed my info", then "1 yes". -->
 <!-- Previous: V1.15 | Date: 2026-09-12 | LAST CHANGE: one early read for both paths as soon as a signed-in person opens the page, so a path usually opens without waiting. Jessie: "2 A and B". -->
 <!-- Previous: V1.14 | Date: 2026-09-12 | LAST CHANGE: the clean address is written the moment a part is chosen, not after its answers load, so an old ?part= address never sits in the bar during the wait. -->
 <!-- Previous: V1.13 | Date: 2026-09-12 | LAST CHANGE: the waiting pill says "Loading information", because "Loading your answers" claimed answers before the page knew there were any. Jessie: "say loading information instead of loading your answers because I don't even have any answers maybe". -->
@@ -210,6 +211,7 @@
   // whoever signs in next.
   try{ localStorage.removeItem('cw-inquiry-draft'); }catch(e){}
   var A={path:'',sent_build:'',sent_work:'',edited_build:'',edited_work:'',
+         base_build:'',base_work:'',seen_build:'',seen_work:'',choices:[],
          building:'',forWhom:'',serves:'',asking:'',orgDoes:'',first:'',who:[],person:'',group:'',gather:'',
          needFor:[],needMore:'',offer:'',values:'',how:'',setting:'',scale:'',conditions:'',tools:'',want:'',enjoy:'',contribution:''};
   var BLANK=JSON.stringify(A);
@@ -299,7 +301,7 @@
       p.querySelectorAll('[data-path]').forEach(function(b){
         b.onclick=function(){ A.path=b.getAttribute('data-path'); keep(); show(firstPart()); };
       });
-      if(signed() && !knownName()) fetchName();
+      if(signed() && !knownName()) waitForName();
       bindSignOut();
       return;
     }
@@ -609,8 +611,37 @@
     var hasAny=!d.found && Object.keys(FIELDS[path]).some(function(col){
       var v=A[FIELDS[path][col]]; return Array.isArray(v) ? v.length>0 : !!String(v||'').trim();
     });
-    if(Array.isArray(choices)) needChoices=choices;
+    if(Array.isArray(choices)){ needChoices=choices; A.choices=choices; }
+    A['base_'+path]=d.savedAt||''; A['seen_'+path]='1';
     loaded[path]=true; dirty=hasAny; keep();
+  }
+  // SHOW THIS DEVICE'S COPY AT ONCE. Jessie, 2026-09-12: "Why is it taking so long to load information?
+  // It's not acceptable", then "1 a and b". A device that has opened this path before shows what it
+  // has straight away and checks the saved version behind it. If the saved one is newer and nothing has
+  // been typed yet, it takes the saved one. If something has been typed, the next save carries the
+  // version it started from and the backend refuses it when another device saved since, sending the
+  // newer answers back (see save). So a copy on screen can never write over newer answers.
+  function sameTime(a,b){
+    var x=Date.parse(a||''), y=Date.parse(b||'');
+    if(isNaN(x) && isNaN(y)) return true;
+    return !isNaN(x) && !isNaN(y) && Math.abs(x-y)<=1500;
+  }
+  function reconcile(path, d, choices){
+    if(!d) return;
+    if(Array.isArray(choices)){ needChoices=choices; A.choices=choices; }
+    if(!sameTime(d.savedAt, A['base_'+path]) && !(dirty && path===A.path)){
+      applyLoaded(path, d, choices);
+      if(path===A.path && isForm(current)){ renderPanel(current); }
+    }
+  }
+  function openFromDevice(path){
+    loaded[path]=true;
+    if(A.choices && A.choices.length) needChoices=A.choices;
+    var p=fetchAll();
+    if(p) p.then(function(all){
+      if(all && all.signin){ return; }
+      if(all && all.paths){ reconcile(path, all.paths[path], all.needChoices); }
+    });
   }
   function loadThen(key){
     if(loading) return;
@@ -655,7 +686,8 @@
     saving=true; dirty=false; flash('Saved');
     var path=A.path, F=FIELDS[path];
     var u=GS_URL+'?action=saveInquiry&appearId='+encodeURIComponent(whoId())+'&editToken='+encodeURIComponent(tk)
-      +'&path='+encodeURIComponent(path)+(send?'&send=1':'');
+      +'&path='+encodeURIComponent(path)+(send?'&send=1':'')
+      +'&base='+encodeURIComponent(A['base_'+path]||'');
     Object.keys(F).forEach(function(col){
       var v=A[F[col]]; if(LISTS[F[col]]) v=(v||[]).join('|');
       u+='&'+col+'='+encodeURIComponent(v==null?'':v);
@@ -663,7 +695,15 @@
     fetch(u).then(function(r){ return r.json(); }).then(function(d){
       saving=false;
       if(d&&d.code==='signin'){ dirty=true; setSave(''); needCode(); return; }
+      if(d&&d.code==='conflict'){
+        applyLoaded(path, d, null);
+        if(path===A.path && isForm(current)) renderPanel(current);
+        setSave('Answers saved on another device were newer and they replaced what was typed here.');
+        again=false; againSend=false;
+        return;
+      }
       if(!d||d.status!=='ok'){ dirty=true; setSave('Your answers did not save this time and they stay here until your next step saves them.'); return; }
+      if(d.savedAt){ A['base_'+path]=d.savedAt; keep(); }
       if(send && d.sentAt){ A['sent_'+path]=d.sentAt; A['edited_'+path]=''; keep(); if(current==='review') renderPanel('review'); }
       if(again){ var s=againSend; again=false; againSend=false; save(s); }
     }).catch(function(){
@@ -781,6 +821,14 @@
             // The sign-in answer carries the name now, so "Signed in as" shows at once. Jessie,
             // 2026-09-11: "1 yes". Before that deploy it is absent and the lookup still fills it.
             if(d.name) localStorage.setItem('cw-name-'+d.appearId,String(d.name).trim());
+            // FACE AND NAME IN THE BAR AT ONCE. Jessie, 2026-09-12: "should show my face/name in top
+            // right pill before loading information", then "2 yes". Written where the top bar looks,
+            // then the bar is redrawn, so the pill does not wait on its own slow lookup.
+            if(d.name){ localStorage.setItem('cw-name',String(d.name).trim()); localStorage.setItem('cw-name-for',d.appearId); window.CW_NAME=String(d.name).trim(); }
+            if(d.photo){
+              localStorage.setItem('cw-photo',d.photo); localStorage.setItem('cw-photo-for',d.appearId);
+              localStorage.setItem('cw-photo-at',String(Date.now())); window.CW_TOPBAR_PHOTO=d.photo;
+            }
             if(d.editToken){
               localStorage.setItem('cw-token',d.editToken);
               var exp=parseInt(String(d.editToken).split('.')[1],10);
@@ -790,6 +838,7 @@
           }catch(e){}
           signedId=d.appearId;
           allP=null; allData=null;
+          try{ if(window.CW_REDRAW_BAR) window.CW_REDRAW_BAR(); }catch(e){}
           loadDraft(); keep();
           auth={mode:'',step:1,email:'',first:'',last:''};
           show(current&&isForm(current)&&current!=='signin'?current:firstPart());
@@ -810,11 +859,29 @@
   // (cw-name-<id>), so after the first visit it shows at once. Until it arrives the line names
   // nobody rather than a wrong or empty name.
   function nameKey(){ return 'cw-name-'+whoId(); }
-  function knownName(){ try{ return String(localStorage.getItem(nameKey())||'').trim(); }catch(e){ return ''; } }
+  function knownName(){
+    try{
+      var own=String(localStorage.getItem(nameKey())||'').trim();
+      if(own) return own;
+      // The top bar's copy, when it is this person's. The bar fetches it anyway, so the page does not
+      // ask a second time and two slow requests stop competing.
+      if(norm(localStorage.getItem('cw-name-for'))===norm(whoId())) return String(localStorage.getItem('cw-name')||'').trim();
+    }catch(e){}
+    return '';
+  }
   function whoLine(){
     if(viewing()){ var vn=viewedName(); return 'You are viewing '+(vn?esc(vn)+'\u2019s':'their')+' answers and nothing here can be changed.'; }
     var n=knownName();
     return (n?'Signed in as '+esc(n)+'. ':'')+'Not you? <a role="link" tabindex="0" id="sign-out">Sign out.</a>';
+  }
+  // With the bar on this page, its lookup brings the name; this only watches for it and redraws the line.
+  function waitForName(){
+    if(!window.CW_SHOW_BAR){ fetchName(); return; }
+    var tries=0, t=setInterval(function(){
+      tries++;
+      if(knownName()){ clearInterval(t); if(current==='start'){ var el=document.getElementById('who-line'); if(el){ el.innerHTML=whoLine(); bindSignOut(); } } }
+      else if(tries>40) clearInterval(t);
+    }, 1500);
   }
   var _nameAsked=false;
   function fetchName(){
@@ -861,7 +928,10 @@
     // under "Loading information": "shouldnt there be a path and a part?". It was only written after the
     // answers arrived, so an old address sat in the bar for the whole wait.
     setAddress(key);
-    if(isForm(key) && !loaded[A.path]){ current=key; buildTabs(key); loadThen(key); return; }
+    if(isForm(key) && !loaded[A.path]){
+      if(!viewing() && A['seen_'+A.path] && token()){ openFromDevice(A.path); }
+      else { current=key; buildTabs(key); loadThen(key); return; }
+    }
     current=key; buildTabs(key); renderPanel(key);
     if(viewing() && isForm(key)) lockForViewing();
     // The address names the part, so a link can open straight onto it. EACH PART IS ITS OWN STEP.
@@ -932,7 +1002,7 @@
      am when I sign in as well", with the Creating.Works mark and "Because creating works." The strip above
      it draws only for a super admin, after the backend says so. -->
 <script>window.CW_SHOW_BAR = true;</script>
-<script src="https://2gather.network/nav/topbar.js?v=6.03" defer></script>
+<script src="https://2gather.network/nav/topbar.js?v=6.05" defer></script>
 </body>
 <!--
   Copyright 2026 DayBalancer LLC. All rights reserved.
