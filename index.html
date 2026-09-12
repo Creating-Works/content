@@ -10,7 +10,8 @@
 
   hello@creating.works
 -->
-<!-- Version: V1.15 | Date: 2026-09-12 | LAST CHANGE: one early read for both paths as soon as a signed-in person opens the page, so a path usually opens without waiting. Jessie: "2 A and B". -->
+<!-- Version: V1.16 | Date: 2026-09-12 | LAST CHANGE: viewing as somebody shows their answers read-only, with a line saying whose they are. Jessie: "when i viewed as doug it showed my info", then "1 yes". -->
+<!-- Previous: V1.15 | Date: 2026-09-12 | LAST CHANGE: one early read for both paths as soon as a signed-in person opens the page, so a path usually opens without waiting. Jessie: "2 A and B". -->
 <!-- Previous: V1.14 | Date: 2026-09-12 | LAST CHANGE: the clean address is written the moment a part is chosen, not after its answers load, so an old ?part= address never sits in the bar during the wait. -->
 <!-- Previous: V1.13 | Date: 2026-09-12 | LAST CHANGE: the waiting pill says "Loading information", because "Loading your answers" claimed answers before the page knew there were any. Jessie: "say loading information instead of loading your answers because I don't even have any answers maybe". -->
 <!-- Previous: V1.12 | Date: 2026-09-12 | LAST CHANGE: clean addresses, /build/picture and /work/bring, with /answers as the last part; 404.html hands them here and old ?path= links still work. Jessie: "4 go". -->
@@ -195,6 +196,14 @@
     return '';
   }
   function signed(){ return !!whoId(); }
+  // VIEWING AS SOMEBODY. Jessie, 2026-09-12: "when i viewed as doug it showed my info", then "1 yes".
+  // While a super admin views as somebody, the page reads THEIR answers and shows them read-only:
+  // nothing can be typed, nothing saves, and Send is hidden. whoId() stays the signed-in person, so
+  // no write can ever go anywhere else.
+  function viewing(){ try{ return !!(window.CW && CW.me && CW.me().viewing); }catch(e){ return false; } }
+  function readId(){ try{ return viewing() ? CW.me().id : whoId(); }catch(e){ return whoId(); } }
+  function viewerParam(){ return viewing() ? '&viewer='+encodeURIComponent(whoId()) : ''; }
+  function viewedName(){ try{ return String(sessionStorage.getItem('cw-view-as-name')||'').trim(); }catch(e){ return ''; } }
   function norm(id){ return String(id||'').split('.').join('').toLowerCase(); }
   function draftKey(){ return 'cw-inquiry-draft-'+norm(whoId()); }
   // The first version kept one draft for the whole device. It is dropped rather than handed to
@@ -209,7 +218,7 @@
   function loadDraft(){
     var chosen=A.path;
     A=JSON.parse(BLANK);
-    if(signed()){
+    if(signed() && !viewing()){
       try{ var saved=JSON.parse(localStorage.getItem(draftKey())||'null'); if(saved) for(var k in A){ if(saved[k]!=null) A[k]=saved[k]; } }catch(e){}
     }
     if(chosen) A.path=chosen;
@@ -219,7 +228,7 @@
   }
   loadDraft();
   // Nothing is kept for somebody not signed in: there is no draft to keep before the form opens.
-  function keep(){ if(!signed()) return; try{ localStorage.setItem(draftKey(),JSON.stringify(A)); }catch(e){} }
+  function keep(){ if(!signed() || viewing()) return; try{ localStorage.setItem(draftKey(),JSON.stringify(A)); }catch(e){} }
 
   // The rail holds Start and, once somebody has picked, that path's parts. Nothing of a path is
   // drawn before it is chosen.
@@ -518,7 +527,7 @@
   var LISTS={who:1,needFor:1};           // kept as a list on the page and with | between on the sheet
   var loaded={}, loading=false, dirty=false, saving=false, again=false, againSend=false, saveText='';
   function isForm(k){ return k!=='start' && k!=='signin'; }
-  function changed(){ dirty=true; if(A['sent_'+A.path]) A['edited_'+A.path]='1'; keep(); }
+  function changed(){ if(viewing()) return; dirty=true; if(A['sent_'+A.path]) A['edited_'+A.path]='1'; keep(); }
   function setSave(t){ clearTimeout(flashT); saveText=t||''; var el=document.getElementById('save-stat'); if(el) el.textContent=saveText; }
   // SAVED IS A BRIEF NOTE, SHOWN ON THE PRESS. Jessie, 2026-09-11: "Saving takes a very long time -
   // so just say Saved when clicking button and make it disappear - just a brief notification" and
@@ -556,6 +565,7 @@
   // answers can still reach a person.
   function isSent(){ return !!A['sent_'+A.path] && !A['edited_'+A.path]; }
   function sendButton(){
+    if(viewing()) return '';
     return isSent()
       ? '<button type="button" class="btn solid" id="send-go" disabled style="opacity:.6;cursor:default;">Sent</button>'
       : '<button type="button" class="btn solid" id="send-go">Send</button>';
@@ -568,9 +578,9 @@
   var allP=null, allData=null;
   function fetchAll(){
     if(allP) return allP;
-    var tk=token(), id=whoId();
+    var tk=token(), id=readId();
     if(!tk || !id) return null;
-    allP=fetch(GS_URL+'?action=getInquiry&appearId='+encodeURIComponent(id)+'&editToken='+encodeURIComponent(tk)+'&path=all')
+    allP=fetch(GS_URL+'?action=getInquiry&appearId='+encodeURIComponent(id)+'&editToken='+encodeURIComponent(tk)+'&path=all'+viewerParam())
       .then(function(r){ return r.json(); })
       .then(function(d){
         if(d && d.code==='signin'){ allP=null; return {signin:true}; }
@@ -619,7 +629,7 @@
   }
   // The single-path read, for a backend that has not learned path=all.
   function loadOne(key, path, tk){
-    fetch(GS_URL+'?action=getInquiry&appearId='+encodeURIComponent(whoId())+'&editToken='+encodeURIComponent(tk)+'&path='+encodeURIComponent(path))
+    fetch(GS_URL+'?action=getInquiry&appearId='+encodeURIComponent(readId())+'&editToken='+encodeURIComponent(tk)+'&path='+encodeURIComponent(path)+viewerParam())
       .then(function(r){ return r.json(); })
       .then(function(d){
         loading=false;
@@ -638,6 +648,7 @@
   }
 
   function save(send){
+    if(viewing()) return;   // looking is never changing
     if(!signed()||!A.path||!loaded[A.path]) return;
     if(saving){ again=true; if(send) againSend=true; return; }
     var tk=token(); if(!tk){ needCode(); return; }
@@ -801,6 +812,7 @@
   function nameKey(){ return 'cw-name-'+whoId(); }
   function knownName(){ try{ return String(localStorage.getItem(nameKey())||'').trim(); }catch(e){ return ''; } }
   function whoLine(){
+    if(viewing()){ var vn=viewedName(); return 'You are viewing '+(vn?esc(vn)+'\u2019s':'their')+' answers and nothing here can be changed.'; }
     var n=knownName();
     return (n?'Signed in as '+esc(n)+'. ':'')+'Not you? <a role="link" tabindex="0" id="sign-out">Sign out.</a>';
   }
@@ -851,6 +863,7 @@
     setAddress(key);
     if(isForm(key) && !loaded[A.path]){ current=key; buildTabs(key); loadThen(key); return; }
     current=key; buildTabs(key); renderPanel(key);
+    if(viewing() && isForm(key)) lockForViewing();
     // The address names the part, so a link can open straight onto it. EACH PART IS ITS OWN STEP.
     // Jessie, 2026-09-11: "2 yes". Moving to another part adds a step, so the browser's back arrow
     // goes to the part before instead of leaving the form. The first draw and a return through the
@@ -860,6 +873,16 @@
     // "4 go". The address is /build/picture or /work/bring, and the last part of each path is
     // /answers. Somebody arriving at one of these is sent here by 404.html, which only knows the
     // home page, and this puts the clean address back.
+  }
+  function lockForViewing(){
+    var p=document.getElementById('panel');
+    p.querySelectorAll('textarea,input').forEach(function(el){ el.readOnly=true; el.disabled=true; });
+    p.querySelectorAll('[data-need],[data-ask],[data-drop],#who-add').forEach(function(b){ b.disabled=true; b.style.cursor='default'; });
+    var vn=viewedName();
+    var note=document.createElement('p');
+    note.className='lead'; note.style.cssText='background:var(--panel);border:1px solid var(--panel-line);border-radius:10px;padding:10px 14px;';
+    note.textContent='You are viewing '+(vn?vn+'\u2019s':'their')+' answers and nothing here can be changed.';
+    p.insertBefore(note, p.firstChild);
   }
   function setAddress(key){
     try{
