@@ -54,7 +54,8 @@
   #adminlinks{display:flex;gap:18px;flex-wrap:wrap;align-items:center;}
   #adminlinks.hide{display:none;}
   /* The Engagement table: small, tight, five rows before it scrolls. */
-  .atbl-wrap{max-height:172px;overflow-y:auto;}
+  .atbl-wrap{overflow-x:auto;}
+  .amore{display:inline-block;margin-top:6px;font-size:13px;font-weight:700;color:var(--brand);cursor:pointer;}
   .atbl{width:100%;border-collapse:collapse;font-size:12.5px;}
   .atbl th{position:sticky;top:0;background:#fff;text-align:left;font-size:11.5px;font-weight:700;
            text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:4px 8px;}
@@ -70,7 +71,10 @@
   /* The documents dropdown sits on the right of the blue, shown only after sign-in. */
   #docs{display:flex;justify-content:flex-end;margin:0 0 16px;}
   #docs.hide{display:none;}
-  #docPick{background:#fff;color:var(--brand);font-weight:700;border:0;border-radius:22px;padding:9px 14px;}
+  /* THE ARROW SITS IN FROM THE EDGE. Jessie, 2026-09-12: "make drop down carrot farther away from right
+     of drop down". The browser's own arrow cannot be moved, so it is drawn here instead. */
+  #docPick{background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%231F699E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 20px center;
+    -webkit-appearance:none;appearance:none;color:var(--brand);font-weight:700;border:0;border-radius:22px;padding:9px 52px 9px 16px;cursor:pointer;}
   .scroll{overflow-x:auto;}
   table{border-collapse:collapse;width:100%;font-size:14px;}
   th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);white-space:nowrap;}
@@ -102,6 +106,8 @@
   .tot .tile:hover{background:#F1F5F9;}
   /* A number you can press looks like a link. */
   #ptot .tile b{color:var(--brand);text-decoration:underline;text-underline-offset:3px;}
+  /* A pressed tile is filled blue, so its number turns white rather than vanishing. 2026-09-12. */
+  #ptot .tile.on b{color:#fff;}
   .sortbtn{background:#fff;border:1px solid var(--line);border-radius:12px;font:inherit;font-size:12px;
            padding:3px 10px;cursor:pointer;color:var(--brand);font-weight:700;white-space:nowrap;}
   .sortbtn.on{background:var(--brand);color:#fff;border-color:var(--brand);}
@@ -234,8 +240,10 @@
           <th data-k="email">Address</th>
           <th data-k="roles">Roles</th>
           <th data-k="stage">Stage</th>
+          <th data-k="origin">Origin</th>
           <th data-k="groups" class="num">Groups</th>
           <th data-k="made">Signed up</th>
+          <th data-k="firstSignin">First sign-in</th>
           <th data-k="lastSeen">Last seen</th>
           <th data-k="cwid">ID</th>
         </tr>
@@ -260,8 +268,13 @@
                 <button type="button" data-v="joined group">joined group</button>
                 <button type="button" data-v="created group">created group</button>
               </div></td>
+          <td><div class="chips" data-f="origin">
+                <button type="button" data-v="legacy">legacy</button>
+                <button type="button" data-v="new">new</button>
+              </div></td>
           <td><input data-f="groups" placeholder="filter"></td>
           <td><button type="button" class="sortbtn" data-sort="made">Newest first</button></td>
+          <td><button type="button" class="sortbtn" data-sort="firstSignin">Sort</button></td>
           <td><button type="button" class="sortbtn" data-sort="lastSeen">Sort</button></td>
           <td><input data-f="cwid" placeholder="filter"></td>
         </tr>
@@ -316,7 +329,7 @@
   var token='';
   var rows=[];
   var sortK='members', sortDown=true;
-  var people=[], pSortK='made', pSortDown=true, SHOW=200, pDays=0;
+  var people=[], pSortK='made', pSortDown=true, SHOW=200, pDays=0, pLegacyNot=false;
 
   var $=function(id){ return document.getElementById(id); };
   var say=function(el,msg,bad){ var n=$(el); n.textContent=msg||''; n.className='say'+(bad?' bad':''); };
@@ -613,6 +626,8 @@
           : '<div class="tot-note">Nothing recorded in the past seven days.</div>';
 
         aRecent=d.recent||[];
+        aTotal=(typeof d.recentTotal==='number') ? d.recentTotal : aRecent.length;
+        aShown=5;
         paintRecent();
         // The quiet list went on 2026-09-12. Jessie: "This doesn't really give me any data that I want".
 
@@ -659,13 +674,20 @@
           tile(by['created account']||0,'created account','stage','created account')+
           tile(by['completed intro']||0,'completed intro','stage','completed intro')+
           tile(by['joined group']||0,'joined group','stage','joined group')+
-          tile(by['created group']||0,'created group','stage','created group');
+          tile(by['created group']||0,'created group','stage','created group')+
+          // Only once the backend says who is legacy, so the tile never reads 0 for want of data.
+          (people.length && ('origin' in people[0])
+            ? tile(people.filter(function(p){ return p.origin==='legacy' && !p.firstSignin; }).length,
+                   'legacy, not signed in yet','legacyNot','')
+            : '');
 
         // Every tile is a filter. Clicking one shows exactly the people it counted.
         Array.prototype.forEach.call($('ptot').querySelectorAll('.tile'), function(t){
           t.addEventListener('click', function(){
             var act=t.getAttribute('data-act'), val=t.getAttribute('data-val');
+            pLegacyNot=false;
             if(act==='all'){ resetFilters('#ptbl', function(){}); pDays=0; }
+            else if(act==='legacyNot'){ pDays=0; pLegacyNot=true; }
             else if(act==='days'){ pDays=Number(val); }
             else {
               pDays=0;
@@ -698,21 +720,45 @@
   // the header descriptions and tight with a scroll after displaying 5 rows - add a toggle of include
   // super admin and default on", "put 3 dots at end of each row and add more info like ID" and "2 full".
   // No lines between rows: space does the separating.
-  var aRecent=[];
+  // FIVE, THEN MORE. Jessie, 2026-09-12: "show 5 and show a link for more - then it shows the next 50
+  // and so forth". Rows past what arrived are asked for fifty at a time.
+  // REFERENCE, where each thing came from, is recorded by the other chat into activity.activityFrom
+  // and activity.activityTarget. The column appears once any row carries one.
+  var aRecent=[], aTotal=0, aShown=5, aFetching=false;
   function paintRecent(){
     var withSuper=$('aSuper').checked;
-    var rows=aRecent.filter(function(r){ return withSuper || !r.superAdmin; });
-    if(!rows.length){ $('arecent').innerHTML='<div class="tot-note">Nothing yet.</div>'; return; }
-    var html='<div class="atbl-wrap"><table class="atbl"><thead><tr><th>When</th><th>Who</th><th>What</th><th>Detail</th><th></th></tr></thead><tbody>';
+    var all=aRecent.filter(function(r){ return withSuper || !r.superAdmin; });
+    if(!all.length){ $('arecent').innerHTML='<div class="tot-note">Nothing yet.</div>'; return; }
+    var rows=all.slice(0, aShown);
+    var hasRef=aRecent.some(function(r){ return r.from || r.target; });
+    var html='<div class="atbl-wrap"><table class="atbl"><thead><tr><th>When</th><th>Who</th><th>What</th><th>Detail</th>'
+      +(hasRef?'<th>Reference</th>':'')+'<th></th></tr></thead><tbody>';
     rows.forEach(function(r, i){
       var when='';
       try { when=new Date(r.at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}); } catch(e){}
       html+='<tr><td style="white-space:nowrap;">'+esc(when)+'</td><td>'+esc(r.name)+'</td><td>'+esc(r.kind)+'</td>'
-          +'<td>'+esc(r.detail||'')+'</td><td style="text-align:right;"><button type="button" class="dots" data-i="'+i+'" aria-label="More">&middot;&middot;&middot;</button></td></tr>'
-          +'<tr class="more hide" id="amore'+i+'"><td colspan="5">'
+          +'<td>'+esc(r.detail||'')+'</td>'
+          +(hasRef?'<td>'+esc([r.from, r.target].filter(Boolean).join(' \u00b7 '))+'</td>':'')
+          +'<td style="text-align:right;"><button type="button" class="dots" data-i="'+i+'" aria-label="More">&middot;&middot;&middot;</button></td></tr>'
+          +'<tr class="more hide" id="amore'+i+'"><td colspan="'+(hasRef?6:5)+'">'
           +'ID '+esc(r.id||'not sent yet')+' &nbsp;&middot;&nbsp; '+esc(r.emailFull||r.email||'')+'</td></tr>';
     });
-    $('arecent').innerHTML=html+'</tbody></table></div>';
+    var moreLeft = (all.length > aShown) || (aRecent.length < aTotal);
+    $('arecent').innerHTML=html+'</tbody></table></div>'
+      +(moreLeft ? '<a class="amore" role="button" tabindex="0" id="amoreLink">More</a>' : '');
+    var ml=document.getElementById('amoreLink');
+    if(ml) ml.addEventListener('click', function(){
+      aShown += 50;
+      if(aShown > aRecent.length && aRecent.length < aTotal && !aFetching){
+        aFetching=true; ml.textContent='Loading more';
+        ask('getOpsActivity', GS+'?action=getOpsActivity&appearId='+encodeURIComponent(me)
+              +'&sessionToken='+encodeURIComponent(token)+'&offset='+aRecent.length+'&limit=100&t='+Date.now())
+          .then(function(d){ aFetching=false; if(d && d.status==='ok'){ aRecent=aRecent.concat(d.recent||[]); } paintRecent(); })
+          .catch(function(){ aFetching=false; paintRecent(); });
+        return;
+      }
+      paintRecent();
+    });
     Array.prototype.forEach.call($('arecent').querySelectorAll('.dots'), function(b){
       b.addEventListener('click', function(){ $('amore'+b.getAttribute('data-i')).classList.toggle('hide'); });
     });
@@ -786,6 +832,7 @@
     var list=people.filter(function(p){
       // Ticked means show only test accounts. Unticked hides them.
       if(onlyTest ? !p.test : p.test) return false;
+      if(pLegacyNot && !(p.origin==='legacy' && !p.firstSignin)) return false;
       // The box searches everything on the person's row, not only name and address.
       if(pDays){
         var cut=new Date(Date.now()-pDays*86400000).toISOString();
@@ -805,18 +852,22 @@
     b.innerHTML='';
     list.slice(0,SHOW).forEach(function(p){
       var tr=document.createElement('tr');
-      for(var i=0;i<8;i++){ tr.appendChild(document.createElement('td')); }
+      for(var i=0;i<10;i++){ tr.appendChild(document.createElement('td')); }
       tr.children[0].textContent=p.name||'(no name)';
       tr.children[1].textContent=p.email||'';
       // COMMAS, since a person holds several. Jessie, 2026-09-11: "make stage/roles show things in commas".
       tr.children[2].textContent=String(p.roles||'').split('|').map(function(x){ return x.trim(); }).filter(Boolean).join(', ');
       // EVERY STEP REACHED. Jessie, 2026-09-11: "6 yes".
       tr.children[3].textContent=(p.stages||[p.stage]).join(', ');
-      tr.children[4].textContent=p.groups; tr.children[4].className='num';
-      tr.children[5].textContent=p.made? String(p.made).slice(0,10) : '';
-      tr.children[6].textContent=p.lastSeen? String(p.lastSeen).slice(0,10) : '';
-      tr.children[7].textContent=p.ids||p.cwid||'';
-      tr.children[7].style.cssText='font-size:12px;color:var(--muted);';
+      // LEGACY OR NEW, AND WHEN THEY FIRST SIGNED IN HERE. Jessie, 2026-09-12. Blank until the
+      // backend sends it, rather than a guess.
+      tr.children[4].textContent=p.origin||'';
+      tr.children[5].textContent=p.groups; tr.children[5].className='num';
+      tr.children[6].textContent=p.made? String(p.made).slice(0,10) : '';
+      tr.children[7].textContent=('firstSignin' in p) ? (p.firstSignin ? String(p.firstSignin).slice(0,10) : 'not yet') : '';
+      tr.children[8].textContent=p.lastSeen? String(p.lastSeen).slice(0,10) : '';
+      tr.children[9].textContent=p.ids||p.cwid||'';
+      tr.children[9].style.cssText='font-size:12px;color:var(--muted);';
       if(!p.name){ var s2=document.createElement('span'); s2.className='flag'; s2.textContent='no name';
                    tr.children[0].textContent=''; tr.children[0].appendChild(s2); }
       b.appendChild(tr);
@@ -901,7 +952,7 @@
   $('docPick').addEventListener('change', function(){ var u=this.value; if(u) window.location.href=u; });
 
   $('preset').addEventListener('click', function(){
-    $('q').value=''; $('onlyTest').checked=false; pDays=0;
+    $('q').value=''; $('onlyTest').checked=false; pDays=0; pLegacyNot=false;
     Array.prototype.forEach.call($('ptot').querySelectorAll('.tile'), function(x){ x.classList.remove('on'); });
     resetFilters('#ptbl', ppaint);
   });
