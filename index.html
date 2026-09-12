@@ -10,7 +10,8 @@
 
   hello@creating.works
 -->
-<!-- Version: V1.14 | Date: 2026-09-12 | LAST CHANGE: the clean address is written the moment a part is chosen, not after its answers load, so an old ?part= address never sits in the bar during the wait. -->
+<!-- Version: V1.15 | Date: 2026-09-12 | LAST CHANGE: one early read for both paths as soon as a signed-in person opens the page, so a path usually opens without waiting. Jessie: "2 A and B". -->
+<!-- Previous: V1.14 | Date: 2026-09-12 | LAST CHANGE: the clean address is written the moment a part is chosen, not after its answers load, so an old ?part= address never sits in the bar during the wait. -->
 <!-- Previous: V1.13 | Date: 2026-09-12 | LAST CHANGE: the waiting pill says "Loading information", because "Loading your answers" claimed answers before the page knew there were any. Jessie: "say loading information instead of loading your answers because I don't even have any answers maybe". -->
 <!-- Previous: V1.12 | Date: 2026-09-12 | LAST CHANGE: clean addresses, /build/picture and /work/bring, with /answers as the last part; 404.html hands them here and old ?path= links still work. Jessie: "4 go". -->
 <!-- Previous: V1.11 | Date: 2026-09-11 | LAST CHANGE: Each part is its own step for the back arrow, and a copy the back arrow restores reloads itself. Jessie: "2 yes". -->
@@ -560,36 +561,71 @@
       : '<button type="button" class="btn solid" id="send-go">Send</button>';
   }
 
+  // ONE EARLY READ FOR BOTH PATHS. Jessie, 2026-09-12: "2 A and B". Most of the wait is the backend's
+  // cost per request, not the reading, so the page asks once, as soon as a signed-in person opens it,
+  // for both paths' saved answers (getInquiry path=all). Pressing a path then usually opens at once.
+  // A backend without path=all answers with an error, and the page falls back to asking per path.
+  var allP=null, allData=null;
+  function fetchAll(){
+    if(allP) return allP;
+    var tk=token(), id=whoId();
+    if(!tk || !id) return null;
+    allP=fetch(GS_URL+'?action=getInquiry&appearId='+encodeURIComponent(id)+'&editToken='+encodeURIComponent(tk)+'&path=all')
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if(d && d.code==='signin'){ allP=null; return {signin:true}; }
+        if(d && d.status==='ok' && d.paths){ allData=d; return d; }
+        return null;
+      })
+      .catch(function(){ allP=null; return null; });
+    return allP;
+  }
+  // Puts one path's saved answers into the page, the same way for the early read and the single one.
+  function applyLoaded(path, d, choices){
+    d=d||{};
+    if(d.found&&d.data){
+      var F=FIELDS[path];
+      Object.keys(F).forEach(function(col){
+        var v=String(d.data[col]==null?'':d.data[col]);
+        A[F[col]] = LISTS[F[col]] ? v.split('|').map(function(x){ return x.trim(); }).filter(Boolean) : v;
+      });
+      A['sent_'+path]=d.sentAt||'';
+      A['edited_'+path]=(d.sentAt && d.savedAt && String(d.savedAt)>String(d.sentAt)) ? '1' : '';
+      A.needFor=A.needFor.map(function(n){ return n==='Passing time' ? 'Enjoying my time' : (n==='Impact' ? 'Values-aligned' : n); });
+    }
+    // ANSWERS FROM BEFORE SAVING EXISTED. Jessie, 2026-09-11: "3 yes". Somebody who typed before
+    // 1:33 on 2026-09-11 has answers in this browser and none on the sheet. Nothing saved means
+    // they are unsaved, so the next step saves them instead of leaving them on screen looking kept.
+    var hasAny=!d.found && Object.keys(FIELDS[path]).some(function(col){
+      var v=A[FIELDS[path][col]]; return Array.isArray(v) ? v.length>0 : !!String(v||'').trim();
+    });
+    if(Array.isArray(choices)) needChoices=choices;
+    loaded[path]=true; dirty=hasAny; keep();
+  }
   function loadThen(key){
     if(loading) return;
     var tk=token(); if(!tk){ needCode(); return; }
+    var path=A.path;
+    // Already here from the early read: open at once.
+    if(allData && allData.paths && allData.paths[path]){ applyLoaded(path, allData.paths[path], allData.needChoices); show(key); return; }
     loading=true;
-    var path=A.path, id=whoId();
     document.getElementById('panel').innerHTML='<span class="cw-loading">Loading information</span>';
-    fetch(GS_URL+'?action=getInquiry&appearId='+encodeURIComponent(id)+'&editToken='+encodeURIComponent(tk)+'&path='+encodeURIComponent(path))
+    var p=fetchAll();
+    (p || Promise.resolve(null)).then(function(all){
+      if(all && all.signin){ loading=false; needCode(); return; }
+      if(all && all.paths && all.paths[path]){ loading=false; applyLoaded(path, all.paths[path], all.needChoices); show(key); return; }
+      loadOne(key, path, tk);
+    });
+  }
+  // The single-path read, for a backend that has not learned path=all.
+  function loadOne(key, path, tk){
+    fetch(GS_URL+'?action=getInquiry&appearId='+encodeURIComponent(whoId())+'&editToken='+encodeURIComponent(tk)+'&path='+encodeURIComponent(path))
       .then(function(r){ return r.json(); })
       .then(function(d){
         loading=false;
         if(d&&d.code==='signin'){ needCode(); return; }
         if(!d||d.status!=='ok'){ loadFailed(key); return; }
-        if(d.found&&d.data){
-          var F=FIELDS[path];
-          Object.keys(F).forEach(function(col){
-            var v=String(d.data[col]==null?'':d.data[col]);
-            A[F[col]] = LISTS[F[col]] ? v.split('|').map(function(x){ return x.trim(); }).filter(Boolean) : v;
-          });
-          A['sent_'+path]=d.sentAt||'';
-          A['edited_'+path]=(d.sentAt && d.savedAt && String(d.savedAt)>String(d.sentAt)) ? '1' : '';
-          A.needFor=A.needFor.map(function(n){ return n==='Passing time' ? 'Enjoying my time' : (n==='Impact' ? 'Values-aligned' : n); });
-        }
-        // ANSWERS FROM BEFORE SAVING EXISTED. Jessie, 2026-09-11: "3 yes". Somebody who typed before
-        // 1:33 on 2026-09-11 has answers in this browser and none on the sheet. Nothing saved means
-        // they are unsaved, so the next step saves them instead of leaving them on screen looking kept.
-        var hasAny=!d.found && Object.keys(FIELDS[path]).some(function(col){
-          var v=A[FIELDS[path][col]]; return Array.isArray(v) ? v.length>0 : !!String(v||'').trim();
-        });
-        if(Array.isArray(d.needChoices)) needChoices=d.needChoices;
-        loaded[path]=true; dirty=hasAny; keep();
+        applyLoaded(path, d, d.needChoices);
         show(key);
       })
       .catch(function(){ loading=false; loadFailed(key); });
@@ -742,6 +778,7 @@
             }
           }catch(e){}
           signedId=d.appearId;
+          allP=null; allData=null;
           loadDraft(); keep();
           auth={mode:'',step:1,email:'',first:'',last:''};
           show(current&&isForm(current)&&current!=='signin'?current:firstPart());
@@ -784,7 +821,7 @@
     var so=document.getElementById('sign-out');
     if(so) so.onclick=function(){
       try{ if(window.CW&&CW.forget) CW.forget(); }catch(e){}
-      signedId=''; _nameAsked=false; loaded={}; dirty=false; setSave(''); A=JSON.parse(BLANK); auth={mode:'',step:1,email:'',first:'',last:''}; show('start');
+      signedId=''; _nameAsked=false; loaded={}; dirty=false; allP=null; allData=null; setSave(''); A=JSON.parse(BLANK); auth={mode:'',step:1,email:'',first:'',last:''}; show('start');
     };
   }
   window._safeNavGo=window._safeNavGo||function(el){try{var u=el&&el.getAttribute&&el.getAttribute('data-nav');if(u){window.location.href=u;}}catch(e){}return false;};
@@ -864,6 +901,8 @@
   if(parts().some(function(s){ return s.key===start; })) show(start);
   else show(A.path && askPath ? PATHS[A.path][0].key : 'start');
   _navQuiet=false;
+  // The early read, while they are still looking at the first screen.
+  if(signed()) fetchAll();
 })();
 </script>
 </body>
