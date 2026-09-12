@@ -78,6 +78,9 @@
      cursor:pointer;user-select:none;}
   th:hover{color:var(--brand);}
   td.num,th.num{text-align:right;}
+  /* People's Groups count sits on the left, next to Roles, so no empty stretch opens between them.
+     Jessie, 2026-09-12: "Why not?" to lining them up on the left. */
+  #ptbl td.num,#ptbl th.num{text-align:left;}
   .flag{background:var(--warnbg);color:var(--warn);border-radius:11px;padding:2px 9px;
         font-size:12px;font-weight:700;}
   .tot{display:flex;gap:26px;flex-wrap:wrap;margin-bottom:16px;}
