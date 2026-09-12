@@ -10,7 +10,7 @@
 
   hello@creating.works
 -->
-<!-- Version: V1.17 | Date: 2026-09-12 | LAST CHANGE: a path this device has opened before shows at once and checks the saved version behind it; saves carry their version and a refused one takes the newer answers; the sign-in hands the bar your face and name. Jessie: "1 a and b", "2 yes". -->
+<!-- Version: V1.18 | Date: 2026-09-12 | LAST CHANGE: Continue with Google on the sign-in, and Google signs in by itself somebody who has said yes to Creating Works before. Previous: V1.17: a path this device has opened before shows at once and checks the saved version behind it; saves carry their version and a refused one takes the newer answers; the sign-in hands the bar your face and name. Jessie: "1 a and b", "2 yes". -->
 <!-- Previous: V1.16 | Date: 2026-09-12 | LAST CHANGE: viewing as somebody shows their answers read-only, with a line saying whose they are. Jessie: "when i viewed as doug it showed my info", then "1 yes". -->
 <!-- Previous: V1.15 | Date: 2026-09-12 | LAST CHANGE: one early read for both paths as soon as a signed-in person opens the page, so a path usually opens without waiting. Jessie: "2 A and B". -->
 <!-- Previous: V1.14 | Date: 2026-09-12 | LAST CHANGE: the clean address is written the moment a part is chosen, not after its answers load, so an old ?part= address never sits in the bar during the wait. -->
@@ -127,6 +127,12 @@
   .tick input{width:18px;height:18px;flex-shrink:0;margin:2px 0 0;accent-color:var(--brand);}
   .tick a{color:var(--brand);font-weight:700;}
   .say{font-size:14px;margin-top:12px;}
+  /* Continue with Google, above Sign in and Sign up (see SIGN IN WITH GOOGLE in the script). */
+  .au-g{display:flex;justify-content:center;min-height:44px;}
+  .au-gwait{display:flex;justify-content:center;margin-top:12px;}
+  .au-gwait[hidden]{display:none;}
+  .au-gor{display:flex;align-items:center;gap:10px;color:#8A97A6;font-size:13px;margin:16px 0 18px;}
+  .au-gor::before,.au-gor::after{content:"";flex:1;height:1px;background:#DDE3EA;}
   .say.bad{color:#7A2410;}
   .say.ok{color:var(--soft);}
   .quiet{font-size:13.5px;color:var(--muted);margin-top:18px;}
@@ -725,6 +731,8 @@
     var h='<h2>Sign in to begin</h2>'
       +'<p class="lead">'+(auth.note?esc(auth.note):'Your answers are saved to your account and wait for you whenever you come back.')+'</p>';
     if(auth.step===1){
+      // CONTINUE WITH GOOGLE, first (see SIGN IN WITH GOOGLE below).
+      h+='<div id="au-google" class="au-g"></div><div id="au-gwait" class="au-gwait" hidden><span class="cw-loading">Signing you in...</span></div><div class="au-gor">or</div>';
       h+='<div class="choice" style="margin-bottom:22px;">'
         +'<button type="button" data-mode="in"'+(auth.mode==='in'?' class="on"':'')+'>Sign in</button>'
         +'<button type="button" data-mode="up"'+(auth.mode==='up'?' class="on"':'')+'>Sign up</button></div>';
@@ -763,6 +771,82 @@
     var c=document.getElementById('au-code'); if(c){ c.focus(); c.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); verifyCode(); } }); }
     var ag=document.getElementById('au-again'); if(ag) ag.onclick=function(){ auth.step=2; renderSignin(p); fireSend(); };
     var bk=document.getElementById('au-back'); if(bk) bk.onclick=function(){ auth.step=1; renderSignin(p); };
+    if(document.getElementById('au-google')) mountGoogle();
+  }
+
+  // ── SIGN IN WITH GOOGLE ───────────────────────────────────────────────────────────────────
+  // Jessie, 2026-09-12: "3 A yes" (Google on both sites, signing in by itself for somebody who has used it
+  // before) and yes to "Continue with Google on creating.works's sign-in". The same Google client as
+  // 2gather.network (GOOGLE_CLIENT_ID in Code.js, CLIENT_ID in 2gather.network's nav/google-signin.js) and the
+  // same backend steps (googleSignin, googleSignup) with from=creatingworks, so the activity line says which
+  // site. Each site still keeps its own sign-in (browsers keep each site's apart), which is why Google's own
+  // one-tap is asked here: somebody who has said yes to Creating Works on either site is signed in without a
+  // press. An address nobody has is asked, and nothing is created until Create my account is pressed.
+  var GCID='702611145180-r2f9ntdg8sg7u3o7ktdfnvdgaafukm9n.apps.googleusercontent.com';
+  var gisReady=false, gisWaiting=[], gPrompted=false, gCred='';
+  function loadGis(cb){
+    if(gisReady){ cb(); return; }
+    gisWaiting.push(cb);
+    if(gisWaiting.length>1) return;
+    var sc=document.createElement('script'); sc.src='https://accounts.google.com/gsi/client'; sc.async=true;
+    sc.onload=function(){
+      try{ google.accounts.id.initialize({client_id:GCID, callback:onGoogle, auto_select:true, ux_mode:'popup', cancel_on_tap_outside:true}); }catch(e){}
+      gisReady=true; var w=gisWaiting; gisWaiting=[]; w.forEach(function(f){ try{ f(); }catch(e){} });
+    };
+    document.head.appendChild(sc);
+  }
+  function mountGoogle(){
+    loadGis(function(){
+      var slot=document.getElementById('au-google'); if(!slot) return;
+      var w=Math.min(400,Math.max(220,Math.round(slot.getBoundingClientRect().width||320)));
+      try{ google.accounts.id.renderButton(slot,{theme:'outline',size:'large',shape:'pill',text:'continue_with',width:w}); }catch(e){}
+      if(!gPrompted){ gPrompted=true; try{ google.accounts.id.prompt(); }catch(e){} }
+    });
+  }
+  function gWait(on){
+    var w=document.getElementById('au-gwait'); if(w) w.hidden=!on;
+    var b=document.getElementById('au-google'); if(b) b.style.opacity=on?'.5':'';
+    if(on) say('');
+  }
+  function gAsk(action,extra){
+    return fetch(GS_URL+'?action='+action+'&from=creatingworks&credential='+encodeURIComponent(gCred)+(extra||''))
+      .then(function(r){ return r.json(); });
+  }
+  function onGoogle(resp){
+    gCred=String((resp&&resp.credential)||'');
+    if(!gCred){ say('Google did not answer. Try again.'); return; }
+    if(!document.getElementById('au-google')) show('signin');
+    gWait(true);
+    gAsk('googleSignin').then(function(d){
+      if(d&&d.status==='ok'&&d.appearId){ signedInAs(d,'',''); return; }
+      gWait(false);
+      if(d&&d.status==='new'){ askNewGoogle(d); return; }
+      say((d&&d.message)||'Google sign-in did not go through. Try again, or use the emailed code.');
+    }).catch(function(){ gWait(false); say('Google sign-in did not go through. Try again, or use the emailed code.'); });
+  }
+  function askNewGoogle(d){
+    var p=document.getElementById('panel'); if(!p) return;
+    p.innerHTML='<h2>Welcome to Creating.Works</h2>'
+      +'<p class="lead">We do not have '+esc(d.email)+' yet.</p>'
+      +'<label class="tick"><input id="au-gagree" type="checkbox"><span>I agree to the '
+      +'<a role="link" tabindex="0" data-nav="https://creating.works/terms-of-service.html" onclick="event.stopPropagation();return _safeNavGo(this)">Terms of Service</a>, '
+      +'<a role="link" tabindex="0" data-nav="https://creating.works/privacy-policy.html" onclick="event.stopPropagation();return _safeNavGo(this)">Privacy Policy</a>, and '
+      +'<a role="link" tabindex="0" data-nav="https://creating.works/code-of-conduct.html" onclick="event.stopPropagation();return _safeNavGo(this)">Code of Conduct</a>.</span></label>'
+      +'<label class="tick"><input id="au-g18" type="checkbox"><span>I confirm that I am 18 or older.</span></label>'
+      +'<div class="acts"><button type="button" class="btn ghost" id="au-gother">Use a different account</button>'
+      +'<button type="button" class="btn solid" id="au-gcreate">Create my account</button></div>'
+      +'<div class="say" id="au-say"></div>';
+    document.getElementById('au-gother').onclick=function(){ renderSignin(p); try{ google.accounts.id.prompt(); }catch(e){} };
+    document.getElementById('au-gcreate').onclick=function(){
+      if(!document.getElementById('au-gagree').checked){ say('Tick the box to agree to the terms.'); return; }
+      if(!document.getElementById('au-g18').checked){ say('An account here is for people 18 or older.'); return; }
+      var b=this; b.disabled=true; b.textContent='Creating your account...'; say('');
+      gAsk('googleSignup','&terms=1&age=1').then(function(r){
+        if(r&&r.status==='ok'&&r.appearId){ signedInAs(r, d.first||'', d.last||''); return; }
+        b.disabled=false; b.textContent='Create my account';
+        say((r&&r.message)||'That did not go through. Try once more.');
+      }).catch(function(){ b.disabled=false; b.textContent='Create my account'; say('That did not go through. Try once more.'); });
+    };
   }
   function say(msg,good){ var el=document.getElementById('au-say'); if(!el) return; el.className='say '+(good?'ok':'bad'); el.textContent=msg||''; }
   function harvest(){
@@ -808,40 +892,7 @@
       .then(function(r){ return r.json(); })
       .then(function(d){
         if(d&&d.status==='ok'&&d.appearId){
-          // The same things the sign-in page keeps, so the profile and account pages on this site
-          // know them too and do not ask for a second code.
-          try{
-            if(window.CW&&CW.remember) CW.remember(d.appearId);
-            localStorage.setItem('cw-id',d.appearId);
-            localStorage.setItem('appear-id',d.appearId);
-            if(auth.mode==='up'&&auth.first){
-              localStorage.setItem('cw-first',auth.first);
-              localStorage.setItem('cw-name-'+d.appearId,(auth.first+' '+auth.last).trim());
-            }
-            // The sign-in answer carries the name now, so "Signed in as" shows at once. Jessie,
-            // 2026-09-11: "1 yes". Before that deploy it is absent and the lookup still fills it.
-            if(d.name) localStorage.setItem('cw-name-'+d.appearId,String(d.name).trim());
-            // FACE AND NAME IN THE BAR AT ONCE. Jessie, 2026-09-12: "should show my face/name in top
-            // right pill before loading information", then "2 yes". Written where the top bar looks,
-            // then the bar is redrawn, so the pill does not wait on its own slow lookup.
-            if(d.name){ localStorage.setItem('cw-name',String(d.name).trim()); localStorage.setItem('cw-name-for',d.appearId); window.CW_NAME=String(d.name).trim(); }
-            if(d.photo){
-              localStorage.setItem('cw-photo',d.photo); localStorage.setItem('cw-photo-for',d.appearId);
-              localStorage.setItem('cw-photo-at',String(Date.now())); window.CW_TOPBAR_PHOTO=d.photo;
-            }
-            if(d.editToken){
-              localStorage.setItem('cw-token',d.editToken);
-              var exp=parseInt(String(d.editToken).split('.')[1],10);
-              if(!exp||exp<Date.now()) exp=Date.now()+60*60*1000;
-              localStorage.setItem('cw-edit-'+norm(d.appearId),JSON.stringify({t:d.editToken,exp:exp}));
-            }
-          }catch(e){}
-          signedId=d.appearId;
-          allP=null; allData=null;
-          try{ if(window.CW_REDRAW_BAR) window.CW_REDRAW_BAR(); }catch(e){}
-          loadDraft(); keep();
-          auth={mode:'',step:1,email:'',first:'',last:''};
-          show(current&&isForm(current)&&current!=='signin'?current:firstPart());
+          signedInAs(d, auth.mode==='up'?auth.first:'', auth.mode==='up'?auth.last:'');
           return;
         }
         b.disabled=false;
@@ -853,6 +904,44 @@
         if(s){ s.className='lead'; s.textContent='We sent a six digit code to '+auth.email+'. It expires in fifteen minutes.'; }
         say('The code did not check and your connection is the first thing to look at.');
       });
+  }
+  // SIGNED IN, BY CODE OR BY GOOGLE. The steps a right code always took, in one place, so Continue with Google
+  // (below) signs somebody in exactly the same way. first and last only on a new account.
+  function signedInAs(d, first, last){
+    // The same things the sign-in page keeps, so the profile and account pages on this site
+    // know them too and do not ask for a second code.
+    try{
+      if(window.CW&&CW.remember) CW.remember(d.appearId);
+      localStorage.setItem('cw-id',d.appearId);
+      localStorage.setItem('appear-id',d.appearId);
+      if(first){
+        localStorage.setItem('cw-first',first);
+        localStorage.setItem('cw-name-'+d.appearId,(first+' '+(last||'')).trim());
+      }
+      // The sign-in answer carries the name now, so "Signed in as" shows at once. Jessie,
+      // 2026-09-11: "1 yes". Before that deploy it is absent and the lookup still fills it.
+      if(d.name) localStorage.setItem('cw-name-'+d.appearId,String(d.name).trim());
+      // FACE AND NAME IN THE BAR AT ONCE. Jessie, 2026-09-12: "should show my face/name in top
+      // right pill before loading information", then "2 yes". Written where the top bar looks,
+      // then the bar is redrawn, so the pill does not wait on its own slow lookup.
+      if(d.name){ localStorage.setItem('cw-name',String(d.name).trim()); localStorage.setItem('cw-name-for',d.appearId); window.CW_NAME=String(d.name).trim(); }
+      if(d.photo){
+        localStorage.setItem('cw-photo',d.photo); localStorage.setItem('cw-photo-for',d.appearId);
+        localStorage.setItem('cw-photo-at',String(Date.now())); window.CW_TOPBAR_PHOTO=d.photo;
+      }
+      if(d.editToken){
+        localStorage.setItem('cw-token',d.editToken);
+        var exp=parseInt(String(d.editToken).split('.')[1],10);
+        if(!exp||exp<Date.now()) exp=Date.now()+60*60*1000;
+        localStorage.setItem('cw-edit-'+norm(d.appearId),JSON.stringify({t:d.editToken,exp:exp}));
+      }
+    }catch(e){}
+    signedId=d.appearId;
+    allP=null; allData=null;
+    try{ if(window.CW_REDRAW_BAR) window.CW_REDRAW_BAR(); }catch(e){}
+    loadDraft(); keep();
+    auth={mode:'',step:1,email:'',first:'',last:''};
+    show(current&&isForm(current)&&current!=='signin'?current:firstPart());
   }
   // WHO IS SIGNED IN. Jessie, 2026-09-10: "say who it is maybe?", then "5a". The name comes from
   // lookupProfile, the read My account makes, and is kept under the same key My account keeps it
