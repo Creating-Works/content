@@ -10,7 +10,8 @@
 
   hello@creating.works
 -->
-<!-- Version: V1.19 | Date: 2026-09-12 | LAST CHANGE: Sign in and Sign up are blue buttons, and once one is pressed the choice steps aside until Back; the whole sign-in is centered; while Google signs somebody in, the two buttons step aside. Jessie: "remove sig in/up buttons when google is signing in", "make these blue buttons for sign in/up", "center all", and "remove the sign in /up button when they are in hte sign in/up process". -->
+<!-- Version: V1.20 | Date: 2026-09-12 | LAST CHANGE: once the answers are sent, Your answers invites people on to their 2Gather profile and to the calendar (Finding work) or starting a group (Building something), each with Yes and Not now. Jessie: "go", in her words, and "go" to the line under the profile one. -->
+<!-- Previous: V1.19 | Date: 2026-09-12 | LAST CHANGE: Sign in and Sign up are blue buttons, and once one is pressed the choice steps aside until Back; the whole sign-in is centered; while Google signs somebody in, the two buttons step aside. Jessie: "remove sig in/up buttons when google is signing in", "make these blue buttons for sign in/up", "center all", and "remove the sign in /up button when they are in hte sign in/up process". -->
 <!-- Previous: V1.18 | Date: 2026-09-12 | LAST CHANGE: Continue with Google on the sign-in, and Google signs in by itself somebody who has said yes to Creating Works before. Previous: V1.17: a path this device has opened before shows at once and checks the saved version behind it; saves carry their version and a refused one takes the newer answers; the sign-in hands the bar your face and name. Jessie: "1 a and b", "2 yes". -->
 <!-- Previous: V1.16 | Date: 2026-09-12 | LAST CHANGE: viewing as somebody shows their answers read-only, with a line saying whose they are. Jessie: "when i viewed as doug it showed my info", then "1 yes". -->
 <!-- Previous: V1.15 | Date: 2026-09-12 | LAST CHANGE: one early read for both paths as soon as a signed-in person opens the page, so a path usually opens without waiting. Jessie: "2 A and B". -->
@@ -456,7 +457,7 @@
               ['What would you want?',A.want],['What would you enjoy?',A.enjoy],['What would bring out your greatest contribution?',A.contribution]])+'</div>'
           +'<div class="infobox"><div class="t">What happens next</div>'
             +'<div class="d">The person who invited you or someone from Creating.Works will reach out and look at this together.</div></div>'
-          +acts('suits','',sendButton());
+          +acts('suits','',sendButton())+invites();
         bindCommon(p); return;
       }
       var pic=[['What are you building?',A.building],['Who do you picture using it?',A.forWhom],['What does it serve?',A.serves],
@@ -476,7 +477,7 @@
         +'<div class="infobox"><div class="t">What happens next</div>'
           +'<div class="d">The person who invited you or someone from Creating.Works will reach out and look at this together. '
           +'For each constituency we ask what they need and want, what they give, and what circulates back.</div></div>'
-        +acts('help','',sendButton());
+        +acts('help','',sendButton())+invites();
     }
 
     bindCommon(p);
@@ -489,6 +490,59 @@
       b.onclick=function(){ show(b.getAttribute('data-go')); window.scrollTo(0,0); };
     });
     var sb=document.getElementById('send-go'); if(sb && !isSent()) sb.onclick=function(){ sb.disabled=true; save(true); };
+    bindInvites(p);
+  }
+
+  // ── AFTER SEND, WHERE TO GO NEXT ──────────────────────────────────────────────────────────
+  // Jessie, 2026-09-12: "go" to pointing people onward once they send, in her words, and "go" to the line
+  // under the profile one. Once the answers are sent, Your answers invites them on, one invitation at a
+  // time with Yes and Not now. Yes opens the page in this tab with no id in the address. Not now hides that
+  // one on this device, for this person and this path, until the next Send: it is kept against the Send's
+  // time, so a new Send brings it back. Changing an answer turns Sent back into Send and the invitations
+  // wait for it. Viewing as somebody shows none. Nothing is saved, so there is no backend change.
+  // The line under the profile one goes once 2Gather takes the sign-in across (handoff item 2).
+  var INVITES=[
+    {key:'profile', paths:['build','work'], url:'https://2gather.network/profile',
+     text:'Your profile on our events platform (called 2Gather) can hold what you wrote as tags, which help people and compatible events find you. Would you like to add them now?',
+     note:'2Gather asks for a code once more, because each site keeps its own sign-in.'},
+    {key:'events', paths:['work'], url:'https://2gather.network/events/',
+     text:'Your profile helps you find compatible work, where you meet people in person through our events calendar. Would you like to visit the events calendar?'},
+    {key:'group', paths:['build'], url:'https://2gather.network/groups/create/',
+     text:'Your profile helps you build within your own groups. Would you like to start a group?'}
+  ];
+  function offKey(){ return 'cw-invites-off-'+norm(whoId())+'-'+A.path; }
+  function invitesOff(){
+    try{
+      var o=JSON.parse(localStorage.getItem(offKey())||'null');
+      if(o && o.sent===A['sent_'+A.path] && Array.isArray(o.off)) return o.off;
+    }catch(e){}
+    return [];
+  }
+  function invites(){
+    if(viewing() || !isSent()) return '';
+    var off=invitesOff();
+    var l=INVITES.filter(function(v){ return v.paths.indexOf(A.path)>-1 && off.indexOf(v.key)<0; });
+    if(!l.length) return '';
+    return '<div id="invites" style="margin-top:26px;">'+l.map(function(v){
+      return '<div class="infobox" data-invite="'+v.key+'">'
+        +'<div class="d" style="color:var(--ink);font-size:14.5px;">'+esc(v.text)+'</div>'
+        +(v.note?'<div class="quiet" style="margin-top:8px;">'+esc(v.note)+'</div>':'')
+        +'<div class="acts" style="margin-top:14px;">'
+          +'<button type="button" class="btn solid" data-nav="'+esc(v.url)+'" onclick="return _safeNavGo(this)">Yes</button>'
+          +'<button type="button" class="btn ghost" data-notnow="'+v.key+'">Not now</button>'
+        +'</div></div>';
+    }).join('')+'</div>';
+  }
+  function bindInvites(p){
+    p.querySelectorAll('[data-notnow]').forEach(function(b){
+      b.onclick=function(){
+        var k=b.getAttribute('data-notnow'), off=invitesOff();
+        if(off.indexOf(k)<0) off.push(k);
+        try{ localStorage.setItem(offKey(),JSON.stringify({sent:A['sent_'+A.path],off:off})); }catch(e){}
+        var card=p.querySelector('[data-invite="'+k+'"]'); if(card) card.remove();
+        var box=document.getElementById('invites'); if(box && !box.querySelector('[data-invite]')) box.remove();
+      };
+    });
   }
 
   function bindAsking(){
