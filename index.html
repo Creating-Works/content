@@ -10,7 +10,8 @@
 
   hello@creating.works
 -->
-<!-- Version: V1.24 | Date: 2026-09-13 | LAST CHANGE: Finding work opens the one-question-at-a-time form at /work/, straight away when signed in and right after signing in otherwise. Jessie: "Yea it works publish". -->
+<!-- Version: V1.25 | Date: 2026-09-13 | LAST CHANGE: the first screen's rail shows Start alone until Building something is picked, and a remembered Finding work choice is dropped. Jessie: "Don't show all buttons until you select what of the first two". -->
+<!-- Previous: V1.24 | Date: 2026-09-13 | LAST CHANGE: Finding work opens the one-question-at-a-time form at /work/, straight away when signed in and right after signing in otherwise. Jessie: "Yea it works publish". -->
 <!-- Previous: V1.23 | Date: 2026-09-13 | LAST CHANGE: Who is asking? reads "Are you working for yourself or are you representing a team within an organization?" under it. Jessie named the change. -->
 <!-- Previous: V1.22 | Date: 2026-09-13 | LAST CHANGE: Building something's What happens next drops "For each constituency we ask what they need and want, what they give, and what circulates back." Jessie named the change. -->
 <!-- Previous: V1.21 | Date: 2026-09-12 | LAST CHANGE: the first screen says what each choice covers in a gray line beside it, and the line above starts "Each one asks its own questions." Jessie: "Yes publish this part - without the third set". -->
@@ -1090,9 +1091,16 @@
   window._safeNavGo=window._safeNavGo||function(el){try{var u=el&&el.getAttribute&&el.getAttribute('data-nav');if(u){window.location.href=u;}}catch(e){}return false;};
 
   var current='start';
+  // THE RAIL SHOWS START ALONE until a path is picked. Jessie, 2026-09-13, looking at the Finding work parts drawn on
+  // the first screen: "Don't show all buttons until you select what of the first two". Finding work never draws
+  // parts here, because it opens its own form at /work/.
+  function railParts(active){
+    if(active==='start' || active==='signin' || A.path==='work') return [{key:'start',label:'Start'}];
+    return parts();
+  }
   function buildTabs(active){
     var t=document.getElementById('tabs'); t.innerHTML='';
-    parts().forEach(function(s){
+    railParts(active).forEach(function(s){
       var b=document.createElement('button'); b.type='button';
       b.className='tab'+((s.key===active||(active==='signin'&&s.key==='start'))?' on':'');
       b.textContent=s.label;
@@ -1181,6 +1189,8 @@
   var route=readRoute();
   var askPath=route.path; if(PATHS[askPath]){ A.path=askPath; keep(); }
   if(askPath==='work' && signed()){ toNewWork(true); return; }
+  // A Finding work choice remembered from the old form is not a choice on this page any more.
+  if(A.path==='work' && askPath!=='work'){ A.path=''; keep(); }
   var start=route.part;
   if(parts().some(function(s){ return s.key===start; })) show(start);
   else show(A.path && askPath ? PATHS[A.path][0].key : 'start');
