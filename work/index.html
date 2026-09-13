@@ -3,7 +3,8 @@
   Copyright 2026 DayBalancer LLC. All rights reserved.
   hello@creating.works
 -->
-<!-- Version: V1.4 | Date: 2026-09-13 | LAST CHANGE: a screen for what paid and non-paid work somebody is open to, before appreciation. Jessie: "bring back What type of paid work are you open to? ... What type of non-paid work are you open to?". -->
+<!-- Version: V1.5 | Date: 2026-09-13 | LAST CHANGE: non-paid work asks Full-time, Part-time or One-time first, then "Which types of non-paid work?". Jessie: "Also ask What type of non-paid work are you open to? Full-time, Part-time, one-time Before which types of". -->
+<!-- Previous: V1.4 | Date: 2026-09-13 | LAST CHANGE: a screen for what paid and non-paid work somebody is open to, before appreciation. Jessie: "bring back What type of paid work are you open to? ... What type of non-paid work are you open to?". -->
 <!-- Previous: V1.3 | Date: 2026-09-13 | LAST CHANGE: screen 5 shows everything somebody offers, their skills (ikigai.skills) and their things and spaces (ikigai.haves, My haves on the 2Gather profile), and adds to those same lists. Jessie: "1A also should be writing to same fields as gather form". -->
 <!-- Previous: V1.2 | Date: 2026-09-13 | LAST CHANGE: appreciation is read back, and nothing saves until the saved answers have arrived. Jessie: "Fix now with deploy". -->
 <!-- Previous: V1.1 | Date: 2026-09-13 | LAST CHANGE: published as Finding work, at https://creating.works/work/ (it was /intro/, which now forwards here). Jessie: "Yea it works publish". -->
@@ -1781,7 +1782,8 @@
       + row('For work, income, or trade what do you have to offer right now?', cwOffersText())
       + row('What would work give you?', cwWorkText())
       + row('What type of paid work are you open to?', cwOtwList('paid').join(', '))
-      + row('What type of non-paid work are you open to?', cwOtwList('unpaid').join(', '))
+      + row('What type of non-paid work are you open to?', cwOtwList('unpaidTime').join(', '))
+      + row('Which types of non-paid work?', cwOtwList('unpaid').join(', '))
       + row('How do you like to get appreciated?', thanks.join(', '))
       + '<div style="background:#F7FBFF;border:1px solid #C9DFF3;border-radius:12px;padding:18px 20px;margin-top:10px;">'
       + '<div style="font-size:15.5px;font-weight:800;margin-bottom:4px;color:#1A2E42;">What happens next</div>'
@@ -1837,6 +1839,7 @@
         + '&location='      + encodeURIComponent(gpLocString(_gpLoc));
     if (window._gpLoaded) qs += '&havesTags=' + encodeURIComponent(CW_HAVES.join('|'))
       + '&openToPaidWork=' + encodeURIComponent(cwOtwList('paid').join('|'))
+      + '&openToUnpaidTime=' + encodeURIComponent(cwOtwList('unpaidTime').join('|'))
       + '&openToUnpaidWork=' + encodeURIComponent(cwOtwList('unpaid').join('|'));
     return qs;
   }
@@ -2079,7 +2082,9 @@
   // intake asked "Are you open to work?" and kept the answer in ikigai.retired. These are ikigai.openToPaidWork and
   // ikigai.openToUnpaidWork now. The options are getReferenceData's paidWorkTypes and unpaidWorkTypes, which a
   // reference-data column of that name decides once it exists. Nothing is drawn until the options have arrived.
-  var CW_OTW = { paid: {}, unpaid: {} };
+  // unpaidTime, 2026-09-13: Full-time, Part-time or One-time for non-paid work, asked before which types. It uses
+  // the same options as paid work (paidWorkTypes), so the two can never drift apart.
+  var CW_OTW = { paid: {}, unpaidTime: {}, unpaid: {} };
   function cwOtwList(side){ return Object.keys(CW_OTW[side]).filter(function(k){ return CW_OTW[side][k]; }); }
   function cwPaintOtw(){
     var box = document.getElementById('cw-otw'); if (!box) return;
@@ -2102,6 +2107,9 @@
     box.innerHTML = '<div style="font-size:13.5px;color:#6B7A8D;margin-bottom:12px;">Pick as many as fit.</div>'
       + pills('paid', rd.paidWorkTypes || [])
       + '<div style="font-size:17px;font-weight:800;color:#1A2E42;margin:26px 0 2px;">What type of non-paid work are you open to?</div>'
+      + '<div style="font-size:13.5px;color:#6B7A8D;margin-bottom:12px;">Pick as many as fit.</div>'
+      + pills('unpaidTime', rd.paidWorkTypes || [])
+      + '<div style="font-size:17px;font-weight:800;color:#1A2E42;margin:26px 0 2px;">Which types of non-paid work?</div>'
       + '<div style="font-size:13.5px;color:#6B7A8D;margin-bottom:12px;">Pick as many as fit.</div>'
       + pills('unpaid', rd.unpaidWorkTypes || []);
     box.querySelectorAll('[data-cw-otw]').forEach(function(b){
@@ -2217,14 +2225,15 @@
         window._gpLoaded = true;
         CW_HAVES = String(have.haves || '').split('|').map(function(x){ return x.trim(); }).filter(Boolean);
         var _split = function(v){ return String(v || '').split('|').map(function(x){ return x.trim(); }).filter(Boolean); };
-        var _paid = _split(have.openToPaidWork), _unpaid = _split(have.openToUnpaidWork);
+        var _paid = _split(have.openToPaidWork), _unpaid = _split(have.openToUnpaidWork), _unpaidTime = _split(have.openToUnpaidTime);
         // Nothing saved here yet: the kinds the old intake kept in ikigai.retired ("openToWork|kind:Projects|pay:Both")
         // show as picked, and any the list no longer holds still show, so nobody loses an answer.
         if (!_paid.length && !_unpaid.length) {
           _paid = _split(have.retired).filter(function(x){ return x.indexOf('kind:') === 0; }).map(function(x){ return x.slice(5).trim(); }).filter(Boolean);
         }
-        CW_OTW = { paid: {}, unpaid: {} };
+        CW_OTW = { paid: {}, unpaidTime: {}, unpaid: {} };
         _paid.forEach(function(v){ CW_OTW.paid[v] = true; });
+        _unpaidTime.forEach(function(v){ CW_OTW.unpaidTime[v] = true; });
         _unpaid.forEach(function(v){ CW_OTW.unpaid[v] = true; });
         // Work needs already saved from here are the truth once there are any; before that, the home page's
         // Finding work picks (read in cwLoadWork) stand in and are saved as work needs on the first Next.
