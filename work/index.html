@@ -3,7 +3,8 @@
   Copyright 2026 DayBalancer LLC. All rights reserved.
   hello@creating.works
 -->
-<!-- Version: V1.8 | Date: 2026-09-13 | LAST CHANGE: "Who would you most like your work to serve?" under What comes most naturally to you?, and Your answers drafts a purpose that Send saves to ikigai.purpose. Jessie: "Yes addd this below Facilitation and coaching question". -->
+<!-- Version: V1.9 | Date: 2026-09-13 | LAST CHANGE: Your purpose offers a few statements to pick from, one or more, instead of one sentence joining every answer. Jessie: "What of there are multiple purpose statements bcz they selected so much? Can you give them a few to select from?". -->
+<!-- Previous: V1.8 | Date: 2026-09-13 | LAST CHANGE: "Who would you most like your work to serve?" under What comes most naturally to you?, and Your answers drafts a purpose that Send saves to ikigai.purpose. Jessie: "Yes addd this below Facilitation and coaching question". -->
 <!-- Previous: V1.7 | Date: 2026-09-13 | LAST CHANGE: Which types of non-paid work? has + Other, which adds somebody's own as a picked choice. Jessie: "Make a chip for other like we normally do". -->
 <!-- Previous: V1.6 | Date: 2026-09-13 | LAST CHANGE: "What would work give you?" reads "What outcomes would you like work to give you?". Jessie named the change. -->
 <!-- Previous: V1.5 | Date: 2026-09-13 | LAST CHANGE: non-paid work asks Full-time, Part-time or One-time first, then "Which types of non-paid work?". Jessie: "Also ask What type of non-paid work are you open to? Full-time, Part-time, one-time Before which types of". -->
@@ -2199,27 +2200,68 @@
   // "Facilitating and coaching, for youth and seniors, in service to clean water". Only when all three parts are there.
   function cwJoin(l){ if (l.length < 3) return l.join(' and '); return l.slice(0, -1).join(', ') + ', and ' + l[l.length - 1]; }
   function cwLow(w){ w = String(w || '').trim(); return (w.length > 1 && w.charAt(1) === w.charAt(1).toLowerCase()) ? w.charAt(0).toLowerCase() + w.slice(1) : w; }
-  function cwDraftPurpose(){
+  // A FEW TO PICK FROM. Jessie, 2026-09-13: "What of there are multiple purpose statements bcz they selected so much? Can you
+  // give them a few to select from?". Joining every answer made one long sentence. Each statement pairs one thing that
+  // comes naturally, one group served and one thing cared about, cycling so every answer appears in at least one, up to
+  // four. Nothing is picked to start with. Picking one puts it in the box on its own line and picking it again takes it
+  // out, so anything typed in the box stays.
+  function cwPurposeParts(){
     var what = Object.keys(_gpMethodPicked || {}).filter(function(k){ return _gpMethodPicked[k]; })
       .map(function(m){ return String(m).replace(/^[^\p{L}\p{N}]+/u, '').trim(); }).filter(Boolean);
     var who = Object.keys(CW_SERVE).filter(function(k){ return CW_SERVE[k]; }).map(cwLow);
     var cv = document.getElementById('gp-intro-introValues');
     var cares = String((cv && cv.value) || '').split(',').map(function(x){ return cwLow(x.trim()); }).filter(Boolean);
-    if (!what.length || !who.length || !cares.length) return '';
-    var first = cwJoin(what.map(function(w, i){ return i ? cwLow(w) : w; }));
-    return first + ', for ' + cwJoin(who) + ', in service to ' + cwJoin(cares);
+    return { what: what, who: who, cares: cares };
+  }
+  function cwPurposeOptions(){
+    var p = cwPurposeParts();
+    if (!p.what.length || !p.who.length || !p.cares.length) return [];
+    var n = Math.min(4, Math.max(p.what.length, p.who.length, p.cares.length)), out = [];
+    for (var i = 0; i < n; i++) {
+      var s = p.what[i % p.what.length] + ', for ' + p.who[i % p.who.length] + ', in service to ' + p.cares[i % p.cares.length];
+      if (out.indexOf(s) < 0) out.push(s);
+    }
+    return out;
   }
   function cwPurposeBox(){
-    if (!CW_PURPOSE.edited) CW_PURPOSE.text = CW_PURPOSE.saved || cwDraftPurpose();
+    if (!CW_PURPOSE.edited) CW_PURPOSE.text = CW_PURPOSE.saved;
+    var opts = cwPurposeOptions();
+    var lines = function(){ return String(CW_PURPOSE.text || '').split('\n').map(function(x){ return x.trim(); }).filter(Boolean); };
     setTimeout(function(){
       var ta = document.getElementById('cw-purpose');
-      if (ta) ta.addEventListener('input', function(){ CW_PURPOSE.text = ta.value; CW_PURPOSE.edited = true; gpStepPaint(); });
+      if (ta) ta.addEventListener('input', function(){ CW_PURPOSE.text = ta.value; CW_PURPOSE.edited = true; gpStepPaint(); cwPaintPurposePicks(); });
+      document.querySelectorAll('[data-cw-purpose]').forEach(function(b){
+        b.onclick = function(){
+          var sLine = opts[parseInt(b.getAttribute('data-cw-purpose'), 10)], l = lines(), at = l.indexOf(sLine);
+          if (at > -1) l.splice(at, 1); else l.push(sLine);
+          CW_PURPOSE.text = l.join('\n'); CW_PURPOSE.edited = true;
+          var t = document.getElementById('cw-purpose'); if (t) t.value = CW_PURPOSE.text;
+          gpStepPaint(); cwPaintPurposePicks();
+        };
+      });
+      cwPaintPurposePicks();
     }, 0);
+    window._cwPurposeOpts = opts;
     return '<div style="font-size:14px;font-weight:700;color:#1A2E42;margin-top:4px;">Your purpose</div>'
-      + '<div style="font-size:13.5px;color:#6B7A8D;margin:2px 0 8px;">We drew it from your answers and you can change any of it to say it your way.</div>'
+      + (opts.length ? '<div style="font-size:13.5px;color:#6B7A8D;margin:2px 0 10px;">We drew these from your answers. Pick one or more and change any of it to say it your way.</div>'
+          + '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;">'
+          + opts.map(function(o, i){ return '<button type="button" data-cw-purpose="' + i + '" style="font:inherit;font-size:14px;text-align:left;padding:10px 14px;border-radius:12px;cursor:pointer;line-height:1.45;">' + _gpEsc(o) + '</button>'; }).join('')
+          + '</div>'
+        : '<div style="font-size:13.5px;color:#6B7A8D;margin:2px 0 8px;">Say what you are making, for whom, and in service to what.</div>')
       + '<textarea id="cw-purpose" rows="3" class="cw-intro-box" placeholder="Example: Facilitating and coaching, for families new to the area, in service to community health" '
       + 'style="width:100%;border:1.5px solid #DDE3EA;background:#F7FBFF;border-radius:10px;padding:12px 14px;font:inherit;font-size:14.5px;color:#1A2E42;line-height:1.5;resize:vertical;margin-bottom:14px;">'
       + _gpEsc(CW_PURPOSE.text || '') + '</textarea>';
+  }
+  // A statement in the box is shown picked, filled blue like every other choice.
+  function cwPaintPurposePicks(){
+    var l = String(CW_PURPOSE.text || '').split('\n').map(function(x){ return x.trim(); });
+    document.querySelectorAll('[data-cw-purpose]').forEach(function(b){
+      var on = l.indexOf((window._cwPurposeOpts || [])[parseInt(b.getAttribute('data-cw-purpose'), 10)]) > -1;
+      b.style.background = on ? '#1F699E' : '#fff';
+      b.style.color = on ? '#fff' : '#1F699E';
+      b.style.border = on ? '1px solid #1F699E' : '1px solid #C9DFF3';
+      b.style.fontWeight = on ? '700' : '600';
+    });
   }
 
   function cwLoadWork(){
@@ -2362,7 +2404,7 @@
         // What is on screen is what is saved, unless the home page's work picks still have to be written here.
         var _homePicks = !CW_WORK.fromIkigai && Object.keys(CW_WORK.picked).some(function(k){ return CW_WORK.picked[k]; });
         _cwLastQs = _homePicks ? null : cwBuildQs();
-        if (window._cwSentLoaded) { window._cwSent = true; if (!CW_PURPOSE.edited) CW_PURPOSE.text = CW_PURPOSE.saved || cwDraftPurpose(); _cwSentQs = cwSendKey(); }
+        if (window._cwSentLoaded) { window._cwSent = true; if (!CW_PURPOSE.edited) CW_PURPOSE.text = CW_PURPOSE.saved; _cwSentQs = cwSendKey(); }
         // A Next pressed while loading saves now, from the answers as they stand with the saved ones in.
         if (window._cwWantedSave) { window._cwWantedSave = false; _cwLastQs = null; cwStat(''); gpQuietSave(); }
         gpStepPaint();
