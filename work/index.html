@@ -3,7 +3,8 @@
   Copyright 2026 DayBalancer LLC. All rights reserved.
   hello@creating.works
 -->
-<!-- Version: V1.2 | Date: 2026-09-13 | LAST CHANGE: appreciation is read back, and nothing saves until the saved answers have arrived. Jessie: "Fix now with deploy". -->
+<!-- Version: V1.3 | Date: 2026-09-13 | LAST CHANGE: screen 5 shows everything somebody offers, their skills (ikigai.skills) and their things and spaces (ikigai.haves, My haves on the 2Gather profile), and adds to those same lists. Jessie: "1A also should be writing to same fields as gather form". -->
+<!-- Previous: V1.2 | Date: 2026-09-13 | LAST CHANGE: appreciation is read back, and nothing saves until the saved answers have arrived. Jessie: "Fix now with deploy". -->
 <!-- Previous: V1.1 | Date: 2026-09-13 | LAST CHANGE: published as Finding work, at https://creating.works/work/ (it was /intro/, which now forwards here). Jessie: "Yea it works publish". -->
 <!-- Previous: V1.0 | Date: 2026-09-13 | LAST CHANGE: it saves. Every Next saves what changed, offers carry work ("massage therapy:work:skill"), What would work give you? writes "Money:work" into ikigai.needs, and Send emails the answers and records ikigai.introSentDate. Jessie: "2 yes", then "Yes go and deploy". -->
 <!-- Previous: V0.6 | Date: 2026-09-13 | LAST CHANGE: no Skip this anywhere; the last question says Next; then Your answers with every answer, What happens next, Back and Send. Jessie named each change. -->
@@ -63,9 +64,9 @@
   // stays so the page can be turned back into a look-only copy by setting it to true.
   var CW_MOCKUP = false;
   // WORK, ON EVERY OFFER AND NEED MADE HERE. Jessie, 2026-09-13: "Append the answeres here to work:skill and so
-  // forth / We will ask them later to tag each for in come trade etc", then "2 yes". An offer made on this page
-  // is stored as "massage therapy:work:skill" (":work:thing", ":work:space", or "truck:work" with no kind), and
-  // a pick under What would work give you? as "Money:work" in ikigai.needs. See cwBuildQs.
+  // forth", then "2 yes", then "1A". A skill added on screen 5 joins ikigai.skills as "Facilitating:work:skill", a
+  // thing or space joins ikigai.haves as "Truck:work:thing", and a pick under What would work give you? joins
+  // ikigai.needs as "Money:work". See cwPaintOffers and cwBuildQs.
 
 // Your own record is never served from cache. Added 2026-08-31, after a profile showed the
 // answers from before a save for up to six hours. The gate caches getIntake, getProfile,
@@ -697,7 +698,7 @@
           var _bits = String(w).split(':');
           var _kind = (_bits.length > 1) ? _bits[_bits.length - 1].toLowerCase() : '';
           if (_kind === 'skill' || _kind === 'thing' || _kind === 'space') {
-            t2.textContent = _bits.slice(0, -1).join(':');
+            t2.textContent = _bits.slice(0, -1).filter(function(b){ return b.toLowerCase() !== 'work'; }).join(':');
             var _k = document.createElement('span');
             _k.textContent = '· ' + _kind;
             _k.style.cssText = 'font-weight:600;opacity:.7;font-size:11.5px;margin-left:5px;';
@@ -1067,6 +1068,7 @@
 
     // Anything already answered shows the moment the screen is built, not on the first tap.
     repaint();
+    (window._gpRepaints = window._gpRepaints || {})[key] = repaint;   // screen 5 adds skills to screen 3's list
     return box;
   }
 
@@ -1642,12 +1644,18 @@
       // Enjoy, skills, values each get a screen. Needs and haves share the last question screen,
       // because they are two halves of one thought and neither is required.
       // What do you need? is not asked in this copy: the work screen asked it first. 'off' is never a step.
-      var _map = { introEnjoy:'1', introSkills:'2', introValues:'3', introNeed:'off', introOffer:'4' };
+      var _map = { introEnjoy:'1', introSkills:'2', introValues:'3', introNeed:'off', introOffer:'off' };   // screen 5 draws cw-offers instead
       wrap.setAttribute('data-gp-step', _map[q.key] || '4');
       box.appendChild(wrap);
       // WHAT WOULD WORK GIVE YOU sits on the offer screen, under the offer question. Jessie, 2026-09-13:
       // "Stop put this on this screen instead For work, income, or trade what do you have to offer right now?"
       if (q.key === 'introOffer') {
+        var _co = document.createElement('div');
+        _co.id = 'cw-offers';
+        _co.setAttribute('data-gp-step', '4');
+        _co.style.cssText = 'padding-top:10px;';
+        box.appendChild(_co);
+        if (typeof CW_HAVES !== 'undefined') cwPaintOffers();
         var _cw = document.createElement('div');
         _cw.id = 'cw-work-step';
         _cw.setAttribute('data-gp-step', '4');
@@ -1762,7 +1770,7 @@
       + row('What skills do you have?', val('introSkills'))
       + row('What comes most naturally to you?', on(_gpMethodPicked).join(', '))
       + row('What do you care about?', val('introValues'))
-      + row('For work, income, or trade what do you have to offer right now?', val('introOffer'))
+      + row('For work, income, or trade what do you have to offer right now?', cwOffersText())
       + row('What would work give you?', cwWorkText())
       + row('How do you like to get appreciated?', thanks.join(', '))
       + '<div style="background:#F7FBFF;border:1px solid #C9DFF3;border-radius:12px;padding:18px 20px;margin-top:10px;">'
@@ -1783,17 +1791,6 @@
   }
 
   // THE SAVE, built in one place for every Next and for Send.
-  function cwWorkOffers(v){
-    // Loaded offers go back exactly as they arrived. One added here carries work before its kind.
-    var orig = _gpOrig.introOffer || {};
-    return String(v || '').split(',').map(function(x){ return x.trim(); }).filter(Boolean).map(function(w){
-      var name = w.split(':')[0].trim().replace(/^[^\p{L}\p{N}]+/u, '').trim().toLowerCase();
-      if (orig[name]) return orig[name];
-      if (/:work(:|$)/i.test(w)) return w;
-      var m = w.match(/^(.*):(skill|thing|space)$/i);
-      return m ? (m[1] + ':work:' + m[2]) : (w + ':work');
-    }).join(', ');
-  }
   function cwNeedsTags(base){
     // What would work give you? decides every need ending in ":work". The others go back untouched.
     var picks = Object.keys(CW_WORK.picked).filter(function(k){ return CW_WORK.picked[k]; }).map(function(k){ return k + ':work'; });
@@ -1820,7 +1817,7 @@
       + '&methods='      + encodeURIComponent(picked(_gpMethodPicked, '|'));
     GP_INTRO_Q.forEach(function(q){
       var v = val(q.key);
-      if (q.key === 'introOffer') v = cwWorkOffers(v);
+      if (q.key === 'introOffer') return;   // offers live in ikigai.skills and ikigai.haves now (cw-offers)
       qs += '&' + q.key + '=' + encodeURIComponent(v);
     });
     qs += '&needsTags='     + encodeURIComponent(cwNeedsTags(tagFor('introNeed')))
@@ -1828,6 +1825,7 @@
         + '&skillsTags='    + encodeURIComponent(tagFor('introSkills'))
         + '&valuesTags='    + encodeURIComponent(tagFor('introValues'))
         + '&location='      + encodeURIComponent(gpLocString(_gpLoc));
+    if (window._gpLoaded) qs += '&havesTags=' + encodeURIComponent(CW_HAVES.join('|'));
     return qs;
   }
   // Saved on every Next, but only when something changed since the last save: one trip to the backend
@@ -1992,6 +1990,77 @@
       };
     });
   }
+  // ── SCREEN 5: EVERYTHING SOMEBODY OFFERS ──────────────────────────────────────────────────────
+  // Jessie, 2026-09-13: "skills are one subset of offers (skill, Thing, space)", then "1A also should be writing to
+  // same fields as gather form". An offer is a skill, a thing or a space. Skills are ikigai.skills, the list screen 3
+  // fills; things and spaces are ikigai.haves, My haves on the 2Gather profile. Both show here as chosen, and adding
+  // or removing here changes those same lists, so the profile, screen 3 and this screen always agree. Anything
+  // added here carries work before its kind ("Facilitating:work:skill", "Truck:work:thing").
+  var CW_HAVES = [], _cwOfferKind = '';
+  function cwName(w){ return String(w || '').split(':')[0].replace(/^[^\p{L}\p{N}]+/u, '').trim(); }
+  function cwKindOf(w){ var b = String(w || '').split(':'); var k = b.length > 1 ? b[b.length - 1].toLowerCase() : ''; return (k === 'skill' || k === 'thing' || k === 'space') ? k : ''; }
+  function cwSkillsBox(){ return document.getElementById('gp-intro-introSkills'); }
+  function cwSkillList(){ var t = cwSkillsBox(); return String((t && t.value) || '').split(',').map(function(x){ return x.trim(); }).filter(Boolean); }
+  function cwOffersText(){
+    return cwSkillList().map(function(w){ return cwName(w) + ' (skill)'; })
+      .concat(CW_HAVES.map(function(w){ var k = cwKindOf(w); return cwName(w) + (k ? ' (' + k + ')' : ''); }))
+      .join(', ');
+  }
+  function cwPaintOffers(){
+    var box = document.getElementById('cw-offers'); if (!box) return;
+    var chip = function(label, kind, attr){
+      return '<span style="display:inline-flex;align-items:center;gap:8px;font-size:13.5px;padding:7px 10px 7px 14px;border-radius:20px;background:#1F699E;color:#fff;font-weight:700;">'
+        + _gpEsc(label) + (kind ? '<span style="font-weight:600;opacity:.7;font-size:11.5px;">\u00b7 ' + kind + '</span>' : '')
+        + '<button type="button" ' + attr + ' aria-label="Remove ' + _gpEsc(label) + '" style="background:none;border:0;color:#fff;font-size:16px;line-height:1;cursor:pointer;padding:0 2px;">\u00d7</button></span>';
+    };
+    var skills = cwSkillList(), h = '';
+    if (skills.length || CW_HAVES.length) {
+      h += '<div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px;">';
+      skills.forEach(function(w, i){ h += chip(cwName(w), 'skill', 'data-cw-dropskill="' + i + '"'); });
+      CW_HAVES.forEach(function(w, i){ h += chip(cwName(w), cwKindOf(w), 'data-cw-drophave="' + i + '"'); });
+      h += '</div>';
+    }
+    var pill = function(k, label){
+      var on = _cwOfferKind === k;
+      return '<button type="button" data-cw-kind="' + k + '" style="font:inherit;font-size:13.5px;padding:7px 14px;border-radius:20px;cursor:pointer;'
+        + (on ? 'background:#1F699E;border:1px solid #1F699E;color:#fff;font-weight:700;' : 'background:#fff;border:1px solid #C9DFF3;color:#1F699E;font-weight:600;') + '">' + label + '</button>';
+    };
+    h += '<div style="display:flex;flex-wrap:wrap;gap:7px;">' + pill('skill', 'A skill') + pill('thing', 'A thing') + pill('space', 'A space') + '</div>';
+    if (_cwOfferKind) {
+      var ask = { skill: 'What skill?', thing: 'What thing?', space: 'What space?' }[_cwOfferKind];
+      h += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">'
+        + '<input type="text" id="cw-offer-in" placeholder="' + ask + '" style="flex:1 1 220px;border:1.5px solid #DDE3EA;background:#F7FBFF;border-radius:10px;padding:9px 12px;font:inherit;font-size:14px;color:#1A2E42;">'
+        + '<button type="button" id="cw-offer-add" style="font:inherit;font-size:13.5px;font-weight:700;padding:8px 16px;border-radius:20px;border:0;background:#1F699E;color:#fff;cursor:pointer;">Add</button></div>';
+    }
+    box.innerHTML = h;
+    box.querySelectorAll('[data-cw-kind]').forEach(function(b){
+      b.onclick = function(){ var k = b.getAttribute('data-cw-kind'); _cwOfferKind = (_cwOfferKind === k) ? '' : k; cwPaintOffers();
+        var i = document.getElementById('cw-offer-in'); if (i) { try { i.focus(); } catch (e) {} } };
+    });
+    box.querySelectorAll('[data-cw-dropskill]').forEach(function(b){
+      b.onclick = function(){ var w = cwSkillList()[parseInt(b.getAttribute('data-cw-dropskill'), 10)]; if (w) gpDropWord('introSkills', w, cwSkillsBox());
+        if (window._gpRepaints && window._gpRepaints.introSkills) window._gpRepaints.introSkills(); cwPaintOffers(); };
+    });
+    box.querySelectorAll('[data-cw-drophave]').forEach(function(b){
+      b.onclick = function(){ CW_HAVES.splice(parseInt(b.getAttribute('data-cw-drophave'), 10), 1); cwPaintOffers(); };
+    });
+    var add = function(){
+      var inp = document.getElementById('cw-offer-in'); if (!inp) return;
+      var v = String(inp.value || '').trim(); if (!v || !_cwOfferKind) return;
+      if (_cwOfferKind === 'skill') {
+        var t = cwSkillsBox();
+        var have = cwSkillList().some(function(w){ return cwName(w).toLowerCase() === v.toLowerCase(); });
+        if (t && !have) gpAddWord('introSkills', v + ':work:skill', '', t);
+        if (window._gpRepaints && window._gpRepaints.introSkills) window._gpRepaints.introSkills();
+      } else if (!CW_HAVES.some(function(w){ return cwName(w).toLowerCase() === v.toLowerCase(); })) {
+        CW_HAVES.push(v + ':work:' + _cwOfferKind);
+      }
+      _cwOfferKind = ''; cwPaintOffers();
+    };
+    var ab = document.getElementById('cw-offer-add'); if (ab) ab.onclick = add;
+    var ai = document.getElementById('cw-offer-in'); if (ai) ai.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); add(); } });
+  }
+
   function cwLoadWork(){
     try {
       var d = JSON.parse(localStorage.getItem('cw-inquiry-draft-' + cwNorm(meId)) || 'null');
@@ -2022,6 +2091,7 @@
       .catch(function(){ if (!CW_WORK.choices) cwPaintWork('failed'); });
   }
   cwLoadWork();
+  cwPaintOffers();
   // Most people answered these long before the intro* columns existed, and their words
   // sit one column away under the older names. Asking somebody to type out again what
   // we already hold is how a form earns a reputation for not listening, so fall back to
@@ -2096,6 +2166,7 @@
         gpLocFrom(have.location);
         if (gpLocString(_gpLoc)) any = true;
         window._gpLoaded = true;
+        CW_HAVES = String(have.haves || '').split('|').map(function(x){ return x.trim(); }).filter(Boolean);
         // Work needs already saved from here are the truth once there are any; before that, the home page's
         // Finding work picks (read in cwLoadWork) stand in and are saved as work needs on the first Next.
         var _workSaved = String(have.needs || '').split('|').map(function(x){ return x.trim(); })
@@ -2109,6 +2180,7 @@
         window._cwSentLoaded = !isNaN(_sentT) && (isNaN(_savedT) || _savedT <= _sentT + 5000);
         if (any) { gpRenderIntro(use); }
         if (CW_WORK.fromIkigai) cwPaintWork();
+        cwPaintOffers();
         // What is on screen is what is saved, unless the home page's work picks still have to be written here.
         var _homePicks = !CW_WORK.fromIkigai && Object.keys(CW_WORK.picked).some(function(k){ return CW_WORK.picked[k]; });
         _cwLastQs = _homePicks ? null : cwBuildQs();
