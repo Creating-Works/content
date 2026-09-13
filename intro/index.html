@@ -3,7 +3,8 @@
   Copyright 2026 DayBalancer LLC. All rights reserved.
   hello@creating.works
 -->
-<!-- Version: V0.5 | Date: 2026-09-13 | LAST CHANGE: the offer question on screen 5 is 17px, the same size as What would work give you? under it. Jessie: "Make same size as other questions". -->
+<!-- Version: V0.6 | Date: 2026-09-13 | LAST CHANGE: no Skip this anywhere; the last question says Next; then Your answers with every answer, What happens next, Back and Send. Jessie named each change. -->
+<!-- Previous: V0.5 | Date: 2026-09-13 | LAST CHANGE: the offer question on screen 5 is 17px, the same size as What would work give you? under it. Jessie: "Make same size as other questions". -->
 <!-- Previous: V0.4 | Date: 2026-09-13 | LAST CHANGE: How do you like to get appreciated? is the last question, on its own screen, and What would work give you? has + Other instead of an Anything else box. Jessie named both. -->
 <!-- Previous: V0.3 | Date: 2026-09-13 | LAST CHANGE: What would work give you? moves onto the offer screen, under "For work, income, or trade what do you have to offer right now?", and is no longer a screen of its own. Jessie: "Stop put this on this screen instead". -->
 <!-- Previous: V0.2 | Date: 2026-09-13 | LAST CHANGE: no mockup note, no group members line, no photo, and the needs-and-offers screen asks only "For work, income, or trade what do you have to offer right now?". Jessie named each change. -->
@@ -1402,7 +1403,7 @@
     // How do you like to be thanked has moved, so it is not a screen here any more and the
     // profile is what comes after the last question.
     // Jessie, 2026-09-13: "How do you like to get appreciated? 🎁 ... As last question".
-    ? ['How do you like to get appreciated? \u{1F381}', 'This is your profile']
+    ? ['How do you like to get appreciated? \u{1F381}', 'Your answers']
     : ['How do you like to be thanked?', 'This is your profile']);
   var _gpStep = 0;
   var GP_LAST = GP_STEP_TITLES.length - 1;
@@ -1468,13 +1469,14 @@
     var skip = document.getElementById('gp-step-skip');
     // Skipping needs and haves is a choice somebody makes, not a thing they miss, so it is a
     // control on the screen rather than an absence of one.
-    if (skip) skip.style.display = (_gpStep === 4) ? '' : 'none';
+    if (skip) skip.style.display = 'none';   // Jessie, 2026-09-13: "Remove any skip this on pages"
     if (!next) return;
     // "Go in" said nothing about where. It goes back to the group somebody was joining, so it
     // says so. Jessie, 2026-08-31.
-    if (_gpStep === GP_LAST) { next.textContent = /\/group/.test(_next) ? 'View group' : 'See my profile'; next.disabled = false; }
+    // The last screen is Your answers and ends on Send, as the home page's does. Jessie, 2026-09-13.
+    if (_gpStep === GP_LAST) { next.textContent = window._cwSent ? 'Sent' : 'Send'; next.disabled = !!window._cwSent; }
     else if (_gpStep === GP_LAST - 1) {
-      next.textContent = GP_BROWSE ? 'View my profile' : 'Save and see my profile';
+      next.textContent = 'Next';   // Jessie, 2026-09-13: "Make last question have next"
       next.disabled = false;
     }
     else { next.textContent = 'Next'; next.disabled = !gpStepOK(_gpStep); }
@@ -1799,51 +1801,34 @@
   });
   // The last screen. Somebody has just answered six questions and has never once seen what any
   // of it looks like from the outside, which is the only view that matters to anybody else.
+  // YOUR ANSWERS, then What happens next, then Back and Send. Jessie, 2026-09-13: "Then go to showing answers /
+  // And then / What happens next / The person who invited you or someone from Creating.Works will reach out and
+  // look at this together. / Back / Send". Laid out the way the home page's Your answers is: each question in
+  // the order it was asked, the answer under it, and "Not answered yet" where there is none.
   function gpBuildPreview(){
     var el = document.getElementById('gp-preview');
     if (!el) return;
-    var who = '';
-    try { who = String(localStorage.getItem('cw-first') || '').trim(); } catch (e) {}
-    var photo = '';
-    var img = document.querySelector('#gp-photo-face img');
-    if (img) photo = img.getAttribute('src') || '';
     var val = function(k){ var t = document.getElementById('gp-intro-' + k); return t ? String(t.value || '').trim() : ''; };
     var esc = function(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
-    var row = function(label, text){
-      if (!text) return '';
-      return '<div style="padding:14px 0;border-top:1px solid #f0f1f5;">'
-        + '<div style="font-size:12px;font-weight:800;color:#6B7A8D;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;">' + label + '</div>'
-        + '<div style="font-size:14.5px;color:#1A2E42;line-height:1.55;">' + esc(text) + '</div></div>';
+    var on = function(m){ return Object.keys(m || {}).filter(function(k){ return m[k]; }); };
+    var thanks = GP_THANKS.filter(function(o){ return _gpThanksPicked[o.value]; }).map(function(o){ return o.label; });
+    var row = function(q, a){
+      return '<div style="font-size:14px;font-weight:700;color:#1A2E42;">' + esc(q) + '</div>'
+        + '<div style="font-size:14.5px;margin:2px 0 14px;white-space:pre-wrap;' + (a ? 'color:#4B5A6D;">' + esc(a) : 'color:#6B7A8D;font-style:italic;">Not answered yet') + '</div>';
     };
-    var langs = Object.keys(_gpLangPicked || {}).filter(function(k){ return _gpLangPicked[k]; }).join(', ');
     el.innerHTML =
-      '<div style="font-size:13.5px;color:#6B7A8D;margin-bottom:16px;max-width:60ch;line-height:1.55;">'
-      + 'This is how you look to somebody in a group you join. You can change any of it later from '
-      + 'your profile.</div>'
-      + '<div style="display:flex;align-items:center;gap:16px;">'
-      + (photo
-          ? '<img src="' + photo + '" alt="" style="width:76px;height:76px;border-radius:50%;object-fit:cover;border:1.5px solid #DDE3EA;">'
-          : '')
-      + '<div><div style="font-size:22px;font-weight:800;color:#1A2E42;">' + esc(who || 'You') + '</div>'
-      + (gpLocString(_gpLoc) ? '<div style="font-size:14px;color:#6B7A8D;">' + esc(gpLocString(_gpLoc)) + '</div>' : '')
-      + '</div></div>'
-      + '<div style="margin-top:14px;">'
-      + row('Enjoys', val('introEnjoy'))
-      + row('Skills', val('introSkills'))
-      + row('Cares about', val('introValues'))
-      + row('Needs from work', cwWorkText())
-      + row('Needs', val('introNeed'))
-      + row('Has to offer', val('introOffer'))
-      + row('Speaks', langs)
-      + '</div>'
-      // Go in takes somebody where they were headed, which for a person arriving from a group
-      // link is that group. The other doors are on one page already, so this points at it
-      // rather than printing a second copy of the same six choices.
-      + (GP_BROWSE
-          ? '<div style="margin-top:18px;font-size:14px;color:#6B7A8D;">Or '
-            + '<a id="gp-where-start" href="https://2gather.network/welcome/" style="color:#1F699E;font-weight:700;">'
-            + 'pick somewhere to start</a>.</div>'
-          : '');
+        row('Which languages do you speak?', on(_gpLangPicked).join(', '))
+      + row('Where are you?', gpLocString(_gpLoc))
+      + row('What brings you joy?', val('introEnjoy'))
+      + row('What skills do you have?', val('introSkills'))
+      + row('What comes most naturally to you?', on(_gpMethodPicked).join(', '))
+      + row('What do you care about?', val('introValues'))
+      + row('For work, income, or trade what do you have to offer right now?', val('introOffer'))
+      + row('What would work give you?', cwWorkText())
+      + row('How do you like to get appreciated?', thanks.join(', '))
+      + '<div style="background:#F7FBFF;border:1px solid #C9DFF3;border-radius:12px;padding:18px 20px;margin-top:10px;">'
+      + '<div style="font-size:15.5px;font-weight:800;margin-bottom:4px;color:#1A2E42;">What happens next</div>'
+      + '<div style="font-size:14px;color:#4B5A6D;">The person who invited you or someone from Creating.Works will reach out and look at this together.</div></div>';
   }
 
   // Next does one of three things: move on, save, or leave. Back never saves, because going
@@ -1888,6 +1873,12 @@
   }
 
   document.getElementById('gp-step-next').addEventListener('click', function(){
+    if (_gpStep === GP_LAST && CW_MOCKUP) {
+      // A MOCKUP: Send turns into a greyed Sent, the way the home page's does, and nothing is sent.
+      window._cwSent = true;
+      this.textContent = 'Sent'; this.disabled = true; this.style.opacity = '.6'; this.style.cursor = 'default';
+      return;
+    }
     if (_gpStep === GP_LAST) {
       // Say where it is going while it goes there. The jump is not instant and a button that
       // stays put reads as a press that did not land. It names the real destination rather than
