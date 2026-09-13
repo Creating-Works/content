@@ -3,7 +3,8 @@
   Copyright 2026 DayBalancer LLC. All rights reserved.
   hello@creating.works
 -->
-<!-- Version: V1.1 | Date: 2026-09-13 | LAST CHANGE: published as Finding work, at https://creating.works/work/ (it was /intro/, which now forwards here). Jessie: "Yea it works publish". -->
+<!-- Version: V1.2 | Date: 2026-09-13 | LAST CHANGE: appreciation is read back, and nothing saves until the saved answers have arrived. Jessie: "Fix now with deploy". -->
+<!-- Previous: V1.1 | Date: 2026-09-13 | LAST CHANGE: published as Finding work, at https://creating.works/work/ (it was /intro/, which now forwards here). Jessie: "Yea it works publish". -->
 <!-- Previous: V1.0 | Date: 2026-09-13 | LAST CHANGE: it saves. Every Next saves what changed, offers carry work ("massage therapy:work:skill"), What would work give you? writes "Money:work" into ikigai.needs, and Send emails the answers and records ikigai.introSentDate. Jessie: "2 yes", then "Yes go and deploy". -->
 <!-- Previous: V0.6 | Date: 2026-09-13 | LAST CHANGE: no Skip this anywhere; the last question says Next; then Your answers with every answer, What happens next, Back and Send. Jessie named each change. -->
 <!-- Previous: V0.5 | Date: 2026-09-13 | LAST CHANGE: the offer question on screen 5 is 17px, the same size as What would work give you? under it. Jessie: "Make same size as other questions". -->
@@ -1833,10 +1834,20 @@
   // fewer, and the answers' time only moves when an answer did, which is what Sent is measured against.
   var _cwLastQs = null, _cwSentQs = null;
   function cwIsSent(){ return !!window._cwSent && _cwSentQs !== null && cwBuildQs() === _cwSentQs; }
+  // NOTHING SAVES BEFORE THE SAVED ANSWERS ARRIVE. Jessie, 2026-09-13: "Fix now with deploy". Every save writes
+  // every box, blanks included, so a Next pressed while they were still loading (up to 40 seconds) wrote empty
+  // boxes over real answers. Until they are here a Next only moves on, and the save runs the moment they land.
+  function cwStat(msg, bad){ var st = document.getElementById('gp-intro-status'); if (st) { st.style.color = bad ? '#7A2410' : '#6B7A8D'; st.textContent = msg || ''; } }
   function gpQuietSave(){
     if (CW_MOCKUP) return;
     if (!GP_BROWSE || !meId) return;
     if (gpViewingSomebodyElse()) return;
+    if (!window._gpLoaded) {
+      window._cwWantedSave = true;
+      cwStat(window._cwLoadFailed ? 'Your saved answers did not load, so nothing here saves. A reload tries again.'
+                                  : 'Your saved answers are still loading and this saves as soon as they arrive.', !!window._cwLoadFailed);
+      return;
+    }
     var qs = cwBuildQs();
     if (qs === _cwLastQs) return;
     _cwLastQs = qs;
@@ -1847,6 +1858,7 @@
   function cwSend(btn){
     var stat = document.getElementById('gp-intro-status');
     if (gpViewingSomebodyElse()) { if (stat) stat.textContent = 'You are looking as somebody else, so nothing is sent.'; return; }
+    if (!window._gpLoaded) { cwStat(window._cwLoadFailed ? 'Your saved answers did not load, so nothing can be sent. A reload tries again.' : 'Your saved answers are still loading and Send works once they arrive.', !!window._cwLoadFailed); return; }
     var tk = cwToken();
     if (!tk) {
       if (stat) { stat.style.color = '#7A2410'; stat.innerHTML = 'Sending needs you signed in on <a href="https://creating.works/" style="color:#1F699E;font-weight:700;">the home page</a>.'; }
@@ -2071,6 +2083,11 @@
         String(have.methods || '').split('|').forEach(function(m){
           var v = String(m).trim(); if (v) { _gpMethodPicked[v] = true; any = true; }
         });
+        // APPRECIATION IS READ BACK. Jessie, 2026-09-13: "Same with appreciated". 2Gather's form never read it,
+        // so it opened empty and every save wrote that empty choice over what somebody had.
+        String(have.appreciation || '').split('|').forEach(function(a){
+          var v = String(a).trim(); if (v) { _gpThanksPicked[v] = true; any = true; }
+        });
         GP_INTRO_Q.forEach(function(q){
           var el = document.getElementById('gp-intro-' + q.key);
           var typed = el ? String(el.value || '').trim() : '';
@@ -2096,8 +2113,11 @@
         var _homePicks = !CW_WORK.fromIkigai && Object.keys(CW_WORK.picked).some(function(k){ return CW_WORK.picked[k]; });
         _cwLastQs = _homePicks ? null : cwBuildQs();
         if (window._cwSentLoaded) { window._cwSent = true; _cwSentQs = cwBuildQs(); }
+        // A Next pressed while loading saves now, from the answers as they stand with the saved ones in.
+        if (window._cwWantedSave) { window._cwWantedSave = false; _cwLastQs = null; cwStat(''); gpQuietSave(); }
+        gpStepPaint();
       })
-      .catch(function(){});
+      .catch(function(){ window._cwLoadFailed = true; cwStat('Your saved answers did not load, so nothing here saves. A reload tries again.', true); });
   }
 </script>
 </body>
