@@ -1,0 +1,2115 @@
+<!doctype html>
+<!--
+  Copyright 2026 DayBalancer LLC. All rights reserved.
+  hello@creating.works
+-->
+<!-- Version: V1.1 | Date: 2026-09-13 | LAST CHANGE: published as Finding work, at https://creating.works/work/ (it was /intro/, which now forwards here). Jessie: "Yea it works publish". -->
+<!-- Previous: V1.0 | Date: 2026-09-13 | LAST CHANGE: it saves. Every Next saves what changed, offers carry work ("massage therapy:work:skill"), What would work give you? writes "Money:work" into ikigai.needs, and Send emails the answers and records ikigai.introSentDate. Jessie: "2 yes", then "Yes go and deploy". -->
+<!-- Previous: V0.6 | Date: 2026-09-13 | LAST CHANGE: no Skip this anywhere; the last question says Next; then Your answers with every answer, What happens next, Back and Send. Jessie named each change. -->
+<!-- Previous: V0.5 | Date: 2026-09-13 | LAST CHANGE: the offer question on screen 5 is 17px, the same size as What would work give you? under it. Jessie: "Make same size as other questions". -->
+<!-- Previous: V0.4 | Date: 2026-09-13 | LAST CHANGE: How do you like to get appreciated? is the last question, on its own screen, and What would work give you? has + Other instead of an Anything else box. Jessie named both. -->
+<!-- Previous: V0.3 | Date: 2026-09-13 | LAST CHANGE: What would work give you? moves onto the offer screen, under "For work, income, or trade what do you have to offer right now?", and is no longer a screen of its own. Jessie: "Stop put this on this screen instead". -->
+<!-- Previous: V0.2 | Date: 2026-09-13 | LAST CHANGE: no mockup note, no group members line, no photo, and the needs-and-offers screen asks only "For work, income, or trade what do you have to offer right now?". Jessie named each change. -->
+<!-- Previous: V0.1 | Date: 2026-09-13 | LAST CHANGE: A MOCKUP on creating.works. A copy of 2gather.network/intro/ (V1.46) with the home page's
+     "What would work give you?" as its first screen. Nothing on it saves. Jessie, 2026-09-13: "Make mockup live link / Give me an exact
+     duplicate of the other form but on creating works / Can you Start with What you need page on c works form we have". -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta property="og:site_name" content="Creating.Works">
+<meta property="og:title" content="Before you go in · Creating.Works">
+<title>Before you go in · Creating.Works</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  :root{--brand:#1F699E;--ink:#1A2E42;--soft:#6B7A8D;--line:#DDE3EA;--panel:#F7FBFF;}
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--brand);color:var(--ink);
+    font-family:'DM Sans','Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    line-height:1.55;padding:26px 18px 60px;}
+  .wrap{max-width:760px;margin:0 auto;}
+  .crumb{color:#fff;font-size:14px;font-weight:800;margin:0 0 14px;text-decoration:none;display:inline-block;cursor:pointer;}
+  .card{background:#fff;border-radius:14px;padding:24px 28px;}
+  .btn{background:var(--brand);color:#fff;border:0;font:inherit;font-size:14.5px;font-weight:700;
+    padding:11px 22px;border-radius:24px;cursor:pointer;}
+  .btn[disabled]{opacity:.6;cursor:default;}
+  .cw-intro-box::placeholder{color:#9AA8B7;opacity:1;}
+</style>
+  <script src="https://2gather.network/nav/identity.js?v=14"></script>
+</head>
+<body>
+<div class="wrap">
+  <a class="crumb" id="intro-back" role="link" tabindex="0">&lsaquo; Back</a>
+  <div class="card">
+    <div style="font-size:22px;font-weight:800;color:#1A2E42;margin:0 0 6px;" id="gp-intro-title">Before you go in</div>
+    <p id="gp-intro-lede" style="display:none;font-size:14.5px;color:#6B7A8D;margin:0 0 22px;line-height:1.55;"></p>
+    <div id="gp-intro-qs"></div>
+    <div style="display:flex;gap:12px;align-items:center;margin-top:22px;padding-top:18px;border-top:1px solid #f0f1f5;flex-wrap:wrap;">
+      <button type="button" id="gp-step-back" style="display:none;font:inherit;font-size:14px;font-weight:700;padding:10px 18px;border-radius:24px;border:1.5px solid #C9DFF3;background:#fff;color:#1F699E;cursor:pointer;">Back</button>
+      <span id="gp-step-count" style="font-size:13px;color:#6B7A8D;"></span>
+      <span id="gp-step-note" style="font-size:13px;color:#7A2410;"></span>
+      <span style="flex:1;"></span>
+      <span id="gp-intro-status" style="font-size:13px;color:#6B7A8D;"></span>
+      <button type="button" id="gp-step-skip" style="display:none;font:inherit;font-size:14px;font-weight:600;padding:10px 16px;border-radius:24px;border:0;background:transparent;color:#6B7A8D;cursor:pointer;text-decoration:underline;">Skip this</button>
+      <button class="btn" id="gp-step-next">Next</button>
+    </div>
+  </div>
+</div>
+<script>
+  var GS_URL = 'https://cw-api-gate.jessieupp.workers.dev';
+  // Was a mockup that sent nothing. It saves since V1.0 (Jessie, 2026-09-13: "Yes go and deploy"); the flag
+  // stays so the page can be turned back into a look-only copy by setting it to true.
+  var CW_MOCKUP = false;
+  // WORK, ON EVERY OFFER AND NEED MADE HERE. Jessie, 2026-09-13: "Append the answeres here to work:skill and so
+  // forth / We will ask them later to tag each for in come trade etc", then "2 yes". An offer made on this page
+  // is stored as "massage therapy:work:skill" (":work:thing", ":work:space", or "truck:work" with no kind), and
+  // a pick under What would work give you? as "Money:work" in ikigai.needs. See cwBuildQs.
+
+// Your own record is never served from cache. Added 2026-08-31, after a profile showed the
+// answers from before a save for up to six hours. The gate caches getIntake, getProfile,
+// lookupProfile, getAccount, getMyGroups, getBookmarks and getRegistrations, and a write clears
+// none of them: its purge only ever touches the events feed. `nocache` is a switch the gate
+// already has, so this asks for a fresh answer rather than changing how the cache works.
+//
+// Somebody else's record stays cached and stays fast. Only a read about YOU skips it, which is
+// the only case where a stale answer is ever wrong.
+(function () {
+  var _base = GS_URL;
+  var _f = window.fetch;
+  window.fetch = function (input, init) {
+    try {
+      var u = (typeof input === 'string') ? input : (input && input.url) || '';
+      if (u.indexOf(_base) === 0 && u.indexOf('nocache=') === -1) {
+        var me = (window.CW && CW.me && CW.me().key) || '';
+        if (me) {
+          var norm = function (s) { return String(s || '').split('.').join('').toLowerCase(); };
+          var carries = false;
+          (u.split('?')[1] || '').split('&').forEach(function (pair) {
+            var bits = pair.split('=');
+            var k = bits[0];
+            if (k !== 'appearId' && k !== 'id' && k !== 'me' && k !== 'CWid' && k !== 'from' && k !== 'memberCard') return;
+            if (norm(decodeURIComponent(bits[1] || '')) === norm(me)) carries = true;
+          });
+          if (carries) { input = (typeof input === 'string') ? (u + '&nocache=1') : new Request(u + '&nocache=1', input); }
+        }
+      }
+    } catch (e) {}
+    return _f.call(this, input, init);
+  };
+})();
+
+  var params = new URLSearchParams(window.location.search);
+  var meId = CW.me().id;
+  // Where to send somebody once they are through. Only our own two hosts are accepted, so a
+  // crafted link cannot use this page to bounce anybody somewhere else.
+  var _next = (function(){
+    var raw = params.get('next') || '';
+    try {
+      var u = new URL(raw, 'https://2gather.network');
+      if (u.host === '2gather.network' || u.host === 'gather.2gather.network'
+          || u.host === 'creating.works') return u.toString();
+    } catch(err){}
+    return 'https://2gather.network/mygroups' + (meId ? '?CWid=' + encodeURIComponent(meId) : '');
+  })();
+  // Somebody arriving on their way into a group is told about the group, and somebody on
+  // their way to an event is told about the event. The link can say which with ?for=event,
+  // and when it does not, where it is sending them says it instead.
+  var GP_FOR = (function(){
+    var said = String(params.get('for') || '').trim().toLowerCase();
+    if (said === 'event' || said === 'group') return said;
+    return /\/(events?|e)\//.test(_next) ? 'event' : 'group';
+  })();
+  // Nothing here can be saved by somebody the site does not know, so nobody is left filling in
+  // a form that will quietly throw their answers away. They are sent to sign in and brought
+  // straight back to this exact address. Jessie's rule, 2026-08-30: any page that writes sends a
+  // signed-out person to sign in first.
+  if (!meId) {
+    var _here = encodeURIComponent(location.pathname + location.search);
+    window.location.replace('https://creating.works/?path=work');   // the home page signs them in and brings them back here
+  }
+  window._gpAlreadyIn = (params.get('already') || '') === '1';
+  window._gpFirstTime = (params.get('first') || '') === '1';
+  // The group bundle is cached for a minute, and the answer just changed. Without this the
+  // page somebody lands on could still believe they had not answered and ask again.
+  function _introDone(){
+    var u = _next + (_next.indexOf('?') > -1 ? '&' : '?') + 'nocache=1';
+    window.location.href = u;
+  }
+
+  var GP_INTRO_Q = [
+    { key:'introNeed',   need:false, q:'What do you need?',
+      ph:'A cat sitter for the last week of September, a massage therapist local to Seattle, and someone who can help me get a PT nursing job where I can travel anywhere.' },
+    { key:'introEnjoy',  need:true,  q:'What do you enjoy?',
+      hint:'What you love doing.',
+      ph:'Pickleball, kayaking, singing badly in a group, anything on the water.' },
+    { key:'introSkills', need:true,  q:'What skills do you have?',
+      hint:'Name whatever you’re good at. You are multi-dimensional so please shine your light! ✨',
+      ph:'Facilitating a room full of people who disagree. Experience design. Cutting short hair, helping people move (I’m great at finding ways to make small spaces very functional!)' },
+    { key:'introValues', need:false, q:'What do you care about?',
+      hint:'What matters to you, and what you want more of in the world. Leave it blank if you would rather not say.',
+      ph:'Housing, food security, keeping the lake swimmable…' },
+    { key:'introOffer',  need:false, q:'For work, income, or trade what do you have to offer right now?',
+      ph:'A spare room for the month of September, a truck for moving stuff, a meeting space to meet each week, and gardening tools.' }
+  ];
+  // Shown to a person, stored as the category that already exists on the giving page.
+  var GP_THANKS = [
+    { label:'\u{1F48E} Money',                        value:'Money' },
+    { label:'\u{1F49B} Say thank you',                value:'Say thank you' },
+    { label:'✨ Acts of service',                 value:'Acts of service' },
+    { label:'\u{1F4E6} Something from my gift list',  value:'Physical goods' },
+    { label:'\u{1F331} Pass it on to somebody else',  value:'Pass it on' }
+  ];
+  var _gpThanksPicked = {};
+
+  // Chips under every question. Somebody in a hurry taps and moves on, somebody with something
+  // specific to say still types it. The words come from the reference sheet, so a tap produces
+  // something matching already knows.
+  //
+  //   need + offer  three pills, a person, a place, a thing
+  //   enjoy         the five kinds of recreation, which is all of them
+  //   skills        five categories, More opens the other thirteen
+  //   care about    social or ecological first, then that side's values, and you can flip
+  // Published 2026-08-26. Everybody gets the chips. ?chips=0 turns them off, which is only
+  // there so the two versions can be put side by side.
+  var GP_CHIPS_ON = (params.get('chips') || '') !== '0';
+  // Browse by category, behind ?browse=1 while Jessie looks at it. Off by default, so the live
+  // page is untouched for everybody else.
+  // Was the mockup, is now the intro. Jessie, 2026-08-30: go live on it. Turned around rather
+  // than deleted, so ?browse=0 still reaches the older one if anything here turns out wrong.
+  // The twenty-three forks below come out in one pass later; a deletion tonight is a deletion
+  // nobody could check.
+  var GP_BROWSE = (params.get('browse') || '') !== '0';
+  var GP_BROWSE_KEYS = { introEnjoy:1, introSkills:1, introValues:1 };
+  var GP_CHIPS = {
+    introEnjoy:  { words: ['Sports', 'Outdoor & Nature', 'Making & Collecting', 'Movement & Performance', 'Games & Strategy'] },
+    introSkills: { lead: 'And/or tap any category below...',
+                   words: ['Home & Construction', 'Business & Finance', 'Physical Wellbeing', 'Arts & Culture', 'Technology & Communications'],
+                   more:  ['Community & Civic', 'Mechanical & Manufacturing', 'Food & Drink', 'Transportation', 'Family Wellbeing',
+                           'Self-Expression & Beauty', 'Mental Wellbeing', 'Nature & Outdoors', 'Pets & Animal Care',
+                           'Events & Gatherings', 'Making & Collecting', 'Recreation & Hobbies', 'Basic needs and security'] },
+    introValues: { lenses: [
+                     { label:'Social',
+                       words:['Housing and Shelter', 'Food Security', 'Safety and Peace', 'Community Health', 'Economic Opportunity'],
+                       more: ['Physical Wellbeing', 'Mental Wellbeing', 'Urgent Medical Care', 'Clothing and Supplies',
+                              'Empowerment and Resilience', 'Freedom and Autonomy', 'Personal Expression', 'Local Economic Vitality',
+                              'Wealth Equity', 'Quality Goods and Services', 'Information Access', 'Social and Civic Engagement',
+                              'Cultural Vitality', 'Shared Community Resources', 'Transportation Access', 'Reliable Utilities',
+                              'Digital Connectivity'] },
+                     { label:'Ecological',
+                       words:['Clean Water', 'Clean Air', 'Climate Stability', 'Biodiversity', 'Clean Energy'],
+                       more: ['Clean Soil', 'Clean Food', 'Animal Welfare', 'Water Security', 'Land Security', 'Eco Values'] }
+                   ] },
+  };
+  var _gpChipsPicked = {};
+  var _gpLangPicked = {}, _gpMethodPicked = {};
+  var GP_LANGS = ['English','Mandarin','Cantonese','Hindi','Spanish','Arabic','Bengali','Portuguese','French','Urdu',
+    'Russian','Indonesian','German','Japanese','Swahili','Marathi','Telugu','Turkish','Tamil','Vietnamese','Korean',
+    'Italian','Thai','Persian (Farsi)','Polish','Pashto','Punjabi','Ukrainian','Malayalam','Kannada','Romanian','Dutch',
+    'Greek','Czech','Hungarian','Gujarati','Somali','Swedish','Norwegian','Hebrew','Danish','Finnish','Albanian',
+    'Croatian','Lithuanian','Nepali','Khmer (Cambodian)','Hmong','Estonian','Laotian','Sign Language'];
+  // The short form, spelled exactly as the profile stores it, so the two pages never disagree
+  // about what somebody said.
+  var GP_METHODS = ['\u{1F5C2} Organizing and planning','\u{1F527} Repairing and fixing',
+    '\u{1F4DA} Demonstrating what I know','\u{1F9ED} Consulting and advising',
+    '\u{1F300} Facilitating and coaching','\u{1F3A8} Making and designing','\u{1F33F} Caring and healing'];
+
+  function gpPickRow(all, picked, firstN){
+    var row = document.createElement('div');
+    row.style.cssText = 'display:flex;flex-wrap:wrap;gap:7px;';
+    function btn(word){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = word;
+      var paint = function(){
+        b.style.cssText = 'font:inherit;font-size:13.5px;padding:7px 14px;border-radius:20px;cursor:pointer;'
+          + (picked[word]
+              ? 'background:#1F699E;border:1px solid #1F699E;color:#fff;font-weight:700;'
+              : 'background:#fff;border:1px solid #C9DFF3;color:#1F699E;font-weight:600;');
+      };
+      paint();
+      b.addEventListener('click', function(){
+        picked[word] = !picked[word]; paint();
+        // A language chosen here is what unlocks step 0, so the footer is told.
+        if (typeof gpStepPaint === 'function') gpStepPaint();
+      });
+      return b;
+    }
+    var shown = all.filter(function(w, i){ return !firstN || i < firstN || picked[w]; });
+    var rest  = all.filter(function(w){ return shown.indexOf(w) === -1; });
+    shown.forEach(function(w){ row.appendChild(btn(w)); });
+    if (rest.length) {
+      row.appendChild(gpMoreBtn('More', function(){
+        rest.forEach(function(w){ row.appendChild(btn(w)); });
+      }));
+    }
+    return { row: row, add: function(w){ picked[w] = true; row.appendChild(btn(w)); } };
+  }
+
+  function gpBlock(title, hint, body){
+    var w = document.createElement('div');
+    w.style.cssText = 'padding:18px 0;border-top:1px solid #f0f1f5;';
+    var t = document.createElement('div');
+    t.style.cssText = 'font-size:17px;font-weight:800;color:#1A2E42;margin-bottom:2px;';
+    t.textContent = title;
+    var h = document.createElement('div');
+    h.style.cssText = 'font-size:13.5px;color:#6B7A8D;margin-bottom:12px;';
+    h.textContent = hint;
+    w.appendChild(t); w.appendChild(h); w.appendChild(body);
+    return w;
+  }
+
+  // The search is for the long tail. It is not on screen until somebody has asked for more
+  // than the eight in front of them, because a search box beside eight buttons is a question
+  // nobody was asking. Picking a language out of the search lights the button that is already
+  // there rather than adding a second one that says the same word.
+  function gpLanguagesBlockBrowse(){
+    var wrap = document.createElement('div');
+    var btns = {};
+    var row = document.createElement('div');
+    row.style.cssText = 'display:flex;flex-wrap:wrap;gap:7px;';
+
+    function paint(word){
+      var b = btns[word]; if (!b) return;
+      b.style.cssText = 'font:inherit;font-size:13.5px;padding:7px 14px;border-radius:20px;cursor:pointer;'
+        + (_gpLangPicked[word]
+            ? 'background:#1F699E;border:1px solid #1F699E;color:#fff;font-weight:700;'
+            : 'background:#fff;border:1px solid #C9DFF3;color:#1F699E;font-weight:600;');
+    }
+    function chip(word){
+      if (btns[word]) return btns[word];
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = word;
+      btns[word] = b;
+      b.addEventListener('click', function(){
+        _gpLangPicked[word] = !_gpLangPicked[word];
+        paint(word);
+        if (typeof gpStepPaint === 'function') gpStepPaint();
+      });
+      paint(word);
+      return b;
+    }
+    function turnOn(word){
+      _gpLangPicked[word] = true;
+      if (!btns[word]) row.appendChild(chip(word));
+      paint(word);
+      if (typeof gpStepPaint === 'function') gpStepPaint();
+    }
+
+    // The search, above the chips, and not on screen until More is pressed.
+    var searchWrap = document.createElement('div');
+    searchWrap.style.cssText = 'display:none;margin-bottom:10px;';
+    var line = document.createElement('div');
+    line.style.cssText = 'display:flex;gap:8px;';
+    var inp = document.createElement('input');
+    inp.type = 'text';
+    inp.placeholder = 'Search languages';
+    inp.style.cssText = 'flex:1;min-width:0;border:1.5px solid #DDE3EA;background:#fff;border-radius:10px;'
+      + 'padding:9px 12px;font:inherit;font-size:14px;color:#1A2E42;outline:none;';
+    var add = document.createElement('button');
+    add.type = 'button';
+    add.textContent = 'Add';
+    add.style.cssText = 'font:inherit;font-size:14px;font-weight:700;padding:9px 18px;border-radius:20px;'
+      + 'border:0;background:#1F699E;color:#fff;cursor:pointer;';
+    line.appendChild(inp); line.appendChild(add);
+    var hits = document.createElement('div');
+    hits.style.cssText = 'margin-top:6px;';
+    searchWrap.appendChild(line); searchWrap.appendChild(hits);
+
+    function clearSearch(){ inp.value = ''; hits.innerHTML = ''; }
+    inp.addEventListener('input', function(){
+      var t = String(inp.value || '').trim().toLowerCase();
+      hits.innerHTML = '';
+      if (t.length < 2) return;
+      GP_LANGS.filter(function(w){ return w.toLowerCase().indexOf(t) > -1; }).slice(0, 6)
+        .forEach(function(w){
+          var r = document.createElement('div');
+          r.setAttribute('role', 'button');
+          r.tabIndex = 0;
+          r.style.cssText = 'border:1px solid #DDE3EA;border-radius:10px;padding:9px 12px;margin-top:6px;'
+            + 'cursor:pointer;background:#fff;font-size:14.5px;font-weight:700;color:#1A2E42;';
+          r.textContent = w;
+          r.addEventListener('click', function(){
+            turnOn(w);
+            clearSearch();
+            try { btns[w].scrollIntoView({ behavior:'smooth', block:'nearest' }); } catch (e) {}
+          });
+          hits.appendChild(r);
+        });
+    });
+    function commit(){
+      var v = inp.value.trim(); if (!v) return;
+      // Typed a language that is already a button? Light that one instead of making a twin.
+      var known = null;
+      for (var i = 0; i < GP_LANGS.length; i++) {
+        if (GP_LANGS[i].toLowerCase() === v.toLowerCase()) { known = GP_LANGS[i]; break; }
+      }
+      turnOn(known || v);
+      clearSearch();
+      inp.focus();
+    }
+    add.addEventListener('click', commit);
+    inp.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); commit(); } });
+
+    var first = GP_LANGS.filter(function(w, i){ return i < 8 || _gpLangPicked[w]; });
+    var rest  = GP_LANGS.filter(function(w){ return first.indexOf(w) === -1; });
+    first.forEach(function(w){ row.appendChild(chip(w)); });
+    if (rest.length) {
+      row.appendChild(gpMoreBtn('More', function(){
+        rest.forEach(function(w){ row.appendChild(chip(w)); });
+        searchWrap.style.display = 'block';
+        inp.focus();
+      }));
+    }
+    wrap.appendChild(searchWrap);
+    wrap.appendChild(row);
+    return gpBlock('Which languages do you speak?', 'So people know they can talk to you in theirs.', wrap);
+  }
+
+  function gpLanguagesBlock(){
+    if (GP_BROWSE) return gpLanguagesBlockBrowse();
+    var picker = gpPickRow(GP_LANGS, _gpLangPicked, 8);
+    var wrap = document.createElement('div');
+    wrap.appendChild(picker.row);
+    var line = document.createElement('div');
+    line.style.cssText = 'display:flex;gap:8px;margin-top:10px;';
+    var inp = document.createElement('input');
+    inp.type = 'text';
+    inp.placeholder = 'Another language';
+    inp.style.cssText = 'flex:1;min-width:0;border:1.5px solid #DDE3EA;background:#fff;border-radius:10px;'
+      + 'padding:9px 12px;font:inherit;font-size:14px;color:#1A2E42;outline:none;';
+    var add = document.createElement('button');
+    add.type = 'button';
+    add.textContent = 'Add';
+    add.style.cssText = 'font:inherit;font-size:14px;font-weight:700;padding:9px 18px;border-radius:20px;'
+      + 'border:0;background:#1F699E;color:#fff;cursor:pointer;';
+    function commit(){ var v = inp.value.trim(); if (!v) return; picker.add(v); inp.value = ''; inp.focus(); }
+    add.addEventListener('click', commit);
+    inp.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); commit(); } });
+    line.appendChild(inp); line.appendChild(add);
+    wrap.appendChild(line);
+    return gpBlock('Which languages do you speak?', 'So people know they can talk to you in theirs.', wrap);
+  }
+
+  function gpMethodsBlock(){
+    return gpBlock('What comes most naturally to you?',
+      'How you like to help, rather than what you know.',
+      gpPickRow(GP_METHODS, _gpMethodPicked, 0).row);
+  }
+
+  // Faces on the chips. The reference sheet carries an emoji for exactly one list, the seven
+  // ways of helping, and nothing else, so these are picked here for now. When an emoji column
+  // exists on the reference tabs this map goes and the sheet decides.
+  // No people and no hands, so nothing here carries a skin tone.
+  // The emoji is decoration only. What lands in the box, and what a tap is stored as, stays the
+  // plain word, so nothing downstream has to strip a picture back off.
+  var GP_EMOJI = {
+    'A service':'\u{1F464}', 'A place':'\u{1F3E0}', 'A thing':'\u{1F4E6}',
+    'Sports':'\u26BD', 'Outdoor & Nature':'\u{1F332}', 'Making & Collecting':'\u{1F9F6}',
+    'Movement & Performance':'\u{1F3AD}', 'Games & Strategy':'\u{1F3B2}',
+    'Home & Construction':'\u{1F528}', 'Business & Finance':'\u{1F4BC}', 'Physical Wellbeing':'\u{1FA7A}',
+    'Arts & Culture':'\u{1F5BC}\uFE0F', 'Technology & Communications':'\u{1F4BB}', 'Community & Civic':'\u{1F3DB}\uFE0F',
+    'Mechanical & Manufacturing':'\u2699\uFE0F', 'Food & Drink':'\u{1F37D}\uFE0F', 'Transportation':'\u{1F697}',
+    'Family Wellbeing':'\u{1F9F8}', 'Self-Expression & Beauty':'\u{1F484}', 'Mental Wellbeing':'\u{1F9E0}',
+    'Nature & Outdoors':'\u{1F33F}', 'Pets & Animal Care':'\u{1F43E}', 'Events & Gatherings':'\u{1F389}',
+    'Recreation & Hobbies':'\u{1F3AF}', 'Basic needs and security':'\u{1F6DF}',
+    'Housing and Shelter':'\u{1F3D8}\uFE0F', 'Food Security':'\u{1F372}', 'Safety and Peace':'\u{1F6E1}\uFE0F',
+    'Community Health':'\u{1F3E5}', 'Economic Opportunity':'\u{1F4C8}', 'Urgent Medical Care':'\u{1F691}',
+    'Clothing and Supplies':'\u{1F9E5}', 'Empowerment and Resilience':'\u{1F31F}', 'Freedom and Autonomy':'\u{1F54A}\uFE0F',
+    'Personal Expression':'\u{1F3A4}', 'Local Economic Vitality':'\u{1F3EA}', 'Wealth Equity':'\u2696\uFE0F',
+    'Quality Goods and Services':'\u{1F3F7}\uFE0F', 'Information Access':'\u{1F4F0}', 'Social and Civic Engagement':'\u{1F5F3}\uFE0F',
+    'Cultural Vitality':'\u{1F3B6}', 'Shared Community Resources':'\u{1F9FA}', 'Transportation Access':'\u{1F68C}',
+    'Reliable Utilities':'\u{1F4A1}', 'Digital Connectivity':'\u{1F4F6}',
+    'Clean Water':'\u{1F4A7}', 'Clean Air':'\u{1F32C}\uFE0F', 'Climate Stability':'\u{1F321}\uFE0F',
+    'Biodiversity':'\u{1F98B}', 'Clean Energy':'\u26A1', 'Clean Soil':'\u{1FAB1}', 'Clean Food':'\u{1F96C}',
+    'Animal Welfare':'\u{1F43F}\uFE0F', 'Water Security':'\u{1F6B0}', 'Land Security':'\u{1F5FA}\uFE0F', 'Eco Values':'\u267B\uFE0F'
+  };
+  function gpChipLabel(word){ var e = GP_EMOJI[word]; return e ? (e + ' ' + word) : word; }
+
+  // A tapped chip writes its word into the box, so a person sees the answer they just gave and
+  // can keep typing after it. It is also kept in _gpChipsPicked, which is what a later change
+  // will store as a tag rather than as a sentence.
+  function gpChipBtn(key, word, ta){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = gpChipLabel(word);
+    var paint = function(){
+      b.style.cssText = 'font:inherit;font-size:13.5px;padding:7px 14px;border-radius:20px;cursor:pointer;'
+        + (_gpChipsPicked[key] && _gpChipsPicked[key][word]
+            ? 'background:#1F699E;border:1px solid #1F699E;color:#fff;font-weight:700;'
+            : 'background:#fff;border:1px solid #C9DFF3;color:#1F699E;font-weight:600;');
+    };
+    paint();
+    b.addEventListener('click', function(){
+      if (!_gpChipsPicked[key]) _gpChipsPicked[key] = {};
+      var on = !_gpChipsPicked[key][word];
+      _gpChipsPicked[key][word] = on;
+      var parts = String(ta.value || '').split(',').map(function(x){ return x.trim(); }).filter(Boolean);
+      var at = -1;
+      for (var pi = 0; pi < parts.length; pi++) {
+        if (parts[pi].toLowerCase() === String(word).toLowerCase()) { at = pi; break; }
+      }
+      if (on && at === -1) parts.push(word);
+      if (!on && at > -1) parts.splice(at, 1);
+      ta.value = parts.join(', ');
+      paint();
+    });
+    return b;
+  }
+
+  // A quiet pill that opens the rest of a list. It removes itself once pressed, because a
+  // control that has already done its work is one more thing to read past.
+  function gpMoreBtn(label, onOpen){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = label;
+    b.style.cssText = 'font:inherit;font-size:13.5px;padding:7px 14px;border-radius:20px;cursor:pointer;'
+      + 'background:#EEF1F5;border:1px dashed #C4CDD8;color:#6B7A8D;font-weight:600;';
+    b.addEventListener('click', function(){ b.parentNode.removeChild(b); onOpen(); });
+    return b;
+  }
+
+  // ── The picker, 2026-08-30 ────────────────────────────────────────────────
+  // Five concrete examples, a keyword search over the reference sheet, and Other for a word
+  // nobody has thought of. The same shape as /profile-edit/, reading the same getReferenceData,
+  // so there is one list of words on this site rather than two that drift.
+  //
+  // Choosing from the search IS the tag: the reference tree already knows that yoga is Movement
+  // & Performance. Only a genuinely new word has to be asked about, which is what Other does.
+  var GP_PICK = {
+    // 2026-08-31, Jessie: needing and offering are the same shape, so they ask the same way.
+    // Pick the kind, then say what it is. The stored word is "massage therapy:skill", which is
+    // the format a need is already saved and read in.
+    introNeed: {
+      examples: ['A skill', 'A thing', 'A space'],
+      kinds: true,
+      tagQ: 'Is that a person, a place or a thing?',
+      tagOpts: ['Person', 'Place', 'Thing'], source: 'need'
+    },
+    introEnjoy: {
+      examples: ['Pickleball', 'Karaoke', 'Gundam model kits', 'Walking', 'Board games'],
+      tagQ: 'Which of these is it?',
+      tagOpts: ['⚽ Sports', '\u{1F332} Outdoor & Nature', '\u{1F9F6} Making & Collecting',
+                '\u{1F3AD} Movement & Performance', '\u{1F3B2} Games & Strategy'], source: 'recreation'
+    },
+    introSkills: {
+      examples: ['Massage therapist', 'Hairstylist', 'Accountant', 'Nurse', 'AI specialist'],
+      tagQ: 'Which category does it belong to?', tagOpts: null, source: 'skills'
+    },
+    // The three kinds of thing somebody can offer, the same three the reference sheet holds
+    // under offeringTypes.
+    introOffer: {
+      examples: ['A skill', 'A thing', 'A space'],
+      kinds: true,
+      tagQ: 'Tag this to which categories?', tagOpts: null, source: 'resources'
+    },
+    introValues: {
+      examples: ['\u{1F3D8}️ Housing and Shelter', '\u{1F372} Food Security', '\u{1F4A7} Clean Water',
+                 '\u{1F32C}️ Clean Air', '⚡ Clean Energy', '\u{1F43F}️ Animal Welfare'],
+      tagQ: 'Tag this to which categories?', tagOpts: null, source: 'values'
+    }
+  };
+  // word -> the category it was filed under. Sent to the backend beside the sentence.
+  var _gpTags = {};
+  // The real columns hold more than a name: "Singing:Participant" carries a level, and
+  // "Project Manager:Business & Finance:Expert Level" carries a category and a level too. The
+  // screen shows the name alone, so saving the screen back would quietly throw the rest away.
+  // What each name arrived as is remembered here and sent back untouched unless it was removed.
+  var _gpOrig = {};
+
+  var _gpRefP = null;
+  function gpRefOnce(){
+    if (_gpRefP) return _gpRefP;
+    _gpRefP = fetch(GS_URL + '?action=getReferenceData')
+      .then(function(r){ return r.json(); })
+      // Kept where the tag options can read it, so a question can be tagged along its own axis.
+      .then(function(rd){ window._gpRd = rd; return rd; })
+      .catch(function(){ return {}; });
+    return _gpRefP;
+  }
+
+  // One flat list of {word, cat} per question, which is all the search needs.
+  function gpCorpus(source, rd){
+    var out = [], seen = {};
+    // The reference sheet carries an `associations` column of everyday words, so searching
+    // "doctor" finds Physician. Without it the search only matches the formal name, which is
+    // the one thing somebody looking for help does not know.
+    var push = function(w, c, a){
+      w = String(w || '').trim(); if (!w) return;
+      var k = w.toLowerCase(); if (seen[k]) return;
+      seen[k] = 1; out.push({ word: w, cat: String(c || '').trim(), assoc: String(a || '').toLowerCase() });
+    };
+    if (source === 'recreation') {
+      (rd.recreation || []).forEach(function(r){ push(r.item, r.recType, r.associations); });
+    } else if (source === 'skills') {
+      (rd.skills || []).forEach(function(s){ push(s.item, s.category, s.associations); });
+    } else if (source === 'values') {
+      // The category comes from the sheet now, so Housing and Shelter arrives knowing it is
+      // Social. It used to be filed as the flat word "Values", which told nobody anything.
+      (rd.values || []).forEach(function(v){
+        push((v && v.item !== undefined) ? v.item : v, (v && v.category) || 'Values', v && v.associations);
+      });
+      (rd.domains || []).forEach(function(v){
+        push((v && v.item !== undefined) ? v.item : v, (v && v.category) || 'Domains', v && v.associations);
+      });
+      // The values list on the reference sheet is empty today, so the two lenses that have been
+      // on this page since August are the corpus. Without this the search finds nothing at all.
+      var lens = (GP_CHIPS.introValues && GP_CHIPS.introValues.lenses) || [];
+      lens.forEach(function(l){
+        (l.words || []).forEach(function(w){ push(w, l.label, ''); });
+        (l.more  || []).forEach(function(w){ push(w, l.label, ''); });
+      });
+    } else if (source === 'resources') {
+      // Things and spaces people can share. Without this branch the offer question had no words
+      // at all, so its search found nothing and every answer went in untagged.
+      (rd.resources || []).forEach(function(r){ push(r.item, r.category, r.associations); });
+    } else if (source === 'need') {
+      (rd.skills || []).forEach(function(s){ push(s.item, s.category, s.associations); });
+      (rd.recreation || []).forEach(function(r){ push(r.item, r.recType, r.associations); });
+    }
+    return out;
+  }
+
+  // Adding a word writes it into the box, so somebody sees the answer they just gave and can
+  // keep typing after it, and files the tag beside it.
+  function gpAddWord(key, word, cat, ta){
+    word = String(word || '').trim(); if (!word) return;
+    if (!_gpTags[key]) _gpTags[key] = {};
+    _gpTags[key][word] = cat || '';
+    var parts = String(ta.value || '').split(',').map(function(x){ return x.trim(); }).filter(Boolean);
+    for (var i = 0; i < parts.length; i++) {
+      if (parts[i].toLowerCase() === word.toLowerCase()) return;
+    }
+    parts.push(word);
+    ta.value = parts.join(', ');
+    if (typeof gpStepPaint === 'function') gpStepPaint();
+  }
+  function gpDropWord(key, word, ta){
+    if (_gpTags[key]) delete _gpTags[key][word];
+    var parts = String(ta.value || '').split(',').map(function(x){ return x.trim(); }).filter(Boolean);
+    ta.value = parts.filter(function(p){ return p.toLowerCase() !== String(word).toLowerCase(); }).join(', ');
+    if (typeof gpStepPaint === 'function') gpStepPaint();
+  }
+  function gpHasWord(key, word){
+    return !!(_gpTags[key] && _gpTags[key][word] !== undefined);
+  }
+
+  function gpPill(label, on){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = label;
+    b.style.cssText = 'font:inherit;font-size:13.5px;padding:7px 14px;border-radius:20px;cursor:pointer;'
+      + (on ? 'background:#1F699E;border:1px solid #1F699E;color:#fff;font-weight:700;'
+            : 'background:#fff;border:1px solid #C9DFF3;color:#1F699E;font-weight:600;');
+    return b;
+  }
+
+  // ── Browse by category ─────────────────────────────────────────────────
+  // The walk-down list the profile editor has, built here from getReferenceData rather than
+  // typed into the page, and drawn in the intro's own colours. One level on screen at a time:
+  // tapping a category replaces what is showing instead of expanding underneath it.
+  function gpBuildTree(source, rd){
+    var tree = {}, seen = {};
+    var add = function(top, sub, item){
+      top = String(top || '').trim(); sub = String(sub || '').trim(); item = String(item || '').trim();
+      if (!top || !item) return;
+      var k = (top + '|' + sub + '|' + item).toLowerCase();
+      if (seen[k]) return; seen[k] = 1;
+      if (!tree[top]) tree[top] = { subs:{}, items:[] };
+      if (sub) { if (!tree[top].subs[sub]) tree[top].subs[sub] = []; tree[top].subs[sub].push(item); }
+      else tree[top].items.push(item);
+    };
+    if (source === 'recreation') {
+      (rd.recreation || []).forEach(function(r){ add(r.recType, r.category, r.item); });
+    } else if (source === 'skills') {
+      (rd.skills || []).forEach(function(s){ add(s.category, '', s.item); });
+    } else if (source === 'values') {
+      var vs = (rd.values || []).filter(function(v){ return v && v.item; });
+      if (vs.length) {
+        // The sheet carries the category once the backend reads Eco Social Value beside
+        // Eco Social Category. Then this is the whole list and the page holds none of it.
+        vs.forEach(function(v){ add(v.category || 'Values', '', v.item); });
+      } else {
+        // Until that one line ships, the two lenses already on this page are the list.
+        ((GP_CHIPS.introValues && GP_CHIPS.introValues.lenses) || []).forEach(function(l){
+          (l.words || []).forEach(function(w){ add(l.label, '', w); });
+          (l.more  || []).forEach(function(w){ add(l.label, '', w); });
+        });
+      }
+    }
+    return tree;
+  }
+  function gpLevel(tree, path){
+    var alpha = function(x){ return x.slice().sort(function(a,b){ return a.localeCompare(b); }); };
+    if (!path.length) return alpha(Object.keys(tree)).map(function(k){ return { name:k, drill:true }; });
+    var node = tree[path[0]] || { subs:{}, items:[] };
+    if (path.length === 1) {
+      var out = alpha(Object.keys(node.subs)).map(function(k){ return { name:k, drill:true }; });
+      alpha(node.items).forEach(function(i){ out.push({ name:i, drill:false }); });
+      return out;
+    }
+    return alpha(node.subs[path[1]] || []).map(function(i){ return { name:i, drill:false }; });
+  }
+
+  // The joy screen, reshaped 2026-08-30. Five examples and Other, nothing else, because a
+  // search box beside five buttons asks a question nobody had yet. Other opens the search.
+  var GP_BARE_KEYS = { introEnjoy:1, introSkills:1, introValues:1, introNeed:1, introOffer:1 };
+  // Where the card heading already asks the question, the second copy comes off. Needs and
+  // haves keeps its headings, because two questions share that screen and they have to be
+  // told apart.
+  var GP_BARE_HEAD = { introEnjoy:1, introSkills:1, introValues:1, introOffer:1 };
+  function gpBareKey(key){ return GP_BROWSE && !!GP_BARE_KEYS[key]; }
+
+  // The appreciation question appears once somebody has said what their skills are, and goes
+  // again if they take the last one off. One function so every path agrees.
+  function gpRevealThanks(){
+    var el = document.getElementById('gp-thanks-block');
+    if (!el) return;
+    // Only on its own screen. Setting display here on any other step overrode the step machinery
+    // and put this question on every screen, which is what it did on the needs and haves one.
+    // It has its own screen at the end in this copy, so the step machinery shows it and nothing here does.
+    return;
+  }
+
+  function gpPicker(key, ta){
+    var cfg = GP_PICK[key];
+    if (!GP_CHIPS_ON || !cfg) return null;
+    var _bare = gpBareKey(key);
+    var box = document.createElement('div');
+    box.style.cssText = 'margin-top:12px;';
+
+    // What somebody has chosen, on screen. Without this the only sign that an answer landed was
+    // the Next button turning on, because the box that used to show it is hidden now.
+    var chosen = document.createElement('div');
+    chosen.style.cssText = 'display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px;';
+    box.appendChild(chosen);
+    function gpPaintChosen(){
+      chosen.innerHTML = '';
+      String(ta.value || '').split(',').map(function(x){ return x.trim(); }).filter(Boolean)
+        .forEach(function(w){
+          var c = document.createElement('span');
+          c.style.cssText = 'display:inline-flex;align-items:center;gap:8px;font-size:13.5px;'
+            + 'padding:7px 10px 7px 14px;border-radius:20px;background:#1F699E;color:#fff;font-weight:700;';
+          var t2 = document.createElement('span');
+          // Stored as "massage therapy:skill". Somebody reads the thing, not the colon.
+          var _bits = String(w).split(':');
+          var _kind = (_bits.length > 1) ? _bits[_bits.length - 1].toLowerCase() : '';
+          if (_kind === 'skill' || _kind === 'thing' || _kind === 'space') {
+            t2.textContent = _bits.slice(0, -1).join(':');
+            var _k = document.createElement('span');
+            _k.textContent = '· ' + _kind;
+            _k.style.cssText = 'font-weight:600;opacity:.7;font-size:11.5px;margin-left:5px;';
+            c.appendChild(t2); c.appendChild(_k);
+            t2 = null;
+          } else {
+            t2.textContent = w;
+          }
+          var x = document.createElement('button');
+          x.type = 'button';
+          x.setAttribute('aria-label', 'Remove ' + w);
+          x.textContent = '\u00D7';
+          x.style.cssText = 'font:inherit;font-size:15px;line-height:1;border:0;background:transparent;'
+            + 'color:#fff;cursor:pointer;padding:0 2px;';
+          x.addEventListener('click', function(){ gpDropWord(key, w, ta); repaint(); });
+          if (t2) c.appendChild(t2);
+          c.appendChild(x);
+          chosen.appendChild(c);
+        });
+    }
+
+    if (!_bare) {
+      var lead = document.createElement('div');
+      lead.style.cssText = 'font-size:13px;color:#6B7A8D;margin-bottom:8px;';
+      lead.textContent = 'Search for something, or tap one below.';
+      box.appendChild(lead);
+    }
+
+    var search = document.createElement('input');
+    search.type = 'text';
+    search.placeholder = 'Search';
+    search.style.cssText = 'width:100%;border:1.5px solid #DDE3EA;background:#F7FBFF;border-radius:10px;'
+      + 'padding:10px 12px;font:inherit;font-size:14px;color:#1A2E42;outline:none;';
+    var searchWrap = document.createElement('div');
+    if (_bare) searchWrap.style.cssText = 'display:none;margin-bottom:10px;';
+    searchWrap.appendChild(search);
+    var results = document.createElement('div');
+    results.style.cssText = 'margin-top:6px;';
+    searchWrap.appendChild(results);
+    box.appendChild(searchWrap);
+
+    var row = document.createElement('div');
+    row.style.cssText = 'display:flex;flex-wrap:wrap;gap:7px;margin-top:10px;';
+    box.appendChild(row);
+
+    var corpus = [];
+    var _browseOn = GP_BROWSE && !!GP_BROWSE_KEYS[key] && !_bare;
+    var browseWrap = document.createElement('div');
+    browseWrap.style.cssText = 'margin-top:14px;';
+    if (_browseOn) {
+      box.appendChild(browseWrap);
+      // The list has not arrived yet, so say that rather than draw an empty row somebody
+      // will read as "there is nothing here".
+      var _wait = document.createElement('div');
+      _wait.style.cssText = 'font-size:13px;color:#6B7A8D;';
+      _wait.textContent = 'Looking up the list\u2026';
+      browseWrap.appendChild(_wait);
+    }
+    gpRefOnce().then(function(rd){
+      corpus = gpCorpus(cfg.source, rd);
+      if (_browseOn) gpRenderBrowse(gpBuildTree(cfg.source, rd), []);
+    });
+
+    // The examples show at the top level and step aside once somebody is inside a category,
+    // so there is one list on the screen rather than two.
+    function gpRenderBrowse(tree, path){
+      browseWrap.innerHTML = '';
+      var atTop = !path.length;
+      row.style.display = atTop ? 'flex' : 'none';
+      if (atTop) {
+        var lead2 = document.createElement('div');
+        lead2.style.cssText = 'font-size:13px;color:#6B7A8D;margin-bottom:8px;';
+        lead2.textContent = 'Or browse by category.';
+        browseWrap.appendChild(lead2);
+      } else {
+        var trail = document.createElement('div');
+        trail.style.cssText = 'font-size:13.5px;font-weight:700;color:#1A2E42;margin-bottom:10px;';
+        var mkLink = function(text, to){
+          var a = document.createElement('a');
+          a.href = '#'; a.textContent = text;
+          a.style.cssText = 'color:#1F699E;text-decoration:underline;cursor:pointer;';
+          a.addEventListener('click', function(e){ e.preventDefault(); gpRenderBrowse(tree, to); });
+          return a;
+        };
+        trail.appendChild(mkLink('All categories', []));
+        path.forEach(function(seg, idx){
+          var sep = document.createElement('span');
+          sep.style.cssText = 'color:#6B7A8D;margin:0 6px;font-weight:400;';
+          sep.textContent = '\u203A';
+          trail.appendChild(sep);
+          if (idx === path.length - 1) {
+            var cur = document.createElement('span');
+            cur.textContent = seg;
+            trail.appendChild(cur);
+          } else {
+            trail.appendChild(mkLink(seg, path.slice(0, idx + 1)));
+          }
+        });
+        browseWrap.appendChild(trail);
+      }
+      var lrow = document.createElement('div');
+      lrow.style.cssText = 'display:flex;flex-wrap:wrap;gap:7px;';
+      gpLevel(tree, path).forEach(function(it){
+        if (it.drill) {
+          // A category opens, a word gets added, and the two are told apart by how they look
+          // rather than by a glyph on the label.
+          var d = document.createElement('button');
+          d.type = 'button';
+          d.textContent = it.name;
+          d.style.cssText = 'font:inherit;font-size:13.5px;padding:7px 14px;border-radius:20px;cursor:pointer;'
+            + 'background:#EDF4FA;border:1px solid #BBD4E8;color:#1A2E42;font-weight:700;';
+          d.addEventListener('click', function(){ gpRenderBrowse(tree, path.concat(it.name)); });
+          lrow.appendChild(d);
+          return;
+        }
+        // The top of the path IS the tag, because the tree already knows where the word lives.
+        var b = gpPill(it.name, gpHasWord(key, it.name));
+        b.addEventListener('click', function(){
+          if (gpHasWord(key, it.name)) gpDropWord(key, it.name, ta);
+          else gpAddWord(key, it.name, path[0] || '', ta);
+          gpRenderBrowse(tree, path);
+          repaint();
+        });
+        lrow.appendChild(b);
+      });
+      browseWrap.appendChild(lrow);
+    }
+
+    function repaint(){
+      gpPaintChosen();
+      gpRevealThanks();
+      Array.prototype.forEach.call(row.querySelectorAll('button[data-word]'), function(b){
+        var on = gpHasWord(key, b.getAttribute('data-word'));
+        b.style.cssText = 'font:inherit;font-size:13.5px;padding:7px 14px;border-radius:20px;cursor:pointer;'
+          + (on ? 'background:#1F699E;border:1px solid #1F699E;color:#fff;font-weight:700;'
+                : 'background:#fff;border:1px solid #C9DFF3;color:#1F699E;font-weight:600;');
+      });
+    }
+
+    // The five examples. Emoji stay on screen and come off the stored word, so a tag matches
+    // what the reference sheet holds rather than a decorated version of it.
+    // When a question asks for a kind rather than a thing, tapping a kind opens a box for the
+    // thing itself. "A skill" on its own tells nobody anything, and it is what was being stored.
+    var kindBox = null;
+    if (cfg.kinds) {
+      kindBox = document.createElement('div');
+      kindBox.style.cssText = 'display:none;margin-top:10px;gap:8px;align-items:center;';
+      var kindInput = document.createElement('input');
+      kindInput.type = 'text';
+      kindInput.style.cssText = 'flex:1;min-width:0;border:1.5px solid #DDE3EA;background:#fff;'
+        + 'border-radius:10px;padding:10px 12px;font:inherit;font-size:14px;color:#1A2E42;outline:none;';
+      var kindAdd = document.createElement('button');
+      kindAdd.type = 'button';
+      kindAdd.textContent = 'Add';
+      kindAdd.style.cssText = 'font:inherit;font-size:14px;font-weight:700;padding:10px 18px;'
+        + 'border-radius:20px;border:0;background:#1F699E;color:#fff;cursor:pointer;';
+      kindBox.appendChild(kindInput); kindBox.appendChild(kindAdd);
+      box.appendChild(kindBox);
+      var kindNow = '';
+      var kindCommit = function(){
+        var v = String(kindInput.value || '').trim();
+        if (!v || !kindNow) return;
+        gpAddWord(key, v + ':' + kindNow, '', ta);
+        kindInput.value = '';
+        kindBox.style.display = 'none';
+        kindNow = '';
+        repaint();
+      };
+      kindAdd.addEventListener('click', kindCommit);
+      kindInput.addEventListener('keydown', function(e){
+        if (e.key === 'Enter') { e.preventDefault(); kindCommit(); }
+      });
+      cfg._openKind = function(kind, prompt){
+        kindNow = kind;
+        kindInput.placeholder = prompt;
+        kindBox.style.display = 'flex';
+        kindInput.focus();
+      };
+    }
+
+    cfg.examples.forEach(function(label){
+      var word = label.replace(/^[^A-Za-z0-9]+/, '').trim();
+      var b = gpPill(label, gpHasWord(key, word));
+      b.setAttribute('data-word', word);
+      b.addEventListener('click', function(){
+        if (cfg.kinds && cfg._openKind) {
+          // "A skill" -> skill, and ask what kind of skill.
+          var kind = word.toLowerCase().replace(/^a\s+/, '').trim();
+          var asks = { skill: 'What skill?', thing: 'What thing?', space: 'What space?' };
+          cfg._openKind(kind, asks[kind] || ('What ' + kind + '?'));
+          return;
+        }
+        if (gpHasWord(key, word)) { gpDropWord(key, word, ta); }
+        else {
+          // An example is usually in the reference sheet too, so it takes that sheet's category
+          // rather than arriving untagged. Pickleball files as Sports, not as nothing.
+          var cat = '';
+          for (var ci = 0; ci < corpus.length; ci++) {
+            if (corpus[ci].word.toLowerCase() === word.toLowerCase()) { cat = corpus[ci].cat; break; }
+          }
+          gpAddWord(key, word, cat, ta);
+        }
+        repaint();
+      });
+      row.appendChild(b);
+    });
+
+    // Other, and the one question a genuinely new word has to answer.
+    var other = document.createElement('button');
+    other.type = 'button';
+    other.textContent = '+ Other';
+    other.style.cssText = 'font:inherit;font-size:13.5px;padding:7px 14px;border-radius:20px;cursor:pointer;'
+      + 'background:#EEF1F5;border:1px dashed #C4CDD8;color:#6B7A8D;font-weight:600;';
+    if (_browseOn) {
+      // Its own row, below the browse, so it is still there when the examples have stepped aside.
+      var otherRow = document.createElement('div');
+      otherRow.style.cssText = 'display:flex;flex-wrap:wrap;gap:7px;margin-top:12px;';
+      otherRow.appendChild(other);
+      box.appendChild(otherRow);
+    } else {
+      row.appendChild(other);
+    }
+
+    var otherBox = document.createElement('div');
+    otherBox.style.cssText = 'display:none;margin-top:10px;';
+    box.appendChild(otherBox);
+
+    other.addEventListener('click', function(){
+      // Other opens the search and nothing else. The search now offers "Add this to my list"
+      // when it finds nothing, so a second box asking for the same words was the same question
+      // twice on one screen.
+      if (_bare) {
+        searchWrap.style.display = 'block';
+        try { search.focus(); } catch (e) {}
+        return;
+      }
+      otherBox.style.display = otherBox.style.display === 'none' ? 'block' : 'none';
+      if (otherBox.style.display === 'none') { otherBox.innerHTML = ''; return; }
+      otherBox.innerHTML = '';
+      var inp = document.createElement('input');
+      inp.type = 'text';
+      inp.placeholder = 'In your own words';
+      inp.style.cssText = 'width:100%;border:1.5px solid #DDE3EA;background:#fff;border-radius:10px;'
+        + 'padding:10px 12px;font:inherit;font-size:14px;color:#1A2E42;outline:none;';
+      otherBox.appendChild(inp);
+      var ask = document.createElement('div');
+      ask.style.cssText = 'margin-top:8px;';
+      otherBox.appendChild(ask);
+      inp.focus();
+
+      var commit = function(){
+        var word = String(inp.value || '').trim();
+        if (!word) return;
+        // Already in the reference sheet? Then it is not new and it keeps that sheet's category.
+        var hit = null;
+        for (var i = 0; i < corpus.length; i++) {
+          if (corpus[i].word.toLowerCase() === word.toLowerCase()) { hit = corpus[i]; break; }
+        }
+        if (hit) {
+          gpAddWord(key, hit.word, hit.cat, ta);
+          otherBox.style.display = 'none'; otherBox.innerHTML = '';
+          return;
+        }
+        if (!cfg.tagQ) {
+          gpAddWord(key, word, '', ta);
+          otherBox.style.display = 'none'; otherBox.innerHTML = '';
+          return;
+        }
+        ask.innerHTML = '';
+        var q = document.createElement('div');
+        q.style.cssText = 'font-size:13px;color:#6B7A8D;margin-bottom:8px;';
+        q.textContent = cfg.tagQ;
+        ask.appendChild(q);
+        var opts = cfg.tagOpts;
+        if (!opts) {
+          // Skills and values take their categories from the reference sheet itself.
+          var seen = {}; opts = [];
+          corpus.forEach(function(c){ if (c.cat && !seen[c.cat]) { seen[c.cat] = 1; opts.push(c.cat); } });
+        }
+        var orow = document.createElement('div');
+        orow.style.cssText = 'display:flex;flex-wrap:wrap;gap:7px;';
+        opts.forEach(function(o){
+          var ob = gpPill(o, false);
+          ob.addEventListener('click', function(){
+            gpAddWord(key, word, o.replace(/^[^A-Za-z0-9]+/, '').trim(), ta);
+            otherBox.style.display = 'none'; otherBox.innerHTML = '';
+          });
+          orow.appendChild(ob);
+        });
+        ask.appendChild(orow);
+      };
+      inp.addEventListener('keydown', function(ev){ if (ev.key === 'Enter') { ev.preventDefault(); commit(); } });
+      var add = document.createElement('button');
+      add.type = 'button';
+      add.textContent = 'Add';
+      add.style.cssText = 'margin-top:8px;font:inherit;font-size:13.5px;font-weight:700;padding:8px 16px;'
+        + 'border-radius:20px;border:1.5px solid #1F699E;background:#fff;color:#1F699E;cursor:pointer;';
+      add.addEventListener('click', commit);
+      otherBox.insertBefore(add, ask);
+    });
+
+    // Nothing matched, so the search becomes the way in rather than a dead end pointing at
+    // another button. A word nobody has used before still has to be filed, which is the one
+    // question Other asks, and it is asked right here instead.
+    function gpAddNew(word, mount, done){
+      word = String(word || '').trim(); if (!word) return;
+      // Typed something the sheet already knows? Then it is not new and it keeps that category.
+      for (var i = 0; i < corpus.length; i++) {
+        if (corpus[i].word.toLowerCase() === word.toLowerCase()) {
+          gpAddWord(key, corpus[i].word, corpus[i].cat, ta); repaint(); if (done) done(); return;
+        }
+      }
+      // 2026-08-30. The tag question is gone. It asked somebody to do taxonomy work that was
+      // unwanted and modelled the wrong thing, and it only ever fired on a word nobody had used
+      // before, which is exactly where a person's guess is worst. A word the sheet already knows
+      // still arrives with its category, because the sheet knows it. A new word is saved as it
+      // was typed. See design/data-direction-edges-not-categories.md.
+      gpAddWord(key, word, '', ta);
+      repaint();
+      if (done) done();
+      if (typeof gpStepPaint === 'function') gpStepPaint();
+    }
+
+    // Search. Filters as you type, because pressing a button to search reads as broken.
+    search.addEventListener('input', function(){
+      var t = String(search.value || '').trim().toLowerCase();
+      results.innerHTML = '';
+      if (t.length < 2) return;
+      var hits = corpus.filter(function(c){
+        return c.word.toLowerCase().indexOf(t) > -1 || (c.assoc && c.assoc.indexOf(t) > -1);
+      }).slice(0, 6);
+      hits.forEach(function(h){
+        var r = document.createElement('div');
+        r.setAttribute('role', 'button');
+        r.tabIndex = 0;
+        r.style.cssText = 'border:1px solid #DDE3EA;border-radius:10px;padding:10px 12px;margin-top:6px;cursor:pointer;background:#fff;';
+        r.innerHTML = '<div style="font-size:14.5px;font-weight:700;color:#1A2E42;">' + h.word + '</div>'
+          + (h.cat ? '<div style="font-size:13px;color:#6B7A8D;">' + h.cat + '</div>' : '');
+        r.addEventListener('click', function(){
+          gpAddWord(key, h.word, h.cat, ta);
+          search.value = ''; results.innerHTML = ''; repaint();
+        });
+        results.appendChild(r);
+      });
+      if (!hits.length) {
+        var typed = String(search.value || '').trim();
+        var r = document.createElement('div');
+        r.setAttribute('role', 'button');
+        r.tabIndex = 0;
+        r.style.cssText = 'border:1px solid #C9DFF3;border-radius:10px;padding:10px 12px;margin-top:6px;'
+          + 'cursor:pointer;background:#F7FBFF;';
+        var rt = document.createElement('div');
+        rt.style.cssText = 'font-size:14.5px;font-weight:700;color:#1F699E;';
+        rt.textContent = 'Add this to my list';
+        var rw = document.createElement('div');
+        rw.style.cssText = 'font-size:13px;color:#6B7A8D;';
+        rw.textContent = typed;
+        r.appendChild(rt); r.appendChild(rw);
+        var ask = document.createElement('div');
+        r.addEventListener('click', function(){
+          gpAddNew(typed, ask, function(){ search.value = ''; results.innerHTML = ''; });
+        });
+        results.appendChild(r);
+        results.appendChild(ask);
+      }
+    });
+
+    // Anything already answered shows the moment the screen is built, not on the first tap.
+    repaint();
+    return box;
+  }
+
+  function gpChipRow(key, ta){
+    var cfg = GP_CHIPS[key];
+    if (!GP_CHIPS_ON || !cfg) return null;
+    var box = document.createElement('div');
+    box.style.cssText = 'margin-top:10px;';
+    var lead = document.createElement('div');
+    lead.style.cssText = 'font-size:13px;color:#6B7A8D;margin-bottom:8px;';
+    lead.textContent = cfg.lead || 'And/or tap any below...';
+    box.appendChild(lead);
+
+    // Social or ecological is asked first, and the other side stays on screen so somebody can
+    // flip without going back. Anything already tapped stays tapped when the list changes.
+    if (cfg.lenses) {
+      var lensRow = document.createElement('div');
+      lensRow.style.cssText = 'display:flex;flex-wrap:wrap;gap:7px;';
+      var wordRow = document.createElement('div');
+      wordRow.style.cssText = 'display:flex;flex-wrap:wrap;gap:7px;margin-top:10px;';
+      var current = null;
+      var lensBtns = [];
+      var paintLenses = function(){
+        lensBtns.forEach(function(pair){
+          pair.btn.style.cssText = 'font:inherit;font-size:13.5px;padding:7px 16px;border-radius:20px;cursor:pointer;'
+            + (current === pair.lens
+                ? 'background:#1A2E42;border:1px solid #1A2E42;color:#fff;font-weight:700;'
+                : 'background:#F7FBFF;border:1px solid #C9DFF3;color:#1A2E42;font-weight:700;');
+        });
+      };
+      var showLens = function(lens){
+        current = lens;
+        paintLenses();
+        wordRow.innerHTML = '';
+        lens.words.forEach(function(w){ wordRow.appendChild(gpChipBtn(key, w, ta)); });
+        if (lens.more && lens.more.length) {
+          wordRow.appendChild(gpMoreBtn('More', function(){
+            lens.more.forEach(function(w){ wordRow.appendChild(gpChipBtn(key, w, ta)); });
+          }));
+        }
+      };
+      cfg.lenses.forEach(function(lens){
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = lens.label;
+        b.addEventListener('click', function(){ showLens(lens); });
+        lensBtns.push({ btn:b, lens:lens });
+        lensRow.appendChild(b);
+      });
+      paintLenses();
+      box.appendChild(lensRow);
+      box.appendChild(wordRow);
+      return box;
+    }
+
+    var row = document.createElement('div');
+    row.style.cssText = 'display:flex;flex-wrap:wrap;gap:7px;';
+    cfg.words.forEach(function(w){ row.appendChild(gpChipBtn(key, w, ta)); });
+    if (cfg.more && cfg.more.length) {
+      row.appendChild(gpMoreBtn('More', function(){
+        cfg.more.forEach(function(w){ row.appendChild(gpChipBtn(key, w, ta)); });
+      }));
+    }
+    box.appendChild(row);
+    return box;
+  }
+
+
+  // ---- A face, before the words -------------------------------------------
+  // This lives here rather than on the sign-up page on purpose. Somebody who gives up on
+  // sign-up was never here; somebody who gives up on this page is already in and can come back
+  // to it whenever they like. So the optional things belong on this side of the door.
+  var PHOTO_URL = 'https://cw-photos.jessieupp.workers.dev';
+  var _gpPhotoToken = '';
+
+  // The same session the profile editor asks for. Signing up wrote it under both names, so
+  // either will do and neither means asking somebody for a second code.
+  function gpToken(){
+    if (_gpPhotoToken) return _gpPhotoToken;
+    try {
+      var norm = String(meId || '').split('.').join('').toLowerCase();
+      var raw = localStorage.getItem('cw-edit-' + norm);
+      if (raw) {
+        var o = JSON.parse(raw);
+        if (o && o.t && (!o.exp || o.exp > Date.now())) { _gpPhotoToken = o.t; return _gpPhotoToken; }
+      }
+      var t2 = localStorage.getItem('cw-token') || '';
+      var who = String(localStorage.getItem('cw-id') || '').split('.').join('').toLowerCase();
+      if (t2 && who && who === norm) {
+        var exp = parseInt(String(t2).split('.')[1], 10);
+        if (exp && Date.now() <= exp - 60000) { _gpPhotoToken = t2; return _gpPhotoToken; }
+      }
+    } catch (e) {}
+    return '';
+  }
+
+  function gpPhotoStat(msg){ var el = document.getElementById('gp-photo-stat'); if (el) el.textContent = msg || ''; }
+  function gpPhotoShow(url){
+    var f = document.getElementById('gp-photo-face'); if (!f) return;
+    f.innerHTML = '<img src="' + url + '" alt="" style="width:100%;height:100%;object-fit:cover;">';
+    var b = document.getElementById('gp-photo-btn'); if (b) b.textContent = 'Change photo';
+    // Step 0 will not let anybody past without one, so the moment a face lands the door opens.
+    window._gpPhotoUp = true;
+    if (typeof gpStepPaint === 'function') gpStepPaint();
+  }
+
+  // ── Location, 2026-08-30 ──────────────────────────────────────────────────
+  // Ported from My account rather than invented again, so somebody meets the same picker in both
+  // places and a stored value reads the same way. Held as one plain string, "Washington, United
+  // States", so anything showing a profile can print it without knowing the three levels.
+  var GP_REGIONS = ['North America','South America','Europe','Asia','Africa','Oceania','Antarctica'];
+  var GP_NA = ['United States','Canada','Mexico'];
+  var GP_US = ["Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming","Washington D.C."];
+  var _gpLoc = { region:'', country:'', state:'' };
+  // The place is held as one plain string, so it has to be read back into the three levels the
+  // picker draws. Without this it was saved on every visit and asked for on every visit.
+  function gpLocFrom(str){
+    var v = String(str || '').trim();
+    if (!v) return;
+    var parts = v.split(',').map(function(x){ return x.trim(); });
+    if (parts.length > 1 && parts[parts.length - 1] === 'United States') {
+      var st = parts[0];
+      if (GP_US.indexOf(st) > -1) { _gpLoc = { region:'North America', country:'United States', state:st }; return; }
+    }
+    if (GP_NA.indexOf(v) > -1) { _gpLoc = { region:'North America', country:v, state:'' }; return; }
+    if (GP_REGIONS.indexOf(v) > -1) { _gpLoc = { region:v, country:'', state:'' }; return; }
+  }
+  // A part-made choice stores nothing. "North America" on its own says less than a blank does.
+  function gpLocString(l){
+    if (l.state) return l.state + ', United States';
+    if (l.country && l.country !== 'United States') return l.country;
+    if (l.region && l.region !== 'North America') return l.region;
+    return '';
+  }
+  function gpLocationBlock(){
+    var wrap = document.createElement('div');
+    wrap.setAttribute('data-gp-loc','1');
+    wrap.style.cssText = 'padding:18px 0 0;border-top:1px solid #f0f1f5;margin-top:18px;';
+    var t = document.createElement('div');
+    t.style.cssText = 'font-size:17px;font-weight:800;color:#1A2E42;margin-bottom:2px;';
+    t.textContent = 'Where are you?';
+    var h = document.createElement('div');
+    h.style.cssText = 'font-size:13.5px;color:#6B7A8D;margin-bottom:12px;';
+    h.textContent = 'So the people and events near you can reach you.';
+    var box = document.createElement('div');
+    box.id = 'gp-loc-box';
+    box.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;';
+    wrap.appendChild(t); wrap.appendChild(h); wrap.appendChild(box);
+    gpRenderLoc();
+    return wrap;
+  }
+  function gpRenderLoc(){
+    var box = document.getElementById('gp-loc-box');
+    if (!box) { setTimeout(gpRenderLoc, 0); return; }
+    var l = _gpLoc, ss = 'font:inherit;font-size:14px;padding:10px 12px;border:1.5px solid #DDE3EA;border-radius:10px;background:#F7FBFF;color:#1A2E42;';
+    var sel = function(id, list, val, ph){
+      var h = '<select id="' + id + '" style="' + ss + '"><option value="">' + ph + '</option>';
+      list.forEach(function(x){ h += '<option' + (x === val ? ' selected' : '') + '>' + x + '</option>'; });
+      return h + '</select>';
+    };
+    var html = sel('gp-loc-region', GP_REGIONS, l.region, 'Select region…');
+    if (l.region === 'North America') html += sel('gp-loc-country', GP_NA, l.country, 'Select country…');
+    if (l.region === 'North America' && l.country === 'United States') html += sel('gp-loc-state', GP_US, l.state, 'Select state…');
+    box.innerHTML = html;
+    var rg = box.querySelector('#gp-loc-region');
+    if (rg) rg.onchange = function(){
+      _gpLoc = { region: rg.value, country: '', state: '' };
+      if (rg.value === 'North America') _gpLoc.country = 'United States';
+      gpRenderLoc(); gpStepPaint();
+    };
+    var ct = box.querySelector('#gp-loc-country');
+    if (ct) ct.onchange = function(){ _gpLoc.country = ct.value; _gpLoc.state = ''; gpRenderLoc(); gpStepPaint(); };
+    var st = box.querySelector('#gp-loc-state');
+    if (st) st.onchange = function(){ _gpLoc.state = st.value; gpRenderLoc(); gpStepPaint(); };
+  }
+
+  function gpPhotoBlock(){
+    var wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;align-items:center;gap:16px;padding:0 0 18px;flex-wrap:wrap;';
+    wrap.innerHTML =
+      '<div id="gp-photo-face" style="width:76px;height:76px;border-radius:50%;overflow:hidden;'
+      + 'background:#EDF3F9;border:1.5px solid #DDE3EA;flex-shrink:0;display:flex;align-items:center;'
+      + 'justify-content:center;font-size:26px;">\u{1F331}</div>'
+      + '<div style="min-width:0;">'
+      + '<div style="font-size:17px;font-weight:800;color:#1A2E42;margin-bottom:2px;">Your photo</div>'
+      + '<div id="gp-photo-hint" style="font-size:13.5px;color:#6B7A8D;line-height:1.5;margin-bottom:8px;">'
+      + (GP_BROWSE ? 'A professional photo helps members recognize you when you show up.</div>'
+                   : 'A professional photo helps people recognize you when you show up.</div>')
+      + (GP_BROWSE
+          ? '<div style="font-size:13.5px;color:#6B7A8D;line-height:1.5;margin-bottom:8px;">'
+            + (GP_FOR === 'event'
+                ? 'Your photo is needed to register for an event that has a bulletin board.'
+                : 'Your photo is needed to join a group.')
+            + '</div>'
+          : '')
+      + '<button type="button" id="gp-photo-btn" style="font:inherit;font-size:13.5px;font-weight:700;'
+      + 'padding:8px 16px;border-radius:20px;border:1.5px solid #1F699E;background:#fff;color:#1F699E;'
+      + 'cursor:pointer;">Add a photo</button>'
+      + '<div id="gp-photo-stat" style="font-size:13px;color:#6B7A8D;margin-top:6px;"></div>'
+      + '</div>';
+    var btn = wrap.querySelector('#gp-photo-btn');
+    btn.addEventListener('click', gpChoosePhoto);
+    // Already have one? Show it rather than inviting them to add what they have.
+    //
+    // "Add a photo" beside an empty circle is a claim that somebody has no photo, and until the
+    // lookup lands that claim is a guess. lookupProfile has been measured at 39 seconds, so the
+    // guess was on screen for most of a minute and it was wrong for anybody who has one.
+    //
+    // Three things now happen instead. The face the photo Worker holds is asked for first,
+    // because it answers in about a tenth of a second with no backend in the way. The slow
+    // lookup still runs, for a photo stored somewhere other than R2. And until one of them
+    // answers, the button says nothing at all.
+    if (GP_BROWSE && meId) {
+      var _face = wrap.querySelector('#gp-photo-face');
+      var _btn2 = wrap.querySelector('#gp-photo-btn');
+      var _hint = wrap.querySelector('#gp-photo-hint');
+      _face.innerHTML = '';
+      _btn2.style.display = 'none';
+      if (_hint) _hint.textContent = 'Looking for your photo\u2026';
+      var _settled = false;
+      // A photo that lands after we have given up still gets shown. Saying "add a photo" and
+      // then quietly showing the one they have is better than never showing it.
+      var _late = function(url){
+        if (!url) return;
+        try { localStorage.setItem('cw-photo-' + meId, url); } catch (e) {}
+        gpPhotoShow(url);
+      };
+      var _settle = function(url){
+        if (_settled) { _late(url); return; }
+        _settled = true;
+        _btn2.style.display = '';
+        if (_hint) _hint.textContent = 'A professional photo helps members recognize you when you show up.';
+        window._gpPhotoKnown = true;
+        if (url) {
+          try { localStorage.setItem('cw-photo-' + meId, url); } catch (e) {}
+          gpPhotoShow(url);
+        } else {
+          _face.innerHTML = '\u{1F331}';
+          if (typeof gpStepPaint === 'function') gpStepPaint();
+        }
+      };
+      // A photo seen before paints at once, so a return visit never waits at all.
+      var _seen = '';
+      try { _seen = localStorage.getItem('cw-photo-' + meId) || ''; } catch (e) {}
+      // On the next tick, because gpPhotoShow finds the circle by id and this block is not on
+      // the page yet. Painting straight away looked instant and drew nothing at all.
+      if (_seen) setTimeout(function(){ _settle(_seen); }, 0);
+
+      var _direct = PHOTO_URL + '/p/' + encodeURIComponent(meId) + '?v=' + Date.now();
+      var _probe = new Image();
+      _probe.onload  = function(){ _settle(_direct); };
+      _probe.onerror = function(){
+        // Not in R2. The slow lookup is the only thing left that could know, so wait for it.
+        fetch(GS_URL + '?action=lookupProfile&appearId=' + encodeURIComponent(meId))
+          .then(function(r){ return r.json(); })
+          .then(function(d){ _settle((d && d.photo) || ''); })
+          .catch(function(){ _settle(''); });
+      };
+      _probe.src = _direct;
+      // Nobody waits forever. After eight seconds we say we do not have one, which is at worst
+      // an invitation to add a photo they already have.
+      setTimeout(function(){ _settle(''); }, 6000);
+    } else if (meId) {
+      fetch(GS_URL + '?action=lookupProfile&appearId=' + encodeURIComponent(meId))
+        .then(function(r){ return r.json(); })
+        .then(function(d){ if (d && d.photo) gpPhotoShow(d.photo); })
+        .catch(function(){});
+    }
+    return wrap;
+  }
+
+  function gpChoosePhoto(){
+    if (!meId) { gpPhotoStat('This device does not know who you are yet.'); return; }
+    if (!gpToken()) { gpPhotoStat('Sign in again and your photo will go straight up.'); return; }
+    var inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = 'image/*';
+    inp.onchange = function(){ var f = inp.files && inp.files[0]; if (f) gpShrinkPhoto(f); };
+    inp.click();
+  }
+
+  // Shrunk here, in the browser, so a photo straight off a phone camera never crosses the wire
+  // at full size. An 8.4MB source came out at 6KB in testing.
+  function gpShrinkPhoto(file){
+    gpPhotoStat('Getting it ready\u2026');
+    var img = new Image();
+    img.onload = function(){
+      try {
+        var side = Math.min(img.width, img.height);
+        var c = document.createElement('canvas'); c.width = 600; c.height = 600;
+        c.getContext('2d').drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, 600, 600);
+        c.toBlob(function(blob){
+          if (!blob) { gpPhotoStat('That picture could not be read.'); return; }
+          gpSendPhoto(blob);
+        }, 'image/jpeg', 0.85);
+      } catch (e) { gpPhotoStat('That picture could not be read.'); }
+      finally { try { URL.revokeObjectURL(img.src); } catch (e) {} }
+    };
+    img.onerror = function(){ gpPhotoStat('That picture could not be read.'); };
+    img.src = URL.createObjectURL(file);
+  }
+
+  function gpSendPhoto(blob){
+    if (CW_MOCKUP) { gpPhotoStat('This is a mockup, so the photo is not sent.'); return; }
+    gpPhotoStat('Sending\u2026');
+    fetch(PHOTO_URL + '/upload?id=' + encodeURIComponent(meId), {
+      method: 'POST',
+      headers: { 'Content-Type': 'image/jpeg', 'x-cw-token': gpToken() },
+      body: blob
+    }).then(function(r){ return r.json(); }).then(function(d){
+      if (!d || d.status !== 'ok' || !d.url) { gpPhotoStat((d && d.message) || 'That did not go through.'); return; }
+      gpPhotoShow(d.url + '?v=' + Date.now());
+      gpPhotoStat('');
+      // Only photoURL is sent, and saveIntake leaves alone anything it was not given, so this
+      // cannot touch an answer somebody has already written.
+      fetch(GS_URL + '?action=saveIntake&appearId=' + encodeURIComponent(meId)
+            + '&secure=1&editToken=' + encodeURIComponent(gpToken())
+            + '&photoURL=' + encodeURIComponent(d.url)).catch(function(){});
+    }).catch(function(){ gpPhotoStat('That did not go through.'); });
+  }
+
+  // ── One thing at a time, 2026-08-30 ───────────────────────────────────────
+  // Five questions in a column is a form. One question on a screen is a conversation, and it is
+  // the difference between somebody answering three of them and answering all of them.
+  //
+  // Step 0 is the only wall on the site: a photo, a language and a place. Everything after it is
+  // asked properly and can be left, because the gate that matters is joining a group.
+  var GP_STEP_TITLES = [
+    'First, so people can recognise you',
+    (typeof GP_BROWSE !== 'undefined' && GP_BROWSE) ? 'What brings you joy?' : 'What do you enjoy?',
+    (typeof GP_BROWSE !== 'undefined' && GP_BROWSE)
+      ? 'What skills do you have?'
+      : 'What skills do you have?',
+    'What do you care about?',
+    // Jessie, 2026-09-13: "Remove Anything you need, or have to offer?" and "What do you need?", and the
+    // offer question reads as she wrote it. It is the heading, so it is not asked a second time below.
+    'For work, income, or trade what do you have to offer right now?'
+  ].concat((typeof GP_BROWSE !== 'undefined' && GP_BROWSE)
+    // How do you like to be thanked has moved, so it is not a screen here any more and the
+    // profile is what comes after the last question.
+    // Jessie, 2026-09-13: "How do you like to get appreciated? 🎁 ... As last question".
+    ? ['How do you like to get appreciated? \u{1F381}', 'Your answers']
+    : ['How do you like to be thanked?', 'This is your profile']);
+  var _gpStep = 0;
+  var GP_LAST = GP_STEP_TITLES.length - 1;
+  // Somebody sent here from a group arrived mid-join and the page never said which group, so
+  // they were answering questions with no idea what for. The group page passes the name across.
+  var GP_GROUP = String(params.get('groupName') || '').trim();
+  var _gpEsc = function (t) {
+    return String(t).replace(/[&<>"']/g, function (ch) {
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch];
+    });
+  };
+  var GP_LEDE_BASE = (GP_GROUP ? 'You are joining <b>' + _gpEsc(GP_GROUP) + '</b>. ' : '')
+    + 'Other ' + (GP_FOR === 'event' ? 'event attendees' : 'group members')
+    + ' would like to get to know you! Your answers help others find you and puts the right '
+    + 'people in front of you. Everything saves as you go.';
+  // Needs and haves, and how you like to be thanked. The two nobody has to answer.
+  var GP_OPTIONAL_STEPS = { 4:1, 5:1 };
+
+  // What counts as an answer: a tapped word, or something typed. Either half is an answer,
+  // so somebody who wrote in prose is never told they have answered nothing.
+  var GP_REQUIRED_STEPS = { 1:{ key:'introEnjoy',  miss:'one thing you enjoy' },
+                            2:{ key:'introSkills', miss:'one skill' },
+                            3:{ key:'introValues', miss:'one thing you care about' } };
+  function gpAnswered(key){
+    var tags = (_gpTags && _gpTags[key]) ? Object.keys(_gpTags[key]).length : 0;
+    if (tags) return true;
+    var el = document.getElementById('gp-intro-' + key);
+    return !!(el && String(el.value || '').trim());
+  }
+  function gpStepOK(n){
+    if (GP_BROWSE && GP_REQUIRED_STEPS[n]) return gpAnswered(GP_REQUIRED_STEPS[n].key);
+    if (n !== 0) return true;
+    if (true) return Object.keys(_gpLangPicked || {}).some(function(k){ return _gpLangPicked[k]; }) && !!gpLocString(_gpLoc);   // no photo in this copy
+    // The three that step 0 asks for. The photo is the strongest ask on the site and it is made
+    // here, once, while somebody is still arriving.
+    var hasPhoto = !!(window._gpPhotoUp || document.querySelector('#gp-photo-face img'));
+    var hasLang  = Object.keys(_gpLangPicked || {}).some(function(k){ return _gpLangPicked[k]; });
+    var hasLoc   = !!gpLocString(_gpLoc);
+    return hasPhoto && hasLang && hasLoc;
+  }
+  function gpStepMissing(){
+    var out = [];
+    if (!Object.keys(_gpLangPicked || {}).some(function(k){ return _gpLangPicked[k]; })) out.push('a language');
+    if (!gpLocString(_gpLoc)) out.push('where you are');
+    return out;
+  }
+
+  function gpStepPaint(){
+    var next = document.getElementById('gp-step-next');
+    var back = document.getElementById('gp-step-back');
+    var note = document.getElementById('gp-step-note');
+    var count = document.getElementById('gp-step-count');
+    var title = document.getElementById('gp-intro-title');
+    // Coming back to the first screen used to leave the last question's heading up there, so
+    // the photo screen introduced itself as whatever somebody had just answered.
+    // Jessie, 2026-09-13: the offer question is the same size as What would work give you? under it.
+    if (title) title.style.fontSize = (_gpStep === 4) ? '17px' : '22px';
+    if (title) title.textContent = (_gpStep > 0)
+      ? GP_STEP_TITLES[_gpStep]
+      : (window._gpWelcome || GP_STEP_TITLES[0]);
+    if (count) count.textContent = (_gpStep < GP_LAST) ? ((_gpStep + 1) + ' of ' + GP_LAST) : '';
+    if (back) back.style.display = _gpStep === 0 ? 'none' : '';
+    var skip = document.getElementById('gp-step-skip');
+    // Skipping needs and haves is a choice somebody makes, not a thing they miss, so it is a
+    // control on the screen rather than an absence of one.
+    if (skip) skip.style.display = 'none';   // Jessie, 2026-09-13: "Remove any skip this on pages"
+    if (!next) return;
+    // "Go in" said nothing about where. It goes back to the group somebody was joining, so it
+    // says so. Jessie, 2026-08-31.
+    // The last screen is Your answers and ends on Send, as the home page's does. Jessie, 2026-09-13.
+    next.style.display = (_gpStep === GP_LAST && gpViewingSomebodyElse()) ? 'none' : '';   // looking is never sending
+    if (_gpStep === GP_LAST) { var _sentNow = cwIsSent(); next.textContent = window._cwSending ? 'Sending' : (_sentNow ? 'Sent' : 'Send'); next.disabled = _sentNow || !!window._cwSending; }
+    else if (_gpStep === GP_LAST - 1) {
+      next.textContent = 'Next';   // Jessie, 2026-09-13: "Make last question have next"
+      next.disabled = false;
+    }
+    else { next.textContent = 'Next'; next.disabled = !gpStepOK(_gpStep); }
+    next.style.opacity = next.disabled ? '.55' : '1';
+    next.style.cursor = next.disabled ? 'default' : 'pointer';
+    if (note) {
+      var miss = (_gpStep === 0) ? gpStepMissing() : [];
+      // Do not list a photo as missing before we have looked for one.
+      if (false) {
+        miss = miss.filter(function(m){ return m !== 'a photo'; });
+        miss.unshift('looking for your photo');
+      }
+      var _req = GP_BROWSE ? GP_REQUIRED_STEPS[_gpStep] : null;
+      if (_req && !gpAnswered(_req.key)) miss = [_req.miss];
+      note.textContent = miss.length ? ('Still to add: ' + miss.join(', ') + '.') : '';
+      // 6. What is left to add is a reminder, not a telling-off, so it is grey like the count.
+      if (GP_BROWSE) note.style.color = '#6B7A8D';
+    }
+    if (GP_BROWSE) {
+      // One thing at a time. The next block is not on screen until the one before it has been
+      // answered, so nobody meets four questions stacked up at once.
+      var _picked = function(m){ return Object.keys(m || {}).some(function(k){ return m[k]; }); };
+      var reveal = function(id, ok){
+        var el = document.getElementById(id); if (!el) return;
+        // gpShowStep owns anything that is a step of its own, so never fight it.
+        var st = el.getAttribute('data-gp-step');
+        if (st !== null && String(st) !== String(_gpStep)) return;
+        el.style.display = ok ? '' : 'none';
+      };
+      // Step 0 shows all three at once. Chaining them there was mine and not asked for.
+      reveal('gp-methods-block', gpAnswered('introSkills'));
+
+      // The welcome is said once, on the way in. On a question screen the question is the
+      // whole of it, and the only thing worth adding is on the two nobody has to answer.
+      var lede = document.getElementById('gp-intro-lede');
+      if (lede) {
+        // Jessie, 2026-09-13: the group members line is removed here, on every screen.
+        lede.style.display = 'none'; lede.innerHTML = '';
+      }
+    }
+  }
+
+  function gpShowStep(n){
+    _gpStep = Math.max(0, Math.min(GP_LAST, n));
+    var all = document.querySelectorAll('[data-gp-step]');
+    Array.prototype.forEach.call(all, function(el){
+      el.style.display = (String(el.getAttribute('data-gp-step')) === String(_gpStep)) ? '' : 'none';
+    });
+    gpStepPaint();
+    try { gpRevealThanks(); } catch (e) {}
+    try { window.scrollTo(0, 0); } catch (e) {}
+  }
+
+  function gpRenderIntro(prefill){
+    var box = document.getElementById('gp-intro-qs');
+    if (!box) return;
+    // Everybody is greeted by name, not only somebody arriving straight from signing up.
+    // This page invites, it does not gate, so nothing here tells anyone they must.
+    var _t0 = document.getElementById('gp-intro-title');
+    var _l0 = document.getElementById('gp-intro-lede');
+    var _who = '';
+    try { _who = String(localStorage.getItem('cw-first') || '').trim(); } catch (err) {}
+    window._gpWelcome = _who ? ('Welcome, ' + _who + ' \u{1F389}') : 'Welcome \u{1F389}';
+    if (_t0) _t0.textContent = window._gpWelcome;
+    // A device that does not hold a name asks for one and drops it in when it lands. The
+    // heading is already on screen either way, so nobody waits on this.
+    if (!_who && meId) {
+      fetch(GS_URL + '?action=lookupProfile&appearId=' + encodeURIComponent(meId))
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+          var nm = String((d && d.name) || '').trim().split(' ')[0];
+          if (!nm) return;
+          try { localStorage.setItem('cw-first', nm); } catch (err) {}
+          window._gpWelcome = 'Welcome, ' + nm + ' \u{1F389}';
+          var el = document.getElementById('gp-intro-title');
+          if (el && _gpStep === 0) el.textContent = window._gpWelcome;
+        })
+        .catch(function(){});
+    }
+    // Somebody arriving here is on their way into a group, so the reason is the group. The
+    // "answer what you like" line is not said here, because it is only true of the optional
+    // questions and gpStepPaint adds it on those screens.
+    if (_l0 && GP_BROWSE) _l0.innerHTML = '';
+    else if (_l0) _l0.innerHTML = window._gpAlreadyIn
+      ? 'Nothing changes about your place here. These answers are what let people find you and '
+        + 'what puts the right people in front of you, and we never asked for them. Answer what '
+        + 'you like now and add the rest whenever.'
+      : 'Write as much or as little as you like, in your own words. These answers are what let '
+        + 'people find you and what puts the right people in front of you. Answer what you like '
+        + 'now and add the rest whenever.';
+    box.innerHTML = '';
+    // Step 0. The photo, and the promise that goes with asking for it.
+    var _s0 = document.createElement('div');
+    _s0.setAttribute('data-gp-step', '0');
+    // Jessie, 2026-09-13: the photo is removed from this copy.
+    var _pn = document.createElement('div');
+    _pn.style.cssText = 'font-size:13px;color:#6B7A8D;margin:-6px 0 0;max-width:60ch;line-height:1.5;';
+    _pn.textContent = 'Your photo is only shown inside groups you join or start. It is not on the open web '
+      + 'and it is not shown to people outside your groups.';
+    if (!GP_BROWSE) _s0.appendChild(_pn);
+    var _lg = gpLanguagesBlock(); _lg.id = 'gp-langs-block'; _s0.appendChild(_lg);
+    var _lc = gpLocationBlock();  _lc.id = 'gp-loc-block';   _s0.appendChild(_lc);
+    box.appendChild(_s0);
+    GP_INTRO_Q.forEach(function(q, i){
+      var wrap = document.createElement('div');
+      // The offer is first on its screen now that What do you need? is not asked, so no line above it.
+      wrap.style.cssText = 'padding:18px 0;' + ((i && q.key !== 'introOffer') ? 'border-top:1px solid #f0f1f5;' : 'padding-top:0;');
+      var t = document.createElement('div');
+      t.style.cssText = 'font-size:17px;font-weight:800;color:#1A2E42;margin-bottom:2px;';
+      t.textContent = q.q;
+      var h = document.createElement('div');
+      h.style.cssText = 'font-size:13.5px;color:#6B7A8D;margin-bottom:12px;';
+      h.textContent = q.hint;
+      var ta = document.createElement('textarea');
+      ta.id = 'gp-intro-' + q.key;
+      ta.rows = 3;
+      ta.placeholder = q.ph;
+      ta.value = (prefill && prefill[q.key]) || '';
+      // A chip whose word is already in the box has plainly been chosen, so show it chosen.
+      // Matching ignores case, because saved answers were not always stored the way the chip
+      // spells it: "Community health" and "Community Health" are one answer, not two.
+      (function(){
+        var already = String(ta.value || '').split(',').map(function(x){
+          return x.trim().toLowerCase();
+        }).filter(Boolean);
+        if (!already.length) return;
+        var conf = GP_CHIPS[q.key]; if (!conf) return;
+        var all = [];
+        (conf.words || []).forEach(function(w){ all.push(w); });
+        (conf.more  || []).forEach(function(w){ all.push(w); });
+        (conf.lenses|| []).forEach(function(l){
+          (l.words || []).forEach(function(w){ all.push(w); });
+          (l.more  || []).forEach(function(w){ all.push(w); });
+        });
+        all.forEach(function(w){
+          if (already.indexOf(String(w).toLowerCase()) > -1) {
+            if (!_gpChipsPicked[q.key]) _gpChipsPicked[q.key] = {};
+            _gpChipsPicked[q.key][w] = true;
+          }
+        });
+      })();
+      ta.className = 'cw-intro-box';
+      ta.style.cssText = 'width:100%;border:1.5px solid #DDE3EA;background:#F7FBFF;border-radius:10px;'
+        + 'padding:12px 14px;font:inherit;font-size:14.5px;color:#1A2E42;line-height:1.5;resize:vertical;';
+      // On the joy screen the card heading already asks the question, so asking it again two
+      // lines down was the same words twice. The box goes with it: what somebody picks is what
+      // gets saved, and the box stays in the page, unseen, as the thing that holds it.
+      var _bare = gpBareKey(q.key);
+      if (_bare) {
+        ta.style.display = 'none';
+        if (!GP_BARE_HEAD[q.key]) { wrap.appendChild(t); wrap.appendChild(h); }
+        wrap.appendChild(ta);
+      } else {
+        wrap.appendChild(t); wrap.appendChild(h); wrap.appendChild(ta);
+      }
+      var chipRow = gpPicker(q.key, ta) || gpChipRow(q.key, ta);
+      if (chipRow) wrap.appendChild(chipRow);
+      // Enjoy, skills, values each get a screen. Needs and haves share the last question screen,
+      // because they are two halves of one thought and neither is required.
+      // What do you need? is not asked in this copy: the work screen asked it first. 'off' is never a step.
+      var _map = { introEnjoy:'1', introSkills:'2', introValues:'3', introNeed:'off', introOffer:'4' };
+      wrap.setAttribute('data-gp-step', _map[q.key] || '4');
+      box.appendChild(wrap);
+      // WHAT WOULD WORK GIVE YOU sits on the offer screen, under the offer question. Jessie, 2026-09-13:
+      // "Stop put this on this screen instead For work, income, or trade what do you have to offer right now?"
+      if (q.key === 'introOffer') {
+        var _cw = document.createElement('div');
+        _cw.id = 'cw-work-step';
+        _cw.setAttribute('data-gp-step', '4');
+        _cw.style.cssText = 'padding:18px 0 0;';
+        box.appendChild(_cw);
+        if (typeof CW_WORK !== 'undefined' && CW_WORK) cwPaintWork();
+      }
+      if (q.key === 'introSkills') {
+        // What comes most naturally to you sits with the skills, which is what it is about.
+        var _m = gpMethodsBlock();
+        _m.id = 'gp-methods-block';
+        _m.setAttribute('data-gp-step', '2');
+        box.appendChild(_m);
+        // How you like to be thanked belongs here too. Both questions are about the shape of the
+        // exchange rather than what somebody knows, and asking them together is one screen
+        // instead of two. Jessie, 2026-08-30. It had no screen at all in this flow, so
+        // appreciation was saving empty for everybody.
+        if (false) {   // appreciation is the last question in this copy, drawn below
+          var _th2 = gpThanksBlock();
+          _th2.id = 'gp-thanks-block';
+          _th2.setAttribute('data-gp-step', '2');
+          // Asked second, and only once the first question on this screen has an answer. Two
+          // questions arriving together made the screen look like a form. Jessie, 2026-08-31.
+          _th2.style.display = 'none';
+          box.appendChild(_th2);
+        }
+      }
+    });
+    // Appreciation last, then the profile as everybody else sees it.
+    {
+      var _th = gpThanksBlock();
+      _th.id = 'gp-thanks-block';
+      _th.setAttribute('data-gp-step', '5');
+      box.appendChild(_th);
+    }
+    var _pv = document.createElement('div');
+    _pv.setAttribute('data-gp-step', '6');
+    _pv.id = 'gp-preview';
+    box.appendChild(_pv);
+    gpShowStep(0);
+  }
+
+  function gpThanksBlock(){
+    var tw = document.createElement('div');
+    tw.style.cssText = 'padding:0;';
+    var tt = document.createElement('div');
+    tt.style.cssText = 'font-size:17px;font-weight:800;color:#1A2E42;margin-bottom:2px;';
+    tt.textContent = 'How do you like to get appreciated? \u{1F381}';
+    var th = document.createElement('div');
+    th.style.cssText = 'font-size:13.5px;color:#6B7A8D;margin-bottom:12px;';
+    th.textContent = 'When somebody wants to give something back, this is where it lands. Pick as many as you are happy to receive.';
+    var row = document.createElement('div');
+    row.style.cssText = 'display:flex;flex-wrap:wrap;gap:7px;';
+    GP_THANKS.forEach(function(opt){
+      var b = document.createElement('button');
+      b.type = 'button';
+      var paint = function(){
+        b.style.cssText = 'font:inherit;font-size:13.5px;padding:7px 14px;border-radius:20px;cursor:pointer;'
+          + (_gpThanksPicked[opt.value]
+              ? 'background:#1F699E;border:1px solid #1F699E;color:#fff;font-weight:700;'
+              : 'background:#fff;border:1px solid #C9DFF3;color:#1F699E;font-weight:600;');
+      };
+      b.textContent = opt.label;
+      paint();
+      b.addEventListener('click', function(){
+        _gpThanksPicked[opt.value] = !_gpThanksPicked[opt.value];
+        paint();
+      });
+      row.appendChild(b);
+    });
+    tw.appendChild(th); tw.appendChild(row);   // the screen's heading asks the question
+    return tw;
+  }
+
+  // Into Your answers. The answers save in the background, the same as every other Next, so nobody waits on
+  // the backend to see what they said. 2Gather's copy waits here because its last screen is the profile.
+  function gpSaveIntro(){
+    gpQuietSave();
+    gpBuildPreview();
+    gpShowStep(GP_LAST);
+  }
+
+  // Back goes back one screen. It used to leave the intro entirely and drop somebody on the
+  // group they were joining, which looked like being thrown out halfway through. Doug did that
+  // on 2026-08-31 and could not carry on. It only leaves from the first screen, where there is
+  // nothing behind it.
+  document.getElementById('intro-back').addEventListener('click', function(){
+    if (_gpStep > 0) { gpShowStep(_gpStep - 1); return; }
+    window.location.href = 'https://creating.works/';
+  });
+  // The last screen. Somebody has just answered six questions and has never once seen what any
+  // of it looks like from the outside, which is the only view that matters to anybody else.
+  // YOUR ANSWERS, then What happens next, then Back and Send. Jessie, 2026-09-13: "Then go to showing answers /
+  // And then / What happens next / The person who invited you or someone from Creating.Works will reach out and
+  // look at this together. / Back / Send". Laid out the way the home page's Your answers is: each question in
+  // the order it was asked, the answer under it, and "Not answered yet" where there is none.
+  function gpBuildPreview(){
+    var el = document.getElementById('gp-preview');
+    if (!el) return;
+    var val = function(k){ var t = document.getElementById('gp-intro-' + k); return t ? String(t.value || '').trim() : ''; };
+    var esc = function(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+    var on = function(m){ return Object.keys(m || {}).filter(function(k){ return m[k]; }); };
+    var thanks = GP_THANKS.filter(function(o){ return _gpThanksPicked[o.value]; }).map(function(o){ return o.label; });
+    var row = function(q, a){
+      return '<div style="font-size:14px;font-weight:700;color:#1A2E42;">' + esc(q) + '</div>'
+        + '<div style="font-size:14.5px;margin:2px 0 14px;white-space:pre-wrap;' + (a ? 'color:#4B5A6D;">' + esc(a) : 'color:#6B7A8D;font-style:italic;">Not answered yet') + '</div>';
+    };
+    el.innerHTML =
+        row('Which languages do you speak?', on(_gpLangPicked).join(', '))
+      + row('Where are you?', gpLocString(_gpLoc))
+      + row('What brings you joy?', val('introEnjoy'))
+      + row('What skills do you have?', val('introSkills'))
+      + row('What comes most naturally to you?', on(_gpMethodPicked).join(', '))
+      + row('What do you care about?', val('introValues'))
+      + row('For work, income, or trade what do you have to offer right now?', val('introOffer'))
+      + row('What would work give you?', cwWorkText())
+      + row('How do you like to get appreciated?', thanks.join(', '))
+      + '<div style="background:#F7FBFF;border:1px solid #C9DFF3;border-radius:12px;padding:18px 20px;margin-top:10px;">'
+      + '<div style="font-size:15.5px;font-weight:800;margin-bottom:4px;color:#1A2E42;">What happens next</div>'
+      + '<div style="font-size:14px;color:#4B5A6D;">The person who invited you or someone from Creating.Works will reach out and look at this together.</div></div>';
+  }
+
+  // Next does one of three things: move on, save, or leave. Back never saves, because going
+  // back to look at something should not write anything.
+  // Every move forward writes what is on the screen. Nobody should be able to answer four
+  // questions, close the tab, and find out none of it was kept because they never reached a
+  // button at the end. Quiet on purpose: it takes nothing over and says nothing unless it fails.
+  // Looking as somebody else is looking, never writing. identity.js sets `viewing` and says
+  // every page that writes is expected to check it. This one did not, so pressing Next while
+  // viewing as another member would have written this screen onto their row.
+  function gpViewingSomebodyElse(){
+    try { return !!(window.CW && CW.me && CW.me().viewing); } catch (e) { return false; }
+  }
+
+  // THE SAVE, built in one place for every Next and for Send.
+  function cwWorkOffers(v){
+    // Loaded offers go back exactly as they arrived. One added here carries work before its kind.
+    var orig = _gpOrig.introOffer || {};
+    return String(v || '').split(',').map(function(x){ return x.trim(); }).filter(Boolean).map(function(w){
+      var name = w.split(':')[0].trim().replace(/^[^\p{L}\p{N}]+/u, '').trim().toLowerCase();
+      if (orig[name]) return orig[name];
+      if (/:work(:|$)/i.test(w)) return w;
+      var m = w.match(/^(.*):(skill|thing|space)$/i);
+      return m ? (m[1] + ':work:' + m[2]) : (w + ':work');
+    }).join(', ');
+  }
+  function cwNeedsTags(base){
+    // What would work give you? decides every need ending in ":work". The others go back untouched.
+    var picks = Object.keys(CW_WORK.picked).filter(function(k){ return CW_WORK.picked[k]; }).map(function(k){ return k + ':work'; });
+    var rest = String(base || '').split('|').map(function(x){ return x.trim(); }).filter(Boolean);
+    if (window._gpLoaded) rest = rest.filter(function(x){ return !/:work$/i.test(x); });
+    return rest.concat(picks).join('|');
+  }
+  function cwBuildQs(){
+    var val = function(k){ var el = document.getElementById('gp-intro-' + k); return el ? String(el.value || '').trim() : ''; };
+    var picked = function(map, sep){ return Object.keys(map).filter(function(k){ return map[k]; }).join(sep); };
+    var tagFor = function(k){
+      var el = document.getElementById('gp-intro-' + k);
+      var orig = _gpOrig[k] || {};
+      return String((el && el.value) || '').split(',').map(function(x){ return x.trim(); })
+        .filter(Boolean)
+        // Send back exactly what arrived, level and all, unless it is a word added just now.
+        .map(function(w){ return orig[w.toLowerCase()] || w; })
+        .join('|');
+    };
+    var qs = 'action=saveIntro&appearId=' + encodeURIComponent(meId)
+      + (window._gpLoaded ? '&tagsMode=replace' : '')
+      + '&appreciation=' + encodeURIComponent(picked(_gpThanksPicked, '|'))
+      + '&languages='    + encodeURIComponent(picked(_gpLangPicked, ', '))
+      + '&methods='      + encodeURIComponent(picked(_gpMethodPicked, '|'));
+    GP_INTRO_Q.forEach(function(q){
+      var v = val(q.key);
+      if (q.key === 'introOffer') v = cwWorkOffers(v);
+      qs += '&' + q.key + '=' + encodeURIComponent(v);
+    });
+    qs += '&needsTags='     + encodeURIComponent(cwNeedsTags(tagFor('introNeed')))
+        + '&interestsTags=' + encodeURIComponent(tagFor('introEnjoy'))
+        + '&skillsTags='    + encodeURIComponent(tagFor('introSkills'))
+        + '&valuesTags='    + encodeURIComponent(tagFor('introValues'))
+        + '&location='      + encodeURIComponent(gpLocString(_gpLoc));
+    return qs;
+  }
+  // Saved on every Next, but only when something changed since the last save: one trip to the backend
+  // fewer, and the answers' time only moves when an answer did, which is what Sent is measured against.
+  var _cwLastQs = null, _cwSentQs = null;
+  function cwIsSent(){ return !!window._cwSent && _cwSentQs !== null && cwBuildQs() === _cwSentQs; }
+  function gpQuietSave(){
+    if (CW_MOCKUP) return;
+    if (!GP_BROWSE || !meId) return;
+    if (gpViewingSomebodyElse()) return;
+    var qs = cwBuildQs();
+    if (qs === _cwLastQs) return;
+    _cwLastQs = qs;
+    fetch(GS_URL + '?' + qs).catch(function(){ _cwLastQs = null; });
+  }
+  // SEND. Saves once more and emails the person their answers, with the operators copied. One trip, and
+  // the button says Sending until it answers, then a greyed Sent until an answer changes.
+  function cwSend(btn){
+    var stat = document.getElementById('gp-intro-status');
+    if (gpViewingSomebodyElse()) { if (stat) stat.textContent = 'You are looking as somebody else, so nothing is sent.'; return; }
+    var tk = cwToken();
+    if (!tk) {
+      if (stat) { stat.style.color = '#7A2410'; stat.innerHTML = 'Sending needs you signed in on <a href="https://creating.works/" style="color:#1F699E;font-weight:700;">the home page</a>.'; }
+      return;
+    }
+    var qs = cwBuildQs();
+    window._cwSending = true; gpStepPaint();
+    if (stat) { stat.style.color = '#6B7A8D'; stat.textContent = ''; }
+    fetch(GS_URL + '?' + qs + '&send=1&editToken=' + encodeURIComponent(tk))
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        window._cwSending = false;
+        if (d && (d.status === 'ok' || d.ok === true) && d.sentAt) {
+          window._cwSent = true; _cwSentQs = qs; _cwLastQs = qs;
+          gpStepPaint(); return;
+        }
+        if (stat) { stat.style.color = '#7A2410'; stat.textContent = (d && d.message) || 'Your answers did not send this time and Send tries again.'; }
+        gpStepPaint();
+      })
+      .catch(function(){
+        window._cwSending = false;
+        if (stat) { stat.style.color = '#7A2410'; stat.textContent = 'Your answers did not send this time and Send tries again.'; }
+        gpStepPaint();
+      });
+  }
+
+  document.getElementById('gp-step-next').addEventListener('click', function(){
+    if (_gpStep === GP_LAST) { if (!cwIsSent() && !window._cwSending) cwSend(this); return; }
+    if (_gpStep === GP_LAST) {
+      // Say where it is going while it goes there. The jump is not instant and a button that
+      // stays put reads as a press that did not land. It names the real destination rather than
+      // always saying "your profile", because _next is the group when somebody arrived from one.
+      var _isGroup = /\/group/.test(_next);
+      var _go = _isGroup ? _next : 'https://2gather.network/profile/';
+      this.textContent = _isGroup ? 'Taking you back to the group\u2026' : 'Taking you to your profile\u2026';
+      this.disabled = true;
+      window.location.href = _go;
+      return;
+    }
+    if (_gpStep === GP_LAST - 1) { gpSaveIntro(); return; }
+    if (!gpStepOK(_gpStep)) { gpStepPaint(); return; }
+    gpQuietSave();
+    gpShowStep(_gpStep + 1);
+  });
+  document.getElementById('gp-step-back').addEventListener('click', function(){ gpShowStep(_gpStep - 1); });
+  document.getElementById('gp-step-skip').addEventListener('click', function(){ gpQuietSave(); gpShowStep(_gpStep + 1); });
+  // Show somebody what they already said before asking them to say it again.
+  // saveIntro writes whatever is in a box, blank included, so a page that opens
+  // empty quietly erases the answers of anybody who has been here before. Only
+  // enjoy and skills are required, which is exactly how need and values used to
+  // disappear. Draw the empty form first so a slow or failed lookup never leaves
+  // somebody staring at nothing, then fill it in when their answers arrive.
+  gpRenderIntro(null);
+
+  // ── WHAT WOULD WORK GIVE YOU, ON THE OFFER SCREEN ───────────────────────────────────────────
+  // It was the first screen, then was to follow joy, and Jessie put it on the offer screen instead,
+  // under "For work, income, or trade what do you have to offer right now?" (2026-09-13).
+  // Jessie, 2026-09-13: "Start with What you need page on c works form we have". The home page's own
+  // question, its choices from reference-data.needFor and Anything else, asked before the group form's
+  // screens. The choices and this person's saved answers arrive the way the home page gets them: this
+  // device's copy first, then one read through the gate. Until they are here it says it is looking.
+  var CW_WORK = { choices: null, picked: {}, more: '', touched: false };
+  function cwNorm(x){ return String(x || '').split('.').join('').toLowerCase(); }
+  function cwToken(){
+    try {
+      var o = JSON.parse(localStorage.getItem('cw-edit-' + cwNorm(meId)) || 'null');
+      if (o && o.t && o.exp && Date.now() < o.exp - 60000) return o.t;
+      var t = localStorage.getItem('cw-token') || '';
+      if (t && cwNorm(localStorage.getItem('cw-id')) === cwNorm(meId)) return t;
+    } catch (e) {}
+    return '';
+  }
+  function cwWorkText(){
+    var l = Object.keys(CW_WORK.picked).filter(function(k){ return CW_WORK.picked[k]; });
+    return l.length ? l.join(', ') : '';
+  }
+  function cwPill(n){
+    var on = !!CW_WORK.picked[n];
+    return '<button type="button" data-cw-need="' + _gpEsc(n) + '" style="font:inherit;font-size:13.5px;padding:7px 14px;border-radius:20px;cursor:pointer;'
+      + (on ? 'background:#1F699E;border:1px solid #1F699E;color:#fff;font-weight:700;'
+            : 'background:#fff;border:1px solid #C9DFF3;color:#1F699E;font-weight:600;') + '">' + _gpEsc(n) + '</button>';
+  }
+  function cwPaintWork(state){
+    var box = document.getElementById('cw-work-step'); if (!box) return;
+    var h = '<div style="font-size:17px;font-weight:800;color:#1A2E42;margin-bottom:2px;">What would work give you?</div>'
+      + '<div style="font-size:13.5px;color:#6B7A8D;margin-bottom:12px;">Pick as many as fit or add your own.</div>';
+    if (CW_WORK.choices) {
+      var list = CW_WORK.choices.slice();
+      Object.keys(CW_WORK.picked).forEach(function(n){ if (CW_WORK.picked[n] && list.indexOf(n) < 0) list.push(n); });
+      // + Other instead of an Anything else box. Jessie, 2026-09-13: "Just add other and remove next question".
+      // What somebody adds becomes one more choice, picked.
+      h += '<div style="display:flex;flex-wrap:wrap;gap:7px;">' + list.map(cwPill).join('')
+        + '<button type="button" id="cw-work-other" style="font:inherit;font-size:13.5px;padding:7px 14px;border-radius:20px;cursor:pointer;'
+        + 'background:#EEF1F5;border:1px dashed #C4CDD8;color:#6B7A8D;font-weight:600;">+ Other</button></div>'
+        + '<div id="cw-work-otherbox" style="display:none;margin-top:10px;gap:8px;flex-wrap:wrap;">'
+        + '<input type="text" id="cw-work-otherin" placeholder="In your own words" style="flex:1 1 220px;border:1.5px solid #DDE3EA;'
+        + 'background:#F7FBFF;border-radius:10px;padding:9px 12px;font:inherit;font-size:14px;color:#1A2E42;">'
+        + '<button type="button" id="cw-work-otheradd" style="font:inherit;font-size:13.5px;font-weight:700;padding:8px 16px;'
+        + 'border-radius:20px;border:0;background:#1F699E;color:#fff;cursor:pointer;">Add</button></div>';
+    } else if (state === 'signin') {
+      h += '<div style="font-size:14px;color:#4B5A6D;margin-bottom:24px;">The choices show once you are signed in on '
+        + '<a href="https://creating.works/" style="color:#1F699E;font-weight:700;">the home page</a>.</div>';
+    } else if (state === 'failed') {
+      h += '<div style="font-size:14px;color:#7A2410;margin-bottom:24px;">The choices did not load and a reload looks again.</div>';
+    } else {
+      h += '<div style="margin-bottom:24px;"><span style="display:inline-flex;background:#1F699E;color:#fff;font-size:13px;font-weight:700;'
+        + 'padding:8px 16px;border-radius:20px;">Loading the choices</span></div>';
+    }
+    box.innerHTML = h;
+    var ob = document.getElementById('cw-work-other');
+    if (ob) ob.onclick = function(){
+      var bx = document.getElementById('cw-work-otherbox');
+      bx.style.display = bx.style.display === 'none' ? 'flex' : 'none';
+      if (bx.style.display === 'flex') { try { document.getElementById('cw-work-otherin').focus(); } catch (e) {} }
+    };
+    var addOther = function(){
+      var inp = document.getElementById('cw-work-otherin'); if (!inp) return;
+      var v = String(inp.value || '').trim(); if (!v) return;
+      var known = (CW_WORK.choices || []).concat(Object.keys(CW_WORK.picked)).filter(function(k){ return k.toLowerCase() === v.toLowerCase(); })[0];
+      CW_WORK.picked[known || v] = true; CW_WORK.touched = true;
+      cwPaintWork();
+    };
+    var oa = document.getElementById('cw-work-otheradd'); if (oa) oa.onclick = addOther;
+    var oi = document.getElementById('cw-work-otherin');
+    if (oi) oi.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); addOther(); } });
+    box.querySelectorAll('[data-cw-need]').forEach(function(b){
+      b.onclick = function(){
+        var n = b.getAttribute('data-cw-need');
+        CW_WORK.picked[n] = !CW_WORK.picked[n]; CW_WORK.touched = true;
+        cwPaintWork();
+      };
+    });
+  }
+  function cwLoadWork(){
+    try {
+      var d = JSON.parse(localStorage.getItem('cw-inquiry-draft-' + cwNorm(meId)) || 'null');
+      if (d && Array.isArray(d.choices) && d.choices.length) {
+        CW_WORK.choices = d.choices.slice();
+        (Array.isArray(d.needFor) ? d.needFor : []).forEach(function(n){ CW_WORK.picked[n] = true; });
+        CW_WORK.more = String(d.needMore || '');
+      }
+    } catch (e) {}
+    cwPaintWork();
+    var tk = cwToken();
+    if (!tk || !meId) { if (!CW_WORK.choices) cwPaintWork('signin'); return; }
+    fetch(GS_URL + '?action=getInquiry&appearId=' + encodeURIComponent(meId) + '&editToken=' + encodeURIComponent(tk) + '&path=all')
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if (d && d.code === 'signin') { if (!CW_WORK.choices) cwPaintWork('signin'); return; }
+        if (!d || d.status !== 'ok') { if (!CW_WORK.choices) cwPaintWork('failed'); return; }
+        if (Array.isArray(d.needChoices) && d.needChoices.length) CW_WORK.choices = d.needChoices.slice();
+        var w = d.paths && d.paths.work;
+        if (w && w.found && w.data && !CW_WORK.touched && !CW_WORK.fromIkigai) {
+          CW_WORK.picked = {};
+          String(w.data.needFor || '').split('|').map(function(x){ return x.trim(); }).filter(Boolean)
+            .forEach(function(n){ CW_WORK.picked[n] = true; });
+          CW_WORK.more = String(w.data.needMore || '');
+        }
+        if (!CW_WORK.touched) cwPaintWork(); else if (!document.querySelector('[data-cw-need]')) cwPaintWork();
+      })
+      .catch(function(){ if (!CW_WORK.choices) cwPaintWork('failed'); });
+  }
+  cwLoadWork();
+  // Most people answered these long before the intro* columns existed, and their words
+  // sit one column away under the older names. Asking somebody to type out again what
+  // we already hold is how a form earns a reputation for not listening, so fall back to
+  // the older field wherever the newer one is empty.
+  var GP_OLDER = {
+    introNeed:   'needs',
+    introEnjoy:  'interests',
+    introSkills: 'skills',
+    introValues: 'values',
+    introOffer:  'offers'
+  };
+
+  if (meId) {
+    fetch(GS_URL + '?action=getIntake&appearId=' + encodeURIComponent(meId))
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        var have = (d && d.data) || {};
+        var use = {}, any = false;
+        GP_INTRO_Q.forEach(function(q){
+          // The real column holds tags, not sentences: items split by | and each one
+          // carrying its type and level after a colon, as in "Ping Pong:Participant".
+          // Shown raw that reads as gibberish, so keep the names only. An older picker also
+          // stored the emoji with the word, and the picture was always decoration.
+          var clean = function(part){
+            var name = String(part).split(':')[0].trim();
+            return name.replace(/^[^\p{L}\p{N}]+/u, '').trim();
+          };
+          // Both, not one or the other. This used to fall back to the real column only when the
+          // intro's own field was empty, so a single word typed here hid a list somebody had
+          // spent months building. Nobody loses what they already said.
+          var seenW = {}, all = [];
+          _gpOrig[q.key] = _gpOrig[q.key] || {};
+          // Each list has its own separator and only its own. The real column is pipe
+          // separated and a single item may hold commas of its own, as "Kayaking:Fan,Participant"
+          // does. Splitting it on commas too tore that in half and invented a person who enjoys
+          // "Participant".
+          [[String(have[GP_OLDER[q.key]] || ''), '|'],
+           [String(have[q.key] || ''), ',']].forEach(function(pair){
+            pair[0].split(pair[1]).forEach(function(part){
+              var w = clean(part);
+              if (!w) return;
+              var kw = w.toLowerCase();
+              // Remember the fullest version seen, so a level or a category survives the trip.
+              var raw = String(part).trim();
+              if (raw && (!_gpOrig[q.key][kw] || raw.length > _gpOrig[q.key][kw].length)) {
+                _gpOrig[q.key][kw] = raw;
+              }
+              if (seenW[kw]) return;
+              seenW[kw] = 1; all.push(w);
+            });
+          });
+          var v = all.join(', ');
+          if (v) { use[q.key] = v; any = true; }
+        });
+        // Anything already chosen shows as chosen, so nobody picks their own languages twice.
+        String(have.languages || '').split(/[|,]/).forEach(function(l){
+          var v = String(l).trim(); if (v) { _gpLangPicked[v] = true; any = true; }
+        });
+        String(have.methods || '').split('|').forEach(function(m){
+          var v = String(m).trim(); if (v) { _gpMethodPicked[v] = true; any = true; }
+        });
+        GP_INTRO_Q.forEach(function(q){
+          var el = document.getElementById('gp-intro-' + q.key);
+          var typed = el ? String(el.value || '').trim() : '';
+          if (typed) { use[q.key] = typed; any = true; }
+        });
+        gpLocFrom(have.location);
+        if (gpLocString(_gpLoc)) any = true;
+        window._gpLoaded = true;
+        // Work needs already saved from here are the truth once there are any; before that, the home page's
+        // Finding work picks (read in cwLoadWork) stand in and are saved as work needs on the first Next.
+        var _workSaved = String(have.needs || '').split('|').map(function(x){ return x.trim(); })
+          .filter(function(x){ return /:work$/i.test(x); }).map(function(x){ return x.replace(/:work$/i, ''); });
+        if (_workSaved.length && !CW_WORK.touched) {
+          CW_WORK.picked = {}; _workSaved.forEach(function(n){ CW_WORK.picked[n] = true; });
+          CW_WORK.fromIkigai = true;
+        }
+        // Sent, if the answers have not moved since they were sent.
+        var _sentT = Date.parse(String(have.introSentDate || '')), _savedT = Date.parse(String(have.timestamp || ''));
+        window._cwSentLoaded = !isNaN(_sentT) && (isNaN(_savedT) || _savedT <= _sentT + 5000);
+        if (any) { gpRenderIntro(use); }
+        if (CW_WORK.fromIkigai) cwPaintWork();
+        // What is on screen is what is saved, unless the home page's work picks still have to be written here.
+        var _homePicks = !CW_WORK.fromIkigai && Object.keys(CW_WORK.picked).some(function(k){ return CW_WORK.picked[k]; });
+        _cwLastQs = _homePicks ? null : cwBuildQs();
+        if (window._cwSentLoaded) { window._cwSent = true; _cwSentQs = cwBuildQs(); }
+      })
+      .catch(function(){});
+  }
+</script>
+</body>
+<!--
+  Copyright 2026 DayBalancer LLC. All rights reserved.
+
+  The code and the content here power Creating.Works, DayBalancer, Appear Network,
+  and 2Gather. They are published so they can be read, audited, and dated.
+
+  Running either as a separate offering requires a license, whether you brand it as
+  ours or as your own, and whether or not money changes hands.
+
+  hello@creating.works
+-->
+</html>

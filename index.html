@@ -10,7 +10,8 @@
 
   hello@creating.works
 -->
-<!-- Version: V1.23 | Date: 2026-09-13 | LAST CHANGE: Who is asking? reads "Are you working for yourself or are you representing a team within an organization?" under it. Jessie named the change. -->
+<!-- Version: V1.24 | Date: 2026-09-13 | LAST CHANGE: Finding work opens the one-question-at-a-time form at /work/, straight away when signed in and right after signing in otherwise. Jessie: "Yea it works publish". -->
+<!-- Previous: V1.23 | Date: 2026-09-13 | LAST CHANGE: Who is asking? reads "Are you working for yourself or are you representing a team within an organization?" under it. Jessie named the change. -->
 <!-- Previous: V1.22 | Date: 2026-09-13 | LAST CHANGE: Building something's What happens next drops "For each constituency we ask what they need and want, what they give, and what circulates back." Jessie named the change. -->
 <!-- Previous: V1.21 | Date: 2026-09-12 | LAST CHANGE: the first screen says what each choice covers in a gray line beside it, and the line above starts "Each one asks its own questions." Jessie: "Yes publish this part - without the third set". -->
 <!-- Previous: V1.20 | Date: 2026-09-12 | LAST CHANGE: once the answers are sent, Your answers invites people on to their 2Gather profile and to the calendar (Finding work) or starting a group (Building something), each with Yes and Not now. Jessie: "go", in her words, and "go" to the line under the profile one. -->
@@ -333,7 +334,7 @@
         +'</div>'
         +(signed()?'<p class="quiet" id="who-line">'+whoLine()+'</p>':'');
       p.querySelectorAll('[data-path]').forEach(function(b){
-        b.onclick=function(){ A.path=b.getAttribute('data-path'); keep(); show(firstPart()); };
+        b.onclick=function(){ A.path=b.getAttribute('data-path'); keep(); if(A.path==='work' && signed()){ toNewWork(); return; } show(firstPart()); };
       });
       if(signed() && !knownName()) waitForName();
       bindSignOut();
@@ -1034,6 +1035,7 @@
     try{ if(window.CW_REDRAW_BAR) window.CW_REDRAW_BAR(); }catch(e){}
     loadDraft(); keep();
     auth={mode:'',step:1,email:'',first:'',last:''};
+    if(A.path==='work'){ toNewWork(); return; }
     show(current&&isForm(current)&&current!=='signin'?current:firstPart());
   }
   // WHO IS SIGNED IN. Jessie, 2026-09-10: "say who it is maybe?", then "5a". The name comes from
@@ -1126,6 +1128,11 @@
     // /answers. Somebody arriving at one of these is sent here by 404.html, which only knows the
     // home page, and this puts the clean address back.
   }
+  // FINDING WORK IS THE ONE-QUESTION-AT-A-TIME FORM NOW. Jessie, 2026-09-13: "Yea it works publish". It lives at
+  // https://creating.works/work/ (content/work/index.html). This page still signs people in, and then hands them
+  // there; an old /work/bring link does the same. The Finding work parts below stay in the file, unreached, as
+  // the frozen form Jessie asked to bring questions back from (design/frozen/creatingworks-home-2026-09-13-form-frozen.html).
+  function toNewWork(replace){ try{ if(replace) location.replace('/work/'); else location.href='/work/'; }catch(e){} }
   function lockForViewing(){
     var p=document.getElementById('panel');
     p.querySelectorAll('textarea,input').forEach(function(el){ el.readOnly=true; el.disabled=true; });
@@ -1158,6 +1165,7 @@
   var _navQuiet=true;
   window.addEventListener('popstate',function(){
     var r=readRoute();
+    if(r.path==='work' && signed()){ toNewWork(true); return; }
     if(PATHS[r.path]) A.path=r.path;
     var k=r.part || (r.path ? firstPart() : 'start');
     if(k==='signin' && signed()) k='start';
@@ -1172,6 +1180,7 @@
   // /work opens Finding work straight away, and /work/need a part of it.
   var route=readRoute();
   var askPath=route.path; if(PATHS[askPath]){ A.path=askPath; keep(); }
+  if(askPath==='work' && signed()){ toNewWork(true); return; }
   var start=route.part;
   if(parts().some(function(s){ return s.key===start; })) show(start);
   else show(A.path && askPath ? PATHS[A.path][0].key : 'start');
