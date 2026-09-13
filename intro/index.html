@@ -3,7 +3,8 @@
   Copyright 2026 DayBalancer LLC. All rights reserved.
   hello@creating.works
 -->
-<!-- Version: V0.1 | Date: 2026-09-13 | LAST CHANGE: A MOCKUP on creating.works. A copy of 2gather.network/intro/ (V1.46) with the home page's
+<!-- Version: V0.2 | Date: 2026-09-13 | LAST CHANGE: no mockup note, no group members line, no photo, and the needs-and-offers screen asks only "For work, income, or trade what do you have to offer right now?". Jessie named each change. -->
+<!-- Previous: V0.1 | Date: 2026-09-13 | LAST CHANGE: A MOCKUP on creating.works. A copy of 2gather.network/intro/ (V1.46) with the home page's
      "What would work give you?" as its first screen. Nothing on it saves. Jessie, 2026-09-13: "Make mockup live link / Give me an exact
      duplicate of the other form but on creating works / Can you Start with What you need page on c works form we have". -->
 <html lang="en">
@@ -36,11 +37,7 @@
   <a class="crumb" id="intro-back" role="link" tabindex="0">&lsaquo; Back</a>
   <div class="card">
     <div style="font-size:22px;font-weight:800;color:#1A2E42;margin:0 0 6px;" id="gp-intro-title">Before you go in</div>
-    <p id="gp-intro-lede" style="font-size:14.5px;color:#6B7A8D;margin:0 0 22px;line-height:1.55;">
-      Your answers below help others get to know you and will generate matches to the right people
-      over time. Answer what you like now and add the rest whenever.</p>
-    <!-- A MOCKUP. Said at the top of the card, where a page's messages go. -->
-    <div id="cw-mock-note" style="background:#F7FBFF;border:1px solid #C9DFF3;border-radius:10px;padding:10px 14px;font-size:13.5px;color:#4B5A6D;margin:0 0 18px;">This is a mockup and nothing on this page saves.</div>
+    <p id="gp-intro-lede" style="display:none;font-size:14.5px;color:#6B7A8D;margin:0 0 22px;line-height:1.55;"></p>
     <div id="cw-work-step" style="display:none;"></div>
     <div id="gp-intro-qs"></div>
     <div style="display:flex;gap:12px;align-items:center;margin-top:22px;padding-top:18px;border-top:1px solid #f0f1f5;flex-wrap:wrap;">
@@ -58,6 +55,10 @@
   var GS_URL = 'https://cw-api-gate.jessieupp.workers.dev';
   // A MOCKUP: nothing is sent anywhere that writes. Reads still happen, so it shows real answers.
   var CW_MOCKUP = true;
+  // WHEN THIS SAVES. Jessie, 2026-09-13: "Append the answeres here to work:skill and so forth / We will ask
+  // them later to tag each for in come trade etc". An offer is stored as "massage therapy:skill" today, and
+  // from this page it is to carry work before its kind, as "massage therapy:work:skill", ":work:thing" and
+  // ":work:space". Built with the saving, once Jessie has approved it.
 
 // Your own record is never served from cache. Added 2026-08-31, after a profile showed the
 // answers from before a save for up to six hours. The gate caches getIntake, getProfile,
@@ -142,7 +143,7 @@
     { key:'introValues', need:false, q:'What do you care about?',
       hint:'What matters to you, and what you want more of in the world. Leave it blank if you would rather not say.',
       ph:'Housing, food security, keeping the lake swimmable…' },
-    { key:'introOffer',  need:false, q:'Do you have something you want to offer right now?',
+    { key:'introOffer',  need:false, q:'For work, income, or trade what do you have to offer right now?',
       ph:'A spare room for the month of September, a truck for moving stuff, a meeting space to meet each week, and gardening tools.' }
   ];
   // Shown to a person, stored as the category that already exists on the giving page.
@@ -651,7 +652,7 @@
   // Where the card heading already asks the question, the second copy comes off. Needs and
   // haves keeps its headings, because two questions share that screen and they have to be
   // told apart.
-  var GP_BARE_HEAD = { introEnjoy:1, introSkills:1, introValues:1 };
+  var GP_BARE_HEAD = { introEnjoy:1, introSkills:1, introValues:1, introOffer:1 };
   function gpBareKey(key){ return GP_BROWSE && !!GP_BARE_KEYS[key]; }
 
   // The appreciation question appears once somebody has said what their skills are, and goes
@@ -1392,7 +1393,9 @@
       ? 'What skills do you have?'
       : 'What skills do you have?',
     'What do you care about?',
-    'Anything you need, or have to offer?'
+    // Jessie, 2026-09-13: "Remove Anything you need, or have to offer?" and "What do you need?", and the
+    // offer question reads as she wrote it. It is the heading, so it is not asked a second time below.
+    'For work, income, or trade what do you have to offer right now?'
   ].concat((typeof GP_BROWSE !== 'undefined' && GP_BROWSE)
     // How do you like to be thanked has moved, so it is not a screen here any more and the
     // profile is what comes after the last question.
@@ -1439,7 +1442,6 @@
   }
   function gpStepMissing(){
     var out = [];
-    if (!(window._gpPhotoUp || document.querySelector('#gp-photo-face img'))) out.push('a photo');
     if (!Object.keys(_gpLangPicked || {}).some(function(k){ return _gpLangPicked[k]; })) out.push('a language');
     if (!gpLocString(_gpLoc)) out.push('where you are');
     return out;
@@ -1487,7 +1489,7 @@
     if (note) {
       var miss = (_gpStep === 0) ? gpStepMissing() : [];
       // Do not list a photo as missing before we have looked for one.
-      if (GP_BROWSE && _gpStep === 0 && !window._gpPhotoKnown && !window._gpPhotoUp) {
+      if (false) {
         miss = miss.filter(function(m){ return m !== 'a photo'; });
         miss.unshift('looking for your photo');
       }
@@ -1515,8 +1517,8 @@
       // whole of it, and the only thing worth adding is on the two nobody has to answer.
       var lede = document.getElementById('gp-intro-lede');
       if (lede) {
-        if (_gpStep === 0) { lede.style.display = ''; lede.innerHTML = GP_LEDE_BASE; }
-        else { lede.style.display = 'none'; lede.innerHTML = ''; }
+        // Jessie, 2026-09-13: the group members line is removed here, on every screen.
+        lede.style.display = 'none'; lede.innerHTML = '';
       }
     }
   }
@@ -1561,7 +1563,7 @@
     // Somebody arriving here is on their way into a group, so the reason is the group. The
     // "answer what you like" line is not said here, because it is only true of the optional
     // questions and gpStepPaint adds it on those screens.
-    if (_l0 && GP_BROWSE) _l0.innerHTML = GP_LEDE_BASE;
+    if (_l0 && GP_BROWSE) _l0.innerHTML = '';
     else if (_l0) _l0.innerHTML = window._gpAlreadyIn
       ? 'Nothing changes about your place here. These answers are what let people find you and '
         + 'what puts the right people in front of you, and we never asked for them. Answer what '
@@ -1573,7 +1575,7 @@
     // Step 0. The photo, and the promise that goes with asking for it.
     var _s0 = document.createElement('div');
     _s0.setAttribute('data-gp-step', '0');
-    _s0.appendChild(gpPhotoBlock());
+    // Jessie, 2026-09-13: the photo is removed from this copy.
     var _pn = document.createElement('div');
     _pn.style.cssText = 'font-size:13px;color:#6B7A8D;margin:-6px 0 0;max-width:60ch;line-height:1.5;';
     _pn.textContent = 'Your photo is only shown inside groups you join or start. It is not on the open web '
@@ -1584,7 +1586,8 @@
     box.appendChild(_s0);
     GP_INTRO_Q.forEach(function(q, i){
       var wrap = document.createElement('div');
-      wrap.style.cssText = 'padding:18px 0;' + (i ? 'border-top:1px solid #f0f1f5;' : 'padding-top:0;');
+      // The offer is first on its screen now that What do you need? is not asked, so no line above it.
+      wrap.style.cssText = 'padding:18px 0;' + ((i && q.key !== 'introOffer') ? 'border-top:1px solid #f0f1f5;' : 'padding-top:0;');
       var t = document.createElement('div');
       t.style.cssText = 'font-size:17px;font-weight:800;color:#1A2E42;margin-bottom:2px;';
       t.textContent = q.q;
@@ -1637,7 +1640,8 @@
       if (chipRow) wrap.appendChild(chipRow);
       // Enjoy, skills, values each get a screen. Needs and haves share the last question screen,
       // because they are two halves of one thought and neither is required.
-      var _map = { introEnjoy:'1', introSkills:'2', introValues:'3', introNeed:'4', introOffer:'4' };
+      // What do you need? is not asked in this copy: the work screen asked it first. 'off' is never a step.
+      var _map = { introEnjoy:'1', introSkills:'2', introValues:'3', introNeed:'off', introOffer:'4' };
       wrap.setAttribute('data-gp-step', _map[q.key] || '4');
       box.appendChild(wrap);
       if (q.key === 'introSkills') {
@@ -1710,7 +1714,6 @@
   function gpSaveIntro(){
     var stat = document.getElementById('gp-intro-status');
     if (CW_MOCKUP) {
-      if (stat) { stat.style.color = '#6B7A8D'; stat.textContent = 'This is a mockup, so nothing is saved.'; }
       gpBuildPreview();
       gpShowStep(GP_LAST);
       return;
@@ -1817,7 +1820,7 @@
       + '<div style="display:flex;align-items:center;gap:16px;">'
       + (photo
           ? '<img src="' + photo + '" alt="" style="width:76px;height:76px;border-radius:50%;object-fit:cover;border:1.5px solid #DDE3EA;">'
-          : '<div style="width:76px;height:76px;border-radius:50%;background:#EDF3F9;border:1.5px solid #DDE3EA;"></div>')
+          : '')
       + '<div><div style="font-size:22px;font-weight:800;color:#1A2E42;">' + esc(who || 'You') + '</div>'
       + (gpLocString(_gpLoc) ? '<div style="font-size:14px;color:#6B7A8D;">' + esc(gpLocString(_gpLoc)) + '</div>' : '')
       + '</div></div>'
