@@ -3,7 +3,8 @@
   Copyright 2026 DayBalancer LLC. All rights reserved.
   hello@creating.works
 -->
-<!-- Version: V1.6 | Date: 2026-09-13 | LAST CHANGE: "What would work give you?" reads "What outcomes would you like work to give you?". Jessie named the change. -->
+<!-- Version: V1.7 | Date: 2026-09-13 | LAST CHANGE: Which types of non-paid work? has + Other, which adds somebody's own as a picked choice. Jessie: "Make a chip for other like we normally do". -->
+<!-- Previous: V1.6 | Date: 2026-09-13 | LAST CHANGE: "What would work give you?" reads "What outcomes would you like work to give you?". Jessie named the change. -->
 <!-- Previous: V1.5 | Date: 2026-09-13 | LAST CHANGE: non-paid work asks Full-time, Part-time or One-time first, then "Which types of non-paid work?". Jessie: "Also ask What type of non-paid work are you open to? Full-time, Part-time, one-time Before which types of". -->
 <!-- Previous: V1.4 | Date: 2026-09-13 | LAST CHANGE: a screen for what paid and non-paid work somebody is open to, before appreciation. Jessie: "bring back What type of paid work are you open to? ... What type of non-paid work are you open to?". -->
 <!-- Previous: V1.3 | Date: 2026-09-13 | LAST CHANGE: screen 5 shows everything somebody offers, their skills (ikigai.skills) and their things and spaces (ikigai.haves, My haves on the 2Gather profile), and adds to those same lists. Jessie: "1A also should be writing to same fields as gather form". -->
@@ -2113,10 +2114,25 @@
       + pills('unpaidTime', rd.paidWorkTypes || [])
       + '<div style="font-size:17px;font-weight:800;color:#1A2E42;margin:26px 0 2px;">Which types of non-paid work?</div>'
       + '<div style="font-size:13.5px;color:#6B7A8D;margin-bottom:12px;">Pick as many as fit.</div>'
-      + pills('unpaid', rd.unpaidWorkTypes || []);
+      + pills('unpaid', rd.unpaidWorkTypes || [])
+      // + OTHER, the way the other pickers have it. Jessie, 2026-09-13: "Make a chip for other like we normally do".
+      + '<div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:7px;"><button type="button" id="cw-otw-other" style="font:inherit;font-size:13.5px;padding:7px 14px;border-radius:20px;cursor:pointer;'
+      + 'background:#EEF1F5;border:1px dashed #C4CDD8;color:#6B7A8D;font-weight:600;">+ Other</button></div>'
+      + '<div id="cw-otw-otherbox" style="display:none;margin-top:10px;gap:8px;flex-wrap:wrap;">'
+      + '<input type="text" id="cw-otw-otherin" placeholder="In your own words" style="flex:1 1 220px;border:1.5px solid #DDE3EA;background:#F7FBFF;border-radius:10px;padding:9px 12px;font:inherit;font-size:14px;color:#1A2E42;">'
+      + '<button type="button" id="cw-otw-otheradd" style="font:inherit;font-size:13.5px;font-weight:700;padding:8px 16px;border-radius:20px;border:0;background:#1F699E;color:#fff;cursor:pointer;">Add</button></div>';
     box.querySelectorAll('[data-cw-otw]').forEach(function(b){
       b.onclick = function(){ var side = b.getAttribute('data-cw-otw'), v = b.getAttribute('data-v'); CW_OTW[side][v] = !CW_OTW[side][v]; cwPaintOtw(); };
     });
+    var ob = document.getElementById('cw-otw-other'), obx = document.getElementById('cw-otw-otherbox'), oin = document.getElementById('cw-otw-otherin');
+    if (ob) ob.onclick = function(){ obx.style.display = obx.style.display === 'none' ? 'flex' : 'none'; if (obx.style.display === 'flex') { try { oin.focus(); } catch (e) {} } };
+    var addOther = function(){
+      var v = String((oin && oin.value) || '').trim(); if (!v) return;
+      var known = (rd.unpaidWorkTypes || []).concat(Object.keys(CW_OTW.unpaid)).filter(function(k){ return k.toLowerCase() === v.toLowerCase(); })[0];
+      CW_OTW.unpaid[known || v] = true; cwPaintOtw();
+    };
+    var oa = document.getElementById('cw-otw-otheradd'); if (oa) oa.onclick = addOther;
+    if (oin) oin.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); addOther(); } });
   }
 
   function cwLoadWork(){
