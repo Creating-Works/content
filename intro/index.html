@@ -3,7 +3,8 @@
   Copyright 2026 DayBalancer LLC. All rights reserved.
   hello@creating.works
 -->
-<!-- Version: V0.2 | Date: 2026-09-13 | LAST CHANGE: no mockup note, no group members line, no photo, and the needs-and-offers screen asks only "For work, income, or trade what do you have to offer right now?". Jessie named each change. -->
+<!-- Version: V0.3 | Date: 2026-09-13 | LAST CHANGE: What would work give you? moves onto the offer screen, under "For work, income, or trade what do you have to offer right now?", and is no longer a screen of its own. Jessie: "Stop put this on this screen instead". -->
+<!-- Previous: V0.2 | Date: 2026-09-13 | LAST CHANGE: no mockup note, no group members line, no photo, and the needs-and-offers screen asks only "For work, income, or trade what do you have to offer right now?". Jessie named each change. -->
 <!-- Previous: V0.1 | Date: 2026-09-13 | LAST CHANGE: A MOCKUP on creating.works. A copy of 2gather.network/intro/ (V1.46) with the home page's
      "What would work give you?" as its first screen. Nothing on it saves. Jessie, 2026-09-13: "Make mockup live link / Give me an exact
      duplicate of the other form but on creating works / Can you Start with What you need page on c works form we have". -->
@@ -38,7 +39,6 @@
   <div class="card">
     <div style="font-size:22px;font-weight:800;color:#1A2E42;margin:0 0 6px;" id="gp-intro-title">Before you go in</div>
     <p id="gp-intro-lede" style="display:none;font-size:14.5px;color:#6B7A8D;margin:0 0 22px;line-height:1.55;"></p>
-    <div id="cw-work-step" style="display:none;"></div>
     <div id="gp-intro-qs"></div>
     <div style="display:flex;gap:12px;align-items:center;margin-top:22px;padding-top:18px;border-top:1px solid #f0f1f5;flex-wrap:wrap;">
       <button type="button" id="gp-step-back" style="display:none;font:inherit;font-size:14px;font-weight:700;padding:10px 18px;border-radius:24px;border:1.5px solid #C9DFF3;background:#fff;color:#1F699E;cursor:pointer;">Back</button>
@@ -1455,22 +1455,11 @@
     var title = document.getElementById('gp-intro-title');
     // Coming back to the first screen used to leave the last question's heading up there, so
     // the photo screen introduced itself as whatever somebody had just answered.
-    // THE WORK SCREEN, while it is up (see WHAT WOULD WORK GIVE YOU below).
-    if (_cwPre) {
-      if (title) title.textContent = 'What would work give you?';
-      if (count) count.textContent = '1 of ' + (GP_LAST + 1);
-      if (back) back.style.display = 'none';
-      var _sk = document.getElementById('gp-step-skip'); if (_sk) _sk.style.display = 'none';
-      if (note) note.textContent = '';
-      if (next) { next.textContent = 'Next'; next.disabled = false; next.style.opacity = '1'; next.style.cursor = 'pointer'; }
-      var _ld = document.getElementById('gp-intro-lede'); if (_ld) _ld.style.display = 'none';
-      return;
-    }
     if (title) title.textContent = (_gpStep > 0)
       ? GP_STEP_TITLES[_gpStep]
       : (window._gpWelcome || GP_STEP_TITLES[0]);
-    if (count) count.textContent = (_gpStep < GP_LAST) ? ((_gpStep + 2) + ' of ' + (GP_LAST + 1)) : '';
-    if (back) back.style.display = '';   // the work screen sits behind the first one
+    if (count) count.textContent = (_gpStep < GP_LAST) ? ((_gpStep + 1) + ' of ' + GP_LAST) : '';
+    if (back) back.style.display = _gpStep === 0 ? 'none' : '';
     var skip = document.getElementById('gp-step-skip');
     // Skipping needs and haves is a choice somebody makes, not a thing they miss, so it is a
     // control on the screen rather than an absence of one.
@@ -1644,6 +1633,16 @@
       var _map = { introEnjoy:'1', introSkills:'2', introValues:'3', introNeed:'off', introOffer:'4' };
       wrap.setAttribute('data-gp-step', _map[q.key] || '4');
       box.appendChild(wrap);
+      // WHAT WOULD WORK GIVE YOU sits on the offer screen, under the offer question. Jessie, 2026-09-13:
+      // "Stop put this on this screen instead For work, income, or trade what do you have to offer right now?"
+      if (q.key === 'introOffer') {
+        var _cw = document.createElement('div');
+        _cw.id = 'cw-work-step';
+        _cw.setAttribute('data-gp-step', '4');
+        _cw.style.cssText = 'padding:18px 0 0;';
+        box.appendChild(_cw);
+        if (typeof CW_WORK !== 'undefined' && CW_WORK) cwPaintWork();
+      }
       if (q.key === 'introSkills') {
         // What comes most naturally to you sits with the skills, which is what it is about.
         var _m = gpMethodsBlock();
@@ -1790,9 +1789,8 @@
   // on 2026-08-31 and could not carry on. It only leaves from the first screen, where there is
   // nothing behind it.
   document.getElementById('intro-back').addEventListener('click', function(){
-    if (_cwPre) { window.location.href = 'https://creating.works/'; return; }
     if (_gpStep > 0) { gpShowStep(_gpStep - 1); return; }
-    cwEnterPre();
+    window.location.href = 'https://creating.works/';
   });
   // The last screen. Somebody has just answered six questions and has never once seen what any
   // of it looks like from the outside, which is the only view that matters to anybody else.
@@ -1885,7 +1883,6 @@
   }
 
   document.getElementById('gp-step-next').addEventListener('click', function(){
-    if (_cwPre) { cwLeavePre(); return; }
     if (_gpStep === GP_LAST) {
       // Say where it is going while it goes there. The jump is not instant and a button that
       // stays put reads as a press that did not land. It names the real destination rather than
@@ -1902,7 +1899,7 @@
     gpQuietSave();
     gpShowStep(_gpStep + 1);
   });
-  document.getElementById('gp-step-back').addEventListener('click', function(){ if (_gpStep === 0) { cwEnterPre(); return; } gpShowStep(_gpStep - 1); });
+  document.getElementById('gp-step-back').addEventListener('click', function(){ gpShowStep(_gpStep - 1); });
   document.getElementById('gp-step-skip').addEventListener('click', function(){ gpQuietSave(); gpShowStep(_gpStep + 1); });
   // Show somebody what they already said before asking them to say it again.
   // saveIntro writes whatever is in a box, blank included, so a page that opens
@@ -1912,12 +1909,13 @@
   // somebody staring at nothing, then fill it in when their answers arrive.
   gpRenderIntro(null);
 
-  // ── WHAT WOULD WORK GIVE YOU, FIRST ─────────────────────────────────────────────────────────
+  // ── WHAT WOULD WORK GIVE YOU, ON THE OFFER SCREEN ───────────────────────────────────────────
+  // It was the first screen, then was to follow joy, and Jessie put it on the offer screen instead,
+  // under "For work, income, or trade what do you have to offer right now?" (2026-09-13).
   // Jessie, 2026-09-13: "Start with What you need page on c works form we have". The home page's own
   // question, its choices from reference-data.needFor and Anything else, asked before the group form's
   // screens. The choices and this person's saved answers arrive the way the home page gets them: this
   // device's copy first, then one read through the gate. Until they are here it says it is looking.
-  var _cwPre = false;
   var CW_WORK = { choices: null, picked: {}, more: '', touched: false };
   function cwNorm(x){ return String(x || '').split('.').join('').toLowerCase(); }
   function cwToken(){
@@ -1942,7 +1940,8 @@
   }
   function cwPaintWork(state){
     var box = document.getElementById('cw-work-step'); if (!box) return;
-    var h = '<div style="font-size:13.5px;color:#6B7A8D;margin-bottom:12px;">Pick as many as fit and add your own below.</div>';
+    var h = '<div style="font-size:17px;font-weight:800;color:#1A2E42;margin-bottom:2px;">What would work give you?</div>'
+      + '<div style="font-size:13.5px;color:#6B7A8D;margin-bottom:12px;">Pick as many as fit and add your own below.</div>';
     if (CW_WORK.choices) {
       var list = CW_WORK.choices.slice();
       Object.keys(CW_WORK.picked).forEach(function(n){ if (CW_WORK.picked[n] && list.indexOf(n) < 0) list.push(n); });
@@ -2002,22 +2001,7 @@
       })
       .catch(function(){ if (!CW_WORK.choices) cwPaintWork('failed'); });
   }
-  function cwEnterPre(){
-    _cwPre = true;
-    document.getElementById('cw-work-step').style.display = '';
-    document.getElementById('gp-intro-qs').style.display = 'none';
-    var st = document.getElementById('gp-intro-status'); if (st) st.textContent = '';
-    gpStepPaint();
-    try { window.scrollTo(0, 0); } catch (e) {}
-  }
-  function cwLeavePre(){
-    _cwPre = false;
-    document.getElementById('cw-work-step').style.display = 'none';
-    document.getElementById('gp-intro-qs').style.display = '';
-    gpShowStep(0);
-  }
   cwLoadWork();
-  cwEnterPre();
   // Most people answered these long before the intro* columns existed, and their words
   // sit one column away under the older names. Asking somebody to type out again what
   // we already hold is how a form earns a reputation for not listening, so fall back to
