@@ -3,7 +3,8 @@
   Copyright 2026 DayBalancer LLC. All rights reserved.
   hello@creating.works
 -->
-<!-- Version: V1.3 | Date: 2026-09-13 | LAST CHANGE: screen 5 shows everything somebody offers, their skills (ikigai.skills) and their things and spaces (ikigai.haves, My haves on the 2Gather profile), and adds to those same lists. Jessie: "1A also should be writing to same fields as gather form". -->
+<!-- Version: V1.4 | Date: 2026-09-13 | LAST CHANGE: a screen for what paid and non-paid work somebody is open to, before appreciation. Jessie: "bring back What type of paid work are you open to? ... What type of non-paid work are you open to?". -->
+<!-- Previous: V1.3 | Date: 2026-09-13 | LAST CHANGE: screen 5 shows everything somebody offers, their skills (ikigai.skills) and their things and spaces (ikigai.haves, My haves on the 2Gather profile), and adds to those same lists. Jessie: "1A also should be writing to same fields as gather form". -->
 <!-- Previous: V1.2 | Date: 2026-09-13 | LAST CHANGE: appreciation is read back, and nothing saves until the saved answers have arrived. Jessie: "Fix now with deploy". -->
 <!-- Previous: V1.1 | Date: 2026-09-13 | LAST CHANGE: published as Finding work, at https://creating.works/work/ (it was /intro/, which now forwards here). Jessie: "Yea it works publish". -->
 <!-- Previous: V1.0 | Date: 2026-09-13 | LAST CHANGE: it saves. Every Next saves what changed, offers carry work ("massage therapy:work:skill"), What would work give you? writes "Money:work" into ikigai.needs, and Send emails the answers and records ikigai.introSentDate. Jessie: "2 yes", then "Yes go and deploy". -->
@@ -1409,7 +1410,7 @@
     // How do you like to be thanked has moved, so it is not a screen here any more and the
     // profile is what comes after the last question.
     // Jessie, 2026-09-13: "How do you like to get appreciated? 🎁 ... As last question".
-    ? ['How do you like to get appreciated? \u{1F381}', 'Your answers']
+    ? ['What type of paid work are you open to?', 'How do you like to get appreciated? \u{1F381}', 'Your answers']
     : ['How do you like to be thanked?', 'This is your profile']);
   var _gpStep = 0;
   var GP_LAST = GP_STEP_TITLES.length - 1;
@@ -1466,7 +1467,7 @@
     // Coming back to the first screen used to leave the last question's heading up there, so
     // the photo screen introduced itself as whatever somebody had just answered.
     // Jessie, 2026-09-13: the offer question is the same size as What would work give you? under it.
-    if (title) title.style.fontSize = (_gpStep === 4) ? '17px' : '22px';
+    if (title) title.style.fontSize = (_gpStep === 4 || _gpStep === 5) ? '17px' : '22px';   // the two screens asking two questions
     if (title) title.textContent = (_gpStep > 0)
       ? GP_STEP_TITLES[_gpStep]
       : (window._gpWelcome || GP_STEP_TITLES[0]);
@@ -1685,14 +1686,21 @@
       }
     });
     // Appreciation last, then the profile as everybody else sees it.
+    // OPEN TO WORK, its own screen before appreciation. See cwPaintOtw.
+    var _ow = document.createElement('div');
+    _ow.id = 'cw-otw';
+    _ow.setAttribute('data-gp-step', '5');
+    _ow.style.cssText = 'padding-top:6px;';
+    box.appendChild(_ow);
+    if (typeof CW_OTW !== 'undefined') cwPaintOtw();
     {
       var _th = gpThanksBlock();
       _th.id = 'gp-thanks-block';
-      _th.setAttribute('data-gp-step', '5');
+      _th.setAttribute('data-gp-step', '6');
       box.appendChild(_th);
     }
     var _pv = document.createElement('div');
-    _pv.setAttribute('data-gp-step', '6');
+    _pv.setAttribute('data-gp-step', '7');
     _pv.id = 'gp-preview';
     box.appendChild(_pv);
     gpShowStep(0);
@@ -1772,6 +1780,8 @@
       + row('What do you care about?', val('introValues'))
       + row('For work, income, or trade what do you have to offer right now?', cwOffersText())
       + row('What would work give you?', cwWorkText())
+      + row('What type of paid work are you open to?', cwOtwList('paid').join(', '))
+      + row('What type of non-paid work are you open to?', cwOtwList('unpaid').join(', '))
       + row('How do you like to get appreciated?', thanks.join(', '))
       + '<div style="background:#F7FBFF;border:1px solid #C9DFF3;border-radius:12px;padding:18px 20px;margin-top:10px;">'
       + '<div style="font-size:15.5px;font-weight:800;margin-bottom:4px;color:#1A2E42;">What happens next</div>'
@@ -1825,7 +1835,9 @@
         + '&skillsTags='    + encodeURIComponent(tagFor('introSkills'))
         + '&valuesTags='    + encodeURIComponent(tagFor('introValues'))
         + '&location='      + encodeURIComponent(gpLocString(_gpLoc));
-    if (window._gpLoaded) qs += '&havesTags=' + encodeURIComponent(CW_HAVES.join('|'));
+    if (window._gpLoaded) qs += '&havesTags=' + encodeURIComponent(CW_HAVES.join('|'))
+      + '&openToPaidWork=' + encodeURIComponent(cwOtwList('paid').join('|'))
+      + '&openToUnpaidWork=' + encodeURIComponent(cwOtwList('unpaid').join('|'));
     return qs;
   }
   // Saved on every Next, but only when something changed since the last save: one trip to the backend
@@ -2061,6 +2073,42 @@
     var ai = document.getElementById('cw-offer-in'); if (ai) ai.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); add(); } });
   }
 
+  // ── OPEN TO WORK ─────────────────────────────────────────────────────────────────────────────
+  // Jessie, 2026-09-13: "bring back What type of paid work are you open to? Full-time, Part-time, one-time / What type
+  // of non-paid work are you open to? Mentor, advisor, board member, tutor, volunteer, intern, job shadowing". The old
+  // intake asked "Are you open to work?" and kept the answer in ikigai.retired. These are ikigai.openToPaidWork and
+  // ikigai.openToUnpaidWork now. The options are getReferenceData's paidWorkTypes and unpaidWorkTypes, which a
+  // reference-data column of that name decides once it exists. Nothing is drawn until the options have arrived.
+  var CW_OTW = { paid: {}, unpaid: {} };
+  function cwOtwList(side){ return Object.keys(CW_OTW[side]).filter(function(k){ return CW_OTW[side][k]; }); }
+  function cwPaintOtw(){
+    var box = document.getElementById('cw-otw'); if (!box) return;
+    var rd = window._gpRd;
+    if (!rd || !Array.isArray(rd.paidWorkTypes)) {
+      box.innerHTML = '<span style="display:inline-flex;background:#1F699E;color:#fff;font-size:13px;font-weight:700;padding:8px 16px;border-radius:20px;">Loading the choices</span>';
+      gpRefOnce().then(function(){ if (window._gpRd && Array.isArray(window._gpRd.paidWorkTypes)) cwPaintOtw(); });
+      return;
+    }
+    var pills = function(side, opts){
+      var list = opts.slice();
+      cwOtwList(side).forEach(function(v){ if (list.indexOf(v) < 0) list.push(v); });   // an old answer still shows
+      return '<div style="display:flex;flex-wrap:wrap;gap:7px;">' + list.map(function(v){
+        var on = !!CW_OTW[side][v];
+        return '<button type="button" data-cw-otw="' + side + '" data-v="' + _gpEsc(v) + '" style="font:inherit;font-size:13.5px;padding:7px 14px;border-radius:20px;cursor:pointer;'
+          + (on ? 'background:#1F699E;border:1px solid #1F699E;color:#fff;font-weight:700;' : 'background:#fff;border:1px solid #C9DFF3;color:#1F699E;font-weight:600;')
+          + '">' + _gpEsc(v) + '</button>';
+      }).join('') + '</div>';
+    };
+    box.innerHTML = '<div style="font-size:13.5px;color:#6B7A8D;margin-bottom:12px;">Pick as many as fit.</div>'
+      + pills('paid', rd.paidWorkTypes || [])
+      + '<div style="font-size:17px;font-weight:800;color:#1A2E42;margin:26px 0 2px;">What type of non-paid work are you open to?</div>'
+      + '<div style="font-size:13.5px;color:#6B7A8D;margin-bottom:12px;">Pick as many as fit.</div>'
+      + pills('unpaid', rd.unpaidWorkTypes || []);
+    box.querySelectorAll('[data-cw-otw]').forEach(function(b){
+      b.onclick = function(){ var side = b.getAttribute('data-cw-otw'), v = b.getAttribute('data-v'); CW_OTW[side][v] = !CW_OTW[side][v]; cwPaintOtw(); };
+    });
+  }
+
   function cwLoadWork(){
     try {
       var d = JSON.parse(localStorage.getItem('cw-inquiry-draft-' + cwNorm(meId)) || 'null');
@@ -2092,6 +2140,7 @@
   }
   cwLoadWork();
   cwPaintOffers();
+  cwPaintOtw();
   // Most people answered these long before the intro* columns existed, and their words
   // sit one column away under the older names. Asking somebody to type out again what
   // we already hold is how a form earns a reputation for not listening, so fall back to
@@ -2167,6 +2216,16 @@
         if (gpLocString(_gpLoc)) any = true;
         window._gpLoaded = true;
         CW_HAVES = String(have.haves || '').split('|').map(function(x){ return x.trim(); }).filter(Boolean);
+        var _split = function(v){ return String(v || '').split('|').map(function(x){ return x.trim(); }).filter(Boolean); };
+        var _paid = _split(have.openToPaidWork), _unpaid = _split(have.openToUnpaidWork);
+        // Nothing saved here yet: the kinds the old intake kept in ikigai.retired ("openToWork|kind:Projects|pay:Both")
+        // show as picked, and any the list no longer holds still show, so nobody loses an answer.
+        if (!_paid.length && !_unpaid.length) {
+          _paid = _split(have.retired).filter(function(x){ return x.indexOf('kind:') === 0; }).map(function(x){ return x.slice(5).trim(); }).filter(Boolean);
+        }
+        CW_OTW = { paid: {}, unpaid: {} };
+        _paid.forEach(function(v){ CW_OTW.paid[v] = true; });
+        _unpaid.forEach(function(v){ CW_OTW.unpaid[v] = true; });
         // Work needs already saved from here are the truth once there are any; before that, the home page's
         // Finding work picks (read in cwLoadWork) stand in and are saved as work needs on the first Next.
         var _workSaved = String(have.needs || '').split('|').map(function(x){ return x.trim(); })
@@ -2181,6 +2240,7 @@
         if (any) { gpRenderIntro(use); }
         if (CW_WORK.fromIkigai) cwPaintWork();
         cwPaintOffers();
+        cwPaintOtw();
         // What is on screen is what is saved, unless the home page's work picks still have to be written here.
         var _homePicks = !CW_WORK.fromIkigai && Object.keys(CW_WORK.picked).some(function(k){ return CW_WORK.picked[k]; });
         _cwLastQs = _homePicks ? null : cwBuildQs();
