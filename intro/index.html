@@ -3,7 +3,8 @@
   Copyright 2026 DayBalancer LLC. All rights reserved.
   hello@creating.works
 -->
-<!-- Version: V0.6 | Date: 2026-09-13 | LAST CHANGE: no Skip this anywhere; the last question says Next; then Your answers with every answer, What happens next, Back and Send. Jessie named each change. -->
+<!-- Version: V1.0 | Date: 2026-09-13 | LAST CHANGE: it saves. Every Next saves what changed, offers carry work ("massage therapy:work:skill"), What would work give you? writes "Money:work" into ikigai.needs, and Send emails the answers and records ikigai.introSentDate. Jessie: "2 yes", then "Yes go and deploy". -->
+<!-- Previous: V0.6 | Date: 2026-09-13 | LAST CHANGE: no Skip this anywhere; the last question says Next; then Your answers with every answer, What happens next, Back and Send. Jessie named each change. -->
 <!-- Previous: V0.5 | Date: 2026-09-13 | LAST CHANGE: the offer question on screen 5 is 17px, the same size as What would work give you? under it. Jessie: "Make same size as other questions". -->
 <!-- Previous: V0.4 | Date: 2026-09-13 | LAST CHANGE: How do you like to get appreciated? is the last question, on its own screen, and What would work give you? has + Other instead of an Anything else box. Jessie named both. -->
 <!-- Previous: V0.3 | Date: 2026-09-13 | LAST CHANGE: What would work give you? moves onto the offer screen, under "For work, income, or trade what do you have to offer right now?", and is no longer a screen of its own. Jessie: "Stop put this on this screen instead". -->
@@ -56,12 +57,13 @@
 </div>
 <script>
   var GS_URL = 'https://cw-api-gate.jessieupp.workers.dev';
-  // A MOCKUP: nothing is sent anywhere that writes. Reads still happen, so it shows real answers.
-  var CW_MOCKUP = true;
-  // WHEN THIS SAVES. Jessie, 2026-09-13: "Append the answeres here to work:skill and so forth / We will ask
-  // them later to tag each for in come trade etc". An offer is stored as "massage therapy:skill" today, and
-  // from this page it is to carry work before its kind, as "massage therapy:work:skill", ":work:thing" and
-  // ":work:space". Built with the saving, once Jessie has approved it.
+  // Was a mockup that sent nothing. It saves since V1.0 (Jessie, 2026-09-13: "Yes go and deploy"); the flag
+  // stays so the page can be turned back into a look-only copy by setting it to true.
+  var CW_MOCKUP = false;
+  // WORK, ON EVERY OFFER AND NEED MADE HERE. Jessie, 2026-09-13: "Append the answeres here to work:skill and so
+  // forth / We will ask them later to tag each for in come trade etc", then "2 yes". An offer made on this page
+  // is stored as "massage therapy:work:skill" (":work:thing", ":work:space", or "truck:work" with no kind), and
+  // a pick under What would work give you? as "Money:work" in ikigai.needs. See cwBuildQs.
 
 // Your own record is never served from cache. Added 2026-08-31, after a profile showed the
 // answers from before a save for up to six hours. The gate caches getIntake, getProfile,
@@ -1436,7 +1438,7 @@
   function gpStepOK(n){
     if (GP_BROWSE && GP_REQUIRED_STEPS[n]) return gpAnswered(GP_REQUIRED_STEPS[n].key);
     if (n !== 0) return true;
-    if (CW_MOCKUP) return true;
+    if (true) return Object.keys(_gpLangPicked || {}).some(function(k){ return _gpLangPicked[k]; }) && !!gpLocString(_gpLoc);   // no photo in this copy
     // The three that step 0 asks for. The photo is the strongest ask on the site and it is made
     // here, once, while somebody is still arriving.
     var hasPhoto = !!(window._gpPhotoUp || document.querySelector('#gp-photo-face img'));
@@ -1474,7 +1476,8 @@
     // "Go in" said nothing about where. It goes back to the group somebody was joining, so it
     // says so. Jessie, 2026-08-31.
     // The last screen is Your answers and ends on Send, as the home page's does. Jessie, 2026-09-13.
-    if (_gpStep === GP_LAST) { next.textContent = window._cwSent ? 'Sent' : 'Send'; next.disabled = !!window._cwSent; }
+    next.style.display = (_gpStep === GP_LAST && gpViewingSomebodyElse()) ? 'none' : '';   // looking is never sending
+    if (_gpStep === GP_LAST) { var _sentNow = cwIsSent(); next.textContent = window._cwSending ? 'Sending' : (_sentNow ? 'Sent' : 'Send'); next.disabled = _sentNow || !!window._cwSending; }
     else if (_gpStep === GP_LAST - 1) {
       next.textContent = 'Next';   // Jessie, 2026-09-13: "Make last question have next"
       next.disabled = false;
@@ -1717,79 +1720,13 @@
     return tw;
   }
 
+  // Into Your answers. The answers save in the background, the same as every other Next, so nobody waits on
+  // the backend to see what they said. 2Gather's copy waits here because its last screen is the profile.
   function gpSaveIntro(){
-    var stat = document.getElementById('gp-intro-status');
-    if (CW_MOCKUP) {
-      gpBuildPreview();
-      gpShowStep(GP_LAST);
-      return;
-    }
-    if (gpViewingSomebodyElse()) {
-      if (stat) {
-        stat.style.color = '#6B7A8D';
-        stat.textContent = 'You are looking as somebody else, so nothing is saved.';
-      }
-      gpBuildPreview();
-      gpShowStep(GP_LAST);
-      return;
-    }
-    // 2026-08-30: this was gp-intro-go until the footer became a step bar. A null here threw
-    // before the fetch, so pressing save did nothing at all and said nothing either.
-    var btn = document.getElementById('gp-step-next');
-    var val = function(k){ var el = document.getElementById('gp-intro-' + k); return el ? String(el.value || '').trim() : ''; };
-    // Nothing is refused. This page invites, and the gate lives on joining a group, where an
-    // empty profile actually costs the other people in the room something. Decided 2026-08-30.
-    btn.disabled = true;
-    stat.style.color = '#6B7A8D';
-    stat.textContent = 'Loading your profile…';
-    var picked = function(map, sep){ return Object.keys(map).filter(function(k){ return map[k]; }).join(sep); };
-    var qs = 'action=saveIntro&appearId=' + encodeURIComponent(meId)
-      // Taking a word off with the cross has to take it off the sheet too, and it only can when
-      // the page is holding the whole list. It says so here, and only after a load that worked.
-      + (window._gpLoaded ? '&tagsMode=replace' : '')
-      + '&appreciation=' + encodeURIComponent(picked(_gpThanksPicked, '|'))
-      + '&languages=' + encodeURIComponent(picked(_gpLangPicked, ', '))
-      + '&methods=' + encodeURIComponent(picked(_gpMethodPicked, '|'));
-    GP_INTRO_Q.forEach(function(q){ qs += '&' + q.key + '=' + encodeURIComponent(val(q.key)); });
-    // The tags, beside the sentence rather than instead of it. Without these somebody can answer
-    // every question and stay invisible to matching, because matching reads these columns and
-    // never reads the sentence. Pipe separated, which is how every other list on ikigai is held.
-    // Everything showing on the screen, not only what was tapped in this visit. A word loaded
-    // from the sheet and left alone has to come back, or replacing would drop it.
-    var tagFor = function(k){
-      var el = document.getElementById('gp-intro-' + k);
-      var orig = _gpOrig[k] || {};
-      return String((el && el.value) || '').split(',').map(function(x){ return x.trim(); })
-        .filter(Boolean)
-        // Send back exactly what arrived, level and all, unless it is a word added just now.
-        .map(function(w){ return orig[w.toLowerCase()] || w; })
-        .join('|');
-    };
-    qs += '&needsTags='     + encodeURIComponent(tagFor('introNeed'))
-        + '&interestsTags=' + encodeURIComponent(tagFor('introEnjoy'))
-        + '&skillsTags='    + encodeURIComponent(tagFor('introSkills'))
-        + '&valuesTags='    + encodeURIComponent(tagFor('introValues'))
-        + '&location='      + encodeURIComponent(gpLocString(_gpLoc));
-    fetch(GS_URL + '?' + qs)
-      .then(function(r){ return r.json(); })
-      .then(function(d){
-        if (!d || (d.status !== 'ok' && d.ok !== true)) {
-          btn.disabled = false;
-          stat.style.color = '#7A2410';
-          stat.textContent = (d && d.message) || 'Could not save just now. Try again in a moment.';
-          return;
-        }
-        stat.textContent = '';
-        gpBuildPreview();
-        gpShowStep(GP_LAST);
-      })
-      .catch(function(){
-        btn.disabled = false;
-        stat.style.color = '#7A2410';
-        stat.textContent = 'Could not reach the server. Try again in a moment.';
-      });
+    gpQuietSave();
+    gpBuildPreview();
+    gpShowStep(GP_LAST);
   }
-
 
   // Back goes back one screen. It used to leave the intro entirely and drop somebody on the
   // group they were joining, which looked like being thrown out halfway through. Doug did that
@@ -1843,10 +1780,26 @@
     try { return !!(window.CW && CW.me && CW.me().viewing); } catch (e) { return false; }
   }
 
-  function gpQuietSave(){
-    if (CW_MOCKUP) return;
-    if (!GP_BROWSE || !meId) return;
-    if (gpViewingSomebodyElse()) return;
+  // THE SAVE, built in one place for every Next and for Send.
+  function cwWorkOffers(v){
+    // Loaded offers go back exactly as they arrived. One added here carries work before its kind.
+    var orig = _gpOrig.introOffer || {};
+    return String(v || '').split(',').map(function(x){ return x.trim(); }).filter(Boolean).map(function(w){
+      var name = w.split(':')[0].trim().replace(/^[^\p{L}\p{N}]+/u, '').trim().toLowerCase();
+      if (orig[name]) return orig[name];
+      if (/:work(:|$)/i.test(w)) return w;
+      var m = w.match(/^(.*):(skill|thing|space)$/i);
+      return m ? (m[1] + ':work:' + m[2]) : (w + ':work');
+    }).join(', ');
+  }
+  function cwNeedsTags(base){
+    // What would work give you? decides every need ending in ":work". The others go back untouched.
+    var picks = Object.keys(CW_WORK.picked).filter(function(k){ return CW_WORK.picked[k]; }).map(function(k){ return k + ':work'; });
+    var rest = String(base || '').split('|').map(function(x){ return x.trim(); }).filter(Boolean);
+    if (window._gpLoaded) rest = rest.filter(function(x){ return !/:work$/i.test(x); });
+    return rest.concat(picks).join('|');
+  }
+  function cwBuildQs(){
     var val = function(k){ var el = document.getElementById('gp-intro-' + k); return el ? String(el.value || '').trim() : ''; };
     var picked = function(map, sep){ return Object.keys(map).filter(function(k){ return map[k]; }).join(sep); };
     var tagFor = function(k){
@@ -1863,22 +1816,64 @@
       + '&appreciation=' + encodeURIComponent(picked(_gpThanksPicked, '|'))
       + '&languages='    + encodeURIComponent(picked(_gpLangPicked, ', '))
       + '&methods='      + encodeURIComponent(picked(_gpMethodPicked, '|'));
-    GP_INTRO_Q.forEach(function(q){ qs += '&' + q.key + '=' + encodeURIComponent(val(q.key)); });
-    qs += '&needsTags='     + encodeURIComponent(tagFor('introNeed'))
+    GP_INTRO_Q.forEach(function(q){
+      var v = val(q.key);
+      if (q.key === 'introOffer') v = cwWorkOffers(v);
+      qs += '&' + q.key + '=' + encodeURIComponent(v);
+    });
+    qs += '&needsTags='     + encodeURIComponent(cwNeedsTags(tagFor('introNeed')))
         + '&interestsTags=' + encodeURIComponent(tagFor('introEnjoy'))
         + '&skillsTags='    + encodeURIComponent(tagFor('introSkills'))
         + '&valuesTags='    + encodeURIComponent(tagFor('introValues'))
         + '&location='      + encodeURIComponent(gpLocString(_gpLoc));
-    fetch(GS_URL + '?' + qs).catch(function(){});
+    return qs;
+  }
+  // Saved on every Next, but only when something changed since the last save: one trip to the backend
+  // fewer, and the answers' time only moves when an answer did, which is what Sent is measured against.
+  var _cwLastQs = null, _cwSentQs = null;
+  function cwIsSent(){ return !!window._cwSent && _cwSentQs !== null && cwBuildQs() === _cwSentQs; }
+  function gpQuietSave(){
+    if (CW_MOCKUP) return;
+    if (!GP_BROWSE || !meId) return;
+    if (gpViewingSomebodyElse()) return;
+    var qs = cwBuildQs();
+    if (qs === _cwLastQs) return;
+    _cwLastQs = qs;
+    fetch(GS_URL + '?' + qs).catch(function(){ _cwLastQs = null; });
+  }
+  // SEND. Saves once more and emails the person their answers, with the operators copied. One trip, and
+  // the button says Sending until it answers, then a greyed Sent until an answer changes.
+  function cwSend(btn){
+    var stat = document.getElementById('gp-intro-status');
+    if (gpViewingSomebodyElse()) { if (stat) stat.textContent = 'You are looking as somebody else, so nothing is sent.'; return; }
+    var tk = cwToken();
+    if (!tk) {
+      if (stat) { stat.style.color = '#7A2410'; stat.innerHTML = 'Sending needs you signed in on <a href="https://creating.works/" style="color:#1F699E;font-weight:700;">the home page</a>.'; }
+      return;
+    }
+    var qs = cwBuildQs();
+    window._cwSending = true; gpStepPaint();
+    if (stat) { stat.style.color = '#6B7A8D'; stat.textContent = ''; }
+    fetch(GS_URL + '?' + qs + '&send=1&editToken=' + encodeURIComponent(tk))
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        window._cwSending = false;
+        if (d && (d.status === 'ok' || d.ok === true) && d.sentAt) {
+          window._cwSent = true; _cwSentQs = qs; _cwLastQs = qs;
+          gpStepPaint(); return;
+        }
+        if (stat) { stat.style.color = '#7A2410'; stat.textContent = (d && d.message) || 'Your answers did not send this time and Send tries again.'; }
+        gpStepPaint();
+      })
+      .catch(function(){
+        window._cwSending = false;
+        if (stat) { stat.style.color = '#7A2410'; stat.textContent = 'Your answers did not send this time and Send tries again.'; }
+        gpStepPaint();
+      });
   }
 
   document.getElementById('gp-step-next').addEventListener('click', function(){
-    if (_gpStep === GP_LAST && CW_MOCKUP) {
-      // A MOCKUP: Send turns into a greyed Sent, the way the home page's does, and nothing is sent.
-      window._cwSent = true;
-      this.textContent = 'Sent'; this.disabled = true; this.style.opacity = '.6'; this.style.cursor = 'default';
-      return;
-    }
+    if (_gpStep === GP_LAST) { if (!cwIsSent() && !window._cwSending) cwSend(this); return; }
     if (_gpStep === GP_LAST) {
       // Say where it is going while it goes there. The jump is not instant and a button that
       // stays put reads as a press that did not land. It names the real destination rather than
@@ -2003,7 +1998,7 @@
         if (!d || d.status !== 'ok') { if (!CW_WORK.choices) cwPaintWork('failed'); return; }
         if (Array.isArray(d.needChoices) && d.needChoices.length) CW_WORK.choices = d.needChoices.slice();
         var w = d.paths && d.paths.work;
-        if (w && w.found && w.data && !CW_WORK.touched) {
+        if (w && w.found && w.data && !CW_WORK.touched && !CW_WORK.fromIkigai) {
           CW_WORK.picked = {};
           String(w.data.needFor || '').split('|').map(function(x){ return x.trim(); }).filter(Boolean)
             .forEach(function(n){ CW_WORK.picked[n] = true; });
@@ -2083,7 +2078,23 @@
         gpLocFrom(have.location);
         if (gpLocString(_gpLoc)) any = true;
         window._gpLoaded = true;
+        // Work needs already saved from here are the truth once there are any; before that, the home page's
+        // Finding work picks (read in cwLoadWork) stand in and are saved as work needs on the first Next.
+        var _workSaved = String(have.needs || '').split('|').map(function(x){ return x.trim(); })
+          .filter(function(x){ return /:work$/i.test(x); }).map(function(x){ return x.replace(/:work$/i, ''); });
+        if (_workSaved.length && !CW_WORK.touched) {
+          CW_WORK.picked = {}; _workSaved.forEach(function(n){ CW_WORK.picked[n] = true; });
+          CW_WORK.fromIkigai = true;
+        }
+        // Sent, if the answers have not moved since they were sent.
+        var _sentT = Date.parse(String(have.introSentDate || '')), _savedT = Date.parse(String(have.timestamp || ''));
+        window._cwSentLoaded = !isNaN(_sentT) && (isNaN(_savedT) || _savedT <= _sentT + 5000);
         if (any) { gpRenderIntro(use); }
+        if (CW_WORK.fromIkigai) cwPaintWork();
+        // What is on screen is what is saved, unless the home page's work picks still have to be written here.
+        var _homePicks = !CW_WORK.fromIkigai && Object.keys(CW_WORK.picked).some(function(k){ return CW_WORK.picked[k]; });
+        _cwLastQs = _homePicks ? null : cwBuildQs();
+        if (window._cwSentLoaded) { window._cwSent = true; _cwSentQs = cwBuildQs(); }
       })
       .catch(function(){});
   }
