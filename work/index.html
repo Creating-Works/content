@@ -3,7 +3,8 @@
   Copyright 2026 DayBalancer LLC. All rights reserved.
   hello@creating.works
 -->
-<!-- Version: V1.13 | Date: 2026-09-13 | LAST CHANGE: no question asked twice. Welcome needs only where you are and the skills screen needs a skill and a language; who your work serves under what you care about; the offer screen asks what you have to offer, a space or things (skills are screen 3), then What outcomes would you like work to give you?, then appreciation; open to work reworded with an I'm retired toggle and non-paid availability last. Jessie: "I'm trying not to ask the same question twice". -->
+<!-- Version: V1.14 | Date: 2026-09-14 | LAST CHANGE: the choice lists are asked for by version, asked again fresh when a list is missing, and say so when they cannot load; every loading pill breathes; "Who would you most like to serve in your work or life?"; "For additional forms of income or trade, do you have any resources to offer others right now?". Jessie: "Never loaded", "Loading information button should breathe like we have on gather". -->
+<!-- Previous: V1.13 | Date: 2026-09-13 | LAST CHANGE: no question asked twice. Welcome needs only where you are and the skills screen needs a skill and a language; who your work serves under what you care about; the offer screen asks what you have to offer, a space or things (skills are screen 3), then What outcomes would you like work to give you?, then appreciation; open to work reworded with an I'm retired toggle and non-paid availability last. Jessie: "I'm trying not to ask the same question twice". -->
 <!-- Previous: V1.12 | Date: 2026-09-13 | LAST CHANGE: the question reads "What outcomes would you like to create with your work?". Jessie named the change. -->
 <!-- Previous: V1.11 | Date: 2026-09-13 | LAST CHANGE: an example already chosen is not shown a second time under the list of answers. Jessie: "Duplicates showing". -->
 <!-- Previous: V1.10 | Date: 2026-09-13 | LAST CHANGE: until the saved answers arrive the card shows a breathing Loading information and no empty questions. Jessie: "shouldn't it not show unanswered pages and instead show a breathing loading info button?". -->
@@ -51,7 +52,6 @@
   .cw-loading{display:inline-flex;align-items:center;background:#1F699E;color:#fff;font-size:13px;font-weight:700;
     padding:8px 16px;border-radius:20px;animation:cw-breathe 1.6s ease-in-out infinite;}
   @keyframes cw-breathe{0%,100%{opacity:1}50%{opacity:.62}}
-  @media (prefers-reduced-motion: reduce){ .cw-loading{animation:none;} }
 </style>
   <script src="https://2gather.network/nav/identity.js?v=14"></script>
 </head>
@@ -537,13 +537,21 @@
   var _gpOrig = {};
 
   var _gpRefP = null;
+  var CW_REF_V = 8;   // the shape of getReferenceData this page needs; raised with every new list
   function gpRefOnce(){
     if (_gpRefP) return _gpRefP;
-    _gpRefP = fetch(GS_URL + '?action=getReferenceData')
+    // NEVER LOADED. Jessie, 2026-09-14, on the offer screen stuck on Loading the choices: "Never loaded". The lists are
+    // asked for by version, so a copy from before a list existed is never reused; a reply missing the newest list is asked
+    // for once more past every cache; and a failure is not remembered, so the next ask tries again.
+    _gpRefP = fetch(GS_URL + '?action=getReferenceData&v=' + CW_REF_V)
       .then(function(r){ return r.json(); })
+      .then(function(rd){
+        if (rd && Array.isArray(rd.spaceOfferTypes)) return rd;
+        return fetch(GS_URL + '?action=getReferenceData&v=' + CW_REF_V + '&nocache=1').then(function(r){ return r.json(); });
+      })
       // Kept where the tag options can read it, so a question can be tagged along its own axis.
       .then(function(rd){ window._gpRd = rd; return rd; })
-      .catch(function(){ return {}; });
+      .catch(function(){ _gpRefP = null; return {}; });
     return _gpRefP;
   }
 
@@ -1431,7 +1439,8 @@
     // Jessie, 2026-09-13: "Can You make the last one just show space and things and remove skills?".
     // then "For other forms of income or trade, what do you have to offer right now? Space: options and other / Things:
     // options and other".
-    'For other forms of income or trade, what do you have to offer right now?'
+    // and on 2026-09-14 "For additional forms of income or trade, do you have any resources to offer others right now?".
+    'For additional forms of income or trade, do you have any resources to offer others right now?'
   ].concat((typeof GP_BROWSE !== 'undefined' && GP_BROWSE)
     // How do you like to be thanked has moved, so it is not a screen here any more and the
     // profile is what comes after the last question.
@@ -1823,8 +1832,8 @@
       + row('What comes most naturally to you?', on(_gpMethodPicked).join(', '))
       + row('Which languages do you speak?', on(_gpLangPicked).join(', '))
       + row('What do you care about?', val('introValues'))
-      + row('Who would you most like your work to serve?', Object.keys(CW_SERVE).filter(function(k){ return CW_SERVE[k]; }).join(', '))
-      + row('For other forms of income or trade, what do you have to offer right now?', [cwOfferNames('space').length ? 'Space: ' + cwOfferNames('space').join(', ') : '', cwOfferNames('thing').length ? 'Things: ' + cwOfferNames('thing').join(', ') : ''].filter(Boolean).join('\n'))
+      + row('Who would you most like to serve in your work or life?', Object.keys(CW_SERVE).filter(function(k){ return CW_SERVE[k]; }).join(', '))
+      + row('For additional forms of income or trade, do you have any resources to offer others right now?', [cwOfferNames('space').length ? 'Space: ' + cwOfferNames('space').join(', ') : '', cwOfferNames('thing').length ? 'Things: ' + cwOfferNames('thing').join(', ') : ''].filter(Boolean).join('\n'))
       + row('What outcomes would you like work to give you?', cwWorkText())
       + row('How do you like to get appreciated?', thanks.join(', '))
       + row('If you\u2019re open to paid work, what type of paid work are you open to?', cwOtwList('paid').join(', '))
@@ -2046,8 +2055,7 @@
     } else if (state === 'failed') {
       h += '<div style="font-size:14px;color:#7A2410;margin-bottom:24px;">The choices did not load and a reload looks again.</div>';
     } else {
-      h += '<div style="margin-bottom:24px;"><span style="display:inline-flex;background:#1F699E;color:#fff;font-size:13px;font-weight:700;'
-        + 'padding:8px 16px;border-radius:20px;">Loading the choices</span></div>';
+      h += '<div style="margin-bottom:24px;"><span class="cw-loading">Loading the choices</span></div>';
     }
     box.innerHTML = h;
     var ob = document.getElementById('cw-work-other');
@@ -2097,12 +2105,15 @@
   function cwOffersText(){
     return cwOfferNames('space').map(function(n){ return n + ' (space)'; }).concat(cwOfferNames('thing')).join(', ');
   }
+  function cwChoicesFailed(box){
+    if (box) box.innerHTML = '<div style="font-size:14px;color:#7A2410;padding:6px 0;">The choices did not load and a reload looks again.</div>';
+  }
   function cwPaintOffers(){
     var box = document.getElementById('cw-offers'); if (!box) return;
     var rd = window._gpRd;
     if (!rd || !Array.isArray(rd.spaceOfferTypes)) {
       box.innerHTML = '<span class="cw-loading">Loading the choices</span>';
-      gpRefOnce().then(function(){ if (window._gpRd && Array.isArray(window._gpRd.spaceOfferTypes)) cwPaintOffers(); });
+      gpRefOnce().then(function(){ if (window._gpRd && Array.isArray(window._gpRd.spaceOfferTypes)) cwPaintOffers(); else cwChoicesFailed(box); });
       return;
     }
     var section = function(kind, opts, label){
@@ -2160,8 +2171,8 @@
     var box = document.getElementById('cw-otw'); if (!box) return;
     var rd = window._gpRd;
     if (!rd || !Array.isArray(rd.paidWorkTypes)) {
-      box.innerHTML = '<span style="display:inline-flex;background:#1F699E;color:#fff;font-size:13px;font-weight:700;padding:8px 16px;border-radius:20px;">Loading the choices</span>';
-      gpRefOnce().then(function(){ if (window._gpRd && Array.isArray(window._gpRd.paidWorkTypes)) cwPaintOtw(); });
+      box.innerHTML = '<span class="cw-loading">Loading the choices</span>';
+      gpRefOnce().then(function(){ if (window._gpRd && Array.isArray(window._gpRd.paidWorkTypes)) cwPaintOtw(); else cwChoicesFailed(box); });
       return;
     }
     var pills = function(side, opts){
@@ -2222,8 +2233,8 @@
     var rd = window._gpRd;
     box.innerHTML = '';
     if (!rd || !Array.isArray(rd.serveWhoTypes)) {
-      box.innerHTML = '<div style="padding:18px 0;"><span style="display:inline-flex;background:#1F699E;color:#fff;font-size:13px;font-weight:700;padding:8px 16px;border-radius:20px;">Loading the choices</span></div>';
-      gpRefOnce().then(function(){ if (window._gpRd && Array.isArray(window._gpRd.serveWhoTypes)) cwPaintServe(); });
+      box.innerHTML = '<div style="padding:18px 0;"><span class="cw-loading">Loading the choices</span></div>';
+      gpRefOnce().then(function(){ if (window._gpRd && Array.isArray(window._gpRd.serveWhoTypes)) cwPaintServe(); else cwChoicesFailed(box); });
       return;
     }
     var list = rd.serveWhoTypes.slice();
@@ -2251,7 +2262,8 @@
     oin.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); add(); } });
     pr.row.appendChild(oth);
     var body = document.createElement('div'); body.appendChild(pr.row); body.appendChild(obx);
-    box.appendChild(gpBlock('Who would you most like your work to serve?', 'Pick as many as fit or add your own.', body));
+    // Jessie, 2026-09-14: "Who would you most like your work to serve? To Who would you most like to serve in your work or life?".
+    box.appendChild(gpBlock('Who would you most like to serve in your work or life?', 'Pick as many as fit or add your own.', body));
   }
   // "Facilitating and coaching, for youth and seniors, in service to clean water". Only when all three parts are there.
   function cwJoin(l){ if (l.length < 3) return l.join(' and '); return l.slice(0, -1).join(', ') + ', and ' + l[l.length - 1]; }
