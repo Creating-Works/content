@@ -3,7 +3,8 @@
   Copyright 2026 DayBalancer LLC. All rights reserved.
   hello@creating.works
 -->
-<!-- Version: V1.12 | Date: 2026-09-13 | LAST CHANGE: the question reads "What outcomes would you like to create with your work?". Jessie named the change. -->
+<!-- Version: V1.13 | Date: 2026-09-13 | LAST CHANGE: no question asked twice. Welcome needs only where you are and the skills screen needs a skill and a language; who your work serves under what you care about; the offer screen asks what you have to offer, a space or things (skills are screen 3), then What outcomes would you like work to give you?, then appreciation; open to work reworded with an I'm retired toggle and non-paid availability last. Jessie: "I'm trying not to ask the same question twice". -->
+<!-- Previous: V1.12 | Date: 2026-09-13 | LAST CHANGE: the question reads "What outcomes would you like to create with your work?". Jessie named the change. -->
 <!-- Previous: V1.11 | Date: 2026-09-13 | LAST CHANGE: an example already chosen is not shown a second time under the list of answers. Jessie: "Duplicates showing". -->
 <!-- Previous: V1.10 | Date: 2026-09-13 | LAST CHANGE: until the saved answers arrive the card shows a breathing Loading information and no empty questions. Jessie: "shouldn't it not show unanswered pages and instead show a breathing loading info button?". -->
 <!-- Previous: V1.9 | Date: 2026-09-13 | LAST CHANGE: Your purpose offers a few statements to pick from, one or more, instead of one sentence joining every answer. Jessie: "What of there are multiple purpose statements bcz they selected so much? Can you give them a few to select from?". -->
@@ -79,9 +80,9 @@
   // stays so the page can be turned back into a look-only copy by setting it to true.
   var CW_MOCKUP = false;
   // WORK, ON EVERY OFFER AND NEED MADE HERE. Jessie, 2026-09-13: "Append the answeres here to work:skill and so
-  // forth", then "2 yes", then "1A". A skill added on screen 5 joins ikigai.skills as "Facilitating:work:skill", a
-  // thing or space joins ikigai.haves as "Truck:work:thing", and a pick under What would work give you? joins
-  // ikigai.needs as "Money:work". See cwPaintOffers and cwBuildQs.
+  // forth", then "2 yes". A space or anything else offered on screen 5 joins ikigai.haves as "An extra room:work:space"
+  // or "Plants:work:thing", and a pick under What outcomes would you like work to give you? joins ikigai.needs as
+  // "Money:work". Skills are asked on screen 3 only. See cwPaintOffers and cwBuildQs.
 
 // Your own record is never served from cache. Added 2026-08-31, after a profile showed the
 // answers from before a save for up to six hours. The gate caches getIntake, getProfile,
@@ -1427,12 +1428,16 @@
     'What do you care about?',
     // Jessie, 2026-09-13: "Remove Anything you need, or have to offer?" and "What do you need?", and the
     // offer question reads as she wrote it. It is the heading, so it is not asked a second time below.
-    'For work, income, or trade what do you have to offer right now?'
+    // Jessie, 2026-09-13: "Can You make the last one just show space and things and remove skills?".
+    // then "For other forms of income or trade, what do you have to offer right now? Space: options and other / Things:
+    // options and other".
+    'For other forms of income or trade, what do you have to offer right now?'
   ].concat((typeof GP_BROWSE !== 'undefined' && GP_BROWSE)
     // How do you like to be thanked has moved, so it is not a screen here any more and the
     // profile is what comes after the last question.
     // Jessie, 2026-09-13: "How do you like to get appreciated? 🎁 ... As last question".
-    ? ['What type of paid work are you open to?', 'How do you like to get appreciated? \u{1F381}', 'Your answers']
+    // Appreciation sits at the bottom of the space and things screen now (2026-09-13).
+    ? ['If you\u2019re open to paid work, what type of paid work are you open to?', 'Your answers']
     : ['How do you like to be thanked?', 'This is your profile']);
   var _gpStep = 0;
   var GP_LAST = GP_STEP_TITLES.length - 1;
@@ -1463,9 +1468,11 @@
     return !!(el && String(el.value || '').trim());
   }
   function gpStepOK(n){
+    // Jessie, 2026-09-13: "Languages required on next screen". The skills screen needs a skill and a language.
+    if (GP_BROWSE && n === 2) return gpAnswered('introSkills') && Object.keys(_gpLangPicked || {}).some(function(k){ return _gpLangPicked[k]; });
     if (GP_BROWSE && GP_REQUIRED_STEPS[n]) return gpAnswered(GP_REQUIRED_STEPS[n].key);
     if (n !== 0) return true;
-    if (true) return Object.keys(_gpLangPicked || {}).some(function(k){ return _gpLangPicked[k]; }) && !!gpLocString(_gpLoc);   // no photo in this copy
+    if (true) return !!gpLocString(_gpLoc);   // no photo in this copy, and languages are on the skills screen
     // The three that step 0 asks for. The photo is the strongest ask on the site and it is made
     // here, once, while somebody is still arriving.
     var hasPhoto = !!(window._gpPhotoUp || document.querySelector('#gp-photo-face img'));
@@ -1475,7 +1482,6 @@
   }
   function gpStepMissing(){
     var out = [];
-    if (!Object.keys(_gpLangPicked || {}).some(function(k){ return _gpLangPicked[k]; })) out.push('a language');
     if (!gpLocString(_gpLoc)) out.push('where you are');
     return out;
   }
@@ -1521,6 +1527,7 @@
       }
       var _req = GP_BROWSE ? GP_REQUIRED_STEPS[_gpStep] : null;
       if (_req && !gpAnswered(_req.key)) miss = [_req.miss];
+      else if (_gpStep === 2 && !Object.keys(_gpLangPicked || {}).some(function(k){ return _gpLangPicked[k]; })) miss = ['a language'];
       note.textContent = miss.length ? ('Still to add: ' + miss.join(', ') + '.') : '';
       // 6. What is left to add is a reminder, not a telling-off, so it is grey like the count.
       if (GP_BROWSE) note.style.color = '#6B7A8D';
@@ -1538,7 +1545,8 @@
       };
       // Step 0 shows all three at once. Chaining them there was mine and not asked for.
       reveal('gp-methods-block', gpAnswered('introSkills'));
-      reveal('gp-serve-block', gpAnswered('introSkills'));
+      reveal('gp-langs-block', gpAnswered('introSkills'));
+      reveal('gp-serve-block', gpAnswered('introValues'));
 
       // The welcome is said once, on the way in. On a question screen the question is the
       // whole of it, and the only thing worth adding is on the two nobody has to answer.
@@ -1608,7 +1616,7 @@
     _pn.textContent = 'Your photo is only shown inside groups you join or start. It is not on the open web '
       + 'and it is not shown to people outside your groups.';
     if (!GP_BROWSE) _s0.appendChild(_pn);
-    var _lg = gpLanguagesBlock(); _lg.id = 'gp-langs-block'; _s0.appendChild(_lg);
+    // Languages are asked on the skills screen in this copy. Jessie, 2026-09-13: "Put language on skills page".
     var _lc = gpLocationBlock();  _lc.id = 'gp-loc-block';   _s0.appendChild(_lc);
     box.appendChild(_s0);
     GP_INTRO_Q.forEach(function(q, i){
@@ -1683,9 +1691,19 @@
         var _cw = document.createElement('div');
         _cw.id = 'cw-work-step';
         _cw.setAttribute('data-gp-step', '4');
-        _cw.style.cssText = 'padding:18px 0 0;';
+        _cw.style.cssText = 'padding:0;';
         box.appendChild(_cw);
         if (typeof CW_WORK !== 'undefined' && CW_WORK) cwPaintWork();
+      }
+      if (q.key === 'introValues') {
+        // WHO YOUR WORK SERVES, under What do you care about?. Jessie, 2026-09-13: "Who would you most like your work to
+        // serve? Goes under first question in what do you care about". See cwPaintServe.
+        var _sv = document.createElement('div');
+        _sv.id = 'gp-serve-block';
+        _sv.setAttribute('data-gp-step', '3');
+        _sv.style.display = 'none';
+        box.appendChild(_sv);
+        if (typeof CW_SERVE !== 'undefined') cwPaintServe();
       }
       if (q.key === 'introSkills') {
         // What comes most naturally to you sits with the skills, which is what it is about.
@@ -1693,13 +1711,10 @@
         _m.id = 'gp-methods-block';
         _m.setAttribute('data-gp-step', '2');
         box.appendChild(_m);
-        // WHO YOUR WORK SERVES, under What comes most naturally to you? (2026-09-13). See cwPaintServe.
-        var _sv = document.createElement('div');
-        _sv.id = 'gp-serve-block';
-        _sv.setAttribute('data-gp-step', '2');
-        _sv.style.display = 'none';
-        box.appendChild(_sv);
-        if (typeof CW_SERVE !== 'undefined') cwPaintServe();
+        // LANGUAGES, on the skills screen. Jessie, 2026-09-13: "Put language on skills page".
+        var _lg = gpLanguagesBlock(); _lg.id = 'gp-langs-block';
+        _lg.setAttribute('data-gp-step', '2');
+        box.appendChild(_lg);
         // How you like to be thanked belongs here too. Both questions are about the shape of the
         // exchange rather than what somebody knows, and asking them together is one screen
         // instead of two. Jessie, 2026-08-30. It had no screen at all in this flow, so
@@ -1726,11 +1741,11 @@
     {
       var _th = gpThanksBlock();
       _th.id = 'gp-thanks-block';
-      _th.setAttribute('data-gp-step', '6');
+      _th.setAttribute('data-gp-step', '4');   // after What outcomes would you like work to give you? (2026-09-13)
       box.appendChild(_th);
     }
     var _pv = document.createElement('div');
-    _pv.setAttribute('data-gp-step', '7');
+    _pv.setAttribute('data-gp-step', '6');
     _pv.id = 'gp-preview';
     box.appendChild(_pv);
     gpShowStep(0);
@@ -1738,7 +1753,7 @@
 
   function gpThanksBlock(){
     var tw = document.createElement('div');
-    tw.style.cssText = 'padding:0;';
+    tw.style.cssText = 'padding:26px 0 0;';
     var tt = document.createElement('div');
     tt.style.cssText = 'font-size:17px;font-weight:800;color:#1A2E42;margin-bottom:2px;';
     tt.textContent = 'How do you like to get appreciated? \u{1F381}';
@@ -1764,7 +1779,7 @@
       });
       row.appendChild(b);
     });
-    tw.appendChild(th); tw.appendChild(row);   // the screen's heading asks the question
+    tw.appendChild(tt); tw.appendChild(th); tw.appendChild(row);   // asked at the bottom of screen 5 again, so it says its question
     return tw;
   }
 
@@ -1802,19 +1817,20 @@
         + '<div style="font-size:14.5px;margin:2px 0 14px;white-space:pre-wrap;' + (a ? 'color:#4B5A6D;">' + esc(a) : 'color:#6B7A8D;font-style:italic;">Not answered yet') + '</div>';
     };
     el.innerHTML =
-        row('Which languages do you speak?', on(_gpLangPicked).join(', '))
-      + row('Where are you?', gpLocString(_gpLoc))
+        row('Where are you?', gpLocString(_gpLoc))
       + row('What brings you joy?', val('introEnjoy'))
       + row('What skills do you have?', val('introSkills'))
       + row('What comes most naturally to you?', on(_gpMethodPicked).join(', '))
-      + row('Who would you most like your work to serve?', Object.keys(CW_SERVE).filter(function(k){ return CW_SERVE[k]; }).join(', '))
+      + row('Which languages do you speak?', on(_gpLangPicked).join(', '))
       + row('What do you care about?', val('introValues'))
-      + row('For work, income, or trade what do you have to offer right now?', cwOffersText())
-      + row('What outcomes would you like to create with your work?', cwWorkText())
-      + row('What type of paid work are you open to?', cwOtwList('paid').join(', '))
-      + row('What type of non-paid work are you open to?', cwOtwList('unpaidTime').join(', '))
-      + row('Which types of non-paid work?', cwOtwList('unpaid').join(', '))
+      + row('Who would you most like your work to serve?', Object.keys(CW_SERVE).filter(function(k){ return CW_SERVE[k]; }).join(', '))
+      + row('For other forms of income or trade, what do you have to offer right now?', [cwOfferNames('space').length ? 'Space: ' + cwOfferNames('space').join(', ') : '', cwOfferNames('thing').length ? 'Things: ' + cwOfferNames('thing').join(', ') : ''].filter(Boolean).join('\n'))
+      + row('What outcomes would you like work to give you?', cwWorkText())
       + row('How do you like to get appreciated?', thanks.join(', '))
+      + row('If you\u2019re open to paid work, what type of paid work are you open to?', cwOtwList('paid').join(', '))
+      + (CW_RETIRED.on ? row('I\u2019m retired', 'Yes') : '')
+      + row('If you\u2019re open to non-paid work, what type are you open to?', cwOtwList('unpaid').join(', '))
+      + row('What is your availability for non-paid work?', cwOtwList('unpaidTime').join(', '))
       + cwPurposeBox()
       + '<div style="background:#F7FBFF;border:1px solid #C9DFF3;border-radius:12px;padding:18px 20px;margin-top:10px;">'
       + '<div style="font-size:15.5px;font-weight:800;margin-bottom:4px;color:#1A2E42;">What happens next</div>'
@@ -1872,7 +1888,8 @@
       + '&openToPaidWork=' + encodeURIComponent(cwOtwList('paid').join('|'))
       + '&openToUnpaidTime=' + encodeURIComponent(cwOtwList('unpaidTime').join('|'))
       + '&openToUnpaidWork=' + encodeURIComponent(cwOtwList('unpaid').join('|'))
-      + '&servesWho=' + encodeURIComponent(Object.keys(CW_SERVE).filter(function(k){ return CW_SERVE[k]; }).join('|'));
+      + '&servesWho=' + encodeURIComponent(Object.keys(CW_SERVE).filter(function(k){ return CW_SERVE[k]; }).join('|'))
+      + '&retired=' + encodeURIComponent(cwRetiredValue());
     return qs;
   }
   // Saved on every Next, but only when something changed since the last save: one trip to the backend
@@ -2007,7 +2024,8 @@
     var box = document.getElementById('cw-work-step'); if (!box) return;
     // Jessie, 2026-09-13: "What would work give you? To What outcomes would you like work give you?", then
     // "What outcomes would you like work to give you? To What outcomes would you like to create with your work?"
-    var h = '<div style="font-size:17px;font-weight:800;color:#1A2E42;margin-bottom:2px;">What outcomes would you like to create with your work?</div>'
+    // Jessie, 2026-09-13: "the question means what you get from work", so it reads as it did before.
+    var h = '<div style="font-size:17px;font-weight:800;color:#1A2E42;margin:26px 0 2px;">What outcomes would you like work to give you?</div>'
       + '<div style="font-size:13.5px;color:#6B7A8D;margin-bottom:12px;">Pick as many as fit or add your own.</div>';
     if (CW_WORK.choices) {
       var list = CW_WORK.choices.slice();
@@ -2067,64 +2085,61 @@
   function cwKindOf(w){ var b = String(w || '').split(':'); var k = b.length > 1 ? b[b.length - 1].toLowerCase() : ''; return (k === 'skill' || k === 'thing' || k === 'space') ? k : ''; }
   function cwSkillsBox(){ return document.getElementById('gp-intro-introSkills'); }
   function cwSkillList(){ var t = cwSkillsBox(); return String((t && t.value) || '').split(',').map(function(x){ return x.trim(); }).filter(Boolean); }
+  // A SPACE, AND ANYTHING ELSE. Jessie, 2026-09-13: "make the last one just show space and things and remove skills",
+  // "For other forms of income or trade, do you have a space to offer right now? Give choices like an extra room, an event
+  // venue (and tag in background for space in offer)" and "...do you have anything else to offer right now? Give 4 choices
+  // like food clothing shoes jewelry plants (and tag in background as thing)". Skills are asked on screen 3. Both lists save
+  // to ikigai.haves, My haves on the profile: "An extra room:work:space", "Plants:work:thing". A have saved with no kind is
+  // shown under anything else. The choices are getReferenceData's spaceOfferTypes and thingOfferTypes.
+  function cwOfferNames(kind){
+    return CW_HAVES.filter(function(w){ var k = cwKindOf(w); return kind === 'space' ? k === 'space' : k !== 'space'; }).map(cwName);
+  }
   function cwOffersText(){
-    return cwSkillList().map(function(w){ return cwName(w) + ' (skill)'; })
-      .concat(CW_HAVES.map(function(w){ var k = cwKindOf(w); return cwName(w) + (k ? ' (' + k + ')' : ''); }))
-      .join(', ');
+    return cwOfferNames('space').map(function(n){ return n + ' (space)'; }).concat(cwOfferNames('thing')).join(', ');
   }
   function cwPaintOffers(){
     var box = document.getElementById('cw-offers'); if (!box) return;
-    var chip = function(label, kind, attr){
-      return '<span style="display:inline-flex;align-items:center;gap:8px;font-size:13.5px;padding:7px 10px 7px 14px;border-radius:20px;background:#1F699E;color:#fff;font-weight:700;">'
-        + _gpEsc(label) + (kind ? '<span style="font-weight:600;opacity:.7;font-size:11.5px;">\u00b7 ' + kind + '</span>' : '')
-        + '<button type="button" ' + attr + ' aria-label="Remove ' + _gpEsc(label) + '" style="background:none;border:0;color:#fff;font-size:16px;line-height:1;cursor:pointer;padding:0 2px;">\u00d7</button></span>';
-    };
-    var skills = cwSkillList(), h = '';
-    if (skills.length || CW_HAVES.length) {
-      h += '<div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px;">';
-      skills.forEach(function(w, i){ h += chip(cwName(w), 'skill', 'data-cw-dropskill="' + i + '"'); });
-      CW_HAVES.forEach(function(w, i){ h += chip(cwName(w), cwKindOf(w), 'data-cw-drophave="' + i + '"'); });
-      h += '</div>';
+    var rd = window._gpRd;
+    if (!rd || !Array.isArray(rd.spaceOfferTypes)) {
+      box.innerHTML = '<span class="cw-loading">Loading the choices</span>';
+      gpRefOnce().then(function(){ if (window._gpRd && Array.isArray(window._gpRd.spaceOfferTypes)) cwPaintOffers(); });
+      return;
     }
-    var pill = function(k, label){
-      var on = _cwOfferKind === k;
-      return '<button type="button" data-cw-kind="' + k + '" style="font:inherit;font-size:13.5px;padding:7px 14px;border-radius:20px;cursor:pointer;'
-        + (on ? 'background:#1F699E;border:1px solid #1F699E;color:#fff;font-weight:700;' : 'background:#fff;border:1px solid #C9DFF3;color:#1F699E;font-weight:600;') + '">' + label + '</button>';
+    var section = function(kind, opts, label){
+      var names = cwOfferNames(kind), lower = names.map(function(n){ return n.toLowerCase(); });
+      var list = opts.slice();
+      names.forEach(function(n){ if (!list.some(function(o){ return o.toLowerCase() === n.toLowerCase(); })) list.push(n); });   // their own still show
+      return '<div style="font-size:15px;font-weight:800;color:#1A2E42;margin:' + (kind === 'space' ? '0' : '22px') + ' 0 8px;">' + label + '</div>'
+        + '<div style="display:flex;flex-wrap:wrap;gap:7px;">' + list.map(function(v){
+            var on = lower.indexOf(v.toLowerCase()) > -1;
+            return '<button type="button" data-cw-have="' + kind + '" data-v="' + _gpEsc(v) + '" style="font:inherit;font-size:13.5px;padding:7px 14px;border-radius:20px;cursor:pointer;'
+              + (on ? 'background:#1F699E;border:1px solid #1F699E;color:#fff;font-weight:700;' : 'background:#fff;border:1px solid #C9DFF3;color:#1F699E;font-weight:600;')
+              + '">' + _gpEsc(v) + '</button>';
+          }).join('')
+        + '<button type="button" data-cw-haveother="' + kind + '" style="font:inherit;font-size:13.5px;padding:7px 14px;border-radius:20px;cursor:pointer;background:#EEF1F5;border:1px dashed #C4CDD8;color:#6B7A8D;font-weight:600;">+ Other</button></div>'
+        + '<div data-cw-havebox="' + kind + '" style="display:none;margin-top:10px;gap:8px;flex-wrap:wrap;">'
+        + '<input type="text" placeholder="In your own words" style="flex:1 1 220px;border:1.5px solid #DDE3EA;background:#F7FBFF;border-radius:10px;padding:9px 12px;font:inherit;font-size:14px;color:#1A2E42;">'
+        + '<button type="button" style="font:inherit;font-size:13.5px;font-weight:700;padding:8px 16px;border-radius:20px;border:0;background:#1F699E;color:#fff;cursor:pointer;">Add</button></div>';
     };
-    h += '<div style="display:flex;flex-wrap:wrap;gap:7px;">' + pill('skill', 'A skill') + pill('thing', 'A thing') + pill('space', 'A space') + '</div>';
-    if (_cwOfferKind) {
-      var ask = { skill: 'What skill?', thing: 'What thing?', space: 'What space?' }[_cwOfferKind];
-      h += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">'
-        + '<input type="text" id="cw-offer-in" placeholder="' + ask + '" style="flex:1 1 220px;border:1.5px solid #DDE3EA;background:#F7FBFF;border-radius:10px;padding:9px 12px;font:inherit;font-size:14px;color:#1A2E42;">'
-        + '<button type="button" id="cw-offer-add" style="font:inherit;font-size:13.5px;font-weight:700;padding:8px 16px;border-radius:20px;border:0;background:#1F699E;color:#fff;cursor:pointer;">Add</button></div>';
-    }
-    box.innerHTML = h;
-    box.querySelectorAll('[data-cw-kind]').forEach(function(b){
-      b.onclick = function(){ var k = b.getAttribute('data-cw-kind'); _cwOfferKind = (_cwOfferKind === k) ? '' : k; cwPaintOffers();
-        var i = document.getElementById('cw-offer-in'); if (i) { try { i.focus(); } catch (e) {} } };
-    });
-    box.querySelectorAll('[data-cw-dropskill]').forEach(function(b){
-      b.onclick = function(){ var w = cwSkillList()[parseInt(b.getAttribute('data-cw-dropskill'), 10)]; if (w) gpDropWord('introSkills', w, cwSkillsBox());
-        if (window._gpRepaints && window._gpRepaints.introSkills) window._gpRepaints.introSkills(); cwPaintOffers(); };
-    });
-    box.querySelectorAll('[data-cw-drophave]').forEach(function(b){
-      b.onclick = function(){ CW_HAVES.splice(parseInt(b.getAttribute('data-cw-drophave'), 10), 1); cwPaintOffers(); };
-    });
-    var add = function(){
-      var inp = document.getElementById('cw-offer-in'); if (!inp) return;
-      var v = String(inp.value || '').trim(); if (!v || !_cwOfferKind) return;
-      if (_cwOfferKind === 'skill') {
-        var t = cwSkillsBox();
-        var have = cwSkillList().some(function(w){ return cwName(w).toLowerCase() === v.toLowerCase(); });
-        if (t && !have) gpAddWord('introSkills', v + ':work:skill', '', t);
-        if (window._gpRepaints && window._gpRepaints.introSkills) window._gpRepaints.introSkills();
-      } else if (!CW_HAVES.some(function(w){ return cwName(w).toLowerCase() === v.toLowerCase(); })) {
-        CW_HAVES.push(v + ':work:' + _cwOfferKind);
-      }
-      _cwOfferKind = ''; cwPaintOffers();
+    box.innerHTML = '<div style="font-size:13.5px;color:#6B7A8D;margin-bottom:14px;">Pick as many as fit or add your own.</div>'
+      + section('space', rd.spaceOfferTypes, 'Space')
+      + section('thing', rd.thingOfferTypes || [], 'Things');
+    var toggle = function(kind, v){
+      var at = -1;
+      CW_HAVES.forEach(function(w, i){ if (at < 0 && cwName(w).toLowerCase() === v.toLowerCase() && (kind === 'space') === (cwKindOf(w) === 'space')) at = i; });
+      if (at > -1) CW_HAVES.splice(at, 1); else CW_HAVES.push(v + ':work:' + kind);
+      cwPaintOffers();
     };
-    var ab = document.getElementById('cw-offer-add'); if (ab) ab.onclick = add;
-    var ai = document.getElementById('cw-offer-in'); if (ai) ai.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); add(); } });
+    box.querySelectorAll('[data-cw-have]').forEach(function(b){ b.onclick = function(){ toggle(b.getAttribute('data-cw-have'), b.getAttribute('data-v')); }; });
+    box.querySelectorAll('[data-cw-haveother]').forEach(function(b){
+      var kind = b.getAttribute('data-cw-haveother'), bx = box.querySelector('[data-cw-havebox="' + kind + '"]');
+      var inp = bx.querySelector('input'), add = bx.querySelector('button');
+      var go = function(){ var v = String(inp.value || '').trim(); if (!v) return;
+        if (!cwOfferNames(kind).some(function(n){ return n.toLowerCase() === v.toLowerCase(); })) toggle(kind, v); else cwPaintOffers(); };
+      b.onclick = function(){ bx.style.display = bx.style.display === 'none' ? 'flex' : 'none'; if (bx.style.display === 'flex') { try { inp.focus(); } catch (e) {} } };
+      add.onclick = go;
+      inp.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); go(); } });
+    });
   }
 
   // ── OPEN TO WORK ─────────────────────────────────────────────────────────────────────────────
@@ -2136,6 +2151,10 @@
   // unpaidTime, 2026-09-13: Full-time, Part-time or One-time for non-paid work, asked before which types. It uses
   // the same options as paid work (paidWorkTypes), so the two can never drift apart.
   var CW_OTW = { paid: {}, unpaidTime: {}, unpaid: {} };
+  // I'M RETIRED lives where the old intake kept it: "true" among the parts of ikigai.retired. Everything else in that
+  // cell ("openToWork|kind:Projects|pay:Both") goes back exactly as it arrived.
+  var CW_RETIRED = { on: false, rest: [] };
+  function cwRetiredValue(){ return CW_RETIRED.rest.concat(CW_RETIRED.on ? ['true'] : []).join('|'); }
   function cwOtwList(side){ return Object.keys(CW_OTW[side]).filter(function(k){ return CW_OTW[side][k]; }); }
   function cwPaintOtw(){
     var box = document.getElementById('cw-otw'); if (!box) return;
@@ -2155,12 +2174,16 @@
           + '">' + _gpEsc(v) + '</button>';
       }).join('') + '</div>';
     };
+    // Jessie, 2026-09-13: "If you're open to paid work, what type of paid work are you open to? And add "I'm retired" as a
+    // toggle on below that", "Which types of non-paid work? To If you're open to non-paid work, what type are you open to?"
+    // and "Then ask What is your availability for non-paid work?".
+    var retired = '<div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:14px;"><button type="button" id="cw-retired" aria-pressed="' + (CW_RETIRED.on ? 'true' : 'false') + '" style="font:inherit;font-size:13.5px;padding:7px 14px;border-radius:20px;cursor:pointer;'
+      + (CW_RETIRED.on ? 'background:#1F699E;border:1px solid #1F699E;color:#fff;font-weight:700;' : 'background:#fff;border:1px solid #C9DFF3;color:#1F699E;font-weight:600;')
+      + '">I\u2019m retired</button></div>';
     box.innerHTML = '<div style="font-size:13.5px;color:#6B7A8D;margin-bottom:12px;">Pick as many as fit.</div>'
       + pills('paid', rd.paidWorkTypes || [])
-      + '<div style="font-size:17px;font-weight:800;color:#1A2E42;margin:26px 0 2px;">What type of non-paid work are you open to?</div>'
-      + '<div style="font-size:13.5px;color:#6B7A8D;margin-bottom:12px;">Pick as many as fit.</div>'
-      + pills('unpaidTime', rd.paidWorkTypes || [])
-      + '<div style="font-size:17px;font-weight:800;color:#1A2E42;margin:26px 0 2px;">Which types of non-paid work?</div>'
+      + retired
+      + '<div style="font-size:17px;font-weight:800;color:#1A2E42;margin:26px 0 2px;">If you\u2019re open to non-paid work, what type are you open to?</div>'
       + '<div style="font-size:13.5px;color:#6B7A8D;margin-bottom:12px;">Pick as many as fit.</div>'
       + pills('unpaid', rd.unpaidWorkTypes || [])
       // + OTHER, the way the other pickers have it. Jessie, 2026-09-13: "Make a chip for other like we normally do".
@@ -2168,7 +2191,11 @@
       + 'background:#EEF1F5;border:1px dashed #C4CDD8;color:#6B7A8D;font-weight:600;">+ Other</button></div>'
       + '<div id="cw-otw-otherbox" style="display:none;margin-top:10px;gap:8px;flex-wrap:wrap;">'
       + '<input type="text" id="cw-otw-otherin" placeholder="In your own words" style="flex:1 1 220px;border:1.5px solid #DDE3EA;background:#F7FBFF;border-radius:10px;padding:9px 12px;font:inherit;font-size:14px;color:#1A2E42;">'
-      + '<button type="button" id="cw-otw-otheradd" style="font:inherit;font-size:13.5px;font-weight:700;padding:8px 16px;border-radius:20px;border:0;background:#1F699E;color:#fff;cursor:pointer;">Add</button></div>';
+      + '<button type="button" id="cw-otw-otheradd" style="font:inherit;font-size:13.5px;font-weight:700;padding:8px 16px;border-radius:20px;border:0;background:#1F699E;color:#fff;cursor:pointer;">Add</button></div>'
+      + '<div style="font-size:17px;font-weight:800;color:#1A2E42;margin:26px 0 2px;">What is your availability for non-paid work?</div>'
+      + '<div style="font-size:13.5px;color:#6B7A8D;margin-bottom:12px;">Pick as many as fit.</div>'
+      + pills('unpaidTime', rd.paidWorkTypes || []);
+    var rb = document.getElementById('cw-retired'); if (rb) rb.onclick = function(){ CW_RETIRED.on = !CW_RETIRED.on; cwPaintOtw(); };
     box.querySelectorAll('[data-cw-otw]').forEach(function(b){
       b.onclick = function(){ var side = b.getAttribute('data-cw-otw'), v = b.getAttribute('data-v'); CW_OTW[side][v] = !CW_OTW[side][v]; cwPaintOtw(); };
     });
@@ -2410,6 +2437,8 @@
         }
         CW_SERVE = {}; _split(have.servesWho).forEach(function(v){ CW_SERVE[v] = true; });
         CW_PURPOSE.saved = String(have.purpose || '').trim();
+        var _rt = _split(have.retired);
+        CW_RETIRED = { on: _rt.some(function(x){ return x.toLowerCase() === 'true'; }), rest: _rt.filter(function(x){ return x.toLowerCase() !== 'true'; }) };
         CW_OTW = { paid: {}, unpaidTime: {}, unpaid: {} };
         _paid.forEach(function(v){ CW_OTW.paid[v] = true; });
         _unpaidTime.forEach(function(v){ CW_OTW.unpaidTime[v] = true; });
