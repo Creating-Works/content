@@ -3,7 +3,9 @@
   Copyright 2026 DayBalancer LLC. All rights reserved.
   hello@creating.works
 -->
-<!-- Version: V1.14 | Date: 2026-09-14 | LAST CHANGE: the choice lists are asked for by version, asked again fresh when a list is missing, and say so when they cannot load; every loading pill breathes; "Who would you most like to serve in your work or life?"; "For additional forms of income or trade, do you have any resources to offer others right now?". Jessie: "Never loaded", "Loading information button should breathe like we have on gather". -->
+<!-- Version: V1.16 | Date: 2026-09-14 | LAST CHANGE: the loading pill breathes over 3 seconds instead of 1.6; the skills screen is headed Skills and the care screen Attention towards, each asking its question at the size of the others; no lines under headings or between questions. Jessie: "make breathing button slower" "make What skills do you have? the size of the questions and the header as Skills" and "samewith What do you care about? and header as Attention towards". -->
+<!-- Previous: V1.15 | Date: 2026-09-14 | LAST CHANGE: the home page's layout, with its top bar, heading, rail of parts and panel, and no breadcrumb. Jessie: "stick with railing and dont move to wide screen panel without railing and remove all breadcrumbs" and "keep the top nav in place like you do on homeapge". -->
+<!-- Previous: V1.14 | Date: 2026-09-14 | LAST CHANGE: the choice lists are asked for by version, asked again fresh when a list is missing, and say so when they cannot load; every loading pill breathes; "Who would you most like to serve in your work or life?"; "For additional forms of income or trade, do you have any resources to offer others right now?". Jessie: "Never loaded", "Loading information button should breathe like we have on gather". -->
 <!-- Previous: V1.13 | Date: 2026-09-13 | LAST CHANGE: no question asked twice. Welcome needs only where you are and the skills screen needs a skill and a language; who your work serves under what you care about; the offer screen asks what you have to offer, a space or things (skills are screen 3), then What outcomes would you like work to give you?, then appreciation; open to work reworded with an I'm retired toggle and non-paid availability last. Jessie: "I'm trying not to ask the same question twice". -->
 <!-- Previous: V1.12 | Date: 2026-09-13 | LAST CHANGE: the question reads "What outcomes would you like to create with your work?". Jessie named the change. -->
 <!-- Previous: V1.11 | Date: 2026-09-13 | LAST CHANGE: an example already chosen is not shown a second time under the list of answers. Jessie: "Duplicates showing". -->
@@ -40,30 +42,53 @@
   *{box-sizing:border-box;}
   body{margin:0;background:var(--brand);color:var(--ink);
     font-family:'DM Sans','Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
-    line-height:1.55;padding:26px 18px 60px;}
-  .wrap{max-width:760px;margin:0 auto;}
-  .crumb{color:#fff;font-size:14px;font-weight:800;margin:0 0 14px;text-decoration:none;display:inline-block;cursor:pointer;}
-  .card{background:#fff;border-radius:14px;padding:24px 28px;}
+    line-height:1.55;padding:0;}
+  /* THE PAGE TEMPLATE, the one the home page uses. Jessie, 2026-09-14: "stick with railing and dont move to wide screen
+     panel without railing and remove all breadcrumbs". 1200 wide, a 340 rail, an 18px gap, one column below 860. */
+  .wrap{max-width:1200px;margin:0 auto;padding:24px 20px 60px;}
+  .head{margin-bottom:16px;}
+  .head h1{font-size:26px;font-weight:800;margin:0;color:#fff;}
+  .head .sub{color:#fff;opacity:.92;font-size:15px;margin-top:6px;max-width:62ch;}
+  .layout{display:grid;grid-template-columns:340px minmax(0,1fr);gap:18px;align-items:start;}
+  .tabs{background:#fff;border-radius:14px;padding:12px;height:fit-content;display:flex;flex-direction:column;gap:6px;}
+  .tab{display:block;width:100%;text-align:left;background:#fff;color:var(--brand);border:1.5px solid #C9D6E2;border-radius:9px;
+    font-family:inherit;font-size:14px;font-weight:700;padding:11px 14px;cursor:pointer;line-height:1.25;}
+  .tab:hover{background:var(--panel);}
+  .tab.on{background:var(--brand);color:#fff;border-color:var(--brand);}
+  .tab.on:hover{background:var(--brand);}
+  .tab:focus-visible{outline:2px solid var(--brand);outline-offset:2px;}
+  .card{background:#fff;border-radius:14px;padding:18px 30px 28px;min-height:280px;}
+  @media(max-width:860px){
+    .layout{grid-template-columns:1fr;}
+    .tabs{flex-direction:row;flex-wrap:wrap;}
+    .tab{width:auto;flex:1 1 40%;}
+  }
+  @media(max-width:760px){ .card{padding:14px 18px 22px;} .head h1{font-size:24px;} }
   .btn{background:var(--brand);color:#fff;border:0;font:inherit;font-size:14.5px;font-weight:700;
     padding:11px 22px;border-radius:24px;cursor:pointer;}
   .btn[disabled]{opacity:.6;cursor:default;}
   .cw-intro-box::placeholder{color:#9AA8B7;opacity:1;}
   /* WAITING IS THE BREATHING PILL, the same one the home page uses. */
   .cw-loading{display:inline-flex;align-items:center;background:#1F699E;color:#fff;font-size:13px;font-weight:700;
-    padding:8px 16px;border-radius:20px;animation:cw-breathe 1.6s ease-in-out infinite;}
+    padding:8px 16px;border-radius:20px;animation:cw-breathe 3s ease-in-out infinite;}   /* 3s a breath, 2026-09-14: "make breathing button slower" */
   @keyframes cw-breathe{0%,100%{opacity:1}50%{opacity:.62}}
 </style>
   <script src="https://2gather.network/nav/identity.js?v=14"></script>
 </head>
 <body>
 <div class="wrap">
-  <a class="crumb" id="intro-back" role="link" tabindex="0">&lsaquo; Back</a>
+  <div class="head">
+    <h1>Start a conversation</h1>
+    <div class="sub">Answer what you can and we will take it from there together.</div>
+  </div>
+  <div class="layout">
+  <div class="tabs" id="cw-rail"></div>
   <div class="card">
     <div style="font-size:22px;font-weight:800;color:#1A2E42;margin:0 0 6px;" id="gp-intro-title">Before you go in</div>
     <p id="gp-intro-lede" style="display:none;font-size:14.5px;color:#6B7A8D;margin:0 0 22px;line-height:1.55;"></p>
     <div id="cw-wait" style="display:none;padding:6px 0 4px;"><span class="cw-loading">Loading information</span></div>
     <div id="gp-intro-qs"></div>
-    <div id="gp-footer" style="display:flex;gap:12px;align-items:center;margin-top:22px;padding-top:18px;border-top:1px solid #f0f1f5;flex-wrap:wrap;">
+    <div id="gp-footer" style="display:flex;gap:12px;align-items:center;margin-top:22px;padding-top:6px;flex-wrap:wrap;">
       <button type="button" id="gp-step-back" style="display:none;font:inherit;font-size:14px;font-weight:700;padding:10px 18px;border-radius:24px;border:1.5px solid #C9DFF3;background:#fff;color:#1F699E;cursor:pointer;">Back</button>
       <span id="gp-step-count" style="font-size:13px;color:#6B7A8D;"></span>
       <span id="gp-step-note" style="font-size:13px;color:#7A2410;"></span>
@@ -72,6 +97,7 @@
       <button type="button" id="gp-step-skip" style="display:none;font:inherit;font-size:14px;font-weight:600;padding:10px 16px;border-radius:24px;border:0;background:transparent;color:#6B7A8D;cursor:pointer;text-decoration:underline;">Skip this</button>
       <button class="btn" id="gp-step-next">Next</button>
     </div>
+  </div>
   </div>
 </div>
 <script>
@@ -266,7 +292,7 @@
 
   function gpBlock(title, hint, body){
     var w = document.createElement('div');
-    w.style.cssText = 'padding:18px 0;border-top:1px solid #f0f1f5;';
+    w.style.cssText = 'padding:18px 0;';   // space separates, never a line
     var t = document.createElement('div');
     t.style.cssText = 'font-size:17px;font-weight:800;color:#1A2E42;margin-bottom:2px;';
     t.textContent = title;
@@ -1431,9 +1457,9 @@
     'First, so people can recognise you',
     (typeof GP_BROWSE !== 'undefined' && GP_BROWSE) ? 'What brings you joy?' : 'What do you enjoy?',
     (typeof GP_BROWSE !== 'undefined' && GP_BROWSE)
-      ? 'What skills do you have?'
+      ? 'Skills'   // Jessie, 2026-09-14: "the header as Skills"; the question itself is asked below at question size
       : 'What skills do you have?',
-    'What do you care about?',
+    'Attention towards',   // Jessie, 2026-09-14: "samewith What do you care about? and header as Attention towards"
     // Jessie, 2026-09-13: "Remove Anything you need, or have to offer?" and "What do you need?", and the
     // offer question reads as she wrote it. It is the heading, so it is not asked a second time below.
     // Jessie, 2026-09-13: "Can You make the last one just show space and things and remove skills?".
@@ -1495,7 +1521,31 @@
     return out;
   }
 
+  // THE RAIL. Start goes back to the home page's first screen, where the path is chosen, and each screen of this form is
+  // a part, the chosen one filled blue as on the home page. Nothing but Start until the saved answers have arrived, so a
+  // part cannot open empty. Moving forward from the rail passes the same checks Next does and saves the same way.
+  var CW_RAIL = ['Where you are', 'What brings you joy', 'Skills', 'Attention towards', 'What you offer', 'Open to work', 'Your answers'];
+  function cwPaintRail(){
+    var r = document.getElementById('cw-rail'); if (!r) return;
+    var waiting = (document.getElementById('cw-wait') || {}).style && document.getElementById('cw-wait').style.display !== 'none';
+    var h = '<button type="button" class="tab" data-rail="start">Start</button>';
+    if (!waiting) CW_RAIL.forEach(function(l, i){ h += '<button type="button" class="tab' + (i === _gpStep ? ' on' : '') + '" data-rail="' + i + '">' + l + '</button>'; });
+    r.innerHTML = h;
+    r.querySelectorAll('[data-rail]').forEach(function(b){
+      b.onclick = function(){
+        var k = b.getAttribute('data-rail');
+        if (k === 'start') { window.location.href = 'https://creating.works/'; return; }
+        var n = parseInt(k, 10);
+        if (n <= _gpStep) { gpShowStep(n); return; }
+        for (var i = _gpStep; i < n; i++) { if (!gpStepOK(i)) { gpShowStep(i); gpStepPaint(); return; } }
+        gpQuietSave();
+        if (n === GP_LAST) { gpSaveIntro(); return; }
+        gpShowStep(n);
+      };
+    });
+  }
   function gpStepPaint(){
+    try { cwPaintRail(); } catch (e) {}
     var next = document.getElementById('gp-step-next');
     var back = document.getElementById('gp-step-back');
     var note = document.getElementById('gp-step-note');
@@ -1631,7 +1681,7 @@
     GP_INTRO_Q.forEach(function(q, i){
       var wrap = document.createElement('div');
       // The offer is first on its screen now that What do you need? is not asked, so no line above it.
-      wrap.style.cssText = 'padding:18px 0;' + ((i && q.key !== 'introOffer') ? 'border-top:1px solid #f0f1f5;' : 'padding-top:0;');
+      wrap.style.cssText = 'padding:0 0 18px;';   // no line under a heading or between questions (design checklist)
       var t = document.createElement('div');
       t.style.cssText = 'font-size:17px;font-weight:800;color:#1A2E42;margin-bottom:2px;';
       t.textContent = q.q;
@@ -1676,6 +1726,7 @@
       if (_bare) {
         ta.style.display = 'none';
         if (!GP_BARE_HEAD[q.key]) { wrap.appendChild(t); wrap.appendChild(h); }
+        else if (q.key === 'introSkills' || q.key === 'introValues') wrap.appendChild(t);   // under the Skills heading, at the size of the other questions
         wrap.appendChild(ta);
       } else {
         wrap.appendChild(t); wrap.appendChild(h); wrap.appendChild(ta);
@@ -1804,10 +1855,7 @@
   // group they were joining, which looked like being thrown out halfway through. Doug did that
   // on 2026-08-31 and could not carry on. It only leaves from the first screen, where there is
   // nothing behind it.
-  document.getElementById('intro-back').addEventListener('click', function(){
-    if (_gpStep > 0) { gpShowStep(_gpStep - 1); return; }
-    window.location.href = 'https://creating.works/';
-  });
+  // No breadcrumb since V1.15: Start in the rail goes back to the home page's first screen.
   // The last screen. Somebody has just answered six questions and has never once seen what any
   // of it looks like from the outside, which is the only view that matters to anybody else.
   // YOUR ANSWERS, then What happens next, then Back and Send. Jessie, 2026-09-13: "Then go to showing answers /
@@ -1994,6 +2042,7 @@
   // claim that nothing had been said. Until getIntake answers, the card holds only the pill; then the first screen opens
   // with everything filled in. A failed load opens the form with its note that nothing saves.
   function cwWaiting(on){
+    setTimeout(function(){ try { cwPaintRail(); } catch (e) {} }, 0);
     var w = document.getElementById('cw-wait'), q = document.getElementById('gp-intro-qs'), f = document.getElementById('gp-footer');
     if (w) w.style.display = on ? '' : 'none';
     if (q) q.style.display = on ? 'none' : '';
@@ -2483,6 +2532,9 @@
       .catch(function(){ window._cwLoadFailed = true; cwWaiting(false); cwStat('Your saved answers did not load, so nothing here saves. A reload tries again.', true); });
   }
 </script>
+<!-- THE BAR, as on the home page. Jessie, 2026-09-14: "keep the top nav in place like you do on homeapge". -->
+<script>window.CW_SHOW_BAR = true;</script>
+<script src="https://2gather.network/nav/topbar.js?v=6.05" defer></script>
 </body>
 <!--
   Copyright 2026 DayBalancer LLC. All rights reserved.

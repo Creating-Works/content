@@ -10,7 +10,8 @@
 
   hello@creating.works
 -->
-<!-- Version: V1.25 | Date: 2026-09-13 | LAST CHANGE: the first screen's rail shows Start alone until Building something is picked, and a remembered Finding work choice is dropped. Jessie: "Don't show all buttons until you select what of the first two". -->
+<!-- Version: V1.26 | Date: 2026-09-14 | LAST CHANGE: the loading pill breathes over 3 seconds instead of 1.6. Jessie: "make breathing button slower". -->
+<!-- Previous: V1.25 | Date: 2026-09-13 | LAST CHANGE: the first screen's rail shows Start alone until Building something is picked, and a remembered Finding work choice is dropped. Jessie: "Don't show all buttons until you select what of the first two". -->
 <!-- Previous: V1.24 | Date: 2026-09-13 | LAST CHANGE: Finding work opens the one-question-at-a-time form at /work/, straight away when signed in and right after signing in otherwise. Jessie: "Yea it works publish". -->
 <!-- Previous: V1.23 | Date: 2026-09-13 | LAST CHANGE: Who is asking? reads "Are you working for yourself or are you representing a team within an organization?" under it. Jessie named the change. -->
 <!-- Previous: V1.22 | Date: 2026-09-13 | LAST CHANGE: Building something's What happens next drops "For each constituency we ask what they need and want, what they give, and what circulates back." Jessie named the change. -->
@@ -137,7 +138,7 @@
   /* WAITING IS THE BREATHING PILL. Sending and checking a code each take one trip to the backend. */
   .cw-loading{display:inline-flex;align-items:center;gap:8px;background:#1F699E;color:#fff;
     font-size:13px;font-weight:700;padding:8px 16px;border-radius:20px;white-space:nowrap;
-    animation:cw-breathe 1.6s ease-in-out infinite;}
+    animation:cw-breathe 3s ease-in-out infinite;}   /* 3s a breath, 2026-09-14: "make breathing button slower" */
   @keyframes cw-breathe{0%,100%{opacity:1}50%{opacity:.62}}
   .tick{display:flex;gap:10px;align-items:flex-start;font-size:14px;color:var(--ink);margin:0 0 12px;cursor:pointer;}
   .tick input{width:18px;height:18px;flex-shrink:0;margin:2px 0 0;accent-color:var(--brand);}
