@@ -972,6 +972,9 @@
     var dSec=addedSection('Added domains','dom-arrow');
     VALUES_ADDED.forEach(function(it){ addCard(vSec, it.t, 'Value', it.lvl); });
     DOMAINS_ADDED.forEach(function(it){ addCard(dSec, it.t, 'Domain', it.lvl); });
+    // A HEADING WITH NOTHING UNDER IT STILL SAYS WHAT IT IS. Jessie, 2026-09-14: "for some reason the domains
+    // subheading is not showing up correctly". It was only written when a card went in, so no domains meant a blank bar.
+    vSec.refresh(); dSec.refresh();
 
     function valueIdeaPool(){ var list=(mode==='values'?VALUE_IDEAS:DOMAIN_IDEAS), typ=(mode==='values'?'Value':'Domain'); return list.map(function(n){ return {name:n, tag:typ}; }); }
     function showAddOwn(){
