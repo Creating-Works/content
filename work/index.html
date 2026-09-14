@@ -3,7 +3,7 @@
   Copyright 2026 DayBalancer LLC. All rights reserved.
   hello@creating.works
 -->
-<!-- Version: V1.19 | Date: 2026-09-14 | LAST CHANGE: signing in, Start in the rail and the two "signed in on" lines go to https://creating.works/intro/, where the home page's form moved when the home page became Coming soon. Jessie: "move this to a page called Intro and make the index just say that". -->
+<!-- Version: V1.20 | Date: 2026-09-14 | LAST CHANGE: answers that name a kind of thing (Money) stay needs marked :work; every other answer is a work value in ikigai.workValues. Previous: V1.19: signing in, Start in the rail and the two "signed in on" lines go to https://creating.works/intro/, where the home page's form moved when the home page became Coming soon. Jessie: "move this to a page called Intro and make the index just say that". -->
 <!-- Previous: V1.18 | Date: 2026-09-14 | LAST CHANGE: the loading pill sits on the header's line, left of it; Offer reads Offerings in the header and the rail; Your purpose on Your answers is header size with a line above it. Jessie: "loading pill on same line as header", "Offer to Offerings", "Make Your purpose a header size on the answers page so it stands out with horizontal line above". -->
 <!-- Previous: V1.17 | Date: 2026-09-14 | LAST CHANGE: every screen has a one-word header, top right, with its questions under it at question size: Location, Joy, Skills, Attention towards, Offer, Open to work; the pill breathes over 2.3 seconds. Jessie: "go to 2.3 s for pill's cycle", "Where are you? to Location for header", "What brings you joy? as question font and Joy as header", "what you offer to Offer header", "put all headers on top right justified". -->
 <!-- Previous: V1.16 | Date: 2026-09-14 | LAST CHANGE: the loading pill breathes over 3 seconds instead of 1.6; the skills screen is headed Skills and the care screen Attention towards, each asking its question at the size of the others; no lines under headings or between questions. Jessie: "make breathing button slower" "make What skills do you have? the size of the questions and the header as Skills" and "samewith What do you care about? and header as Attention towards". -->
@@ -1897,9 +1897,18 @@
   }
 
   // THE SAVE, built in one place for every Next and for Send.
+  // WORK VALUES AND THINGS. Jessie, 2026-09-14, of these answers showing under Things on her 2Gather profile: "Those should
+  // fall under VALUES - but under a heading Work values in the values page. Money should be a thing yes". An answer that
+  // names a kind of thing (the profile's own four: Money, Physical goods, Consumables, Living things) stays a need marked
+  // :work; every other answer is a work value, in ikigai.workValues (workValuesTags in saveIntro).
+  var CW_THING_KINDS = { 'money': 1, 'physical goods': 1, 'consumables': 1, 'living things': 1 };
+  function cwIsThing(n){ return !!CW_THING_KINDS[String(n || '').trim().toLowerCase()]; }
+  function cwWorkValuesTags(){
+    return Object.keys(CW_WORK.picked).filter(function(k){ return CW_WORK.picked[k] && !cwIsThing(k); }).join('|');
+  }
   function cwNeedsTags(base){
     // What would work give you? decides every need ending in ":work". The others go back untouched.
-    var picks = Object.keys(CW_WORK.picked).filter(function(k){ return CW_WORK.picked[k]; }).map(function(k){ return k + ':work'; });
+    var picks = Object.keys(CW_WORK.picked).filter(function(k){ return CW_WORK.picked[k] && cwIsThing(k); }).map(function(k){ return k + ':work'; });
     var rest = String(base || '').split('|').map(function(x){ return x.trim(); }).filter(Boolean);
     if (window._gpLoaded) rest = rest.filter(function(x){ return !/:work$/i.test(x); });
     return rest.concat(picks).join('|');
@@ -1926,6 +1935,7 @@
       if (q.key === 'introOffer') return;   // offers live in ikigai.skills and ikigai.haves now (cw-offers)
       qs += '&' + q.key + '=' + encodeURIComponent(v);
     });
+    qs += '&workValuesTags=' + encodeURIComponent(cwWorkValuesTags());
     qs += '&needsTags='     + encodeURIComponent(cwNeedsTags(tagFor('introNeed')))
         + '&interestsTags=' + encodeURIComponent(tagFor('introEnjoy'))
         + '&skillsTags='    + encodeURIComponent(tagFor('introSkills'))
@@ -2501,7 +2511,9 @@
         // Work needs already saved from here are the truth once there are any; before that, the home page's
         // Finding work picks (read in cwLoadWork) stand in and are saved as work needs on the first Next.
         var _workSaved = String(have.needs || '').split('|').map(function(x){ return x.trim(); })
-          .filter(function(x){ return /:work$/i.test(x); }).map(function(x){ return x.replace(/:work$/i, ''); });
+          .filter(function(x){ return /:work$/i.test(x); }).map(function(x){ return x.replace(/:work$/i, ''); })
+          // and the work values (see WORK VALUES AND THINGS)
+          .concat(String(have.workValues || '').split('|').map(function(x){ return x.trim(); }).filter(Boolean));
         if (_workSaved.length && !CW_WORK.touched) {
           CW_WORK.picked = {}; _workSaved.forEach(function(n){ CW_WORK.picked[n] = true; });
           CW_WORK.fromIkigai = true;

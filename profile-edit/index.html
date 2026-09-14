@@ -354,7 +354,7 @@
     // every later field holding whatever it held before. Starting empty means a partial load
     // shows nothing rather than showing somebody else's answers.
     NEEDS_ADDED = []; ENJOY_ADDED = []; SKILLS_ADDED = []; SKILL_METHODS_ON = [];
-    VALUES_ADDED = []; DOMAINS_ADDED = []; EXPRESSION_ADDED = ['']; SECTIONS[4].data = [];
+    VALUES_ADDED = []; DOMAINS_ADDED = []; WORK_VALUES_ADDED = []; EXPRESSION_ADDED = ['']; SECTIONS[4].data = [];
     try{
       // A found profile is authoritative — empty fields mean empty, not the demo seed.
       _loaded={ postal:d.postal||'', retired:d.retired||'', bringType:d.bringType||'', wantsSignupList:d.wantsSignupList||'', languages:d.languages||'', photoURL:d.photoURL||'' };
@@ -363,7 +363,20 @@
       _said={ need:String(d.introNeed||'').trim(), enjoy:String(d.introEnjoy||'').trim(),
               skills:String(d.introSkills||'').trim(), values:String(d.introValues||'').trim(),
               offer:String(d.introOffer||'').trim() };
-      NEEDS_ADDED = parseNeedsStr(d.needs||'').map(function(n){ return { item:n.item, type:(n.ntype==='skill'?'person':n.ntype==='space'?'space':'thing'), category:n.category||'', level:'', local:!!n.local, detail:n.detail||'' }; });
+      // WORK VALUES. Jessie, 2026-09-14, of her answers to creating.works' "What would work give you?" showing under
+      // Things: "Those should fall under VALUES - but under a heading Work values in the values page. Money should be a
+      // thing yes". They live in ikigai.workValues. Answers saved before that sit in ikigai.needs marked :work; those that
+      // are not a kind of thing are read as work values here, and the next save moves them. Money and the other kinds of
+      // thing stay needs, and keep their :work mark so creating.works still finds them.
+      WORK_VALUES_ADDED = String(d.workValues||'').split('|').map(function(x){ return x.trim(); }).filter(Boolean);
+      var _thingKinds = {'money':1,'physical goods':1,'consumables':1,'living things':1};
+      NEEDS_ADDED = parseNeedsStr(d.needs||'').filter(function(n){
+        if (n.ntype === 'work' && !_thingKinds[String(n.item||'').trim().toLowerCase()]) {
+          if (WORK_VALUES_ADDED.map(function(x){ return x.toLowerCase(); }).indexOf(String(n.item).trim().toLowerCase()) < 0) WORK_VALUES_ADDED.push(String(n.item).trim());
+          return false;
+        }
+        return true;
+      }).map(function(n){ return { item:n.item, type:(n.ntype==='skill'?'person':n.ntype==='space'?'space':'thing'), category:n.category||'', level:'', local:!!n.local, detail:n.detail||'', work:(n.ntype==='work') }; });
       ENJOY_ADDED = parseTagStr(d.interests||'','level').map(function(x){ return { t:x.item, sel:(x.level?String(x.level).split(',').map(function(s){return s.trim();}).filter(Boolean):[]) }; });
       SKILLS_ADDED = parseTagStr(d.skills||'','level').map(function(x){ return { t:x.item, cat:x.category||'', level:x.level||'' }; });
       SKILL_METHODS_ON = (d.methods||'').split('|').filter(Boolean);
@@ -919,6 +932,8 @@
   var DOMAIN_IDEAS = ['Aerospace','Agriculture and Food','Arts and Entertainment','Building and Construction','Ecology and Nature','Education and Learning','Energy and Utilities','Financial','Government and Policy','Hospitality','Manufacturing','Media','Medical','Real Estate','Retail','Security and Defense','Technology','Telecommunications','Transportation','Wellness and Fitness'];
   var VALUES_ADDED = [];
   var DOMAINS_ADDED = [];
+  // WORK VALUES, 2026-09-14 (see WORK VALUES below renderValues): what somebody wants work to give them, from ikigai.workValues.
+  var WORK_VALUES_ADDED = [];
 
   function renderValues(){
     listEl.className='list flow'; listEl.innerHTML='';
@@ -950,7 +965,7 @@
     // what was already added, so a word already among somebody's values (older answers hold sector words there) showed
     // lit as a domain and could not be added as one. Each heading keeps its own list now: v| for values, d| for domains.
     var VAL_ON={};
-    function valKey(typeLabel, name){ return (typeLabel==='Domain'?'d|':'v|')+String(name).trim().toLowerCase(); }
+    function valKey(typeLabel, name){ return (typeLabel==='Domain'?'d|':typeLabel==='Work value'?'w|':'v|')+String(name).trim().toLowerCase(); }
     function syncValChips(){
       ideasZone.querySelectorAll('.cat').forEach(function(el){
         if(el.classList.contains('more')) return;
@@ -967,6 +982,8 @@
       var x=document.createElement('button'); x.className='practice-item-x'; x.innerHTML='&times;'; x.onclick=function(){ delete VAL_ON[key]; card.remove(); sectn.refresh(); syncValChips(); };
       head.appendChild(nm); head.appendChild(x); card.appendChild(head);
       var cat=document.createElement('div'); cat.className='practice-item-cat'; cat.textContent=typeLabel; card.appendChild(cat);
+      // A work value has no Exploring, Engaged or Leading: it is what somebody wants from work, not how far along they are.
+      if (typeLabel === 'Work value') { sectn.grid.appendChild(card); sectn.refresh(); syncValChips(); return; }
       var opts=document.createElement('div'); opts.className='practice-options';
       ['Exploring','Engaged','Leading'].forEach(function(lv){ var b=document.createElement('button'); b.className='practice-btn'+(level===lv?' selected':''); b.textContent=lv; b.onclick=function(){ var was=b.classList.contains('selected'); opts.querySelectorAll('.practice-btn').forEach(function(z){z.classList.remove('selected');}); if(!was){ b.classList.add('selected'); level=lv; } else { level=''; } }; opts.appendChild(b); });
       card.appendChild(opts);
@@ -977,6 +994,12 @@
     var dSec=addedSection('Added domains','dom-arrow');
     VALUES_ADDED.forEach(function(it){ addCard(vSec, it.t, 'Value', it.lvl); });
     DOMAINS_ADDED.forEach(function(it){ addCard(dSec, it.t, 'Domain', it.lvl); });
+    // Work values, under their own heading, only for somebody who has some (see WORK VALUES).
+    if (WORK_VALUES_ADDED.length) {
+      var wSec=addedSection('Work values','wv-arrow');
+      WORK_VALUES_ADDED.forEach(function(t){ addCard(wSec, t, 'Work value', ''); });
+      wSec.refresh();
+    }
     // A HEADING WITH NOTHING UNDER IT STILL SAYS WHAT IT IS. Jessie, 2026-09-14: "for some reason the domains
     // subheading is not showing up correctly". It was only written when a card went in, so no domains meant a blank bar.
     vSec.refresh(); dSec.refresh();
@@ -1374,7 +1397,7 @@
       +pvSection("What I'm seeking",0,seeking,pvSaid('need'))
       +pvSection('What I enjoy',1,enjoy,pvSaid('enjoy')+expr)
       +pvSection('My skills',2,'',methods+skills+pvSaid('skills'))
-      +pvSection('What I care about',3,'',vals+doms+pvSaid('values'))
+      +pvSection('What I care about',3,'',vals+doms+pvWrap((WORK_VALUES_ADDED||[]).map(function(t){ return pvTag(t); }).join(''), 'Work values')+pvSaid('values'))
       +pvSection('My haves',4,haves,pvSaid('offer'))
       +'</div>';
     pv.querySelectorAll('.pv-edit').forEach(function(b){ if(b.id==='pv-photo-btn'||b.id==='pv-bookmark') return; b.onclick=function(){ requestEdit(parseInt(b.getAttribute('data-step'),10)); }; });
@@ -1673,11 +1696,11 @@
         var ms=[]; listEl.querySelectorAll('.method-item.on .method-text').forEach(function(m){ ms.push(m.textContent); });
         SKILL_METHODS_ON=ms;
       } else if(sec.custom==='values'){
-        var vals=[],doms=[]; listEl.querySelectorAll('.practice-grid .practice-item').forEach(function(c){
+        var vals=[],doms=[],wvs=[]; listEl.querySelectorAll('.practice-grid .practice-item').forEach(function(c){
           var nm=c.querySelector('.practice-item-name'); if(!nm) return;
           var ty=c.querySelector('.practice-item-cat'), lv=c.querySelector('.practice-btn.selected');
-          var o={t:nm.textContent, lvl:lv?lv.textContent:''}; if(ty&&ty.textContent==='Domain') doms.push(o); else vals.push(o); });
-        VALUES_ADDED=vals; DOMAINS_ADDED=doms;
+          var o={t:nm.textContent, lvl:lv?lv.textContent:''}; if(ty&&ty.textContent==='Domain') doms.push(o); else if(ty&&ty.textContent==='Work value') wvs.push(o.t); else vals.push(o); });
+        VALUES_ADDED=vals; DOMAINS_ADDED=doms; WORK_VALUES_ADDED=wvs;
       }
     }catch(e){}
   }
@@ -1689,7 +1712,7 @@
       needs: NEEDS_ADDED.map(function(n){
         var nm = String(n.item||'').trim() || String(n.detail||'').trim();
         if(!nm) return '';
-        var nt=(n.type==='person'?'skill':n.type==='space'?'space':'thing');
+        var nt=n.work?'work':(n.type==='person'?'skill':n.type==='space'?'space':'thing');   // :work kept (see WORK VALUES)
         var extra = (String(n.item||'').trim() && n.detail) ? '~'+encodeURIComponent(n.detail) : '';
         return nm+(n.local?':local':'')+':'+nt+(n.category?':'+n.category:'')+extra;
       }).filter(Boolean).join('|'),
@@ -1697,6 +1720,7 @@
       skills: SKILLS_ADDED.map(function(x){ return x.t+':'+(x.cat||'')+':'+(x.level||''); }).join('|'),
       values: VALUES_ADDED.map(function(x){ return x.t+':Value:'+(x.lvl||''); }).join('|'),
       domains: DOMAINS_ADDED.map(function(x){ return x.t+(x.lvl?':'+x.lvl:''); }).join('|'),
+      workValues: (WORK_VALUES_ADDED||[]).join('|'),
       methods: (SKILL_METHODS_ON||[]).join('|'),
       expression: EXPRESSION_ADDED.filter(Boolean).join('|'),
       haves: (SECTIONS[4].data||[]).map(function(h){ return (h.text||'')+(h.cats&&h.cats[0]?':'+h.cats[0]:''); }).filter(function(s){ return s && s.charAt(0)!==':'; }).join('|')
@@ -1743,7 +1767,7 @@
     var u=GS_URL+'?action=saveIntake&appearId='+encodeURIComponent(_id)+'&secure=1&editToken='+encodeURIComponent(_editToken)
 
       +'&needs='+encodeURIComponent(d.needs)+'&interests='+encodeURIComponent(d.interests)+'&skills='+encodeURIComponent(d.skills)
-      +'&values='+encodeURIComponent(d.values)+'&domains='+encodeURIComponent(d.domains)+'&methods='+encodeURIComponent(d.methods)
+      +'&values='+encodeURIComponent(d.values)+'&domains='+encodeURIComponent(d.domains)+'&workValues='+encodeURIComponent(d.workValues)+'&methods='+encodeURIComponent(d.methods)
       +'&expression='+encodeURIComponent(d.expression)+'&haves='+encodeURIComponent(d.haves)
       +'&retired='+encodeURIComponent(_loaded.retired||'')+'&bringType='+encodeURIComponent(_loaded.bringType||'')
       +'&wantsSignupList='+encodeURIComponent(_loaded.wantsSignupList||'')+'&languages='+encodeURIComponent(_loaded.languages||'')+'&postal='+encodeURIComponent(_loaded.postal||'')
