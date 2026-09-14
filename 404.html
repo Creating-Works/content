@@ -24,7 +24,7 @@
   (function () {
     var p = location.pathname;
     if (/^\/(build|work)(\/[a-z]+)?\/?$/.test(p)) {
-      location.replace('/?to=' + encodeURIComponent(p) + location.hash);
+      location.replace('/intro/?to=' + encodeURIComponent(p) + location.hash);   // the form lives at /intro/ since 2026-09-14
     }
   })();
 </script>

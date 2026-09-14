@@ -3,7 +3,8 @@
   Copyright 2026 DayBalancer LLC. All rights reserved.
   hello@creating.works
 -->
-<!-- Version: V1.18 | Date: 2026-09-14 | LAST CHANGE: the loading pill sits on the header's line, left of it; Offer reads Offerings in the header and the rail; Your purpose on Your answers is header size with a line above it. Jessie: "loading pill on same line as header", "Offer to Offerings", "Make Your purpose a header size on the answers page so it stands out with horizontal line above". -->
+<!-- Version: V1.19 | Date: 2026-09-14 | LAST CHANGE: signing in, Start in the rail and the two "signed in on" lines go to https://creating.works/intro/, where the home page's form moved when the home page became Coming soon. Jessie: "move this to a page called Intro and make the index just say that". -->
+<!-- Previous: V1.18 | Date: 2026-09-14 | LAST CHANGE: the loading pill sits on the header's line, left of it; Offer reads Offerings in the header and the rail; Your purpose on Your answers is header size with a line above it. Jessie: "loading pill on same line as header", "Offer to Offerings", "Make Your purpose a header size on the answers page so it stands out with horizontal line above". -->
 <!-- Previous: V1.17 | Date: 2026-09-14 | LAST CHANGE: every screen has a one-word header, top right, with its questions under it at question size: Location, Joy, Skills, Attention towards, Offer, Open to work; the pill breathes over 2.3 seconds. Jessie: "go to 2.3 s for pill's cycle", "Where are you? to Location for header", "What brings you joy? as question font and Joy as header", "what you offer to Offer header", "put all headers on top right justified". -->
 <!-- Previous: V1.16 | Date: 2026-09-14 | LAST CHANGE: the loading pill breathes over 3 seconds instead of 1.6; the skills screen is headed Skills and the care screen Attention towards, each asking its question at the size of the others; no lines under headings or between questions. Jessie: "make breathing button slower" "make What skills do you have? the size of the questions and the header as Skills" and "samewith What do you care about? and header as Attention towards". -->
 <!-- Previous: V1.15 | Date: 2026-09-14 | LAST CHANGE: the home page's layout, with its top bar, heading, rail of parts and panel, and no breadcrumb. Jessie: "stick with railing and dont move to wide screen panel without railing and remove all breadcrumbs" and "keep the top nav in place like you do on homeapge". -->
@@ -176,7 +177,7 @@
   // signed-out person to sign in first.
   if (!meId) {
     var _here = encodeURIComponent(location.pathname + location.search);
-    window.location.replace('https://creating.works/?path=work');   // the home page signs them in and brings them back here
+    window.location.replace('https://creating.works/intro/?path=work');   // the intro page signs them in and brings them back here
   }
   window._gpAlreadyIn = (params.get('already') || '') === '1';
   window._gpFirstTime = (params.get('first') || '') === '1';
@@ -1523,7 +1524,7 @@
     r.querySelectorAll('[data-rail]').forEach(function(b){
       b.onclick = function(){
         var k = b.getAttribute('data-rail');
-        if (k === 'start') { window.location.href = 'https://creating.works/'; return; }
+        if (k === 'start') { window.location.href = 'https://creating.works/intro/'; return; }
         var n = parseInt(k, 10);
         if (n <= _gpStep) { gpShowStep(n); return; }
         for (var i = _gpStep; i < n; i++) { if (!gpStepOK(i)) { gpShowStep(i); gpStepPaint(); return; } }
@@ -1970,7 +1971,7 @@
     if (!window._gpLoaded) { cwStat(window._cwLoadFailed ? 'Your saved answers did not load, so nothing can be sent. A reload tries again.' : 'Your saved answers are still loading and Send works once they arrive.', !!window._cwLoadFailed); return; }
     var tk = cwToken();
     if (!tk) {
-      if (stat) { stat.style.color = '#7A2410'; stat.innerHTML = 'Sending needs you signed in on <a href="https://creating.works/" style="color:#1F699E;font-weight:700;">the home page</a>.'; }
+      if (stat) { stat.style.color = '#7A2410'; stat.innerHTML = 'Sending needs you signed in on <a href="https://creating.works/intro/" style="color:#1F699E;font-weight:700;">the intro page</a>.'; }
       return;
     }
     var qs = cwBuildQs();
@@ -2089,7 +2090,7 @@
         + 'border-radius:20px;border:0;background:#1F699E;color:#fff;cursor:pointer;">Add</button></div>';
     } else if (state === 'signin') {
       h += '<div style="font-size:14px;color:#4B5A6D;margin-bottom:24px;">The choices show once you are signed in on '
-        + '<a href="https://creating.works/" style="color:#1F699E;font-weight:700;">the home page</a>.</div>';
+        + '<a href="https://creating.works/intro/" style="color:#1F699E;font-weight:700;">the intro page</a>.</div>';
     } else if (state === 'failed') {
       h += '<div style="font-size:14px;color:#7A2410;margin-bottom:24px;">The choices did not load and a reload looks again.</div>';
     } else {
