@@ -3,7 +3,8 @@
   Copyright 2026 DayBalancer LLC. All rights reserved.
   hello@creating.works
 -->
-<!-- Version: V1.9 | Date: 2026-09-13 | LAST CHANGE: Your purpose offers a few statements to pick from, one or more, instead of one sentence joining every answer. Jessie: "What of there are multiple purpose statements bcz they selected so much? Can you give them a few to select from?". -->
+<!-- Version: V1.10 | Date: 2026-09-13 | LAST CHANGE: until the saved answers arrive the card shows a breathing Loading information and no empty questions. Jessie: "shouldn't it not show unanswered pages and instead show a breathing loading info button?". -->
+<!-- Previous: V1.9 | Date: 2026-09-13 | LAST CHANGE: Your purpose offers a few statements to pick from, one or more, instead of one sentence joining every answer. Jessie: "What of there are multiple purpose statements bcz they selected so much? Can you give them a few to select from?". -->
 <!-- Previous: V1.8 | Date: 2026-09-13 | LAST CHANGE: "Who would you most like your work to serve?" under What comes most naturally to you?, and Your answers drafts a purpose that Send saves to ikigai.purpose. Jessie: "Yes addd this below Facilitation and coaching question". -->
 <!-- Previous: V1.7 | Date: 2026-09-13 | LAST CHANGE: Which types of non-paid work? has + Other, which adds somebody's own as a picked choice. Jessie: "Make a chip for other like we normally do". -->
 <!-- Previous: V1.6 | Date: 2026-09-13 | LAST CHANGE: "What would work give you?" reads "What outcomes would you like work to give you?". Jessie named the change. -->
@@ -43,6 +44,11 @@
     padding:11px 22px;border-radius:24px;cursor:pointer;}
   .btn[disabled]{opacity:.6;cursor:default;}
   .cw-intro-box::placeholder{color:#9AA8B7;opacity:1;}
+  /* WAITING IS THE BREATHING PILL, the same one the home page uses. */
+  .cw-loading{display:inline-flex;align-items:center;background:#1F699E;color:#fff;font-size:13px;font-weight:700;
+    padding:8px 16px;border-radius:20px;animation:cw-breathe 1.6s ease-in-out infinite;}
+  @keyframes cw-breathe{0%,100%{opacity:1}50%{opacity:.62}}
+  @media (prefers-reduced-motion: reduce){ .cw-loading{animation:none;} }
 </style>
   <script src="https://2gather.network/nav/identity.js?v=14"></script>
 </head>
@@ -52,8 +58,9 @@
   <div class="card">
     <div style="font-size:22px;font-weight:800;color:#1A2E42;margin:0 0 6px;" id="gp-intro-title">Before you go in</div>
     <p id="gp-intro-lede" style="display:none;font-size:14.5px;color:#6B7A8D;margin:0 0 22px;line-height:1.55;"></p>
+    <div id="cw-wait" style="display:none;padding:6px 0 4px;"><span class="cw-loading">Loading information</span></div>
     <div id="gp-intro-qs"></div>
-    <div style="display:flex;gap:12px;align-items:center;margin-top:22px;padding-top:18px;border-top:1px solid #f0f1f5;flex-wrap:wrap;">
+    <div id="gp-footer" style="display:flex;gap:12px;align-items:center;margin-top:22px;padding-top:18px;border-top:1px solid #f0f1f5;flex-wrap:wrap;">
       <button type="button" id="gp-step-back" style="display:none;font:inherit;font-size:14px;font-weight:700;padding:10px 18px;border-radius:24px;border:1.5px solid #C9DFF3;background:#fff;color:#1F699E;cursor:pointer;">Back</button>
       <span id="gp-step-count" style="font-size:13px;color:#6B7A8D;"></span>
       <span id="gp-step-note" style="font-size:13px;color:#7A2410;"></span>
@@ -1946,6 +1953,17 @@
   // disappear. Draw the empty form first so a slow or failed lookup never leaves
   // somebody staring at nothing, then fill it in when their answers arrive.
   gpRenderIntro(null);
+  // NOTHING IS ASKED BEFORE THE SAVED ANSWERS ARE HERE. Jessie, 2026-09-13: "If I already see my answers the first time,
+  // shouldn't it not show unanswered pages and instead show a breathing loading info button?". The empty questions were a
+  // claim that nothing had been said. Until getIntake answers, the card holds only the pill; then the first screen opens
+  // with everything filled in. A failed load opens the form with its note that nothing saves.
+  function cwWaiting(on){
+    var w = document.getElementById('cw-wait'), q = document.getElementById('gp-intro-qs'), f = document.getElementById('gp-footer');
+    if (w) w.style.display = on ? '' : 'none';
+    if (q) q.style.display = on ? 'none' : '';
+    if (f) f.style.display = on ? 'none' : 'flex';
+  }
+  if (meId) cwWaiting(true);
 
   // ── WHAT WOULD WORK GIVE YOU, ON THE OFFER SCREEN ───────────────────────────────────────────
   // It was the first screen, then was to follow joy, and Jessie put it on the offer screen instead,
@@ -2407,9 +2425,10 @@
         if (window._cwSentLoaded) { window._cwSent = true; if (!CW_PURPOSE.edited) CW_PURPOSE.text = CW_PURPOSE.saved; _cwSentQs = cwSendKey(); }
         // A Next pressed while loading saves now, from the answers as they stand with the saved ones in.
         if (window._cwWantedSave) { window._cwWantedSave = false; _cwLastQs = null; cwStat(''); gpQuietSave(); }
+        cwWaiting(false);
         gpStepPaint();
       })
-      .catch(function(){ window._cwLoadFailed = true; cwStat('Your saved answers did not load, so nothing here saves. A reload tries again.', true); });
+      .catch(function(){ window._cwLoadFailed = true; cwWaiting(false); cwStat('Your saved answers did not load, so nothing here saves. A reload tries again.', true); });
   }
 </script>
 </body>
