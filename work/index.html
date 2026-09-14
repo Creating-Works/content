@@ -3,7 +3,8 @@
   Copyright 2026 DayBalancer LLC. All rights reserved.
   hello@creating.works
 -->
-<!-- Version: V1.16 | Date: 2026-09-14 | LAST CHANGE: the loading pill breathes over 3 seconds instead of 1.6; the skills screen is headed Skills and the care screen Attention towards, each asking its question at the size of the others; no lines under headings or between questions. Jessie: "make breathing button slower" "make What skills do you have? the size of the questions and the header as Skills" and "samewith What do you care about? and header as Attention towards". -->
+<!-- Version: V1.17 | Date: 2026-09-14 | LAST CHANGE: every screen has a one-word header, top right, with its questions under it at question size: Location, Joy, Skills, Attention towards, Offer, Open to work; the pill breathes over 2.3 seconds. Jessie: "go to 2.3 s for pill's cycle", "Where are you? to Location for header", "What brings you joy? as question font and Joy as header", "what you offer to Offer header", "put all headers on top right justified". -->
+<!-- Previous: V1.16 | Date: 2026-09-14 | LAST CHANGE: the loading pill breathes over 3 seconds instead of 1.6; the skills screen is headed Skills and the care screen Attention towards, each asking its question at the size of the others; no lines under headings or between questions. Jessie: "make breathing button slower" "make What skills do you have? the size of the questions and the header as Skills" and "samewith What do you care about? and header as Attention towards". -->
 <!-- Previous: V1.15 | Date: 2026-09-14 | LAST CHANGE: the home page's layout, with its top bar, heading, rail of parts and panel, and no breadcrumb. Jessie: "stick with railing and dont move to wide screen panel without railing and remove all breadcrumbs" and "keep the top nav in place like you do on homeapge". -->
 <!-- Previous: V1.14 | Date: 2026-09-14 | LAST CHANGE: the choice lists are asked for by version, asked again fresh when a list is missing, and say so when they cannot load; every loading pill breathes; "Who would you most like to serve in your work or life?"; "For additional forms of income or trade, do you have any resources to offer others right now?". Jessie: "Never loaded", "Loading information button should breathe like we have on gather". -->
 <!-- Previous: V1.13 | Date: 2026-09-13 | LAST CHANGE: no question asked twice. Welcome needs only where you are and the skills screen needs a skill and a language; who your work serves under what you care about; the offer screen asks what you have to offer, a space or things (skills are screen 3), then What outcomes would you like work to give you?, then appreciation; open to work reworded with an I'm retired toggle and non-paid availability last. Jessie: "I'm trying not to ask the same question twice". -->
@@ -70,7 +71,7 @@
   .cw-intro-box::placeholder{color:#9AA8B7;opacity:1;}
   /* WAITING IS THE BREATHING PILL, the same one the home page uses. */
   .cw-loading{display:inline-flex;align-items:center;background:#1F699E;color:#fff;font-size:13px;font-weight:700;
-    padding:8px 16px;border-radius:20px;animation:cw-breathe 3s ease-in-out infinite;}   /* 3s a breath, 2026-09-14: "make breathing button slower" */
+    padding:8px 16px;border-radius:20px;animation:cw-breathe 2.3s ease-in-out infinite;}   /* 2.3s a breath, 2026-09-14: "go to 2.3 s for pill's cycle" */
   @keyframes cw-breathe{0%,100%{opacity:1}50%{opacity:.62}}
 </style>
   <script src="https://2gather.network/nav/identity.js?v=14"></script>
@@ -84,7 +85,7 @@
   <div class="layout">
   <div class="tabs" id="cw-rail"></div>
   <div class="card">
-    <div style="font-size:22px;font-weight:800;color:#1A2E42;margin:0 0 6px;" id="gp-intro-title">Before you go in</div>
+    <div style="font-size:22px;font-weight:800;color:#1A2E42;margin:0 0 10px;text-align:right;" id="gp-intro-title">Before you go in</div>
     <p id="gp-intro-lede" style="display:none;font-size:14.5px;color:#6B7A8D;margin:0 0 22px;line-height:1.55;"></p>
     <div id="cw-wait" style="display:none;padding:6px 0 4px;"><span class="cw-loading">Loading information</span></div>
     <div id="gp-intro-qs"></div>
@@ -1453,27 +1454,9 @@
   //
   // Step 0 is the only wall on the site: a photo, a language and a place. Everything after it is
   // asked properly and can be left, because the gate that matters is joining a group.
-  var GP_STEP_TITLES = [
-    'First, so people can recognise you',
-    (typeof GP_BROWSE !== 'undefined' && GP_BROWSE) ? 'What brings you joy?' : 'What do you enjoy?',
-    (typeof GP_BROWSE !== 'undefined' && GP_BROWSE)
-      ? 'Skills'   // Jessie, 2026-09-14: "the header as Skills"; the question itself is asked below at question size
-      : 'What skills do you have?',
-    'Attention towards',   // Jessie, 2026-09-14: "samewith What do you care about? and header as Attention towards"
-    // Jessie, 2026-09-13: "Remove Anything you need, or have to offer?" and "What do you need?", and the
-    // offer question reads as she wrote it. It is the heading, so it is not asked a second time below.
-    // Jessie, 2026-09-13: "Can You make the last one just show space and things and remove skills?".
-    // then "For other forms of income or trade, what do you have to offer right now? Space: options and other / Things:
-    // options and other".
-    // and on 2026-09-14 "For additional forms of income or trade, do you have any resources to offer others right now?".
-    'For additional forms of income or trade, do you have any resources to offer others right now?'
-  ].concat((typeof GP_BROWSE !== 'undefined' && GP_BROWSE)
-    // How do you like to be thanked has moved, so it is not a screen here any more and the
-    // profile is what comes after the last question.
-    // Jessie, 2026-09-13: "How do you like to get appreciated? 🎁 ... As last question".
-    // Appreciation sits at the bottom of the space and things screen now (2026-09-13).
-    ? ['If you\u2019re open to paid work, what type of paid work are you open to?', 'Your answers']
-    : ['How do you like to be thanked?', 'This is your profile']);
+  // One-word headers, 2026-09-14: "Where are you? to Location for header", "Joy as header", "the header as Skills",
+  // "header as Attention towards", "what you offer to Offer header". Open to work followed the same pattern.
+  var GP_STEP_TITLES = ['Location', 'Joy', 'Skills', 'Attention towards', 'Offer', 'Open to work', 'Your answers'];
   var _gpStep = 0;
   var GP_LAST = GP_STEP_TITLES.length - 1;
   // Somebody sent here from a group arrived mid-join and the page never said which group, so
@@ -1524,7 +1507,7 @@
   // THE RAIL. Start goes back to the home page's first screen, where the path is chosen, and each screen of this form is
   // a part, the chosen one filled blue as on the home page. Nothing but Start until the saved answers have arrived, so a
   // part cannot open empty. Moving forward from the rail passes the same checks Next does and saves the same way.
-  var CW_RAIL = ['Where you are', 'What brings you joy', 'Skills', 'Attention towards', 'What you offer', 'Open to work', 'Your answers'];
+  var CW_RAIL = ['Location', 'Joy', 'Skills', 'Attention towards', 'Offer', 'Open to work', 'Your answers'];
   function cwPaintRail(){
     var r = document.getElementById('cw-rail'); if (!r) return;
     var waiting = (document.getElementById('cw-wait') || {}).style && document.getElementById('cw-wait').style.display !== 'none';
@@ -1554,10 +1537,9 @@
     // Coming back to the first screen used to leave the last question's heading up there, so
     // the photo screen introduced itself as whatever somebody had just answered.
     // Jessie, 2026-09-13: the offer question is the same size as What would work give you? under it.
-    if (title) title.style.fontSize = (_gpStep === 4 || _gpStep === 5) ? '17px' : '22px';   // the two screens asking two questions
-    if (title) title.textContent = (_gpStep > 0)
-      ? GP_STEP_TITLES[_gpStep]
-      : (window._gpWelcome || GP_STEP_TITLES[0]);
+    // HEADERS, TOP RIGHT. Jessie, 2026-09-14: "put all headers on top right justified". Every screen has a header and its
+    // questions under it at question size, so the header is always the same size.
+    if (title) title.textContent = GP_STEP_TITLES[_gpStep];   // Location on the first screen, not a welcome
     if (count) count.textContent = (_gpStep < GP_LAST) ? ((_gpStep + 1) + ' of ' + GP_LAST) : '';
     if (back) back.style.display = _gpStep === 0 ? 'none' : '';
     var skip = document.getElementById('gp-step-skip');
@@ -1726,7 +1708,8 @@
       if (_bare) {
         ta.style.display = 'none';
         if (!GP_BARE_HEAD[q.key]) { wrap.appendChild(t); wrap.appendChild(h); }
-        else if (q.key === 'introSkills' || q.key === 'introValues') wrap.appendChild(t);   // under the Skills heading, at the size of the other questions
+        else if (q.key === 'introSkills' || q.key === 'introValues') wrap.appendChild(t);
+        else if (q.key === 'introEnjoy') { t.textContent = 'What brings you joy?'; wrap.appendChild(t); }   // "What brings you joy? as question font"   // under the Skills heading, at the size of the other questions
         wrap.appendChild(ta);
       } else {
         wrap.appendChild(t); wrap.appendChild(h); wrap.appendChild(ta);
@@ -2181,7 +2164,8 @@
         + '<input type="text" placeholder="In your own words" style="flex:1 1 220px;border:1.5px solid #DDE3EA;background:#F7FBFF;border-radius:10px;padding:9px 12px;font:inherit;font-size:14px;color:#1A2E42;">'
         + '<button type="button" style="font:inherit;font-size:13.5px;font-weight:700;padding:8px 16px;border-radius:20px;border:0;background:#1F699E;color:#fff;cursor:pointer;">Add</button></div>';
     };
-    box.innerHTML = '<div style="font-size:13.5px;color:#6B7A8D;margin-bottom:14px;">Pick as many as fit or add your own.</div>'
+    box.innerHTML = '<div style="font-size:17px;font-weight:800;color:#1A2E42;margin-bottom:2px;">For additional forms of income or trade, do you have any resources to offer others right now?</div>'
+      + '<div style="font-size:13.5px;color:#6B7A8D;margin-bottom:14px;">Pick as many as fit or add your own.</div>'
       + section('space', rd.spaceOfferTypes, 'Space')
       + section('thing', rd.thingOfferTypes || [], 'Things');
     var toggle = function(kind, v){
@@ -2240,7 +2224,8 @@
     var retired = '<div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:14px;"><button type="button" id="cw-retired" aria-pressed="' + (CW_RETIRED.on ? 'true' : 'false') + '" style="font:inherit;font-size:13.5px;padding:7px 14px;border-radius:20px;cursor:pointer;'
       + (CW_RETIRED.on ? 'background:#1F699E;border:1px solid #1F699E;color:#fff;font-weight:700;' : 'background:#fff;border:1px solid #C9DFF3;color:#1F699E;font-weight:600;')
       + '">I\u2019m retired</button></div>';
-    box.innerHTML = '<div style="font-size:13.5px;color:#6B7A8D;margin-bottom:12px;">Pick as many as fit.</div>'
+    box.innerHTML = '<div style="font-size:17px;font-weight:800;color:#1A2E42;margin-bottom:2px;">If you\u2019re open to paid work, what type of paid work are you open to?</div>'
+      + '<div style="font-size:13.5px;color:#6B7A8D;margin-bottom:12px;">Pick as many as fit.</div>'
       + pills('paid', rd.paidWorkTypes || [])
       + retired
       + '<div style="font-size:17px;font-weight:800;color:#1A2E42;margin:26px 0 2px;">If you\u2019re open to non-paid work, what type are you open to?</div>'
