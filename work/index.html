@@ -3,7 +3,8 @@
   Copyright 2026 DayBalancer LLC. All rights reserved.
   hello@creating.works
 -->
-<!-- Version: V1.17 | Date: 2026-09-14 | LAST CHANGE: every screen has a one-word header, top right, with its questions under it at question size: Location, Joy, Skills, Attention towards, Offer, Open to work; the pill breathes over 2.3 seconds. Jessie: "go to 2.3 s for pill's cycle", "Where are you? to Location for header", "What brings you joy? as question font and Joy as header", "what you offer to Offer header", "put all headers on top right justified". -->
+<!-- Version: V1.18 | Date: 2026-09-14 | LAST CHANGE: the loading pill sits on the header's line, left of it; Offer reads Offerings in the header and the rail; Your purpose on Your answers is header size with a line above it. Jessie: "loading pill on same line as header", "Offer to Offerings", "Make Your purpose a header size on the answers page so it stands out with horizontal line above". -->
+<!-- Previous: V1.17 | Date: 2026-09-14 | LAST CHANGE: every screen has a one-word header, top right, with its questions under it at question size: Location, Joy, Skills, Attention towards, Offer, Open to work; the pill breathes over 2.3 seconds. Jessie: "go to 2.3 s for pill's cycle", "Where are you? to Location for header", "What brings you joy? as question font and Joy as header", "what you offer to Offer header", "put all headers on top right justified". -->
 <!-- Previous: V1.16 | Date: 2026-09-14 | LAST CHANGE: the loading pill breathes over 3 seconds instead of 1.6; the skills screen is headed Skills and the care screen Attention towards, each asking its question at the size of the others; no lines under headings or between questions. Jessie: "make breathing button slower" "make What skills do you have? the size of the questions and the header as Skills" and "samewith What do you care about? and header as Attention towards". -->
 <!-- Previous: V1.15 | Date: 2026-09-14 | LAST CHANGE: the home page's layout, with its top bar, heading, rail of parts and panel, and no breadcrumb. Jessie: "stick with railing and dont move to wide screen panel without railing and remove all breadcrumbs" and "keep the top nav in place like you do on homeapge". -->
 <!-- Previous: V1.14 | Date: 2026-09-14 | LAST CHANGE: the choice lists are asked for by version, asked again fresh when a list is missing, and say so when they cannot load; every loading pill breathes; "Who would you most like to serve in your work or life?"; "For additional forms of income or trade, do you have any resources to offer others right now?". Jessie: "Never loaded", "Loading information button should breathe like we have on gather". -->
@@ -85,9 +86,13 @@
   <div class="layout">
   <div class="tabs" id="cw-rail"></div>
   <div class="card">
-    <div style="font-size:22px;font-weight:800;color:#1A2E42;margin:0 0 10px;text-align:right;" id="gp-intro-title">Before you go in</div>
+    <!-- The pill and the header share a line, the pill left and the header right. Jessie, 2026-09-14: "loading pill on same
+         line as header". The header keeps to the right when the pill is gone. -->
+    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin:0 0 10px;">
+      <div id="cw-wait" style="display:none;"><span class="cw-loading">Loading information</span></div>
+      <div style="font-size:22px;font-weight:800;color:#1A2E42;margin-left:auto;text-align:right;" id="gp-intro-title">Before you go in</div>
+    </div>
     <p id="gp-intro-lede" style="display:none;font-size:14.5px;color:#6B7A8D;margin:0 0 22px;line-height:1.55;"></p>
-    <div id="cw-wait" style="display:none;padding:6px 0 4px;"><span class="cw-loading">Loading information</span></div>
     <div id="gp-intro-qs"></div>
     <div id="gp-footer" style="display:flex;gap:12px;align-items:center;margin-top:22px;padding-top:6px;flex-wrap:wrap;">
       <button type="button" id="gp-step-back" style="display:none;font:inherit;font-size:14px;font-weight:700;padding:10px 18px;border-radius:24px;border:1.5px solid #C9DFF3;background:#fff;color:#1F699E;cursor:pointer;">Back</button>
@@ -1456,7 +1461,8 @@
   // asked properly and can be left, because the gate that matters is joining a group.
   // One-word headers, 2026-09-14: "Where are you? to Location for header", "Joy as header", "the header as Skills",
   // "header as Attention towards", "what you offer to Offer header". Open to work followed the same pattern.
-  var GP_STEP_TITLES = ['Location', 'Joy', 'Skills', 'Attention towards', 'Offer', 'Open to work', 'Your answers'];
+  // Then "Offer to Offerings", in the header and the rail both.
+  var GP_STEP_TITLES = ['Location', 'Joy', 'Skills', 'Attention towards', 'Offerings', 'Open to work', 'Your answers'];
   var _gpStep = 0;
   var GP_LAST = GP_STEP_TITLES.length - 1;
   // Somebody sent here from a group arrived mid-join and the page never said which group, so
@@ -1507,7 +1513,7 @@
   // THE RAIL. Start goes back to the home page's first screen, where the path is chosen, and each screen of this form is
   // a part, the chosen one filled blue as on the home page. Nothing but Start until the saved answers have arrived, so a
   // part cannot open empty. Moving forward from the rail passes the same checks Next does and saves the same way.
-  var CW_RAIL = ['Location', 'Joy', 'Skills', 'Attention towards', 'Offer', 'Open to work', 'Your answers'];
+  var CW_RAIL = ['Location', 'Joy', 'Skills', 'Attention towards', 'Offerings', 'Open to work', 'Your answers'];
   function cwPaintRail(){
     var r = document.getElementById('cw-rail'); if (!r) return;
     var waiting = (document.getElementById('cw-wait') || {}).style && document.getElementById('cw-wait').style.display !== 'none';
@@ -2344,7 +2350,9 @@
       cwPaintPurposePicks();
     }, 0);
     window._cwPurposeOpts = opts;
-    return '<div style="font-size:14px;font-weight:700;color:#1A2E42;margin-top:4px;">Your purpose</div>'
+    // Header size with a line above, so it stands apart from the answers. Jessie, 2026-09-14: "Make Your purpose a header
+    // size on the answers page so it stands out with horizontal line above".
+    return '<div style="font-size:22px;font-weight:800;color:#1A2E42;border-top:1px solid #DDE3EA;margin-top:10px;padding-top:18px;">Your purpose</div>'
       + (opts.length ? '<div style="font-size:13.5px;color:#6B7A8D;margin:2px 0 10px;">We drew these from your answers. Pick one or more and change any of it to say it your way.</div>'
           + '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;">'
           + opts.map(function(o, i){ return '<button type="button" data-cw-purpose="' + i + '" style="font:inherit;font-size:14px;text-align:left;padding:10px 14px;border-radius:12px;cursor:pointer;line-height:1.45;">' + _gpEsc(o) + '</button>'; }).join('')
