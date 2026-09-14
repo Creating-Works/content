@@ -3,7 +3,8 @@
   Copyright 2026 DayBalancer LLC. All rights reserved.
   hello@creating.works
 -->
-<!-- Version: V1.11 | Date: 2026-09-13 | LAST CHANGE: an example already chosen is not shown a second time under the list of answers. Jessie: "Duplicates showing". -->
+<!-- Version: V1.12 | Date: 2026-09-13 | LAST CHANGE: the question reads "What outcomes would you like to create with your work?". Jessie named the change. -->
+<!-- Previous: V1.11 | Date: 2026-09-13 | LAST CHANGE: an example already chosen is not shown a second time under the list of answers. Jessie: "Duplicates showing". -->
 <!-- Previous: V1.10 | Date: 2026-09-13 | LAST CHANGE: until the saved answers arrive the card shows a breathing Loading information and no empty questions. Jessie: "shouldn't it not show unanswered pages and instead show a breathing loading info button?". -->
 <!-- Previous: V1.9 | Date: 2026-09-13 | LAST CHANGE: Your purpose offers a few statements to pick from, one or more, instead of one sentence joining every answer. Jessie: "What of there are multiple purpose statements bcz they selected so much? Can you give them a few to select from?". -->
 <!-- Previous: V1.8 | Date: 2026-09-13 | LAST CHANGE: "Who would you most like your work to serve?" under What comes most naturally to you?, and Your answers drafts a purpose that Send saves to ikigai.purpose. Jessie: "Yes addd this below Facilitation and coaching question". -->
@@ -1809,7 +1810,7 @@
       + row('Who would you most like your work to serve?', Object.keys(CW_SERVE).filter(function(k){ return CW_SERVE[k]; }).join(', '))
       + row('What do you care about?', val('introValues'))
       + row('For work, income, or trade what do you have to offer right now?', cwOffersText())
-      + row('What outcomes would you like work to give you?', cwWorkText())
+      + row('What outcomes would you like to create with your work?', cwWorkText())
       + row('What type of paid work are you open to?', cwOtwList('paid').join(', '))
       + row('What type of non-paid work are you open to?', cwOtwList('unpaidTime').join(', '))
       + row('Which types of non-paid work?', cwOtwList('unpaid').join(', '))
@@ -2004,8 +2005,9 @@
   }
   function cwPaintWork(state){
     var box = document.getElementById('cw-work-step'); if (!box) return;
-    // Jessie, 2026-09-13: "What would work give you? To What outcomes would you like work give you?"
-    var h = '<div style="font-size:17px;font-weight:800;color:#1A2E42;margin-bottom:2px;">What outcomes would you like work to give you?</div>'
+    // Jessie, 2026-09-13: "What would work give you? To What outcomes would you like work give you?", then
+    // "What outcomes would you like work to give you? To What outcomes would you like to create with your work?"
+    var h = '<div style="font-size:17px;font-weight:800;color:#1A2E42;margin-bottom:2px;">What outcomes would you like to create with your work?</div>'
       + '<div style="font-size:13.5px;color:#6B7A8D;margin-bottom:12px;">Pick as many as fit or add your own.</div>';
     if (CW_WORK.choices) {
       var list = CW_WORK.choices.slice();
