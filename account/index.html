@@ -10,7 +10,7 @@
 
   hello@creating.works
 -->
-<!-- Version: V1.10 | Date: 2026-08-25 | LAST CHANGE: Location picker, real fields behind the permission switches, and My account saves -->
+<!-- Version: V1.11 | Date: 2026-09-14 | LAST CHANGE: with ?look=rail, the same rail as My profile (nav/profile-rail.js), My account lit. Previous: V1.10: Location picker, real fields behind the permission switches, and My account saves -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -731,6 +731,28 @@
         if(t && t.textContent==='My account') renderPanel('account');
       }).catch(function(){});
   }
+})();
+</script>
+<!-- MY ACCOUNT IN THE TEMPLATE, A LIVE MOCKUP. Jessie, 2026-09-14: "my account should look exactllyt eh same rail, excep
+     the pane shouodl change" and "the rail should stay the same when toggling to my account". Only with ?look=rail. The
+     rail is 2gather.network's nav/profile-rail.js, the one My profile draws, with My account lit; this page's own list of
+     places goes, and its name and panel sit in the white panel beside the rail. -->
+<style>
+  html.cw-prail-on .wrap{max-width:1200px;}
+  html.cw-prail-on #tabs{display:none;}
+  html.cw-prail-on .layout{display:block;}
+  html.cw-prail-on .cw-prail-main .panel{background:transparent;padding:6px 0 0;border-radius:0;min-height:0;}
+  html.cw-prail-on .cw-prail-main h1{color:var(--ink);font-weight:800;font-size:26px;margin-top:14px;}
+  html.cw-prail-on .cw-prail-main .hello .sub, html.cw-prail-on .cw-prail-main .hello .sub a{color:var(--ink);}
+</style>
+<script src="https://2gather.network/nav/profile-rail.js?v=1"></script>
+<script>
+(function(){
+  var look = ''; try { look = new URLSearchParams(location.search).get('look') || ''; } catch (e) {}
+  if (look !== 'rail' || !window.cwProfileRail) return;
+  var viewing = false;
+  try { viewing = !!(window.CW && CW.me && CW.me().viewing); } catch (e) {}
+  cwProfileRail({ active: 'account', wrap: document.querySelector('.wrap'), viewingSomeoneElse: viewing });
 })();
 </script>
 <script src="https://2gather.network/nav/topbar.js?v=5.87" defer></script>
