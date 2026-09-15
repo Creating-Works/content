@@ -3,7 +3,7 @@
   Copyright 2026 DayBalancer LLC. All rights reserved.
   hello@creating.works
 -->
-<!-- Version: V1.20 | Date: 2026-09-14 | LAST CHANGE: answers that name a kind of thing (Money) stay needs marked :work; every other answer is a work value in ikigai.workValues. Previous: V1.19: signing in, Start in the rail and the two "signed in on" lines go to https://creating.works/intro/, where the home page's form moved when the home page became Coming soon. Jessie: "move this to a page called Intro and make the index just say that". -->
+<!-- Version: V1.21 | Date: 2026-09-15 | LAST CHANGE: every work experience pick saves to ikigai.workValues, Money and Resources too, and none is ever a need; the Needs box leaves them out (as on 2gather.network/intro). Previous: V1.20 | Date: 2026-09-14 | LAST CHANGE: answers that name a kind of thing (Money) stay needs marked :work; every other answer is a work value in ikigai.workValues. Previous: V1.19: signing in, Start in the rail and the two "signed in on" lines go to https://creating.works/intro/, where the home page's form moved when the home page became Coming soon. Jessie: "move this to a page called Intro and make the index just say that". -->
 <!-- Previous: V1.18 | Date: 2026-09-14 | LAST CHANGE: the loading pill sits on the header's line, left of it; Offer reads Offerings in the header and the rail; Your purpose on Your answers is header size with a line above it. Jessie: "loading pill on same line as header", "Offer to Offerings", "Make Your purpose a header size on the answers page so it stands out with horizontal line above". -->
 <!-- Previous: V1.17 | Date: 2026-09-14 | LAST CHANGE: every screen has a one-word header, top right, with its questions under it at question size: Location, Joy, Skills, Attention towards, Offer, Open to work; the pill breathes over 2.3 seconds. Jessie: "go to 2.3 s for pill's cycle", "Where are you? to Location for header", "What brings you joy? as question font and Joy as header", "what you offer to Offer header", "put all headers on top right justified". -->
 <!-- Previous: V1.16 | Date: 2026-09-14 | LAST CHANGE: the loading pill breathes over 3 seconds instead of 1.6; the skills screen is headed Skills and the care screen Attention towards, each asking its question at the size of the others; no lines under headings or between questions. Jessie: "make breathing button slower" "make What skills do you have? the size of the questions and the header as Skills" and "samewith What do you care about? and header as Attention towards". -->
@@ -1915,15 +1915,16 @@
   // :work; every other answer is a work value, in ikigai.workValues (workValuesTags in saveIntro).
   var CW_THING_KINDS = { 'money': 1, 'physical goods': 1, 'consumables': 1, 'living things': 1 };
   function cwIsThing(n){ return !!CW_THING_KINDS[String(n || '').trim().toLowerCase()]; }
+  // WORK EXPERIENCE IS NEVER A NEED (2026-09-15), as on 2gather.network/intro. Jessie: "are resources and money under needs not
+  // in the right place? should this on work experience I'm creating?" Every pick goes to ikigai.workValues, Money and
+  // Resources too; a need marked ":work" is dropped from needs and never shown in the Needs box. n124 moved the saved ones.
   function cwWorkValuesTags(){
-    return Object.keys(CW_WORK.picked).filter(function(k){ return CW_WORK.picked[k] && !cwIsThing(k); }).join('|');
+    return Object.keys(CW_WORK.picked).filter(function(k){ return CW_WORK.picked[k]; }).join('|');
   }
   function cwNeedsTags(base){
-    // What would work give you? decides every need ending in ":work". The others go back untouched.
-    var picks = Object.keys(CW_WORK.picked).filter(function(k){ return CW_WORK.picked[k] && cwIsThing(k); }).map(function(k){ return k + ':work'; });
     var rest = String(base || '').split('|').map(function(x){ return x.trim(); }).filter(Boolean);
-    if (window._gpLoaded) rest = rest.filter(function(x){ return !/:work$/i.test(x); });
-    return rest.concat(picks).join('|');
+    if (window._gpLoaded) rest = rest.filter(function(x){ return !/:work$/i.test(x) && !CW_WORK.picked[String(x).split(':')[0].trim()]; });
+    return rest.join('|');
   }
   function cwBuildQs(){
     var val = function(k){ var el = document.getElementById('gp-intro-' + k); return el ? String(el.value || '').trim() : ''; };
@@ -2476,6 +2477,9 @@
       .then(function(d){
         var have = (d && d.data) || {};
         var use = {}, any = false;
+        var _cwWorkNames = {};
+        String(have.workValues || '').split('|').concat(String(have.needs || '').split('|').filter(function(x){ return /:work$/i.test(x); }))
+          .forEach(function(x){ var n = String(x).split(':')[0].trim().toLowerCase(); if (n) _cwWorkNames[n] = 1; });
         GP_INTRO_Q.forEach(function(q){
           // The real column holds tags, not sentences: items split by | and each one
           // carrying its type and level after a colon, as in "Ping Pong:Participant".
@@ -2500,6 +2504,8 @@
               var w = clean(part);
               if (!w) return;
               var kw = w.toLowerCase();
+              // The work picks never show as needs (2026-09-15).
+              if (q.key === 'introNeed' && (/:work$/i.test(String(part).trim()) || _cwWorkNames[kw])) return;
               // Remember the fullest version seen, so a level or a category survives the trip.
               var raw = String(part).trim();
               if (raw && (!_gpOrig[q.key][kw] || raw.length > _gpOrig[q.key][kw].length)) {
