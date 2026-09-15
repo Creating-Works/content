@@ -1235,6 +1235,7 @@
     var f = document.getElementById('gp-photo-face'); if (!f) return;
     f.innerHTML = '<img src="' + url + '" alt="" style="width:100%;height:100%;object-fit:cover;">';
     var b = document.getElementById('gp-photo-btn'); if (b) b.textContent = 'Change photo';
+    var need = document.getElementById('gp-photo-need'); if (need) need.style.display = 'none';   // only for somebody without one
     // Step 0 will not let anybody past without one, so the moment a face lands the door opens.
     window._gpPhotoUp = true;
     if (typeof gpStepPaint === 'function') gpStepPaint();
@@ -1323,7 +1324,7 @@
       + (GP_BROWSE ? 'A professional photo helps members recognize you when you show up.</div>'
                    : 'A professional photo helps people recognize you when you show up.</div>')
       + (GP_BROWSE
-          ? '<div style="font-size:13.5px;color:#6B7A8D;line-height:1.5;margin-bottom:8px;">'
+          ? '<div id="gp-photo-need" style="font-size:13.5px;color:#6B7A8D;line-height:1.5;margin-bottom:8px;">'
             + (GP_FOR === 'event'
                 ? 'Your photo is needed to register for an event that has a bulletin board.'
                 : 'Your photo is needed to join a group.')
@@ -1378,6 +1379,12 @@
       // A photo seen before paints at once, so a return visit never waits at all.
       var _seen = '';
       try { _seen = localStorage.getItem('cw-photo-' + meId) || ''; } catch (e) {}
+      // Or the one the top bar keeps from signing in (2026-09-15, the same as 2gather.network/intro).
+      try {
+        if (!_seen && String(localStorage.getItem('cw-photo-for') || '').split('.').join('').toLowerCase() === String(meId).split('.').join('').toLowerCase()) {
+          _seen = localStorage.getItem('cw-photo') || '';
+        }
+      } catch (e) {}
       // On the next tick, because gpPhotoShow finds the circle by id and this block is not on
       // the page yet. Painting straight away looked instant and drew nothing at all.
       if (_seen) setTimeout(function(){ _settle(_seen); }, 0);
@@ -1395,7 +1402,12 @@
       _probe.src = _direct;
       // Nobody waits forever. After eight seconds we say we do not have one, which is at worst
       // an invitation to add a photo they already have.
-      setTimeout(function(){ _settle(''); }, 6000);
+      // Nobody is told they have no photo before the lookup says so (2026-09-15, the same as 2gather.network/intro).
+      setTimeout(function(){
+        if (_settled) return;
+        _btn2.style.display = '';
+        if (_hint) _hint.textContent = 'Still looking for your photo. You can add one now if you like.';
+      }, 6000);
     } else if (meId) {
       fetch(GS_URL + '?action=lookupProfile&appearId=' + encodeURIComponent(meId))
         .then(function(r){ return r.json(); })
