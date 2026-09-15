@@ -1933,13 +1933,18 @@
     GP_INTRO_Q.forEach(function(q){
       var v = val(q.key);
       if (q.key === 'introOffer') return;   // offers live in ikigai.skills and ikigai.haves now (cw-offers)
+      // THE SENTENCE STAYS THE PERSON'S (row 176, 2026-09-15). The box joins the care-about tags with the person's own
+      // sentence split at its commas, and saving it wrote that word list over the sentence and made its pieces tags.
+      // The sentence is not sent from here now; the tags are.
+      if (q.key === 'introValues') return;
       qs += '&' + q.key + '=' + encodeURIComponent(v);
     });
     qs += '&workValuesTags=' + encodeURIComponent(cwWorkValuesTags());
     qs += '&needsTags='     + encodeURIComponent(cwNeedsTags(tagFor('introNeed')))
         + '&interestsTags=' + encodeURIComponent(tagFor('introEnjoy'))
         + '&skillsTags='    + encodeURIComponent(tagFor('introSkills'))
-        + '&valuesTags='    + encodeURIComponent(tagFor('introValues'))
+        + '&valuesTags='    + encodeURIComponent(gpSplitCare(cwCareTags(tagFor('introValues'))).values)
+        + '&domainsTags='   + encodeURIComponent(gpSplitCare(cwCareTags(tagFor('introValues'))).domains)
         + '&location='      + encodeURIComponent(gpLocString(_gpLoc));
     if (window._gpLoaded) qs += '&havesTags=' + encodeURIComponent(CW_HAVES.join('|'))
       + '&openToPaidWork=' + encodeURIComponent(cwOtwList('paid').join('|'))
@@ -2422,6 +2427,29 @@
   // sit one column away under the older names. Asking somebody to type out again what
   // we already hold is how a form earns a reputation for not listening, so fall back to
   // the older field wherever the newer one is empty.
+  // The care-about tags without the words that are only in the person's sentence (see THE SENTENCE STAYS THE PERSON'S).
+  function cwCareTags(tags){
+    var only = window._gpSentenceOnly || {};
+    return String(tags || '').split('|').filter(function(t){
+      var w = String(t).split(':')[0].replace(/^[^\p{L}\p{N}]+/u, '').trim().toLowerCase();
+      return w && !only[w];
+    }).join('|');
+  }
+  // SECTORS GO TO SECTORS (row 176, 2026-09-15; the same as 2gather.network/intro). A care-about pick that is on the
+  // reference sectors list is saved in ikigai.domains (domainsTags, only ever added to); the rest stay in ikigai.values.
+  function gpSplitCare(tags){
+    var rd = window._gpRd || {}, sec = {};
+    (rd.domains || []).forEach(function(v){ var w = String((v && v.item !== undefined) ? v.item : v).trim().toLowerCase(); if (w) sec[w] = 1; });
+    var vals = [], doms = [];
+    String(tags || '').split('|').map(function(x){ return x.trim(); }).filter(Boolean).forEach(function(t){
+      var bits = t.split(':'), w = String(bits[0] || '').replace(/^[^\p{L}\p{N}]+/u, '').trim();
+      if (!sec[w.toLowerCase()]) { vals.push(t); return; }
+      var lvl = (bits[1] === 'Value') ? (bits[2] || '') : (bits[1] || '');
+      doms.push(w + (lvl ? ':' + lvl : ''));
+    });
+    return { values: vals.join('|'), domains: doms.join('|') };
+  }
+  window.gpSplitCare = gpSplitCare; window.cwCareTags = cwCareTags;   // the save is written in another part of the page
   var GP_OLDER = {
     introNeed:   'needs',
     introEnjoy:  'interests',
@@ -2469,6 +2497,14 @@
               seenW[kw] = 1; all.push(w);
             });
           });
+          // Words that are only in the person's own sentence, not in the column (row 176): shown in the box, never saved
+          // as tags, and the sentence itself is left as it is.
+          if (q.key === 'introValues') {
+            var colSet = {};
+            String(have[GP_OLDER[q.key]] || '').split('|').forEach(function(part){ var w = clean(part); if (w) colSet[w.toLowerCase()] = 1; });
+            window._gpSentenceOnly = {};
+            all.forEach(function(w){ if (!colSet[w.toLowerCase()]) window._gpSentenceOnly[w.toLowerCase()] = 1; });
+          }
           var v = all.join(', ');
           if (v) { use[q.key] = v; any = true; }
         });
