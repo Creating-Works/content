@@ -10,7 +10,7 @@
 
   hello@creating.works
 -->
-<!-- Version: V1.11 | Date: 2026-09-14 | LAST CHANGE: with ?look=rail, the same rail as My profile (nav/profile-rail.js), My account lit. Previous: V1.10: Location picker, real fields behind the permission switches, and My account saves -->
+<!-- Version: V1.12 | Date: 2026-09-15 | LAST CHANGE: the rail beside the panel is the look for everybody (?look=list shows the old page). Previous: V1.11 | Date: 2026-09-14 | LAST CHANGE: with ?look=rail, the same rail as My profile (nav/profile-rail.js), My account lit. Previous: V1.10: Location picker, real fields behind the permission switches, and My account saves -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -745,11 +745,13 @@
   html.cw-prail-on .cw-prail-main h1{color:var(--ink);font-weight:800;font-size:26px;margin-top:14px;}
   html.cw-prail-on .cw-prail-main .hello .sub, html.cw-prail-on .cw-prail-main .hello .sub a{color:var(--ink);}
 </style>
-<script src="https://2gather.network/nav/profile-rail.js?v=1"></script>
+<script src="https://2gather.network/nav/profile-rail.js?v=2"></script>
 <script>
 (function(){
   var look = ''; try { look = new URLSearchParams(location.search).get('look') || ''; } catch (e) {}
-  if (look !== 'rail' || !window.cwProfileRail) return;
+  // THE LOOK FOR EVERYBODY NOW. Jessie, 2026-09-15: "publish new look for profile/account pages too". ?look=list shows
+  // the old page for one load, for a comparison.
+  if (look === 'list' || !window.cwProfileRail) return;
   var viewing = false;
   try { viewing = !!(window.CW && CW.me && CW.me().viewing); } catch (e) {}
   cwProfileRail({ active: 'account', wrap: document.querySelector('.wrap'), viewingSomeoneElse: viewing });
