@@ -10,7 +10,7 @@
 
   hello@creating.works
 -->
-<!-- Version: V1.12 | Date: 2026-09-15 | LAST CHANGE: the rail beside the panel is the look for everybody (?look=list shows the old page). Previous: V1.11 | Date: 2026-09-14 | LAST CHANGE: with ?look=rail, the same rail as My profile (nav/profile-rail.js), My account lit. Previous: V1.10: Location picker, real fields behind the permission switches, and My account saves -->
+<!-- Version: V1.13 | Date: 2026-09-15 | LAST CHANGE: Location asks for County and City once a US state is chosen, from the same lists the intro offers, saved to Info.county and Info.city (row 206). Previous: V1.12 | Date: 2026-09-15 | LAST CHANGE: the rail beside the panel is the look for everybody (?look=list shows the old page). Previous: V1.11 | Date: 2026-09-14 | LAST CHANGE: with ?look=rail, the same rail as My profile (nav/profile-rail.js), My account lit. Previous: V1.10: Location picker, real fields behind the permission switches, and My account saves -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -95,6 +95,8 @@
   .f select:focus{outline:2px solid var(--panel-line);outline-offset:1px;border-color:var(--brand);}
   .locrow{display:flex;gap:10px;flex-wrap:wrap;}
   .locrow select{width:auto;flex:1 1 180px;min-width:150px;}
+  /* City is typed, not picked, so it needs the same rule as the selects beside it (row 206). */
+  .locrow input{width:auto;flex:1 1 180px;min-width:150px;}
   .photorow{display:flex;gap:16px;align-items:center;margin-bottom:18px;}
   .photo{width:64px;height:64px;border-radius:50%;object-fit:cover;background:#DDE4EE;flex-shrink:0;}
 
@@ -187,7 +189,7 @@
 
   // CWid is the standard "this is me" param; id/me/memberCard/appearId accepted too.
   var meId=(window.CW&&CW.me)?CW.me().id:(P('CWid')||P('id')||P('me')||P('memberCard')||P('appearId')||'').trim();
-  var D={name:'',firstName:'',lastName:'',photo:'',pageLink:'',postal:'',location:'',languages:'',email:'',phone:'',
+  var D={name:'',firstName:'',lastName:'',photo:'',pageLink:'',postal:'',location:'',county:'',city:'',languages:'',email:'',phone:'',
        visPublic:'',showPhoto:'',onMap:'',findable:'',ackTerms:'',dateAckTerms:''};
 
   function go(url){ window.location.href=url; }
@@ -403,6 +405,11 @@
       +'&secure=1&editToken='+encodeURIComponent(_editToken)
       +'&postal='+encodeURIComponent(D.postal||'')
       +'&location='+encodeURIComponent(D.location||'')
+      // COUNTY AND CITY, row 206, 2026-09-15. Jessie: "add location fields to https://2gather.network/account/ too?"
+      // The intro has asked for them since V1.61 and this page did not, so the two pages held different halves of one
+      // place. Both write Info.county and Info.city now.
+      +'&county='+encodeURIComponent(D.county||'')
+      +'&city='+encodeURIComponent(D.city||'')
       +'&languages='+encodeURIComponent(D.languages||'')
       +'&firstName='+encodeURIComponent(D.firstName||'')
       +'&lastName='+encodeURIComponent(D.lastName||'')
@@ -532,6 +539,17 @@
   var NA_COUNTRIES=['United States','Canada','Mexico'];
   var US_STATES=["Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming","Washington D.C."];
   var _loc={region:'',country:'',state:''};
+  // COUNTY AND CITY, row 206, 2026-09-15. The same lists the intro offers, from the same read
+  // (getPlaces, held six hours at the edge), keyed by the state's two letters. Asked for only once
+  // a US state is chosen, because that is as far as the list goes.
+  var US_ABBR={"Alabama":"AL","Alaska":"AK","Arizona":"AZ","Arkansas":"AR","California":"CA","Colorado":"CO","Connecticut":"CT","Delaware":"DE","District of Columbia":"DC","Florida":"FL","Georgia":"GA","Hawaii":"HI","Idaho":"ID","Illinois":"IL","Indiana":"IN","Iowa":"IA","Kansas":"KS","Kentucky":"KY","Louisiana":"LA","Maine":"ME","Maryland":"MD","Massachusetts":"MA","Michigan":"MI","Minnesota":"MN","Mississippi":"MS","Missouri":"MO","Montana":"MT","Nebraska":"NE","Nevada":"NV","New Hampshire":"NH","New Jersey":"NJ","New Mexico":"NM","New York":"NY","North Carolina":"NC","North Dakota":"ND","Ohio":"OH","Oklahoma":"OK","Oregon":"OR","Pennsylvania":"PA","Rhode Island":"RI","South Carolina":"SC","South Dakota":"SD","Tennessee":"TN","Texas":"TX","Utah":"UT","Vermont":"VT","Virginia":"VA","Washington":"WA","West Virginia":"WV","Wisconsin":"WI","Wyoming":"WY"};
+  var _places=null,_placesP=null;
+  function placesOnce(){
+    if(!_placesP) _placesP=fetch(GS_URL+'?action=getPlaces').then(function(r){ return r.json(); })
+      .then(function(d){ if(d&&d.counties){ _places=d; renderLoc(); } else { _placesP=null; } })
+      .catch(function(){ _placesP=null; });
+    return _placesP;
+  }
 
   // Read a stored string back into the three levels so the picker opens where the person left it.
   function parseLoc(v){
@@ -563,23 +581,39 @@
     var h='<div class="locrow">'+sel('loc-region',REGIONS,l.region,'Select region…');
     if(l.region==='North America') h+=sel('loc-country',NA_COUNTRIES,l.country,'Select country…');
     if(l.region==='North America' && l.country==='United States') h+=sel('loc-state',US_STATES,l.state,'Select state…');
+    var ab=l.state?US_ABBR[l.state]:'';
+    if(ab){
+      if(_places){
+        var cs=(_places.counties[ab]||[]).slice().sort();
+        var ci=(_places.cities[ab]||[]).slice().filter(function(x,i,a){ return a.indexOf(x)===i; }).sort();
+        if(D.county && cs.indexOf(D.county)<0) cs.push(D.county);
+        if(cs.length) h+=sel('loc-county',cs,D.county,'County (optional)');
+        h+='<input id="loc-city" list="loc-cities" placeholder="City (optional)" value="'+esc(D.city||'')+'">'
+          +'<datalist id="loc-cities">'+ci.map(function(c){ return '<option value="'+esc(c)+'">'; }).join('')+'</datalist>';
+      } else { placesOnce(); }
+    }
     box.innerHTML=h+'</div>';
+    var cy=box.querySelector('#loc-county');
+    if(cy) cy.onchange=function(){ D.county=cy.value; markDirty(); };
+    var cit=box.querySelector('#loc-city');
+    if(cit) cit.onchange=function(){ D.city=String(cit.value||'').trim(); markDirty(); };
 
     var rg=box.querySelector('#loc-region');
     if(rg) rg.onchange=function(){
       _loc={region:rg.value,country:'',state:''};
       // Only North America opens a country, matching the events page. Anywhere else is the answer.
       if(rg.value==='North America') _loc.country='United States';
+      D.county=''; D.city='';
       D.location=locString(_loc); markDirty(); renderLoc();
     };
     var ct=box.querySelector('#loc-country');
     if(ct) ct.onchange=function(){
-      _loc.country=ct.value; _loc.state='';
+      _loc.country=ct.value; _loc.state=''; D.county=''; D.city='';
       D.location=locString(_loc); markDirty(); renderLoc();
     };
     var st=box.querySelector('#loc-state');
     if(st) st.onchange=function(){
-      _loc.state=st.value;
+      _loc.state=st.value; D.county=''; D.city='';
       D.location=locString(_loc); markDirty(); renderLoc();
     };
   }
@@ -684,6 +718,7 @@
       var d=pr.data||{};
       D.postal=d.postal||''; D.languages=d.languages||''; D.phone=d.phone||'';
       D.location=d.location||''; _loc=parseLoc(D.location);
+      D.county=d.county||''; D.city=d.city||'';
       if(!_loc.region) _loc={region:'North America',country:'United States',state:''};
       // The permission columns may not exist on the sheet yet. A missing one stays blank,
       // and a blank falls back to what the site does today rather than inventing a choice.
