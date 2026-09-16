@@ -591,9 +591,24 @@
           else if (d && d.message) why = 'The server said: ' + d.message;
           else if (d) why = 'The server refused, and gave no reason.';
           else why = 'The server did not answer.';
-          forget(); token='';
-          $('gate').classList.remove('hide');
-          say('s2', why);
+          // A FAILED REQUEST IS NOT AN EXPIRED SESSION. Jessie, 2026-09-16, minutes after signing in:
+          // "i have to ask for pin again ? why? it's been just 15 minutes". An hour's session had a
+          // quarter of an hour left on it. What happened is that Apps Script sent back its own error
+          // page instead of an answer, the answer would not read as JSON, and EVERY failure - a dropped
+          // connection, an error page, a timeout - fell through to here and threw the session away.
+          //
+          // Her own rule, from the calendar and My groups: a failed request is never an answer. So the
+          // session is only forgotten when the server actually refuses it, or when the token's own
+          // expiry has passed. Anything else keeps it and says the request failed.
+          var reallyRefused = !!d || expired || !hadToken;
+          if (reallyRefused) {
+            forget(); token='';
+            $('gate').classList.remove('hide');
+            say('s2', why);
+          } else {
+            why = 'That did not reach the server. Your session is still good - press Load again.';
+            say('s2', why);
+          }
           fail_('groups', {message: why});
           return;
         }
