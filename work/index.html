@@ -519,7 +519,7 @@
     b.type = 'button';
     b.textContent = label;
     b.style.cssText = 'font:inherit;font-size:13.5px;padding:7px 14px;border-radius:20px;cursor:pointer;'
-      + 'background:#EEF1F5;border:1px dashed #C4CDD8;color:#6B7A8D;font-weight:600;';
+      + 'background:#6B7A8D;border:1px solid #6B7A8D;color:#fff;font-weight:700;';
     b.addEventListener('click', function(){ b.parentNode.removeChild(b); onOpen(); });
     return b;
   }
@@ -979,7 +979,7 @@
     other.type = 'button';
     other.textContent = '+ Other';
     other.style.cssText = 'font:inherit;font-size:13.5px;padding:7px 14px;border-radius:20px;cursor:pointer;'
-      + 'background:#EEF1F5;border:1px dashed #C4CDD8;color:#6B7A8D;font-weight:600;';
+      + 'background:#6B7A8D;border:1px solid #6B7A8D;color:#fff;font-weight:700;';
     if (_browseOn) {
       // Its own row, below the browse, so it is still there when the examples have stepped aside.
       var otherRow = document.createElement('div');
@@ -2113,7 +2113,7 @@
       // What somebody adds becomes one more choice, picked.
       h += '<div style="display:flex;flex-wrap:wrap;gap:7px;">' + list.map(cwPill).join('')
         + '<button type="button" id="cw-work-other" style="font:inherit;font-size:13.5px;padding:7px 14px;border-radius:20px;cursor:pointer;'
-        + 'background:#EEF1F5;border:1px dashed #C4CDD8;color:#6B7A8D;font-weight:600;">+ Other</button></div>'
+        + 'background:#6B7A8D;border:1px solid #6B7A8D;color:#fff;font-weight:700;">+ Other</button></div>'
         + '<div id="cw-work-otherbox" style="display:none;margin-top:10px;gap:8px;flex-wrap:wrap;">'
         + '<input type="text" id="cw-work-otherin" placeholder="In your own words" style="flex:1 1 220px;border:1.5px solid #DDE3EA;'
         + 'background:#F7FBFF;border-radius:10px;padding:9px 12px;font:inherit;font-size:14px;color:#1A2E42;">'
@@ -2197,7 +2197,7 @@
               + (on ? 'background:#1F699E;border:1px solid #1F699E;color:#fff;font-weight:700;' : 'background:#fff;border:1px solid #C9DFF3;color:#1F699E;font-weight:600;')
               + '">' + _gpEsc(v) + '</button>';
           }).join('')
-        + '<button type="button" data-cw-haveother="' + kind + '" style="font:inherit;font-size:13.5px;padding:7px 14px;border-radius:20px;cursor:pointer;background:#EEF1F5;border:1px dashed #C4CDD8;color:#6B7A8D;font-weight:600;">+ Other</button></div>'
+        + '<button type="button" data-cw-haveother="' + kind + '" style="font:inherit;font-size:13.5px;padding:7px 14px;border-radius:20px;cursor:pointer;background:#6B7A8D;border:1px solid #6B7A8D;color:#fff;font-weight:700;">+ Other</button></div>'
         + '<div data-cw-havebox="' + kind + '" style="display:none;margin-top:10px;gap:8px;flex-wrap:wrap;">'
         + '<input type="text" placeholder="In your own words" style="flex:1 1 220px;border:1.5px solid #DDE3EA;background:#F7FBFF;border-radius:10px;padding:9px 12px;font:inherit;font-size:14px;color:#1A2E42;">'
         + '<button type="button" style="font:inherit;font-size:13.5px;font-weight:700;padding:8px 16px;border-radius:20px;border:0;background:#1F699E;color:#fff;cursor:pointer;">Add</button></div>';
@@ -2271,7 +2271,7 @@
       + pills('unpaid', rd.unpaidWorkTypes || [])
       // + OTHER, the way the other pickers have it. Jessie, 2026-09-13: "Make a chip for other like we normally do".
       + '<div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:7px;"><button type="button" id="cw-otw-other" style="font:inherit;font-size:13.5px;padding:7px 14px;border-radius:20px;cursor:pointer;'
-      + 'background:#EEF1F5;border:1px dashed #C4CDD8;color:#6B7A8D;font-weight:600;">+ Other</button></div>'
+      + 'background:#6B7A8D;border:1px solid #6B7A8D;color:#fff;font-weight:700;">+ Other</button></div>'
       + '<div id="cw-otw-otherbox" style="display:none;margin-top:10px;gap:8px;flex-wrap:wrap;">'
       + '<input type="text" id="cw-otw-otherin" placeholder="In your own words" style="flex:1 1 220px;border:1.5px solid #DDE3EA;background:#F7FBFF;border-radius:10px;padding:9px 12px;font:inherit;font-size:14px;color:#1A2E42;">'
       + '<button type="button" id="cw-otw-otheradd" style="font:inherit;font-size:13.5px;font-weight:700;padding:8px 16px;border-radius:20px;border:0;background:#1F699E;color:#fff;cursor:pointer;">Add</button></div>'
@@ -2314,7 +2314,7 @@
     var pr = gpPickRow(list, CW_SERVE, 0);
     var oth = document.createElement('button');
     oth.type = 'button'; oth.textContent = '+ Other';
-    oth.style.cssText = 'font:inherit;font-size:13.5px;padding:7px 14px;border-radius:20px;cursor:pointer;background:#EEF1F5;border:1px dashed #C4CDD8;color:#6B7A8D;font-weight:600;';
+    oth.style.cssText = 'font:inherit;font-size:13.5px;padding:7px 14px;border-radius:20px;cursor:pointer;background:#6B7A8D;border:1px solid #6B7A8D;color:#fff;font-weight:700;';
     var obx = document.createElement('div');
     obx.style.cssText = 'display:none;margin-top:10px;gap:8px;flex-wrap:wrap;';
     var oin = document.createElement('input');

@@ -121,7 +121,9 @@
     }
     .chip:hover { border-color: var(--brand); color: var(--brand); }
     .chip.selected { background: var(--sel-bg); border-color: var(--sel-border); color: var(--brand); font-weight: 500; }
-    .chip.other-chip { border-style: dashed; }
+    /* + Other reads as a button: darker grey, white lettering (row 205, 2026-09-15). */
+    .chip.other-chip { border-style: solid; background:#6B7A8D; border-color:#6B7A8D; color:#fff; font-weight:700; }
+    .chip.other-chip:hover { background:#5A6B7E; border-color:#5A6B7E; }
 
     /* ── Skills grid ── */
     .skills-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
@@ -132,7 +134,7 @@
     }
     .skill-chip:hover { border-color: var(--brand); color: var(--brand); }
     .skill-chip.selected { background: var(--sel-bg); border-color: var(--sel-border); color: var(--brand); font-weight: 500; }
-    .skill-chip.other-chip { border-style: dashed; font-size: 12px; }
+    .skill-chip.other-chip { border-style: solid; font-size: 12px; background:#6B7A8D; border-color:#6B7A8D; color:#fff; font-weight:700; }
 
     /* ── Other inline input ── */
     .other-input-wrap { display: flex; gap: 8px; margin-top: 10px; width: 100%; }
