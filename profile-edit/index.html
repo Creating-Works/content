@@ -1441,7 +1441,9 @@
       '<h1 style="font-size:28px;font-weight:400;color:#fff;margin:0 0 16px;letter-spacing:-.01em;">'
       + (nm ? (nm + ' \u{1F331}') : '') + '</h1>'
       + '<div style="display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px;">'
-      + pill('My profile', 'https://creating.works/profile?show=' + q + '&me=' + q, true)
+      // YOUR OWN PAGE NEEDS NO ID IN THE ADDRESS. Jessie, 2026-09-18: "if I go to a URL with the
+      // ID exposed in the domain, I don't ever want to see that again." It is this device's person.
+      + pill('My profile', 'https://2gather.network/ikigai/', true)
       + pill('My groups', 'https://2gather.network/mygroups?CWid=' + q, false)
       + pill('My events', 'https://2gather.network/myevents?id=' + q, false)
       + pill('My account', 'https://creating.works/account?CWid=' + q + '&tab=account', false)
