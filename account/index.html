@@ -10,6 +10,7 @@
 
   hello@creating.works
 -->
+<!-- Version: V1.17 | Date: 2026-09-19 | LAST CHANGE: the city box is short, and the addresses fill two columns. Jessie: "emdonds is still a very long field. make it a short field." and "now we can use better space for eamil with 2 columns - maybe put the third and fourth where postcal code whent?" City is flex:0 1 220px, so it may shrink on a narrow screen and can never grow to fill a line it is alone on, which is what stretched it. The address list is two fixed ROWS with the flow set to column, so the first two stay put and the third and fourth appear beside them in the space the postal code left; a two-column grid would have put the second address on the right instead. One column on a phone. -->
 <!-- Version: V1.16 | Date: 2026-09-19 | LAST CHANGE: the postal code sits beside the city rather than up in the name grid. Jessie: "city shouldn't be this long of a field  and zip code should go t the right of city". City was the only thing on the second line of the location row, so flex-grow stretched it across the whole panel. Postal is always drawn, state chosen or not, because somebody outside the United States still has one and losing the field loses the way to edit it; it keeps data-acct="postal" so it is collected on save exactly as before, and it marks the page dirty from inside renderLoc because that function redraws the row and would otherwise take the listener with it. The Email addresses list spans the grid now that it is a list rather than a box. -->
 <!-- Version: V1.15 | Date: 2026-09-19 | LAST CHANGE: the addresses are a list rather than boxes, at her "l list". She asked "is this how github's UI is for mutiiple eamlis?" and it was not: GitHub draws each address as plain text on its own line with a small label beside it. A readonly input the same shape as the boxes around it reads as something you can type into and cannot, which is the door-onto-nothing fault in miniature. Plain text, a hairline between each, PRIMARY as a small outlined label, and the foot of the list is where Add another email address goes once the code flow exists. Still behind ?emails=1. -->
 <!-- Version: V1.14 | Date: 2026-09-19 | LAST CHANGE: ?emails=1 shows every address that reaches this account, primary labelled. Jessie, having signed in with her second address and landed on her own account: "can i see all asosciated emails in the account sectino? - just shows gmail right now". Reading only, and no Add button, because adding one safely needs two proofs at once - already signed in, AND a code typed back from the new address - and that flow is not built; a box that looked like it could add one would be a door onto nothing. Behind the parameter until she has looked at it, and the plain single Email field is exactly as it was without it. -->
@@ -97,6 +98,10 @@
     font:inherit;color:var(--ink);background:#fff;}
   .f select:focus{outline:2px solid var(--panel-line);outline-offset:1px;border-color:var(--brand);}
   .locrow{display:flex;gap:10px;flex-wrap:wrap;}
+  /* Addresses fill DOWN two rows and then across, so one and two stay put and three and four
+     appear beside them rather than everything reshuffling each time one is added. */
+  .emaillist{display:grid;grid-template-rows:repeat(2,auto);grid-auto-flow:column;
+    grid-auto-columns:minmax(0,1fr);column-gap:28px;}
   .locrow select{width:auto;flex:1 1 180px;min-width:150px;}
   /* City is typed, not picked, so it needs the same rule as the selects beside it (row 206). */
   .locrow input{width:auto;flex:1 1 180px;min-width:150px;}
@@ -143,6 +148,7 @@
   }
   @media(max-width:760px){
     .fieldgrid{grid-template-columns:1fr;}
+    .emaillist{display:block;}
     .panel{padding:20px 18px;}
     h1{font-size:24px;}
   }
@@ -262,8 +268,14 @@
     }
     var rows=line(D.email||'', true);
     D.alsoEmails.forEach(function(a){ rows+=line(a, false); });
+    // TWO COLUMNS, FILLING DOWN THEN ACROSS. Jessie, 2026-09-19: "now we can use better space for
+    // eamil with 2 columns - maybe put the third and fourth where postcal code whent?" So the
+    // first two addresses stay where they are and the third and fourth appear beside them, in the
+    // space the postal code left. Two fixed ROWS with the flow set to column is what does that:
+    // a grid of two columns would put the second address on the right instead.
+    // It collapses to one column on a phone, in .emaillist below.
     return '<div class="f" style="grid-column:1/-1;"><label>Email addresses</label>'
-      +'<div style="border-top:1px solid var(--line);">'+rows+'</div>'
+      +'<div class="emaillist" style="border-top:1px solid var(--line);">'+rows+'</div>'
       +'<div style="font-size:12.5px;color:var(--muted);margin-top:8px;">'
       +'Signing in with any of these reaches this account. Adding another one is coming.</div></div>';
   }
@@ -634,7 +646,10 @@
         var ci=(_places.cities[ab]||[]).slice().filter(function(x,i,a){ return a.indexOf(x)===i; }).sort();
         if(D.county && cs.indexOf(D.county)<0) cs.push(D.county);
         if(cs.length) h+=sel('loc-county',cs,D.county,'County (optional)');
-        h+='<input id="loc-city" list="loc-cities" placeholder="City (optional)" value="'+esc(D.city||'')+'">'
+        // A CITY NAME IS SHORT, SO THE BOX IS. Jessie, 2026-09-19: "emdonds is still a very long
+        // field. make it a short field." flex:0 1 means it may shrink on a narrow screen and will
+        // never grow to fill a line it happens to be alone on, which is what stretched it.
+        h+='<input id="loc-city" list="loc-cities" placeholder="City (optional)" value="'+esc(D.city||'')+'" style="flex:0 1 220px;">'
           +'<datalist id="loc-cities">'+ci.map(function(c){ return '<option value="'+esc(c)+'">'; }).join('')+'</datalist>';
       } else { placesOnce(); }
     }
