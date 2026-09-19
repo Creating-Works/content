@@ -10,6 +10,7 @@
 
   hello@creating.works
 -->
+<!-- Version: V1.15 | Date: 2026-09-19 | LAST CHANGE: the addresses are a list rather than boxes, at her "l list". She asked "is this how github's UI is for mutiiple eamlis?" and it was not: GitHub draws each address as plain text on its own line with a small label beside it. A readonly input the same shape as the boxes around it reads as something you can type into and cannot, which is the door-onto-nothing fault in miniature. Plain text, a hairline between each, PRIMARY as a small outlined label, and the foot of the list is where Add another email address goes once the code flow exists. Still behind ?emails=1. -->
 <!-- Version: V1.14 | Date: 2026-09-19 | LAST CHANGE: ?emails=1 shows every address that reaches this account, primary labelled. Jessie, having signed in with her second address and landed on her own account: "can i see all asosciated emails in the account sectino? - just shows gmail right now". Reading only, and no Add button, because adding one safely needs two proofs at once - already signed in, AND a code typed back from the new address - and that flow is not built; a box that looked like it could add one would be a door onto nothing. Behind the parameter until she has looked at it, and the plain single Email field is exactly as it was without it. -->
 <!-- Version: V1.13 | Date: 2026-09-15 | LAST CHANGE: Location asks for County and City once a US state is chosen, from the same lists the intro offers, saved to Info.county and Info.city (row 206). Previous: V1.12 | Date: 2026-09-15 | LAST CHANGE: the rail beside the panel is the look for everybody (?look=list shows the old page). Previous: V1.11 | Date: 2026-09-14 | LAST CHANGE: with ?look=rail, the same rail as My profile (nav/profile-rail.js), My account lit. Previous: V1.10: Location picker, real fields behind the permission switches, and My account saves -->
 <html lang="en">
@@ -241,16 +242,28 @@
     if(!showList || !_editToken || !D.alsoEmails.length){
       return readonlyField('Email', D.email, hint);
     }
-    var rows='<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">'
-      +'<input type="text" value="'+esc(D.email||'')+'" readonly style="background:var(--panel);color:var(--soft);">'
-      +'<span style="font-size:12px;font-weight:700;color:var(--soft);white-space:nowrap;">Primary</span></div>';
-    D.alsoEmails.forEach(function(a){
-      rows+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">'
-        +'<input type="text" value="'+esc(a)+'" readonly style="background:var(--panel);color:var(--soft);">'
-        +'<span style="font-size:12px;color:var(--muted);white-space:nowrap;">&nbsp;</span></div>';
-    });
-    return '<div class="f"><label>Email addresses</label>'+rows
-      +'<div style="font-size:12.5px;color:var(--muted);margin-top:6px;">'
+    // A LIST, NOT BOXES. Jessie, 2026-09-19, seeing the first version: "is this how github's UI is
+    // for mutiiple eamlis?" It was not. GitHub draws each address as plain text on its own line
+    // with a small label beside it, and an Add box at the foot. Ours put each one in a readonly
+    // input, the same shape as the First name and Postal code boxes beside it, so it read as
+    // something you could type into and could not - the same door-onto-nothing fault as an Add
+    // button that cannot add, in a smaller form.
+    function line(addr, primary){
+      return '<div style="display:flex;align-items:baseline;gap:10px;padding:9px 0;'
+        + 'border-bottom:1px solid var(--line);">'
+        + '<span style="font-size:15px;color:var(--ink);word-break:break-all;">'+esc(addr)+'</span>'
+        + (primary
+            ? '<span style="font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;'
+              + 'color:var(--soft);border:1px solid var(--line);border-radius:999px;padding:2px 8px;'
+              + 'white-space:nowrap;">Primary</span>'
+            : '')
+        + '</div>';
+    }
+    var rows=line(D.email||'', true);
+    D.alsoEmails.forEach(function(a){ rows+=line(a, false); });
+    return '<div class="f"><label>Email addresses</label>'
+      +'<div style="border-top:1px solid var(--line);">'+rows+'</div>'
+      +'<div style="font-size:12.5px;color:var(--muted);margin-top:8px;">'
       +'Signing in with any of these reaches this account. Adding another one is coming.</div></div>';
   }
 
