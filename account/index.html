@@ -10,6 +10,7 @@
 
   hello@creating.works
 -->
+<!-- Version: V1.16 | Date: 2026-09-19 | LAST CHANGE: the postal code sits beside the city rather than up in the name grid. Jessie: "city shouldn't be this long of a field  and zip code should go t the right of city". City was the only thing on the second line of the location row, so flex-grow stretched it across the whole panel. Postal is always drawn, state chosen or not, because somebody outside the United States still has one and losing the field loses the way to edit it; it keeps data-acct="postal" so it is collected on save exactly as before, and it marks the page dirty from inside renderLoc because that function redraws the row and would otherwise take the listener with it. The Email addresses list spans the grid now that it is a list rather than a box. -->
 <!-- Version: V1.15 | Date: 2026-09-19 | LAST CHANGE: the addresses are a list rather than boxes, at her "l list". She asked "is this how github's UI is for mutiiple eamlis?" and it was not: GitHub draws each address as plain text on its own line with a small label beside it. A readonly input the same shape as the boxes around it reads as something you can type into and cannot, which is the door-onto-nothing fault in miniature. Plain text, a hairline between each, PRIMARY as a small outlined label, and the foot of the list is where Add another email address goes once the code flow exists. Still behind ?emails=1. -->
 <!-- Version: V1.14 | Date: 2026-09-19 | LAST CHANGE: ?emails=1 shows every address that reaches this account, primary labelled. Jessie, having signed in with her second address and landed on her own account: "can i see all asosciated emails in the account sectino? - just shows gmail right now". Reading only, and no Add button, because adding one safely needs two proofs at once - already signed in, AND a code typed back from the new address - and that flow is not built; a box that looked like it could add one would be a door onto nothing. Behind the parameter until she has looked at it, and the plain single Email field is exactly as it was without it. -->
 <!-- Version: V1.13 | Date: 2026-09-15 | LAST CHANGE: Location asks for County and City once a US state is chosen, from the same lists the intro offers, saved to Info.county and Info.city (row 206). Previous: V1.12 | Date: 2026-09-15 | LAST CHANGE: the rail beside the panel is the look for everybody (?look=list shows the old page). Previous: V1.11 | Date: 2026-09-14 | LAST CHANGE: with ?look=rail, the same rail as My profile (nav/profile-rail.js), My account lit. Previous: V1.10: Location picker, real fields behind the permission switches, and My account saves -->
@@ -261,7 +262,7 @@
     }
     var rows=line(D.email||'', true);
     D.alsoEmails.forEach(function(a){ rows+=line(a, false); });
-    return '<div class="f"><label>Email addresses</label>'
+    return '<div class="f" style="grid-column:1/-1;"><label>Email addresses</label>'
       +'<div style="border-top:1px solid var(--line);">'+rows+'</div>'
       +'<div style="font-size:12.5px;color:var(--muted);margin-top:8px;">'
       +'Signing in with any of these reaches this account. Adding another one is coming.</div></div>';
@@ -562,7 +563,6 @@
       +field('firstName','First name','text',D.firstName,'')
       +field('lastName','Last name','text',D.lastName,'')
       +emailBlock()
-      +field('postal','Postal code','text',D.postal,'98026')
       +'</div>'
       +'<div class="f" style="margin-top:16px;"><label>Location</label><div id="loc-box"></div></div>'
       +'<div class="f" style="margin-top:16px;"><label>Languages</label><div id="lang-box"></div></div>'
@@ -638,7 +638,20 @@
           +'<datalist id="loc-cities">'+ci.map(function(c){ return '<option value="'+esc(c)+'">'; }).join('')+'</datalist>';
       } else { placesOnce(); }
     }
+    // POSTAL CODE SITS BESIDE THE CITY. Jessie, 2026-09-19: "city shouldn't be this long of a field
+    // and zip code should go t the right of city". It was over in the name grid, so City was the
+    // only thing on its own line and flex-grow stretched it the whole width of the panel.
+    // It is ALWAYS drawn, whether or not a state has been chosen, because somebody outside the
+    // United States still has a postal code and losing the field would lose the way to edit it.
+    // It keeps data-acct="postal", which is how every field on this page is collected on save, so
+    // moving it changes where it sits and nothing about what it writes.
+    h+='<input data-acct="postal" id="loc-postal" type="text" placeholder="Postal code"'
+      +' value="'+esc(D.postal||'')+'" style="flex:0 1 150px;">';
     box.innerHTML=h+'</div>';
+    // renderLoc redraws this whole row whenever the region, country or state changes, which takes
+    // the page-level input listener with it, so postal marks the page dirty from here instead.
+    var pc=box.querySelector('#loc-postal');
+    if(pc) pc.addEventListener('input',function(){ D.postal=String(pc.value||'').trim(); markDirty(); });
     var cy=box.querySelector('#loc-county');
     if(cy) cy.onchange=function(){ D.county=cy.value; markDirty(); };
     var cit=box.querySelector('#loc-city');
