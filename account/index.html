@@ -10,6 +10,7 @@
 
   hello@creating.works
 -->
+<!-- Version: V1.14 | Date: 2026-09-19 | LAST CHANGE: ?emails=1 shows every address that reaches this account, primary labelled. Jessie, having signed in with her second address and landed on her own account: "can i see all asosciated emails in the account sectino? - just shows gmail right now". Reading only, and no Add button, because adding one safely needs two proofs at once - already signed in, AND a code typed back from the new address - and that flow is not built; a box that looked like it could add one would be a door onto nothing. Behind the parameter until she has looked at it, and the plain single Email field is exactly as it was without it. -->
 <!-- Version: V1.13 | Date: 2026-09-15 | LAST CHANGE: Location asks for County and City once a US state is chosen, from the same lists the intro offers, saved to Info.county and Info.city (row 206). Previous: V1.12 | Date: 2026-09-15 | LAST CHANGE: the rail beside the panel is the look for everybody (?look=list shows the old page). Previous: V1.11 | Date: 2026-09-14 | LAST CHANGE: with ?look=rail, the same rail as My profile (nav/profile-rail.js), My account lit. Previous: V1.10: Location picker, real fields behind the permission switches, and My account saves -->
 <html lang="en">
 <head>
@@ -189,7 +190,7 @@
 
   // CWid is the standard "this is me" param; id/me/memberCard/appearId accepted too.
   var meId=(window.CW&&CW.me)?CW.me().id:(P('CWid')||P('id')||P('me')||P('memberCard')||P('appearId')||'').trim();
-  var D={name:'',firstName:'',lastName:'',photo:'',pageLink:'',postal:'',location:'',county:'',city:'',languages:'',email:'',phone:'',
+  var D={name:'',firstName:'',lastName:'',photo:'',pageLink:'',postal:'',location:'',county:'',city:'',languages:'',email:'',alsoEmails:[],phone:'',
        visPublic:'',showPhoto:'',onMap:'',findable:'',ackTerms:'',dateAckTerms:''};
 
   function go(url){ window.location.href=url; }
@@ -219,6 +220,40 @@
   }
   // A name shown here comes from the Appear page, and Glide owns that row, so anything written
   // back would be overwritten on the next sync. It is shown, not offered for editing.
+  // EVERY ADDRESS THAT REACHES THIS ACCOUNT. Jessie, 2026-09-19: "can i see all asosciated emails
+  // in the account sectino? - just shows gmail right now", after signing in with her second address
+  // and landing on her own account.
+  //
+  // Behind ?emails=1 until she has looked at it, so nobody meets it without the parameter.
+  //
+  // READING ONLY. There is no Add here and no Remove, because adding an address safely needs two
+  // proofs at once - you are already signed in, AND you type a code sent to the new address - and
+  // that flow is steps three and four of
+  // design/features/many-addresses-one-person-2026-09-03.md and is not built. A box that looked
+  // like it could add one would be a door onto nothing.
+  //
+  // The primary is labelled, because which address a code goes to is the one thing somebody
+  // actually needs to know from this list.
+  function emailBlock(){
+    var hint=_editToken?'':'Hidden until you verify it is you. Press Save changes to verify.';
+    var showList=false;
+    try{ showList=new URLSearchParams(location.search).get('emails')==='1'; }catch(e){}
+    if(!showList || !_editToken || !D.alsoEmails.length){
+      return readonlyField('Email', D.email, hint);
+    }
+    var rows='<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">'
+      +'<input type="text" value="'+esc(D.email||'')+'" readonly style="background:var(--panel);color:var(--soft);">'
+      +'<span style="font-size:12px;font-weight:700;color:var(--soft);white-space:nowrap;">Primary</span></div>';
+    D.alsoEmails.forEach(function(a){
+      rows+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">'
+        +'<input type="text" value="'+esc(a)+'" readonly style="background:var(--panel);color:var(--soft);">'
+        +'<span style="font-size:12px;color:var(--muted);white-space:nowrap;">&nbsp;</span></div>';
+    });
+    return '<div class="f"><label>Email addresses</label>'+rows
+      +'<div style="font-size:12.5px;color:var(--muted);margin-top:6px;">'
+      +'Signing in with any of these reaches this account. Adding another one is coming.</div></div>';
+  }
+
   function readonlyField(lab,val,note){
     return '<div class="f"><label>'+esc(lab)+'</label>'
       +'<input type="text" value="'+esc(val||'')+'" readonly style="background:var(--panel);color:var(--soft);">'
@@ -513,9 +548,7 @@
       +'<div class="fieldgrid">'
       +field('firstName','First name','text',D.firstName,'')
       +field('lastName','Last name','text',D.lastName,'')
-      +readonlyField('Email', D.email, _editToken
-        ? ''
-        : 'Hidden until you verify it is you. Press Save changes to verify.')
+      +emailBlock()
       +field('postal','Postal code','text',D.postal,'98026')
       +'</div>'
       +'<div class="f" style="margin-top:16px;"><label>Location</label><div id="loc-box"></div></div>'
@@ -753,6 +786,8 @@
           return;
         }
         if(resp.email) D.email=resp.email;
+        // The other verified addresses on this row, primary not among them. 2026-09-19.
+        D.alsoEmails=Array.isArray(resp.alsoEmails)?resp.alsoEmails:[];
         // The two name columns come back from the account now. The page used to hold only one
         // joined name and rebuild both boxes by splitting it, calling the last word the surname,
         // so a two-word surname could never survive a reload. Anything typed since the page
