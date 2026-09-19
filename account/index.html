@@ -10,6 +10,7 @@
 
   hello@creating.works
 -->
+<!-- Version: V1.21 | Date: 2026-09-19 | LAST CHANGE: Remove and Make primary can say what happened. Jessie: "remove didn't work when I tried to remove it" - and she saw NO message, because the only place this block had to speak was inside the add-an-address form, which is hidden until Add is pressed. So a refusal landed nowhere and the press looked like it did nothing. There is a line under the list now that both of them write to. A page that knows exactly what happened must never say nothing. -->
 <!-- Version: V1.20 | Date: 2026-09-19 | LAST CHANGE: room and a Cancel on the add-an-address form, and Languages comes off this screen. Jessie: "put cancel to the right of send a code button and give some room beneath field and above buttons - looks squished - and left justify under field for email" and "remove languages from account screen?" The buttons were inline after the field with an 8px nudge, so on wrapping they landed indented and tight under it; they are their own row now, under the left edge, with 14px above. Cancel empties the form and puts it away, so reopening never shows a half-typed address or an expired code. Languages is asked in the Skills step of the intro and belongs there alone (row 186); Info.languages is still read on load and still sent on save, so nothing is blanked, and the picker is kept unreferenced so it is one line to put back. -->
 <!-- Version: V1.19 | Date: 2026-09-19 | LAST CHANGE: Add another email address, Make primary and Remove, at her "0 build". Two proofs and neither alone is enough: the page already holds the verified session that saving needs, which proves the account is yours, and adding an address sends a code to THAT address, which proves you hold it. Remove is never offered on the primary, so nobody can lock themselves out; making another one primary first is the way, and the old primary stays on the list rather than being dropped. Nothing is optimistic - the list is redrawn from what the backend answers, never from what the page hoped. Still behind ?emails=1, and it needs the deploy that carries addEmailStart, addEmailConfirm, makePrimaryEmail and removeEmail. -->
 <!-- Version: V1.18 | Date: 2026-09-19 | LAST CHANGE: the help line under Email addresses moves above the list. Jessie: "put 'Signing in with any of these reaches this account.' below header. all in help small liners like this go under headers." Her rule from 2026-09-08, in design-checklist.md ever since, and I wrote it the wrong way round: help under the thing is help after the decision. -->
@@ -309,7 +310,13 @@
     return '<div class="f" style="grid-column:1/-1;"><label>Email addresses</label>'
       +'<div style="font-size:12.5px;color:var(--muted);margin:-2px 0 8px;">'
       +'Signing in with any of these reaches this account. Adding another one is coming.</div>'
-      +'<div class="emaillist" style="border-top:1px solid var(--line);">'+rows+'</div></div>';
+      +'<div class="emaillist" style="border-top:1px solid var(--line);">'+rows+'</div>'
+      // WHERE REMOVE AND MAKE PRIMARY SAY ANYTHING AT ALL. Jessie, 2026-09-19: "remove didn't work
+      // when I tried to remove it" - and she saw NO message, because the only place this block had
+      // to speak was inside the add-an-address form, which is hidden until Add is pressed. So a
+      // refusal from Remove or Make primary landed nowhere and the press looked like it did
+      // nothing. A page that knows exactly what happened must never say nothing.
+      +'<div id="em-note" style="font-size:13px;color:#7A2410;margin-top:8px;display:none;"></div></div>';
   }
 
   // ADDING, PROMOTING AND REMOVING AN ADDRESS. Jessie, 2026-09-19: "0 build", and before it
@@ -384,17 +391,19 @@
         if(!after(r)) say((r&&r.message)||'That did not work.',true);
       });
     };
+    function note(m){ var el=document.getElementById('em-note');
+      if(el){ el.textContent=m||''; el.style.display=m?'block':'none'; } }
     p.querySelectorAll('[data-emprime]').forEach(function(a){
-      a.onclick=function(ev){ ev.preventDefault();
+      a.onclick=function(ev){ ev.preventDefault(); note('');
         call('makePrimaryEmail',{email:a.getAttribute('data-emprime')},function(r){
-          if(!after(r)) say((r&&r.message)||'That did not work.',true);
+          if(!after(r)) note((r&&r.message)||'That did not work. Try once more.');
         });
         return false; };
     });
     p.querySelectorAll('[data-emdrop]').forEach(function(a){
-      a.onclick=function(ev){ ev.preventDefault();
+      a.onclick=function(ev){ ev.preventDefault(); note('');
         call('removeEmail',{email:a.getAttribute('data-emdrop')},function(r){
-          if(!after(r)) say((r&&r.message)||'That did not work.',true);
+          if(!after(r)) note((r&&r.message)||'That did not work. Try once more.');
         });
         return false; };
     });
