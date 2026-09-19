@@ -10,7 +10,8 @@
 
   hello@creating.works
 -->
-<!-- Version: V1.18 | Date: 2026-09-19 | LAST CHANGE: the help line under Email addresses moves above the list. Jessie: "put 'Signing in with any of these reaches this account. Adding another one is coming.' below header. all in help small liners like this go under headers." Her rule from 2026-09-08, in design-checklist.md ever since, and I wrote it the wrong way round: help under the thing is help after the decision. -->
+<!-- Version: V1.19 | Date: 2026-09-19 | LAST CHANGE: Add another email address, Make primary and Remove, at her "0 build". Two proofs and neither alone is enough: the page already holds the verified session that saving needs, which proves the account is yours, and adding an address sends a code to THAT address, which proves you hold it. Remove is never offered on the primary, so nobody can lock themselves out; making another one primary first is the way, and the old primary stays on the list rather than being dropped. Nothing is optimistic - the list is redrawn from what the backend answers, never from what the page hoped. Still behind ?emails=1, and it needs the deploy that carries addEmailStart, addEmailConfirm, makePrimaryEmail and removeEmail. -->
+<!-- Version: V1.18 | Date: 2026-09-19 | LAST CHANGE: the help line under Email addresses moves above the list. Jessie: "put 'Signing in with any of these reaches this account.' below header. all in help small liners like this go under headers." Her rule from 2026-09-08, in design-checklist.md ever since, and I wrote it the wrong way round: help under the thing is help after the decision. -->
 <!-- Version: V1.17 | Date: 2026-09-19 | LAST CHANGE: the city box is short, and the addresses fill two columns. Jessie: "emdonds is still a very long field. make it a short field." and "now we can use better space for eamil with 2 columns - maybe put the third and fourth where postcal code whent?" City is flex:0 1 220px, so it may shrink on a narrow screen and can never grow to fill a line it is alone on, which is what stretched it. The address list is two fixed ROWS with the flow set to column, so the first two stay put and the third and fourth appear beside them in the space the postal code left; a two-column grid would have put the second address on the right instead. One column on a phone. -->
 <!-- Version: V1.16 | Date: 2026-09-19 | LAST CHANGE: the postal code sits beside the city rather than up in the name grid. Jessie: "city shouldn't be this long of a field  and zip code should go t the right of city". City was the only thing on the second line of the location row, so flex-grow stretched it across the whole panel. Postal is always drawn, state chosen or not, because somebody outside the United States still has one and losing the field loses the way to edit it; it keeps data-acct="postal" so it is collected on save exactly as before, and it marks the page dirty from inside renderLoc because that function redraws the row and would otherwise take the listener with it. The Email addresses list spans the grid now that it is a list rather than a box. -->
 <!-- Version: V1.15 | Date: 2026-09-19 | LAST CHANGE: the addresses are a list rather than boxes, at her "l list". She asked "is this how github's UI is for mutiiple eamlis?" and it was not: GitHub draws each address as plain text on its own line with a small label beside it. A readonly input the same shape as the boxes around it reads as something you can type into and cannot, which is the door-onto-nothing fault in miniature. Plain text, a hairline between each, PRIMARY as a small outlined label, and the foot of the list is where Add another email address goes once the code flow exists. Still behind ?emails=1. -->
@@ -264,11 +265,26 @@
             ? '<span style="font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;'
               + 'color:var(--soft);border:1px solid var(--line);border-radius:999px;padding:2px 8px;'
               + 'white-space:nowrap;">Primary</span>'
-            : '')
+            // Make primary and Remove belong to an address that is NOT the primary. Remove is
+            // deliberately never offered on the primary, so nobody can lock themselves out of
+            // their own account; making another one primary first is the way.
+            : '<span style="margin-left:auto;white-space:nowrap;font-size:13px;">'
+              + '<a href="#" data-emprime="'+esc(addr)+'" style="color:#1F699E;text-decoration:none;">Make primary</a>'
+              + '<a href="#" data-emdrop="'+esc(addr)+'" style="color:var(--muted);text-decoration:none;margin-left:12px;">Remove</a>'
+              + '</span>')
         + '</div>';
     }
     var rows=line(D.email||'', true);
     D.alsoEmails.forEach(function(a){ rows+=line(a, false); });
+    rows+='<div id="em-add" style="padding:10px 0 2px;">'
+      +'<a href="#" id="em-open" style="color:#1F699E;font-weight:700;font-size:14px;text-decoration:none;">Add another email address</a>'
+      +'<div id="em-form" style="display:none;margin-top:8px;">'
+        +'<div id="em-step1"><input id="em-new" type="email" placeholder="you@work.com" autocomplete="email" style="max-width:320px;">'
+          +'<button type="button" id="em-send" class="btn ghost" style="font-size:14px;padding:9px 16px;margin-left:8px;">Send a code</button></div>'
+        +'<div id="em-step2" style="display:none;"><input id="em-code" type="text" inputmode="numeric" maxlength="6" placeholder="000000" style="max-width:160px;letter-spacing:6px;">'
+          +'<button type="button" id="em-ok" class="btn ghost" style="font-size:14px;padding:9px 16px;margin-left:8px;">Add this address</button></div>'
+        +'<div id="em-say" style="font-size:13px;color:var(--soft);margin-top:8px;"></div>'
+      +'</div></div>';
     // TWO COLUMNS, FILLING DOWN THEN ACROSS. Jessie, 2026-09-19: "now we can use better space for
     // eamil with 2 columns - maybe put the third and fourth where postcal code whent?" So the
     // first two addresses stay where they are and the third and fourth appear beside them, in the
@@ -284,6 +300,81 @@
       +'<div style="font-size:12.5px;color:var(--muted);margin:-2px 0 8px;">'
       +'Signing in with any of these reaches this account. Adding another one is coming.</div>'
       +'<div class="emaillist" style="border-top:1px solid var(--line);">'+rows+'</div></div>';
+  }
+
+  // ADDING, PROMOTING AND REMOVING AN ADDRESS. Jessie, 2026-09-19: "0 build", and before it
+  // "how do they udpate these emails btw?" and "can they cjange one email to be the primary
+  // instead?"
+  //
+  // TWO PROOFS AND NEITHER ALONE IS ENOUGH: this page already holds the verified session that
+  // saving needs, which proves the account is yours, and adding an address sends a code to THAT
+  // address which proves you hold it. The backend checks both and checks again on the second
+  // half, because minutes pass in between.
+  //
+  // Nothing here is optimistic: the list is redrawn from what the backend answers, never from
+  // what the page hoped. A save that half worked would otherwise leave the screen lying.
+  function wireEmails(p){
+    if(!p) return;
+    function say(m,bad){ var el=document.getElementById('em-say'); if(el){ el.textContent=m||''; el.style.color=bad?'#7A2410':'var(--soft)'; } }
+    function after(resp){
+      if(!resp||resp.status!=='ok') return false;
+      if(resp.email) D.email=resp.email;
+      D.alsoEmails=Array.isArray(resp.alsoEmails)?resp.alsoEmails:D.alsoEmails;
+      renderPanel('account');
+      return true;
+    }
+    function call(action, extra, done){
+      var u=GS_URL+'?action='+action+'&appearId='+encodeURIComponent(meId)
+        +'&editToken='+encodeURIComponent(_editToken);
+      Object.keys(extra||{}).forEach(function(k){ u+='&'+k+'='+encodeURIComponent(extra[k]); });
+      fetch(u).then(function(r){ return r.json(); }).then(done)
+        .catch(function(){ say('That did not reach the server. Try once more.',true); });
+    }
+    var open=document.getElementById('em-open');
+    if(open) open.onclick=function(ev){ ev.preventDefault();
+      var f=document.getElementById('em-form'); if(f){ f.style.display='block'; }
+      open.style.display='none';
+      var n=document.getElementById('em-new'); if(n) n.focus();
+      return false; };
+    var send=document.getElementById('em-send');
+    if(send) send.onclick=function(){
+      var n=document.getElementById('em-new'); var v=n?String(n.value||'').trim():'';
+      if(!v){ say('Type the address first.',true); return; }
+      send.disabled=true; say('Sending a code to '+v+'…');
+      call('addEmailStart',{email:v},function(r){
+        send.disabled=false;
+        if(!r||r.status!=='ok'){ say((r&&r.message)||'That did not work.',true); return; }
+        document.getElementById('em-step1').style.display='none';
+        document.getElementById('em-step2').style.display='block';
+        say('We sent a code to '+v+'. Type it here. It expires in fifteen minutes.');
+        var c=document.getElementById('em-code'); if(c) c.focus();
+      });
+    };
+    var ok=document.getElementById('em-ok');
+    if(ok) ok.onclick=function(){
+      var n=document.getElementById('em-new'), c=document.getElementById('em-code');
+      var v=n?String(n.value||'').trim():'', code=c?String(c.value||'').trim():'';
+      if(!code){ say('Type the code.',true); return; }
+      ok.disabled=true; say('Checking…');
+      call('addEmailConfirm',{email:v,code:code},function(r){
+        ok.disabled=false;
+        if(!after(r)) say((r&&r.message)||'That did not work.',true);
+      });
+    };
+    p.querySelectorAll('[data-emprime]').forEach(function(a){
+      a.onclick=function(ev){ ev.preventDefault();
+        call('makePrimaryEmail',{email:a.getAttribute('data-emprime')},function(r){
+          if(!after(r)) say((r&&r.message)||'That did not work.',true);
+        });
+        return false; };
+    });
+    p.querySelectorAll('[data-emdrop]').forEach(function(a){
+      a.onclick=function(ev){ ev.preventDefault();
+        call('removeEmail',{email:a.getAttribute('data-emdrop')},function(r){
+          if(!after(r)) say((r&&r.message)||'That did not work.',true);
+        });
+        return false; };
+    });
   }
 
   function readonlyField(lab,val,note){
@@ -591,6 +682,7 @@
     renderLangs();
     bindSave();
     p.querySelectorAll('[data-acct]').forEach(function(i){ i.addEventListener('input',markDirty); });
+    wireEmails(p);
   }
 
   // Location reuses the picker people already meet on the events page: region, then country, then
