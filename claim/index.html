@@ -11,6 +11,9 @@
 -->
 <!-- Version: V1.01 | Date: 2026-07-22 | LAST CHANGE: Show the person's Appear page link as a read-only clickable link (opens new tab), passed in via ?link= (from the event form / their profile), instead of an editable paste field. Pick a slug -> live checkVanity -> saveVanity writes slug + fills Main "Page link". Needs GAS checkVanity/saveVanity/vanity + the appear.network Worker. -->
 <meta charset="UTF-8">
+<!-- Who is looking at this page, and since identity.js V18 whether they may see it at all.
+     First in the head, no defer and no async: it has to run before this page's own script. -->
+<script src="https://2gather.network/nav/identity.js?v=18"></script>
 <meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Claim your link</title>
