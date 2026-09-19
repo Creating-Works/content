@@ -10,6 +10,7 @@
 
   hello@creating.works
 -->
+<!-- Version: V1.20 | Date: 2026-09-19 | LAST CHANGE: room and a Cancel on the add-an-address form, and Languages comes off this screen. Jessie: "put cancel to the right of send a code button and give some room beneath field and above buttons - looks squished - and left justify under field for email" and "remove languages from account screen?" The buttons were inline after the field with an 8px nudge, so on wrapping they landed indented and tight under it; they are their own row now, under the left edge, with 14px above. Cancel empties the form and puts it away, so reopening never shows a half-typed address or an expired code. Languages is asked in the Skills step of the intro and belongs there alone (row 186); Info.languages is still read on load and still sent on save, so nothing is blanked, and the picker is kept unreferenced so it is one line to put back. -->
 <!-- Version: V1.19 | Date: 2026-09-19 | LAST CHANGE: Add another email address, Make primary and Remove, at her "0 build". Two proofs and neither alone is enough: the page already holds the verified session that saving needs, which proves the account is yours, and adding an address sends a code to THAT address, which proves you hold it. Remove is never offered on the primary, so nobody can lock themselves out; making another one primary first is the way, and the old primary stays on the list rather than being dropped. Nothing is optimistic - the list is redrawn from what the backend answers, never from what the page hoped. Still behind ?emails=1, and it needs the deploy that carries addEmailStart, addEmailConfirm, makePrimaryEmail and removeEmail. -->
 <!-- Version: V1.18 | Date: 2026-09-19 | LAST CHANGE: the help line under Email addresses moves above the list. Jessie: "put 'Signing in with any of these reaches this account.' below header. all in help small liners like this go under headers." Her rule from 2026-09-08, in design-checklist.md ever since, and I wrote it the wrong way round: help under the thing is help after the decision. -->
 <!-- Version: V1.17 | Date: 2026-09-19 | LAST CHANGE: the city box is short, and the addresses fill two columns. Jessie: "emdonds is still a very long field. make it a short field." and "now we can use better space for eamil with 2 columns - maybe put the third and fourth where postcal code whent?" City is flex:0 1 220px, so it may shrink on a narrow screen and can never grow to fill a line it is alone on, which is what stretched it. The address list is two fixed ROWS with the flow set to column, so the first two stay put and the third and fourth appear beside them in the space the postal code left; a two-column grid would have put the second address on the right instead. One column on a phone. -->
@@ -279,10 +280,19 @@
     rows+='<div id="em-add" style="padding:10px 0 2px;">'
       +'<a href="#" id="em-open" style="color:#1F699E;font-weight:700;font-size:14px;text-decoration:none;">Add another email address</a>'
       +'<div id="em-form" style="display:none;margin-top:8px;">'
+        // THE BUTTONS SIT UNDER THE LEFT EDGE OF THE FIELD, WITH ROOM ABOVE THEM. Jessie,
+        // 2026-09-19: "put cancel to the right of send a code button and give some room beneath
+        // field and above buttons - looks squished - and left justify under field for email".
+        // They were inline after the field with an 8px nudge, so when they wrapped they landed
+        // indented and tight under it.
         +'<div id="em-step1"><input id="em-new" type="email" placeholder="you@work.com" autocomplete="email" style="max-width:320px;">'
-          +'<button type="button" id="em-send" class="btn ghost" style="font-size:14px;padding:9px 16px;margin-left:8px;">Send a code</button></div>'
+          +'<div style="margin-top:14px;display:flex;gap:10px;align-items:center;">'
+          +'<button type="button" id="em-send" class="btn ghost" style="font-size:14px;padding:9px 16px;">Send a code</button>'
+          +'<button type="button" class="btn ghost em-cancel" style="font-size:14px;padding:9px 16px;">Cancel</button></div></div>'
         +'<div id="em-step2" style="display:none;"><input id="em-code" type="text" inputmode="numeric" maxlength="6" placeholder="000000" style="max-width:160px;letter-spacing:6px;">'
-          +'<button type="button" id="em-ok" class="btn ghost" style="font-size:14px;padding:9px 16px;margin-left:8px;">Add this address</button></div>'
+          +'<div style="margin-top:14px;display:flex;gap:10px;align-items:center;">'
+          +'<button type="button" id="em-ok" class="btn ghost" style="font-size:14px;padding:9px 16px;">Add this address</button>'
+          +'<button type="button" class="btn ghost em-cancel" style="font-size:14px;padding:9px 16px;">Cancel</button></div></div>'
         +'<div id="em-say" style="font-size:13px;color:var(--soft);margin-top:8px;"></div>'
       +'</div></div>';
     // TWO COLUMNS, FILLING DOWN THEN ACROSS. Jessie, 2026-09-19: "now we can use better space for
@@ -323,6 +333,7 @@
       renderPanel('account');
       return true;
     }
+    var open=document.getElementById('em-open');
     function call(action, extra, done){
       var u=GS_URL+'?action='+action+'&appearId='+encodeURIComponent(meId)
         +'&editToken='+encodeURIComponent(_editToken);
@@ -330,12 +341,24 @@
       fetch(u).then(function(r){ return r.json(); }).then(done)
         .catch(function(){ say('That did not reach the server. Try once more.',true); });
     }
-    var open=document.getElementById('em-open');
     if(open) open.onclick=function(ev){ ev.preventDefault();
       var f=document.getElementById('em-form'); if(f){ f.style.display='block'; }
       open.style.display='none';
       var n=document.getElementById('em-new'); if(n) n.focus();
       return false; };
+    // Cancel puts the whole thing away and empties it, so reopening never shows a half-typed
+    // address or a code that has expired since.
+    p.querySelectorAll('.em-cancel').forEach(function(b){
+      b.onclick=function(){
+        var f=document.getElementById('em-form'); if(f) f.style.display='none';
+        if(open) open.style.display='';
+        var n=document.getElementById('em-new'), c=document.getElementById('em-code');
+        if(n) n.value=''; if(c) c.value='';
+        document.getElementById('em-step1').style.display='';
+        document.getElementById('em-step2').style.display='none';
+        say('');
+      };
+    });
     var send=document.getElementById('em-send');
     if(send) send.onclick=function(){
       var n=document.getElementById('em-new'); var v=n?String(n.value||'').trim():'';
@@ -674,7 +697,14 @@
       +emailBlock()
       +'</div>'
       +'<div class="f" style="margin-top:16px;"><label>Location</label><div id="loc-box"></div></div>'
-      +'<div class="f" style="margin-top:16px;"><label>Languages</label><div id="lang-box"></div></div>'
+      // LANGUAGES COMES OFF THIS SCREEN. Jessie, 2026-09-19: "move laungauges away since we have
+      // them here already: https://2gather.network/intro/?perm=1&step=skills and we'll be suing
+      // that anyways", then "remove languages from account screen?" It is asked and answered in
+      // the Skills step of the intro, which is the one place it belongs (row 186, her own
+      // "languages move to skills" on 2026-09-15). NOTHING IS LOST: Info.languages is still read
+      // when this page loads and still sent on every save, so a save from here carries whatever
+      // the intro stored rather than blanking it. The picker itself is kept below, unreferenced,
+      // so putting it back is one line.
       +saveRow();
     var up=document.getElementById('photo-upload');
     if(up) up.onclick=choosePhoto;
