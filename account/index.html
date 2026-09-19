@@ -10,6 +10,7 @@
 
   hello@creating.works
 -->
+<!-- Version: V1.24 | Date: 2026-09-19 | LAST CHANGE: the page says it was refused rather than drawing an empty place. Jessie: "city is gone from this again htough" and "and county". Her record was never touched - n161 read all four cells back intact. getProfile now refuses without a proved session, which is this afternoon's security fix, and answers found:false with code signin; this page reads every place field out of that answer, so it drew an empty picker instead of saying it could not read, and because lookupProfile still answered the could-not-load line never fired. A page asserting something before it knows, again. -->
 <!-- Version: V1.23 | Date: 2026-09-19 | LAST CHANGE: the Location row reads like the welcome step of the intro, and the rule above Save changes is gone. Jessie: "make look slike this on welcome" and "remove horizontal line above save changes". On the intro, region, country, state, county and city run across one line with the postal code on its own beneath, so city takes the same width as the selects beside it and postal is forced onto its own line rather than tucked beside city. Space separates the save row now; a line between every section draws a grid nobody asked for. -->
 <!-- Version: V1.22 | Date: 2026-09-19 | LAST CHANGE: removing an address is asked for in words. Jessie: "put a message Are you sure you want to remove 'email' ? and say type remove". Inline rather than a dialog, because this site has no modals. The address is NAMED in the question rather than left to whichever row the finger landed on, and the word has to be typed, so it cannot happen by a stray press. It also says what removing costs - it will stop signing you in. The press says Removing... while it waits, because the backend proves the write before answering. -->
 <!-- Version: V1.21 | Date: 2026-09-19 | LAST CHANGE: Remove and Make primary can say what happened. Jessie: "remove didn't work when I tried to remove it" - and she saw NO message, because the only place this block had to speak was inside the add-an-address form, which is hidden until Add is pressed. So a refusal landed nowhere and the press looked like it did nothing. There is a line under the list now that both of them write to. A page that knows exactly what happened must never say nothing. -->
@@ -977,6 +978,26 @@
       ['visPublic','showPhoto','onMap','findable','ackTerms','dateAckTerms'].forEach(function(k){
         D[k]=(d[k]==null?'':String(d[k]));
       });
+    }
+    // THE PAGE MUST NOT DRAW A PLACE IT WAS REFUSED. Jessie, 2026-09-19: "city is gone from this
+    // again htough" and "and county", with Location showing Select state where it had shown
+    // Washington an hour before. Her record was never touched - n161 read all four cells back:
+    // Washington, United States / Snohomish County / Edmonds / 98026.
+    //
+    // WHAT ACTUALLY HAPPENED, and I shipped it this afternoon: getProfile now REFUSES without a
+    // proved session, which is the security fix, and it answers { found:false, code:'signin' }.
+    // This page reads every place field out of pr.data and simply never got one - so it drew an
+    // empty picker rather than saying it could not read. Because lookupProfile still answered, the
+    // "could not load" line below never fired either.
+    //
+    // A page asserting something before it knows, for the fifth time this month. It says so now,
+    // and Save changes sends a fresh code so the way back is on the screen rather than a reload.
+    if(pr && pr.status==='error' && pr.code==='signin'){
+      var _ph=document.getElementById('panel');
+      if(_ph){ _ph.innerHTML='<div class="status err">This device needs to prove who you are before '
+        +'your details can be shown. <a href="https://2gather.network/signin/?next=%2Faccount%2F" '
+        +'style="color:#1F699E;font-weight:700;">Sign in again</a> and you will land back here.</div>'; }
+      return;
     }
     if(!lu.found && !pr.found){
       document.getElementById('panel').innerHTML='<div class="status err">Could not load your account. Reload the page to try again.</div>';
