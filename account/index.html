@@ -703,7 +703,7 @@
   // Two reads in parallel (one round-trip of wall-clock): lookupProfile carries the name, photo,
   // and the stored Appear page link; getProfile carries the contact fields.
   var pLookup=fetch(GS_URL+'?action=lookupProfile&appearId='+encodeURIComponent(meId)).then(function(r){return r.json();}).catch(function(){return null;});
-  var pProfile=fetch(GS_URL+'?action=getProfile&appearId='+encodeURIComponent(meId)).then(function(r){return r.json();}).catch(function(){return null;});
+  var pProfile=fetch(GS_URL+'?action=getProfile&appearId='+encodeURIComponent(meId)+'&meToken='+encodeURIComponent((function(){try{return localStorage.getItem('cw-token')||'';}catch(e){return '';}})())).then(function(r){return r.json();}).catch(function(){return null;});
   Promise.all([pLookup,pProfile]).then(function(res){
     var lu=res[0]||{}, pr=res[1]||{};
     if(lu.found){ D.name=lu.name||''; D.photo=lu.photo||''; D.pageLink=lu.pageLink||''; }

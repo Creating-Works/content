@@ -102,7 +102,7 @@ function showNoLink(){
   // from two to forty seconds, and a page that asserts the wrong thing for the first half minute
   // reads as broken.
   document.getElementById('looking').style.display='block';
-  fetch(GS_URL+'?action=getProfile&appearId='+encodeURIComponent(_me))
+  fetch(GS_URL+'?action=getProfile&appearId='+encodeURIComponent(_me)+'&meToken='+encodeURIComponent((function(){try{return localStorage.getItem('cw-token')||'';}catch(e){return '';}})()))
     .then(function(r){ return r.json(); })
     .then(function(d){
       var v=String((d&&d.data&&d.data.appearLink)||'').trim();

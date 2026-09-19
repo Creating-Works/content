@@ -1848,7 +1848,7 @@
   (function(){ var em=document.getElementById('edit-mode'); if(em){ var s=document.createElement('div'); s.id='da-savestat'; s.style.cssText='font-size:13px;color:var(--muted);font-weight:600;text-align:right;min-height:16px;margin-bottom:6px;'; em.insertBefore(s, em.firstChild); } })();
 
   var _pRef=fetch(GS_URL+'?action=getReferenceData').then(function(r){return r.json();}).then(function(rd){ buildTreesFromRefData(rd); }).catch(function(){});
-  var _pProf=_id ? fetch(GS_URL+'?action=getProfile&appearId='+encodeURIComponent(_id)).then(function(r){return r.json();}).then(function(resp){ window._profAnswered = !!(resp && (resp.found===true || (resp.found===false && resp.status!=='error'))); if(resp&&resp.found&&resp.data){ _profilePhoto=resp.photo||''; _profileName=resp.name||''; _pageLink=resp.pageLink||''; loadProfile(resp.data); } }).catch(function(){ window._profFetchFailed = true; }) : Promise.resolve();
+  var _pProf=_id ? fetch(GS_URL+'?action=getProfile&appearId='+encodeURIComponent(_id)+'&meToken='+encodeURIComponent((function(){try{return localStorage.getItem('cw-token')||'';}catch(e){return '';}})())).then(function(r){return r.json();}).then(function(resp){ window._profAnswered = !!(resp && (resp.found===true || (resp.found===false && resp.status!=='error'))); if(resp&&resp.found&&resp.data){ _profilePhoto=resp.photo||''; _profileName=resp.name||''; _pageLink=resp.pageLink||''; loadProfile(resp.data); } }).catch(function(){ window._profFetchFailed = true; }) : Promise.resolve();
   var _manageParam=_param('manage');
   // Concept A: your OWN page lands on the hub (welcome + tabs). The "This is me" card is the
   // quick view of SOMEONE ELSE, the way it appears from a bulletin board (?show=them&me=you).
