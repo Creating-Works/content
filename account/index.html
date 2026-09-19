@@ -10,6 +10,7 @@
 
   hello@creating.works
 -->
+<!-- Version: V1.23 | Date: 2026-09-19 | LAST CHANGE: the Location row reads like the welcome step of the intro, and the rule above Save changes is gone. Jessie: "make look slike this on welcome" and "remove horizontal line above save changes". On the intro, region, country, state, county and city run across one line with the postal code on its own beneath, so city takes the same width as the selects beside it and postal is forced onto its own line rather than tucked beside city. Space separates the save row now; a line between every section draws a grid nobody asked for. -->
 <!-- Version: V1.22 | Date: 2026-09-19 | LAST CHANGE: removing an address is asked for in words. Jessie: "put a message Are you sure you want to remove 'email' ? and say type remove". Inline rather than a dialog, because this site has no modals. The address is NAMED in the question rather than left to whichever row the finger landed on, and the word has to be typed, so it cannot happen by a stray press. It also says what removing costs - it will stop signing you in. The press says Removing... while it waits, because the backend proves the write before answering. -->
 <!-- Version: V1.21 | Date: 2026-09-19 | LAST CHANGE: Remove and Make primary can say what happened. Jessie: "remove didn't work when I tried to remove it" - and she saw NO message, because the only place this block had to speak was inside the add-an-address form, which is hidden until Add is pressed. So a refusal landed nowhere and the press looked like it did nothing. There is a line under the list now that both of them write to. A page that knows exactly what happened must never say nothing. -->
 <!-- Version: V1.20 | Date: 2026-09-19 | LAST CHANGE: room and a Cancel on the add-an-address form, and Languages comes off this screen. Jessie: "put cancel to the right of send a code button and give some room beneath field and above buttons - looks squished - and left justify under field for email" and "remove languages from account screen?" The buttons were inline after the field with an 8px nudge, so on wrapping they landed indented and tight under it; they are their own row now, under the left edge, with 14px above. Cancel empties the form and puts it away, so reopening never shows a half-typed address or an expired code. Languages is asked in the Skills step of the intro and belongs there alone (row 186); Info.languages is still read on load and still sent on save, so nothing is blanked, and the picker is kept unreferenced so it is one line to put back. -->
@@ -529,8 +530,10 @@
   // there is a record of it.
   function termsLede(){ return termsRecorded() ? 'You accepted the ' : 'Read the '; }
   function saveRow(){
-    return '<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:24px;'
-      +'padding-top:20px;border-top:1px solid var(--line);">'
+    // NO RULE ABOVE SAVE CHANGES. Jessie, 2026-09-19: "remove horizontal line above save changes".
+    // Space does the separating; a line between every section draws a grid nobody asked for, which
+    // is what the note further up this file already says about rows.
+    return '<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:26px;">'
       +'<button type="button" class="btn solid" id="acct-save">Save changes</button>'
       +'<span id="acct-savestat" style="font-size:13.5px;color:var(--soft);font-weight:600;"></span>'
       +'</div><div id="acct-gate"></div>';
@@ -819,7 +822,7 @@
         // A CITY NAME IS SHORT, SO THE BOX IS. Jessie, 2026-09-19: "emdonds is still a very long
         // field. make it a short field." flex:0 1 means it may shrink on a narrow screen and will
         // never grow to fill a line it happens to be alone on, which is what stretched it.
-        h+='<input id="loc-city" list="loc-cities" placeholder="City (optional)" value="'+esc(D.city||'')+'" style="flex:0 1 220px;">'
+        h+='<input id="loc-city" list="loc-cities" placeholder="City (optional)" value="'+esc(D.city||'')+'" style="flex:1 1 180px;min-width:150px;">'
           +'<datalist id="loc-cities">'+ci.map(function(c){ return '<option value="'+esc(c)+'">'; }).join('')+'</datalist>';
       } else { placesOnce(); }
     }
@@ -830,7 +833,12 @@
     // United States still has a postal code and losing the field would lose the way to edit it.
     // It keeps data-acct="postal", which is how every field on this page is collected on save, so
     // moving it changes where it sits and nothing about what it writes.
-    h+='<input data-acct="postal" id="loc-postal" type="text" placeholder="Postal code"'
+    // THE SAME ROW AS THE INTRO. Jessie, 2026-09-19, of the welcome step: "make look slike this".
+    // There: region, country, state, county and city run across one line and the postal code sits
+    // on its own beneath. So postal is forced onto its own line rather than tucked beside the city,
+    // which is where it went an hour ago when city was the only thing on the second line.
+    h+='<div style="flex-basis:100%;height:0;"></div>'
+      +'<input data-acct="postal" id="loc-postal" type="text" placeholder="Postal code"'
       +' value="'+esc(D.postal||'')+'" style="flex:0 1 150px;">';
     box.innerHTML=h+'</div>';
     // renderLoc redraws this whole row whenever the region, country or state changes, which takes
