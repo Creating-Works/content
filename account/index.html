@@ -10,6 +10,7 @@
 
   hello@creating.works
 -->
+<!-- Version: V1.22 | Date: 2026-09-19 | LAST CHANGE: removing an address is asked for in words. Jessie: "put a message Are you sure you want to remove 'email' ? and say type remove". Inline rather than a dialog, because this site has no modals. The address is NAMED in the question rather than left to whichever row the finger landed on, and the word has to be typed, so it cannot happen by a stray press. It also says what removing costs - it will stop signing you in. The press says Removing... while it waits, because the backend proves the write before answering. -->
 <!-- Version: V1.21 | Date: 2026-09-19 | LAST CHANGE: Remove and Make primary can say what happened. Jessie: "remove didn't work when I tried to remove it" - and she saw NO message, because the only place this block had to speak was inside the add-an-address form, which is hidden until Add is pressed. So a refusal landed nowhere and the press looked like it did nothing. There is a line under the list now that both of them write to. A page that knows exactly what happened must never say nothing. -->
 <!-- Version: V1.20 | Date: 2026-09-19 | LAST CHANGE: room and a Cancel on the add-an-address form, and Languages comes off this screen. Jessie: "put cancel to the right of send a code button and give some room beneath field and above buttons - looks squished - and left justify under field for email" and "remove languages from account screen?" The buttons were inline after the field with an 8px nudge, so on wrapping they landed indented and tight under it; they are their own row now, under the left edge, with 14px above. Cancel empties the form and puts it away, so reopening never shows a half-typed address or an expired code. Languages is asked in the Skills step of the intro and belongs there alone (row 186); Info.languages is still read on load and still sent on save, so nothing is blanked, and the picker is kept unreferenced so it is one line to put back. -->
 <!-- Version: V1.19 | Date: 2026-09-19 | LAST CHANGE: Add another email address, Make primary and Remove, at her "0 build". Two proofs and neither alone is enough: the page already holds the verified session that saving needs, which proves the account is yours, and adding an address sends a code to THAT address, which proves you hold it. Remove is never offered on the primary, so nobody can lock themselves out; making another one primary first is the way, and the old primary stays on the list rather than being dropped. Nothing is optimistic - the list is redrawn from what the backend answers, never from what the page hoped. Still behind ?emails=1, and it needs the deploy that carries addEmailStart, addEmailConfirm, makePrimaryEmail and removeEmail. -->
@@ -316,7 +317,19 @@
       // to speak was inside the add-an-address form, which is hidden until Add is pressed. So a
       // refusal from Remove or Make primary landed nowhere and the press looked like it did
       // nothing. A page that knows exactly what happened must never say nothing.
-      +'<div id="em-note" style="font-size:13px;color:#7A2410;margin-top:8px;display:none;"></div></div>';
+      +'<div id="em-note" style="font-size:13px;color:#7A2410;margin-top:8px;display:none;"></div>'
+      // TAKING AN ADDRESS OFF IS ASKED FOR IN WORDS. Jessie, 2026-09-19: "put a message Are you
+      // sure you want to remove \'email\' ? and say type remove". Inline rather than a dialog,
+      // because this site has no modals - and typing the word is the point: it cannot happen by a
+      // stray press, and the address being removed is named in the question rather than left to
+      // whichever row the finger landed on.
+      +'<div id="em-conf" style="display:none;margin-top:10px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel);">'
+        +'<div id="em-conf-ask" style="font-size:14px;line-height:1.5;"></div>'
+        +'<div style="margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">'
+        +'<input id="em-conf-word" type="text" placeholder="remove" autocomplete="off" style="max-width:160px;">'
+        +'<button type="button" id="em-conf-go" class="btn ghost" style="font-size:14px;padding:9px 16px;">Remove</button>'
+        +'<button type="button" id="em-conf-no" class="btn ghost" style="font-size:14px;padding:9px 16px;">Cancel</button></div>'
+      +'</div></div>';
   }
 
   // ADDING, PROMOTING AND REMOVING AN ADDRESS. Jessie, 2026-09-19: "0 build", and before it
@@ -400,11 +413,31 @@
         });
         return false; };
     });
+    // Remove ASKS FIRST, and the answer is the word itself.
+    var conf=document.getElementById('em-conf');
+    function closeConf(){ if(conf) conf.style.display='none';
+      var w=document.getElementById('em-conf-word'); if(w) w.value=''; }
+    var no=document.getElementById('em-conf-no'); if(no) no.onclick=function(){ closeConf(); note(''); };
     p.querySelectorAll('[data-emdrop]').forEach(function(a){
       a.onclick=function(ev){ ev.preventDefault(); note('');
-        call('removeEmail',{email:a.getAttribute('data-emdrop')},function(r){
-          if(!after(r)) note((r&&r.message)||'That did not work. Try once more.');
-        });
+        var addr=a.getAttribute('data-emdrop');
+        var ask=document.getElementById('em-conf-ask');
+        if(ask) ask.innerHTML='Are you sure you want to remove <strong>'+esc(addr)+'</strong>? '
+          +'It will stop signing you in. Type <strong>remove</strong> to confirm.';
+        var go=document.getElementById('em-conf-go');
+        if(go) go.onclick=function(){
+          var w=document.getElementById('em-conf-word');
+          var typed=w?String(w.value||'').trim().toLowerCase():'';
+          if(typed!=='remove'){ note('Type the word remove to confirm, or press Cancel.'); return; }
+          go.disabled=true; note('Removing '+addr+'\u2026');
+          call('removeEmail',{email:addr},function(r){
+            go.disabled=false;
+            if(after(r)){ closeConf(); }
+            else note((r&&r.message)||'That did not work. Try once more.');
+          });
+        };
+        if(conf) conf.style.display='block';
+        var w0=document.getElementById('em-conf-word'); if(w0){ w0.value=''; w0.focus(); }
         return false; };
     });
   }
