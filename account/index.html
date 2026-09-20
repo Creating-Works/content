@@ -10,6 +10,7 @@
 
   hello@creating.works
 -->
+<!-- Version: V1.26 | Date: 2026-09-19 | LAST CHANGE: the city box stops stretching again. Jessie: "edmonds field is not small again". V1.23 gave it flex:1 1 to match the welcome step, where all five sit on one line - but this panel is narrower, so City wraps onto a line of its own and flex-grow fills it. flex:0 1 220px means it may SHRINK on a narrow screen and can never GROW to fill a line it is alone on, which is the only behaviour that is right at every width. The postal code stays on its own line beneath. -->
 <!-- Version: V1.25 | Date: 2026-09-19 | LAST CHANGE: a place that could not be READ is not an empty place, and the help line stops promising. Jessie: "no", with Location still empty on V1.24. My first guard looked for status error AND code signin exactly and whatever came back carried neither, so the page went on drawing an empty picker. The test is simpler now: if getProfile did not FIND her, the Location section says so in red, offers Sign in again, and tells her not to press Save changes until it comes back - because saving from a page that was refused would write the emptiness over the real answer. The rest of the page stays usable rather than being blocked behind one failed read. Also: "Adding another one is coming" comes off the help line, which the V1.19 edit had aimed at and missed. -->
 <!-- Version: V1.24 | Date: 2026-09-19 | LAST CHANGE: the page says it was refused rather than drawing an empty place. Jessie: "city is gone from this again htough" and "and county". Her record was never touched - n161 read all four cells back intact. getProfile now refuses without a proved session, which is this afternoon's security fix, and answers found:false with code signin; this page reads every place field out of that answer, so it drew an empty picker instead of saying it could not read, and because lookupProfile still answered the could-not-load line never fired. A page asserting something before it knows, again. -->
 <!-- Version: V1.23 | Date: 2026-09-19 | LAST CHANGE: the Location row reads like the welcome step of the intro, and the rule above Save changes is gone. Jessie: "make look slike this on welcome" and "remove horizontal line above save changes". On the intro, region, country, state, county and city run across one line with the postal code on its own beneath, so city takes the same width as the selects beside it and postal is forced onto its own line rather than tucked beside city. Space separates the save row now; a line between every section draws a grid nobody asked for. -->
@@ -832,7 +833,7 @@
         // A CITY NAME IS SHORT, SO THE BOX IS. Jessie, 2026-09-19: "emdonds is still a very long
         // field. make it a short field." flex:0 1 means it may shrink on a narrow screen and will
         // never grow to fill a line it happens to be alone on, which is what stretched it.
-        h+='<input id="loc-city" list="loc-cities" placeholder="City (optional)" value="'+esc(D.city||'')+'" style="flex:1 1 180px;min-width:150px;">'
+        h+='<input id="loc-city" list="loc-cities" placeholder="City (optional)" value="'+esc(D.city||'')+'" style="flex:0 1 220px;min-width:150px;">'
           +'<datalist id="loc-cities">'+ci.map(function(c){ return '<option value="'+esc(c)+'">'; }).join('')+'</datalist>';
       } else { placesOnce(); }
     }
