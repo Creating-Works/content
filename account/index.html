@@ -10,6 +10,7 @@
 
   hello@creating.works
 -->
+<!-- Version: V1.31 | Date: 2026-09-20 | LAST CHANGE: Terms accepted moves onto My info, under Location, and a date we do not hold says nothing. Jessie: "move Terms accepted to my info under location and don't say Not recorded". It was the last row of the permissions pane, which made an agreement look like a setting - something you flip - when it is a record of something that happened; it belongs with the other things that are simply true about this account. And "Not recorded" printed beside somebody's name reads as a failing of theirs rather than a gap in ours, so where there is no date there is now nothing, and the three links stay because the row is still useful without one. -->
 <!-- Version: V1.30 | Date: 2026-09-20 | LAST CHANGE: the rail beside this page is ACCOUNT and PRODUCTS. Jessie: "change the rail for account to this instead", "my permissions stays on that page but the rail changes to global permissions", "support / sign out stay". So the rail reads My info, Global permissions, Support, Sign out, then Balance, Appear, Gather, License each with a dot; and My events, My groups and My profile came OFF it, because they moved into the menu under her name in the top bar the same morning and a shortcut in two places is a shortcut nobody can find in either. My permissions is headed Global permissions now, with one line saying they hold for every group and where a single group is set on its own - a rail row and the heading it opens saying two different things is how somebody decides they are lost. The four product panes open in place rather than by loading a page. NOTHING ABOUT THIS PAGE'S OWN CONTENT MOVED: My info is My account exactly as it was, and the address is still /account/, her "le'ts not change the wrord manage quiet yet". -->
 <!-- Version: V1.29 | Date: 2026-09-19 | LAST CHANGE: Your link - see the name people find you by, and change it. Jessie: "I go". 746 people already had a name and every one was set by a one-off, so nobody could see their own. The box shows 2gather.network/hi/<name>, checks a new name while it is typed and says at once if somebody has it, and the backend now demands the same verified session the rest of the account needs - it took an id alone before, which meant an id could name anybody. The name they had is kept beside the new one, so a link already shared still opens and nobody else can take it. Nothing stores a finished address: the sheet holds the name, the backend answers the name, and the host is written in ONE place on this page, so moving /hi/ to appear.network stays a switch. -->
 <!-- Version: V1.28 | Date: 2026-09-19 | LAST CHANGE: the postal code sits beside the city again. Jessie: "put postal to the right of city - not below". V1.23 forced a line break to copy the welcome step, which was the wrong thing to copy. City is fixed at 220 and postal at 150, so the two share the second line and neither stretches. -->
@@ -665,7 +666,10 @@
       if(!isNaN(t.getTime())) return t.toLocaleDateString(undefined,{month:'short',year:'numeric'});
       return d;
     }
-    return String(D.ackTerms||'').trim() ? 'Accepted' : 'Not recorded';
+    // NOTHING WHERE THERE IS NOTHING. Jessie, 2026-09-20: "don't say Not recorded". A date we do
+    // not hold is not a fact about the person, and printing it beside their name reads as a
+    // failing of theirs. The links stay, so the row is still useful with no date on it.
+    return String(D.ackTerms||'').trim() ? 'Accepted' : '';
   }
   // The row used to claim an acceptance whatever the sheet held. It now only claims one when
   // there is a record of it.
@@ -913,11 +917,6 @@
         +toggleRow('showPhoto','Show my photo','Display your headshot on your profile and the network map.')
         +toggleRow('onMap','Appear on the network map','Include me in the shared map of people and resources.')
         +toggleRow('findable','Findable in search','Let people find me by skills, interests, and needs.')
-        +'<div class="prow"><div><div class="lab">Terms accepted</div><div class="desc">'+termsLede()
-        +'<a href="https://creating.works/terms-of-service.html">Terms of Service</a>, '
-        +'<a href="https://creating.works/privacy-policy.html">Privacy Policy</a>, and '
-        +'<a href="https://creating.works/code-of-conduct.html">Code of Conduct</a>.</div></div>'
-        +'<div style="font-size:13px;color:var(--soft);">'+esc(termsStamp())+'</div></div>'
         +saveRow();
       bindToggles(p); bindSave(); return;
     }
@@ -944,6 +943,18 @@
           +'Do not press Save changes until it does.</div>'
         : '')
       +'<div id="loc-box"></div></div>'
+      // TERMS ACCEPTED SITS UNDER LOCATION, ON MY INFO. Jessie, 2026-09-20: "move Terms accepted to
+      // my info under location". It was the last row of the permissions pane, which made an
+      // agreement look like a setting - something you flip - when it is a record of something that
+      // happened. It belongs with the other things that are simply true about this account.
+      +'<div class="f" style="margin-top:18px;"><label>Terms accepted</label>'
+      +'<div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;">'
+      +'<div style="font-size:13.5px;color:var(--soft);line-height:1.6;flex:1 1 320px;min-width:0;">'+termsLede()
+      +'<a href="https://creating.works/terms-of-service" style="color:#1F699E;font-weight:700;">Terms of Service</a>, '
+      +'<a href="https://creating.works/privacy-policy" style="color:#1F699E;font-weight:700;">Privacy Policy</a>, and '
+      +'<a href="https://creating.works/code-of-conduct" style="color:#1F699E;font-weight:700;">Code of Conduct</a>.</div>'
+      +(termsStamp()?'<div style="font-size:13px;color:var(--soft);white-space:nowrap;">'+esc(termsStamp())+'</div>':'')
+      +'</div></div>'
       // LANGUAGES COMES OFF THIS SCREEN. Jessie, 2026-09-19: "move laungauges away since we have
       // them here already: https://2gather.network/intro/?perm=1&step=skills and we'll be suing
       // that anyways", then "remove languages from account screen?" It is asked and answered in
