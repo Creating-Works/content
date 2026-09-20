@@ -10,6 +10,7 @@
 
   hello@creating.works
 -->
+<!-- Version: V1.32 | Date: 2026-09-20 | LAST CHANGE: Global permissions is a real pane on this page. Jessie: "dont' send people to the global permissoins here: /intro/?perm=1&step=permissions" and "put teh pane fo permissioms IN the global permissions on /account/". She asked twice for this screen to look like that one and I twice argued for opening that one instead, because two screens writing one set of columns is the fault this build has paid for most; she decided, so here it is, and the risk is answered rather than ignored: IT WRITES WHERE THE OTHER ONE WRITES - same action, same audience word (members), the same nine column names, and the same rule that the screen is redrawn from the rows the backend says it wrote rather than from the press that was made. This is a second WINDOW onto one set of rows, not a second copy. THE FOUR OLD SWITCHES ARE GONE from this pane: they wrote Info.visPublic, showPhoto, onMap and findable, a different model entirely, so leaving them here would have been two things called permissions on one screen. NEEDS THE DEPLOY: reading them back needs the new getPermissions action, because nothing could read these rows before - savePermissions answered with what it had just written, which was enough for a screen that only showed them after a press. -->
 <!-- Version: V1.31 | Date: 2026-09-20 | LAST CHANGE: Terms accepted moves onto My info, under Location, and a date we do not hold says nothing. Jessie: "move Terms accepted to my info under location and don't say Not recorded". It was the last row of the permissions pane, which made an agreement look like a setting - something you flip - when it is a record of something that happened; it belongs with the other things that are simply true about this account. And "Not recorded" printed beside somebody's name reads as a failing of theirs rather than a gap in ours, so where there is no date there is now nothing, and the three links stay because the row is still useful without one. -->
 <!-- Version: V1.30 | Date: 2026-09-20 | LAST CHANGE: the rail beside this page is ACCOUNT and PRODUCTS. Jessie: "change the rail for account to this instead", "my permissions stays on that page but the rail changes to global permissions", "support / sign out stay". So the rail reads My info, Global permissions, Support, Sign out, then Balance, Appear, Gather, License each with a dot; and My events, My groups and My profile came OFF it, because they moved into the menu under her name in the top bar the same morning and a shortcut in two places is a shortcut nobody can find in either. My permissions is headed Global permissions now, with one line saying they hold for every group and where a single group is set on its own - a rail row and the heading it opens saying two different things is how somebody decides they are lost. The four product panes open in place rather than by loading a page. NOTHING ABOUT THIS PAGE'S OWN CONTENT MOVED: My info is My account exactly as it was, and the address is still /account/, her "le'ts not change the wrord manage quiet yet". -->
 <!-- Version: V1.29 | Date: 2026-09-19 | LAST CHANGE: Your link - see the name people find you by, and change it. Jessie: "I go". 746 people already had a name and every one was set by a one-off, so nobody could see their own. The box shows 2gather.network/hi/<name>, checks a new name while it is typed and says at once if somebody has it, and the backend now demands the same verified session the rest of the account needs - it took an id alone before, which meant an id could name anybody. The name they had is kept beside the new one, so a link already shared still opens and nobody else can take it. Nothing stores a finished address: the sheet holds the name, the backend answers the name, and the host is written in ONE place on this page, so moving /hi/ to appear.network stays a switch. -->
@@ -585,6 +586,74 @@
     };
   }
 
+  /* THE ROWS THEMSELVES, AND THE ONE PLACE THEY ARE WRITTEN. The audience word is "members",
+     which is what the intro's Global permissions tab writes too - so both windows open onto the
+     same row rather than two rows that disagree. Nothing is optimistic: every press sends the
+     change and redraws from what the backend says it stored, which is the rule that stops a press
+     that did not land from sitting on screen looking chosen. */
+  var _perm=null, _permState='new';
+  function loadPerm(){
+    if(!_editToken||!meId){ _permState='refused'; return; }
+    _permState='looking';
+    fetch(GS_URL+'?action=getPermissions&appearId='+encodeURIComponent(meId)
+      +'&editToken='+encodeURIComponent(_editToken))
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if(!d||d.status!=='ok'){ _permState='refused'; renderPanel('permissions'); return; }
+        _perm=permFrom(d.permissions);
+        _permState='ok';
+        renderPanel('permissions');
+      })
+      .catch(function(){ _permState='refused'; renderPanel('permissions'); });
+  }
+  // A person with no row yet is not a person with everything switched off: the defaults are what
+  // the site does today, which is what the intro assumes as well.
+  function permFrom(rows){
+    var COL={photo:'photo',needs:'needs',enjoy:'enjoy',skills:'skillsLanguages',
+      offers:'offerings',otw:'openToWork',care:'careSectors',work:'workExperience',purpose:'purpose'};
+    var out={ nameShown:'full', placeShown:'state' };
+    Object.keys(COL).forEach(function(k){ out[k]=true; });
+    (rows||[]).forEach(function(r){
+      if(String(r.audience||'')!=='members') return;
+      if(r.nameShown) out.nameShown=String(r.nameShown);
+      if(r.placeShown) out.placeShown=String(r.placeShown);
+      Object.keys(COL).forEach(function(k){
+        var v=String(r[COL[k]]==null?'':r[COL[k]]).trim().toUpperCase();
+        if(v) out[k]=(v==='TRUE');
+      });
+    });
+    return out;
+  }
+  function permSave(){
+    var st=document.getElementById('perm-status');
+    if(st){ st.style.color='var(--soft)'; st.textContent='Saving\u2026'; }
+    var COL={photo:'photo',needs:'needs',enjoy:'enjoy',skills:'skillsLanguages',
+      offers:'offerings',otw:'openToWork',care:'careSectors',work:'workExperience',purpose:'purpose'};
+    var q=GS_URL+'?action=savePermissions&appearId='+encodeURIComponent(meId)
+      +'&editToken='+encodeURIComponent(_editToken)+'&audience=members'
+      +'&nameShown='+encodeURIComponent(_perm.nameShown)
+      +'&placeShown='+encodeURIComponent(_perm.placeShown);
+    Object.keys(COL).forEach(function(k){ q+='&'+COL[k]+'='+(_perm[k]?'true':'false'); });
+    fetch(q).then(function(r){ return r.json(); }).then(function(d){
+      if(d&&d.status==='ok'&&d.permissions){ _perm=permFrom(d.permissions); renderPanel('permissions');
+        var s2=document.getElementById('perm-status'); if(s2){ s2.textContent='Saved.'; } return; }
+      var s3=document.getElementById('perm-status');
+      if(s3){ s3.style.color='#7A2410'; s3.textContent=(d&&d.message)||'That did not save. Try once more.'; }
+    }).catch(function(){
+      var s4=document.getElementById('perm-status');
+      if(s4){ s4.style.color='#7A2410'; s4.textContent='That did not reach the server. Try once more.'; }
+    });
+  }
+  function bindPerm(p){
+    if(!p||!_perm) return;
+    p.querySelectorAll('[data-permname]').forEach(function(b){
+      b.onclick=function(){ _perm.nameShown=b.getAttribute('data-permname'); renderPanel('permissions'); permSave(); }; });
+    p.querySelectorAll('[data-permwhere]').forEach(function(b){
+      b.onclick=function(){ _perm.placeShown=b.getAttribute('data-permwhere'); renderPanel('permissions'); permSave(); }; });
+    p.querySelectorAll('[data-permflag]').forEach(function(b){
+      b.onclick=function(){ var k=b.getAttribute('data-permflag'); _perm[k]=!_perm[k]; renderPanel('permissions'); permSave(); }; });
+  }
+
   function readonlyField(lab,val,note){
     return '<div class="f"><label>'+esc(lab)+'</label>'
       +'<input type="text" value="'+esc(val||'')+'" readonly style="background:var(--panel);color:var(--soft);">'
@@ -884,7 +953,7 @@
         +'<div style="font-size:15.5px;color:var(--soft);margin-top:4px;">'+esc(pr.line)+'</div></div>'
         +'<span style="display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);'
         +'border-radius:999px;padding:8px 15px;font-size:13.5px;font-weight:700;color:var(--soft);">'
-        +'<span style="width:9px;height:9px;border-radius:50%;background:'+(pr.on?'#C2410C':'#B9C4D2')+';"></span>'
+        +'<span style="width:9px;height:9px;border-radius:50%;background:'+(pr.on?'#E2711D':'#B9C4D2')+';"></span>'
         +(pr.on?'On':'Off')+'</span></div>'
         +'<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--panel);'
         +'border:1px solid var(--panel-line);border-radius:14px;padding:16px 18px;margin:22px 0 6px;">'
@@ -906,19 +975,76 @@
       return;
     }
     if(key==='permissions'){
-      /* GLOBAL PERMISSIONS. Jessie, 2026-09-20: "my permissions stays on that page but the rail
-         changes to global permissions". One name in both places, because a rail row and the
-         heading it opens saying two different things is how somebody decides they are lost. */
-      p.innerHTML='<h2>Global permissions</h2>'
-        +'<div style="font-size:12.5px;color:var(--muted);margin:-6px 0 14px;">'
-        +'These hold for every group you are in. A group can be set on its own on the '
-        +'<a href="https://2gather.network/intro/?perm=1&step=permissions" style="color:#1F699E;font-weight:700;">permissions step</a>.</div>'
-        +toggleRow('visPublic','Public profile','Anyone with the link can view your profile.')
-        +toggleRow('showPhoto','Show my photo','Display your headshot on your profile and the network map.')
-        +toggleRow('onMap','Appear on the network map','Include me in the shared map of people and resources.')
-        +toggleRow('findable','Findable in search','Let people find me by skills, interests, and needs.')
-        +saveRow();
-      bindToggles(p); bindSave(); return;
+      /* ── GLOBAL PERMISSIONS, THE REAL PANE ─────────────────────────────────────────────────
+         Jessie, 2026-09-20: "dont' send people to the global permissoins here: /intro/
+         ?perm=1&step=permissions" and "put teh pane fo permissioms IN the global permissions on
+         /account/". She asked twice for this screen to LOOK like that one; I twice argued for
+         opening that one instead, because two screens writing one set of columns is the fault
+         this build has paid for more than any other. She has decided, so here it is - and the
+         way the risk is answered rather than ignored:
+
+         IT WRITES WHERE THE OTHER ONE WRITES. Same action, same audience word, same nine column
+         names, same rule that the screen is redrawn from the rows the backend says it wrote
+         rather than from the press that was made. Nothing new is stored and no second shape of
+         the truth exists; this is a second WINDOW onto one set of rows, not a second copy.
+
+         THE FOUR OLD SWITCHES ARE GONE FROM HERE. They wrote Info.visPublic, showPhoto, onMap and
+         findable - a different model entirely - so leaving them on the same pane would have been
+         two things called permissions on one screen, each quietly overwriting nothing the other
+         knew about. They are still on the record and still read elsewhere; this pane no longer
+         pretends to own them. */
+      var PERM_ITEMS=[
+        ['photo','Your photo'],['needs','Needs'],['enjoy','Enjoys'],
+        ['skills','Skills and languages'],['offers','Offerings'],['otw','Open to work'],
+        ['care','What I care about and sectors'],['work','Work experience I\u2019m creating'],
+        ['purpose','My purpose']
+      ];
+      var PERM_COL={photo:'photo',needs:'needs',enjoy:'enjoy',skills:'skillsLanguages',
+        offers:'offerings',otw:'openToWork',care:'careSectors',work:'workExperience',purpose:'purpose'};
+      var NAME_CHOICES=[['full','Full name'],['short','First name, last initial'],['initials','Initials']];
+      var PLACE_CHOICES=[['city','City'],['county','County'],['state','State'],['country','Country'],['hidden','Hidden']];
+      function permPill(on){ return 'font:inherit;font-size:14px;font-weight:700;padding:9px 14px;border-radius:20px;'
+        +'cursor:pointer;'+(on?'background:#1F699E;border:1.5px solid #1F699E;color:#fff;':'background:#fff;border:1.5px solid #C9D6E2;color:#1F699E;'); }
+      function permSw(on){ return '<span style="display:inline-block;width:46px;height:26px;border-radius:999px;position:relative;'
+        +'background:'+(on?'#E2711D':'#C9D3DE')+';vertical-align:middle;">'
+        +'<span style="position:absolute;top:3px;left:'+(on?'23':'3')+'px;width:20px;height:20px;border-radius:50%;background:#fff;"></span></span>'; }
+      function permDraw(){
+        var P=_perm||{}, h='';
+        h='<h2>Global permissions</h2>'
+          +'<div style="font-size:12.5px;color:var(--muted);margin:-6px 0 16px;">'
+          +'These hold for every group you are in.</div>';
+        if(_permState==='looking'){ return h+'<div style="font-size:14px;color:var(--soft);">Looking\u2026</div>'; }
+        if(_permState==='refused'){ return h+'<div style="font-size:13.5px;color:#7A2410;line-height:1.55;">'
+          +'We could not read your permissions just now, so nothing below would be your answer. '
+          +'<a href="https://2gather.network/signin/?next=%2Faccount%2F" style="color:#1F699E;font-weight:700;">Sign in again</a> '
+          +'and they come back.</div>'; }
+        h+='<div style="background:#EEF2F6;border:1px solid #DDE3EA;border-radius:12px;padding:12px 14px;margin-bottom:6px;">'
+          +'<div style="font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#4B5A6D;margin-bottom:3px;">Who is looking</div>'
+          +'<div style="font-size:13px;color:#6B7A8D;">Set these once and they hold for every group you are in.</div>'
+          +'<div style="margin-top:10px;"><span style="'+permPill(true)+'display:inline-block;">Global permissions for all groups</span></div></div>'
+          +'<div style="text-align:right;font-size:13.5px;font-weight:700;color:#1A2E42;margin:6px 0 18px;">These permissions will be set for all groups</div>'
+          +'<div style="font-size:15px;font-weight:800;margin-bottom:8px;">Your name</div>'
+          +'<div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px;">'
+          +NAME_CHOICES.map(function(o){ return '<button type="button" data-permname="'+o[0]+'" style="'+permPill(P.nameShown===o[0])+'">'+esc(o[1])+'</button>'; }).join('')
+          +'</div>'
+          +'<div style="font-size:15px;font-weight:800;margin-bottom:8px;">Where you are</div>'
+          +'<div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:22px;">'
+          +PLACE_CHOICES.map(function(o){ return '<button type="button" data-permwhere="'+o[0]+'" style="'+permPill(P.placeShown===o[0])+'">'+esc(o[1])+'</button>'; }).join('')
+          +'</div>'
+          +'<div style="font-size:15px;font-weight:800;margin-bottom:4px;">What shows</div>';
+        PERM_ITEMS.forEach(function(it){
+          h+='<button type="button" data-permflag="'+it[0]+'" style="display:flex;align-items:center;justify-content:space-between;'
+            +'width:100%;font:inherit;font-size:15px;font-weight:700;color:#1A2E42;background:#fff;border:0;'
+            +'border-bottom:1px solid var(--line);padding:13px 2px;cursor:pointer;text-align:left;">'
+            +'<span>'+esc(it[1])+'</span>'+permSw(P[it[0]]===true)+'</button>';
+        });
+        h+='<div id="perm-status" style="font-size:13.5px;color:var(--soft);margin-top:14px;min-height:18px;"></div>';
+        return h;
+      }
+      p.innerHTML=permDraw();
+      bindPerm(p);
+      if(_permState==='new'){ loadPerm(); }
+      return;
     }
     // My account
     var ph=D.photo?'<img class="photo" src="'+esc(D.photo)+'" alt="">':'<div class="photo"></div>';
