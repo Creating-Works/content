@@ -10,6 +10,7 @@
 
   hello@creating.works
 -->
+<!-- Version: V1.27 | Date: 2026-09-19 | LAST CHANGE: Email addresses is the page, not a parameter. Jessie: "https://2gather.network/account/ doesn't match the 2gather.network/account/?emails=1." The ?emails=1 gate is gone - she approved the look twice and tested adding, promoting and removing an address behind it. Somebody with only one address still sees the plain Email field, because a list of one is a list nobody needs. -->
 <!-- Version: V1.26 | Date: 2026-09-19 | LAST CHANGE: the city box stops stretching again. Jessie: "edmonds field is not small again". V1.23 gave it flex:1 1 to match the welcome step, where all five sit on one line - but this panel is narrower, so City wraps onto a line of its own and flex-grow fills it. flex:0 1 220px means it may SHRINK on a narrow screen and can never GROW to fill a line it is alone on, which is the only behaviour that is right at every width. The postal code stays on its own line beneath. -->
 <!-- Version: V1.25 | Date: 2026-09-19 | LAST CHANGE: a place that could not be READ is not an empty place, and the help line stops promising. Jessie: "no", with Location still empty on V1.24. My first guard looked for status error AND code signin exactly and whatever came back carried neither, so the page went on drawing an empty picker. The test is simpler now: if getProfile did not FIND her, the Location section says so in red, offers Sign in again, and tells her not to press Save changes until it comes back - because saving from a page that was refused would write the emptiness over the real answer. The rest of the page stays usable rather than being blocked behind one failed read. Also: "Adding another one is coming" comes off the help line, which the V1.19 edit had aimed at and missed. -->
 <!-- Version: V1.24 | Date: 2026-09-19 | LAST CHANGE: the page says it was refused rather than drawing an empty place. Jessie: "city is gone from this again htough" and "and county". Her record was never touched - n161 read all four cells back intact. getProfile now refuses without a proved session, which is this afternoon's security fix, and answers found:false with code signin; this page reads every place field out of that answer, so it drew an empty picker instead of saying it could not read, and because lookupProfile still answered the could-not-load line never fired. A page asserting something before it knows, again. -->
@@ -254,9 +255,12 @@
   // actually needs to know from this list.
   function emailBlock(){
     var hint=_editToken?'':'Hidden until you verify it is you. Press Save changes to verify.';
-    var showList=false;
-    try{ showList=new URLSearchParams(location.search).get('emails')==='1'; }catch(e){}
-    if(!showList || !_editToken || !D.alsoEmails.length){
+    // THE PARAMETER IS GONE. Jessie, 2026-09-19: "https://2gather.network/account/ doesn't match
+    // the 2gather.network/account/?emails=1." It did not, and there was no longer a reason for it
+    // to: she approved this look twice and tested adding, promoting and removing an address on it.
+    // The list is simply the page now. Somebody with one address still sees the plain Email field,
+    // because a list of one is a list nobody needs.
+    if(!_editToken || !D.alsoEmails.length){
       return readonlyField('Email', D.email, hint);
     }
     // A LIST, NOT BOXES. Jessie, 2026-09-19, seeing the first version: "is this how github's UI is
