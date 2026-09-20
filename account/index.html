@@ -1385,6 +1385,17 @@
         // The short name they are found by, read with the rest of the account rather than on a
         // call of its own. 2026-09-19.
         D.vanity=String(resp.vanity||'');
+        /* KEPT ON THE DEVICE, so another page can offer the pretty address without a read of its
+           own. Your answers wants a "View public profile" button and the name is the only thing
+           it is missing; every read here costs 9 to 39 seconds, so the page that already asks is
+           the one that writes it down. Keyed to whose it is, so a shared computer never hands
+           one person another person's address. 2026-09-20. */
+        try {
+          if (D.vanity) {
+            localStorage.setItem('cw-vanity', D.vanity);
+            localStorage.setItem('cw-vanity-for', String(meId||''));
+          } else { localStorage.removeItem('cw-vanity'); }
+        } catch(e){}
         // The two name columns come back from the account now. The page used to hold only one
         // joined name and rebuild both boxes by splitting it, calling the last word the surname,
         // so a two-word surname could never survive a reload. Anything typed since the page
