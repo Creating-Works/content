@@ -10,6 +10,7 @@
 
   hello@creating.works
 -->
+<!-- Version: V1.29 | Date: 2026-09-19 | LAST CHANGE: Your link - see the name people find you by, and change it. Jessie: "I go". 746 people already had a name and every one was set by a one-off, so nobody could see their own. The box shows 2gather.network/hi/<name>, checks a new name while it is typed and says at once if somebody has it, and the backend now demands the same verified session the rest of the account needs - it took an id alone before, which meant an id could name anybody. The name they had is kept beside the new one, so a link already shared still opens and nobody else can take it. Nothing stores a finished address: the sheet holds the name, the backend answers the name, and the host is written in ONE place on this page, so moving /hi/ to appear.network stays a switch. -->
 <!-- Version: V1.28 | Date: 2026-09-19 | LAST CHANGE: the postal code sits beside the city again. Jessie: "put postal to the right of city - not below". V1.23 forced a line break to copy the welcome step, which was the wrong thing to copy. City is fixed at 220 and postal at 150, so the two share the second line and neither stretches. -->
 <!-- Version: V1.27 | Date: 2026-09-19 | LAST CHANGE: Email addresses is the page, not a parameter. Jessie: "https://2gather.network/account/ doesn't match the 2gather.network/account/?emails=1." The ?emails=1 gate is gone - she approved the look twice and tested adding, promoting and removing an address behind it. Somebody with only one address still sees the plain Email field, because a list of one is a list nobody needs. -->
 <!-- Version: V1.26 | Date: 2026-09-19 | LAST CHANGE: the city box stops stretching again. Jessie: "edmonds field is not small again". V1.23 gave it flex:1 1 to match the welcome step, where all five sit on one line - but this panel is narrower, so City wraps onto a line of its own and flex-grow fills it. flex:0 1 220px means it may SHRINK on a narrow screen and can never GROW to fill a line it is alone on, which is the only behaviour that is right at every width. The postal code stays on its own line beneath. -->
@@ -210,7 +211,7 @@
   // CWid is the standard "this is me" param; id/me/memberCard/appearId accepted too.
   var meId=(window.CW&&CW.me)?CW.me().id:(P('CWid')||P('id')||P('me')||P('memberCard')||P('appearId')||'').trim();
   var _placeUnread=false;
-  var D={name:'',firstName:'',lastName:'',photo:'',pageLink:'',postal:'',location:'',county:'',city:'',languages:'',email:'',alsoEmails:[],phone:'',
+  var D={name:'',firstName:'',lastName:'',photo:'',pageLink:'',postal:'',location:'',county:'',city:'',languages:'',email:'',alsoEmails:[],vanity:'',phone:'',
        visPublic:'',showPhoto:'',onMap:'',findable:'',ackTerms:'',dateAckTerms:''};
 
   function go(url){ window.location.href=url; }
@@ -360,6 +361,9 @@
       if(!resp||resp.status!=='ok') return false;
       if(resp.email) D.email=resp.email;
       D.alsoEmails=Array.isArray(resp.alsoEmails)?resp.alsoEmails:D.alsoEmails;
+      // The same redraw, and the same reason to read the boxes first: anything typed into First
+      // name or City lives only in the DOM until harvestAccount takes it.
+      harvestAccount();
       renderPanel('account');
       return true;
     }
@@ -450,6 +454,133 @@
         var w0=document.getElementById('em-conf-word'); if(w0){ w0.value=''; w0.focus(); }
         return false; };
     });
+  }
+
+  // ── THE NAME SOMEBODY IS FOUND BY ───────────────────────────────────────────────────────────
+  // Jessie, 2026-09-19: "I go". 746 people already have a name, every one of them set by a
+  // one-off, and until now nobody could see their own or change it. This is the box the design
+  // doc called "the next piece": see the name you have, change it, told at once if it is taken.
+  //
+  // NOTHING HERE HOLDS A FINISHED ADDRESS. The sheet holds the NAME, the backend answers with the
+  // NAME, and the host is written in ONE place on this page - VHOST below. Her long-term goal is
+  // to move /hi/<name> to appear.network "with the press of a button on the domain", and that
+  // stays a switch only while no finished URL is stored anywhere.
+  //
+  // It is only drawn behind a verified session, like the addresses, because changing the name
+  // people find you by is a change to the account, not to a profile.
+  var VHOST='2gather.network';
+  function vanityBlock(){
+    if(!_editToken){
+      return '<div class="f" style="grid-column:1/-1;"><label>Your link</label>'
+        +'<div style="font-size:12.5px;color:var(--muted);margin:-2px 0 0;">'
+        +'Hidden until you verify it is you. Press Save changes to verify.</div></div>';
+    }
+    var have=String(D.vanity||'').trim();
+    // THE ADDRESS IS SHOWN AS PLAIN TEXT WITH THE NAME IN BOLD, not as a box you cannot type in.
+    // The same reason the addresses stopped being readonly inputs on V1.15: a field shaped like
+    // the fields beside it reads as something you can edit, and this one you change by pressing
+    // Change.
+    var shown=have
+      ? '<div style="font-size:15px;color:var(--ink);word-break:break-all;">'
+        +VHOST+'/hi/<strong>'+esc(have)+'</strong></div>'
+      : '<div style="font-size:15px;color:var(--soft);">You do not have one yet.</div>';
+    return '<div class="f" style="grid-column:1/-1;"><label>Your link</label>'
+      +'<div style="font-size:12.5px;color:var(--muted);margin:-2px 0 8px;">'
+      +'This is where people find your profile. Share it anywhere.</div>'
+      +'<div style="border-top:1px solid var(--line);padding:9px 0;display:flex;align-items:baseline;'
+      +'gap:10px;flex-wrap:wrap;">'+shown
+      +'<span style="margin-left:auto;white-space:nowrap;font-size:13px;">'
+      +'<a href="#" id="vn-open" style="color:#1F699E;text-decoration:none;font-weight:700;">'
+      +(have?'Change':'Choose a name')+'</a></span></div>'
+      +'<div id="vn-form" style="display:none;margin-top:10px;">'
+        +'<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">'
+        +'<span style="font-size:14px;color:var(--soft);">'+VHOST+'/hi/</span>'
+        +'<input id="vn-new" type="text" autocomplete="off" spellcheck="false" placeholder="your-name"'
+        +' value="'+esc(have)+'" style="flex:0 1 220px;min-width:150px;"></div>'
+        +'<div style="margin-top:14px;display:flex;gap:10px;align-items:center;">'
+        +'<button type="button" id="vn-save" class="btn ghost" style="font-size:14px;padding:9px 16px;">Save this name</button>'
+        +'<button type="button" id="vn-cancel" class="btn ghost" style="font-size:14px;padding:9px 16px;">Cancel</button></div>'
+        +'<div id="vn-say" style="font-size:13px;color:var(--soft);margin-top:8px;min-height:18px;"></div>'
+        // WHAT CHANGING IT COSTS, SAID BEFORE IT IS CHANGED. It costs nothing, and that is worth
+        // saying: the backend keeps the name they had beside the new one, so a link already
+        // shared still opens their profile and nobody else can take it.
+        +(have?'<div style="font-size:12.5px;color:var(--muted);margin-top:6px;">'
+          +'Your old link keeps working, so anything you have already shared still opens.</div>':'')
+      +'</div></div>';
+  }
+
+  // Is this name free, asked while they type. Debounced, because every call is a round trip to a
+  // backend that measures 9 to 39 seconds at its worst, and an answer for a name they have since
+  // finished typing is worse than none - so each answer is thrown away unless it is still the
+  // name in the box.
+  function wireVanity(){
+    var open=document.getElementById('vn-open');
+    if(!open) return;
+    var form=document.getElementById('vn-form'), box=document.getElementById('vn-new');
+    function say(m,bad){ var el=document.getElementById('vn-say');
+      if(el){ el.textContent=m||''; el.style.color=bad?'#7A2410':'var(--soft)'; } }
+    function clean(v){ return String(v||'').trim().toLowerCase(); }
+    open.onclick=function(ev){ ev.preventDefault();
+      if(form) form.style.display='block';
+      open.style.display='none';
+      if(box){ box.focus(); box.select(); }
+      return false; };
+    var cancel=document.getElementById('vn-cancel');
+    if(cancel) cancel.onclick=function(){
+      if(form) form.style.display='none';
+      open.style.display='';
+      if(box) box.value=String(D.vanity||'');
+      say('');
+    };
+    var timer=null, asked='';
+    if(box) box.oninput=function(){
+      var v=clean(box.value);
+      if(timer) clearTimeout(timer);
+      if(v===clean(D.vanity)){ say(''); return; }
+      // The rule is said before the round trip, so a typo is answered at once rather than in
+      // thirty seconds.
+      if(!/^[a-z0-9-]{2,30}$/.test(v)){ say(v?'Use 2 to 30 letters, numbers or dashes.':''); return; }
+      say('Checking…');
+      timer=setTimeout(function(){
+        asked=v;
+        fetch(GS_URL+'?action=checkVanity&slug='+encodeURIComponent(v))
+          .then(function(r){ return r.json(); })
+          .then(function(d){
+            if(clean(box.value)!==asked) return;   // they kept typing; this answer is about a name that is gone
+            if(d&&d.available) say(v+' is free.');
+            else say('Somebody already has that name.',true);
+          })
+          .catch(function(){ if(clean(box.value)===asked) say('Could not check that just now.',true); });
+      },450);
+    };
+    var save=document.getElementById('vn-save');
+    if(save) save.onclick=function(){
+      var v=clean(box?box.value:'');
+      if(!/^[a-z0-9-]{2,30}$/.test(v)){ say('Use 2 to 30 letters, numbers or dashes.',true); return; }
+      if(v===clean(D.vanity)){ say('That is already your name.'); return; }
+      save.disabled=true; say('Saving…');
+      fetch(GS_URL+'?action=saveVanity&appearId='+encodeURIComponent(meId)
+        +'&editToken='+encodeURIComponent(_editToken)
+        +'&slug='+encodeURIComponent(v))
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+          save.disabled=false;
+          // NOTHING OPTIMISTIC: the name on the screen is the name the backend read back off the
+          // sheet after writing it, never the one this page hoped for.
+          if(d&&d.status==='ok'&&d.slug){
+            D.vanity=String(d.slug);
+            // A REDRAW MUST NOT EAT WHAT THEY WERE TYPING. This repaints the whole panel, and
+            // every text box on it lives only in the DOM until harvestAccount reads it back, so
+            // a half-typed first name would vanish the moment somebody changed their name.
+            harvestAccount();
+            renderPanel('account');
+            setStat('Your link is now '+VHOST+'/hi/'+D.vanity);
+            return;
+          }
+          say((d&&d.message)||'That did not save. Try once more.',true);
+        })
+        .catch(function(){ save.disabled=false; say('That did not reach the server. Try once more.',true); });
+    };
   }
 
   function readonlyField(lab,val,note){
@@ -749,6 +880,7 @@
       +field('firstName','First name','text',D.firstName,'')
       +field('lastName','Last name','text',D.lastName,'')
       +emailBlock()
+      +vanityBlock()
       +'</div>'
       +'<div class="f" style="margin-top:16px;"><label>Location</label>'
       +(_placeUnread
@@ -774,6 +906,7 @@
     bindSave();
     p.querySelectorAll('[data-acct]').forEach(function(i){ i.addEventListener('input',markDirty); });
     wireEmails(p);
+    wireVanity();
   }
 
   // Location reuses the picker people already meet on the events page: region, then country, then
@@ -1054,6 +1187,9 @@
         if(resp.email) D.email=resp.email;
         // The other verified addresses on this row, primary not among them. 2026-09-19.
         D.alsoEmails=Array.isArray(resp.alsoEmails)?resp.alsoEmails:[];
+        // The short name they are found by, read with the rest of the account rather than on a
+        // call of its own. 2026-09-19.
+        D.vanity=String(resp.vanity||'');
         // The two name columns come back from the account now. The page used to hold only one
         // joined name and rebuild both boxes by splitting it, calling the last word the surname,
         // so a two-word surname could never survive a reload. Anything typed since the page
