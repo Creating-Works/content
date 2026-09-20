@@ -10,6 +10,7 @@
 
   hello@creating.works
 -->
+<!-- Version: V1.30 | Date: 2026-09-20 | LAST CHANGE: the rail beside this page is ACCOUNT and PRODUCTS. Jessie: "change the rail for account to this instead", "my permissions stays on that page but the rail changes to global permissions", "support / sign out stay". So the rail reads My info, Global permissions, Support, Sign out, then Balance, Appear, Gather, License each with a dot; and My events, My groups and My profile came OFF it, because they moved into the menu under her name in the top bar the same morning and a shortcut in two places is a shortcut nobody can find in either. My permissions is headed Global permissions now, with one line saying they hold for every group and where a single group is set on its own - a rail row and the heading it opens saying two different things is how somebody decides they are lost. The four product panes open in place rather than by loading a page. NOTHING ABOUT THIS PAGE'S OWN CONTENT MOVED: My info is My account exactly as it was, and the address is still /account/, her "le'ts not change the wrord manage quiet yet". -->
 <!-- Version: V1.29 | Date: 2026-09-19 | LAST CHANGE: Your link - see the name people find you by, and change it. Jessie: "I go". 746 people already had a name and every one was set by a one-off, so nobody could see their own. The box shows 2gather.network/hi/<name>, checks a new name while it is typed and says at once if somebody has it, and the backend now demands the same verified session the rest of the account needs - it took an id alone before, which meant an id could name anybody. The name they had is kept beside the new one, so a link already shared still opens and nobody else can take it. Nothing stores a finished address: the sheet holds the name, the backend answers the name, and the host is written in ONE place on this page, so moving /hi/ to appear.network stays a switch. -->
 <!-- Version: V1.28 | Date: 2026-09-19 | LAST CHANGE: the postal code sits beside the city again. Jessie: "put postal to the right of city - not below". V1.23 forced a line break to copy the welcome step, which was the wrong thing to copy. City is fixed at 220 and postal at 150, so the two share the second line and neither stretches. -->
 <!-- Version: V1.27 | Date: 2026-09-19 | LAST CHANGE: Email addresses is the page, not a parameter. Jessie: "https://2gather.network/account/ doesn't match the 2gather.network/account/?emails=1." The ?emails=1 gate is gone - she approved the look twice and tested adding, promoting and removing an address behind it. Somebody with only one address still sees the plain Email field, because a list of one is a list nobody needs. -->
@@ -853,8 +854,61 @@
         ;
       return;
     }
+    /* THE FOUR PRODUCTS, on the rail beside the account. Jessie, 2026-09-20: "change the rail for
+       account to this instead". Each pane carries the name that is registered and the line she
+       wrote for it, a dot and a word for whether it is on, and one enable in the same place on
+       every one of them - so "can I turn this off" never depends on hunting for the button.
+       NOTHING SAVES YET and the enable says so when it is pressed, rather than doing nothing. */
+    var PRODUCTS = {
+      balance: { name:'DayBalancer.com', line:'Energy in. Energy out.', on:false, rows:[] },
+      appear:  { name:'Appear.Network',  line:'Where people, resources, and opportunities appear.', on:false,
+                 rows:[['Appear page','The page people land on when they look you up on Appear.',
+                        'https://appear.network/dl/page/','Edit it on Appear']] },
+      gather:  { name:'2Gather.Network', line:'Gathering for the common good.', on:true,
+                 rows:[['My events','Everything you host, share or have said you are going to.','https://2gather.network/myevents/','Open'],
+                       ['My groups','The groups you are in and the ones you host.','https://2gather.network/mygroups/','Open'],
+                       ['My profile','How you look to everybody else.','https://2gather.network/ikigai/','Open']] },
+      license: { name:'Creating.Works',  line:'Because creating works.', on:true,
+                 rows:[['Terms of service','','https://creating.works/terms-of-service','Terms of service'],
+                       ['Privacy policy','','https://creating.works/privacy-policy','Privacy policy'],
+                       ['Code of conduct','','https://creating.works/code-of-conduct','Code of conduct']] }
+    };
+    if(PRODUCTS[key]){
+      var pr=PRODUCTS[key];
+      var h='<div style="display:flex;align-items:flex-start;gap:14px;justify-content:space-between;flex-wrap:wrap;">'
+        +'<div><h2 style="margin:0;">'+esc(pr.name)+'</h2>'
+        +'<div style="font-size:15.5px;color:var(--soft);margin-top:4px;">'+esc(pr.line)+'</div></div>'
+        +'<span style="display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);'
+        +'border-radius:999px;padding:8px 15px;font-size:13.5px;font-weight:700;color:var(--soft);">'
+        +'<span style="width:9px;height:9px;border-radius:50%;background:'+(pr.on?'#C2410C':'#B9C4D2')+';"></span>'
+        +(pr.on?'On':'Off')+'</span></div>'
+        +'<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--panel);'
+        +'border:1px solid var(--panel-line);border-radius:14px;padding:16px 18px;margin:22px 0 6px;">'
+        +'<div style="font-size:14.5px;color:var(--soft);">'+esc(pr.name.split('.')[0])
+        +(pr.on?' is enabled on this account.':' is not enabled on this account.')+'</div>'
+        +'<button type="button" id="prod-enable" class="btn ghost" style="margin-left:auto;font-size:14px;padding:9px 16px;">'
+        +(pr.on?'Disable':'Enable')+'</button></div>';
+      pr.rows.forEach(function(r){
+        h+='<div style="display:flex;align-items:flex-start;gap:18px;padding:16px 0;border-bottom:1px solid var(--line);">'
+          +'<div style="flex:1 1 auto;min-width:0;"><div style="font-size:16px;font-weight:700;">'+esc(r[0])+'</div>'
+          +(r[1]?'<div style="font-size:13.5px;color:var(--soft);margin-top:3px;">'+esc(r[1])+'</div>':'')
+          +'</div><div style="flex:0 0 auto;font-size:14px;"><a href="'+r[2]
+          +'" style="color:#1F699E;font-weight:700;text-decoration:none;">'+esc(r[3])+'</a></div></div>';
+      });
+      p.innerHTML=h;
+      var _pe=document.getElementById('prod-enable');
+      // A button that cannot do anything yet says so when it is pressed.
+      if(_pe) _pe.onclick=function(){ _pe.outerHTML='<span style="margin-left:auto;font-size:13.5px;color:var(--soft);">Turning a product on and off is not built yet.</span>'; };
+      return;
+    }
     if(key==='permissions'){
-      p.innerHTML='<h2>My permissions</h2>'
+      /* GLOBAL PERMISSIONS. Jessie, 2026-09-20: "my permissions stays on that page but the rail
+         changes to global permissions". One name in both places, because a rail row and the
+         heading it opens saying two different things is how somebody decides they are lost. */
+      p.innerHTML='<h2>Global permissions</h2>'
+        +'<div style="font-size:12.5px;color:var(--muted);margin:-6px 0 14px;">'
+        +'These hold for every group you are in. A group can be set on its own on the '
+        +'<a href="https://2gather.network/intro/?perm=1&step=permissions" style="color:#1F699E;font-weight:700;">permissions step</a>.</div>'
         +toggleRow('visPublic','Public profile','Anyone with the link can view your profile.')
         +toggleRow('showPhoto','Show my photo','Display your headshot on your profile and the network map.')
         +toggleRow('onMap','Appear on the network map','Include me in the shared map of people and resources.')
@@ -1163,6 +1217,8 @@
       return;
     }
     paintIdentity(); renderPanel(startTab);
+    // The rail lives in another file and presses this.
+    window.cwAccountPick = function (key) { renderPanel(key); };
     loadEmail(startTab);
   });
 
@@ -1217,7 +1273,7 @@
   html.cw-prail-on .cw-prail-main h1{color:var(--ink);font-weight:800;font-size:26px;margin-top:14px;}
   html.cw-prail-on .cw-prail-main .hello .sub, html.cw-prail-on .cw-prail-main .hello .sub a{color:var(--ink);}
 </style>
-<script src="https://2gather.network/nav/profile-rail.js?v=4"></script>
+<script src="https://2gather.network/nav/profile-rail.js?v=5"></script>
 <script>
 (function(){
   var look = ''; try { look = new URLSearchParams(location.search).get('look') || ''; } catch (e) {}
@@ -1226,7 +1282,12 @@
   if (look === 'list' || !window.cwProfileRail) return;
   var viewing = false;
   try { viewing = !!(window.CW && CW.me && CW.me().viewing); } catch (e) {}
-  cwProfileRail({ active: 'account', wrap: document.querySelector('.wrap'), viewingSomeoneElse: viewing });
+  // THE ACCOUNT SHAPE, 2026-09-20. My events, My groups and My profile came off this rail the
+  // morning they moved into the menu under her name in the top bar. The four products open in
+  // place rather than by loading a page, which is what onPick is for.
+  cwProfileRail({ active: 'account', shape: 'account', wrap: document.querySelector('.wrap'),
+                  viewingSomeoneElse: viewing,
+                  onPick: function (key) { try { window.cwAccountPick(key); } catch (e) {} } });
 })();
 </script>
 <script src="https://2gather.network/nav/topbar.js?v=6.13" defer></script>
