@@ -10,6 +10,7 @@
 
   hello@creating.works
 -->
+<!-- Version: V1.28 | Date: 2026-09-19 | LAST CHANGE: the postal code sits beside the city again. Jessie: "put postal to the right of city - not below". V1.23 forced a line break to copy the welcome step, which was the wrong thing to copy. City is fixed at 220 and postal at 150, so the two share the second line and neither stretches. -->
 <!-- Version: V1.27 | Date: 2026-09-19 | LAST CHANGE: Email addresses is the page, not a parameter. Jessie: "https://2gather.network/account/ doesn't match the 2gather.network/account/?emails=1." The ?emails=1 gate is gone - she approved the look twice and tested adding, promoting and removing an address behind it. Somebody with only one address still sees the plain Email field, because a list of one is a list nobody needs. -->
 <!-- Version: V1.26 | Date: 2026-09-19 | LAST CHANGE: the city box stops stretching again. Jessie: "edmonds field is not small again". V1.23 gave it flex:1 1 to match the welcome step, where all five sit on one line - but this panel is narrower, so City wraps onto a line of its own and flex-grow fills it. flex:0 1 220px means it may SHRINK on a narrow screen and can never GROW to fill a line it is alone on, which is the only behaviour that is right at every width. The postal code stays on its own line beneath. -->
 <!-- Version: V1.25 | Date: 2026-09-19 | LAST CHANGE: a place that could not be READ is not an empty place, and the help line stops promising. Jessie: "no", with Location still empty on V1.24. My first guard looked for status error AND code signin exactly and whatever came back carried neither, so the page went on drawing an empty picker. The test is simpler now: if getProfile did not FIND her, the Location section says so in red, offers Sign in again, and tells her not to press Save changes until it comes back - because saving from a page that was refused would write the emptiness over the real answer. The rest of the page stays usable rather than being blocked behind one failed read. Also: "Adding another one is coming" comes off the help line, which the V1.19 edit had aimed at and missed. -->
@@ -852,8 +853,11 @@
     // There: region, country, state, county and city run across one line and the postal code sits
     // on its own beneath. So postal is forced onto its own line rather than tucked beside the city,
     // which is where it went an hour ago when city was the only thing on the second line.
-    h+='<div style="flex-basis:100%;height:0;"></div>'
-      +'<input data-acct="postal" id="loc-postal" type="text" placeholder="Postal code"'
+    // BESIDE THE CITY, NOT BENEATH IT. Jessie, 2026-09-19: "put postal to the right of city - not
+    // below". V1.23 forced a line break here to copy the welcome step; that was the wrong thing to
+    // copy. With City fixed at 220 and this at 150, the two share the second line and neither
+    // stretches.
+    h+='<input data-acct="postal" id="loc-postal" type="text" placeholder="Postal code"'
       +' value="'+esc(D.postal||'')+'" style="flex:0 1 150px;">';
     box.innerHTML=h+'</div>';
     // renderLoc redraws this whole row whenever the region, country or state changes, which takes
