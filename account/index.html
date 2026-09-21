@@ -67,7 +67,7 @@
 
   .fieldgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
   .f label{display:block;font-size:11.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
-    color:var(--muted);margin-bottom:6px;}
+    color:var(--ink);margin-bottom:6px;}
   .f input,.f textarea{width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:10px;
     font:inherit;color:var(--ink);background:#fff;}
   .f input:focus,.f textarea:focus{outline:2px solid var(--panel-line);outline-offset:1px;border-color:var(--brand);}
@@ -717,7 +717,7 @@
       appear:  { name:'Appear.Network',  line:'Where people, resources, and opportunities appear.', on:false,
                  rows:[['Appear page','The page people land on when they look you up on Appear.',
                         'https://appear.network/dl/page/','Edit it on Appear']] },
-      gather:  { name:'2Gather.Network', line:'Gathering for the common good.', on:true,
+      gather:  { name:'My profile', short:'2Gather', line:'How you look to everybody else with groups and events.', on:true,
                  rows:[['My events','Everything you host, share or have said you are going to.','https://2gather.network/myevents/','Open'],
                        ['My groups','The groups you are in and the ones you host.','https://2gather.network/mygroups/','Open'],
                        ['My profile','How you look to everybody else.','https://2gather.network/me/','Open']] },
@@ -737,7 +737,7 @@
         +(pr.on?'On':'Off')+'</span></div>'
         +'<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--panel);'
         +'border:1px solid var(--panel-line);border-radius:14px;padding:16px 18px;margin:22px 0 6px;">'
-        +'<div style="font-size:14.5px;color:var(--soft);">'+esc(pr.name.split('.')[0])
+        +'<div style="font-size:14.5px;color:var(--soft);">'+esc(pr.short || pr.name.split('.')[0])
         +(pr.on?' is enabled on this account.':' is not enabled on this account.')+'</div>'
         +'<button type="button" id="prod-enable" class="btn ghost" style="margin-left:auto;font-size:14px;padding:9px 16px;">'
         +(pr.on?'Disable':'Enable')+'</button></div>';
@@ -780,7 +780,7 @@
           +'<a href="https://2gather.network/signin/?next=%2Faccount%2F" style="color:#1F699E;font-weight:700;">Sign in again</a> '
           +'and they come back.</div>'; }
         h+='<div style="background:#EEF2F6;border:1px solid #DDE3EA;border-radius:12px;padding:12px 14px;margin-bottom:6px;">'
-          +'<div style="font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#4B5A6D;margin-bottom:3px;">Who is looking</div>'
+          +'<div style="font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);margin-bottom:3px;">Who is looking</div>'
           +'<div style="font-size:13px;color:#6B7A8D;">Set these once and they hold for every group you are in.</div>'
           +'<div style="margin-top:10px;"><span style="'+permPill(true)+'display:inline-block;">Global permissions for all groups</span></div></div>'
           +'<div style="text-align:right;font-size:13.5px;font-weight:700;color:#1A2E42;margin:6px 0 18px;">These permissions will be set for all groups</div>'
