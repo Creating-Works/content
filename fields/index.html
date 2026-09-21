@@ -149,7 +149,7 @@
     <div class="empty hide" id="empty">Nothing matches those filters.</div>
   </div>
 
-  <p class="note hide" id="srcnote">Source: <code>fields/index.html</code> in the <code>Creating-Works/content</code> repository. The written spec is <a href="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/design/fields/field-registry.md">field-registry.md</a>. To add a field, add a row to the <code>FIELDS</code> array in this file.</p>
+  <p class="note hide" id="srcnote">Source: <code>fields/index.html</code> in the <code>Creating-Works/content</code> repository. The written spec is <a href="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/design/fields/field-registry.md">field-registry.md</a>. This page holds no copy of the registry; it is served only to a live operator session. To add a field, edit the registry in the backend.</p>
 </div>
 
 <script src="https://2gather.network/nav/identity.js?v=26"></script>
@@ -161,68 +161,7 @@
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function say(el,msg,bad){ var n=$(el); n.textContent=msg||''; n.className='say'+(bad?' bad':''); }
 
-  var FIELDS = [
-    {field:'Full name', tool:'Creating.Works', table:'Users · Main · CW/Info', existsIn:'Both',
-      reads:['Kumu map','group.html matches','attendees.html'],
-      writes:['intake.html save (queued)'],
-      notes:'Core identity. Glide owns Main; our writes target CW/Info.'},
-    {field:'email', tool:'Creating.Works', table:'Users · CW/Info', existsIn:'Both',
-      reads:['admin.html member list','attendees.html'],
-      writes:['intake.html save (queued)'],
-      notes:'Login and invite key. Never return it on a public read.'},
-    {field:'Image', tool:'Creating.Works', table:'Main', existsIn:'Glide',
-      reads:['Kumu map','group.html cards','attendees.html'],
-      writes:['Glide app only'],
-      notes:'Main.Image is Glide-owned and we do not write it. Guest photos use our own fields below. As of 2026-09-03 nothing on our side reads it either.'},
-    {field:'guestPhotoURL', tool:'Creating.Works', table:'CW/Info', existsIn:'Ours',
-      reads:['attendees.html','group.html','lookupProfile','getPresence','getGiftHistory','getBookmarks'],
-      writes:['photo backfill'],
-      notes:'Our photo URL, separate from Main.Image. An uploaded photo on ikigai.photoURL wins over it.'},
-    {field:'noHeadshot', tool:'Creating.Works', table:'CW/Info', existsIn:'Ours',
-      reads:['findPeople','Kumu consent gate (queued)'],
-      writes:['intake.html save (queued)'],
-      notes:'It means the picture somebody has is not a professional one. It is NOT a consent flag, and reading it as one hid five people from their own group on 2026-09-01.'},
-    {field:'findable', tool:'Creating.Works', table:'CW/Info', existsIn:'Ours',
-      reads:['findPeople'],
-      writes:['saveAccount'],
-      notes:'Only an explicit false hides somebody, and an operator sees everyone regardless. Nothing read this column until 2026-09-03, so setting it changed nothing.'},
-    {field:'appearLink', tool:'Creating.Works', table:'CW/Info', existsIn:'Ours',
-      reads:['lookupProfile','getGroupBundle','claim page'],
-      writes:['saveVanity','n27 normalise'],
-      notes:'A person’s Appear page address. Normalised on 2026-09-03 to https://appear.network/dl/page/s/<org>/r/<suffix>. Only an address containing /dl/page/ is ever served as a page link.'},
-    {field:'vanity', tool:'Creating.Works', table:'CW/Info', existsIn:'Ours',
-      reads:['checkVanity','vanity'],
-      writes:['saveVanity'],
-      notes:'The short name claimed at creating.works/claim/. Added 2026-09-03, empty for everybody but Jessie.'},
-    {field:'postal', tool:'Creating.Works', table:'CW/Info', existsIn:'Both',
-      reads:['getIntake'],
-      writes:['saveLocation','saveAccount'],
-      notes:'OURS IS THE TRUTH. Glide’s postal column is number-formatted and destroyed every postcode with a letter, a hyphen or a leading zero: 07666 became 7666. Of 31 disagreements, 28 are ours being right.'},
-    {field:'languages', tool:'Creating.Works', table:'CW/Info', existsIn:'Both',
-      reads:['getIntake','getGroupBundle'],
-      writes:['saveAccount'],
-      notes:'Written on our side since 2026-09-03. Info also has a second column spelled Languages, and the code reads both, so it works by accident.'},
-    {field:'rolesCW', tool:'Creating.Works', table:'CW/Info', existsIn:'Ours',
-      reads:['_grantedRolesFor_','getOpsPeople','_isSuperAdmin_'],
-      writes:['n38 apply'],
-      notes:'Pipe-separated granted roles. superAdmin here is what opens the operations page and this one.'},
-    {field:'groupId', tool:'2Gather', table:'events sheet · presence', existsIn:'Ours',
-      reads:['group.html','attendees.html'],
-      writes:['create.html','admin.html'],
-      notes:'Added on the APP_ID events sheet and the presence tab.'},
-    {field:'passcode', tool:'2Gather', table:'Groups', existsIn:'Ours',
-      reads:['group.html join'],
-      writes:['create.html','admin.html'],
-      notes:'Every group has one. Public and Private is only visibility, not whether a passcode exists.'},
-    {field:'Groups joined', tool:'2Gather', table:'Main', existsIn:'Glide',
-      reads:['nothing, since 2026-09-03'],
-      writes:['nothing, since 2026-09-03'],
-      notes:'Glide’s membership column. cw.memberships is the one answer now. Measured first: Glide knew 0 memberships we did not.'},
-    {field:'businessCardURL', tool:'Appear', table:'Appear Contacts', existsIn:'Glide',
-      reads:['contact card'],
-      writes:['add / edit contact'],
-      notes:'Photo of a business card or face from the capture flow. Becomes ours when the contact tracker ships.'}
-  ];
+  var FIELDS = [];
 
   var KEY='cw-ops-session';
   var me=(window.CW_ID||'').trim(), token='';
@@ -267,7 +206,7 @@
         if(!d||d.status!=='ok'||!d.sessionToken){
           say('s2',(d&&d.message)||'That code did not work.',true); return;
         }
-        me=d.appearId||me; token=d.sessionToken;
+        me=d.id||d.appearId||me; token=d.sessionToken;
         remember(me, token);
         open_();
       })
@@ -281,7 +220,39 @@
     $('srcnote').classList.remove('hide');
     $('board').classList.remove('hide');
     document.title='Field registry';
-    render();
+    if(FIELDS.length){ render(); return; }
+    load_();
+  }
+
+  function shut_(msg){
+    FIELDS=[]; forget(); token='';
+    $('rows').innerHTML=''; $('count').textContent='';
+    $('board').classList.add('hide');
+    $('h1').classList.add('hide');
+    $('lede').classList.add('hide');
+    $('srcnote').classList.add('hide');
+    $('gate').classList.remove('hide');
+    $('pinRow').classList.remove('hide');
+    say('s2',msg,true);
+  }
+
+  function load_(){
+    $('count').textContent='';
+    $('empty').classList.add('hide');
+    $('rows').innerHTML='<tr><td colspan="7" class="notes">Looking up the registry\u2026</td></tr>';
+    fetch(GS+'?action=getFieldRegistry&appearId='+encodeURIComponent(me)
+          +'&sessionToken='+encodeURIComponent(token)+'&t='+Date.now())
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if(!d||d.status!=='ok'||!d.fields||!d.fields.length){
+          shut_((d&&d.message)||'That session cannot open the registry. Request a new code.');
+          return;
+        }
+        FIELDS=d.fields; render();
+      })
+      .catch(function(){
+        $('rows').innerHTML='<tr><td colspan="7" class="notes">Could not reach the server. Reload the page to try again.</td></tr>';
+      });
   }
 
   var back=recall();
