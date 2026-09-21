@@ -151,6 +151,12 @@ were already wrong on 2026-09-21.
 - **Nobody owns a file.** Route by SUBJECT, not by which file it lives in, and say out loud when you
   cross into another chat's area. The cost of a collision is not the edit, it is the other chat
   re-deriving what you already worked out.
+- **Commit by naming the files you edited. Never `git add -A`, `git add .` or `git commit -a`.**
+  Several chats work in the SAME checkout, so the working tree is usually dirty with somebody else's
+  half-finished edit. `-A` sweeps it into your commit and ships it under your message before they are
+  ready. It happened on 2026-09-21. Checking first does not help — between the check and the commit
+  another chat can write, and there is no lock. Naming your paths is the only thing that actually
+  prevents it, and it costs nothing.
 - **`clasp push` replaces the WHOLE Apps Script file, so pull first, every time.** `all.gs.js` is
   append-only and several chats add one-offs to it. Git handles the repo, but `npx clasp push` sends
   your local copy to the editor and overwrites what is there — so a push from a working copy taken
