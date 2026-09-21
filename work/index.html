@@ -1836,8 +1836,7 @@
         + '<input type="text" placeholder="In your own words" style="flex:1 1 220px;border:1.5px solid #DDE3EA;background:#F7FBFF;border-radius:10px;padding:9px 12px;font:inherit;font-size:14px;color:#1A2E42;">'
         + '<button type="button" style="font:inherit;font-size:13.5px;font-weight:700;padding:8px 16px;border-radius:20px;border:0;background:#1F699E;color:#fff;cursor:pointer;">Add</button></div>';
     };
-    box.innerHTML = '<div style="font-size:17px;font-weight:800;color:#1A2E42;margin-bottom:2px;">For additional forms of income or trade, do you have any resources to offer others right now?</div>'
-      + '<div style="font-size:13.5px;color:#6B7A8D;margin-bottom:14px;">Pick as many as fit or add your own.</div>'
+    box.innerHTML = '<div style="font-size:17px;font-weight:800;color:#1A2E42;margin-bottom:14px;">In addition to offering these skills, do you have any resources to offer others right now?</div>'
       + section('space', rd.spaceOfferTypes, 'My space offerings')
       + section('thing', rd.thingOfferTypes || [], "Something I'm offering as well");
     var toggle = function(kind, v){
