@@ -146,7 +146,10 @@ does what is the nine-row table in `The-New-Build-Repository/design/start-here.m
   shows both. Pull immediately before every push, and afterwards check the editor still holds the
   other chat's most recent function.
 - **`nav/topbar.js` is pinned by version in 29 pages across both repos, 21 in events and 8 in content.** One chat at a time moves
-  that number, and says on the queue when it does. Two chats bumping it at once points a whole set of
+  that number, and says on the queue when it does. **Edit those pages in `~/Documents/events` and
+  `~/Documents/content` directly, never from a worktree** — the 27 worktrees under
+  `content/.claude/worktrees` hold eight different pins between them, the oldest 58 versions behind,
+  so pushing a content page from one silently reverts the bar on that page alone. Two chats bumping it at once points a whole set of
   pages at a version that was never shipped — nothing conflicts, nothing errors, the fix reaches
   nobody.
 
