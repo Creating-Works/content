@@ -136,7 +136,7 @@ does what is the nine-row table in `The-New-Build-Repository/design/start-here.m
 - **Every block she pastes into another chat carries a label: your chat's own letter and a number.**
   `P1`, `P2`, `P3` … counting up without limit, in the item heading AND as the first thing inside the
   fence. **Profile top nav = P, Groups = G, Events = E, Data integrity = D, HTML copy = H, ArangoDB =
-  R, Jazz mono repo = J, CW and Org forms = C, Page 0 Main = M.** `A` is deliberately unused: every
+  R, Jazz mono repo = J, CW and Org forms = C, Page 0 Main = M, Network = N.** `A` is deliberately unused: every
   chat counted from `A1` for part of 2026-09-21, so two different `A2`s and an `A6` are already in
   circulation and none of them should be reused. She pastes constantly between nine chats, and
   without a label unique to the sender she cannot tell a block she already sent from one she skipped
