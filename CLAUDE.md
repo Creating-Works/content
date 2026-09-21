@@ -145,7 +145,7 @@ does what is the nine-row table in `The-New-Build-Repository/design/start-here.m
   before somebody else's append silently wipes their one-off out of the editor while the repo still
   shows both. Pull immediately before every push, and afterwards check the editor still holds the
   other chat's most recent function.
-- **`nav/topbar.js` is pinned by version in 28 pages across both repos.** One chat at a time moves
+- **`nav/topbar.js` is pinned by version in 29 pages across both repos, 21 in events and 8 in content.** One chat at a time moves
   that number, and says on the queue when it does. Two chats bumping it at once points a whole set of
   pages at a version that was never shipped — nothing conflicts, nothing errors, the fix reaches
   nobody.
