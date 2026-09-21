@@ -130,6 +130,12 @@ does what is the nine-row table in `The-New-Build-Repository/design/start-here.m
 - **Nobody owns a file.** Route by SUBJECT, not by which file it lives in, and say out loud when you
   cross into another chat's area. The cost of a collision is not the edit, it is the other chat
   re-deriving what you already worked out.
+- **`clasp push` replaces the WHOLE Apps Script file, so pull first, every time.** `all.gs.js` is
+  append-only and several chats add one-offs to it. Git handles the repo, but `npx clasp push` sends
+  your local copy to the editor and overwrites what is there — so a push from a working copy taken
+  before somebody else's append silently wipes their one-off out of the editor while the repo still
+  shows both. Pull immediately before every push, and afterwards check the editor still holds the
+  other chat's most recent function.
 - **`nav/topbar.js` is pinned by version in 28 pages across both repos.** One chat at a time moves
   that number, and says on the queue when it does. Two chats bumping it at once points a whole set of
   pages at a version that was never shipped — nothing conflicts, nothing errors, the fix reaches
