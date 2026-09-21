@@ -124,6 +124,15 @@ does what is the nine-row table in `The-New-Build-Repository/design/start-here.m
   old single letter series collided twice in one morning: two different DD rows and two different DE
   rows, written minutes apart by different chats. When she then says "DD go", neither chat can be
   sure she means its own row and the wrong one may act.
+- **Write a block for her to paste ONLY when it changes what another chat will BUILD, or prevents
+  real damage.** Routing work to the right chat qualifies; a security hole qualifies; a decision that
+  unblocks somebody qualifies. Correcting a number in our own documentation does not, and neither
+  does a naming scheme or one chat answering another's correction. Rules go into this file and into
+  `design/start-here.md` silently — every chat reads both at startup. Chats already running get ONE
+  line, once: *"Re-read CLAUDE.md and start-here.md."* Her words, 2026-09-21, after five blocks in an
+  hour of which one mattered: *"I just feel like I'm out of the loop if I'm just a copier and a
+  paster for my role."* Before writing any block, answer in one sentence what the receiving chat will
+  DO differently. No answer, no block.
 - **Every block she pastes into another chat carries a label: your chat's own letter and a number.**
   `P1`, `P2`, `P3` … counting up without limit, in the item heading AND as the first thing inside the
   fence. **Profile top nav = P, Groups = G, Events = E, Data integrity = D, HTML copy = H, ArangoDB =
