@@ -113,8 +113,10 @@ Leaving the version dropdown alone ships nothing.
 
 ## Working alongside the other chats
 
-Jessie runs nine chats at once and she is the only wire between them. The register of which chat
-does what is the nine-row table in `The-New-Build-Repository/design/start-here.md`.
+Jessie runs several chats at once and she is the only wire between them. The register of which chat
+does what is the table in `The-New-Build-Repository/design/start-here.md`. No count is written down
+anywhere, deliberately: a number beside a list has to be kept in step with it, and three of them
+were already wrong on 2026-09-21.
 
 - **Never infer a chat's name from a branch, worktree or folder.** Those names are generated from
   whatever was on screen when the session started and are never updated — one chat's folder says
@@ -136,9 +138,10 @@ does what is the nine-row table in `The-New-Build-Repository/design/start-here.m
 - **Every block she pastes into another chat carries a label: your chat's own letter and a number.**
   `P1`, `P2`, `P3` … counting up without limit, in the item heading AND as the first thing inside the
   fence. **Profile top nav = P, Groups = G, Events = E, Data integrity = D, HTML copy = H, ArangoDB =
-  R, Jazz mono repo = J, CW and Org forms = C, Page 0 Main = M, Network = N, Support and Tickets = S.** `A` is deliberately unused: every
+  R, Jazz mono repo = J, CW and Org forms = C, Page 0 Main = M, Network = N, Support and Tickets = S,
+  UX Design = U, Expressions = T.** `A` is deliberately unused: every
   chat counted from `A1` for part of 2026-09-21, so two different `A2`s and an `A6` are already in
-  circulation and none of them should be reused. She pastes constantly between nine chats, and
+  circulation and none of them should be reused. She pastes constantly between all these chats, and
   without a label unique to the sender she cannot tell a block she already sent from one she skipped
   — both look identical.
 - **Every block she pastes into another chat opens by naming the sending chat**, e.g. *From the
