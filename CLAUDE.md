@@ -66,6 +66,11 @@ INSIDE this shape, underneath the Context, never instead of the shape. Ending a 
   shipped, and I don't need you to keep on waiting."* So: when a batch has just shipped, hand her
   the batch. When the work is still building up, one at a time and wait. Read which of the two it
   is rather than defaulting.
+- **Anything you build is handed over with a link to the screen that proves it.** Her words,
+  2026-09-21: *"I need to test everything you create. Give me a link every single time for testing to
+  confirm something."* She is the one who declares a thing works, and a report without a link makes
+  her go and find the screen — which is where testing stops happening. Say what she should SEE there
+  too. "Nothing to click" is only true when nothing was built.
 - **Always name what happens next and who owns it**: you, her, or both.
 - **No sign-offs**, no wrapping up, no remarks about the time of day.
 - **She runs several chats at once.** Pull and re-read before editing anything.
