@@ -47,13 +47,10 @@
   .say{font-size:14px;color:var(--muted);margin-top:12px;min-height:20px;}
   .say.bad{color:var(--warn);}
   .hide{display:none;}
-  /* AN INLINE display BEATS .hide. This row carried style="display:flex" and therefore showed to
-     every stranger at the sign-in box, naming three pages they cannot open and should not know
-     about. The layout lives in a class now so the hide can win. Jessie saw it on 2026-09-06.
-     Same fault, same day, as the filter bar menus that all drew at once. */
+  
   #adminlinks{display:flex;gap:18px;flex-wrap:wrap;align-items:center;}
   #adminlinks.hide{display:none;}
-  /* The Engagement table: small, tight, five rows before it scrolls. */
+  
   .atbl-wrap{overflow-x:auto;}
   .amore{display:inline-block;margin-top:6px;font-size:13px;font-weight:700;color:var(--brand);cursor:pointer;}
   .atbl{width:100%;border-collapse:collapse;font-size:12.5px;}
@@ -62,17 +59,16 @@
   .atbl td{padding:4px 8px;color:var(--text);vertical-align:top;border:0;}
   .atbl tr.more td{color:var(--muted);padding-top:0;padding-bottom:8px;}
   .dots{background:none;border:0;font:inherit;font-size:15px;line-height:1;color:var(--muted);cursor:pointer;padding:0 4px;}
-  /* Waiting is the breathing pill. */
+  
   .cw-loading{display:inline-flex;align-items:center;gap:8px;background:#1F699E;color:#fff;
     font-size:13px;font-weight:700;padding:8px 16px;border-radius:20px;white-space:nowrap;
     animation:cw-breathe 1.6s ease-in-out infinite;margin:6px 0 4px;}
   @keyframes cw-breathe{0%,100%{opacity:1}50%{opacity:.62}}
   .loadbtn{padding:7px 16px;font-size:13.5px;}
-  /* The documents dropdown sits on the right of the blue, shown only after sign-in. */
+  
   #docs{display:flex;justify-content:flex-end;margin:0 0 16px;}
   #docs.hide{display:none;}
-  /* THE ARROW SITS IN FROM THE EDGE. Jessie, 2026-09-12: "make drop down carrot farther away from right
-     of drop down". The browser's own arrow cannot be moved, so it is drawn here instead. */
+  
   #docPick{background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%231F699E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 20px center;
     -webkit-appearance:none;appearance:none;color:var(--brand);font-weight:700;border:0;border-radius:22px;padding:9px 52px 9px 16px;cursor:pointer;}
   .scroll{overflow-x:auto;}
@@ -82,8 +78,7 @@
      cursor:pointer;user-select:none;}
   th:hover{color:var(--brand);}
   td.num,th.num{text-align:right;}
-  /* People's Groups count sits on the left, next to Roles, so no empty stretch opens between them.
-     Jessie, 2026-09-12: "Why not?" to lining them up on the left. */
+  
   #ptbl td.num,#ptbl th.num{text-align:left;}
   .flag{background:var(--warnbg);color:var(--warn);border-radius:11px;padding:2px 9px;
         font-size:12px;font-weight:700;}
@@ -98,15 +93,14 @@
   .pin a{color:#CBDCEA;text-decoration:none;border-bottom:1px solid rgba(203,220,234,.35);}
   .pin a:hover{color:#fff;border-color:#fff;}
   .fold{background:none;border:0;font:inherit;color:inherit;cursor:pointer;padding:0;}
-  /* A BIGGER ARROW, FURTHER FROM THE WORD. Jessie, 2026-09-11: "make collapse icon bigger and farther
-     away from the header". */
+  
   .fold::before{content:'\25BE';display:inline-block;width:1em;margin-right:12px;font-size:1.25em;color:var(--muted);}
   .fold.shut::before{content:'\25B8';}
   .tot .tile{cursor:pointer;border-radius:8px;padding:4px 8px;margin:-4px -8px;}
   .tot .tile:hover{background:#F1F5F9;}
-  /* A number you can press looks like a link. */
+  
   #ptot .tile b{color:var(--brand);text-decoration:underline;text-underline-offset:3px;}
-  /* A pressed tile is filled blue, so its number turns white rather than vanishing. 2026-09-12. */
+  
   #ptot .tile.on b{color:#fff;}
   .sortbtn{background:#fff;border:1px solid var(--line);border-radius:12px;font:inherit;font-size:12px;
            padding:3px 10px;cursor:pointer;color:var(--brand);font-weight:700;white-space:nowrap;}
@@ -132,17 +126,6 @@
 </head>
 <body>
 <div class="wrap">
-  <!-- The page draws nothing until the server says this person may see it. Not a hidden panel,
-       not an empty table: nothing. Anybody else gets a blank page and learns nothing from it. -->
-  <!-- An unlabelled box and a globe. Nothing here says what the page is, so somebody who finds
-       the address learns nothing from it. -->
-  <!-- Pinned, so the licensed list is one click from the numbers rather than a URL to remember. -->
-  <!-- id was "pin", the same as the code box below it. getElementById returns the first match, so
-       every read of the code box was reading THIS paragraph instead: .value came back undefined,
-       the code looked empty, and a correct code was answered with "Type the code from your email".
-       Nobody could get in. Renamed 2026-09-02, and it is the same two-things-one-name fault as the
-       rest of that day. -->
-
   <div class="card" id="gate">
     <div class="row">
       <input id="who" type="email" autocomplete="email" placeholder=" " style="max-width:250px;">
@@ -155,19 +138,8 @@
     <div class="say" id="s2"></div>
   </div>
 
-  <!-- The build documents, so the operational page is one click from the north star and the open
-       decisions rather than a set of URLs somebody has to keep. Added 2026-09-04. -->
-  <!-- ON THE RIGHT, NO HEADING, NO FOLD. Jessie, 2026-09-11: "What a license includes belongs on the
-       drop down menu in build docs", "right justify drop down and remove build documents header" and
-       "remove collapse on build docs/groups". -->
   <div class="hide" id="docs">
-    <!-- A DROPDOWN, NOT A LIST. Jessie, 2026-09-11: "make build docs a drop down to select from instead
-         of a list". Choosing one opens it in the same tab. -->
     <div id="docsBody">
-      <!-- IN HER ORDER, WITH THE SUPER ADMIN PAGES IN IT. Jessie, 2026-09-12: "Put Super admin pages on
-           the drop-down menu at the top and remove the section below for super admin pages put in this
-           order: queue, service desk, field registry, Northstar, writing style guide, decisions to be
-           made standing questions for Doug and then the rest and finally what a license includes". -->
       <select id="docPick" aria-label="Open a page or document">
         <option value="">Choose a page</option>
         <option value="https://claude.ai/code/artifact/e1825deb-d464-4464-ba2a-e4251fab9c5f">Queue</option>
@@ -188,11 +160,6 @@
 
   <p class="loading hide" id="loading">Loading data...</p>
 
-  <!-- WHAT PEOPLE HAVE BEEN DOING. Jessie, 2026-09-09: "can we have a way to see this engagement on
-       our backend? How to best build this? Research other platforms like LinkedIn and Luma."
-       What both of those do is split it: mail the rare thing that might need somebody to act, show
-       the volume on a page. This is the page half. Three things, and the third is the only one
-       scrolling the sheet cannot give her: who signed up and has done nothing since. -->
   <div class="card hide" id="aboard">
     <div class="headrow">
       <h2><button class="fold" id="afold" title="Hide or show">Engagement</button></h2>
@@ -235,7 +202,6 @@
     <div class="scroll"><table id="ptbl">
       <thead>
         <tr>
-          <!-- Roles third and ID last. Jessie, 2026-09-12: "Make ID last column" and "Role third column". -->
           <th data-k="name">Name</th>
           <th data-k="email">Address</th>
           <th data-k="roles">Roles</th>
@@ -248,8 +214,6 @@
           <th data-k="cwid">ID</th>
         </tr>
         <tr class="filters">
-          <!-- Signed up and Last seen sort rather than search. Jessie, 2026-09-12: "Signed up and Last
-               seen should be sort instead of search". -->
           <td><input data-f="name" placeholder="filter"></td>
           <td><input data-f="email" placeholder="filter"></td>
           <td><div class="chips" data-f="roles">
@@ -333,21 +297,15 @@
 
   var $=function(id){ return document.getElementById(id); };
   var say=function(el,msg,bad){ var n=$(el); n.textContent=msg||''; n.className='say'+(bad?' bad':''); };
-  // A server message is text somebody else wrote, so it is escaped before it goes into innerHTML.
   var esc=function(v){ return String(v==null?'':v)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
 
-  // An hour's session, kept so a refresh does not ask again. The server decides when it expires;
-  // this only remembers what it already handed out. Cleared the moment it stops working.
   var KEY='cw-ops-session';
   function tokExp(t){ var d=String(t||'').lastIndexOf('.'); var x=d>-1?parseInt(String(t).slice(d+1),10):0; return x||0; }
   function remember(id,tok){
     var until = tokExp(tok) ? tokExp(tok)-60*1000 : Date.now()+55*60*1000;
     try{ localStorage.setItem(KEY, JSON.stringify({id:id,tok:tok,until:until})); }catch(e){}
   }
-  // SIGNED IN UNTIL AN HOUR OF NOTHING. Jessie, 2026-09-11: "keep me logged UNLESS i have 60 minutes of
-  // no activity". While somebody clicks, types or scrolls, the session is swapped for a fresh hour at
-  // most every ten minutes. Reading without touching anything for an hour lets it end, as asked.
   var lastRenew=Date.now(), renewing=false;
   function renew(){
     if(!token || renewing || Date.now()-lastRenew < 10*60*1000) return;
@@ -373,7 +331,7 @@
     return null;
   }
 
-  setTimeout(function(){ try{ whySession(); }catch(e){} }, 0);   // speaks even when no load happens
+  setTimeout(function(){ try{ whySession(); }catch(e){} }, 0);   
   var back=recall();
   if(back){
     me=back.id; token=back.tok;
@@ -382,7 +340,6 @@
     load();
   }
 
-  // The address, typed once and kept, so signing in again is the globe and the code.
   if(!back){
     try{ var w=localStorage.getItem('cw-ops-who'); if(w) $('who').value=w; }catch(e){}
   }
@@ -390,20 +347,9 @@
   var addr=function(){ return ($('who').value||'').trim(); };
 
   $('send').addEventListener('click', function(){
-    // An empty box used to do nothing at all and say nothing, which reads as a broken page.
     if(!addr() && !me){ $('who').focus(); return; }
     $('send').disabled=true;
     say('s2','');
-    // THE BOX APPEARS ON THE PRESS. Jessie, 2026-09-08: "sent email receigve passcode. not being
-    // given passcode field ot enter", then "passcode field finally showed."
-    //
-    // It waited for sendOpsPin to answer before showing the field. That call is Apps Script
-    // sending an email and measures tens of seconds, so the code landed in her inbox before the
-    // box to type it into existed - and a page with no field looks broken rather than slow.
-    //
-    // Nothing about the field depends on the answer: the email is on its way either way, and this
-    // advances identically whatever comes back, so that nobody can learn from it who is an
-    // operator.
     try{ localStorage.setItem('cw-ops-who', addr()); }catch(e){}
     $('pinRow').classList.remove('hide');
     $('pin').focus();
@@ -412,14 +358,9 @@
           +'&appearId='+encodeURIComponent(addr()?'':me)+'&t='+Date.now())
       .then(function(r){ return r.json(); })
       .then(function(){
-        // Advances the same way whatever the answer, so this cannot be used to find out who is
-        // an operator. Only a server that could not be reached is worth saying out loud.
         $('send').disabled=false;
         say('s2','');
       })
-      // A LATE ANSWER IS NOT "COULD NOT REACH". Jessie, 2026-09-11: "said checking for a while and then
-      // couldn't reach server", then "3 yes". The email often goes even when the answer comes back
-      // too late, and once a code check has started this must not write over it.
       .catch(function(){
         $('send').disabled=false;
         if(checking) return;
@@ -459,18 +400,6 @@
       });
   });
 
-  // ── ?why=1 ────────────────────────────────────────────────────────────────
-  // A switch on the page that already exists, never a page of its own. It does nothing at all
-  // unless the parameter is there.
-  //
-  // Added 2026-09-03 after two guesses in a row. The People section answered "did not load" and
-  // I theorised about identity, then about speed, and the second attempt changed the error from
-  // a 524 timeout to an HTML page, which is a different fault. Jessie: look at what we learned in
-  // start here to stop troubleshooting.
-  //
-  // So this prints what the server actually said: which call, how long it took, the HTTP status,
-  // the content type, and the first 300 characters of the body when it is not JSON. The token is
-  // never printed.
   var WHY = (function(){ try { return new URLSearchParams(location.search).get('why')==='1'; } catch(e){ return false; } })();
   var whyPanel=null;
   function whySay(line){
@@ -487,16 +416,6 @@
     whyPanel.textContent += line + '\n';
   }
 
-  // WHAT THE SESSION ACTUALLY IS, printed before any call is made.
-  //
-  // Added 2026-09-06. ?why=1 only spoke from inside a data call, so somebody sitting at the code
-  // box with no session saw an empty screen from the one tool built to tell them why. The step
-  // that was failing was the step it could not describe.
-  //
-  // The token carries its own expiry after the dot, in milliseconds, put there by the SERVER when
-  // it was minted. The browser also keeps its own guess, fifty-five minutes from when it stored
-  // it. Those are two different numbers and only the first one decides anything, so both are
-  // printed and the difference between them is the answer when a session dies early.
   function whySession(){
     if(!WHY) return;
     var raw=null;
@@ -517,7 +436,6 @@
     if(serverLeft <= 0) whySay('  SO IT IS GENUINELY EXPIRED. Ask for another code.');
     else whySay('  SO IT IS STILL VALID. A refusal now is the server saying no for another reason, not the clock.');
   }
-  // One fetch for both calls, so what is reported is exactly what was sent.
   function ask(action, url){
     var t0=Date.now();
     whySay('\n' + action + '  asking...');
@@ -531,9 +449,6 @@
         if(bad){
           whySay(action + '  NOT JSON. The first 300 characters:');
           whySay('  ' + body.slice(0,300).replace(/\s+/g,' '));
-          // SAY WHICH IT WAS, IN WORDS. Jessie, 2026-09-12, looking at "Unexpected token '<',
-          // "<!DOCTYPE "... is not valid JSON". A 524 is Cloudflare giving up after a hundred seconds,
-          // which with Load buttons usually means another section was loading at the same time.
           throw new Error(r.status===524
             ? 'The server took longer than 100 seconds to answer, which usually means another section was loading at the same time. Press Load again once it finishes.'
             : 'The server sent back an error page instead of an answer. Press Load again and open this page with ?why=1 if it keeps happening.');
@@ -545,13 +460,6 @@
     });
   }
 
-  // LOAD BUTTONS, ONE SECTION AT A TIME. Jessie, 2026-09-11: "is failed response timeout bcz too much
-  // is being called on right away? how about buttons to call in info instead so it's not all at
-  // once?", then "2 go". Signing in used to ask for Groups, Engagement and People together. Each is a
-  // heavy read, the backend answers them one after another, and the last one could wait past the
-  // hundred seconds a connection is allowed and come back as nothing at all, drawn as nothing at
-  // all. Now signing in asks for nothing: each section has its own Load button, says it is waiting
-  // while it waits, and says what went wrong with a Try again when it fails.
   var SECTIONS={
     groups:  {board:'board',  body:'gbody', say:'gsay', label:'groups'},
     activity:{board:'aboard', body:'abody', say:'asay', label:'engagement'},
@@ -575,11 +483,6 @@
           +'&sessionToken='+encodeURIComponent(token)+'&t='+Date.now())
       .then(function(d){
         if(!d||d.status!=='ok'){
-          // SAY WHICH OF THE THREE IT IS. This said "That session has expired" for every failure
-          // there is, including having no session at all, which is what actually happened on
-          // 2026-09-06 and sent two people looking at session lengths for an hour. The token
-          // carries its own expiry, so the page can tell the difference instead of guessing.
-          // Jessie: make it say what is true.
           var why = 'Something went wrong signing you in.';
           var hadToken = !!token, expired = false;
           try {
@@ -591,15 +494,6 @@
           else if (d && d.message) why = 'The server said: ' + d.message;
           else if (d) why = 'The server refused, and gave no reason.';
           else why = 'The server did not answer.';
-          // A FAILED REQUEST IS NOT AN EXPIRED SESSION. Jessie, 2026-09-16, minutes after signing in:
-          // "i have to ask for pin again ? why? it's been just 15 minutes". An hour's session had a
-          // quarter of an hour left on it. What happened is that Apps Script sent back its own error
-          // page instead of an answer, the answer would not read as JSON, and EVERY failure - a dropped
-          // connection, an error page, a timeout - fell through to here and threw the session away.
-          //
-          // Her own rule, from the calendar and My groups: a failed request is never an answer. So the
-          // session is only forgotten when the server actually refuses it, or when the token's own
-          // expiry has passed. Anything else keeps it and says the request failed.
           var reallyRefused = !!d || expired || !hadToken;
           if (reallyRefused) {
             forget(); token='';
@@ -614,8 +508,6 @@
         }
         rows=d.groups||[];
         var people=0; rows.forEach(function(g){ people+=g.members||0; });
-        // Two different things. Memberships counts a person once per group they are in; people
-        // counts each person once however many groups they are in.
         $('tot').innerHTML=
           '<div><b>'+rows.length+'</b>groups</div>'+
           '<div><b>'+(d.uniquePeople||0)+'</b>people belong to a group</div>'+
@@ -639,7 +531,6 @@
           return;
         }
         var counts=d.counts||{}, keys=Object.keys(counts).sort(function(a,b){return counts[b]-counts[a];});
-        // A WEEK, AND IT SAYS SO. A bare number is a number about nothing.
         $('atot').innerHTML = keys.length
           ? keys.map(function(k){ return '<div><b>'+counts[k]+'</b>'+esc(k)+', past 7 days</div>'; }).join('')
             + '<div><b>'+(d.total||0)+'</b>recorded in all</div>'
@@ -649,7 +540,6 @@
         aTotal=(typeof d.recentTotal==='number') ? d.recentTotal : aRecent.length;
         aShown=5;
         paintRecent();
-        // The quiet list went on 2026-09-12. Jessie: "This doesn't really give me any data that I want".
 
 
         $('aboard').classList.remove('hide');
@@ -661,11 +551,6 @@
     ask('getOpsPeople', GS+'?action=getOpsPeople&appearId='+encodeURIComponent(me)
           +'&sessionToken='+encodeURIComponent(token)+'&t='+Date.now())
       .then(function(d){
-        // SAY WHY. This returned silently, so a failure and an empty answer looked identical:
-        // the People card stayed hidden, nothing was drawn and nothing was said, and the page
-        // read as though only the Groups section existed. Jessie, 2026-09-03: "onlly loads
-        // groups section not the sectino above". A page that cannot say what happened cannot be
-        // diagnosed without guessing, which is the recurring fault in start-here.
         if(!d||d.status!=='ok'){
           $('pboard').classList.remove('hide');
           $('ptot').innerHTML='<div class="tot-note">People did not load. '
@@ -674,10 +559,7 @@
           return;
         }
         people=d.people||[];
-        // Counted from the stage names the server actually sends. These read zero for a while
-        // because the tiles still counted the old names after the stages were renamed. 2026-09-01.
         var by={};
-        // Each tile counts everybody who reached that step, which is what its filter shows.
         people.forEach(function(p){ (p.stages||[p.stage]).forEach(function(s){ by[s]=(by[s]||0)+1; }); });
         var since=function(days){
           var cut=new Date(Date.now()-days*86400000).toISOString();
@@ -695,13 +577,11 @@
           tile(by['completed intro']||0,'completed intro','stage','completed intro')+
           tile(by['joined group']||0,'joined group','stage','joined group')+
           tile(by['created group']||0,'created group','stage','created group')+
-          // Only once the backend says who is legacy, so the tile never reads 0 for want of data.
           (people.length && ('origin' in people[0])
             ? tile(people.filter(function(p){ return p.origin==='legacy' && !p.firstSignin; }).length,
                    'legacy, not signed in yet','legacyNot','')
             : '');
 
-        // Every tile is a filter. Clicking one shows exactly the people it counted.
         Array.prototype.forEach.call($('ptot').querySelectorAll('.tile'), function(t){
           t.addEventListener('click', function(){
             var act=t.getAttribute('data-act'), val=t.getAttribute('data-val');
@@ -718,8 +598,6 @@
             Array.prototype.forEach.call($('ptot').querySelectorAll('.tile'), function(x){ x.classList.remove('on'); });
             if(act!=='all') t.classList.add('on');
             ppaint();
-            // SHOW WHO. Jessie, 2026-09-12: "Can we link the number ... to show who this is". The tile
-            // already filtered the table; now it takes you there.
             try{ $('ptbl').scrollIntoView({behavior:'smooth', block:'start'}); }catch(e){}
           });
         });
@@ -736,14 +614,6 @@
   }
   var LOADERS={groups:loadGroups, activity:loadActivity, people:loadPeople};
 
-  // THE ENGAGEMENT TABLE. Jessie, 2026-09-11: "Make engagement section into a table and small font like
-  // the header descriptions and tight with a scroll after displaying 5 rows - add a toggle of include
-  // super admin and default on", "put 3 dots at end of each row and add more info like ID" and "2 full".
-  // No lines between rows: space does the separating.
-  // FIVE, THEN MORE. Jessie, 2026-09-12: "show 5 and show a link for more - then it shows the next 50
-  // and so forth". Rows past what arrived are asked for fifty at a time.
-  // REFERENCE, where each thing came from, is recorded by the other chat into activity.activityFrom
-  // and activity.activityTarget. The column appears once any row carries one.
   var aRecent=[], aTotal=0, aShown=5, aFetching=false;
   function paintRecent(){
     var withSuper=$('aSuper').checked;
@@ -786,9 +656,6 @@
   $('aSuper').addEventListener('change', paintRecent);
   function load(){
     whySession();
-    // Signed in, so the doors behind the code box show: the documents, the other pages, and the
-    // three sections, each waiting for its own Load. The documents used to appear only right after a
-    // code was typed, so a return visit never showed them.
     $('docs').classList.remove('hide');
     ['aboard','pboard','board'].forEach(function(id){ $(id).classList.remove('hide'); });
   }
@@ -807,8 +674,6 @@
       var v=(i.value||'').trim().toLowerCase();
       if(v) out[i.getAttribute('data-f')]=v;
     });
-    // Chips you click on and off. Picking member and host means somebody who is both. Picking
-    // two stages means either, since nobody is at two stages at once.
     Array.prototype.forEach.call(document.querySelectorAll(sel+' tr.filters .chips'), function(box){
       var picked=[];
       Array.prototype.forEach.call(box.querySelectorAll('button.on'), function(b){
@@ -827,7 +692,6 @@
       var want=f[k];
       if(want && want.any){
         var hit=false;
-        // Stage matches any step the person reached, not only the furthest.
         var haves=(k==='stage' && row.stages) ? row.stages.map(function(x){ return String(x).toLowerCase(); }) : [have];
         for(var j=0;j<want.any.length;j++){ if(haves.indexOf(want.any[j])>-1){ hit=true; break; } }
         if(!hit) return false;
@@ -850,10 +714,8 @@
     var onlyTest=$('onlyTest').checked;
     var f=colFilters('#ptbl');
     var list=people.filter(function(p){
-      // Ticked means show only test accounts. Unticked hides them.
       if(onlyTest ? !p.test : p.test) return false;
       if(pLegacyNot && !(p.origin==='legacy' && !p.firstSignin)) return false;
-      // The box searches everything on the person's row, not only name and address.
       if(pDays){
         var cut=new Date(Date.now()-pDays*86400000).toISOString();
         if(String(p.made) < cut) return false;
@@ -875,12 +737,8 @@
       for(var i=0;i<10;i++){ tr.appendChild(document.createElement('td')); }
       tr.children[0].textContent=p.name||'(no name)';
       tr.children[1].textContent=p.email||'';
-      // COMMAS, since a person holds several. Jessie, 2026-09-11: "make stage/roles show things in commas".
       tr.children[2].textContent=String(p.roles||'').split('|').map(function(x){ return x.trim(); }).filter(Boolean).join(', ');
-      // EVERY STEP REACHED. Jessie, 2026-09-11: "6 yes".
       tr.children[3].textContent=(p.stages||[p.stage]).join(', ');
-      // LEGACY OR NEW, AND WHEN THEY FIRST SIGNED IN HERE. Jessie, 2026-09-12. Blank until the
-      // backend sends it, rather than a guess.
       tr.children[4].textContent=p.origin||'';
       tr.children[5].textContent=p.groups; tr.children[5].className='num';
       tr.children[6].textContent=p.made? String(p.made).slice(0,10) : '';
@@ -906,8 +764,6 @@
       sortWords(); ppaint();
     });
   });
-  // The two date columns sort from a button that says what it is doing: Newest first or Oldest first
-  // on the one in use, Sort on the other.
   function sortWords(){
     Array.prototype.forEach.call(document.querySelectorAll('#ptbl .sortbtn'), function(b){
       var k=b.getAttribute('data-sort');
@@ -946,11 +802,6 @@
       tr.children[1].textContent=g.members||0; tr.children[1].className='num';
       tr.children[2].textContent=g.created? String(g.created).slice(0,10) : '';
       tr.children[3].textContent=g.hostName||'';
-      // A tick rather than the word "set". Jessie, 2026-09-03: remove the passcode column off of
-      // group, put a check box. The code itself has never been sent to this page, only whether
-      // there is one, and every group has one, so the word was a column of the same word.
-      // Not a real checkbox: nothing here can be ticked or unticked, and a control that does
-      // nothing when pressed is worse than a mark that is plainly a mark.
       if(g.passcode==='set'){ tr.children[4].textContent='\u2713'; tr.children[4].title='This group has a passcode'; }
       else { var s=document.createElement('span'); s.className='flag'; s.textContent='missing'; tr.children[4].appendChild(s); }
       b.appendChild(tr);
@@ -961,13 +812,13 @@
   var fold=function(btn, body){
     $(btn).addEventListener('click', function(){
       var card=$(body).closest('.card');
-      if(card && !card.getAttribute('data-loaded')) return;   // nothing to fold until it is loaded
+      if(card && !card.getAttribute('data-loaded')) return;   
       var shut=$(body).classList.toggle('hide');
       $(btn).classList.toggle('shut', shut);
     });
   };
   fold('pfold','pbody');
-  fold('afold','abody');   // Engagement had a fold button and nothing listening to it. 2026-09-11.
+  fold('afold','abody');   
 
   $('docPick').addEventListener('change', function(){ var u=this.value; if(u) window.location.href=u; });
 
@@ -979,7 +830,7 @@
   $('greset').addEventListener('click', function(){ $('gq').value=''; resetFilters('#tbl', paint); });
   Array.prototype.forEach.call(document.querySelectorAll('tr.filters .chips button'), function(b){
     b.addEventListener('click', function(){
-      b.classList.toggle('on');                       // click again to unpick it
+      b.classList.toggle('on');                       
       (b.closest('#ptbl') ? ppaint : paint)();
     });
   });
@@ -1000,21 +851,7 @@
   });
 })();
 </script>
-<!-- THE BAR, with Creating.Works on it. Jessie, 2026-09-12: "add the pill on the right hand side of who I
-     am when I sign in as well", with the Creating.Works mark and "Because creating works." The strip above
-     it draws only for a super admin, after the backend says so. -->
 <script>window.CW_SHOW_BAR = true;</script>
-<script src="https://2gather.network/nav/topbar.js?v=6.18" defer></script>
+<script src="https://2gather.network/nav/topbar.js?v=6.19" defer></script>
 </body>
-<!--
-  Copyright 2026 DayBalancer LLC. All rights reserved.
-
-  The code and the content here power Creating.Works, DayBalancer, Appear Network,
-  and 2Gather. They are published so they can be read, audited, and dated.
-
-  Running either as a separate offering requires a license, whether you brand it as
-  ours or as your own, and whether or not money changes hands.
-
-  hello@creating.works
--->
 </html>

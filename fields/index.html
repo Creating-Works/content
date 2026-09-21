@@ -5,31 +5,17 @@
   The code and the content here power Creating.Works, DayBalancer, Appear Network,
   and 2Gather. They are published so they can be read, audited, and dated.
 
-  hello@creating.works
--->
-<!-- Version: V1.00 | Date: 2026-09-03 | LAST CHANGE: the field registry as a live page, behind the ops sign-in -->
-<!--
-  ONE SIGN-IN, TWO PAGES. This uses the SAME session key as /ops/, cw-ops-session, and it is on the
-  same origin, so an operator who signed in there is already signed in here. Signing out of either
-  signs out of both, which is the behaviour Jessie asked for: "available to all superadmins who
-  signed in already".
+  Running either as a separate offering requires a license, whether you brand it as
+  ours or as your own, and whether or not money changes hands.
 
-  WHAT THE GATE IS AND IS NOT. It keeps the registry out of casual sight and it is the same door
-  the operations page uses. It is NOT protection for the data, because the rows are in this file:
-  anybody with the address can read the source. That is fine for field names and which page reads
-  them, and it would not be fine for anything about a person. If this ever needs to hold something
-  real, the rows move behind the token the way getOpsPeople does. Said plainly rather than left to
-  be discovered.
+  hello@creating.works
 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<!-- The site's own mark, copied verbatim from ops/index.html rather than redrawn. It is on
-     creating.works/index.html and 59 pages besides, so a second version of it would be a
-     second thing to keep in step. Jessie, 2026-09-03. -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%25' stop-color='%2310B981'/><stop offset='33%25' stop-color='%233B82F6'/><stop offset='66%25' stop-color='%238B5CF6'/><stop offset='100%25' stop-color='%23F43F5E'/></linearGradient></defs><circle cx='18' cy='18' r='16' fill='transparent' stroke='url(%23g)' stroke-width='3'/></svg>">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%25' stop-color='%2310B981'/><stop offset='33%25' stop-color='%233B82F6'/><stop offset='66%25' stop-color='%238B5CF6'/><stop offset='100%25' stop-color='%23F43F5E'/></linearGradient></defs><circle cx='18' cy='18' r='16' fill='transparent' stroke='url(%23g)' stroke-width='3'/></svg>">
 <title>Field registry</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -88,7 +74,6 @@
   td.name{font-weight:800;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;}
   td.notes{color:var(--soft);min-width:260px;}
 
-  /* The filter row lives under the headers, the way the operations page does it. */
   tr.filters td{padding:6px 10px 12px;border-bottom:1.5px solid var(--line);}
   tr.filters input{width:100%;border:1.5px solid var(--line);border-radius:8px;padding:6px 9px;
     font-family:inherit;font-size:12.5px;color:var(--ink);}
@@ -111,12 +96,6 @@
   code{background:rgba(255,255,255,.15);padding:1px 5px;border-radius:5px;}
   @media(max-width:640px){ .wrap{padding:16px 12px 50px;} h1{font-size:22px;} }
 </style>
-<!-- THE SAME TWO RULES THE TOP BAR PUTS ON EVERY PAGE THAT LOADS IT (nav/topbar.js V6.09), written
-     here because this page does not load the bar. Jessie, 2026-09-18: "#2 works! Update all pages".
-     overflow-wrap lets a long unbroken link or id break rather than spill; overflow-x:clip stops
-     anything left over from panning the whole page, and makes no new scroll container, so sticky
-     headers keep working and the page still scrolls down. IF THEY CHANGE IN THE BAR, CHANGE THEM
-     HERE: this is a copy, and it is a copy only because there is no bar on this page to hold it. -->
 <style>body{overflow-x:clip;overflow-wrap:break-word;}</style>
 <style>@media(max-width:768px){input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea{font-size:16px !important;}}</style>
 </head>
@@ -126,9 +105,6 @@
   <h1 class="hide" id="h1">Field registry</h1>
   <p class="lede hide" id="lede">Our own fields: which tool each lives in, the pages that read or write it, and whether it is Glide's, ours, or both. Operators only.</p>
 
-  <!-- Nothing but a box and a globe until somebody is in. No heading, no explanation of what the
-       page is, and no mention of the operations page: every one of those tells a stranger
-       something. Jessie, 2026-09-03. -->
   <div class="gate card" id="gate">
     <div class="row">
       <input id="who" type="email" autocomplete="email" placeholder="your address">
@@ -184,9 +160,6 @@
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function say(el,msg,bad){ var n=$(el); n.textContent=msg||''; n.className='say'+(bad?' bad':''); }
 
-  // ── The registry ────────────────────────────────────────────────────────────
-  // Ours only. We do not catalogue every Glide column; we list the fields WE use, each flagged
-  // Glide, Ours, or Both.
   var FIELDS = [
     {field:'Full name', tool:'Creating.Works', table:'Users · Main · CW/Info', existsIn:'Both',
       reads:['Kumu map','group.html matches','attendees.html'],
@@ -250,8 +223,6 @@
       notes:'Photo of a business card or face from the capture flow. Becomes ours when the contact tracker ships.'}
   ];
 
-  // ── The same door as /ops/ ──────────────────────────────────────────────────
-  // Same key, same origin, so signing in on either page signs you in on both.
   var KEY='cw-ops-session';
   var me=(window.CW_ID||'').trim(), token='';
   function remember(id,tok){
@@ -271,13 +242,10 @@
     if(!addr()){ say('s2','Put your address in first.',true); return; }
     say('s2','Sending a code…');
     try{ localStorage.setItem('cw-ops-who', addr()); }catch(e){}
-    // Same shape as the ops page, appearId included, so the two doors behave identically.
     fetch(GS+'?action=sendOpsPin&email='+encodeURIComponent(addr())
           +'&appearId='+encodeURIComponent(addr()?'':me)+'&t='+Date.now())
       .then(function(r){ return r.json(); })
       .then(function(d){
-        // Always the same words, whether or not the address is known. Telling them apart would
-        // let anybody discover who is in the database.
         $('pinRow').classList.remove('hide');
         say('s2','If that address can open this, a code is on its way. It lasts fifteen minutes.');
         $('pin').focus();
@@ -289,9 +257,6 @@
     var pin=($('pin').value||'').trim();
     if(pin.length<6){ say('s2','Six digits.',true); return; }
     $('go').disabled=true; say('s2','Checking…');
-    // `code`, not `pin`. The backend reads e.parameter.code, so sending pin left it empty, it
-    // never matched, and every press BURNED one of the five tries until it said "No tries left".
-    // I wrote this call from memory instead of from the ops page beside it. 2026-09-03.
     fetch(GS+'?action=verifyOpsPin&email='+encodeURIComponent(addr())
           +'&appearId='+encodeURIComponent(addr()?'':me)
           +'&code='+encodeURIComponent(pin)+'&t='+Date.now())
@@ -309,9 +274,6 @@
   });
 
   function open_(){
-    // Nothing but the sign-in until somebody is in, the same as the operations page. A page that
-    // describes itself to a stranger has told them what it holds. Jessie, 2026-09-03: it is
-    // supposed to be blank.
     $('gate').classList.add('hide');
     $('h1').classList.remove('hide');
     $('lede').classList.remove('hide');
@@ -325,7 +287,6 @@
   if(back){ me=back.id; token=back.tok; open_(); }
   else { try{ var w=localStorage.getItem('cw-ops-who'); if(w) $('who').value=w; }catch(e){} }
 
-  // ── The table ───────────────────────────────────────────────────────────────
   function chips(list, cls){
     if(!list || !list.length) return '<span class="chip">—</span>';
     return list.map(function(x){ return '<span class="chip '+cls+'">'+esc(x)+'</span>'; }).join('');

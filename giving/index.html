@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- Version: V2.39 | LAST CHANGE: Privacy. Dropped a call to a backend action that does not exist; it cost a round trip and returned data this page never used. | Date: 2026-08-01 -->
 <!--
   Copyright 2026 DayBalancer LLC. All rights reserved.
 
@@ -15,8 +14,6 @@
 <head>
 <script src="/moved.js?v=2"></script>
   <meta charset="UTF-8">
-<!-- Who is looking at this page, and since identity.js V18 whether they may see it at all.
-     First in the head, no defer and no async: it has to run before this page's own script. -->
 <script src="https://2gather.network/nav/identity.js?v=21"></script>
 <meta name="robots" content="noindex, nofollow">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -85,7 +82,6 @@
     input[type="text"]::placeholder { color: var(--ph); }
     .field { margin-bottom: 20px; }
 
-    /* ── Top tabs ── */
     .top-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
     .top-tab {
       padding: 10px 18px; border-radius: 24px; border: 2px solid var(--border);
@@ -95,7 +91,6 @@
     .top-tab:hover { border-color: var(--brand); color: var(--brand); }
     .top-tab.active { background: var(--brand); border-color: var(--brand); color: white; }
 
-    /* ── Drill section ── */
     .drill-section {
       background: var(--input-bg); border: 1px solid var(--border);
       border-radius: 12px; padding: 20px; margin-bottom: 16px;
@@ -105,7 +100,6 @@
     .drill-sub-label { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
     .drill-sub-desc { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
 
-    /* ── Sub tabs ── */
     .sub-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
     .sub-tab {
       padding: 8px 16px; border-radius: 20px; border: 1.5px solid var(--border);
@@ -115,7 +109,6 @@
     .sub-tab:hover { border-color: var(--brand); color: var(--brand); }
     .sub-tab.active { background: var(--brand); border-color: var(--brand); color: white; }
 
-    /* ── Chips ── */
     .chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
     .chip {
       padding: 7px 14px; border-radius: 20px; border: 1.5px solid var(--border);
@@ -124,11 +117,10 @@
     }
     .chip:hover { border-color: var(--brand); color: var(--brand); }
     .chip.selected { background: var(--sel-bg); border-color: var(--sel-border); color: var(--brand); font-weight: 500; }
-    /* + Other reads as a button: darker grey, white lettering (row 205, 2026-09-15). */
+    
     .chip.other-chip { border-style: solid; background:#6B7A8D; border-color:#6B7A8D; color:#fff; font-weight:700; }
     .chip.other-chip:hover { background:#5A6B7E; border-color:#5A6B7E; }
 
-    /* ── Skills grid ── */
     .skills-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
     .skill-chip {
       padding: 6px 12px; border-radius: 16px; border: 1.5px solid var(--border);
@@ -139,7 +131,6 @@
     .skill-chip.selected { background: var(--sel-bg); border-color: var(--sel-border); color: var(--brand); font-weight: 500; }
     .skill-chip.other-chip { border-style: solid; font-size: 12px; background:#6B7A8D; border-color:#6B7A8D; color:#fff; font-weight:700; }
 
-    /* ── Other inline input ── */
     .other-input-wrap { display: flex; gap: 8px; margin-top: 10px; width: 100%; }
     .other-input-wrap input { flex: 1; }
     .btn-other-add {
@@ -149,7 +140,6 @@
     }
     .btn-other-add:hover { background: var(--hover); }
 
-    /* ── Add area ── */
     .add-area {
       margin-top: 16px; padding: 14px; background: white;
       border: 1px solid var(--border); border-radius: 10px;
@@ -164,7 +154,6 @@
     .btn-add:hover { background: var(--hover); }
     .btn-add:disabled { opacity: 0.4; cursor: default; }
 
-    /* ── FAB ── */
     .support-fab {
       position: fixed; top: 20px; right: 20px; left: auto; transform: none;
       background: var(--brand); color: white; border: none; border-radius: 28px;
@@ -179,7 +168,6 @@
       font-size: 13px; font-weight: 700; min-width: 22px; text-align: center;
     }
 
-    /* ── Modals + drawer (events.html pattern) ── */
     .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:500; align-items:flex-start; justify-content:center; padding:12px 0 0; overscroll-behavior:none; touch-action:pan-y; }
     .modal-overlay.open { display:flex; }
     .modal { background:#fff; border-radius:16px; padding:32px; max-width:560px; width:100%; max-height:92vh; overflow-y:auto; -webkit-overflow-scrolling:touch; box-shadow:0 20px 60px rgba(0,0,0,.2); }
@@ -192,7 +180,6 @@
     .modal-body { font-size:14px; color:var(--soft); line-height:1.6; margin-bottom:24px; }
     .modal-body a { color:var(--brand); font-weight:600; text-decoration:none; }
 
-    /* ── Drawer tabs ── */
     .drawer-tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 20px; }
     .drawer-tab {
       flex: 1; padding: 10px; text-align: center; font-size: 14px; font-weight: 500;
@@ -203,9 +190,8 @@
     .drawer-tab:hover { color: var(--brand); }
     .drawer-tab.active { color: var(--brand); border-bottom-color: var(--brand); font-weight: 600; }
 
-    /* ── Wish items ── */
     .wish-item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--border); }
-    .wish-item:last-child { border-bottom: none; }   /* V2.38: no trailing line under the last item */
+    .wish-item:last-child { border-bottom: none; }   
     #below-card { max-width: 660px; margin: 20px auto 0; text-align: center; }
     .btn-below { display: inline-block; padding: 12px 26px; border: 1.5px solid rgba(255,255,255,0.75); border-radius: 10px; color: #fff; background: transparent; font-weight: 600; text-decoration: none; font-size: 15px; font-family: inherit; cursor: pointer; }
     .btn-below:hover { background: rgba(255,255,255,0.14); }
@@ -222,13 +208,11 @@
     .btn-sm.receive:hover { background: var(--green); }
     .btn-sm.remove:hover { border-color: #e57373; color: #c62828; }
 
-    /* ── Progress ── */
     .progress-wrap { margin-bottom: 20px; }
     .progress-labels { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
     .progress-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
     .progress-fill { height: 100%; background: var(--brand); border-radius: 3px; transition: width 0.3s; }
 
-    /* ── Buttons ── */
     .btn-primary { display: block; width: 100%; padding: 14px; background: var(--brand); color: white; border: none; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; cursor: pointer; text-align: center; transition: background 0.15s; margin-top: 20px; }
     .btn-primary:hover { background: var(--hover); }
     .btn-secondary { display: block; width: 100%; padding: 12px; background: transparent; color: var(--brand); border: 2px solid var(--brand); border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; cursor: pointer; text-align: center; transition: all 0.15s; margin-top: 10px; }
@@ -236,12 +220,10 @@
     .btn-outline { display: block; width: 100%; padding: 12px; background: transparent; color: var(--brand); border: 2px solid var(--brand); border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; cursor: pointer; text-align: center; text-decoration: none; transition: all 0.15s; }
     .btn-outline:hover { background: var(--input-bg); }
 
-    /* ── Share box ── */
     .share-box { margin-top: 20px; padding: 18px; background: var(--input-bg); border: 1px solid var(--border); border-radius: 10px; }
     .share-box p { font-size: 14px; color: var(--soft); margin-bottom: 10px; }
     .share-url { font-size: 12px; color: var(--muted); word-break: break-all; background: white; border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; margin-bottom: 10px; }
 
-    /* ── Review ── */
     .review-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
     .review-count { font-size: 13px; color: var(--muted); margin-top: 4px; }
     .btn-edit { padding: 6px 14px; border-radius: 16px; border: 1.5px solid var(--border); background: white; font-size: 13px; color: var(--soft); cursor: pointer; font-family: 'DM Sans', sans-serif; }
@@ -253,19 +235,16 @@
 
     .empty { font-size: 14px; color: var(--muted); padding: 20px 0; text-align: center; }
 
-    /* ── Toast ── */
     .toast { position:fixed; top:24px; left:50%; transform:translateX(-50%); background:#1a1a2e; color:white; padding:10px 20px; border-radius:20px; font-size:14px; font-weight:700; opacity:0; transition:opacity 0.3s; pointer-events:none; z-index:9999; white-space:nowrap; }
     .toast.show { opacity:1; }
 
     .page-footer { text-align: center; margin-top: 28px; font-size: 12px; color: rgba(255,255,255,0.55); }
     .page-footer a { color: rgba(255,255,255,0.75); text-decoration: none; }
 
-    /* ── Anonymous choice buttons ── */
     .anon-options { display:flex; flex-direction:column; gap:10px; }
     .btn-anon { padding:12px 16px; border-radius:10px; border:1.5px solid var(--border); background:white; font-family:'DM Sans',sans-serif; font-size:14px; color:var(--text); cursor:pointer; transition:all 0.15s; text-align:left; }
     .btn-anon:hover { border-color:var(--brand); color:var(--brand); }
 
-    /* ── History item (Given/Received tabs) ── */
     .history-item { display:flex; align-items:center; gap:12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
     .history-item:last-child { border-bottom: none; }
     .history-photo { width:40px; height:40px; border-radius:50%; object-fit:cover; background:var(--input-bg); border:1px solid var(--border); flex-shrink:0; }
@@ -282,8 +261,6 @@
 <div class="card" id="app"></div>
 <div id="below-card"></div>
 <div class="toast" id="toast"></div>
-<!-- Footer removed 2026-08-20 per Jessie's ask. -->
-
 <div id="debug-id" style="text-align:center;margin-top:12px;font-size:11px;color:#1F699E;user-select:all;"></div>
 
 <div class="modal-overlay" id="gift-drawer-modal" onclick="if(event.target===this)closeDrawer()">
@@ -292,7 +269,6 @@
   </div>
 </div>
 
-<!-- Sign-in modal -->
 <div class="modal-overlay" id="signin-modal" onclick="if(event.target===this)closeSigninModal()">
   <div class="modal">
     <div class="modal-title">Add your gift list</div>
@@ -301,7 +277,6 @@
   </div>
 </div>
 
-<!-- Is this you? modal -->
 <div class="modal-overlay" id="confirm-modal">
   <div class="modal" style="text-align:center;">
     <div id="confirm-photo-placeholder" style="width:72px;height:72px;border-radius:50%;margin:0 auto 16px;border:2px solid var(--border);background:var(--input-bg);display:flex;align-items:center;justify-content:center;font-size:28px;">🌱</div>
@@ -313,7 +288,6 @@
   </div>
 </div>
 
-<!-- Location prompt modal -->
 <div class="modal-overlay" id="location-modal">
   <div class="modal">
     <div class="modal-title">Local gifts</div>
@@ -324,7 +298,6 @@
   </div>
 </div>
 
-<!-- Gift choice modal - sign in OR give with name -->
 <div class="modal-overlay" id="gift-signin-modal" onclick="if(event.target===this)closeGiftSigninModal()">
   <div class="modal" style="text-align:center;">
     <div class="modal-title">Want to give this?</div>
@@ -339,7 +312,6 @@
   </div>
 </div>
 
-<!-- Anonymous choice modal -->
 <div class="modal-overlay" id="anon-modal">
   <div class="modal">
     <div class="modal-title">How do you want to give?</div>
@@ -353,11 +325,9 @@
 </div>
 
 <script>
-// ─── Registry init (must be first - init() runs before declarations below) ─
 window._chips = [];
 window._items = [];
 
-// ─── Data ──────────────────────────────────────────────────────────────────
 
 const SKILLS = [
   'Vision/Product Direction','Strategy','Analytics','Marketing/Outreach',
@@ -399,7 +369,6 @@ const ACTION_CHIPS = [
   { id:'labor',      icon:'💪', label:'Labor',      desc:"Examples: help me move, set up for an event, garden with me, build something together" }
 ];
 
-// ─── Identity ──────────────────────────────────────────────────────────────
 function getMemberId() {
   const params = new URLSearchParams(window.location.search);
   const urlParam = params.get('id') || params.get('memberCard');
@@ -409,7 +378,7 @@ function getMemberId() {
 
 let _appearId = getMemberId();
 let _pendingId = null;
-let _ownerAppearId = null; // owner of the list being viewed
+let _ownerAppearId = null; 
 let _ownerPhoto    = '';
 let _ownerName     = '';
 
@@ -418,20 +387,13 @@ let _ownerName     = '';
   const urlId  = params.get('id') || params.get('memberCard');
   const listParam = params.get('list');
 
-  // Read owner from URL
   _ownerAppearId = params.get('owner') || null;
 
-  // BOTH keys, or neither. These three lines wrote appear-id alone and left cw-id holding
-  // somebody else, so which page found you depended on which key it read first. That is how a
-  // browser ended up carrying appear-id=w.hss and cw-id=zz-kind-test at the same time.
-  // 2026-09-03.
   function _rememberBoth(id) {
     try { localStorage.setItem('appear-id', id); } catch(e) {}
     try { localStorage.setItem('cw-id', id); } catch(e) {}
   }
   if (urlId) {
-    // Always trust ?id= from URL (Glide passes this reliably)
-    // Never show "Is this you?" - localStorage can't be trusted across Glide sessions
     _appearId = urlId;
     _rememberBoth(_appearId);
   } else if (_appearId) {
@@ -454,7 +416,6 @@ function openConfirmModal(id) {
   document.getElementById('confirm-photo').style.display = 'none';
   document.getElementById('confirm-photo-placeholder').style.display = 'flex';
   document.getElementById('confirm-modal').classList.add('open');
-  // Fetch photo
   fetch(GS_URL + '?action=lookupProfile&appearId=' + encodeURIComponent(id))
     .then(r => r.json())
     .then(data => {
@@ -554,7 +515,6 @@ function toggleLocalRequest(checked) { isLocalRequest = checked; render(); }
 function closeGiftSigninModal() { document.getElementById('gift-signin-modal').classList.remove('open'); }
 function openGiftSigninModal()  { document.getElementById('gift-signin-modal').classList.add('open'); }
 
-// ─── Anonymous modal ────────────────────────────────────────────────────────
 let _pendingGiftOwner = null;
 let _pendingGiftItem  = null;
 
@@ -564,7 +524,6 @@ function giftItem(itemTitle) {
   _pendingGiftOwner = ownerForGift;
   _pendingGiftItem  = itemTitle;
   if (!_appearId) {
-    // Clear name input and open choice modal
     const nameEl = document.getElementById('gifter-name-input');
     if (nameEl) nameEl.value = '';
     openGiftSigninModal();
@@ -629,7 +588,6 @@ function confirmGift(anonymous) {
   _pendingGiftItem  = null;
 }
 
-// ─── State ─────────────────────────────────────────────────────────────────
 let mode          = 'builder';
 let viewerData    = null;
 let viewFulfilled = new Set();
@@ -664,22 +622,18 @@ let shareURL       = '';
 let items          = [];
 let myName         = '';
 
-// Drawer tab state
-let drawerTab = 'list'; // 'list' | 'received' | 'given'
+let drawerTab = 'list'; 
 let giftHistory = { received: [], given: [] };
 let historyLoaded = false;
 let drawerPage = 1;
 const ITEMS_PER_PAGE = 5;
 
-// shareURL restored on boot if previously generated
 try { shareURL = localStorage.getItem('giving_shareURL') || ''; } catch(e) {}
 
-// ─── Boot ──────────────────────────────────────────────────────────────────
 (function init() {
   const params    = new URLSearchParams(window.location.search);
   const ownerParam = params.get('owner');
 
-  // Viewer mode: ?owner= present and no explicit ?id= matching owner
   const explicitId = params.get('id') || params.get('memberCard');
   if (ownerParam && (!explicitId || ownerParam !== explicitId)) {
     _ownerAppearId = ownerParam;
@@ -687,7 +641,6 @@ try { shareURL = localStorage.getItem('giving_shareURL') || ''; } catch(e) {}
   }
 
   if (mode === 'builder') {
-    // User-specific localStorage key - prevents cross-user cache contamination
     const cacheKey = _appearId ? 'an_support_' + _appearId.replace(/\./g,'') : 'an_support_anon';
     try { const s = JSON.parse(localStorage.getItem(cacheKey) || '{}'); items = s.items||[]; myName = s.name||''; } catch(_) {}
     if (_appearId && !myName) myName = _appearId;
@@ -707,7 +660,6 @@ async function loadSupportList() {
     const res  = await fetch(GS_URL + '?action=getSupportList&appearId=' + encodeURIComponent(_appearId));
     const data = await res.json();
     if (data.status === 'ok' && data.items) {
-      // Replace entirely from sheet - never merge with local cache
       items = data.items.map(function(r) {
         return {
           id: uid(), topCat: r.category, subCat: r.subCategory,
@@ -723,7 +675,6 @@ async function loadSupportList() {
 async function loadViewerList() {
   if (!_ownerAppearId) return;
   try {
-    // Fetch profile and list in parallel
     var profilePromise = fetch(GS_URL + '?action=lookupProfile&appearId=' + encodeURIComponent(_ownerAppearId)).then(function(r) { return r.json(); });
     var listPromise = fetch(GS_URL + '?action=getSupportList&appearId=' + encodeURIComponent(_ownerAppearId)).then(function(r) { return r.json(); });
     var results = await Promise.all([profilePromise, listPromise]);
@@ -774,7 +725,6 @@ function saveViewer() {
   localStorage.setItem('vf_' + encoded.slice(0,24), JSON.stringify([...viewFulfilled]));
 }
 
-// ─── Navigation ────────────────────────────────────────────────────────────
 function setTopCat(id) {
   openTopCat = (openTopCat === id) ? null : id;
   openSpacesSub = null; openThingsSub = null; openActionSub = null;
@@ -797,13 +747,12 @@ function clearAll() {
   otherExpOpen   = false; otherExpText   = '';
 }
 
-// ─── Chip + item registries (separate - never clear together) ──────────────
 window._chips = [];
 window._items = [];
 function regChip(val) { window._chips.push(val); return window._chips.length - 1; }
 function regItem(id)  { window._items.push(id);  return window._items.length - 1; }
-function clearChipRegistry() { window._chips = []; }   // called by render() only
-function clearItemRegistry()  { window._items = []; }   // called by renderDrawer() only
+function clearChipRegistry() { window._chips = []; }   
+function clearItemRegistry()  { window._items = []; }   
 
 function chipClick(type, idx) { const val = window._chips[idx]; if (!val) return; render(); }
 function toggle(set, val) { set.has(val) ? set.delete(val) : set.add(val); }
@@ -868,10 +817,8 @@ function addOther(type) {
   render();
 }
 
-// ─── Note ──────────────────────────────────────────────────────────────────
 function updateNote(val) { noteText = val; }
 
-// ─── Add to list ───────────────────────────────────────────────────────────
 function addToList() {
   if (!_appearId) { openSigninModal(); return; }
   const note = noteText.trim();
@@ -923,10 +870,8 @@ function addToList() {
   }
 }
 
-// ─── FAB ───────────────────────────────────────────────────────────────────
-function updateFAB() { /* FAB rendered inline in builderHTML */ }
+function updateFAB() {  }
 
-// ─── Drawer ────────────────────────────────────────────────────────────────
 function openDrawer() {
   drawerTab = 'list';
   historyLoaded = false;
@@ -952,11 +897,10 @@ function setDrawerTab(tab) {
 }
 
 function renderDrawer() {
-  clearItemRegistry(); // items only - never touches _chips
+  clearItemRegistry(); 
   const active = items.filter(i=>!i.done);
   const done   = items.filter(i=> i.done);
 
-  // Postal code settings row
   const postalLine = postalEditing
     ? `<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
         <input type="text" id="postal-settings-input" value="${esc(savedPostal)}" placeholder="Postal code" style="flex:1;font-size:13px;padding:7px 10px;">
@@ -967,7 +911,6 @@ function renderDrawer() {
         <button onclick="togglePostalEdit()" style="background:none;border:none;color:var(--brand);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:underline;">${savedPostal ? 'Edit' : 'Add'}</button>
       </div>`;
 
-  // Share link area above tabs
   const displayURL = shareURL ? (shareURL.length > 48 ? shareURL.slice(0,48)+'...' : shareURL) : '';
   const shareLine = shareURL
     ? `<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
@@ -989,7 +932,6 @@ function renderDrawer() {
 
   if (drawerTab === 'list') {
     if (items.length) {
-      // Pagination
       const totalPages = Math.ceil(active.length / ITEMS_PER_PAGE);
       const page = Math.max(1, Math.min(drawerPage, totalPages || 1));
       const start = (page - 1) * ITEMS_PER_PAGE;
@@ -1085,8 +1027,6 @@ function generateLink() {
   if (!_appearId) { toast('Sign in to generate a link'); return; }
   shareURL = location.origin + location.pathname + '?owner=' + encodeURIComponent(_appearId);
   try { localStorage.setItem('giving_shareURL', shareURL); } catch(e) {}
-  // 2026-08-01: dropped a call to a backend action that does not exist. It returned data this
-  // page never used and cost a round trip. The share link is built and stored locally.
   renderDrawer();
 }
 
@@ -1098,7 +1038,6 @@ function copyShareURL() { navigator.clipboard.writeText(shareURL).then(() => toa
 function copyURL()      { navigator.clipboard.writeText(shareURL).then(() => toast('Link copied')); }
 function updateName()   { myName = (qs('#b-name')||{}).value; save(); }
 
-// ─── Item actions ──────────────────────────────────────────────────────────
 function removeItem(id) {
   const it = items.find(i=>i.id===id);
   items = items.filter(i=>i.id!==id);
@@ -1180,8 +1119,6 @@ function normCatLabel(raw) {
 }
 
 function parseSubCat(subCat) {
-  // Splits "for-myself_labor" into { type: "labor", context: "For myself" }
-  // Splits "physical" into { type: "physical", context: "" }
   var sc = subCat || '';
   var uIdx = sc.lastIndexOf('_');
   if (uIdx > 0) {
@@ -1214,7 +1151,6 @@ function wishItemHTML(it, ctx) {
       </div>
     </div>` : '';
 
-  // Action buttons - hide all except cancel when editing
   const actionButtons = isEditing ? '' : `
     ${isDone
       ? `<button class="btn-sm" onclick="toggleDoneByIdx(${idx})">Undo</button>`
@@ -1240,13 +1176,11 @@ function wishItemHTML(it, ctx) {
     </div>`;
 }
 
-// ─── Render ────────────────────────────────────────────────────────────────
 function render() {
-  clearChipRegistry(); // chips only - never touches _items
+  clearChipRegistry(); 
   updateDebug();
   qs('#app').innerHTML =
     mode === 'viewer' ? viewerHTML() : builderHTML();
-  // V2.38: "Create my gift list" sits BELOW the white card, on the blue.
   const below = qs('#below-card');
   if (below) below.innerHTML = (mode === 'viewer')
     ? '<a href="https://creating.works/giving" class="btn-below">Create my gift list</a>'
@@ -1254,7 +1188,6 @@ function render() {
   updateFAB();
 }
 
-// ─── Builder ───────────────────────────────────────────────────────────────
 function builderHTML() {
   const openCount = items.filter(i=>!i.done).length;
   const fabHTML = items.length
@@ -1277,7 +1210,6 @@ function builderHTML() {
   `;
 }
 
-// ─── Helpers: chip row + other + add area ──────────────────────────────────
 function chipRow(chips, type, selectedSet) {
   const rows = chips.map(p => {
     const idx = regChip(p);
@@ -1318,7 +1250,6 @@ function addArea(hasSelection, isAction, descText) {
     </div>`;
 }
 
-// ─── Spaces ────────────────────────────────────────────────────────────────
 function spacesSection() {
   const sub = SPACES_SUBS[0];
   if (!openSpacesSub) openSpacesSub = sub.id;
@@ -1328,7 +1259,6 @@ function spacesSection() {
   </div>`;
 }
 
-// ─── Things ────────────────────────────────────────────────────────────────
 function thingsSection() {
   let html = `<div class="drill-section">
     <div class="drill-label">📦 Things</div>
@@ -1346,7 +1276,6 @@ function thingsSection() {
   return html;
 }
 
-// ─── Actions ──────────────────────────────────────────────────────────────
 function actionsSection() {
   const sub  = ACTIONS_SUBS.find(s=>s.id===openActionSub);
   const chip = ACTION_CHIPS.find(c=>c.id===selectedActionChip);
@@ -1382,7 +1311,6 @@ function actionsSection() {
   return html;
 }
 
-// ─── Review ────────────────────────────────────────────────────────────────
 function reviewHTML() {
   const grouped = {};
   for (const it of items) {
@@ -1410,7 +1338,6 @@ function reviewHTML() {
     <button class="btn-primary" id="share-btn-review" onclick="genShareInline()">🔗 Copy link</button>`;
 }
 
-// ─── Viewer ────────────────────────────────────────────────────────────────
 function viewerHTML() {
   const vItems = viewerData.items || [];
   const name   = viewerData.name  || 'Someone';
@@ -1424,11 +1351,9 @@ function viewerHTML() {
     ${vItems.length ? `<div class="eyebrow" style="margin-bottom:12px">Still open</div>${vItems.map(it=>wishItemHTML(it,'viewer')).join('')}` : `<div class="empty">Well supported right now, everything has been offered.</div>`}`;
 }
 
-// ─── Helpers ───────────────────────────────────────────────────────────────
 function qs(sel)  { return document.querySelector(sel); }
 function uid()    { return Date.now() + '_' + Math.random().toString(36).slice(2); }
 function esc(s)   { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-// Hover-URL leak protection — same pattern as intake.html + the 4 live pages.
 window._safeNavGo=function(el){try{var u=el&&el.getAttribute&&el.getAttribute('data-nav');if(u){window.location.href=u;}}catch(e){}return false;};
 document.addEventListener('keydown',function(e){if(e.key!=='Enter'&&e.key!==' ')return;var t=e.target;if(t&&t.tagName==='A'&&!t.hasAttribute('href')&&t.hasAttribute('data-nav')){e.preventDefault();_safeNavGo(t);}});
 function toast(msg) {
@@ -1438,7 +1363,6 @@ function toast(msg) {
   setTimeout(()=>el.classList.remove('show'), 2400);
 }
 
-// ─── Window assignments (required for inline onclick access) ───────────────
 window.toggleDoneByIdx     = toggleDoneByIdx;
 window.removeItemByIdx     = removeItemByIdx;
 window.editItemByIdx       = editItemByIdx;
@@ -1480,18 +1404,6 @@ window.togglePostalEdit    = togglePostalEdit;
 window.savePostalSettings  = savePostalSettings;
 window.moveBackToList      = moveBackToList;
 </script>
-<script src="https://2gather.network/nav/topbar.js?v=6.18" defer></script>
+<script src="https://2gather.network/nav/topbar.js?v=6.19" defer></script>
 </body>
-<!--
-  Copyright 2026 DayBalancer LLC. All rights reserved.
-
-  The code and the content here power Creating.Works, DayBalancer, Appear Network,
-  and 2Gather. They are published so they can be read, audited, and dated.
-
-  Running either as a separate offering requires a license, whether you brand it as
-  ours or as your own, and whether or not money changes hands.
-
-  hello@creating.works
--->
 </html>
-<!-- V2.37 -->

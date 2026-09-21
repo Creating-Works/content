@@ -5,23 +5,10 @@
   The code and the content here power Creating.Works, DayBalancer, Appear Network,
   and 2Gather. They are published so they can be read, audited, and dated.
 
+  Running either as a separate offering requires a license, whether you brand it as
+  ours or as your own, and whether or not money changes hands.
+
   hello@creating.works
--->
-<!-- Version: V1.00 | Date: 2026-09-05 | LAST CHANGE: first build, the service desk -->
-<!--
-  ONE SIGN-IN, THREE PAGES. Same session key as /ops/ and /fields/, cw-ops-session, on the same
-  origin, so an operator already signed in on either is already signed in here.
-
-  WHAT IS DIFFERENT ABOUT THIS PAGE, and it matters. /fields/ holds its rows in the file, which is
-  fine for field names. This page holds PEOPLE'S MESSAGES, so nothing is in the file: every row
-  arrives from the backend, and getSupportTickets answers a stranger with an EMPTY LIST rather than
-  a refusal, because a refusal tells them the door is real.
-
-  TWO SOURCES, ONE TABLE:
-    cw.helpdesk  ->  a member request. Somebody wrote in.
-    cw.status    ->  a bug. Something we know is broken, whether or not anybody reported it.
-  Member requests sort to the top on arrival, always, because a person is waiting on those and
-  nobody is waiting on our own list.
 -->
 <html lang="en">
 <head>
@@ -101,30 +88,18 @@
   .note{color:rgba(255,255,255,.82);font-size:12.5px;margin-top:16px;line-height:1.6;}
   .note code{background:rgba(255,255,255,.15);padding:1px 5px;border-radius:5px;}
 </style>
-<!-- THE SAME TWO RULES THE TOP BAR PUTS ON EVERY PAGE THAT LOADS IT (nav/topbar.js V6.09), written
-     here because this page does not load the bar. Jessie, 2026-09-18: "#2 works! Update all pages".
-     overflow-wrap lets a long unbroken link or id break rather than spill; overflow-x:clip stops
-     anything left over from panning the whole page, and makes no new scroll container, so sticky
-     headers keep working and the page still scrolls down. IF THEY CHANGE IN THE BAR, CHANGE THEM
-     HERE: this is a copy, and it is a copy only because there is no bar on this page to hold it. -->
 <style>body{overflow-x:clip;overflow-wrap:break-word;}</style>
 <style>@media(max-width:768px){input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea{font-size:16px !important;}}</style>
 </head>
 <body>
 
 <div class="wrap">
-  <!-- The title and the way back to the page people actually write on, which is public and is the
-       other half of this one. Jessie, 2026-09-06: "link to the public afcing support page ... on
-       top right". It hides with the heading, so a stranger still sees nothing but the box. -->
   <div class="head hide" id="head">
     <h1 id="h1">Service desk</h1>
     <a id="publiclink" href="https://2gather.network/support/">The page people write on</a>
   </div>
   <p class="lede hide" id="lede">What people have asked us and what we know is broken. Member requests first.</p>
 
-  <!-- Nothing but a box and a globe until somebody is in. No heading, no explanation of what this
-       page is, and no mention of the other operator pages. Each of those tells a stranger
-       something. Same shape as /fields/, Jessie 2026-09-03. -->
   <div class="gate card" id="gate">
     <div class="row">
       <input id="who" type="email" autocomplete="email" placeholder="your address">
@@ -182,14 +157,6 @@
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); };
   function say(id, t, bad) { var el = $(id); el.textContent = t || ''; el.className = 'say' + (bad ? ' bad' : ''); }
 
-  // ── ?why=1 ────────────────────────────────────────────────────────────────
-  // Added 2026-09-06. Jessie signed in here, opened /ops/, and its own switch said no session was
-  // stored in that browser at all. This page had no way to say what it did with the one it was
-  // handed, so the step that fails is the step nothing can describe. Two guesses had already been
-  // spent, which is where guessing stops and a measurement starts.
-  //
-  // It prints what is in storage, what the sign-in handed back, whether writing to storage worked,
-  // and what each call answered. It never prints the token itself.
   var WHY = (function(){ try { return new URLSearchParams(location.search).get('why') === '1'; } catch(e){ return false; } })();
   var whyPanel = null;
   function whySay(line) {
@@ -218,7 +185,6 @@
       + ', token expires ' + (exp ? new Date(exp).toISOString() + ' (' + Math.round((exp - Date.now()) / 60000) + ' min from now)' : 'unreadable'));
   }
 
-  // ── The same door as /ops/ and /fields/ ────────────────────────────────────
   var KEY = 'cw-ops-session';
   var me = (window.CW_ID || '').trim(), token = '';
   function remember(id, tok) {
@@ -238,9 +204,6 @@
           + '&appearId=' + encodeURIComponent(addr() ? '' : me) + '&t=' + Date.now())
       .then(function (r) { return r.json(); })
       .then(function () {
-        // NO SENTENCE. The code box appearing IS the answer, and it appears whatever the address
-        // was, so nobody can discover who is an operator by watching what the page says. Jessie,
-        // 2026-09-06: "remove If that address can open this, a code is on its way."
         $('pinRow').classList.remove('hide');
         say('s2', '');
         $('pin').focus();
@@ -252,7 +215,6 @@
     var pin = ($('pin').value || '').trim();
     if (pin.length < 6) { say('s2', 'Six digits.', true); return; }
     $('go').disabled = true; say('s2', 'Checking\u2026');
-    // `code`, not `pin`. The backend reads e.parameter.code; sending `pin` burns a try every press.
     fetch(GS + '?action=verifyOpsPin&email=' + encodeURIComponent(addr())
           + '&appearId=' + encodeURIComponent(addr() ? '' : me)
           + '&code=' + encodeURIComponent(pin) + '&t=' + Date.now())
@@ -270,7 +232,6 @@
       .catch(function () { $('go').disabled = false; say('s2', 'Could not reach the server.', true); });
   });
 
-  // ── The rows ───────────────────────────────────────────────────────────────
   var ROWS = [], filters = {}, text = '';
 
   function stateOf(raw) {
@@ -283,12 +244,6 @@
     return s.charAt(0).toUpperCase() + s.slice(1);
   }
 
-  // DATE AND TIME WHEN THERE IS A TIME, date alone when there is not.
-  //
-  // A member request arrives at a particular minute and that minute is worth seeing. A bug is
-  // recorded against a DAY: statusStartedDate holds 2026-09-04 and nothing else, so printing
-  // "12:00 AM" beside it would assert a time nobody gave. The value decides, not the column.
-  // Jessie, 2026-09-06: "add date time in filter here to test".
   function when(v) {
     if (!v) return '';
     var t = String(v).trim();
@@ -315,8 +270,6 @@
       return true;
     });
 
-    // Member requests first, ALWAYS, because a person is waiting on one of those and nobody is
-    // waiting on our own list. Newest first inside each group.
     list.sort(function (a, b) {
       if (a.type !== b.type) return a.type === 'Member request' ? -1 : 1;
       return b.sort - a.sort;
@@ -353,15 +306,12 @@
 
   function open_() {
     $('gate').classList.add('hide');
-    $('head').classList.remove('hide');   // the heading and the link to the public page, together
+    $('head').classList.remove('hide');   
     $('lede').classList.remove('hide');
     $('board').classList.remove('hide');
     $('srcnote').classList.remove('hide');
     $('count').textContent = 'reading\u2026';
 
-    // Two calls, fired together because they are different actions on the same slow backend and
-    // neither waits on the other. Apps Script runs them one at a time, so this is two waits either
-    // way; firing them together only stops the second one starting late.
     whySay('asking for tickets as ' + (me || '(no id)') + (token ? ' with a token' : ' WITH NO TOKEN'));
     var tickets = fetch(GS + '?action=getSupportTickets&appearId=' + encodeURIComponent(me) + '&t=' + Date.now())
       .then(function (r) { return r.json(); }).catch(function () { return null; });
@@ -395,11 +345,6 @@
             detail: x.what || '',
             area: x.area || '',
             state: stateOf(x.state),
-            // OURS, so the column says so rather than sitting empty. Every row on the status tab
-            // was written by this build session. Jessie, 2026-09-06: "if you wrote the supprot
-            // ticket, say Claude in the who". The tab carries no author column, so this is the
-            // page saying what is true of every row on it today rather than reading a value; the
-            // day somebody else writes one, that tab needs a column of its own.
             who: 'Claude', mail: '',
             when: when(x.updated || x.started),
             sort: sortKey(x.updated || x.started)
@@ -407,17 +352,12 @@
         });
       }
 
-      // Says what it does not know rather than drawing an empty table that looks like good news.
       if (!t && !b) {
         $('count').textContent = '';
         $('empty').textContent = 'Neither list could be read. That is this page failing, not an empty desk.';
         $('empty').classList.remove('hide');
         return;
       }
-      // The top bar draws "N support tickets waiting" from this key. The support page used to
-      // write it, as a side effect of drawing a list that no longer belongs there, so it moved
-      // here with the list. A number written by whichever page happens to know it is a number
-      // that goes stale the moment nobody visits that page.
       try {
         var _open = ROWS.filter(function (r) {
           return r.type === 'Member request' && r.state !== 'Resolved' && r.state !== 'Closed';

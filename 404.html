@@ -10,10 +10,6 @@
 
   hello@creating.works
 -->
-<!-- Version: V1.0 | Date: 2026-09-12 | LAST CHANGE: first version. The host serves this for any
-     address it has no file for. /build and /work addresses belong to the home page's questions, so
-     they go there, carrying the address in ?to= for the home page to put back. Anything else says
-     plainly that nothing is here. Jessie: "https://creating.works/build then build/picture" and "4 go". -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -24,7 +20,7 @@
   (function () {
     var p = location.pathname;
     if (/^\/(build|work)(\/[a-z]+)?\/?$/.test(p)) {
-      location.replace('/intro/?to=' + encodeURIComponent(p) + location.hash);   // the form lives at /intro/ since 2026-09-14
+      location.replace('/intro/?to=' + encodeURIComponent(p) + location.hash);   
     }
   })();
 </script>
@@ -35,12 +31,6 @@
   p{font-size:16px;line-height:1.6;margin:0 0 20px;opacity:.95;}
   a{display:inline-block;background:#fff;color:#1F699E;font-weight:700;text-decoration:none;padding:11px 20px;border-radius:26px;}
 </style>
-<!-- THE SAME TWO RULES THE TOP BAR PUTS ON EVERY PAGE THAT LOADS IT (nav/topbar.js V6.09), written
-     here because this page does not load the bar. Jessie, 2026-09-18: "#2 works! Update all pages".
-     overflow-wrap lets a long unbroken link or id break rather than spill; overflow-x:clip stops
-     anything left over from panning the whole page, and makes no new scroll container, so sticky
-     headers keep working and the page still scrolls down. IF THEY CHANGE IN THE BAR, CHANGE THEM
-     HERE: this is a copy, and it is a copy only because there is no bar on this page to hold it. -->
 <style>body{overflow-x:clip;overflow-wrap:break-word;}</style>
 <style>@media(max-width:768px){input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea{font-size:16px !important;}}</style>
 </head>

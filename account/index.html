@@ -10,26 +10,6 @@
 
   hello@creating.works
 -->
-<!-- Version: V1.32 | Date: 2026-09-20 | LAST CHANGE: Global permissions is a real pane on this page. Jessie: "dont' send people to the global permissoins here: /intro/?perm=1&step=permissions" and "put teh pane fo permissioms IN the global permissions on /account/". She asked twice for this screen to look like that one and I twice argued for opening that one instead, because two screens writing one set of columns is the fault this build has paid for most; she decided, so here it is, and the risk is answered rather than ignored: IT WRITES WHERE THE OTHER ONE WRITES - same action, same audience word (members), the same nine column names, and the same rule that the screen is redrawn from the rows the backend says it wrote rather than from the press that was made. This is a second WINDOW onto one set of rows, not a second copy. THE FOUR OLD SWITCHES ARE GONE from this pane: they wrote Info.visPublic, showPhoto, onMap and findable, a different model entirely, so leaving them here would have been two things called permissions on one screen. NEEDS THE DEPLOY: reading them back needs the new getPermissions action, because nothing could read these rows before - savePermissions answered with what it had just written, which was enough for a screen that only showed them after a press. -->
-<!-- Version: V1.31 | Date: 2026-09-20 | LAST CHANGE: Terms accepted moves onto My info, under Location, and a date we do not hold says nothing. Jessie: "move Terms accepted to my info under location and don't say Not recorded". It was the last row of the permissions pane, which made an agreement look like a setting - something you flip - when it is a record of something that happened; it belongs with the other things that are simply true about this account. And "Not recorded" printed beside somebody's name reads as a failing of theirs rather than a gap in ours, so where there is no date there is now nothing, and the three links stay because the row is still useful without one. -->
-<!-- Version: V1.30 | Date: 2026-09-20 | LAST CHANGE: the rail beside this page is ACCOUNT and PRODUCTS. Jessie: "change the rail for account to this instead", "my permissions stays on that page but the rail changes to global permissions", "support / sign out stay". So the rail reads My info, Global permissions, Support, Sign out, then Balance, Appear, Gather, License each with a dot; and My events, My groups and My profile came OFF it, because they moved into the menu under her name in the top bar the same morning and a shortcut in two places is a shortcut nobody can find in either. My permissions is headed Global permissions now, with one line saying they hold for every group and where a single group is set on its own - a rail row and the heading it opens saying two different things is how somebody decides they are lost. The four product panes open in place rather than by loading a page. NOTHING ABOUT THIS PAGE'S OWN CONTENT MOVED: My info is My account exactly as it was, and the address is still /account/, her "le'ts not change the wrord manage quiet yet". -->
-<!-- Version: V1.29 | Date: 2026-09-19 | LAST CHANGE: Your link - see the name people find you by, and change it. Jessie: "I go". 746 people already had a name and every one was set by a one-off, so nobody could see their own. The box shows 2gather.network/hi/<name>, checks a new name while it is typed and says at once if somebody has it, and the backend now demands the same verified session the rest of the account needs - it took an id alone before, which meant an id could name anybody. The name they had is kept beside the new one, so a link already shared still opens and nobody else can take it. Nothing stores a finished address: the sheet holds the name, the backend answers the name, and the host is written in ONE place on this page, so moving /hi/ to appear.network stays a switch. -->
-<!-- Version: V1.28 | Date: 2026-09-19 | LAST CHANGE: the postal code sits beside the city again. Jessie: "put postal to the right of city - not below". V1.23 forced a line break to copy the welcome step, which was the wrong thing to copy. City is fixed at 220 and postal at 150, so the two share the second line and neither stretches. -->
-<!-- Version: V1.27 | Date: 2026-09-19 | LAST CHANGE: Email addresses is the page, not a parameter. Jessie: "https://2gather.network/account/ doesn't match the 2gather.network/account/?emails=1." The ?emails=1 gate is gone - she approved the look twice and tested adding, promoting and removing an address behind it. Somebody with only one address still sees the plain Email field, because a list of one is a list nobody needs. -->
-<!-- Version: V1.26 | Date: 2026-09-19 | LAST CHANGE: the city box stops stretching again. Jessie: "edmonds field is not small again". V1.23 gave it flex:1 1 to match the welcome step, where all five sit on one line - but this panel is narrower, so City wraps onto a line of its own and flex-grow fills it. flex:0 1 220px means it may SHRINK on a narrow screen and can never GROW to fill a line it is alone on, which is the only behaviour that is right at every width. The postal code stays on its own line beneath. -->
-<!-- Version: V1.25 | Date: 2026-09-19 | LAST CHANGE: a place that could not be READ is not an empty place, and the help line stops promising. Jessie: "no", with Location still empty on V1.24. My first guard looked for status error AND code signin exactly and whatever came back carried neither, so the page went on drawing an empty picker. The test is simpler now: if getProfile did not FIND her, the Location section says so in red, offers Sign in again, and tells her not to press Save changes until it comes back - because saving from a page that was refused would write the emptiness over the real answer. The rest of the page stays usable rather than being blocked behind one failed read. Also: "Adding another one is coming" comes off the help line, which the V1.19 edit had aimed at and missed. -->
-<!-- Version: V1.24 | Date: 2026-09-19 | LAST CHANGE: the page says it was refused rather than drawing an empty place. Jessie: "city is gone from this again htough" and "and county". Her record was never touched - n161 read all four cells back intact. getProfile now refuses without a proved session, which is this afternoon's security fix, and answers found:false with code signin; this page reads every place field out of that answer, so it drew an empty picker instead of saying it could not read, and because lookupProfile still answered the could-not-load line never fired. A page asserting something before it knows, again. -->
-<!-- Version: V1.23 | Date: 2026-09-19 | LAST CHANGE: the Location row reads like the welcome step of the intro, and the rule above Save changes is gone. Jessie: "make look slike this on welcome" and "remove horizontal line above save changes". On the intro, region, country, state, county and city run across one line with the postal code on its own beneath, so city takes the same width as the selects beside it and postal is forced onto its own line rather than tucked beside city. Space separates the save row now; a line between every section draws a grid nobody asked for. -->
-<!-- Version: V1.22 | Date: 2026-09-19 | LAST CHANGE: removing an address is asked for in words. Jessie: "put a message Are you sure you want to remove 'email' ? and say type remove". Inline rather than a dialog, because this site has no modals. The address is NAMED in the question rather than left to whichever row the finger landed on, and the word has to be typed, so it cannot happen by a stray press. It also says what removing costs - it will stop signing you in. The press says Removing... while it waits, because the backend proves the write before answering. -->
-<!-- Version: V1.21 | Date: 2026-09-19 | LAST CHANGE: Remove and Make primary can say what happened. Jessie: "remove didn't work when I tried to remove it" - and she saw NO message, because the only place this block had to speak was inside the add-an-address form, which is hidden until Add is pressed. So a refusal landed nowhere and the press looked like it did nothing. There is a line under the list now that both of them write to. A page that knows exactly what happened must never say nothing. -->
-<!-- Version: V1.20 | Date: 2026-09-19 | LAST CHANGE: room and a Cancel on the add-an-address form, and Languages comes off this screen. Jessie: "put cancel to the right of send a code button and give some room beneath field and above buttons - looks squished - and left justify under field for email" and "remove languages from account screen?" The buttons were inline after the field with an 8px nudge, so on wrapping they landed indented and tight under it; they are their own row now, under the left edge, with 14px above. Cancel empties the form and puts it away, so reopening never shows a half-typed address or an expired code. Languages is asked in the Skills step of the intro and belongs there alone (row 186); Info.languages is still read on load and still sent on save, so nothing is blanked, and the picker is kept unreferenced so it is one line to put back. -->
-<!-- Version: V1.19 | Date: 2026-09-19 | LAST CHANGE: Add another email address, Make primary and Remove, at her "0 build". Two proofs and neither alone is enough: the page already holds the verified session that saving needs, which proves the account is yours, and adding an address sends a code to THAT address, which proves you hold it. Remove is never offered on the primary, so nobody can lock themselves out; making another one primary first is the way, and the old primary stays on the list rather than being dropped. Nothing is optimistic - the list is redrawn from what the backend answers, never from what the page hoped. Still behind ?emails=1, and it needs the deploy that carries addEmailStart, addEmailConfirm, makePrimaryEmail and removeEmail. -->
-<!-- Version: V1.18 | Date: 2026-09-19 | LAST CHANGE: the help line under Email addresses moves above the list. Jessie: "put 'Signing in with any of these reaches this account.' below header. all in help small liners like this go under headers." Her rule from 2026-09-08, in design-checklist.md ever since, and I wrote it the wrong way round: help under the thing is help after the decision. -->
-<!-- Version: V1.17 | Date: 2026-09-19 | LAST CHANGE: the city box is short, and the addresses fill two columns. Jessie: "emdonds is still a very long field. make it a short field." and "now we can use better space for eamil with 2 columns - maybe put the third and fourth where postcal code whent?" City is flex:0 1 220px, so it may shrink on a narrow screen and can never grow to fill a line it is alone on, which is what stretched it. The address list is two fixed ROWS with the flow set to column, so the first two stay put and the third and fourth appear beside them in the space the postal code left; a two-column grid would have put the second address on the right instead. One column on a phone. -->
-<!-- Version: V1.16 | Date: 2026-09-19 | LAST CHANGE: the postal code sits beside the city rather than up in the name grid. Jessie: "city shouldn't be this long of a field  and zip code should go t the right of city". City was the only thing on the second line of the location row, so flex-grow stretched it across the whole panel. Postal is always drawn, state chosen or not, because somebody outside the United States still has one and losing the field loses the way to edit it; it keeps data-acct="postal" so it is collected on save exactly as before, and it marks the page dirty from inside renderLoc because that function redraws the row and would otherwise take the listener with it. The Email addresses list spans the grid now that it is a list rather than a box. -->
-<!-- Version: V1.15 | Date: 2026-09-19 | LAST CHANGE: the addresses are a list rather than boxes, at her "l list". She asked "is this how github's UI is for mutiiple eamlis?" and it was not: GitHub draws each address as plain text on its own line with a small label beside it. A readonly input the same shape as the boxes around it reads as something you can type into and cannot, which is the door-onto-nothing fault in miniature. Plain text, a hairline between each, PRIMARY as a small outlined label, and the foot of the list is where Add another email address goes once the code flow exists. Still behind ?emails=1. -->
-<!-- Version: V1.14 | Date: 2026-09-19 | LAST CHANGE: ?emails=1 shows every address that reaches this account, primary labelled. Jessie, having signed in with her second address and landed on her own account: "can i see all asosciated emails in the account sectino? - just shows gmail right now". Reading only, and no Add button, because adding one safely needs two proofs at once - already signed in, AND a code typed back from the new address - and that flow is not built; a box that looked like it could add one would be a door onto nothing. Behind the parameter until she has looked at it, and the plain single Email field is exactly as it was without it. -->
-<!-- Version: V1.13 | Date: 2026-09-15 | LAST CHANGE: Location asks for County and City once a US state is chosen, from the same lists the intro offers, saved to Info.county and Info.city (row 206). Previous: V1.12 | Date: 2026-09-15 | LAST CHANGE: the rail beside the panel is the look for everybody (?look=list shows the old page). Previous: V1.11 | Date: 2026-09-14 | LAST CHANGE: with ?look=rail, the same rail as My profile (nav/profile-rail.js), My account lit. Previous: V1.10: Location picker, real fields behind the permission switches, and My account saves -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -49,14 +29,10 @@
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
     font-family:'DM Sans','Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;line-height:1.5;}
-  /* THE PAGE TEMPLATE. 1200 wide, a 340 rail, an 18px gap, one column below 860.
-     design/component-library/page-template.md. This page was the last one carrying its own
-     width - 1040, no rail, folding at 760 - which made it read as a different product from
-     My groups, My events and the editing page sitting beside it in the same navigation. */
+  
   .wrap{max-width:1200px;margin:0 auto;padding:24px 20px 60px;}
   .layout{display:grid;grid-template-columns:340px minmax(0,1fr);gap:18px;align-items:start;}
 
-  /* Welcome block */
   .hello{margin-bottom:16px;min-height:42px;}
   h1:empty::after{content:"\200b";}
   h1{font-size:28px;font-weight:400;margin:0;color:#fff;letter-spacing:-.01em;}
@@ -69,16 +45,6 @@
   .btn.ghost{background:#fff;color:var(--brand);border:1.5px solid var(--panel-line);}
   .btn.sm{padding:8px 15px;font-size:13px;}
 
-  /* THE RAIL. The six pills that ran across the top are the list down the left now, which is
-     where every other page in this navigation puts them, and the panel holds whatever is open.
-
-     Separate white buttons with their own borders, never one box holding a pressed control, so
-     all six look pressable rather than only the chosen one. Selected is filled blue with white
-     lettering and nothing else marks it - no tick, which would say what the colour already says
-     and shift every label sideways by a character as you move down the list. */
-  /* The rail is a white card, the same one My events and the editing page use, and it is what
-     makes the chosen pill readable: filled blue on the blue ground disappeared into it. A button
-     sitting on the blue is white with brand-blue lettering, never a blue fill. */
   .tabs{background:#fff;border-radius:14px;padding:12px;height:fit-content;
     display:flex;flex-direction:column;gap:6px;}
   .tab{display:block;width:100%;text-align:left;background:#fff;color:var(--brand);
@@ -89,16 +55,11 @@
   .tab.on:hover{background:var(--brand);}
   .tab:focus-visible{outline:2px solid #fff;outline-offset:2px;}
 
-  /* WAITING IS THE BLINKING PILL, not a spinner and not a grey box saying "Loading your
-     account...". The backend answers in anywhere between nine and thirty-nine seconds and a
-     spinner beside that reads as something being wrong. It sits in the panel, because the rail
-     draws at once and only the panel is waiting on an answer. */
   .cw-loading{display:inline-flex;align-items:center;gap:8px;background:#1F699E;color:#fff;
     font-size:13px;font-weight:700;padding:8px 16px;border-radius:20px;white-space:nowrap;
     animation:cw-breathe 1.6s ease-in-out infinite;}
   @keyframes cw-breathe{0%,100%{opacity:1}50%{opacity:.62}}
 
-  /* Content card */
   .panel{background:var(--card);border-radius:14px;padding:26px 30px;min-height:280px;}
   .panel h2{font-size:21px;font-weight:800;margin:0 0 3px;}
   .panel .lead{color:var(--soft);font-size:14.5px;margin:0 0 20px;}
@@ -113,18 +74,15 @@
     font:inherit;color:var(--ink);background:#fff;}
   .f select:focus{outline:2px solid var(--panel-line);outline-offset:1px;border-color:var(--brand);}
   .locrow{display:flex;gap:10px;flex-wrap:wrap;}
-  /* Addresses fill DOWN two rows and then across, so one and two stay put and three and four
-     appear beside them rather than everything reshuffling each time one is added. */
+  
   .emaillist{display:grid;grid-template-rows:repeat(2,auto);grid-auto-flow:column;
     grid-auto-columns:minmax(0,1fr);column-gap:28px;}
   .locrow select{width:auto;flex:1 1 180px;min-width:150px;}
-  /* City is typed, not picked, so it needs the same rule as the selects beside it (row 206). */
+  
   .locrow input{width:auto;flex:1 1 180px;min-width:150px;}
   .photorow{display:flex;gap:16px;align-items:center;margin-bottom:18px;}
   .photo{width:64px;height:64px;border-radius:50%;object-fit:cover;background:#DDE4EE;flex-shrink:0;}
 
-  /* Space does the separating, never a rule. A line between every row draws a grid nobody
-     asked for. Jessie, 2026-09-08: "no horiziontal lines anywhere". */
   .prow{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 0;}
   .prow .lab{font-size:15px;font-weight:700;}
   .prow .desc{font-size:13px;color:var(--soft);margin-top:2px;}
@@ -143,7 +101,6 @@
     font-size:13.5px;color:var(--ink);cursor:pointer;}
   .lang-opt:hover{background:var(--panel);border-color:var(--panel-line);}
 
-  /* Info boxes inside the white card (answers, Appear page) */
   .infobox{background:var(--panel);border:1px solid var(--panel-line);border-radius:12px;padding:18px 20px;margin-bottom:14px;}
   .infobox:last-child{margin-bottom:0;}
   .infobox .t{font-size:15.5px;font-weight:800;margin-bottom:4px;}
@@ -156,8 +113,7 @@
 
   @media(max-width:860px){
     .layout{grid-template-columns:1fr;}
-    /* Six buttons stacked down a phone is most of a screen before the panel starts, so below the
-       fold the rail lies back down and wraps. */
+    
     .tabs{flex-direction:row;flex-wrap:wrap;}
     .tab{width:auto;}
   }
@@ -188,30 +144,12 @@
 (function(){
   var GS_URL='https://cw-api-gate.jessieupp.workers.dev';
 
-// The cache is trusted now, and nothing here skips it.
-//
-// History, because this line has moved twice in three days. On 2026-08-30 the page began adding
-// nocache=1 to every read about you, since a save cleared nothing at the gate and a profile could
-// show pre-save answers for six hours. That cost the whole wait on every visit. On 2026-09-01 the
-// gate learned to clear a person's cached reads the moment they write, so the bypass was cut down
-// to twenty seconds after a save.
-//
-// Twenty seconds was still wrong, and Jessie found it within minutes: the editor autosaves, so
-// every save restamped the clock and kept her in the slow path the entire time she was editing,
-// and for twenty seconds after every keystroke that triggered a save. She saved, moved pages, came
-// back, and everything took five seconds again.
-//
-// It is gone. Every read this page makes carries appearId and nothing else, which is exactly the
-// key the gate's purge rebuilds, so a save clears them all and the next read is fresh. The thirty
-// second life on those entries is the backstop if a purge ever misses.
 
   var APPEAR_EDIT='https://appear.network/dl/page/';
-  // Hrefless navigation so an id-bearing URL never shows on hover. Same-tab always.
   window._safeNavGo=function(el){try{var u=el&&el.getAttribute&&el.getAttribute('data-nav');if(u){window.location.href=u;}}catch(e){}return false;};
   function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
   function P(k){try{return new URLSearchParams(location.search).get(k)||'';}catch(e){return '';}}
 
-  // CWid is the standard "this is me" param; id/me/memberCard/appearId accepted too.
   var meId=(window.CW&&CW.me)?CW.me().id:(P('CWid')||P('id')||P('me')||P('memberCard')||P('appearId')||'').trim();
   var _placeUnread=false;
   var D={name:'',firstName:'',lastName:'',photo:'',pageLink:'',postal:'',location:'',county:'',city:'',languages:'',email:'',alsoEmails:[],vanity:'',phone:'',
@@ -219,11 +157,8 @@
 
   function go(url){ window.location.href=url; }
   function groupsUrl(){ return 'https://2gather.network/mygroups'+(meId?'?CWid='+encodeURIComponent(meId)+'&ref=profile':'?ref=profile'); }
-  // /manage/ was deleted on 2026-09-20 at her word, so this points at My events itself. It was
-  // the last live link to that address; everything else naming it is a comment about history.
   function eventsUrl(){ return 'https://2gather.network/myevents/'; }
 
-  // The stable answers URL. Stays correct after Design A is promoted onto intake.html.
   function answersUrl(){ return 'https://creating.works/profile'+(meId?'?CWid='+encodeURIComponent(meId):''); }
   function profileUrl(){ return 'https://creating.works/profile'+(meId?'?CWid='+encodeURIComponent(meId):''); }
   var TABS=[
@@ -231,51 +166,18 @@
     {key:'groups', label:'My groups', nav:groupsUrl},
     {key:'events', label:'My events', nav:eventsUrl},
     {key:'account', label:'My account'},
-      // SUPPORT AND SIGN OUT LIVE HERE NOW. Jessie, 2026-09-08: "add support to button to top of
-      // sub buttons, to the right of my account" and "add signout can go under my acdount".
-      // The top bar lost its menus the same day, and the More menu was the only door to both.
     {key:'support', label:'Support', nav:function(){ return 'https://2gather.network/support?from=' + encodeURIComponent(location.pathname); }},
     {key:'signout', label:'Sign out', out:true},
-    // Permissions is hidden until its toggles map to real fields. The panel still answers to
-    // ?tab=permissions so the work stays reachable.
-    // {key:'permissions', label:'Permissions'}
   ];
 
   function field(key,lab,type,val,ph){
     return '<div class="f"><label>'+esc(lab)+'</label><input data-acct="'+esc(key)+'" type="'+type+'" value="'+esc(val||'')+'"'+(ph?' placeholder="'+esc(ph)+'"':'')+'></div>';
   }
-  // A name shown here comes from the Appear page, and Glide owns that row, so anything written
-  // back would be overwritten on the next sync. It is shown, not offered for editing.
-  // EVERY ADDRESS THAT REACHES THIS ACCOUNT. Jessie, 2026-09-19: "can i see all asosciated emails
-  // in the account sectino? - just shows gmail right now", after signing in with her second address
-  // and landing on her own account.
-  //
-  // Behind ?emails=1 until she has looked at it, so nobody meets it without the parameter.
-  //
-  // READING ONLY. There is no Add here and no Remove, because adding an address safely needs two
-  // proofs at once - you are already signed in, AND you type a code sent to the new address - and
-  // that flow is steps three and four of
-  // design/features/many-addresses-one-person-2026-09-03.md and is not built. A box that looked
-  // like it could add one would be a door onto nothing.
-  //
-  // The primary is labelled, because which address a code goes to is the one thing somebody
-  // actually needs to know from this list.
   function emailBlock(){
     var hint=_editToken?'':'Hidden until you verify it is you. Press Save changes to verify.';
-    // THE PARAMETER IS GONE. Jessie, 2026-09-19: "https://2gather.network/account/ doesn't match
-    // the 2gather.network/account/?emails=1." It did not, and there was no longer a reason for it
-    // to: she approved this look twice and tested adding, promoting and removing an address on it.
-    // The list is simply the page now. Somebody with one address still sees the plain Email field,
-    // because a list of one is a list nobody needs.
     if(!_editToken || !D.alsoEmails.length){
       return readonlyField('Email', D.email, hint);
     }
-    // A LIST, NOT BOXES. Jessie, 2026-09-19, seeing the first version: "is this how github's UI is
-    // for mutiiple eamlis?" It was not. GitHub draws each address as plain text on its own line
-    // with a small label beside it, and an Add box at the foot. Ours put each one in a readonly
-    // input, the same shape as the First name and Postal code boxes beside it, so it read as
-    // something you could type into and could not - the same door-onto-nothing fault as an Add
-    // button that cannot add, in a smaller form.
     function line(addr, primary){
       return '<div style="display:flex;align-items:baseline;gap:10px;padding:9px 0;'
         + 'border-bottom:1px solid var(--line);">'
@@ -284,9 +186,6 @@
             ? '<span style="font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;'
               + 'color:var(--soft);border:1px solid var(--line);border-radius:999px;padding:2px 8px;'
               + 'white-space:nowrap;">Primary</span>'
-            // Make primary and Remove belong to an address that is NOT the primary. Remove is
-            // deliberately never offered on the primary, so nobody can lock themselves out of
-            // their own account; making another one primary first is the way.
             : '<span style="margin-left:auto;white-space:nowrap;font-size:13px;">'
               + '<a href="#" data-emprime="'+esc(addr)+'" style="color:#1F699E;text-decoration:none;">Make primary</a>'
               + '<a href="#" data-emdrop="'+esc(addr)+'" style="color:var(--muted);text-decoration:none;margin-left:12px;">Remove</a>'
@@ -298,11 +197,6 @@
     rows+='<div id="em-add" style="padding:10px 0 2px;">'
       +'<a href="#" id="em-open" style="color:#1F699E;font-weight:700;font-size:14px;text-decoration:none;">Add another email address</a>'
       +'<div id="em-form" style="display:none;margin-top:8px;">'
-        // THE BUTTONS SIT UNDER THE LEFT EDGE OF THE FIELD, WITH ROOM ABOVE THEM. Jessie,
-        // 2026-09-19: "put cancel to the right of send a code button and give some room beneath
-        // field and above buttons - looks squished - and left justify under field for email".
-        // They were inline after the field with an 8px nudge, so when they wrapped they landed
-        // indented and tight under it.
         +'<div id="em-step1"><input id="em-new" type="email" placeholder="you@work.com" autocomplete="email" style="max-width:320px;">'
           +'<div style="margin-top:14px;display:flex;gap:10px;align-items:center;">'
           +'<button type="button" id="em-send" class="btn ghost" style="font-size:14px;padding:9px 16px;">Send a code</button>'
@@ -313,32 +207,11 @@
           +'<button type="button" class="btn ghost em-cancel" style="font-size:14px;padding:9px 16px;">Cancel</button></div></div>'
         +'<div id="em-say" style="font-size:13px;color:var(--soft);margin-top:8px;"></div>'
       +'</div></div>';
-    // TWO COLUMNS, FILLING DOWN THEN ACROSS. Jessie, 2026-09-19: "now we can use better space for
-    // eamil with 2 columns - maybe put the third and fourth where postcal code whent?" So the
-    // first two addresses stay where they are and the third and fourth appear beside them, in the
-    // space the postal code left. Two fixed ROWS with the flow set to column is what does that:
-    // a grid of two columns would put the second address on the right instead.
-    // It collapses to one column on a phone, in .emaillist below.
-    // THE HELP LINE SITS UNDER THE HEADING, NEVER UNDER THE THING. Jessie, 2026-09-19: "put
-    // 'Signing in with any of these reaches this account. Adding another one is coming.' below
-    // header. all in help small liners like this go under headers." It is her rule from
-    // 2026-09-08 and design-checklist.md has carried it since: help under the field is help AFTER
-    // the decision, and by then it has been read too late to be help at all.
     return '<div class="f" style="grid-column:1/-1;"><label>Email addresses</label>'
       +'<div style="font-size:12.5px;color:var(--muted);margin:-2px 0 8px;">'
       +'Signing in with any of these reaches this account.</div>'
       +'<div class="emaillist" style="border-top:1px solid var(--line);">'+rows+'</div>'
-      // WHERE REMOVE AND MAKE PRIMARY SAY ANYTHING AT ALL. Jessie, 2026-09-19: "remove didn't work
-      // when I tried to remove it" - and she saw NO message, because the only place this block had
-      // to speak was inside the add-an-address form, which is hidden until Add is pressed. So a
-      // refusal from Remove or Make primary landed nowhere and the press looked like it did
-      // nothing. A page that knows exactly what happened must never say nothing.
       +'<div id="em-note" style="font-size:13px;color:#7A2410;margin-top:8px;display:none;"></div>'
-      // TAKING AN ADDRESS OFF IS ASKED FOR IN WORDS. Jessie, 2026-09-19: "put a message Are you
-      // sure you want to remove \'email\' ? and say type remove". Inline rather than a dialog,
-      // because this site has no modals - and typing the word is the point: it cannot happen by a
-      // stray press, and the address being removed is named in the question rather than left to
-      // whichever row the finger landed on.
       +'<div id="em-conf" style="display:none;margin-top:10px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel);">'
         +'<div id="em-conf-ask" style="font-size:14px;line-height:1.5;"></div>'
         +'<div style="margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">'
@@ -348,17 +221,6 @@
       +'</div></div>';
   }
 
-  // ADDING, PROMOTING AND REMOVING AN ADDRESS. Jessie, 2026-09-19: "0 build", and before it
-  // "how do they udpate these emails btw?" and "can they cjange one email to be the primary
-  // instead?"
-  //
-  // TWO PROOFS AND NEITHER ALONE IS ENOUGH: this page already holds the verified session that
-  // saving needs, which proves the account is yours, and adding an address sends a code to THAT
-  // address which proves you hold it. The backend checks both and checks again on the second
-  // half, because minutes pass in between.
-  //
-  // Nothing here is optimistic: the list is redrawn from what the backend answers, never from
-  // what the page hoped. A save that half worked would otherwise leave the screen lying.
   function wireEmails(p){
     if(!p) return;
     function say(m,bad){ var el=document.getElementById('em-say'); if(el){ el.textContent=m||''; el.style.color=bad?'#7A2410':'var(--soft)'; } }
@@ -366,8 +228,6 @@
       if(!resp||resp.status!=='ok') return false;
       if(resp.email) D.email=resp.email;
       D.alsoEmails=Array.isArray(resp.alsoEmails)?resp.alsoEmails:D.alsoEmails;
-      // The same redraw, and the same reason to read the boxes first: anything typed into First
-      // name or City lives only in the DOM until harvestAccount takes it.
       harvestAccount();
       renderPanel('account');
       return true;
@@ -385,8 +245,6 @@
       open.style.display='none';
       var n=document.getElementById('em-new'); if(n) n.focus();
       return false; };
-    // Cancel puts the whole thing away and empties it, so reopening never shows a half-typed
-    // address or a code that has expired since.
     p.querySelectorAll('.em-cancel').forEach(function(b){
       b.onclick=function(){
         var f=document.getElementById('em-form'); if(f) f.style.display='none';
@@ -432,7 +290,6 @@
         });
         return false; };
     });
-    // Remove ASKS FIRST, and the answer is the word itself.
     var conf=document.getElementById('em-conf');
     function closeConf(){ if(conf) conf.style.display='none';
       var w=document.getElementById('em-conf-word'); if(w) w.value=''; }
@@ -461,18 +318,6 @@
     });
   }
 
-  // ── THE NAME SOMEBODY IS FOUND BY ───────────────────────────────────────────────────────────
-  // Jessie, 2026-09-19: "I go". 746 people already have a name, every one of them set by a
-  // one-off, and until now nobody could see their own or change it. This is the box the design
-  // doc called "the next piece": see the name you have, change it, told at once if it is taken.
-  //
-  // NOTHING HERE HOLDS A FINISHED ADDRESS. The sheet holds the NAME, the backend answers with the
-  // NAME, and the host is written in ONE place on this page - VHOST below. Her long-term goal is
-  // to move /hi/<name> to appear.network "with the press of a button on the domain", and that
-  // stays a switch only while no finished URL is stored anywhere.
-  //
-  // It is only drawn behind a verified session, like the addresses, because changing the name
-  // people find you by is a change to the account, not to a profile.
   var VHOST='2gather.network';
   function vanityBlock(){
     if(!_editToken){
@@ -481,10 +326,6 @@
         +'Hidden until you verify it is you. Press Save changes to verify.</div></div>';
     }
     var have=String(D.vanity||'').trim();
-    // THE ADDRESS IS SHOWN AS PLAIN TEXT WITH THE NAME IN BOLD, not as a box you cannot type in.
-    // The same reason the addresses stopped being readonly inputs on V1.15: a field shaped like
-    // the fields beside it reads as something you can edit, and this one you change by pressing
-    // Change.
     var shown=have
       ? '<div style="font-size:15px;color:var(--ink);word-break:break-all;">'
         +VHOST+'/hi/<strong>'+esc(have)+'</strong></div>'
@@ -506,18 +347,11 @@
         +'<button type="button" id="vn-save" class="btn ghost" style="font-size:14px;padding:9px 16px;">Save this name</button>'
         +'<button type="button" id="vn-cancel" class="btn ghost" style="font-size:14px;padding:9px 16px;">Cancel</button></div>'
         +'<div id="vn-say" style="font-size:13px;color:var(--soft);margin-top:8px;min-height:18px;"></div>'
-        // WHAT CHANGING IT COSTS, SAID BEFORE IT IS CHANGED. It costs nothing, and that is worth
-        // saying: the backend keeps the name they had beside the new one, so a link already
-        // shared still opens their profile and nobody else can take it.
         +(have?'<div style="font-size:12.5px;color:var(--muted);margin-top:6px;">'
           +'Your old link keeps working, so anything you have already shared still opens.</div>':'')
       +'</div></div>';
   }
 
-  // Is this name free, asked while they type. Debounced, because every call is a round trip to a
-  // backend that measures 9 to 39 seconds at its worst, and an answer for a name they have since
-  // finished typing is worse than none - so each answer is thrown away unless it is still the
-  // name in the box.
   function wireVanity(){
     var open=document.getElementById('vn-open');
     if(!open) return;
@@ -542,8 +376,6 @@
       var v=clean(box.value);
       if(timer) clearTimeout(timer);
       if(v===clean(D.vanity)){ say(''); return; }
-      // The rule is said before the round trip, so a typo is answered at once rather than in
-      // thirty seconds.
       if(!/^[a-z0-9-]{2,30}$/.test(v)){ say(v?'Use 2 to 30 letters, numbers or dashes.':''); return; }
       say('Checking…');
       timer=setTimeout(function(){
@@ -551,7 +383,7 @@
         fetch(GS_URL+'?action=checkVanity&slug='+encodeURIComponent(v))
           .then(function(r){ return r.json(); })
           .then(function(d){
-            if(clean(box.value)!==asked) return;   // they kept typing; this answer is about a name that is gone
+            if(clean(box.value)!==asked) return;   
             if(d&&d.available) say(v+' is free.');
             else say('Somebody already has that name.',true);
           })
@@ -570,13 +402,8 @@
         .then(function(r){ return r.json(); })
         .then(function(d){
           save.disabled=false;
-          // NOTHING OPTIMISTIC: the name on the screen is the name the backend read back off the
-          // sheet after writing it, never the one this page hoped for.
           if(d&&d.status==='ok'&&d.slug){
             D.vanity=String(d.slug);
-            // A REDRAW MUST NOT EAT WHAT THEY WERE TYPING. This repaints the whole panel, and
-            // every text box on it lives only in the DOM until harvestAccount reads it back, so
-            // a half-typed first name would vanish the moment somebody changed their name.
             harvestAccount();
             renderPanel('account');
             setStat('Your link is now '+VHOST+'/hi/'+D.vanity);
@@ -588,11 +415,6 @@
     };
   }
 
-  /* THE ROWS THEMSELVES, AND THE ONE PLACE THEY ARE WRITTEN. The audience word is "members",
-     which is what the intro's Global permissions tab writes too - so both windows open onto the
-     same row rather than two rows that disagree. Nothing is optimistic: every press sends the
-     change and redraws from what the backend says it stored, which is the rule that stops a press
-     that did not land from sitting on screen looking chosen. */
   var _perm=null, _permState='new';
   function loadPerm(){
     if(!_editToken||!meId){ _permState='refused'; return; }
@@ -608,8 +430,6 @@
       })
       .catch(function(){ _permState='refused'; renderPanel('permissions'); });
   }
-  // A person with no row yet is not a person with everything switched off: the defaults are what
-  // the site does today, which is what the intro assumes as well.
   function permFrom(rows){
     var COL={photo:'photo',needs:'needs',enjoy:'enjoy',skills:'skillsLanguages',
       offers:'offerings',otw:'openToWork',care:'careSectors',work:'workExperience',purpose:'purpose'};
@@ -662,10 +482,6 @@
       +(note?'<div style="font-size:12.5px;color:var(--muted);margin-top:6px;">'+note+'</div>':'')+'</div>';
   }
 
-  // Each switch stands for one stored field. Blank means the person has never set it, so the
-  // default is what the site does today: a profile is reachable by link, the photo shows, the
-  // map includes everyone, and search finds you. Turning one off records the choice; the pages
-  // that show a profile have to read the field before the choice takes effect anywhere.
   var PERM_DEFAULT={visPublic:true,showPhoto:true,onMap:true,findable:true};
   function permOn(key){
     var v=D[key];
@@ -688,24 +504,16 @@
       };
     });
   }
-  // The text fields only live in the DOM until this reads them back.
   function harvestAccount(){
     var p=document.getElementById('panel'); if(!p) return;
     p.querySelectorAll('[data-acct]').forEach(function(i){ D[i.getAttribute('data-acct')]=i.value.trim(); });
   }
 
-  // ---- Saving ----
-  // Nothing on this page saved until now, which broke the rule that anything settable stays
-  // editable. A save carries the same one-time-code token the profile page mints, so an account
-  // cannot be changed by whoever merely holds the link. The token sits under the same browser key
-  // profile.html uses, so verifying once covers both pages for the hour.
   var _EDIT_KEY='cw-edit-'+String(meId||'').split('.').join('').toLowerCase();
   function _tokenGet(){
     try{
       var raw=localStorage.getItem(_EDIT_KEY);
       if(!raw){
-        // Signing in mints exactly this session and keeps it under its own name. Somebody who
-        // has just signed in is not asked again here.
         var t2=localStorage.getItem('cw-token')||'';
         var who=String(localStorage.getItem('cw-id')||'').split('.').join('').toLowerCase();
         var mine=String(meId||'').split('.').join('').toLowerCase();
@@ -725,8 +533,6 @@
   function _tokenClear(){ try{ localStorage.removeItem(_EDIT_KEY); }catch(e){} }
   var _editToken=_tokenGet(), _dirty=false;
 
-  // The panel used to print "Aug 2026" whether or not anything had been accepted. It now says
-  // only what the row actually holds.
   function termsRecorded(){
     return !!(String(D.dateAckTerms||'').trim() || String(D.ackTerms||'').trim());
   }
@@ -737,18 +543,10 @@
       if(!isNaN(t.getTime())) return t.toLocaleDateString(undefined,{month:'short',year:'numeric'});
       return d;
     }
-    // NOTHING WHERE THERE IS NOTHING. Jessie, 2026-09-20: "don't say Not recorded". A date we do
-    // not hold is not a fact about the person, and printing it beside their name reads as a
-    // failing of theirs. The links stay, so the row is still useful with no date on it.
     return String(D.ackTerms||'').trim() ? 'Accepted' : '';
   }
-  // The row used to claim an acceptance whatever the sheet held. It now only claims one when
-  // there is a record of it.
   function termsLede(){ return termsRecorded() ? 'You accepted the ' : 'Read the '; }
   function saveRow(){
-    // NO RULE ABOVE SAVE CHANGES. Jessie, 2026-09-19: "remove horizontal line above save changes".
-    // Space does the separating; a line between every section draws a grid nobody asked for, which
-    // is what the note further up this file already says about rows.
     return '<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:26px;">'
       +'<button type="button" class="btn solid" id="acct-save">Save changes</button>'
       +'<span id="acct-savestat" style="font-size:13.5px;color:var(--soft);font-weight:600;"></span>'
@@ -758,15 +556,6 @@
   function markDirty(){ _dirty=true; setStat('Not saved yet.'); }
   function bindSave(){ var b=document.getElementById('acct-save'); if(b) b.onclick=function(){ saveAccount(); }; }
 
-  // ── The photo ──────────────────────────────────────────────────────────────────────────────
-  // Upload new revealed a note and did nothing else, so the one page named after changing your
-  // details could not change the first thing on it. Jessie, 2026-09-07: "upload new doesn't work
-  // when i click on it". It was not broken. It was never built.
-  //
-  // Lifted from the profile page, which has done this correctly since the photo work: pick, shrink
-  // to a 600px square because a round frame crops to one anyway, send to cw-photos, then write the
-  // address back. The address is cache-busted on screen so the new face appears at once rather than
-  // when the edge forgets the old one, and the SAVED address is the clean one.
   var PHOTO_URL='https://cw-photos.jessieupp.workers.dev';
   function photoStat(msg){ var n=document.getElementById('photo-note'); if(!n) return; n.textContent=msg||''; n.style.display=msg?'':'none'; }
 
@@ -822,8 +611,6 @@
     }).catch(function(){ photoStat('That did not go through.'); });
   }
 
-  // Written on its own rather than through saveAccount, so a picture never carries the rest of the
-  // form with it and a half-filled form cannot be saved by choosing a photo.
   function savePhotoUrl(url){
     fetch(GS_URL+'?action=saveAccount&appearId='+encodeURIComponent(meId)
       +'&secure=1&editToken='+encodeURIComponent(_editToken)
@@ -847,9 +634,6 @@
       +'&secure=1&editToken='+encodeURIComponent(_editToken)
       +'&postal='+encodeURIComponent(D.postal||'')
       +'&location='+encodeURIComponent(D.location||'')
-      // COUNTY AND CITY, row 206, 2026-09-15. Jessie: "add location fields to https://2gather.network/account/ too?"
-      // The intro has asked for them since V1.61 and this page did not, so the two pages held different halves of one
-      // place. Both write Info.county and Info.city now.
       +'&county='+encodeURIComponent(D.county||'')
       +'&city='+encodeURIComponent(D.city||'')
       +'&languages='+encodeURIComponent(D.languages||'')
@@ -862,13 +646,11 @@
     fetch(u).then(function(r){ return r.json(); }).then(function(resp){
       if(b) b.disabled=false;
       if(resp&&resp.status==='ok'){ _dirty=false; setStat('Saved 🌱'); setTimeout(function(){ setStat(''); },2500); return; }
-      // An expired hour asks again rather than dropping the edit.
       _editToken=''; _tokenClear(); setStat('');
       showPinBar(function(){ saveAccount(); },(resp&&resp.message)||'Your hour ran out. Verify again to save.');
     }).catch(function(){ if(b) b.disabled=false; setStat('Could not save. Try again.'); });
   }
 
-  // Inline on the page, never an overlay, and the code goes out only when it is asked for.
   function showPinBar(onOk,msg){
     var host=document.getElementById('acct-gate'); if(!host) return;
     host.innerHTML='';
@@ -929,11 +711,6 @@
         ;
       return;
     }
-    /* THE FOUR PRODUCTS, on the rail beside the account. Jessie, 2026-09-20: "change the rail for
-       account to this instead". Each pane carries the name that is registered and the line she
-       wrote for it, a dot and a word for whether it is on, and one enable in the same place on
-       every one of them - so "can I turn this off" never depends on hunting for the button.
-       NOTHING SAVES YET and the enable says so when it is pressed, rather than doing nothing. */
     var PRODUCTS = {
       balance: { name:'DayBalancer.com', line:'Energy in. Energy out.', on:false, rows:[] },
       appear:  { name:'Appear.Network',  line:'Where people, resources, and opportunities appear.', on:false,
@@ -972,29 +749,10 @@
       });
       p.innerHTML=h;
       var _pe=document.getElementById('prod-enable');
-      // A button that cannot do anything yet says so when it is pressed.
       if(_pe) _pe.onclick=function(){ _pe.outerHTML='<span style="margin-left:auto;font-size:13.5px;color:var(--soft);">Turning a product on and off is not built yet.</span>'; };
       return;
     }
     if(key==='permissions'){
-      /* ── GLOBAL PERMISSIONS, THE REAL PANE ─────────────────────────────────────────────────
-         Jessie, 2026-09-20: "dont' send people to the global permissoins here: /intro/
-         ?perm=1&step=permissions" and "put teh pane fo permissioms IN the global permissions on
-         /account/". She asked twice for this screen to LOOK like that one; I twice argued for
-         opening that one instead, because two screens writing one set of columns is the fault
-         this build has paid for more than any other. She has decided, so here it is - and the
-         way the risk is answered rather than ignored:
-
-         IT WRITES WHERE THE OTHER ONE WRITES. Same action, same audience word, same nine column
-         names, same rule that the screen is redrawn from the rows the backend says it wrote
-         rather than from the press that was made. Nothing new is stored and no second shape of
-         the truth exists; this is a second WINDOW onto one set of rows, not a second copy.
-
-         THE FOUR OLD SWITCHES ARE GONE FROM HERE. They wrote Info.visPublic, showPhoto, onMap and
-         findable - a different model entirely - so leaving them on the same pane would have been
-         two things called permissions on one screen, each quietly overwriting nothing the other
-         knew about. They are still on the record and still read elsewhere; this pane no longer
-         pretends to own them. */
       var PERM_ITEMS=[
         ['photo','Your photo'],['needs','Needs'],['enjoy','Enjoys'],
         ['skills','Skills and languages'],['offers','Offerings'],['otw','Open to work'],
@@ -1048,13 +806,10 @@
       if(_permState==='new'){ loadPerm(); }
       return;
     }
-    // My account
     var ph=D.photo?'<img class="photo" src="'+esc(D.photo)+'" alt="">':'<div class="photo"></div>';
     p.innerHTML='<h2>My account</h2>'
       +'<div class="photorow">'+ph
         +'<div><button type="button" id="photo-upload" class="btn ghost" style="font-size:14px;padding:9px 16px;">Upload new</button>'
-        // 2026-08-30. This said the photo comes from Appear, next to an Upload new button that
-        // now genuinely works. Uploading here is the way to change it, so the sentence went.
         +'<div id="photo-note" style="display:none;font-size:13.5px;color:var(--soft);margin-top:8px;max-width:44ch;"></div></div>'
       +'</div>'
       +'<div class="fieldgrid">'
@@ -1071,10 +826,6 @@
           +'Do not press Save changes until it does.</div>'
         : '')
       +'<div id="loc-box"></div></div>'
-      // TERMS ACCEPTED SITS UNDER LOCATION, ON MY INFO. Jessie, 2026-09-20: "move Terms accepted to
-      // my info under location". It was the last row of the permissions pane, which made an
-      // agreement look like a setting - something you flip - when it is a record of something that
-      // happened. It belongs with the other things that are simply true about this account.
       +'<div class="f" style="margin-top:18px;"><label>Terms accepted</label>'
       +'<div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;">'
       +'<div style="font-size:13.5px;color:var(--soft);line-height:1.6;flex:1 1 320px;min-width:0;">'+termsLede()
@@ -1083,14 +834,6 @@
       +'<a href="https://creating.works/code-of-conduct" style="color:#1F699E;font-weight:700;">Code of Conduct</a>.</div>'
       +(termsStamp()?'<div style="font-size:13px;color:var(--soft);white-space:nowrap;">'+esc(termsStamp())+'</div>':'')
       +'</div></div>'
-      // LANGUAGES COMES OFF THIS SCREEN. Jessie, 2026-09-19: "move laungauges away since we have
-      // them here already: https://2gather.network/ikigai/?perm=1&step=skills and we'll be suing
-      // that anyways", then "remove languages from account screen?" It is asked and answered in
-      // the Skills step of the intro, which is the one place it belongs (row 186, her own
-      // "languages move to skills" on 2026-09-15). NOTHING IS LOST: Info.languages is still read
-      // when this page loads and still sent on every save, so a save from here carries whatever
-      // the intro stored rather than blanking it. The picker itself is kept below, unreferenced,
-      // so putting it back is one line.
       +saveRow();
     var up=document.getElementById('photo-upload');
     if(up) up.onclick=choosePhoto;
@@ -1102,19 +845,10 @@
     wireVanity();
   }
 
-  // Location reuses the picker people already meet on the events page: region, then country, then
-  // state once the country is the United States. It is held as one plain string ("Washington,
-  // United States") so anything showing a profile can print it without knowing the three levels.
-  // Same starting point as events.html: North America / United States, so picking a US state is
-  // one tap. A part-made choice still stores nothing, so nobody is recorded as being in the
-  // United States until they pick a state.
   var REGIONS=['North America','South America','Europe','Asia','Africa','Oceania','Antarctica'];
   var NA_COUNTRIES=['United States','Canada','Mexico'];
   var US_STATES=["Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming","Washington D.C."];
   var _loc={region:'',country:'',state:''};
-  // COUNTY AND CITY, row 206, 2026-09-15. The same lists the intro offers, from the same read
-  // (getPlaces, held six hours at the edge), keyed by the state's two letters. Asked for only once
-  // a US state is chosen, because that is as far as the list goes.
   var US_ABBR={"Alabama":"AL","Alaska":"AK","Arizona":"AZ","Arkansas":"AR","California":"CA","Colorado":"CO","Connecticut":"CT","Delaware":"DE","District of Columbia":"DC","Florida":"FL","Georgia":"GA","Hawaii":"HI","Idaho":"ID","Illinois":"IL","Indiana":"IN","Iowa":"IA","Kansas":"KS","Kentucky":"KY","Louisiana":"LA","Maine":"ME","Maryland":"MD","Massachusetts":"MA","Michigan":"MI","Minnesota":"MN","Mississippi":"MS","Missouri":"MO","Montana":"MT","Nebraska":"NE","Nevada":"NV","New Hampshire":"NH","New Jersey":"NJ","New Mexico":"NM","New York":"NY","North Carolina":"NC","North Dakota":"ND","Ohio":"OH","Oklahoma":"OK","Oregon":"OR","Pennsylvania":"PA","Rhode Island":"RI","South Carolina":"SC","South Dakota":"SD","Tennessee":"TN","Texas":"TX","Utah":"UT","Vermont":"VT","Virginia":"VA","Washington":"WA","West Virginia":"WV","Wisconsin":"WI","Wyoming":"WY"};
   var _places=null,_placesP=null;
   function placesOnce(){
@@ -1124,7 +858,6 @@
     return _placesP;
   }
 
-  // Read a stored string back into the three levels so the picker opens where the person left it.
   function parseLoc(v){
     var t=String(v||'').trim();
     if(!t) return {region:'',country:'',state:''};
@@ -1136,7 +869,6 @@
     if(REGIONS.indexOf(t)>-1) return {region:t,country:'',state:''};
     return {region:'',country:'',state:''};
   }
-  // A part-made choice stores nothing. "North America" on its own says less than the blank does.
   function locString(l){
     if(l.state) return l.state+', United States';
     if(l.country && l.country!=='United States') return l.country;
@@ -1161,33 +893,13 @@
         var ci=(_places.cities[ab]||[]).slice().filter(function(x,i,a){ return a.indexOf(x)===i; }).sort();
         if(D.county && cs.indexOf(D.county)<0) cs.push(D.county);
         if(cs.length) h+=sel('loc-county',cs,D.county,'County (optional)');
-        // A CITY NAME IS SHORT, SO THE BOX IS. Jessie, 2026-09-19: "emdonds is still a very long
-        // field. make it a short field." flex:0 1 means it may shrink on a narrow screen and will
-        // never grow to fill a line it happens to be alone on, which is what stretched it.
         h+='<input id="loc-city" list="loc-cities" placeholder="City (optional)" value="'+esc(D.city||'')+'" style="flex:0 1 220px;min-width:150px;">'
           +'<datalist id="loc-cities">'+ci.map(function(c){ return '<option value="'+esc(c)+'">'; }).join('')+'</datalist>';
       } else { placesOnce(); }
     }
-    // POSTAL CODE SITS BESIDE THE CITY. Jessie, 2026-09-19: "city shouldn't be this long of a field
-    // and zip code should go t the right of city". It was over in the name grid, so City was the
-    // only thing on its own line and flex-grow stretched it the whole width of the panel.
-    // It is ALWAYS drawn, whether or not a state has been chosen, because somebody outside the
-    // United States still has a postal code and losing the field would lose the way to edit it.
-    // It keeps data-acct="postal", which is how every field on this page is collected on save, so
-    // moving it changes where it sits and nothing about what it writes.
-    // THE SAME ROW AS THE INTRO. Jessie, 2026-09-19, of the welcome step: "make look slike this".
-    // There: region, country, state, county and city run across one line and the postal code sits
-    // on its own beneath. So postal is forced onto its own line rather than tucked beside the city,
-    // which is where it went an hour ago when city was the only thing on the second line.
-    // BESIDE THE CITY, NOT BENEATH IT. Jessie, 2026-09-19: "put postal to the right of city - not
-    // below". V1.23 forced a line break here to copy the welcome step; that was the wrong thing to
-    // copy. With City fixed at 220 and this at 150, the two share the second line and neither
-    // stretches.
     h+='<input data-acct="postal" id="loc-postal" type="text" placeholder="Postal code"'
       +' value="'+esc(D.postal||'')+'" style="flex:0 1 150px;">';
     box.innerHTML=h+'</div>';
-    // renderLoc redraws this whole row whenever the region, country or state changes, which takes
-    // the page-level input listener with it, so postal marks the page dirty from here instead.
     var pc=box.querySelector('#loc-postal');
     if(pc) pc.addEventListener('input',function(){ D.postal=String(pc.value||'').trim(); markDirty(); });
     var cy=box.querySelector('#loc-county');
@@ -1198,7 +910,6 @@
     var rg=box.querySelector('#loc-region');
     if(rg) rg.onchange=function(){
       _loc={region:rg.value,country:'',state:''};
-      // Only North America opens a country, matching the events page. Anywhere else is the answer.
       if(rg.value==='North America') _loc.country='United States';
       D.county=''; D.city='';
       D.location=locString(_loc); markDirty(); renderLoc();
@@ -1215,7 +926,6 @@
     };
   }
 
-  // Languages pick the same way they do on the profile: click to add or remove, filter to find.
   var LANGS=[], _langFilter='';
   function renderLangs(){
     var box=document.getElementById('lang-box'); if(!box) return;
@@ -1251,7 +961,6 @@
     var f=box.querySelector('#lang-filter');
     if(f) f.addEventListener('input', function(){ _langFilter=f.value; renderLangs(); var g=document.getElementById('lang-filter'); if(g){ g.focus(); g.setSelectionRange(g.value.length,g.value.length); } });
   }
-  // The language list is reference data, so it is read from the same place the profile reads it.
   fetch(GS_URL+'?action=getReferenceData').then(function(r){return r.json();}).then(function(rd){
     var raw=(rd&&(rd.Languages||rd.languages))||[];
     LANGS=(Array.isArray(raw)?raw:String(raw).split('|')).map(function(x){return String(x).trim();}).filter(Boolean);
@@ -1263,8 +972,6 @@
     TABS.forEach(function(s){
       var b=document.createElement('button'); b.className='tab'+(s.key===active?' on':''); b.type='button'; b.textContent=s.label;
       b.onclick=function(){
-        // The same sign-out the top bar's More menu used to offer, which went with the menus on
-        // 2026-09-08. It forgets the device first, then goes to the front door.
         if(s.out){
           try{ if(window.CW && window.CW.forget){ window.CW.forget(); } }catch(e){}
           window.location.href='https://2gather.network/signin/?out=1';
@@ -1285,10 +992,8 @@
     document.getElementById('hello-title').textContent=nm+' 🌱';
     try{ localStorage.setItem(nameKey,nm); }catch(e){}
   }
-  // Show the last name seen straight away; the fetch below only refreshes it.
   (function(){ try{ var c=localStorage.getItem(nameKey); if(c) document.getElementById('hello-title').textContent=c+' 🌱'; }catch(e){} })();
 
-  // 'account' is the key; 'data' still works so older links keep landing in the right place.
   var _t=P('tab'); if(_t==='data') _t='account';
   var startTab=(['permissions','account'].indexOf(_t)>-1)?_t:'account';
   buildTabs(startTab);
@@ -1297,8 +1002,6 @@
     document.getElementById('panel').innerHTML='<div class="status err">This device does not know who you are yet. <a href="https://2gather.network/signin/?next=%2Faccount%2F" style="color:#1F699E;font-weight:700;">Sign in</a> and you will land back here.</div>';
     return;
   }
-  // Two reads in parallel (one round-trip of wall-clock): lookupProfile carries the name, photo,
-  // and the stored Appear page link; getProfile carries the contact fields.
   var pLookup=fetch(GS_URL+'?action=lookupProfile&appearId='+encodeURIComponent(meId)).then(function(r){return r.json();}).catch(function(){return null;});
   var pProfile=fetch(GS_URL+'?action=getProfile&appearId='+encodeURIComponent(meId)+'&meToken='+encodeURIComponent((function(){try{return localStorage.getItem('cw-token')||'';}catch(e){return '';}})())).then(function(r){return r.json();}).catch(function(){return null;});
   Promise.all([pLookup,pProfile]).then(function(res){
@@ -1317,32 +1020,10 @@
       D.location=d.location||''; _loc=parseLoc(D.location);
       D.county=d.county||''; D.city=d.city||'';
       if(!_loc.region) _loc={region:'North America',country:'United States',state:''};
-      // The permission columns may not exist on the sheet yet. A missing one stays blank,
-      // and a blank falls back to what the site does today rather than inventing a choice.
       ['visPublic','showPhoto','onMap','findable','ackTerms','dateAckTerms'].forEach(function(k){
         D[k]=(d[k]==null?'':String(d[k]));
       });
     }
-    // THE PAGE MUST NOT DRAW A PLACE IT WAS REFUSED. Jessie, 2026-09-19: "city is gone from this
-    // again htough" and "and county", with Location showing Select state where it had shown
-    // Washington an hour before. Her record was never touched - n161 read all four cells back:
-    // Washington, United States / Snohomish County / Edmonds / 98026.
-    //
-    // WHAT ACTUALLY HAPPENED, and I shipped it this afternoon: getProfile now REFUSES without a
-    // proved session, which is the security fix, and it answers { found:false, code:'signin' }.
-    // This page reads every place field out of pr.data and simply never got one - so it drew an
-    // empty picker rather than saying it could not read. Because lookupProfile still answered, the
-    // "could not load" line below never fired either.
-    //
-    // A page asserting something before it knows, for the fifth time this month. It says so now,
-    // and Save changes sends a fresh code so the way back is on the screen rather than a reload.
-    // AND IT IS ANY REFUSED READ, not only the one that names itself. Jessie, 2026-09-19: "no",
-    // with Location still empty on V1.24. My first guard looked for status 'error' and code
-    // 'signin' exactly, and whatever came back did not carry both - so the page went on drawing an
-    // empty picker. The honest test is simpler and it is the one below: if getProfile did not
-    // FIND her, this page has no place, no postal code and no permissions, and it must not draw
-    // them as though they were blank answers. _placeUnread says so in the Location section itself,
-    // which keeps the rest of the page usable rather than blocking it behind one failed read.
     _placeUnread = !(pr && pr.found);
     if(pr && pr.status==='error' && pr.code==='signin'){
       var _ph=document.getElementById('panel');
@@ -1356,14 +1037,10 @@
       return;
     }
     paintIdentity(); renderPanel(startTab);
-    // The rail lives in another file and presses this.
     window.cwAccountPick = function (key) { renderPanel(key); };
     loadEmail(startTab);
   });
 
-  // The address lives on the account, not on the profile, and it is deliberately absent from
-  // every public read so that holding somebody's link never hands you their email. It arrives
-  // only behind the same verified session that saving needs.
   function loadEmail(tab){
     if(!_editToken || !meId) return;
     fetch(GS_URL+'?action=getAccount&appearId='+encodeURIComponent(meId)
@@ -1371,50 +1048,30 @@
       .then(function(r){ return r.json(); })
       .then(function(resp){
         if(!resp || resp.status!=='ok'){
-          // A token the server will not accept is not a token. Holding onto it meant the page
-          // showed an empty Email box and hid the line explaining why, because it believed it
-          // was verified. Jessie's id changed and her old token stopped matching. 2026-09-01.
           _editToken='';
           try{ localStorage.removeItem('cw-edit-'+meId); }catch(e){}
           try{ renderPanel('account'); }catch(e){}
           return;
         }
         if(resp.email) D.email=resp.email;
-        // The other verified addresses on this row, primary not among them. 2026-09-19.
         D.alsoEmails=Array.isArray(resp.alsoEmails)?resp.alsoEmails:[];
-        // The short name they are found by, read with the rest of the account rather than on a
-        // call of its own. 2026-09-19.
         D.vanity=String(resp.vanity||'');
-        /* KEPT ON THE DEVICE, so another page can offer the pretty address without a read of its
-           own. Your answers wants a "View public profile" button and the name is the only thing
-           it is missing; every read here costs 9 to 39 seconds, so the page that already asks is
-           the one that writes it down. Keyed to whose it is, so a shared computer never hands
-           one person another person's address. 2026-09-20. */
         try {
           if (D.vanity) {
             localStorage.setItem('cw-vanity', D.vanity);
             localStorage.setItem('cw-vanity-for', String(meId||''));
           } else { localStorage.removeItem('cw-vanity'); }
         } catch(e){}
-        // The two name columns come back from the account now. The page used to hold only one
-        // joined name and rebuild both boxes by splitting it, calling the last word the surname,
-        // so a two-word surname could never survive a reload. Anything typed since the page
-        // opened wins, so a slow answer cannot wipe an edit in progress.
         if(!_dirty && (resp.firstName || resp.lastName)){
           D.firstName=String(resp.firstName||'');
           D.lastName=String(resp.lastName||'');
         }
-        // Only repaint when the person is looking at the panel that shows it.
         var t=document.querySelector('.tab.on');
         if(t && t.textContent==='My account') renderPanel('account');
       }).catch(function(){});
   }
 })();
 </script>
-<!-- MY ACCOUNT IN THE TEMPLATE, A LIVE MOCKUP. Jessie, 2026-09-14: "my account should look exactllyt eh same rail, excep
-     the pane shouodl change" and "the rail should stay the same when toggling to my account". Only with ?look=rail. The
-     rail is 2gather.network's nav/profile-rail.js, the one My profile draws, with My account lit; this page's own list of
-     places goes, and its name and panel sit in the white panel beside the rail. -->
 <style>
   html.cw-prail-on .wrap{max-width:1200px;}
   html.cw-prail-on #tabs{display:none;}
@@ -1427,30 +1084,14 @@
 <script>
 (function(){
   var look = ''; try { look = new URLSearchParams(location.search).get('look') || ''; } catch (e) {}
-  // THE LOOK FOR EVERYBODY NOW. Jessie, 2026-09-15: "publish new look for profile/account pages too". ?look=list shows
-  // the old page for one load, for a comparison.
   if (look === 'list' || !window.cwProfileRail) return;
   var viewing = false;
   try { viewing = !!(window.CW && CW.me && CW.me().viewing); } catch (e) {}
-  // THE ACCOUNT SHAPE, 2026-09-20. My events, My groups and My profile came off this rail the
-  // morning they moved into the menu under her name in the top bar. The four products open in
-  // place rather than by loading a page, which is what onPick is for.
   cwProfileRail({ active: 'account', shape: 'account', wrap: document.querySelector('.wrap'),
                   viewingSomeoneElse: viewing,
                   onPick: function (key) { try { window.cwAccountPick(key); } catch (e) {} } });
 })();
 </script>
-<script src="https://2gather.network/nav/topbar.js?v=6.18" defer></script>
+<script src="https://2gather.network/nav/topbar.js?v=6.19" defer></script>
 </body>
-<!--
-  Copyright 2026 DayBalancer LLC. All rights reserved.
-
-  The code and the content here power Creating.Works, DayBalancer, Appear Network,
-  and 2Gather. They are published so they can be read, audited, and dated.
-
-  Running either as a separate offering requires a license, whether you brand it as
-  ours or as your own, and whether or not money changes hands.
-
-  hello@creating.works
--->
 </html>

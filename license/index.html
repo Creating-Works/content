@@ -67,19 +67,10 @@
          border-radius:10px;padding:18px;}
   @media (max-width:720px){ .rail{width:100%;flex:1 1 100%;} }
 </style>
-<!-- THE SAME TWO RULES THE TOP BAR PUTS ON EVERY PAGE THAT LOADS IT (nav/topbar.js V6.09), written
-     here because this page does not load the bar. Jessie, 2026-09-18: "#2 works! Update all pages".
-     overflow-wrap lets a long unbroken link or id break rather than spill; overflow-x:clip stops
-     anything left over from panning the whole page, and makes no new scroll container, so sticky
-     headers keep working and the page still scrolls down. IF THEY CHANGE IN THE BAR, CHANGE THEM
-     HERE: this is a copy, and it is a copy only because there is no bar on this page to hold it. -->
 <style>body{overflow-x:clip;overflow-wrap:break-word;}</style>
 <style>@media(max-width:768px){input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea{font-size:16px !important;}}</style>
 </head>
 <body>
-<!-- The same small way in as the operations page. Without it this page was blank whenever the
-     hour had passed, and blank is indistinguishable from broken. A stranger still sees an
-     unlabelled box and learns nothing. Jessie 2026-09-01. -->
 <div class="wrap hide" id="gate">
   <div class="card" style="max-width:420px;">
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
@@ -107,9 +98,6 @@
 
 <script>
 (function(){
-  // Not public. Nothing is drawn unless the server confirms a live operator session, and the
-  // session is the one from creating.works/ops. Jessie 2026-09-01: private until the list is
-  // right. Anybody else gets a blank page and learns nothing from it.
   var GS='https://cw-api-gate.jessieupp.workers.dev';
   var v=null;
   try{ v=JSON.parse(localStorage.getItem('cw-ops-session')||'null'); }catch(e){}
@@ -159,8 +147,6 @@
     }
   });
 
-  // Only what can be checked in the code is written down as free. Nothing here is invented:
-  // an empty list says it is empty rather than filling itself with plausible rows.
   var TOOLS=[
     { key:'2gather', name:'2Gather', blurb:'Groups, events and the bulletin board',
       what:'Where a group gathers: its people, its introductions and its events.',
@@ -179,7 +165,7 @@
       ] },
     { key:'appear', name:'Appear', blurb:'Profiles and the network',
       what:'A person, what they offer and what they need, and how they find each other.',
-      rows:[] },   // nothing licensed here for now, by Jessie's call 2026-09-01
+      rows:[] },   
     { key:'daybalancer', name:'DayBalancer', blurb:'',
       what:'', rows:[] }
   ];
@@ -234,15 +220,4 @@
 })();
 </script>
 </body>
-<!--
-  Copyright 2026 DayBalancer LLC. All rights reserved.
-
-  The code and the content here power Creating.Works, DayBalancer, Appear Network,
-  and 2Gather. They are published so they can be read, audited, and dated.
-
-  Running either as a separate offering requires a license, whether you brand it as
-  ours or as your own, and whether or not money changes hands.
-
-  hello@creating.works
--->
 </html>

@@ -9,12 +9,7 @@
 
   hello@creating.works
 -->
-<!-- Design A profile — live profile answers page (linked from profile.html "Update answers").
-     Freeze of the pre-Design-A intake.html: The-New-Build-Repository/design/frozen/intake-V6.23-preDesignA-2026-08-24.html -->
 <meta charset="utf-8">
-<!-- Without this a phone lays the page out at 980 pixels and scales the whole thing down,
-     which is why the profile was unreadable on an iPhone while being fine on a desktop.
-     Jessie, 2026-09-02: "mobile is not readable for any of this page." 2026-09-03. -->
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="/moved.js?v=2"></script>
 <script src="https://2gather.network/nav/identity.js?v=21"></script>
@@ -60,9 +55,7 @@
   .cat{background:#fff;border:1.5px solid var(--line);border-radius:20px;padding:5px 12px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;user-select:none;transition:all .12s;}
   .cat:hover{border-color:var(--brand);color:var(--brand);}
   .cat.on{background:var(--brand);border-color:var(--brand);color:#fff;}
-  /* + OTHER READS AS A BUTTON (row 205, 2026-09-15). Jessie: "make Other a little darker in grey as its lost",
-     then "design a button ghat's darker grey with white lettering". Grey words on nothing with a dashed line is
-     how a disabled control is drawn everywhere else, so the one chip that adds your own word looked unpressable. */
+  
   .cat.more{color:#fff;background:#6B7A8D;border:1.5px solid #6B7A8D;border-style:solid;font-weight:700;}
   .cat.more:hover{background:#5A6B7E;border-color:#5A6B7E;color:#fff;}
   .extras{display:none;flex-wrap:wrap;gap:6px;margin-top:6px;width:100%;}
@@ -110,12 +103,12 @@
   .actions{display:flex;gap:10px;justify-content:space-between;margin-top:22px;flex-wrap:wrap;}
   .btn{background:#fff;color:var(--brand);border:0;padding:11px 22px;border-radius:26px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;}
   .btn.ghost{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.6);}
-  /* Enjoy section — mirrors the current intake */
+  
   .enjoy-q{font-size:20px;font-weight:800;color:var(--ink);margin:0 0 8px;line-height:1.25;}
   .enjoy-sub{color:var(--brand);font-size:14px;margin:0 0 12px;}
   .enjoy-search{display:flex;align-items:center;gap:8px;background:#F7F9FC;border:1px solid var(--line);border-radius:12px;padding:11px 14px;margin-bottom:14px;}
   .enjoy-search input{flex:1;border:0;background:transparent;outline:none;font-family:inherit;font-size:15px;color:var(--ink);padding:0;}
-  /* copied from live intake.html */
+  
   .added-header-row{background:var(--brand);border-radius:8px;padding:10px 14px;margin:16px 0 8px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
   .added-label{color:#fff;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;}
   .added-right{display:flex;align-items:center;gap:10px;}
@@ -163,7 +156,7 @@
   .some-item{display:flex;align-items:center;justify-content:space-between;background:#F7F9FC;border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:15px;color:var(--ink);}
   .some-item .x{color:var(--muted);cursor:pointer;font-weight:700;}
   .some-input{flex:1;border:0;background:transparent;outline:none;font-family:inherit;font-size:15px;color:var(--ink);padding:0;}
-  /* Skills — mirrors the current intake "What skill pays the bills?" */
+  
   .lang-pill{display:inline-flex;align-items:center;gap:6px;background:var(--brand);color:#fff;border-radius:20px;padding:7px 14px;font-size:14px;font-weight:700;margin-bottom:12px;}
   .practice-item-cat{font-size:12px;font-weight:600;color:var(--brand);margin-top:2px;}
   .cat-missing{font-size:12px;font-weight:600;color:#C0392B;cursor:pointer;margin-top:2px;display:inline-block;}
@@ -175,7 +168,7 @@
   .method-check{width:22px;height:22px;border-radius:5px;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;color:#fff;font-weight:800;}
   .method-item.on .method-check{background:var(--brand);border-color:var(--brand);}
   .method-text{font-size:15px;color:var(--ink);line-height:1.4;}
-  /* Shared profile view ("This is me") — the main screen others see */
+  
   .crumb-link{color:#fff;text-decoration:underline;cursor:pointer;}
   .pv-card{background:#fff;border-radius:14px;padding:8px 24px 18px;}
   .pv-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px 0 4px;}
@@ -201,7 +194,7 @@
   .pv-bm-av{width:44px;height:44px;border-radius:50%;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;flex-shrink:0;}
   .pv-bm-name{font-size:16px;font-weight:700;color:var(--ink);flex:1;}
   .pv-bm-x{background:none;border:0;color:var(--muted);font-size:18px;cursor:pointer;}
-  /* Needs — mirrors the intake "What are you seeking right now?" */
+  
   .needs-crumb{font-size:14px;font-weight:700;margin-bottom:12px;color:var(--brand);}
   .needs-crumb a{color:var(--brand);text-decoration:underline;cursor:pointer;}
   .needs-crumb .sep{color:var(--muted);margin:0 6px;font-weight:400;}
@@ -231,7 +224,7 @@
   .ne-actions{display:flex;gap:10px;margin-top:4px;}
   .ne-save{flex:1;background:var(--brand);color:#fff;border:0;border-radius:10px;padding:13px;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer;}
   .ne-cancel{background:#fff;border:1.5px solid var(--line);color:var(--soft);border-radius:10px;padding:13px 22px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;}
-  /* ── Manage hub (rail + detail), reachable at ?manage=1 ── */
+  
   .mh-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
   .mh-head h1{font-size:24px;font-weight:800;margin:0;color:var(--ink);}
   .mh-layout{display:grid;grid-template-columns:240px 1fr;gap:16px;}
@@ -313,17 +306,10 @@
 </div>
 
 <script>
-  // ── Phase 3.3a: load a real profile (read-only). Escaping + intake's exact parsers. ──
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
   function _param(k){ try{ return new URLSearchParams(location.search).get(k)||''; }catch(e){ return ''; } }
   var _id = _param('id')||_param('show')||_param('CWid')||_param('me')||_param('memberCard')||_param('appearId')||'';
-  // Ids are stripped from the address now, so arriving with a clean one is normal rather than
-  // exceptional. profile/ has always fallen back to what the device remembers and this page
-  // never did, which is why a clean address landed on the placeholder content built into this
-  // file instead of on somebody's own profile.
   if(!_id){ try{ _id = String(localStorage.getItem('appear-id')||localStorage.getItem('cw-id')||'').trim(); }catch(e){ _id=''; } }
-  // Somebody running the site can stand in another person's shoes to see what they see. It is
-  // a look and never a write: nothing on this page saves while it is on.
   var _viewing = false;
   try {
     if (window.CW && CW.me) {
@@ -332,7 +318,6 @@
     }
   } catch(e){}
   var _profilePhoto='', _profileName='', _loaded={}, _pageLink='', _said={};
-  // What a person wrote in their own words, shown under the heading it answers.
   function pvSaid(key){ var v=_said&&_said[key]; return v?'<div class="pv-said">'+esc(v)+'</div>':''; }
   var EXPRESSION_ADDED = [''];
   function parseNeedsStr(str){
@@ -353,24 +338,14 @@
     });
   }
   function loadProfile(d){
-    // Blank first. This whole function is one try/catch, so a single line throwing used to leave
-    // every later field holding whatever it held before. Starting empty means a partial load
-    // shows nothing rather than showing somebody else's answers.
     NEEDS_ADDED = []; ENJOY_ADDED = []; SKILLS_ADDED = []; SKILL_METHODS_ON = [];
     VALUES_ADDED = []; DOMAINS_ADDED = []; WORK_VALUES_ADDED = []; EXPRESSION_ADDED = ['']; SECTIONS[4].data = [];
     try{
-      // A found profile is authoritative — empty fields mean empty, not the demo seed.
       _loaded={ postal:d.postal||'', retired:d.retired||'', bringType:d.bringType||'', wantsSignupList:d.wantsSignupList||'', languages:d.languages||'', photoURL:d.photoURL||'' };
-      // Glide owns Main.Image and always wins; ours is what a person without a Glide row has.
       if(!_profilePhoto && d.photoURL) _profilePhoto=String(d.photoURL);
       _said={ need:String(d.introNeed||'').trim(), enjoy:String(d.introEnjoy||'').trim(),
               skills:String(d.introSkills||'').trim(), values:String(d.introValues||'').trim(),
               offer:String(d.introOffer||'').trim() };
-      // WORK VALUES. Jessie, 2026-09-14, of her answers to creating.works' "What would work give you?" showing under
-      // Things: "Those should fall under VALUES - but under a heading Work values in the values page. Money should be a
-      // thing yes". They live in ikigai.workValues. Answers saved before that sit in ikigai.needs marked :work; those that
-      // are not a kind of thing are read as work values here, and the next save moves them. Money and the other kinds of
-      // thing stay needs, and keep their :work mark so creating.works still finds them.
       WORK_VALUES_ADDED = String(d.workValues||'').split('|').map(function(x){ return x.trim(); }).filter(Boolean);
       var _thingKinds = {'money':1,'physical goods':1,'consumables':1,'living things':1};
       NEEDS_ADDED = parseNeedsStr(d.needs||'').filter(function(n){
@@ -407,7 +382,7 @@
   var listEl = document.getElementById('list');
   var metListEl = document.getElementById('met-list');
   var curSec = 0;
-  var _pendingStep = 0;   // which section the verify card opens once it is satisfied
+  var _pendingStep = 0;   
   var SEC_DONE = [false,false,false,false,false];
 
   var addtile = document.createElement('button'); addtile.type='button'; addtile.className='addtile';
@@ -416,8 +391,6 @@
   function label(text, cls){ var d=document.createElement('div'); d.className=cls; d.textContent=text; return d; }
   function metCount(){ return metListEl.children.length; }
   function sortAlpha(arr){ return arr.slice().sort(function(a,b){ return a.localeCompare(b); }); }
-  // Live "did you mean" search for every add-your-own panel: as the person types, surface
-  // existing items from the pool so they pick one instead of adding a near-duplicate.
   function matchExisting(inp, results, poolFn, onPick){
     inp.addEventListener('input', function(){
       results.innerHTML='';
@@ -431,11 +404,6 @@
       hits.forEach(function(h){ var row=document.createElement('div'); row.className='addown-hit'; row.textContent=h.name; if(h.tag){ var t=document.createElement('span'); t.className='tag'; t.textContent=h.tag; row.appendChild(t); } row.onclick=function(){ onPick(h); }; results.appendChild(row); });
     });
   }
-  // Live search box (icon + input + results dropdown), mirroring the intake search.
-  // A heading in a list is a real word somebody will type, so the search offers it as a way in
-  // rather than pretending it does not exist. Picking a heading opens that level; picking an
-  // item adds it. And whatever was typed can always be kept as Other, so a phrase the list has
-  // no name for is not simply lost.
   function wireSearch(inp, results, poolFn, onPick, onOther){
     inp.addEventListener('input', function(){
       results.innerHTML='';
@@ -498,11 +466,11 @@
     var box=document.createElement('div'); box.className='appr-box';
     var srch=document.createElement('input'); srch.type='text'; srch.placeholder='Search anyone on Appear…';
     var results=document.createElement('div'); results.className='appr-results';
-    var res=document.createElement('div'); res.className='appr-result'; res.textContent='Frank Blau · Data Architect'; results.appendChild(res);
+    var res=document.createElement('div'); res.className='appr-result'; res.textContent='Alex Rivera · Data Architect'; results.appendChild(res);
     var linkWrap=document.createElement('div'); linkWrap.className='appr-linkwrap';
     var tlink=document.createElement('a'); tlink.className='appr-textlink'; tlink.href='#'; tlink.textContent='Open their page to Show appreciation'; tlink.onclick=function(){ return false; }; linkWrap.appendChild(tlink);
     srch.addEventListener('input', function(){ results.style.display = srch.value.trim() ? 'block' : 'none'; });
-    res.addEventListener('click', function(){ srch.value='Frank Blau'; results.style.display='none'; linkWrap.style.display='block'; });
+    res.addEventListener('click', function(){ srch.value='Alex Rivera'; results.style.display='none'; linkWrap.style.display='block'; });
     box.appendChild(srch); box.appendChild(results); box.appendChild(linkWrap);
     apprBtn.addEventListener('click', function(){ box.classList.toggle('open'); });
     body.appendChild(apprBtn); body.appendChild(box);
@@ -547,8 +515,6 @@
     titleWrap.appendChild(ni); card.appendChild(titleWrap);
     var body=document.createElement('div'); body.className='body';
     if (sec.cats){
-      // Category is a follow-up to your words, not a gate in front of them: it stays out of the
-      // way until there is something to categorise.
       var catWrap=document.createElement('div');
       function showCats(){ catWrap.style.display = (ni.value||'').trim() ? '' : 'none'; }
       body.appendChild(catWrap);
@@ -581,13 +547,7 @@
     return card;
   }
 
-  // Enjoy section — mirrors the current intake "What do you enjoy doing?"
   var ENJOY_CATS = ['Movement & Performance','Sports','Outdoor & Nature','Games & Strategy','Making & Collecting'];
-  // Real 3-level recreation tree, pulled from the live intake's reference-data sheet
-  // (recType > category > item). Some top categories have sub-categories that drill a
-  // third level (Sports > Racquet > Tennis); others go straight to items (Outdoor & Nature
-  // > Hiking). Movement & Performance mixes both: Climbing/Dance/Equestrian drill, while
-  // Yoga/Skateboarding/Rollerblading are direct items.
   var ENJOY_TREE = {
     'Movement & Performance':{subs:{'Climbing':['Rock Climbing','Bouldering','Indoor Climbing','Sport Climbing','Trad Climbing','Ice Climbing','Via Ferrata'], 'Dance':['Ballet','Hip Hop','Salsa','Ballroom','Contemporary','Swing','Folk Dance','Breaking','Tap','Line Dancing','Belly Dancing'], 'Equestrian':['Horseback Riding','Polo','Rodeo','Dressage','Show Jumping','Trail Riding']}, items:['Yoga','Skateboarding','Rollerblading']},
     'Sports':{subs:{'Racquet':['Tennis','Pickleball','Ping Pong','Squash','Badminton','Racquetball','Padel'], 'Water':['Swimming','Rowing','Paddling','Kayaking','Surfing','Diving','Water Polo','Stand Up Paddleboarding','Wakeboarding','Water Skiing','Open Water Swimming','Freediving'], 'Snow':['Skiing','Snowboarding','Ice Skating','Hockey','Curling','Cross Country Skiing','Snowshoeing','Biathlon','Bobsled'], 'Field':['Soccer','Baseball','Football','Track and Field','Lacrosse','Rugby','Cricket','Ultimate Frisbee','Flag Football','Softball','Field Hockey'], 'Court':['Basketball','Volleyball','Handball','Netball','Beach Volleyball','Futsal'], 'Strength':['Weightlifting','Wrestling','Gymnastics','Powerlifting','CrossFit','Bodybuilding','Olympic Lifting','Strongman'], 'Combat':['Martial Arts','Boxing','Fencing','Judo','Karate','Taekwondo','Brazilian Jiu Jitsu','Muay Thai','MMA','Kickboxing'], 'Air':['Paragliding','Skydiving','Hang Gliding','Drone Racing','Hot Air Ballooning','Wingsuit Flying'], 'Motor':['Auto Racing','Motorcycle Racing','ATV Racing','Motorboat Racing','Go Kart Racing','Motocross','Rally Racing'], 'Endurance':['Marathon','Triathlon','Cycling','Cross Country','Ultra Running','Open Water Swimming','Obstacle Course Racing','Duathlon','Swimming'], 'Precision':['Archery','Golf','Bowling','Darts','Shooting Sports','Disc Golf','Cornhole','Bocce Ball','Croquet']}, items:[]},
@@ -613,8 +573,6 @@
     hdr.appendChild(lbl); hdr.appendChild(right); listEl.appendChild(hdr);
     var grid=document.createElement('div'); grid.className='practice-grid'; listEl.appendChild(grid);
     function refreshCount(){ lbl.textContent='Joy added ('+grid.querySelectorAll('.practice-item').length+')'; }
-    // A lit chip means "this is in my list". It used to be switched on and never off, so the
-    // picker read as though everything had been chosen. It now follows the list itself.
     var JOY_ON={};
     function syncJoyChips(){
       catzone.querySelectorAll('.cat').forEach(function(el){
@@ -641,8 +599,6 @@
     ENJOY_ADDED.forEach(function(it){ addJoyCard(it.t, it.sel, it.levels!==false); });
     hdr.addEventListener('click', function(e){ if(e.target.classList.contains('level-help-btn')) return; var open=grid.style.display!=='none'; grid.style.display=open?'none':'grid'; document.getElementById('joy-arrow').textContent=open?'▼':'▲'; });
 
-    // Headings are in the pool so typing "music" finds Music Making, but they carry drill and
-    // are opened rather than added. Top categories stay out entirely: no parent categories.
     function enjoyItemPool(){
       var out=[];
       ENJOY_CATS.forEach(function(c){
@@ -655,8 +611,6 @@
       });
       return out;
     }
-    // Add sits beside what is being typed, and the panel stays open so several things can go in
-    // at this level one after another. Done closes it.
     function showAddOwn(path){
       var ex=catzone.querySelector('.addown'); if(ex) ex.remove();
       var panel=document.createElement('div'); panel.className='addown';
@@ -728,13 +682,10 @@
     }
     EXPRESS.forEach(function(e){ var el=chip(e,false); el.addEventListener('click', function(){ addExpression(e); }); erow.appendChild(el); });
     var other=chip('+ Other',false,'more'); other.addEventListener('click', function(){ addExpression(''); }); erow.appendChild(other);
-    // A persistent, non-removable field (no X) so there is always somewhere to type.
     if(EXPRESSION_ADDED.length){ addExpression(EXPRESSION_ADDED[0]||'', false); EXPRESSION_ADDED.slice(1).filter(Boolean).forEach(function(x){ addExpression(x, true); }); }
     else { addExpression('', false); }
   }
 
-  // Skills section — mirrors the current intake "What skill pays the bills?"
-  // Tree pulled from the live intake reference-data (skills category > item, 2 levels).
   var SKILL_CATS = ['Arts & Culture','Food & Drink','Physical Wellbeing','Mental Wellbeing','Family Wellbeing','Self-Expression & Beauty','Home & Construction','Transportation','Mechanical & Manufacturing','Business & Finance','Community & Civic','Recreation & Hobbies','Technology & Communications','Nature & Outdoors','Social Events & Gatherings','Pets & Animal Care'];
   var SKILL_TREE = {
     'Arts & Culture':['Photographer','Videographer','Graphic Designer','Muralist','Illustrator','Musician','DJ','Singer','Dancer','Actor','Filmmaker','Writer','Poet','Tattoo Artist','Jewelry Maker','Fashion Designer','Textile Artist','Woodworker','Ceramicist','Live Music'],
@@ -928,14 +879,10 @@
     });
   }
 
-  // Values section — mirrors the current intake "What do you care about deeply?"
-  // A Values | Domains toggle picks which pool of ideas to browse; adds land in two
-  // separate lists (Added values / Added domains). Ideas pulled from reference-data.
   var VALUE_IDEAS = ['Clean Air','Clean Water','Clean Soil','Clean Food','Clean Energy','Biodiversity','Climate Stability','Animal Welfare','Water Security','Food Security','Safety and Peace','Housing and Shelter','Urgent Medical Care','Clothing and Supplies','Support needed','Physical Wellbeing','Mental Wellbeing','Empowerment and Resilience','Freedom and Autonomy','Personal Expression','Economic Opportunity','Local Economic Vitality','Eco Values','Wealth Equity','Quality Goods and Services','Information Access','Social and Civic Engagement','Community Health','Cultural Vitality','Shared Community Resources','Transportation Access','Reliable Utilities','Digital Connectivity','Land Security'];
   var DOMAIN_IDEAS = ['Aerospace','Agriculture and Food','Arts and Entertainment','Building and Construction','Ecology and Nature','Education and Learning','Energy and Utilities','Financial','Government and Policy','Hospitality','Manufacturing','Media','Medical','Real Estate','Retail','Security and Defense','Technology','Telecommunications','Transportation','Wellness and Fitness'];
   var VALUES_ADDED = [];
   var DOMAINS_ADDED = [];
-  // WORK VALUES, 2026-09-14 (see WORK VALUES below renderValues): what somebody wants work to give them, from ikigai.workValues.
   var WORK_VALUES_ADDED = [];
 
   function renderValues(){
@@ -961,12 +908,6 @@
       hdr.addEventListener('click', function(e){ if(e.target.classList.contains('level-help-btn')) return; var open=grid.style.display!=='none'; grid.style.display=open?'none':'grid'; document.getElementById(arrowId).textContent=open?'▼':'▲'; });
       return {grid:grid, refresh:refresh};
     }
-    // Same rule as the other pickers: a lit idea means it is in the list, and it goes out again
-    // when the card does.
-    // ONE LIST PER HEADING. Jessie, 2026-09-14, with Agriculture and Food lit under Domains and nothing under Added
-    // domains: "the domains that I selected are not showing up under the bar". Values and domains shared one list of
-    // what was already added, so a word already among somebody's values (older answers hold sector words there) showed
-    // lit as a domain and could not be added as one. Each heading keeps its own list now: v| for values, d| for domains.
     var VAL_ON={};
     function valKey(typeLabel, name){ return (typeLabel==='Domain'?'d|':typeLabel==='Work value'?'w|':'v|')+String(name).trim().toLowerCase(); }
     function syncValChips(){
@@ -985,7 +926,6 @@
       var x=document.createElement('button'); x.className='practice-item-x'; x.innerHTML='&times;'; x.onclick=function(){ delete VAL_ON[key]; card.remove(); sectn.refresh(); syncValChips(); };
       head.appendChild(nm); head.appendChild(x); card.appendChild(head);
       var cat=document.createElement('div'); cat.className='practice-item-cat'; cat.textContent=typeLabel; card.appendChild(cat);
-      // A work value has no Exploring, Engaged or Leading: it is what somebody wants from work, not how far along they are.
       if (typeLabel === 'Work value') { sectn.grid.appendChild(card); sectn.refresh(); syncValChips(); return; }
       var opts=document.createElement('div'); opts.className='practice-options';
       ['Exploring','Engaged','Leading'].forEach(function(lv){ var b=document.createElement('button'); b.className='practice-btn'+(level===lv?' selected':''); b.textContent=lv; b.onclick=function(){ var was=b.classList.contains('selected'); opts.querySelectorAll('.practice-btn').forEach(function(z){z.classList.remove('selected');}); if(!was){ b.classList.add('selected'); level=lv; } else { level=''; } }; opts.appendChild(b); });
@@ -997,14 +937,11 @@
     var dSec=addedSection('Added domains','dom-arrow');
     VALUES_ADDED.forEach(function(it){ addCard(vSec, it.t, 'Value', it.lvl); });
     DOMAINS_ADDED.forEach(function(it){ addCard(dSec, it.t, 'Domain', it.lvl); });
-    // Work values, under their own heading, only for somebody who has some (see WORK VALUES).
     if (WORK_VALUES_ADDED.length) {
       var wSec=addedSection('Work values','wv-arrow');
       WORK_VALUES_ADDED.forEach(function(t){ addCard(wSec, t, 'Work value', ''); });
       wSec.refresh();
     }
-    // A HEADING WITH NOTHING UNDER IT STILL SAYS WHAT IT IS. Jessie, 2026-09-14: "for some reason the domains
-    // subheading is not showing up correctly". It was only written when a card went in, so no domains meant a blank bar.
     vSec.refresh(); dSec.refresh();
 
     function valueIdeaPool(){ var list=(mode==='values'?VALUE_IDEAS:DOMAIN_IDEAS), typ=(mode==='values'?'Value':'Domain'); return list.map(function(n){ return {name:n, tag:typ}; }); }
@@ -1047,11 +984,6 @@
     renderIdeas();
   }
 
-  // Needs section — mirrors the intake "What are you seeking right now?"
-  // Person / Space / Thing. Person drills sub-type > (skills or recreation);
-  // Space and Thing collect a free-text detail + a local flag. Added items are grouped
-  // into Person / Space / Thing lists, each card showing Type: Item, category, an optional
-  // "Seeking:" detail, and edit / 📍 Local / remove controls.
   var PERSON_SUBS = ['Skills/services','Recreation buddy','Accountability buddy'];
   var THING_SUBS = {
     'Physical goods':{emoji:'📦',placeholder:'Examples: a book, gear or equipment, art supplies, a tool I need'},
@@ -1059,11 +991,6 @@
     'Money':{emoji:'💙',placeholder:'Examples: help with medical, rent, household bills, funding a project'},
     'Living things':{emoji:'🪴',placeholder:'Examples: a cucumber plant, a bouquet of flowers, a clipping from your garden'}
   };
-  // Nobody's profile starts as somebody else's. Every one of these arrays used to hold the
-  // mockup's persona: Cooking, Collaboration, 20 acres open for camping, a truck to lend, a 2.5
-  // pickleball game. That fiction showed on screen whenever a real profile had not loaded, and
-  // pressing Save would have written it into that person's row as though they had typed it.
-  // Jessie saw her own page offering Karina's truck. 2026-09-01.
   var NEEDS_ADDED = [];
 
   function recFlatPool(){ var out=[]; ENJOY_CATS.forEach(function(c){ var n=ENJOY_TREE[c]||{subs:{},items:[]}; Object.keys(n.subs||{}).forEach(function(sc){ (n.subs[sc]||[]).forEach(function(l){ out.push(l); }); }); (n.items||[]).forEach(function(it){ out.push(it); }); }); return out; }
@@ -1071,16 +998,10 @@
   function renderNeeds(){
     listEl.className='list flow'; listEl.innerHTML='';
     var eq=document.createElement('div'); eq.className='enjoy-q'; eq.textContent='What are you seeking right now?'; listEl.appendChild(eq);
-    // Your own words come first. What kind of thing it is, and which category it sits in, are
-    // asked after it has a name rather than before you are allowed to say anything.
     var ownLine=document.createElement('div'); ownLine.className='addown-line'; ownLine.style.margin='4px 0 6px';
     var ownInp=document.createElement('input'); ownInp.type='text'; ownInp.className='need-own'; ownInp.placeholder='Write it in your own words';
     var ownBtn=document.createElement('button'); ownBtn.className='addown-btn'; ownBtn.textContent='Add';
     ownLine.appendChild(ownInp); ownLine.appendChild(ownBtn); listEl.appendChild(ownLine);
-    // What you write IS the thing you are seeking, so it goes in as the name. It used to be put
-    // in `detail` with the name left empty: the card showed it, because the card falls back to
-    // detail, and the save wrote the name, which was blank. Jessie typed "test add", saw it on
-    // the screen, and the sheet received a need with no name at all. 2026-09-01.
     function ownCommit(){ var v=ownInp.value.trim(); if(!v) return; ownInp.value=''; openAddEditor({item:v,type:'person',category:'',level:'',detail:'',local:true}); }
     ownBtn.onclick=ownCommit;
     ownInp.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); ownCommit(); } });
@@ -1182,18 +1103,11 @@
       done.onclick=function(){ panel.remove(); };
     }
 
-    // scheduleSave marks the page changed and saves shortly after. Without it, adding a need
-    // drew on the screen and was never written: autoSave and Done both return early unless the
-    // page is marked changed, so Jessie added a sixth need, saw it, left, and it was gone.
-    // Every one of these four touches the list, so every one of them has to say so. 2026-09-01.
     function addNeed(obj){ NEEDS_ADDED.unshift(obj); renderAdded(); scheduleSave(); }
-    // Person adds go through the confirm editor first (ask local / level / more context).
     function openAddPerson(item, category){ openAddEditor({item:item,type:'person',category:category||'',level:'',detail:'',local:true}); }
     function addSpace(detail, local){ addNeed({item:detail,type:'space',category:'',level:'',local:!!local,detail:''}); }
     function addThing(sub, detail, local){ addNeed({item:detail,type:'thing',category:sub,level:'',local:!!local,detail:''}); }
 
-    // Shared editor form (screenshot): name, type, category, optional level, "what exactly",
-    // local. Used both as a confirm step before adding and when editing via the pencil.
     function buildNeedEditor(src, onSave, onCancel){
       var d={item:src.item||'',type:src.type||'person',category:src.category||'',level:src.level||'',detail:src.detail||'',local:!!src.local};
       var box=document.createElement('div'); box.className='need-editor';
@@ -1257,7 +1171,6 @@
       h.appendChild(car); g.appendChild(h);
       var grid=document.createElement('div'); grid.className='needs-grid';
       items.forEach(function(o){ grid.appendChild(needCard(o)); });
-      // A long list of one kind should be foldable without losing the others.
       h.addEventListener('click', function(){
         var open = grid.style.display !== 'none';
         grid.style.display = open ? 'none' : '';
@@ -1309,19 +1222,12 @@
     updateSummary();
   }
 
-  // ── Shared profile view ("This is me") — the main screen others see ──
   function pvTag(name, opts){
     opts=opts||{};
     var lv=opts.level?'<span class="lv">'+esc(opts.level)+'</span>':'';
     var sb=opts.sub?'<span class="sub">'+esc(opts.sub)+'</span>':'';
     return '<div class="pv-tag'+(opts.cls?' '+opts.cls:'')+'">'+esc(name)+lv+sb+'</div>';
   }
-  // Somebody who signed up through our own door has no Glide row, so there is nowhere for a
-  // picture to come from and no way to make one. This gives them one.
-  //
-  // The shrinking happens here rather than on a server: a phone photo is four megabytes and a
-  // round avatar is never more than six hundred pixels, so the browser does the only work that
-  // was ever needed and about a hundred kilobytes leaves the device.
   var PHOTO_URL = 'https://cw-photos.jessieupp.workers.dev';
   function photoStat(msg){ var el=document.getElementById('pv-photo-stat'); if(el) el.textContent=msg||''; }
   function choosePhoto(){
@@ -1338,7 +1244,6 @@
     var img=new Image();
     img.onload=function(){
       try{
-        // Square from the middle, which is the crop a round frame makes anyway.
         var side=Math.min(img.width, img.height);
         var c=document.createElement('canvas'); c.width=600; c.height=600;
         c.getContext('2d').drawImage(img,(img.width-side)/2,(img.height-side)/2,side,side,0,0,600,600);
@@ -1360,7 +1265,6 @@
       body:blob
     }).then(function(r){ return r.json(); }).then(function(d){
       if(!d || d.status!=='ok' || !d.url){ photoStat((d&&d.message)||'That did not go through.'); return; }
-      // Cache-busted so the new face shows at once rather than after the edge forgets the old one.
       _profilePhoto = d.url + '?v=' + Date.now();
       _loaded.photoURL = d.url;
       photoStat('');
@@ -1425,8 +1329,6 @@
     else if(mode==='manage'){ bc.innerHTML=''; }
     else { bc.innerHTML=''; }
   }
-  // The shell every page shares: the person's name, then the four places they can go. Painted
-  // above the card so it reads as the page's own header rather than part of the profile.
   function paintShellHeader(){
     var host = document.getElementById('pe-shell');
     if (!host) return;
@@ -1441,15 +1343,12 @@
       '<h1 style="font-size:28px;font-weight:400;color:#fff;margin:0 0 16px;letter-spacing:-.01em;">'
       + (nm ? (nm + ' \u{1F331}') : '') + '</h1>'
       + '<div style="display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px;">'
-      // YOUR OWN PAGE NEEDS NO ID IN THE ADDRESS. Jessie, 2026-09-18: "if I go to a URL with the
-      // ID exposed in the domain, I don't ever want to see that again." It is this device's person.
       + pill('My profile', 'https://2gather.network/me/', true)
       + pill('My groups', 'https://2gather.network/mygroups?CWid=' + q, false)
       + pill('My events', 'https://2gather.network/myevents?id=' + q, false)
       + pill('My account', 'https://creating.works/account?CWid=' + q + '&tab=account', false)
       + '</div>';
   }
-  // Same-tab, and the id never shows on hover.
   window._peNav = function(el){
     var u = el && el.getAttribute('data-nav');
     if (u) window.location.href = u;
@@ -1464,55 +1363,27 @@
     setBreadcrumb('view'); renderProfileView();
     window.scrollTo({top:0,behavior:'smooth'});
   }
-  // Leaving the editor returns to whichever screen is "home" for this viewer: your own page is
-  // the Concept A hub; someone else's is the "This is me" quick view. Always flushes the save.
-  // Finishing an edit puts somebody back where they were looking.
-  // Leave at once, and let the save follow you out.
-  //
-  // The first version of this waited for the save to land before navigating, up to six seconds.
-  // Apps Script was answering in thirty-six that afternoon, so the breadcrumb read as a dead
-  // button: Jessie pressed it, nothing happened, she pressed it again. Waiting was never
-  // necessary. `keepalive` already tells the browser to finish the request after the page has
-  // gone, which is the whole point of it. 2026-09-01.
   function goHome(){
     try { harvest(); } catch (e) {}
     saveOnTheWayOut();
     window.location.href = 'https://2gather.network/profile/';
   }
 
-  // Every other way out of the page: the back button, closing the tab, the top menu, a link we
-  // do not control. pagehide fires for all of them.
   window.addEventListener('pagehide', saveOnTheWayOut);
   document.addEventListener('visibilitychange', function () {
     if (document.hidden) saveOnTheWayOut();
   });
-  // Which inbox to go and look in. Masked: anybody who reaches this page can press Send code,
-  // and the address on file is not necessarily theirs to read in full.
   function _maskEmail(v){
     var e=String(v||'').trim(), at=e.indexOf('@');
     if(at<1) return '';
     var u=e.slice(0,at), d=e.slice(at+1);
     return u.slice(0,1)+'\u2022\u2022\u2022'+(u.length>2?u.slice(-1):'')+'@'+d;
   }
-  // Verify identity BEFORE entering the editor. Once verified, editing is silent for 60 min.
   function requestEdit(step){
     if(!_id || _editToken){ enterEdit(step); return; }
-    // Sending somebody to 2gather.network/signin cannot work from here. The session it
-    // mints lives in that domain's storage and this page is on creating.works, which
-    // cannot read it, so the door opened and closed on the same step. Until the session
-    // moves somewhere both sites can see, asking here is the only way in that works.
-    //
-    // Which section to open once they are through. Every Edit button on the profile calls
-    // this, and the profile is now drawn behind the card, so pressing one while a code is
-    // already on its way used to build the card a second time. That wiped the line naming
-    // their inbox and the box the code goes in, and it looked for all the world like the
-    // code had never sent. The card is built once and only its destination changes.
     _pendingStep = (typeof step === 'number' && step >= 0) ? step : 0;
     var _openGate = document.getElementById('da-pin');
     if(_openGate){ _openGate.scrollIntoView({behavior:'smooth',block:'center'}); return; }
-    // Draw the page before asking. Without this the card floated on an empty background,
-    // with no name, no photo and nothing saying whose profile was about to be opened.
-    // renderProfileView only paints, where showView would also harvest and save.
     setBreadcrumb('view'); renderProfileView();
     showPinGate(document.getElementById('profile-view'), function(){ enterEdit(_pendingStep); },
                 'This is your profile. To change anything, verify it is you.');
@@ -1524,12 +1395,9 @@
     window.scrollTo({top:0,behavior:'smooth'});
   }
 
-  // ── Manage hub (Concept A: top tabs). Reachable at ?manage=1 and from the profile links. ──
-  // Opens our real, live "Groups I host" page (full width, real data) — not a placeholder panel.
   function openMyGroups(){ window.location.href='https://2gather.network/mygroups'+(_id?'?CWid='+encodeURIComponent(_id):''); }
   function openMyEvents(){ window.location.href='https://2gather.network/myevents'+(_id?'?id='+encodeURIComponent(_id):''); }
   function openIntake(){ window.location.href='https://creating.works/profile'+(_id?'?CWid='+encodeURIComponent(_id):''); }
-  // Concept A: top tabs. "My profile" is not a tab — the whole page is the profile.
   var MH_SECTIONS = [
     {key:'groups', label:'My groups'},
     {key:'events', label:'My events'},
@@ -1618,26 +1486,8 @@
   document.getElementById('next-btn').addEventListener('click', function(){ harvest(); flushSave(); SEC_DONE[curSec]=true; if(curSec<SECTIONS.length-1){ paint(curSec+1); window.scrollTo({top:0,behavior:'smooth'}); } else { goHome(); } });
   document.getElementById('back-btn').addEventListener('click', function(){ harvest(); flushSave(); if(curSec>0){ paint(curSec-1); window.scrollTo({top:0,behavior:'smooth'}); } else { goHome(); } });
 
-  // ── Phase 3.2: build the category trees from the live reference-data ──
-  // (getReferenceData), falling back to the hardcoded trees if the fetch fails.
   var GS_URL='https://cw-api-gate.jessieupp.workers.dev';
 
-// The cache is trusted now, and nothing here skips it.
-//
-// History, because this line has moved twice in three days. On 2026-08-30 the page began adding
-// nocache=1 to every read about you, since a save cleared nothing at the gate and a profile could
-// show pre-save answers for six hours. That cost the whole wait on every visit. On 2026-09-01 the
-// gate learned to clear a person's cached reads the moment they write, so the bypass was cut down
-// to twenty seconds after a save.
-//
-// Twenty seconds was still wrong, and Jessie found it within minutes: the editor autosaves, so
-// every save restamped the clock and kept her in the slow path the entire time she was editing,
-// and for twenty seconds after every keystroke that triggered a save. She saved, moved pages, came
-// back, and everything took five seconds again.
-//
-// It is gone. Every read this page makes carries appearId and nothing else, which is exactly the
-// key the gate's purge rebuilds, so a save clears them all and the next read is fresh. The thirty
-// second life on those entries is the backstop if a purge ever misses.
 
   var LANG_LIST=['English','Mandarin','Cantonese','Hindi','Spanish','Arabic','Bengali','Portuguese','French','Urdu',
     'Russian','Indonesian','German','Japanese','Swahili','Marathi','Telugu','Turkish','Tamil','Vietnamese','Korean',
@@ -1647,7 +1497,6 @@
   function buildTreesFromRefData(rd){
     try{
       LANG_LIST=(rd.languages||[]).map(function(x){ return String(x).trim(); }).filter(Boolean);
-      // Recreation → Enjoy tree (recType > category > item)
       var recOrder=['Movement & Performance','Sports','Outdoor & Nature','Games & Strategy','Making & Collecting'];
       var etree={};
       (rd.recreation||[]).forEach(function(r){
@@ -1659,7 +1508,6 @@
       });
       var ecats=recOrder.filter(function(c){return etree[c];}).concat(Object.keys(etree).filter(function(c){return recOrder.indexOf(c)<0;}));
       if(ecats.length){ ENJOY_CATS=ecats; ENJOY_TREE=etree; }
-      // Skills → per parent-category lists (16 fixed parent cats)
       var scats=['Arts & Culture','Food & Drink','Physical Wellbeing','Mental Wellbeing','Family Wellbeing','Self-Expression & Beauty','Home & Construction','Transportation','Mechanical & Manufacturing','Business & Finance','Community & Civic','Recreation & Hobbies','Technology & Communications','Nature & Outdoors','Social Events & Gatherings','Pets & Animal Care'];
       var stree={}, sseen={}; scats.forEach(function(c){ stree[c]=[]; sseen[c]={}; });
       (rd.skills||[]).forEach(function(s){
@@ -1667,20 +1515,16 @@
         if(stree[cat]!==undefined && it && !sseen[cat][it.toLowerCase()]){ sseen[cat][it.toLowerCase()]=1; stree[cat].push(it); }
       });
       SKILL_CATS=scats; SKILL_TREE=stree;
-      // Values / Domains
       var vi=(rd.values||[]).map(function(v){return String((v&&v.item!==undefined)?v.item:v||'').trim();}).filter(Boolean);
       var di=(rd.domains||[]).map(function(v){return String((v&&v.item!==undefined)?v.item:v||'').trim();}).filter(Boolean);
       if(vi.length) VALUE_IDEAS=vi;
       if(di.length) DOMAIN_IDEAS=di;
-      // Methods (display strings) and Person sub-types
       var md=(rd.methodsDisplay||[]).map(function(m){return String(m||'').trim();}).filter(Boolean);
       if(md.length) METHODS=md;
       var pt=(rd.personTypes||[]).map(function(p){return String(p||'').trim();}).filter(function(p){return p && p.toLowerCase()!=='other';});
       if(pt.length) PERSON_SUBS=pt;
-    }catch(e){ /* keep the hardcoded fallback */ }
+    }catch(e){  }
   }
-  // ── Phase 3.3b: SAVE gated by an emailed one-time PIN. ──
-  // Edit sections render from arrays but don't sync edits back, so read the DOM back before serialize.
   function harvest(){
     try{
       var sec=SECTIONS[curSec]; if(!sec) return;
@@ -1712,12 +1556,10 @@
   function serialize(){
     harvest();
     return {
-      // A need with no name is not a need. Falls back to the person's own words if the name is
-      // somehow empty, and drops the row entirely rather than writing a nameless one.
       needs: NEEDS_ADDED.map(function(n){
         var nm = String(n.item||'').trim() || String(n.detail||'').trim();
         if(!nm) return '';
-        var nt=n.work?'work':(n.type==='person'?'skill':n.type==='space'?'space':'thing');   // :work kept (see WORK VALUES)
+        var nt=n.work?'work':(n.type==='person'?'skill':n.type==='space'?'space':'thing');   
         var extra = (String(n.item||'').trim() && n.detail) ? '~'+encodeURIComponent(n.detail) : '';
         return nm+(n.local?':local':'')+':'+nt+(n.category?':'+n.category:'')+extra;
       }).filter(Boolean).join('|'),
@@ -1731,9 +1573,6 @@
       haves: (SECTIONS[4].data||[]).map(function(h){ return (h.text||'')+(h.cats&&h.cats[0]?':'+h.cats[0]:''); }).filter(function(s){ return s && s.charAt(0)!==':'; }).join('|')
     };
   }
-  // The verification is kept where profile.html already keeps it, under the same key and with
-  // the same shape, so verifying on either page covers both for the hour. Held only in memory
-  // before this, which is why every page load asked again.
   var _EDIT_KEY='cw-edit-'+String(_id||'').split('.').join('').toLowerCase();
   function _tokenGet(){
     try{
@@ -1743,8 +1582,6 @@
         if(o&&o.t&&o.exp&&Date.now()<=(o.exp-60000)) return o.t;
         localStorage.removeItem(_EDIT_KEY);
       }
-      // Signing in at 2gather.network/signin mints exactly this session and keeps it
-      // under its own key. Somebody who has just signed in is not asked again here.
       var t2=localStorage.getItem('cw-token')||'';
       var who=String(localStorage.getItem('cw-id')||'').split('.').join('').toLowerCase();
       var mine=String(_id||'').split('.').join('').toLowerCase();
@@ -1757,7 +1594,6 @@
     }catch(e){ return ''; }
   }
   function _tokenPut(t){
-    // The token carries its own expiry after the dot, so the page never has to guess the hour.
     try{
       var exp=parseInt(String(t).split('.')[1],10);
       if(!exp||exp<Date.now()) exp=Date.now()+60*60*1000;
@@ -1768,7 +1604,7 @@
   function setSaveStat(txt){ var s=document.getElementById('da-savestat'); if(s) s.textContent=txt||''; }
   function saveUrl(){
     var d=serialize();
-    _lastSaved = d;                    // what the profile page will be handed
+    _lastSaved = d;                    
     var u=GS_URL+'?action=saveIntake&appearId='+encodeURIComponent(_id)+'&secure=1&editToken='+encodeURIComponent(_editToken)
 
       +'&needs='+encodeURIComponent(d.needs)+'&interests='+encodeURIComponent(d.interests)+'&skills='+encodeURIComponent(d.skills)
@@ -1784,32 +1620,20 @@
     var u = saveUrl();
     return fetch(u).then(function(r){ return r.json(); });
   }
-  // A save that survives the page closing. `keepalive` tells the browser to finish the request
-  // even though the document is going away; a plain fetch is cancelled the instant you navigate,
-  // which is how Jessie's edits reached nothing at all. Nothing reads the answer, on purpose:
-  // there is no page left to tell.
   function saveOnTheWayOut(){
     if(_viewing || !_id || !_dirty || !_editToken) return;
     try { fetch(saveUrl(), { keepalive: true }); _dirty = false; } catch (e) {}
   }
-  // Automatic save: debounced on any edit, flushed when leaving a step or the editor.
   function autoSave(){
     if(_viewing){ setSaveStat('Looking, not editing.'); return; }
-    // NOTHING IS SAVED UNTIL THE PROFILE HAS LOADED (row 176, 2026-09-15; the same guard as 2gather.network's editor). A
-    // load that failed left the boxes empty and the autosave wrote them over the real answers.
     if(!window._profAnswered){ setSaveStat(window._profFetchFailed ? 'Your profile did not load, so nothing was saved. Reload the page.' : 'Saving once your profile has loaded…'); if(!window._profFetchFailed){ if(_saveTimer) clearTimeout(_saveTimer); _saveTimer=setTimeout(autoSave, 3000); } return; }
     if(!_id || !_dirty || _saving) return;
-    if(!_editToken){ return; } // identity is verified before entering the editor
+    if(!_editToken){ return; } 
     _saving=true; setSaveStat('Saving…');
     postSave().then(function(resp){
       _saving=false;
       if(resp&&resp.status==='ok'){
         _dirty=false; setSaveStat('Saved 🌱'); setTimeout(function(){ if(!_dirty && !_saving) setSaveStat(''); },2000);
-        // Hand what was just saved to the profile page, so the person who did the work is not the
-        // one who waits. Saving clears their cached copy at the gate, on purpose, so their next
-        // read is a cold fetch: measured 2026-09-01 at five to seven seconds, and thirty-six when
-        // Apps Script was struggling. Everybody else's profile came back instantly. This carries
-        // the answer across rather than asking for it again.
         try {
           sessionStorage.setItem('cw-just-saved-profile', JSON.stringify({
             at: Date.now(), id: String(_id||''), data: _lastSaved
@@ -1821,11 +1645,8 @@
   }
   function scheduleSave(){ if(!_id) return; _dirty=true; if(_saveTimer) clearTimeout(_saveTimer); _saveTimer=setTimeout(autoSave, 900); }
   function flushSave(){ if(_saveTimer) clearTimeout(_saveTimer); autoSave(); }
-  // Any edit inside the step list marks the profile dirty and schedules a save.
   listEl.addEventListener('input', scheduleSave);
   listEl.addEventListener('click', scheduleSave);
-  // The "verify it's you" gate. host = where it renders (profile view before entering, or the editor on expiry).
-  // Button labels stay short (<=3 words, no banned words); all status lives in the text line, never the button.
   function showPinGate(host, onOk, msg){
     if(!host) return;
     var bar=document.getElementById('da-pin');
@@ -1844,29 +1665,18 @@
     go.onclick=function(){ var c=inp.value.trim(); if(!c) return; st.textContent='Checking…'; go.disabled=true; fetch(GS_URL+'?action=verifyProfilePin&appearId='+encodeURIComponent(_id)+'&code='+encodeURIComponent(c)).then(function(r){return r.json();}).then(function(resp){ if(resp&&resp.status==='ok'&&resp.editToken){ _editToken=resp.editToken; _tokenPut(_editToken); bar.remove(); if(onOk) onOk(); } else { go.disabled=false; st.textContent=(resp&&resp.message)||'Invalid code.'; } }).catch(function(){ go.disabled=false; st.textContent='Could not verify. Try again.'; }); };
     bar.scrollIntoView({behavior:'smooth',block:'center'});
   }
-  // Subtle save-status line at the top of the editor.
   (function(){ var em=document.getElementById('edit-mode'); if(em){ var s=document.createElement('div'); s.id='da-savestat'; s.style.cssText='font-size:13px;color:var(--muted);font-weight:600;text-align:right;min-height:16px;margin-bottom:6px;'; em.insertBefore(s, em.firstChild); } })();
 
   var _pRef=fetch(GS_URL+'?action=getReferenceData').then(function(r){return r.json();}).then(function(rd){ buildTreesFromRefData(rd); }).catch(function(){});
   var _pProf=_id ? fetch(GS_URL+'?action=getProfile&appearId='+encodeURIComponent(_id)+'&meToken='+encodeURIComponent((function(){try{return localStorage.getItem('cw-token')||'';}catch(e){return '';}})())).then(function(r){return r.json();}).then(function(resp){ window._profAnswered = !!(resp && (resp.found===true || (resp.found===false && resp.status!=='error'))); if(resp&&resp.found&&resp.data){ _profilePhoto=resp.photo||''; _profileName=resp.name||''; _pageLink=resp.pageLink||''; loadProfile(resp.data); } }).catch(function(){ window._profFetchFailed = true; }) : Promise.resolve();
   var _manageParam=_param('manage');
-  // Concept A: your OWN page lands on the hub (welcome + tabs). The "This is me" card is the
-  // quick view of SOMEONE ELSE, the way it appears from a bulletin board (?show=them&me=you).
   var _stepParam=(function(){ var v=parseInt(_param('step'),10); return (v>=0 && v<=4) ? v : 0; })();
   var _meParam=(_param('me')||_param('CWid')||_param('memberCard')||'').replace(/\./g,'').toLowerCase();
   var _showParam=(_param('show')||'').replace(/\./g,'').toLowerCase();
-  // Somebody else's profile is read-only, and it used to need BOTH show and me in the address to
-  // know that. A link with only show on it therefore opened their profile with live Edit buttons.
-  // The device already knows who is looking, so it is asked rather than the address.
   var _meNow = (function(){ try { return (window.CW && CW.me) ? String(CW.me().id||'').replace(/\./g,'').toLowerCase() : ''; } catch(e){ return ''; } })();
   var _viewingSomeoneElse = !!(_showParam && _showParam !== (_meNow || _meParam));
-  // Nothing at all was drawn until both calls came back, and those calls are slow: measured on
-  // 2026-08-29 at 9 seconds for the reference data and 39 for the profile. So this page sat
-  // completely blank for the best part of a minute and read as broken rather than as loading.
-  // It says what it is doing now, and a call that fails leaves a sentence rather than a void.
   var _bootNote = document.createElement('div');
   _bootNote.id = 'pe-booting';
-  // White. It sits on the blue, and the grey it used to be was all but unreadable there.
   _bootNote.style.cssText = 'padding:56px 20px;text-align:center;color:#fff;font-size:15px;';
   _bootNote.textContent = 'Loading your profile…';
   (document.getElementById('pe-shell') || document.body).appendChild(_bootNote);
@@ -1877,9 +1687,6 @@
   Promise.all([_pRef,_pProf]).then(function(){
     _bootDone();
     if(_manageParam){ var _mk=(['groups','events','permissions','data'].indexOf(_manageParam)>-1)?_manageParam:'data'; showManage(_mk); }
-    // One page reads a profile and one page changes it. This is the one that changes it, so it
-    // opens the circles and nothing else. Somebody else's profile is not editable by definition,
-    // so a link naming one belongs on the reading page instead.
     else if(_viewingSomeoneElse && _showParam){
       window.location.replace('https://2gather.network/profile/?show=' + encodeURIComponent(_param('show')));
     }
@@ -1890,4 +1697,4 @@
     if (n) { n.textContent = 'Your profile could not be loaded. Reload the page to try again.'; }
   });
 </script>
-<script src="https://2gather.network/nav/topbar.js?v=6.18" defer></script>
+<script src="https://2gather.network/nav/topbar.js?v=6.19" defer></script>
