@@ -119,10 +119,14 @@ does what is the nine-row table in `The-New-Build-Repository/design/start-here.m
   old single letter series collided twice in one morning: two different DD rows and two different DE
   rows, written minutes apart by different chats. When she then says "DD go", neither chat can be
   sure she means its own row and the wrong one may act.
-- **Every block she pastes into another chat carries a label** — `A1`, `A2` … `A9`, then `B1`,
-  counting within your own chat across the whole conversation. It goes in the item heading AND as the
-  first thing inside the fence. She pastes constantly between nine chats, and without a label she
-  cannot tell a block she already sent from one she skipped — both look identical.
+- **Every block she pastes into another chat carries a label: your chat's own letter and a number.**
+  `P1`, `P2`, `P3` … counting up without limit, in the item heading AND as the first thing inside the
+  fence. **Profile top nav = P, Groups = G, Events = E, Data integrity = D, HTML copy = H, ArangoDB =
+  R, Jazz mono repo = J, CW and Org forms = C, Page 0 Main = M.** `A` is deliberately unused: every
+  chat counted from `A1` for part of 2026-09-21, so two different `A2`s and an `A6` are already in
+  circulation and none of them should be reused. She pastes constantly between nine chats, and
+  without a label unique to the sender she cannot tell a block she already sent from one she skipped
+  — both look identical.
 - **Every block she pastes into another chat opens by naming the sending chat**, e.g. *From the
   Profile / top nav chat, to the Groups chat. Jessie is carrying this between chats; it is not her
   asking.* Without it the block arrives in her voice, the receiving chat reads a peer's suggestion as
