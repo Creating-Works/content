@@ -1838,8 +1838,8 @@
     };
     box.innerHTML = '<div style="font-size:17px;font-weight:800;color:#1A2E42;margin-bottom:2px;">For additional forms of income or trade, do you have any resources to offer others right now?</div>'
       + '<div style="font-size:13.5px;color:#6B7A8D;margin-bottom:14px;">Pick as many as fit or add your own.</div>'
-      + section('space', rd.spaceOfferTypes, 'Space')
-      + section('thing', rd.thingOfferTypes || [], 'Things');
+      + section('space', rd.spaceOfferTypes, 'My space offerings')
+      + section('thing', rd.thingOfferTypes || [], "Something I'm offering as well");
     var toggle = function(kind, v){
       var at = -1;
       CW_HAVES.forEach(function(w, i){ if (at < 0 && cwName(w).toLowerCase() === v.toLowerCase() && (kind === 'space') === (cwKindOf(w) === 'space')) at = i; });
