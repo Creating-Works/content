@@ -137,13 +137,38 @@ were already wrong on 2026-09-21.
   DO differently. No answer, no block.
 - **Every block she pastes into another chat carries a label: your chat's own letter and a number.**
   `P1`, `P2`, `P3` … counting up without limit, in the item heading AND as the first thing inside the
-  fence. **Profile top nav = P, Groups = G, Events = E, Data integrity = D, HTML copy = H, ArangoDB =
-  R, Jazz mono repo = J, CW and Org forms = C, Page 0 Main = M, Network = N, Support and Tickets = S,
-  UX Design = X, Expressions = T, Queue = Q.** `A` is deliberately unused: every
-  chat counted from `A1` for part of 2026-09-21, so two different `A2`s and an `A6` are already in
-  circulation and none of them should be reused. She pastes constantly between all these chats, and
-  without a label unique to the sender she cannot tell a block she already sent from one she skipped
-  — both look identical.
+  fence. She pastes constantly between all these chats, and without a label unique to the sender she
+  cannot tell a block she already sent from one she skipped — both look identical. **The letters are
+  the table below.** Find your own chat's title in it; if your chat is not there, add a row rather
+  than asking her.
+
+| letter | chat |
+|---|---|
+| `A` | **burned, never reuse.** Every chat counted from `A1` for part of 2026-09-21, so two different `A2`s and an `A6` are already in circulation |
+| `C` | CW and Org forms |
+| `D` | Data integrity |
+| `E` | Events |
+| `G` | Groups |
+| `H` | HTML copy |
+| `J` | Jazz mono repo |
+| `M` | Page 0 Main |
+| `N` | Network |
+| `P` | Profile top nav |
+| `Q` | Queue |
+| `R` | ArangoDB |
+| `S` | Support and Tickets |
+| `T` | Expressions |
+| `X` | UX Design |
+
+  Free, for the next chat: **B, F, I, K, L, O, U, V, W, Y, Z**. Take the one that says your chat's
+  name out loud and add your row; tell her which you took, do not make her pick.
+
+  **It is a table rather than a sentence for one reason.** It was a single run-on line until
+  2026-09-21, and within one minute that day two chats added themselves to it at once in the same
+  shared checkout. Both edits landed on the same physical line, so neither could be committed without
+  carrying the other, and a letter came within a character of being lost silently — nothing errors, a
+  chat just reads a stale line and labels its blocks wrong. One row per chat means two chats adding
+  themselves touch different lines and git merges them instead of colliding.
 - **Every block she pastes into another chat opens by naming the sending chat**, e.g. *From the
   Profile / top nav chat, to the Groups chat. Jessie is carrying this between chats; it is not her
   asking.* Without it the block arrives in her voice, the receiving chat reads a peer's suggestion as
