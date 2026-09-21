@@ -721,7 +721,12 @@
                  rows:[['My events','Everything you host, share or have said you are going to.','https://2gather.network/myevents/','Open'],
                        ['My groups','The groups you are in and the ones you host.','https://2gather.network/mygroups/','Open'],
                        ['My profile','How you look to everybody else.','https://2gather.network/me/','Open']] },
-      license: { name:'Creating.Works',  line:'Because creating works.', on:true, rows:[] }
+      license: { name:'Creating.Works',  line:'Because creating works.', on:true,
+                 rows:[['Group page','Its own page and passcode, with only the people invited inside.','',''],
+                       ['Matching','What one person or organization offers meets what another needs, inside the group.','',''],
+                       ['Events calendar','Your gatherings in one place, with sign-up and who is coming.','',''],
+                       ['Bulletin board','Asks and offers that stay up between gatherings.','',''],
+                       ['Invitations','A passcode link that brings somebody in and lands them in the group.','','']] }
     };
     if(PRODUCTS[key]){
       var pr=PRODUCTS[key];
@@ -742,8 +747,8 @@
         h+='<div style="display:flex;align-items:flex-start;gap:18px;padding:16px 0;border-bottom:1px solid var(--line);">'
           +'<div style="flex:1 1 auto;min-width:0;"><div style="font-size:16px;font-weight:700;">'+esc(r[0])+'</div>'
           +(r[1]?'<div style="font-size:13.5px;color:var(--soft);margin-top:3px;">'+esc(r[1])+'</div>':'')
-          +'</div><div style="flex:0 0 auto;font-size:14px;"><a href="'+r[2]
-          +'" style="color:#1F699E;font-weight:700;text-decoration:none;">'+esc(r[3])+'</a></div></div>';
+          +'</div>'+((r[2]&&r[3])?'<div style="flex:0 0 auto;font-size:14px;"><a href="'+r[2]
+          +'" style="color:#1F699E;font-weight:700;text-decoration:none;">'+esc(r[3])+'</a></div>':'')+'</div>';
       });
       p.innerHTML=h;
       var _pe=document.getElementById('prod-enable');
