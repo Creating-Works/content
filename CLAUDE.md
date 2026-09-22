@@ -235,6 +235,27 @@ chat tells her it is done and nobody finds out for hours.
    before defining it, and suspect a second definition before suspecting the deploy.
 5. **Pushing Apps Script is not deploying it.** `clasp push` saves the code; it does not ship it.
 
+## Say what a problem does, not what it resembles
+
+No war, weapon or disaster words for a technical problem. **Landmine, trap, minefield, blow up,
+kill, attack, fire, bomb, hostage, casualty, war room** — none of them. Nor alarm framing like *a
+big concern* or *this is dangerous*. Jessie, 2026-09-22: *"Instead of big concern or anything else
+nothing to do with war"*, and *"Regarding land mines or any words that you use"*.
+
+They are worse than decoration. A word like *landmine* says a thing is frightening without saying
+what it does, so she has to ask what actually happens — and every one of these problems already has
+a plain and more useful sentence sitting behind it. **Name the effect and who it reaches.**
+
+| not this | this |
+|---|---|
+| `ikigai.topics` is a landmine | the header is `" topics"` with a leading space, so a write to `topics` is dropped and says it succeeded |
+| this will blow up the save | the save drops the field and reports success, so it looks like it worked |
+| a big concern on the profile | six people see a copy of their own answers from months ago |
+| the deploy is a disaster | the push succeeded and the site is still serving the old copy |
+
+The same goes for anything written as her: the queue, the docs, commit messages, a block she pastes
+into another chat.
+
 ## Nothing internal goes in a page we serve
 
 The pages are public and anyone can read the source, so **no comments in shipped HTML or JS** — not
