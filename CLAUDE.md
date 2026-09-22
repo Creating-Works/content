@@ -225,6 +225,11 @@ chat tells her it is done and nobody finds out for hours.
 1. **A failed site build ships nothing and says nothing.** GitHub Pages errored twice on 2026-09-21
    and kept serving the previous copy. The push succeeded, git was clean, an hour of work was
    invisible. After every push, curl the live page for a string from the new code.
+   **But `errored` in the Pages API does not always mean it failed.** When two chats push within a
+   minute, the first build is CANCELLED and reported as `errored`, while the second one ships BOTH
+   commits. On 2026-09-22 two pushes 59 seconds apart both showed `errored` and both were live.
+   So the string on the live page is the answer, never the build status on its own, and
+   `gh run list` tells cancelled from failed where `gh api .../pages/builds` cannot.
 2. **`tagsMode=replace`, or nothing can ever be removed.** Without it the backend MERGES what you
    send into the existing tag columns. A delete does nothing and the save still reports success.
 3. **A write to a field with no column is dropped in silence.** A save walks the tab's header row and
