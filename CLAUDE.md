@@ -54,9 +54,14 @@ INSIDE this shape, underneath the Context, never instead of the shape. Ending a 
 - **Write a column as `Tab.field`.** `presence.lastActiveAtDate`, `Info.guestID`, `ikigai.languages`.
   A field name on its own makes her ask which tab, every time. The dotted form answers it before
   she asks and it reads faster than a sentence naming both.
-- **End every reply with the open questions**, restated in full with the exact clicks, and keep
-  re-asking every turn until she answers. Silence means she missed it. Re-paste any pending code
-  each time rather than pointing back up the thread.
+- **Ask an open question ONCE, then stop asking.** It was the opposite of this until 2026-09-19,
+  when re-asking every turn was found to bury the one new thing in a reply under a block she had
+  already read. So: ask it once, in the reply shape, and after that it lives on its queue row, not
+  in the chat. **A pending item is never reminded, not even as one line at the end** — she raises it
+  when she wants it. Her words, 2026-09-18: *"dont give me a list of things everytime until we are
+  doine wiht all of them. i'll tell you which one to work on"*, and again on 2026-09-22 of a
+  one-line reminder appended to three replies running: *"i dont' like this at all"*. Name a pending
+  thing in a few words only when it genuinely blocks the next step, never the whole block again.
 - **Every open question takes the reply shape at the top of this file.** Numbered, then Context,
   Question, Action. She must never hunt for what is being asked. A question she has to go looking
   for is a question she cannot answer.
@@ -142,7 +147,13 @@ were already wrong on 2026-09-21.
   line, once: *"Re-read CLAUDE.md and start-here.md."* Her words, 2026-09-21, after five blocks in an
   hour of which one mattered: *"I just feel like I'm out of the loop if I'm just a copier and a
   paster for my role."* Before writing any block, answer in one sentence what the receiving chat will
-  DO differently. No answer, no block.
+  DO differently. No answer, no block. **A pattern, a convention or anything already written into
+  the design docs is never a block**, however useful it is, because every chat reads those files at
+  startup and a block is a second copy that makes her carry it by hand. Her words, 2026-09-22, of a
+  card-layout pattern that was already in the checklist before the block was written: *"wouldn't you
+  put this in the design documentation? I don't want to have to share things like this across all
+  chats unless there is a discrepancy or something that needs to be fixed right now."* So the test
+  is not "is this worth knowing", it is **"is something broken right now that this stops"**.
 - **Every block she pastes into another chat carries a label: your chat's own letter and a number.**
   `P1`, `P2`, `P3` … counting up without limit, in the item heading AND as the first thing inside the
   fence. She pastes constantly between all these chats, and without a label unique to the sender she
@@ -203,12 +214,26 @@ were already wrong on 2026-09-21.
   **clasp check: found `<function>` from `<chat>`, merged**. Set 2026-09-22 at her word: *"let's try
   that rule and explicitly say if this rule was used to test it later."* A rule nobody can tell was
   followed cannot be judged later, and this one is meant to be judged.
+- **Name a one-off with YOUR chat's letter, never the shared `n` series.** `g1_`, `p1_`, `e1_` …
+  counting up within your own chat: `g1_hostsListedTwice_2026_09_22`. The `n` series is CLOSED at
+  n197 — chats numbering into one shared list collided on n196 on 2026-09-22, the same way the queue
+  rows collided on DD, and a number nobody owns is a number two chats pick at once. Your letter is
+  the one in the paste-block rule above, and that is the ONLY list of letters — this line
+  deliberately does not repeat it, because the copy that used to sit here held nine chats when
+  fourteen had letters, so Network, Support and Tickets, UX Design, Expressions and Queue each read
+  a rule that gave them no letter at all. Grep the name before you define it — in Apps Script the last definition of a name wins, across every file.
 - **`clasp push` replaces the WHOLE Apps Script file, so pull first, every time.** `all.gs.js` is
   append-only and several chats add one-offs to it. Git handles the repo, but `npx clasp push` sends
   your local copy to the editor and overwrites what is there — so a push from a working copy taken
   before somebody else's append silently wipes their one-off out of the editor while the repo still
-  shows both. Pull immediately before every push, and afterwards check the editor still holds the
-  other chat's most recent function.
+  shows both. **The pull that matters is `npx clasp pull`, not `git pull`** — only clasp reads what
+  the editor actually holds. In `~/Documents/creating-works-gs`: commit or set aside your change,
+  run `npx clasp pull`, then `git diff`. The working tree now holds the EDITOR, and the direction
+  matters: `+` lines are what the editor has and your commit does not — somebody else's work, stop
+  and ask — while `-` lines are just your own change being pulled over. Then
+  re-apply your change, `npx clasp push`, and `npx clasp pull` once more: a clean `git status` is
+  the proof. Grepping your own file after pushing proves nothing — it can only show what you just
+  sent, never what you erased.
 - **`nav/topbar.js` is pinned by version in 29 pages across both repos, 21 in events and 8 in content.** One chat at a time moves
   that number, and says on the queue when it does. **Edit those pages in `~/Documents/events` and
   `~/Documents/content` directly, never from a worktree** — the 27 worktrees under
@@ -217,7 +242,29 @@ were already wrong on 2026-09-21.
   pages at a version that was never shipped — nothing conflicts, nothing errors, the fix reaches
   nobody.
 
-## Five ways to be told it worked when it did not
+## The number that is actually free, and the one chat whose letter does not work
+
+Counted in the project on 2026-09-22, after the letter scheme arrived. **Count from what is already
+there, not from 1.** Six letters were in use long before the scheme existed, so "start at 1" puts a
+second `g1_`, `e1_`, `d1_`, `h1_`, `c1_` and `m1_` into a dropdown that already has one. Do not
+trust a list of numbers here — it goes stale the moment another chat adds one. Run this, with your
+own letter in both places:
+
+```
+grep -ho "^function g\([0-9]*\)_" ~/Documents/creating-works-gs/*.js | sed 's/^function g//;s/_$//' | sort -n | tail -1
+```
+
+**The Network chat cannot use its own letter.** `n1_` to `n9_` belong to the retired `n` series,
+which is closed at `n197`, so Network uses **`nw1_`** upward. Its row in the table above still says
+`N`, because that is the paste-block letter and it is not the same thing.
+
+**And a correction to the REASON, because a wrong reason gets applied elsewhere.** A prefix clash
+does not silently override anything: the whole function name is the identifier, so
+`g1_previewOfferToMe` and `g1_hostsListedTwice` are two different functions and both run. What
+last-definition-wins needs is the WHOLE name repeated — which is why grepping the exact name before
+defining it is the rule doing the protecting, and this one is tidiness.
+
+## Six ways to be told it worked when it did not
 
 Every one of these has happened here. The shape is the danger: the failure reports success, so the
 chat tells her it is done and nobody finds out for hours.
@@ -239,6 +286,12 @@ chat tells her it is done and nobody finds out for hours.
    permanently unreachable. It emptied every place field on the site on 2026-09-19. Grep the name
    before defining it, and suspect a second definition before suspecting the deploy.
 5. **Pushing Apps Script is not deploying it.** `clasp push` saves the code; it does not ship it.
+6. **A lookup that hides its failures is indistinguishable from a column nobody filled in.**
+   `ikigai.fullName` was an `IFERROR(VLOOKUP(...))` that had matched nothing since the day it was
+   written, and all 406 misses came back as empty cells. It read as missing data, and the request
+   it produced was "put the names in" — which would have destroyed the lookup. Use `IFERROR` for a
+   miss you expect, never around a lookup that should always hit. **A column that is wholly empty
+   gets checked before it gets filled.**
 
 ## Say what a problem does, not what it resembles
 
