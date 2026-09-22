@@ -108,9 +108,13 @@ not to take, search for a second definition before suspecting the deploy.
 |---|---|
 | The one person table | `Info` on Creating Works Data `1Vi3D1UJbvB5GcBBY-dO-bkV1BRLBZn6nJUQzWCFHxYU` |
 | Glide's and Kumu's, read-mostly | `Main` on `1XyYmK6Jai-MXcjDY7NwoNMbAXJqu09bVjl2SqIFfC8U` |
-| Backend | Apps Script project **Creating.Works GS** |
+| Backend | Apps Script project **Creating.Works GS**, script id `1W0EcFkRx5qSxSXJK7n-QQvjSylgsGEQuZdlI0Hp4cnaSmZIY9HUjYlHG` |
+| The Apps Script editor, to press Run | https://script.google.com/home/projects/1W0EcFkRx5qSxSXJK7n-QQvjSylgsGEQuZdlI0Hp4cnaSmZIY9HUjYlHG/edit |
+| Its executions, to see a Run that already happened | https://script.google.com/home/projects/1W0EcFkRx5qSxSXJK7n-QQvjSylgsGEQuZdlI0Hp4cnaSmZIY9HUjYlHG/executions |
 | Docs and handoffs | `The-New-Build-Repository/design/features/` |
 | One-off scripts, readable copy | `~/Documents/creating-works-oneoffs.gs` |
+
+**Never write an Apps Script or spreadsheet URL from memory.** Take the id from the table above, from `~/Documents/creating-works-gs/.clasp.json`, or from `design/start-here.md`. A made-up project id looks exactly like a real one and she finds out by clicking it — it happened on 2026-09-21.
 
 Saving Apps Script is not deploying it. Deploy, Manage deployments, pencil, **New version**, Deploy.
 Leaving the version dropdown alone ships nothing.
