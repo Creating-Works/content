@@ -152,7 +152,6 @@
   <p class="note hide" id="srcnote">Source: <code>fields/index.html</code> in the <code>Creating-Works/content</code> repository. The written spec is <a href="https://github.com/Creating-Works/The-New-Build-Repository/blob/main/design/fields/field-registry.md">field-registry.md</a>. This page holds no copy of the registry; it is served only to a live operator session. To add a field, edit the registry in the backend.</p>
 </div>
 
-<script src="https://2gather.network/nav/identity.js?v=26"></script>
 <script>
 (function(){
   var GS = 'https://cw-api-gate.jessieupp.workers.dev';
@@ -164,7 +163,7 @@
   var FIELDS = [];
 
   var KEY='cw-ops-session';
-  var me=(window.CW_ID||'').trim(), token='';
+  var me='', token='';
   function remember(id,tok){
     try{ localStorage.setItem(KEY, JSON.stringify({id:id,tok:tok,until:Date.now()+55*60*1000})); }catch(e){}
   }
