@@ -10,7 +10,11 @@ it goes in this shape. No exceptions, even if it was all explained one message a
 ```
 **1 · <short title of the item>**
 
-**Context.** What this is about, restated in full so she never scrolls up.
+**Context.** Her own words first, in quote marks — the sentence she typed, verbatim, typos and all —
+then what this is about, restated in full so she never scrolls up. Never a paraphrase: without her
+words at the front she has to work out which of her messages an item answers, and a paraphrase is
+where I quietly substitute what I thought she asked. If an item has no words of hers behind it, say
+so in the first line.
 **Question.** The decision itself, in one sentence.
 **Action.** Exactly what she does, with the clickable link in it. "Nothing to click" if there is none.
 ```
