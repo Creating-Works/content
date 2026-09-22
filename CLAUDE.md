@@ -190,6 +190,19 @@ were already wrong on 2026-09-21.
   ready. It happened on 2026-09-21. Checking first does not help — between the check and the commit
   another chat can write, and there is no lock. Naming your paths is the only thing that actually
   prevents it, and it costs nothing.
+- **Before any `clasp push`, run the four steps below and SAY IN THE QUEUE ROW that you ran them.**
+  `clasp push` sends your whole local file and replaces what is in the editor, so a push from a copy
+  taken before somebody else's append wipes their work with nothing shown and nothing logged. You
+  cannot check whether another chat is pushing — looking for a running process finds your own command,
+  and clasp 3.4.1 cannot pull into a scratch folder. This is the only check that proves anything:
+  1. **Commit the local file to git first**, so nothing can be lost whatever happens next.
+  2. **`clasp pull`** — this overwrites local with whatever the editor actually holds.
+  3. **`git diff`** — anything another chat added that you do not have now shows as a DELETION.
+  4. Merge what the diff found, commit, then `clasp push`.
+  Every queue row for a clasp push carries the result in as many words: **clasp check: clean**, or
+  **clasp check: found `<function>` from `<chat>`, merged**. Set 2026-09-22 at her word: *"let's try
+  that rule and explicitly say if this rule was used to test it later."* A rule nobody can tell was
+  followed cannot be judged later, and this one is meant to be judged.
 - **`clasp push` replaces the WHOLE Apps Script file, so pull first, every time.** `all.gs.js` is
   append-only and several chats add one-offs to it. Git handles the repo, but `npx clasp push` sends
   your local copy to the editor and overwrites what is there — so a push from a working copy taken
