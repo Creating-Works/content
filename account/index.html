@@ -712,11 +712,13 @@
         ;
       return;
     }
+    var acctEmail=function(){ return D.email ? '<b>'+esc(D.email)+'</b>' : 'the email you signed in with'; };
     var PRODUCTS = {
-      balance: { name:'DayBalancer.com', line:'Energy in. Energy out.', on:false, rows:[] },
+      balance: { name:'DayBalancer.com', line:'Energy in. Energy out.', on:false, rows:[],
+                 note:function(){ return 'Log in to DayBalancer with '+acctEmail()+' to <a href="https://www.daybalancer.com/find-nourish-ikigai" style="color:#1F699E;font-weight:700;">explore and nourish your ikigai</a>.'; } },
       appear:  { name:'Appear.Network',  line:'Where people, resources, and opportunities appear.', on:false,
-                 rows:[['Appear page','The page people land on when they look you up on Appear.',
-                        'https://appear.network/dl/page/','Edit it on Appear']] },
+                 rows:[['Appear page','Your public page on Appear.Network.','','',
+                        function(){ return 'Log in with '+acctEmail()+' to <a href="https://appear.network/dl/page/" style="color:#1F699E;font-weight:700;">build your page</a>.'; }]] },
       gather:  { name:'2Gather', short:'2Gather', line:'Gathering for the common good.', on:true,
                  rows:[['My events','Everything you host, share or have said you are going to.','https://2gather.network/myevents/','Open'],
                        ['My groups','The groups you are in and the ones you host.','https://2gather.network/mygroups/','Open'],
@@ -743,10 +745,12 @@
         +(pr.on?' is enabled on this account.':' is not enabled on this account.')+'</div>'
         +'<button type="button" id="prod-enable" class="btn ghost" style="margin-left:auto;font-size:14px;padding:9px 16px;">'
         +(pr.on?'Disable':'Enable')+'</button></div>';
+      if(pr.note){ h+='<div style="font-size:14.5px;color:#1A2E42;line-height:1.55;margin:16px 0 4px;">'+pr.note()+'</div>'; }
       pr.rows.forEach(function(r){
         h+='<div style="display:flex;align-items:flex-start;gap:18px;padding:16px 0;border-bottom:1px solid var(--line);">'
           +'<div style="flex:1 1 auto;min-width:0;"><div style="font-size:16px;font-weight:700;">'+esc(r[0])+'</div>'
           +(r[1]?'<div style="font-size:13.5px;color:var(--soft);margin-top:3px;">'+esc(r[1])+'</div>':'')
+          +(r[4]?'<div style="font-size:13.5px;color:#1A2E42;line-height:1.5;margin-top:6px;">'+r[4]()+'</div>':'')
           +'</div>'+((r[2]&&r[3])?'<div style="flex:0 0 auto;font-size:14px;"><a href="'+r[2]
           +'" style="color:#1F699E;font-weight:700;text-decoration:none;">'+esc(r[3])+'</a></div>':'')+'</div>';
       });
