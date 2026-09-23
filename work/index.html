@@ -123,7 +123,7 @@
       if (u.host === '2gather.network' || u.host === 'gather.2gather.network'
           || u.host === 'creating.works') return u.toString();
     } catch(err){}
-    return 'https://2gather.network/mygroups' + (meId ? '?CWid=' + encodeURIComponent(meId) : '');
+    return 'https://2gather.network/mygroups';
   })();
   var GP_FOR = (function(){
     var said = String(params.get('for') || '').trim().toLowerCase();
@@ -2168,6 +2168,6 @@
 </script>
 <script>window.CW_SHOW_BAR = true;</script>
 <script>try{localStorage.removeItem('cw-super')}catch(e){}</script>
-<script src="https://2gather.network/nav/topbar.js?v=6.28" defer></script>
+<script src="https://2gather.network/nav/topbar.js?v=6.29" defer></script>
 </body>
 </html>

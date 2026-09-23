@@ -157,11 +157,11 @@
        visPublic:'',showPhoto:'',onMap:'',findable:'',ackTerms:'',dateAckTerms:''};
 
   function go(url){ window.location.href=url; }
-  function groupsUrl(){ return 'https://2gather.network/mygroups'+(meId?'?CWid='+encodeURIComponent(meId)+'&ref=profile':'?ref=profile'); }
+  function groupsUrl(){ return 'https://2gather.network/mygroups'+'?ref=profile'; }
   function eventsUrl(){ return 'https://2gather.network/myevents/'; }
 
-  function answersUrl(){ return 'https://creating.works/profile'+(meId?'?CWid='+encodeURIComponent(meId):''); }
-  function profileUrl(){ return 'https://creating.works/profile'+(meId?'?CWid='+encodeURIComponent(meId):''); }
+  function answersUrl(){ return 'https://creating.works/profile'; }
+  function profileUrl(){ return 'https://creating.works/profile'; }
   var TABS=[
     {key:'me', label:'My profile', nav:profileUrl},
     {key:'groups', label:'My groups', nav:groupsUrl},
@@ -1153,6 +1153,6 @@
 })();
 </script>
 <script>try{localStorage.removeItem('cw-super')}catch(e){}</script>
-<script src="https://2gather.network/nav/topbar.js?v=6.28" defer></script>
+<script src="https://2gather.network/nav/topbar.js?v=6.29" defer></script>
 </body>
 </html>
