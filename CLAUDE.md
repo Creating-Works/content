@@ -170,6 +170,7 @@ were already wrong on 2026-09-21.
 | `G` | Groups |
 | `H` | HTML copy |
 | `J` | Jazz mono repo |
+| `L` | Load times |
 | `M` | Page 0 Main |
 | `N` | Network |
 | `P` | Profile top nav |
@@ -179,7 +180,7 @@ were already wrong on 2026-09-21.
 | `T` | Expressions |
 | `X` | UX Design |
 
-  Free, for the next chat: **B, F, I, K, L, O, U, V, W, Y, Z**. Take the one that says your chat's
+  Free, for the next chat: **B, F, I, K, O, U, V, W, Y, Z**. Take the one that says your chat's
   name out loud and add your row; tell her which you took, do not make her pick.
 
   **It is a table rather than a sentence for one reason.** It was a single run-on line until
@@ -201,6 +202,17 @@ were already wrong on 2026-09-21.
   ready. It happened on 2026-09-21. Checking first does not help — between the check and the commit
   another chat can write, and there is no lock. Naming your paths is the only thing that actually
   prevents it, and it costs nothing.
+- **`all.gs.js` is ONE physical file that every chat writes, and nothing stops two at once.** The
+  four clasp steps below protect the chat doing the pushing; this protects everybody else.
+  1. **Commit the moment you append**, naming the file — not when you are ready to push. Committed
+     work can be erased from the file but never from history. Uncommitted work can be erased by
+     anybody's `clasp pull`, `git checkout` or save, with no error and no trace. (Events, 2026-09-22.)
+  2. **Append, never rewrite.** Add with `>>` or an edit that inserts. Never write the whole file back
+     from a copy you read earlier: on 2026-09-22 a commit described as a small preview change carried
+     189 deletions, because the file was written back from an older read, and it erased two other
+     chats' one-offs from git and from the editor.
+  3. **Before every commit of `all.gs.js`, `git diff --stat all.gs.js` shows only insertions you
+     made.** A deletion you did not intend means your copy is stale. Stop.
 - **Before any `clasp push`, run the four steps below and SAY IN THE QUEUE ROW that you ran them.**
   `clasp push` sends your whole local file and replaces what is in the editor, so a push from a copy
   taken before somebody else's append wipes their work with nothing shown and nothing logged. You
@@ -208,7 +220,10 @@ were already wrong on 2026-09-21.
   and clasp 3.4.1 cannot pull into a scratch folder. This is the only check that proves anything:
   1. **Commit the local file to git first**, so nothing can be lost whatever happens next.
   2. **`clasp pull`** — this overwrites local with whatever the editor actually holds.
-  3. **`git diff`** — anything another chat added that you do not have now shows as a DELETION.
+  3. **`git diff`** — anything another chat added that you do not have shows as an ADDITION, a `+`
+     line: the working tree now holds the editor, and your commit does not have their lines. Your
+     own new work, which the editor does not have yet, is what shows as `-`. Proved on 2026-09-22:
+     a one-off committed but not yet pushed came back as 75 `-` lines and zero `+`.
   4. Merge what the diff found, commit, then `clasp push`.
   Every queue row for a clasp push carries the result in as many words: **clasp check: clean**, or
   **clasp check: found `<function>` from `<chat>`, merged**. Set 2026-09-22 at her word: *"let's try
@@ -234,7 +249,7 @@ were already wrong on 2026-09-21.
   re-apply your change, `npx clasp push`, and `npx clasp pull` once more: a clean `git status` is
   the proof. Grepping your own file after pushing proves nothing — it can only show what you just
   sent, never what you erased.
-- **`nav/topbar.js` is pinned by version in 29 pages across both repos, 21 in events and 8 in content.** One chat at a time moves
+- **`nav/topbar.js` is pinned by version in 35 pages across both repos, 27 in events and 8 in content (counted 2026-09-23, V6.29).** One chat at a time moves
   that number, and says on the queue when it does. **Edit those pages in `~/Documents/events` and
   `~/Documents/content` directly, never from a worktree** — the 27 worktrees under
   `content/.claude/worktrees` hold eight different pins between them, the oldest 58 versions behind,
