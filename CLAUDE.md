@@ -41,7 +41,9 @@ INSIDE this shape, underneath the Context, never instead of the shape. Ending a 
 - **She is not a coder.** Ask plain-English questions and make the technical calls yourself. Say the
   user-facing effect, not the function name.
 - **Never ask her to paste code into Apps Script.** Code is appended to
-  `~/Documents/creating-works-gs/all.gs.js` and pushed with `npx clasp push` from a session on her
+  `~/Documents/creating-works-gs/all.js` (the editor shows it as all.gs; on 2026-09-23 she moved
+  everything before d21 into allarchived3 and started all fresh, so all.gs.js no longer exists — never
+  recreate it) and pushed with `npx clasp push` from a session on her
   Mac. A browser chat that cannot reach her files says so and hands her the function in ONE block,
   naming the file, so a session that can reach them puts it there. She presses Run; that part is
   hers. Her words, 2026-09-20: "I don't want to have to tell a new chat to say to do this every time."
@@ -202,7 +204,7 @@ were already wrong on 2026-09-21.
   ready. It happened on 2026-09-21. Checking first does not help — between the check and the commit
   another chat can write, and there is no lock. Naming your paths is the only thing that actually
   prevents it, and it costs nothing.
-- **`all.gs.js` is ONE physical file that every chat writes, and nothing stops two at once.** The
+- **`all.js` is ONE physical file that every chat writes, and nothing stops two at once.** The
   four clasp steps below protect the chat doing the pushing; this protects everybody else.
   1. **Commit the moment you append**, naming the file — not when you are ready to push. Committed
      work can be erased from the file but never from history. Uncommitted work can be erased by
@@ -211,7 +213,7 @@ were already wrong on 2026-09-21.
      from a copy you read earlier: on 2026-09-22 a commit described as a small preview change carried
      189 deletions, because the file was written back from an older read, and it erased two other
      chats' one-offs from git and from the editor.
-  3. **Before every commit of `all.gs.js`, `git diff --stat all.gs.js` shows only insertions you
+  3. **Before every commit of `all.js`, `git diff --stat all.js` shows only insertions you
      made.** A deletion you did not intend means your copy is stale. Stop.
 - **Before any `clasp push`, run the four steps below and SAY IN THE QUEUE ROW that you ran them.**
   `clasp push` sends your whole local file and replaces what is in the editor, so a push from a copy
@@ -237,7 +239,7 @@ were already wrong on 2026-09-21.
   deliberately does not repeat it, because the copy that used to sit here held nine chats when
   fourteen had letters, so Network, Support and Tickets, UX Design, Expressions and Queue each read
   a rule that gave them no letter at all. Grep the name before you define it — in Apps Script the last definition of a name wins, across every file.
-- **`clasp push` replaces the WHOLE Apps Script file, so pull first, every time.** `all.gs.js` is
+- **`clasp push` replaces the WHOLE Apps Script file, so pull first, every time.** `all.js` is
   append-only and several chats add one-offs to it. Git handles the repo, but `npx clasp push` sends
   your local copy to the editor and overwrites what is there — so a push from a working copy taken
   before somebody else's append silently wipes their one-off out of the editor while the repo still
