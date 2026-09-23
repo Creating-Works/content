@@ -700,6 +700,14 @@
     bar.scrollIntoView({behavior:'smooth',block:'center'});
   }
 
+  function paintSolutionDots(){
+    var on=String(D.enabledSolution||'').split('|').map(function(x){ return x.trim(); });
+    [['balance','Balance'],['appear','Appear'],['gather','Gather'],['license','Creating']].forEach(function(p){
+      if(on.indexOf(p[1])<0) return;
+      var d=document.querySelector('[data-prail="'+p[0]+'"] .cw-prail-dot');
+      if(d && !/\bon\b/.test(d.className)) d.className+=' on';
+    });
+  }
   function renderPanel(key){
     var p=document.getElementById('panel');
     if(key==='me'){
@@ -771,7 +779,7 @@
           .then(function(r){ return r.json(); })
           .then(function(resp){
             if(resp&&resp.status==='ok'&&typeof resp.enabledSolution==='string'){
-              D.enabledSolution=resp.enabledSolution; renderPanel(key); return;
+              D.enabledSolution=resp.enabledSolution; paintSolutionDots(); renderPanel(key); return;
             }
             if(_pe){ _pe.disabled=false; }
             if(resp&&/session|expired/i.test(String(resp.message||''))){
@@ -1082,7 +1090,7 @@
       document.getElementById('panel').innerHTML='<div class="status err">Could not load your account. Reload the page to try again.</div>';
       return;
     }
-    paintIdentity(); renderPanel(startTab);
+    paintIdentity(); paintSolutionDots(); renderPanel(startTab);
     window.cwAccountPick = function (key) {
       renderPanel(key);
       // The address follows what you are looking at, so it can be copied and sent.
