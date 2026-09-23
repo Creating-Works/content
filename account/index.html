@@ -732,6 +732,9 @@
     };
     if(PRODUCTS[key]){
       var pr=PRODUCTS[key];
+      var SOL={balance:'Balance',appear:'Appear',gather:'Gather',license:'Creating'}[key];
+      var _enabled=String(D.enabledSolution||'').split('|').map(function(x){ return x.trim(); });
+      if(SOL && _enabled.indexOf(SOL)>-1) pr.on=true;
       var h='<div style="display:flex;align-items:flex-start;gap:14px;justify-content:space-between;flex-wrap:wrap;">'
         +'<div><h2 style="margin:0;">'+esc(pr.name)+'</h2>'
         +'<div style="font-size:15.5px;color:var(--soft);margin-top:4px;">'+esc(pr.line)+'</div></div>'
@@ -744,8 +747,9 @@
         +'<div style="font-size:14.5px;color:var(--soft);">'+esc(pr.short || pr.name.split('.')[0])
         +(pr.on?' is enabled on this account.':' is not enabled on this account.')+'</div>'
         +'<button type="button" id="prod-enable" class="btn ghost" style="margin-left:auto;font-size:14px;padding:9px 16px;">'
-        +(pr.on?'Disable':'Enable')+'</button></div>';
-      if(pr.note){ h+='<div style="font-size:14.5px;color:#1A2E42;line-height:1.55;margin:16px 0 4px;">'+pr.note()+'</div>'; }
+        +(pr.on?'Disable':'Enable')+'</button></div>'
+        +'<div id="acct-gate"></div><div id="prod-say" style="font-size:13.5px;margin-top:8px;"></div>';
+      if(pr.note && pr.on){ h+='<div style="font-size:14.5px;color:#1A2E42;line-height:1.55;margin:16px 0 4px;">'+pr.note()+'</div>'; }
       pr.rows.forEach(function(r){
         h+='<div style="display:flex;align-items:flex-start;gap:18px;padding:16px 0;border-bottom:1px solid var(--line);">'
           +'<div style="flex:1 1 auto;min-width:0;"><div style="font-size:16px;font-weight:700;">'+esc(r[0])+'</div>'
@@ -756,7 +760,32 @@
       });
       p.innerHTML=h;
       var _pe=document.getElementById('prod-enable');
-      if(_pe) _pe.onclick=function(){ _pe.outerHTML='<span style="margin-left:auto;font-size:13.5px;color:var(--soft);">Turning a product on and off is not built yet.</span>'; };
+      var _say=function(m,bad){ var el=document.getElementById('prod-say'); if(el){ el.textContent=m||''; el.style.color=bad?'#7A2410':'var(--soft)'; } };
+      var _enable=function(){
+        if(!_editToken){ showPinBar(_enable,'Verify it is you, then '+(pr.short||pr.name.split('.')[0])+' is enabled.'); return; }
+        if(_pe){ _pe.disabled=true; }
+        _say('Enabling\u2026');
+        fetch(GS_URL+'?action=saveAccount&appearId='+encodeURIComponent(meId)
+          +'&secure=1&editToken='+encodeURIComponent(_editToken)
+          +'&enabledSolution='+encodeURIComponent(SOL))
+          .then(function(r){ return r.json(); })
+          .then(function(resp){
+            if(resp&&resp.status==='ok'&&typeof resp.enabledSolution==='string'){
+              D.enabledSolution=resp.enabledSolution; renderPanel(key); return;
+            }
+            if(_pe){ _pe.disabled=false; }
+            if(resp&&/session|expired/i.test(String(resp.message||''))){
+              _editToken=''; _tokenClear(); _say('');
+              showPinBar(_enable,'Your hour ran out. Verify again to enable it.'); return;
+            }
+            _say((resp&&resp.message)||'That did not save. Try once more.',true);
+          })
+          .catch(function(){ if(_pe){ _pe.disabled=false; } _say('That did not reach the server. Try once more.',true); });
+      };
+      if(_pe) _pe.onclick=function(){
+        if(!pr.on && SOL){ _enable(); return; }
+        _pe.outerHTML='<span style="margin-left:auto;font-size:13.5px;color:var(--soft);">Turning a product off is not built yet.</span>';
+      };
       return;
     }
     if(key==='permissions'){
@@ -1036,6 +1065,7 @@
       D.location=d.location||''; _loc=parseLoc(D.location);
       D.county=d.county||''; D.city=d.city||'';
       if(!_loc.region) _loc={region:'North America',country:'United States',state:''};
+      D.enabledSolution=String(d.enabledSolution||'');
       ['visPublic','showPhoto','onMap','findable','ackTerms','dateAckTerms'].forEach(function(k){
         D[k]=(d[k]==null?'':String(d[k]));
       });
