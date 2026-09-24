@@ -1038,10 +1038,6 @@
   }
   (function(){ try{ var c=localStorage.getItem(nameKey); if(c) document.getElementById('hello-title').textContent=c+' 🌱'; }catch(e){} })();
 
-  // EVERY PANE HAS ITS OWN ADDRESS. Jessie, 2026-09-20: "can we make a link like we do for
-  // joy/needs/offers for our offerings too". A hash rather than a path, the same choice she made for
-  // /myevents/#new: GitHub Pages does no rewriting, so a path would need the 404 page to route it and
-  // the apex Worker to proxy it, while a hash needs neither and works on both domains today.
   var PANES = ['me','account','permissions','balance','appear','gather','license'];
   function paneFromHash(){
     var h = String(location.hash || '').replace(/^#/, '').toLowerCase();
@@ -1093,10 +1089,8 @@
     paintIdentity(); paintSolutionDots(); renderPanel(startTab);
     window.cwAccountPick = function (key) {
       renderPanel(key);
-      // The address follows what you are looking at, so it can be copied and sent.
       try { if (PANES.indexOf(key) > -1 && history.replaceState) history.replaceState({}, '', '#' + key); } catch (e) {}
     };
-    // Back and forward move between panes rather than leaving the page.
     window.addEventListener('hashchange', function(){ var k = paneFromHash(); if (k) renderPanel(k); });
     loadEmail(startTab);
   });
