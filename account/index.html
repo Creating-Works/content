@@ -416,65 +416,101 @@
     };
   }
 
-  var _perm=null, _permState='new';
+  var _perm={}, _permState='new', _permAud='member', _permGroups=[], _permPublicOn=false;
+  var PERM_ITEMS=[['photo','Your photo'],['needs','Needs'],['enjoy','Enjoys'],['skills','Skills and languages'],
+    ['offers','Offerings'],['otw','Open to opportunities'],['care','What I care about and sectors'],
+    ['work','Work experience I\u2019m creating'],['purpose','My purpose']];
+  var PERM_COL={photo:'photo',needs:'needs',enjoy:'enjoy',skills:'skillsLanguages',offers:'offerings',
+    otw:'openToWork',care:'careSectors',work:'workExperience',purpose:'purpose'};
+  function permBase(){ var o={name:'full',where:'state'}; PERM_ITEMS.forEach(function(it){ o[it[0]]=true; }); return o; }
+  function permFor(aud){
+    if(!_perm[aud]){ var b=_perm.member||permBase(), o={}; Object.keys(b).forEach(function(k){ o[k]=b[k]; }); _perm[aud]=o; }
+    _perm[aud].photo=true;
+    return _perm[aud];
+  }
+  function permLoad(rows){
+    _perm={member:permBase()};
+    (rows||[]).forEach(function(r){
+      var a=String(r.audience||''); if(a==='public') return;
+      var key=a==='members'?'member':'g:'+a, o=permBase();
+      if(r.nameShown) o.name=String(r.nameShown);
+      if(r.placeShown) o.where=String(r.placeShown);
+      PERM_ITEMS.forEach(function(it){ var v=String(r[PERM_COL[it[0]]]==null?'':r[PERM_COL[it[0]]]).trim().toUpperCase(); if(v) o[it[0]]=(v==='TRUE'); });
+      _perm[key]=o;
+    });
+  }
   function loadPerm(){
-    if(!_editToken||!meId){ _permState='refused'; return; }
+    if(!meId){ _permState='refused'; return; }
     _permState='looking';
-    fetch(GS_URL+'?action=getPermissions&appearId='+encodeURIComponent(meId)
-      +'&editToken='+encodeURIComponent(_editToken))
+    fetch(GS_URL+'?action=getPermissions&appearId='+encodeURIComponent(meId)+(_editToken?'&editToken='+encodeURIComponent(_editToken):''))
       .then(function(r){ return r.json(); })
       .then(function(d){
         if(!d||d.status!=='ok'){ _permState='refused'; renderPanel('permissions'); return; }
-        _perm=permFrom(d.permissions);
-        _permState='ok';
-        renderPanel('permissions');
+        permLoad(d.permissions); _permPublicOn=!!d.publicOn; _permState='ok'; renderPanel('permissions');
       })
       .catch(function(){ _permState='refused'; renderPanel('permissions'); });
+    fetch(GS_URL+'?action=getMyGroups&appearId='+encodeURIComponent(meId))
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        _permGroups=((d&&d.groups)||[]).map(function(g){ return { id:String(g.groupID||g.groupId||g.id||'').trim(), name:String(g.groupName||g.name||'').trim() }; })
+          .filter(function(g){ return g.id&&g.name; });
+        if(_permState==='ok') renderPanel('permissions');
+      }).catch(function(){});
   }
-  function permFrom(rows){
-    var COL={photo:'photo',needs:'needs',enjoy:'enjoy',skills:'skillsLanguages',
-      offers:'offerings',otw:'openToWork',care:'careSectors',work:'workExperience',purpose:'purpose'};
-    var out={ nameShown:'full', placeShown:'state' };
-    Object.keys(COL).forEach(function(k){ out[k]=true; });
-    (rows||[]).forEach(function(r){
-      if(String(r.audience||'')!=='members') return;
-      if(r.nameShown) out.nameShown=String(r.nameShown);
-      if(r.placeShown) out.placeShown=String(r.placeShown);
-      Object.keys(COL).forEach(function(k){
-        var v=String(r[COL[k]]==null?'':r[COL[k]]).trim().toUpperCase();
-        if(v) out[k]=(v==='TRUE');
-      });
-    });
-    return out;
-  }
+  var _permT=null;
   function permSave(){
     var st=document.getElementById('perm-status');
     if(st){ st.style.color='var(--soft)'; st.textContent='Saving\u2026'; }
-    var COL={photo:'photo',needs:'needs',enjoy:'enjoy',skills:'skillsLanguages',
-      offers:'offerings',otw:'openToWork',care:'careSectors',work:'workExperience',purpose:'purpose'};
-    var q=GS_URL+'?action=savePermissions&appearId='+encodeURIComponent(meId)
-      +'&editToken='+encodeURIComponent(_editToken)+'&audience=members'
-      +'&nameShown='+encodeURIComponent(_perm.nameShown)
-      +'&placeShown='+encodeURIComponent(_perm.placeShown);
-    Object.keys(COL).forEach(function(k){ q+='&'+COL[k]+'='+(_perm[k]?'true':'false'); });
-    fetch(q).then(function(r){ return r.json(); }).then(function(d){
-      if(d&&d.status==='ok'&&d.permissions){ _perm=permFrom(d.permissions); renderPanel('permissions');
-        var s2=document.getElementById('perm-status'); if(s2){ s2.textContent='Saved.'; } return; }
-      var s3=document.getElementById('perm-status');
-      if(s3){ s3.style.color='#7A2410'; s3.textContent=(d&&d.message)||'That did not save. Try once more.'; }
-    }).catch(function(){
-      var s4=document.getElementById('perm-status');
-      if(s4){ s4.style.color='#7A2410'; s4.textContent='That did not reach the server. Try once more.'; }
-    });
+    var P=permFor(_permAud), aud=_permAud==='member'?'members':_permAud.replace(/^g:/,'');
+    clearTimeout(_permT);
+    _permT=setTimeout(function(){
+      var q=GS_URL+'?action=savePermissions&appearId='+encodeURIComponent(meId)
+        +(_editToken?'&editToken='+encodeURIComponent(_editToken):'')+'&audience='+encodeURIComponent(aud)
+        +'&nameShown='+encodeURIComponent(P.name)+'&placeShown='+encodeURIComponent(P.where);
+      PERM_ITEMS.forEach(function(it){ q+='&'+PERM_COL[it[0]]+'='+(P[it[0]]?'true':'false'); });
+      fetch(q).then(function(r){ return r.json(); }).then(function(d){
+        var s2=document.getElementById('perm-status');
+        if(d&&d.status==='ok'){ if(d.permissions){ permLoad(d.permissions); } renderPanel('permissions'); s2=document.getElementById('perm-status'); if(s2){ s2.style.color='#1F699E'; s2.textContent='Saved.'; } return; }
+        if(s2){ s2.style.color='#7A2410'; s2.textContent=(d&&d.message)||'That did not save. Change it again to try once more.'; }
+      }).catch(function(){
+        var s3=document.getElementById('perm-status');
+        if(s3){ s3.style.color='#7A2410'; s3.textContent='That did not reach the server. Change it again to try once more.'; }
+      });
+    },600);
   }
-  function bindPerm(p){
-    if(!p||!_perm) return;
-    p.querySelectorAll('[data-permname]').forEach(function(b){
-      b.onclick=function(){ _perm.nameShown=b.getAttribute('data-permname'); renderPanel('permissions'); permSave(); }; });
-    p.querySelectorAll('[data-permwhere]').forEach(function(b){
-      b.onclick=function(){ _perm.placeShown=b.getAttribute('data-permwhere'); renderPanel('permissions'); permSave(); }; });
-    p.querySelectorAll('[data-permflag]').forEach(function(b){
-      b.onclick=function(){ var k=b.getAttribute('data-permflag'); _perm[k]=!_perm[k]; renderPanel('permissions'); permSave(); }; });
+  function permNames(){
+    var full=String(D.name||'').trim(), bits=full.split(/\s+/).filter(Boolean);
+    return { full: full||'Your name', short: bits.length>1?bits[0]+' '+bits[bits.length-1].charAt(0)+'.':(bits[0]||'You'),
+             initials: bits.map(function(x){ return x.charAt(0).toUpperCase(); }).join('') };
+  }
+  function permPlace(level){
+    var st=_loc&&_loc.state?_loc.state:'', co=_loc&&_loc.country?_loc.country:'';
+    if(level==='city'&&D.city) return [D.city,st].filter(Boolean).join(', ');
+    if(level==='county'&&D.county) return [D.county,st].filter(Boolean).join(', ');
+    if(level==='state'&&(st||co)) return locString(_loc)||co;
+    if(level==='country'&&co) return co;
+    return '';
+  }
+  function permList(v){
+    return (typeof v==='string'?v.split('|'):(v||[])).map(function(x){ return String(x).split(':')[0].replace(/^[^\p{L}\p{N}]+/u,'').trim(); }).filter(Boolean);
+  }
+  function permPreview(P){
+    var d=D.prof||{}, n=permNames(), rows='';
+    var row=function(label,list){ if(!list.length) return; rows+='<div style="padding:10px 0;border-top:1px solid #f0f1f5;"><div style="font-size:11.5px;font-weight:800;color:#6B7A8D;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px;">'+esc(label)+'</div><div style="font-size:14px;color:#1A2E42;line-height:1.5;">'+esc(list.join(', '))+'</div></div>'; };
+    if(P.needs) row('Needs',permList(d.needs));
+    if(P.enjoy) row('Enjoys',permList(d.interests).concat(permList(d.expression)));
+    if(P.skills) row('Skills',permList(d.skills).concat(permList(String(d.languages||'').split(/[|,]/).join('|'))));
+    if(P.offers) row('Offerings',permList(d.haves));
+    if(P.otw) row('Open to opportunities',permList(d.openToPaidWork).concat(permList(d.openToUnpaidWork),permList(d.openToUnpaidTime)).filter(function(x,i,a){ return a.indexOf(x)===i; }));
+    if(P.care) row('What I care about',permList(d.values).concat(permList(d.domains)));
+    if(P.work) row('Work values',permList(d.workValues));
+    if(P.purpose && String(d.purpose||'').trim()) row('My purpose',[String(d.purpose).trim()]);
+    var where=permPlace(P.where);
+    return '<div style="display:flex;align-items:center;gap:14px;margin-bottom:8px;">'
+      +(D.photo?'<img src="'+esc(D.photo)+'" alt="" style="width:60px;height:60px;border-radius:50%;object-fit:cover;">'
+        :'<div style="width:60px;height:60px;border-radius:50%;background:#EDF3F9;display:flex;align-items:center;justify-content:center;font-weight:800;color:#1F699E;">'+esc(n.initials)+'</div>')
+      +'<div><div style="font-size:18px;font-weight:800;color:#1A2E42;">'+esc(n[P.name]||n.full)+'</div>'
+      +(where?'<div style="font-size:13.5px;color:#6B7A8D;">'+esc(where)+'</div>':'')+'</div></div>'+rows;
   }
 
   function readonlyField(lab,val,note){
@@ -797,57 +833,56 @@
       return;
     }
     if(key==='permissions'){
-      var PERM_ITEMS=[
-        ['photo','Your photo'],['needs','Needs'],['enjoy','Enjoys'],
-        ['skills','Skills and languages'],['offers','Offerings'],['otw','Open to opportunities'],
-        ['care','What I care about and sectors'],['work','Work experience I\u2019m creating'],
-        ['purpose','My purpose']
-      ];
-      var PERM_COL={photo:'photo',needs:'needs',enjoy:'enjoy',skills:'skillsLanguages',
-        offers:'offerings',otw:'openToWork',care:'careSectors',work:'workExperience',purpose:'purpose'};
-      var NAME_CHOICES=[['full','Full name'],['short','First name, last initial'],['initials','Initials']];
-      var PLACE_CHOICES=[['city','City'],['county','County'],['state','State'],['country','Country'],['hidden','Hidden']];
-      function permPill(on){ return 'font:inherit;font-size:14px;font-weight:700;padding:9px 14px;border-radius:20px;'
-        +'cursor:pointer;'+(on?'background:#1F699E;border:1.5px solid #1F699E;color:#fff;':'background:#fff;border:1.5px solid #C9D6E2;color:#1F699E;'); }
-      function permSw(on){ return '<span style="display:inline-block;width:46px;height:26px;border-radius:999px;position:relative;'
-        +'background:'+(on?'#E2711D':'#C9D3DE')+';vertical-align:middle;">'
-        +'<span style="position:absolute;top:3px;left:'+(on?'23':'3')+'px;width:20px;height:20px;border-radius:50%;background:#fff;"></span></span>'; }
-      function permDraw(){
-        var P=_perm||{}, h='';
-        h='<h2>Global permissions</h2>'
-          +'<div style="font-size:12.5px;color:var(--muted);margin:-6px 0 16px;">'
-          +'These hold for every group you are in.</div>';
-        if(_permState==='looking'){ return h+'<div style="font-size:14px;color:var(--soft);">Looking\u2026</div>'; }
-        if(_permState==='refused'){ return h+'<div style="font-size:13.5px;color:#7A2410;line-height:1.55;">'
-          +'We could not read your permissions just now, so nothing below would be your answer. '
-          +'<a href="https://2gather.network/signin/?next=%2Faccount%2F" style="color:#1F699E;font-weight:700;">Sign in again</a> '
-          +'and they come back.</div>'; }
-        h+='<div style="background:#EEF2F6;border:1px solid #DDE3EA;border-radius:12px;padding:12px 14px;margin-bottom:6px;">'
-          +'<div style="font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);margin-bottom:3px;">Who is looking</div>'
-          +'<div style="font-size:13px;color:#6B7A8D;">Set these once and they hold for every group you are in.</div>'
-          +'<div style="margin-top:10px;"><span style="'+permPill(true)+'display:inline-block;">Global permissions for all groups</span></div></div>'
-          +'<div style="text-align:right;font-size:13.5px;font-weight:700;color:#1A2E42;margin:6px 0 18px;">These permissions will be set for all groups</div>'
-          +'<div style="font-size:15px;font-weight:800;margin-bottom:8px;">Your name</div>'
-          +'<div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px;">'
-          +NAME_CHOICES.map(function(o){ return '<button type="button" data-permname="'+o[0]+'" style="'+permPill(P.nameShown===o[0])+'">'+esc(o[1])+'</button>'; }).join('')
-          +'</div>'
-          +'<div style="font-size:15px;font-weight:800;margin-bottom:8px;">Where you are</div>'
-          +'<div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:22px;">'
-          +PLACE_CHOICES.map(function(o){ return '<button type="button" data-permwhere="'+o[0]+'" style="'+permPill(P.placeShown===o[0])+'">'+esc(o[1])+'</button>'; }).join('')
-          +'</div>'
-          +'<div style="font-size:15px;font-weight:800;margin-bottom:4px;">What shows</div>';
-        PERM_ITEMS.forEach(function(it){
-          h+='<button type="button" data-permflag="'+it[0]+'" style="display:flex;align-items:center;justify-content:space-between;'
-            +'width:100%;font:inherit;font-size:15px;font-weight:700;color:#1A2E42;background:#fff;border:0;'
-            +'border-bottom:1px solid var(--line);padding:13px 2px;cursor:pointer;text-align:left;">'
-            +'<span>'+esc(it[1])+'</span>'+permSw(P[it[0]]===true)+'</button>';
-        });
-        h+='<div id="perm-status" style="font-size:13.5px;color:var(--soft);margin-top:14px;min-height:18px;"></div>';
-        return h;
-      }
-      p.innerHTML=permDraw();
-      bindPerm(p);
+      var pill=function(on){ return 'font:inherit;font-size:13.5px;padding:8px 14px;border-radius:20px;cursor:pointer;'+(on?'background:#1F699E;border:1px solid #1F699E;color:#fff;font-weight:700;':'background:#fff;border:1px solid #C9DFF3;color:#1F699E;font-weight:600;'); };
+      var tab=function(on){ return 'font:inherit;font-size:14px;font-weight:700;padding:10px 14px;border-radius:9px;cursor:pointer;'+(on?'background:#1F699E;border:1.5px solid #1F699E;color:#fff;':'background:#fff;border:1.5px solid #C9D6E2;color:#1F699E;'); };
+      var sw=function(on){ return '<span style="position:relative;display:inline-block;width:44px;height:26px;border-radius:13px;background:'+(on?'#1F699E':'#C9D3DE')+';flex:0 0 auto;"><span style="position:absolute;top:3px;left:'+(on?'21':'3')+'px;width:20px;height:20px;border-radius:50%;background:#fff;"></span></span>'; };
+      var h='<h2>Global permissions</h2>';
       if(_permState==='new'){ loadPerm(); }
+      if(_permState==='looking'||_permState==='new'){ p.innerHTML=h+'<div style="font-size:14px;color:var(--soft);">Loading your choices\u2026</div>'; return; }
+      if(_permState==='refused'){ p.innerHTML=h+'<div style="font-size:13.5px;color:#7A2410;line-height:1.55;">We could not read your permissions just now, so nothing below would be your answer. <a href="https://2gather.network/signin/?next=%2Faccount%2F%23permissions" style="color:#1F699E;font-weight:700;">Sign in again</a> and they come back.</div>'; return; }
+      var inGroup=_permAud.indexOf('g:')===0, P=permFor(_permAud), n=permNames();
+      var groupName=inGroup?((_permGroups.filter(function(g){ return 'g:'+g.id===_permAud; })[0]||{}).name||'this group'):'';
+      h+='<div id="perm-status" style="font-size:13px;color:#6B7A8D;min-height:18px;margin-bottom:8px;">Every change saves as you go.</div>'
+        +'<div style="background:#EEF2F6;border:1px solid #DDE3EA;border-radius:12px;padding:12px 14px;margin-bottom:18px;">'
+        +'<div style="font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#4B5A6D;margin-bottom:3px;">Who is looking</div>'
+        +'<div style="font-size:13px;color:#6B7A8D;margin-bottom:10px;">Set these once and they hold for every group you are in, or pick one group and set that group on its own.</div>'
+        +'<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">'
+        +'<button type="button" data-permaud="member" style="'+tab(_permAud==='member')+'">Global permissions for all groups</button>'
+        +(_permGroups.length?'<select id="perm-group" aria-label="A group" style="font:inherit;font-size:14px;font-weight:700;padding:9px 14px;border-radius:9px;cursor:pointer;width:auto;max-width:260px;'+(inGroup?'background:#1F699E;color:#fff;border:1.5px solid #1F699E;':'background:#fff;color:#1F699E;border:1.5px solid #C9D6E2;')+'"><option value="">In a group\u2026</option>'
+          +_permGroups.map(function(g){ return '<option value="g:'+esc(g.id)+'"'+('g:'+g.id===_permAud?' selected':'')+'>'+esc(g.name)+'</option>'; }).join('')+'</select>':'')
+        +'</div></div>'
+        +'<div style="text-align:right;font-size:13.5px;font-weight:700;color:#1A2E42;margin:-4px 0 18px;">'+esc(inGroup?'People in '+groupName:'These permissions will be set for all groups')+'</div>'
+        +'<div style="font-size:15px;font-weight:800;color:#1A2E42;margin-bottom:8px;">Your name</div>'
+        +'<div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px;">'
+        +[['full','Full name ('+n.full+')'],['short','First name, last initial ('+n.short+')'],['initials','Initials ('+n.initials+')']].map(function(o){ return '<button type="button" data-permname="'+o[0]+'" style="'+pill(P.name===o[0])+'">'+esc(o[1])+'</button>'; }).join('')
+        +'</div>'
+        +'<div style="font-size:15px;font-weight:800;color:#1A2E42;margin-bottom:8px;">Where you are</div>'
+        +'<div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px;">'
+        +['city','county','state','country'].map(function(l){ var t=permPlace(l); return t?'<button type="button" data-permwhere="'+l+'" style="'+pill(P.where===l)+'">'+esc(t)+'</button>':''; }).join('')
+        +'<button type="button" data-permwhere="hidden" style="'+pill(P.where==='hidden')+'">Hidden</button>'
+        +'</div>'
+        +(permPlace('city')?'':'<div style="font-size:12.5px;color:#6B7A8D;margin:-10px 0 16px;">Your city is not on file yet. Add it under <b>My info</b>, and it joins this list.</div>')
+        +'<div style="font-size:15px;font-weight:800;color:#1A2E42;margin-bottom:4px;">What shows</div>';
+      PERM_ITEMS.forEach(function(it){
+        if(it[0]==='photo'){
+          h+='<div role="switch" aria-checked="true" aria-disabled="true" style="display:flex;align-items:center;justify-content:space-between;width:100%;font-size:14.5px;color:#1A2E42;border-bottom:1px solid #f0f1f5;padding:12px 2px;">'
+            +'<span>'+esc(it[1])+' <span style="font-size:12.5px;font-weight:700;color:#6B7A8D;">Always on in a group</span></span><span style="opacity:.55;">'+sw(true)+'</span></div>'
+            +'<div style="font-size:12.5px;color:#6B7A8D;margin:6px 0 4px;line-height:1.5;">People in a group can always see your face and your name. A group is people who agreed to be in a room together, and somebody nobody can put a face to is watching rather than taking part. You choose how much of your name shows, above.</div>';
+          return;
+        }
+        h+='<button type="button" data-permitem="'+it[0]+'" role="switch" aria-checked="'+(P[it[0]]?'true':'false')+'" style="display:flex;align-items:center;justify-content:space-between;width:100%;font:inherit;font-size:14.5px;color:#1A2E42;background:#fff;border:0;border-bottom:1px solid #f0f1f5;padding:12px 2px;cursor:pointer;text-align:left;">'
+          +'<span>'+esc(it[1])+'</span>'+sw(P[it[0]])+'</button>';
+      });
+      h+='<div style="height:18px;"></div>'
+        +'<div style="font-size:12px;font-weight:800;color:#6B7A8D;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;">'+esc(inGroup?'What '+groupName+' sees':'What signed-in people see')+'</div>'
+        +'<div style="border:1.5px solid #DDE3EA;border-radius:12px;padding:16px;">'+permPreview(P)+'</div>';
+      p.innerHTML=h;
+      p.querySelectorAll('[data-permaud]').forEach(function(b){ b.onclick=function(){ _permAud=b.getAttribute('data-permaud'); renderPanel('permissions'); }; });
+      var gsel=document.getElementById('perm-group');
+      if(gsel) gsel.onchange=function(){ if(gsel.value){ _permAud=gsel.value; renderPanel('permissions'); } };
+      p.querySelectorAll('[data-permname]').forEach(function(b){ b.onclick=function(){ P.name=b.getAttribute('data-permname'); renderPanel('permissions'); permSave(); }; });
+      p.querySelectorAll('[data-permwhere]').forEach(function(b){ b.onclick=function(){ P.where=b.getAttribute('data-permwhere'); renderPanel('permissions'); permSave(); }; });
+      p.querySelectorAll('[data-permitem]').forEach(function(b){ b.onclick=function(){ var k=b.getAttribute('data-permitem'); P[k]=!P[k]; renderPanel('permissions'); permSave(); }; });
       return;
     }
     var ph=D.photo?'<img class="photo" src="'+esc(D.photo)+'" alt="">':'<div class="photo"></div>';
@@ -1064,7 +1099,7 @@
     if(pr.found){
       if(!D.name) D.name=pr.name||'';
       if(!D.photo) D.photo=pr.photo||'';
-      var d=pr.data||{};
+      var d=pr.data||{}; D.prof=d;
       D.postal=d.postal||''; D.languages=d.languages||''; D.phone=d.phone||'';
       D.location=d.location||''; _loc=parseLoc(D.location);
       D.county=d.county||''; D.city=d.city||'';
@@ -1144,7 +1179,7 @@
   html.cw-prail-on .cw-prail-main h1{color:var(--ink);font-weight:800;font-size:26px;margin-top:14px;}
   html.cw-prail-on .cw-prail-main .hello .sub, html.cw-prail-on .cw-prail-main .hello .sub a{color:var(--ink);}
 </style>
-<script src="https://2gather.network/nav/profile-rail.js?v=10"></script>
+<script src="https://2gather.network/nav/profile-rail.js?v=13"></script>
 <script>
 (function(){
   var look = ''; try { look = new URLSearchParams(location.search).get('look') || ''; } catch (e) {}
