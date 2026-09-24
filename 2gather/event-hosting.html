@@ -14,7 +14,8 @@
 <head>
   <script>try{var S='cw-signed-out-2026-09-20';if(localStorage.getItem(S)!=='1'){localStorage.setItem(S,'1');['cw-id','appear-id','cw-token','cw-super','cw-view-as','cw-view-as-name','cw-first','cw-photo','cw-photo-for','cw-photo-at','cw-lastEmail'].forEach(function(k){localStorage.removeItem(k)})}}catch(e){}</script>
 <meta charset="UTF-8">
-<script src="https://2gather.network/nav/identity.js?v=26"></script>
+<script>document.documentElement.className+=' cw-locked';</script>
+<style>html.cw-locked body>*:not(#cw-gate){display:none!important;}#cw-gate{display:none;max-width:420px;margin:60px auto;padding:22px;background:#fff;border:1px solid #DDE4EE;border-radius:14px;font-family:system-ui,-apple-system,sans-serif;}html.cw-locked #cw-gate{display:block;}#cw-gate input{font:inherit;font-size:16px;padding:10px 12px;border:1.5px solid #DDE3EA;border-radius:10px;}#cw-gate button{font:inherit;font-size:14px;font-weight:700;padding:10px 16px;border-radius:20px;border:0;background:#1F699E;color:#fff;cursor:pointer;}</style>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Networking Events · Creating Works</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%25' stop-color='%2310B981'/><stop offset='33%25' stop-color='%233B82F6'/><stop offset='66%25' stop-color='%238B5CF6'/><stop offset='100%25' stop-color='%23F43F5E'/></linearGradient></defs><circle cx='18' cy='18' r='16' fill='transparent' stroke='url(%23g)' stroke-width='3'/></svg>">
@@ -310,6 +311,18 @@
 <style>@media(max-width:768px){input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea{font-size:16px !important;}}</style>
 </head>
 <body>
+<div id="cw-gate">
+  <div style="font-size:15px;font-weight:800;color:#1A2E42;margin-bottom:10px;">Operators only</div>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+    <input id="cw-who" type="email" autocomplete="email" placeholder="Your email" style="max-width:240px;">
+    <button type="button" id="cw-send">Send a code</button>
+  </div>
+  <div id="cw-pinrow" style="display:none;gap:10px;margin-top:12px;flex-wrap:wrap;">
+    <input id="cw-pin" inputmode="numeric" maxlength="6" placeholder="000000" style="max-width:130px;letter-spacing:.18em;text-align:center;">
+    <button type="button" id="cw-go">Open</button>
+  </div>
+  <div id="cw-say" style="font-size:14px;color:#6B7A8D;margin-top:12px;min-height:20px;"></div>
+</div>
 
   <nav>
     <a href="https://creating.works" class="nav-logo">
@@ -512,5 +525,40 @@
     <span>© 2026 Creating Works</span>
   </footer>
 
+<script>
+(function(){
+  var GS='https://cw-api-gate.jessieupp.workers.dev';
+  var $=function(id){ return document.getElementById(id); };
+  var open_=function(){ document.documentElement.className=document.documentElement.className.replace(/\s*cw-locked/g,''); };
+  var ask=function(){ try{ var w=localStorage.getItem('cw-ops-who'); if(w) $('cw-who').value=w; }catch(e){} };
+  var v=null; try{ v=JSON.parse(localStorage.getItem('cw-ops-session')||'null'); }catch(e){}
+  if(v&&v.tok&&v.id&&v.until>Date.now()){
+    fetch(GS+'?action=opsCheck&appearId='+encodeURIComponent(v.id)+'&sessionToken='+encodeURIComponent(v.tok)+'&t='+Date.now())
+      .then(function(r){ return r.json(); })
+      .then(function(d){ if(d&&d.status==='ok'&&d.ok){ open_(); } else { ask(); } })
+      .catch(ask);
+  } else { ask(); }
+  $('cw-send').onclick=function(){
+    var addr=($('cw-who').value||'').trim(); if(!addr){ $('cw-who').focus(); return; }
+    var b=this; b.disabled=true; $('cw-say').textContent='';
+    fetch(GS+'?action=sendOpsPin&email='+encodeURIComponent(addr)+'&t='+Date.now())
+      .then(function(r){ return r.json(); })
+      .then(function(){ b.disabled=false; try{ localStorage.setItem('cw-ops-who', addr); }catch(e){}
+        $('cw-pinrow').style.display='flex'; $('cw-say').textContent='If that address belongs to an operator, a code is on its way.'; $('cw-pin').focus(); })
+      .catch(function(){ b.disabled=false; $('cw-say').textContent='Could not reach the server.'; });
+  };
+  $('cw-go').onclick=function(){
+    var code=($('cw-pin').value||'').replace(/\D/g,''); if(!code){ $('cw-pin').focus(); return; }
+    var b=this; b.disabled=true; $('cw-say').textContent='Checking...';
+    fetch(GS+'?action=verifyOpsPin&email='+encodeURIComponent(($('cw-who').value||'').trim())+'&code='+encodeURIComponent(code)+'&t='+Date.now())
+      .then(function(r){ return r.json(); })
+      .then(function(d){ b.disabled=false;
+        if(!d||d.status!=='ok'||!d.sessionToken){ $('cw-say').textContent=(d&&d.message)||'That code does not match.'; return; }
+        try{ localStorage.setItem('cw-ops-session', JSON.stringify({id:d.id,tok:d.sessionToken,until:Date.now()+55*60*1000})); }catch(e){}
+        $('cw-say').textContent=''; open_(); })
+      .catch(function(){ b.disabled=false; $('cw-say').textContent='Could not reach the server.'; });
+  };
+})();
+</script>
 </body>
 </html>
