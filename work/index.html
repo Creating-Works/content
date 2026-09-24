@@ -1254,7 +1254,7 @@
     }).catch(function(){ gpPhotoStat('That did not go through.'); });
   }
 
-  var GP_STEP_TITLES = ['Location', 'Joy', 'Skills', 'Attention towards', 'Offerings', 'Open to work', 'Your answers'];
+  var GP_STEP_TITLES = ['Location', 'Joy', 'Skills', 'Attention towards', 'Offerings', 'Open to opportunities', 'Your answers'];
   var _gpStep = 0;
   var GP_LAST = GP_STEP_TITLES.length - 1;
   var GP_GROUP = String(params.get('groupName') || '').trim();
@@ -1294,7 +1294,7 @@
     return out;
   }
 
-  var CW_RAIL = ['Location', 'Joy', 'Skills', 'Attention towards', 'Offerings', 'Open to work', 'Your answers'];
+  var CW_RAIL = ['Location', 'Joy', 'Skills', 'Attention towards', 'Offerings', 'Open to opportunities', 'Your answers'];
   function cwPaintRail(){
     var r = document.getElementById('cw-rail'); if (!r) return;
     var waiting = (document.getElementById('cw-wait') || {}).style && document.getElementById('cw-wait').style.display !== 'none';
