@@ -1086,11 +1086,21 @@
       document.getElementById('panel').innerHTML='<div class="status err">Could not load your account. Reload the page to try again.</div>';
       return;
     }
-    paintIdentity(); paintSolutionDots(); renderPanel(startTab);
+    var _paneSafe = function (key) {
+      try { renderPanel(key); }
+      catch (err) {
+        try { console.error('pane ' + key + ' failed', err); } catch (e2) {}
+        var _pp = document.getElementById('panel');
+        if (_pp) { _pp.insertAdjacentHTML('afterbegin', '<div class="status err">This part did not open: ' + esc(String((err && err.message) || err)) + '. Tell us what it says.</div>'); }
+      }
+    };
     window.cwAccountPick = function (key) {
-      renderPanel(key);
+      _paneSafe(key);
       try { if (PANES.indexOf(key) > -1 && history.replaceState) history.replaceState({}, '', '#' + key); } catch (e) {}
     };
+    try { paintIdentity(); } catch (e) {}
+    try { paintSolutionDots(); } catch (e) {}
+    _paneSafe(startTab);
     window.addEventListener('hashchange', function(){ var k = paneFromHash(); if (k) renderPanel(k); });
     loadEmail(startTab);
   });
