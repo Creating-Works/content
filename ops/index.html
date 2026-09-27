@@ -139,6 +139,12 @@
     <div class="say" id="s2"></div>
   </div>
 
+  <div class="card hide" id="ticketPic">
+    <div style="font-weight:800;margin:0 0 10px;">Picture sent with a support ticket</div>
+    <div class="say" id="ticketPicSay"></div>
+    <img id="ticketPicImg" alt="Picture sent with a support ticket" style="max-width:100%;border-radius:10px;display:none;">
+  </div>
+
   <div class="hide" id="docs">
     <div id="docsBody">
       <select id="docPick" aria-label="Open a page or document">
@@ -655,8 +661,27 @@
     });
   }
   $('aSuper').addEventListener('change', paintRecent);
+  function showTicketPic(){
+    var id=''; try{ id=new URLSearchParams(location.search).get('ticketImage')||''; }catch(e){}
+    if(!/^[A-Za-z0-9_-]{21}$/.test(id)) return;
+    $('ticketPic').classList.remove('hide');
+    $('ticketPicSay').textContent='Opening the picture.';
+    fetch('https://cw-photos.jessieupp.workers.dev/s/'+encodeURIComponent(id),{
+      headers:{'x-ops-id':me,'x-ops-session':token}
+    }).then(function(r){
+      if(!r.ok) throw new Error(String(r.status));
+      return r.blob();
+    }).then(function(b){
+      var img=$('ticketPicImg');
+      img.src=URL.createObjectURL(b); img.style.display='block';
+      $('ticketPicSay').textContent='';
+    }).catch(function(){
+      $('ticketPicSay').textContent='This picture did not open. Either it is not there, or this sign-in has expired. Request a new code and open the link from the email again.';
+    });
+  }
   function load(){
     whySession();
+    showTicketPic();
     $('docs').classList.remove('hide');
     ['aboard','pboard','board'].forEach(function(id){ $(id).classList.remove('hide'); });
   }
