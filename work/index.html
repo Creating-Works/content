@@ -1652,7 +1652,7 @@
   var _cwLastQs = null, _cwSentQs = null;
   function cwSendKey(){ return cwBuildQs() + '&purposeKey=' + encodeURIComponent(CW_PURPOSE.text || ''); }
   function cwIsSent(){ return !!window._cwSent && _cwSentQs !== null && cwSendKey() === _cwSentQs; }
-  function cwStat(msg, bad){ var st = document.getElementById('gp-intro-status'); if (st) { st.style.color = bad ? '#7A2410' : '#6B7A8D'; st.textContent = msg || ''; } }
+  function cwStat(msg, bad){ var st = document.getElementById('gp-intro-status'); if (st) { st.style.color = bad ? '#7A2410' : '#4B5A6D'; st.textContent = msg || ''; } }
   function gpQuietSave(){
     if (CW_MOCKUP) return;
     if (!GP_BROWSE || !meId) return;
