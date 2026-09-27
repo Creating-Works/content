@@ -314,7 +314,7 @@
     $('count').textContent = 'reading\u2026';
 
     whySay('asking for tickets as ' + (me || '(no id)') + (token ? ' with a token' : ' WITH NO TOKEN'));
-    var tickets = fetch(GS + '?action=getSupportTickets&appearId=' + encodeURIComponent(me) + '&t=' + Date.now())
+    var tickets = fetch(GS + '?action=getSupportTickets&site=cw&appearId=' + encodeURIComponent(me) + '&t=' + Date.now())
       .then(function (r) { return r.json(); }).catch(function () { return null; });
     var bugs = fetch(GS + '?action=getStatusItems&t=' + Date.now())
       .then(function (r) { return r.json(); }).catch(function () { return null; });
