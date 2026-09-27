@@ -174,7 +174,21 @@
   function field(key,lab,type,val,ph){
     return '<div class="f"><label>'+esc(lab)+'</label><input data-acct="'+esc(key)+'" type="'+type+'" value="'+esc(val||'')+'"'+(ph?' placeholder="'+esc(ph)+'"':'')+'></div>';
   }
+  var _acctLook='';
+  function acctWaitBlock(lab, full){
+    var body=_acctLook==='fail'
+      ? 'Could not look this up just now. <a href="#" data-acct-retry="1" style="color:#1F699E;font-weight:700;text-decoration:none;">Try again</a>'
+      : 'Looking up…';
+    return '<div class="f"'+(full?' style="grid-column:1/-1;"':'')+'><label>'+esc(lab)+'</label>'
+      +'<div style="font-size:14px;color:var(--soft);padding:9px 0;">'+body+'</div></div>';
+  }
+  document.addEventListener('click', function(e){
+    var a=e.target && e.target.closest ? e.target.closest('[data-acct-retry]') : null;
+    if(!a) return;
+    e.preventDefault(); _acctLook=''; try{ renderPanel('account'); }catch(err){} loadEmail();
+  });
   function emailBlock(){
+    if(_editToken && _acctLook!=='ok') return acctWaitBlock('Email', false);
     var hint=_editToken?'':'Hidden until you verify it is you. Press Save changes to verify.';
     if(!_editToken || !D.alsoEmails.length){
       return readonlyField('Email', D.email, hint);
@@ -326,6 +340,7 @@
         +'<div style="font-size:12.5px;color:var(--muted);margin:-2px 0 0;">'
         +'Hidden until you verify it is you. Press Save changes to verify.</div></div>';
     }
+    if(_acctLook!=='ok') return acctWaitBlock('Your link', true);
     var have=String(D.vanity||'').trim();
     var shown=have
       ? '<div style="font-size:15px;color:var(--ink);word-break:break-all;">'
@@ -729,6 +744,7 @@
           if(resp&&resp.status==='ok'&&resp.editToken){
             _editToken=resp.editToken; _tokenSet(_editToken);
             host.innerHTML=''; if(onOk) onOk();
+            if(_acctLook!=='ok') loadEmail();
           } else { st.textContent=(resp&&resp.message)||'That code did not match.'; }
         }).catch(function(){ go.disabled=false; st.textContent='Could not verify. Try again.'; });
     };
@@ -1142,6 +1158,7 @@
 
   function loadEmail(tab){
     if(!_editToken || !meId) return;
+    _acctLook='wait';
     fetch(GS_URL+'?action=getAccount&appearId='+encodeURIComponent(meId)
       +'&editToken='+encodeURIComponent(_editToken))
       .then(function(r){ return r.json(); })
@@ -1152,6 +1169,7 @@
           try{ renderPanel('account'); }catch(e){}
           return;
         }
+        _acctLook='ok';
         if(resp.email) D.email=resp.email;
         D.alsoEmails=Array.isArray(resp.alsoEmails)?resp.alsoEmails:[];
         D.vanity=String(resp.vanity||'');
@@ -1167,7 +1185,11 @@
         }
         var t=document.querySelector('.tab.on');
         if(t && t.textContent==='My account') renderPanel('account');
-      }).catch(function(){});
+      }).catch(function(){
+        _acctLook='fail';
+        var t2=document.querySelector('.tab.on');
+        if(t2 && t2.textContent==='My account'){ try{ renderPanel('account'); }catch(e){} }
+      });
   }
 })();
 </script>
