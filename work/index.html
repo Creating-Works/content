@@ -21,7 +21,7 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
-  :root{--brand:#1F699E;--ink:#1A2E42;--soft:#6B7A8D;--line:#DDE3EA;--panel:#F7FBFF;}
+  :root{--brand:#1F699E;--ink:#1A2E42;--soft:#4B5A6D;--line:#DDE3EA;--panel:#F7FBFF;}
   *{box-sizing:border-box;}
   body{margin:0;background:var(--brand);color:var(--ink);
     font-family:'DM Sans','Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
@@ -49,7 +49,7 @@
   .btn{background:var(--brand);color:#fff;border:0;font:inherit;font-size:14.5px;font-weight:700;
     padding:11px 22px;border-radius:24px;cursor:pointer;}
   .btn[disabled]{opacity:.6;cursor:default;}
-  .cw-intro-box::placeholder{color:#9AA8B7;opacity:1;}
+  .cw-intro-box::placeholder{color:#4B5A6D;opacity:1;}
   
   .cw-loading{display:inline-flex;align-items:center;background:#1F699E;color:#fff;font-size:13px;font-weight:700;
     padding:8px 16px;border-radius:20px;animation:cw-breathe 2.3s ease-in-out infinite;}   
@@ -70,15 +70,15 @@
       <div id="cw-wait" style="display:none;"><span class="cw-loading">Loading information</span></div>
       <div style="font-size:22px;font-weight:800;color:#1A2E42;margin-left:auto;text-align:right;" id="gp-intro-title">Before you go in</div>
     </div>
-    <p id="gp-intro-lede" style="display:none;font-size:14.5px;color:#6B7A8D;margin:0 0 22px;line-height:1.55;"></p>
+    <p id="gp-intro-lede" style="display:none;font-size:14.5px;color:#4B5A6D;margin:0 0 22px;line-height:1.55;"></p>
     <div id="gp-intro-qs"></div>
     <div id="gp-footer" style="display:flex;gap:12px;align-items:center;margin-top:22px;padding-top:6px;flex-wrap:wrap;">
       <button type="button" id="gp-step-back" style="display:none;font:inherit;font-size:14px;font-weight:700;padding:10px 18px;border-radius:24px;border:1.5px solid #C9DFF3;background:#fff;color:#1F699E;cursor:pointer;">Back</button>
-      <span id="gp-step-count" style="font-size:13px;color:#6B7A8D;"></span>
+      <span id="gp-step-count" style="font-size:13px;color:#4B5A6D;"></span>
       <span id="gp-step-note" style="font-size:13px;color:#7A2410;"></span>
       <span style="flex:1;"></span>
-      <span id="gp-intro-status" style="font-size:13px;color:#6B7A8D;"></span>
-      <button type="button" id="gp-step-skip" style="display:none;font:inherit;font-size:14px;font-weight:600;padding:10px 16px;border-radius:24px;border:0;background:transparent;color:#6B7A8D;cursor:pointer;text-decoration:underline;">Skip this</button>
+      <span id="gp-intro-status" style="font-size:13px;color:#4B5A6D;"></span>
+      <button type="button" id="gp-step-skip" style="display:none;font:inherit;font-size:14px;font-weight:600;padding:10px 16px;border-radius:24px;border:0;background:transparent;color:#4B5A6D;cursor:pointer;text-decoration:underline;">Skip this</button>
       <button class="btn" id="gp-step-next">Next</button>
     </div>
   </div>
@@ -237,7 +237,7 @@
     t.style.cssText = 'font-size:17px;font-weight:800;color:#1A2E42;margin-bottom:2px;';
     t.textContent = title;
     var h = document.createElement('div');
-    h.style.cssText = 'font-size:13.5px;color:#6B7A8D;margin-bottom:12px;';
+    h.style.cssText = 'font-size:13.5px;color:#4B5A6D;margin-bottom:12px;';
     h.textContent = hint;
     w.appendChild(t); w.appendChild(h); w.appendChild(body);
     return w;
@@ -642,7 +642,7 @@
 
     if (!_bare) {
       var lead = document.createElement('div');
-      lead.style.cssText = 'font-size:13px;color:#6B7A8D;margin-bottom:8px;';
+      lead.style.cssText = 'font-size:13px;color:#4B5A6D;margin-bottom:8px;';
       lead.textContent = 'Search for something, or tap one below.';
       box.appendChild(lead);
     }
@@ -671,7 +671,7 @@
     if (_browseOn) {
       box.appendChild(browseWrap);
       var _wait = document.createElement('div');
-      _wait.style.cssText = 'font-size:13px;color:#6B7A8D;';
+      _wait.style.cssText = 'font-size:13px;color:#4B5A6D;';
       _wait.textContent = 'Looking up the list\u2026';
       browseWrap.appendChild(_wait);
     }
@@ -686,7 +686,7 @@
       row.style.display = atTop ? 'flex' : 'none';
       if (atTop) {
         var lead2 = document.createElement('div');
-        lead2.style.cssText = 'font-size:13px;color:#6B7A8D;margin-bottom:8px;';
+        lead2.style.cssText = 'font-size:13px;color:#4B5A6D;margin-bottom:8px;';
         lead2.textContent = 'Or browse by category.';
         browseWrap.appendChild(lead2);
       } else {
@@ -702,7 +702,7 @@
         trail.appendChild(mkLink('All categories', []));
         path.forEach(function(seg, idx){
           var sep = document.createElement('span');
-          sep.style.cssText = 'color:#6B7A8D;margin:0 6px;font-weight:400;';
+          sep.style.cssText = 'color:#4B5A6D;margin:0 6px;font-weight:400;';
           sep.textContent = '\u203A';
           trail.appendChild(sep);
           if (idx === path.length - 1) {
@@ -874,7 +874,7 @@
         }
         ask.innerHTML = '';
         var q = document.createElement('div');
-        q.style.cssText = 'font-size:13px;color:#6B7A8D;margin-bottom:8px;';
+        q.style.cssText = 'font-size:13px;color:#4B5A6D;margin-bottom:8px;';
         q.textContent = cfg.tagQ;
         ask.appendChild(q);
         var opts = cfg.tagOpts;
@@ -930,7 +930,7 @@
         r.tabIndex = 0;
         r.style.cssText = 'border:1px solid #DDE3EA;border-radius:10px;padding:10px 12px;margin-top:6px;cursor:pointer;background:#fff;';
         r.innerHTML = '<div style="font-size:14.5px;font-weight:700;color:#1A2E42;">' + h.word + '</div>'
-          + (h.cat ? '<div style="font-size:13px;color:#6B7A8D;">' + h.cat + '</div>' : '');
+          + (h.cat ? '<div style="font-size:13px;color:#4B5A6D;">' + h.cat + '</div>' : '');
         r.addEventListener('click', function(){
           gpAddWord(key, h.word, h.cat, ta);
           search.value = ''; results.innerHTML = ''; repaint();
@@ -948,7 +948,7 @@
         rt.style.cssText = 'font-size:14.5px;font-weight:700;color:#1F699E;';
         rt.textContent = 'Add this to my list';
         var rw = document.createElement('div');
-        rw.style.cssText = 'font-size:13px;color:#6B7A8D;';
+        rw.style.cssText = 'font-size:13px;color:#4B5A6D;';
         rw.textContent = typed;
         r.appendChild(rt); r.appendChild(rw);
         var ask = document.createElement('div');
@@ -971,7 +971,7 @@
     var box = document.createElement('div');
     box.style.cssText = 'margin-top:10px;';
     var lead = document.createElement('div');
-    lead.style.cssText = 'font-size:13px;color:#6B7A8D;margin-bottom:8px;';
+    lead.style.cssText = 'font-size:13px;color:#4B5A6D;margin-bottom:8px;';
     lead.textContent = cfg.lead || 'And/or tap any below...';
     box.appendChild(lead);
 
@@ -1089,7 +1089,7 @@
     t.style.cssText = 'font-size:17px;font-weight:800;color:#1A2E42;margin-bottom:2px;';
     t.textContent = 'Where are you?';
     var h = document.createElement('div');
-    h.style.cssText = 'font-size:13.5px;color:#6B7A8D;margin-bottom:12px;';
+    h.style.cssText = 'font-size:13.5px;color:#4B5A6D;margin-bottom:12px;';
     h.textContent = 'So the people and events near you can reach you.';
     var box = document.createElement('div');
     box.id = 'gp-loc-box';
@@ -1132,11 +1132,11 @@
       + 'justify-content:center;font-size:26px;">\u{1F331}</div>'
       + '<div style="min-width:0;">'
       + '<div style="font-size:17px;font-weight:800;color:#1A2E42;margin-bottom:2px;">Your photo</div>'
-      + '<div id="gp-photo-hint" style="font-size:13.5px;color:#6B7A8D;line-height:1.5;margin-bottom:8px;">'
+      + '<div id="gp-photo-hint" style="font-size:13.5px;color:#4B5A6D;line-height:1.5;margin-bottom:8px;">'
       + (GP_BROWSE ? 'A professional photo helps members recognize you when you show up.</div>'
                    : 'A professional photo helps people recognize you when you show up.</div>')
       + (GP_BROWSE
-          ? '<div id="gp-photo-need" style="font-size:13.5px;color:#6B7A8D;line-height:1.5;margin-bottom:8px;">'
+          ? '<div id="gp-photo-need" style="font-size:13.5px;color:#4B5A6D;line-height:1.5;margin-bottom:8px;">'
             + (GP_FOR === 'event'
                 ? 'Your photo is needed to register for an event that has a bulletin board.'
                 : 'Your photo is needed to join a group.')
@@ -1145,7 +1145,7 @@
       + '<button type="button" id="gp-photo-btn" style="font:inherit;font-size:13.5px;font-weight:700;'
       + 'padding:8px 16px;border-radius:20px;border:1.5px solid #1F699E;background:#fff;color:#1F699E;'
       + 'cursor:pointer;">Add a photo</button>'
-      + '<div id="gp-photo-stat" style="font-size:13px;color:#6B7A8D;margin-top:6px;"></div>'
+      + '<div id="gp-photo-stat" style="font-size:13px;color:#4B5A6D;margin-top:6px;"></div>'
       + '</div>';
     var btn = wrap.querySelector('#gp-photo-btn');
     btn.addEventListener('click', gpChoosePhoto);
@@ -1346,7 +1346,7 @@
       if (_req && !gpAnswered(_req.key)) miss = [_req.miss];
       else if (_gpStep === 2 && !Object.keys(_gpLangPicked || {}).some(function(k){ return _gpLangPicked[k]; })) miss = ['a language'];
       note.textContent = miss.length ? ('Still to add: ' + miss.join(', ') + '.') : '';
-      if (GP_BROWSE) note.style.color = '#6B7A8D';
+      if (GP_BROWSE) note.style.color = '#4B5A6D';
     }
     if (GP_BROWSE) {
       var _picked = function(m){ return Object.keys(m || {}).some(function(k){ return m[k]; }); };
@@ -1412,7 +1412,7 @@
     var _s0 = document.createElement('div');
     _s0.setAttribute('data-gp-step', '0');
     var _pn = document.createElement('div');
-    _pn.style.cssText = 'font-size:13px;color:#6B7A8D;margin:-6px 0 0;max-width:60ch;line-height:1.5;';
+    _pn.style.cssText = 'font-size:13px;color:#4B5A6D;margin:-6px 0 0;max-width:60ch;line-height:1.5;';
     _pn.textContent = 'Your photo is only shown inside groups you join or start. It is not on the open web '
       + 'and it is not shown to people outside your groups.';
     if (!GP_BROWSE) _s0.appendChild(_pn);
@@ -1425,7 +1425,7 @@
       t.style.cssText = 'font-size:17px;font-weight:800;color:#1A2E42;margin-bottom:2px;';
       t.textContent = q.q;
       var h = document.createElement('div');
-      h.style.cssText = 'font-size:13.5px;color:#6B7A8D;margin-bottom:12px;';
+      h.style.cssText = 'font-size:13.5px;color:#4B5A6D;margin-bottom:12px;';
       h.textContent = q.hint;
       var ta = document.createElement('textarea');
       ta.id = 'gp-intro-' + q.key;
@@ -1535,7 +1535,7 @@
     tt.style.cssText = 'font-size:17px;font-weight:800;color:#1A2E42;margin-bottom:2px;';
     tt.textContent = 'How do you like to get appreciated? \u{1F381}';
     var th = document.createElement('div');
-    th.style.cssText = 'font-size:13.5px;color:#6B7A8D;margin-bottom:12px;';
+    th.style.cssText = 'font-size:13.5px;color:#4B5A6D;margin-bottom:12px;';
     th.textContent = 'When somebody wants to give something back, this is where it lands. Pick as many as you are happy to receive.';
     var row = document.createElement('div');
     row.style.cssText = 'display:flex;flex-wrap:wrap;gap:7px;';
@@ -1575,7 +1575,7 @@
     var thanks = GP_THANKS.filter(function(o){ return _gpThanksPicked[o.value]; }).map(function(o){ return o.label; });
     var row = function(q, a){
       return '<div style="font-size:14px;font-weight:700;color:#1A2E42;">' + esc(q) + '</div>'
-        + '<div style="font-size:14.5px;margin:2px 0 14px;white-space:pre-wrap;' + (a ? 'color:#4B5A6D;">' + esc(a) : 'color:#6B7A8D;font-style:italic;">Not answered yet') + '</div>';
+        + '<div style="font-size:14.5px;margin:2px 0 14px;white-space:pre-wrap;' + (a ? 'color:#4B5A6D;">' + esc(a) : 'color:#4B5A6D;font-style:italic;">Not answered yet') + '</div>';
     };
     el.innerHTML =
         row('Where are you?', gpLocString(_gpLoc))
@@ -1679,7 +1679,7 @@
     }
     var qs = cwBuildQs();
     window._cwSending = true; gpStepPaint();
-    if (stat) { stat.style.color = '#6B7A8D'; stat.textContent = ''; }
+    if (stat) { stat.style.color = '#4B5A6D'; stat.textContent = ''; }
     var pq = '&purposeShown=' + encodeURIComponent(CW_PURPOSE.text || '');
     if (CW_PURPOSE.text && (!CW_PURPOSE.saved || CW_PURPOSE.edited)) pq += '&purpose=' + encodeURIComponent(CW_PURPOSE.text);
     var sentKey = cwSendKey();
@@ -1753,7 +1753,7 @@
   function cwPaintWork(state){
     var box = document.getElementById('cw-work-step'); if (!box) return;
     var h = '<div style="font-size:17px;font-weight:800;color:#1A2E42;margin:26px 0 2px;">What outcomes would you like work to give you?</div>'
-      + '<div style="font-size:13.5px;color:#6B7A8D;margin-bottom:12px;">Pick as many as fit or add your own.</div>';
+      + '<div style="font-size:13.5px;color:#4B5A6D;margin-bottom:12px;">Pick as many as fit or add your own.</div>';
     if (CW_WORK.choices) {
       var list = CW_WORK.choices.slice();
       Object.keys(CW_WORK.picked).forEach(function(n){ if (CW_WORK.picked[n] && list.indexOf(n) < 0) list.push(n); });
@@ -1883,11 +1883,11 @@
       + (CW_RETIRED.on ? 'background:#1F699E;border:1px solid #1F699E;color:#fff;font-weight:700;' : 'background:#fff;border:1px solid #C9DFF3;color:#1F699E;font-weight:600;')
       + '">I\u2019m retired</button></div>';
     box.innerHTML = '<div style="font-size:17px;font-weight:800;color:#1A2E42;margin-bottom:2px;">If you\u2019re open to paid work, what type of paid work are you open to?</div>'
-      + '<div style="font-size:13.5px;color:#6B7A8D;margin-bottom:12px;">Pick as many as fit.</div>'
+      + '<div style="font-size:13.5px;color:#4B5A6D;margin-bottom:12px;">Pick as many as fit.</div>'
       + pills('paid', rd.paidWorkTypes || [])
       + retired
       + '<div style="font-size:17px;font-weight:800;color:#1A2E42;margin:26px 0 2px;">If you\u2019re open to non-paid work, what type are you open to?</div>'
-      + '<div style="font-size:13.5px;color:#6B7A8D;margin-bottom:12px;">Pick as many as fit.</div>'
+      + '<div style="font-size:13.5px;color:#4B5A6D;margin-bottom:12px;">Pick as many as fit.</div>'
       + pills('unpaid', rd.unpaidWorkTypes || [])
       + '<div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:7px;"><button type="button" id="cw-otw-other" style="font:inherit;font-size:13.5px;padding:7px 14px;border-radius:20px;cursor:pointer;'
       + 'background:#6B7A8D;border:1px solid #6B7A8D;color:#fff;font-weight:700;">+ Other</button></div>'
@@ -1895,7 +1895,7 @@
       + '<input type="text" id="cw-otw-otherin" placeholder="In your own words" style="flex:1 1 220px;border:1.5px solid #DDE3EA;background:#F7FBFF;border-radius:10px;padding:9px 12px;font:inherit;font-size:14px;color:#1A2E42;">'
       + '<button type="button" id="cw-otw-otheradd" style="font:inherit;font-size:13.5px;font-weight:700;padding:8px 16px;border-radius:20px;border:0;background:#1F699E;color:#fff;cursor:pointer;">Add</button></div>'
       + '<div style="font-size:17px;font-weight:800;color:#1A2E42;margin:26px 0 2px;">What is your availability for non-paid work?</div>'
-      + '<div style="font-size:13.5px;color:#6B7A8D;margin-bottom:12px;">Pick as many as fit.</div>'
+      + '<div style="font-size:13.5px;color:#4B5A6D;margin-bottom:12px;">Pick as many as fit.</div>'
       + pills('unpaidTime', rd.paidWorkTypes || []);
     var rb = document.getElementById('cw-retired'); if (rb) rb.onclick = function(){ CW_RETIRED.on = !CW_RETIRED.on; cwPaintOtw(); };
     box.querySelectorAll('[data-cw-otw]').forEach(function(b){
@@ -1990,11 +1990,11 @@
     }, 0);
     window._cwPurposeOpts = opts;
     return '<div style="font-size:22px;font-weight:800;color:#1A2E42;border-top:1px solid #DDE3EA;margin-top:10px;padding-top:18px;">Your purpose</div>'
-      + (opts.length ? '<div style="font-size:13.5px;color:#6B7A8D;margin:2px 0 10px;">We drew these from your answers. Pick one or more and change any of it to say it your way.</div>'
+      + (opts.length ? '<div style="font-size:13.5px;color:#4B5A6D;margin:2px 0 10px;">We drew these from your answers. Pick one or more and change any of it to say it your way.</div>'
           + '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;">'
           + opts.map(function(o, i){ return '<button type="button" data-cw-purpose="' + i + '" style="font:inherit;font-size:14px;text-align:left;padding:10px 14px;border-radius:12px;cursor:pointer;line-height:1.45;">' + _gpEsc(o) + '</button>'; }).join('')
           + '</div>'
-        : '<div style="font-size:13.5px;color:#6B7A8D;margin:2px 0 8px;">Say what you are making, for whom, and in service to what.</div>')
+        : '<div style="font-size:13.5px;color:#4B5A6D;margin:2px 0 8px;">Say what you are making, for whom, and in service to what.</div>')
       + '<textarea id="cw-purpose" rows="3" class="cw-intro-box" placeholder="Example: Facilitating and coaching, for families new to the area, in service to community health" '
       + 'style="width:100%;border:1.5px solid #DDE3EA;background:#F7FBFF;border-radius:10px;padding:12px 14px;font:inherit;font-size:14.5px;color:#1A2E42;line-height:1.5;resize:vertical;margin-bottom:14px;">'
       + _gpEsc(CW_PURPOSE.text || '') + '</textarea>';
