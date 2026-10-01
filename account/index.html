@@ -1189,8 +1189,7 @@
         if(_curPane==='account') renderPanel('account');
       }).catch(function(){
         _acctLook='fail';
-        var t2=document.querySelector('.tab.on');
-        if(t2 && t2.textContent==='My account'){ try{ renderPanel('account'); }catch(e){} }
+        if(_curPane==='account'){ try{ renderPanel('account'); }catch(e){} }
       });
   }
 })();
