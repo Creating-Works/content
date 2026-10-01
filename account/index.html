@@ -761,7 +761,9 @@
       if(d && !/\bon\b/.test(d.className)) d.className+=' on';
     });
   }
+  var _curPane='';
   function renderPanel(key){
+    _curPane=key;
     var p=document.getElementById('panel');
     if(key==='me'){
       p.innerHTML=
@@ -1167,7 +1169,7 @@
         if(!resp || resp.status!=='ok'){
           _editToken='';
           try{ localStorage.removeItem('cw-edit-'+meId); }catch(e){}
-          try{ renderPanel('account'); }catch(e){}
+          try{ if(_curPane==='account') renderPanel('account'); }catch(e){}
           return;
         }
         _acctLook='ok';
@@ -1184,8 +1186,7 @@
           D.firstName=String(resp.firstName||'');
           D.lastName=String(resp.lastName||'');
         }
-        var t=document.querySelector('.tab.on');
-        if(t && t.textContent==='My account') renderPanel('account');
+        if(_curPane==='account') renderPanel('account');
       }).catch(function(){
         _acctLook='fail';
         var t2=document.querySelector('.tab.on');
