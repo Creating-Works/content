@@ -1153,7 +1153,7 @@
     try { paintIdentity(); } catch (e) {}
     try { paintSolutionDots(); } catch (e) {}
     _paneSafe(startTab);
-    window.addEventListener('hashchange', function(){ var k = paneFromHash(); if (k) renderPanel(k); });
+    window.addEventListener('hashchange', function(){ var k = paneFromHash(); if (k) { renderPanel(k); try { Array.prototype.forEach.call(document.querySelectorAll('[data-prail]'), function(x){ var on = x.getAttribute('data-prail') === k; x.classList.toggle('on', on); if (on) x.setAttribute('aria-current', 'page'); else x.removeAttribute('aria-current'); }); } catch (e) {} } });
     loadEmail(startTab);
   });
 
@@ -1209,7 +1209,9 @@
   if (look === 'list' || !window.cwProfileRail) return;
   var viewing = false;
   try { viewing = !!(window.CW && CW.me && CW.me().viewing); } catch (e) {}
-  cwProfileRail({ active: 'account', shape: 'account', wrap: document.querySelector('.wrap'),
+  var _railKey = String(location.hash || '').replace(/^#/, '').toLowerCase();
+  if (['me','account','permissions','balance','appear','gather','license'].indexOf(_railKey) < 0) _railKey = 'account';
+  cwProfileRail({ active: _railKey, shape: 'account', wrap: document.querySelector('.wrap'),
                   viewingSomeoneElse: viewing,
                   onPick: function (key) { try { window.cwAccountPick(key); } catch (e) {} } });
 })();
