@@ -35,6 +35,10 @@ When she says either one, in any chat, publish (or update) a list **artifact** s
 4. **Ready to build.** Agreed but not built, each with what it waits on.
 5. **Queue and ideas, by page.** Every item explained so she can decide without scrolling back: what it is, where it shows, and what the choice is. Mark items waiting on her, on hold, or future.
 
+**A check marked Works disappears from the board at once**, and the chat leaves it out of the next version. Her words, 2026-10-02: *"we are supposed to hide anything htat has been marked works - add this to all chats"*.
+
+**Making the board's saving work.** The page waits for `window.claude` (poll every 250 ms for up to 15 s) before `claude.use('db')`; read too early and the taps stay in her browser and never reach the chat. That happened on the Profile Test Board on 2026-10-02. On load it also re-sends any taps kept in browser storage that the database doesn't have yet. At the start of every reply the chat reads `feedback`, `answers` and `completed` with `ArtifactData`, acts on anything new, and removes Works items when it next republishes.
+
 **Every artifact gets a search bar right under its title** that filters the page as she types, so she can look up anything in it. Her words, 2026-10-02: *"add a sesarch bar to all artifacts made going forward so i can look up anytihng in the artifact"*, then *"right under title"*. Never list links a second time at the bottom. Never add a "Which of these work?" question. Leave out other chats' items you aren't involved in. Update the same artifact next time rather than making a new one. The chat reply only links to it.
 
 ## Working with her
