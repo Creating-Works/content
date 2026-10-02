@@ -25,6 +25,17 @@ A finding also carries **Suggested fix: <one line naming what I would do>. Fix n
 INSIDE this shape, underneath the Context, never instead of the shape. Ending a finding at
 "Suggested fix ... Fix now?" is the failure this form exists to stop.
 
+## "Give me a list" or "Make a list artifact"
+
+When she says either one, in any chat, publish (or update) a list **artifact** she can keep open beside the chat. The model to copy is the Profile chat's [Profile Test Board](https://claude.ai/artifact/5sssvT7yJvW73BAT9VmuDg). Her words, 2026-10-02: *"this profile test board is a perfect artifact for all chats to make when I say 'Make a list artifact'"*. Four parts, in this order:
+
+1. **Questions for you to answer.** Every decision waiting on her, one card each: what it is about (her own words where there are any), the question in one sentence, the links that go with that question (the screen, the tab, the Run's log on the executions page), and an **open answer box** with Save. Answers go to the board's database (`db` capability, collection `answers`) so the chat reads them with `ArtifactData`, never asking her to paste. Where a person's data makes the choice clearer, add a small **table of real example rows** (row, what it holds now, what would change), emails masked as the logs mask them. A question listed here is not repeated in the other parts. Her words, 2026-10-02: *"We should have a section called questions for me to answer with open-ended fiedlds"*, *"with links htat are associated to yourquesiton"*, *"Please provide tables to give me an example of data from a person if and when necessary"*. Model: the [Data Integrity Board](https://claude.ai/artifact/7GF8rZEtUNV4AuFtDs7an2).
+2. **To test.** Grouped by page or section, in the order a person moves through the site. Each group has **one** link at its top, with a fresh `?cb=`, and every check for that page sits under it, each with its row number and what SHOULD show. Anything that needs a deploy first goes last, saying so. Give each check Works and Not working buttons kept in browser storage, on this device only.
+3. **Ready to build.** Agreed but not built, each with what it waits on.
+4. **Queue and ideas, by page.** Every item explained so she can decide without scrolling back: what it is, where it shows, and what the choice is. Mark items waiting on her, on hold, or future.
+
+Never list links a second time at the bottom. Never add a "Which of these work?" question. Leave out other chats' items you aren't involved in. Update the same artifact next time rather than making a new one. The chat reply only links to it.
+
 ## Working with her
 
 - **One step at a time.** Wait before the next one.
@@ -196,6 +207,7 @@ were already wrong on 2026-09-21.
 | `E` | Events |
 | `G` | Groups |
 | `H` | HTML and email |
+| `I` | Issue tracking |
 | `J` | Jazz mono repo |
 | `L` | Load times |
 | `M` | Page 0 Main |
@@ -207,7 +219,7 @@ were already wrong on 2026-09-21.
 | `T` | Expressions |
 | `X` | UX Design |
 
-  Free, for the next chat: **B, F, I, K, O, U, V, W, Y, Z**. Take the one that says your chat's
+  Free, for the next chat: **B, F, K, O, U, V, W, Y, Z**. Take the one that says your chat's
   name out loud and add your row; tell her which you took, do not make her pick.
 
   **It is a table rather than a sentence for one reason.** It was a single run-on line until
