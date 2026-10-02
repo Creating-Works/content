@@ -518,7 +518,7 @@
     if(P.skills) row('Skills',permList(d.skills).concat(permList(String(d.languages||'').split(/[|,]/).join('|'))));
     if(P.offers) row('Offerings',permList(d.haves));
     if(P.otw) row('Open to opportunities',permList(d.openToPaidWork).concat(permList(d.openToUnpaidWork),permList(d.openToUnpaidTime)).filter(function(x,i,a){ return a.indexOf(x)===i; }));
-    if(P.care) row('What I care about',permList(d.values).concat(permList(d.domains)));
+    if(P.care) row('What I care about',permList(d.cares != null ? d.cares : d.values).concat(permList(d.domains)));
     if(P.work) row('Work values',permList(d.workValues));
     if(P.purpose && String(d.purpose||'').trim()) row('My purpose',[String(d.purpose).trim()]);
     var where=permPlace(P.where);
