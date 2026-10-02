@@ -45,7 +45,8 @@ INSIDE this shape, underneath the Context, never instead of the shape. Ending a 
 - **Never ask her to paste code into Apps Script.** Code is appended to
   `~/Documents/creating-works-gs/all.js` (the editor shows it as all.gs; on 2026-09-23 she moved
   everything before d21 into allarchived3 and started all fresh, so all.gs.js no longer exists — never
-  recreate it) and pushed with `npx clasp push` from a session on her
+  recreate it; on 2026-10-02 she archived it again into allarchived4 (local `allarchived4.gs.js`) and all.gs
+  starts fresh, so new Runs go in all.js and older ones stay runnable from allarchived4) and pushed with `npx clasp push` from a session on her
   Mac. A browser chat that cannot reach her files says so and hands her the function in ONE block,
   naming the file, so a session that can reach them puts it there. She presses Run; that part is
   hers. Her words, 2026-09-20: "I don't want to have to tell a new chat to say to do this every time."
