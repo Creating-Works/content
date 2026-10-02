@@ -1640,7 +1640,7 @@
     qs += '&needsTags='     + encodeURIComponent(cwNeedsTags(tagFor('introNeed')))
         + '&interestsTags=' + encodeURIComponent(tagFor('introEnjoy'))
         + '&skillsTags='    + encodeURIComponent(tagFor('introSkills'))
-        + '&valuesTags='    + encodeURIComponent(gpSplitCare(cwCareTags(tagFor('introValues'))).values)
+        + '&caresTags='    + encodeURIComponent(gpSplitCare(cwCareTags(tagFor('introValues'))).values)
         + '&domainsTags='   + encodeURIComponent(gpSplitCare(cwCareTags(tagFor('introValues'))).domains)
         + '&location='      + encodeURIComponent(gpLocString(_gpLoc));
     if (window._gpLoaded) qs += '&havesTags=' + encodeURIComponent(CW_HAVES.join('|'))
@@ -2069,7 +2069,7 @@
     introNeed:   'needs',
     introEnjoy:  'interests',
     introSkills: 'skills',
-    introValues: 'values',
+    introValues: 'cares',
     introOffer:  'offers'
   };
 
