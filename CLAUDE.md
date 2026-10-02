@@ -38,6 +38,8 @@ INSIDE this shape, underneath the Context, never instead of the shape. Ending a 
   being asked. A field the create form writes and the edit form never loads comes back empty and
   overwrites the real value the next time anybody saves, so half of this is a data loss rather than
   an inconsistency. Checked on 2026-09-07 and three were already open on the event form.
+  When she names only one of them, build or edit, do both and say so; never ask which. Her words,
+  2026-09-23: *"it should always be assumed both need to be updated to be the same."*
 - **She is not a coder.** Ask plain-English questions and make the technical calls yourself. Say the
   user-facing effect, not the function name.
 - **Never ask her to paste code into Apps Script.** Code is appended to
@@ -47,6 +49,10 @@ INSIDE this shape, underneath the Context, never instead of the shape. Ending a 
   Mac. A browser chat that cannot reach her files says so and hands her the function in ONE block,
   naming the file, so a session that can reach them puts it there. She presses Run; that part is
   hers. Her words, 2026-09-20: "I don't want to have to tell a new chat to say to do this every time."
+- **One Run per reply.** Name the next function to Run only after she has pasted the log of the last
+  one, even when a preview and its apply are obvious partners. Her words, 2026-09-23: *"Don't tell me
+  to run something unless I've already run what you wanted me to paste the log to before I run the
+  next one because I get confused on what I ran and what I didn't run."*
 - **Code changes come as FIND and REPLACE blocks**, complete and verbatim. Never "click before the
   brace". Keep the FIND short and unique; long multi-line FINDs fail.
 - **Every reference is a clickable full URL**, and it points at the thing itself, never at a list she
@@ -141,6 +147,24 @@ were already wrong on 2026-09-21.
   old single letter series collided twice in one morning: two different DD rows and two different DE
   rows, written minutes apart by different chats. When she then says "DD go", neither chat can be
   sure she means its own row and the wrong one may act.
+- **Never ask her to carry a message, or to open a chat so you can message it. Send it yourself, then
+  tell her you did.** A chat listed in `ListAgents` gets `SendMessage` by its exact name (never one
+  with "(old" in it). A chat that is not listed is reached with `list_sessions` and then
+  `send_message` to its session id, which queues it for when that chat next runs. Only if both fail
+  does she hear about it, in one line, as a failure of yours rather than a task of hers. Her words,
+  2026-09-23, after being asked to open the Load times chat: *"You should never have to ask me to
+  send a message to another chat. Just do it and tell me you did."* The reply to her says which chat
+  was told what, in plain words.
+- **Any change that returns information about a person goes to the Data integrity chat for a privacy
+  check before it is pushed.** That means any action that reads or returns an email, phone, place, photo, name, id,
+  answer or event detail. Message Data integrity with the commit and what the action returns, and wait for its
+  check. **Before every Apps Script deploy, Jessie runs `k40_privacySweep` (keep.gs)**, which asks every read the
+  backend has, as a stranger, about one person, and flags anything personal that comes back. A LEAK line means
+  no deploy until it is understood. Her words, 2026-09-24, after an event-form change would have let anybody
+  turn an email address into a face: *"I'm so scared if this was not checked"*, then *"privacy go"*.
+  **It is ONE check under ONE name.** Improvements go into `k40_privacySweep` itself; never add a k41, k42 … wrapper
+  per deploy (k41–k45 were made and moved to allarchived3 on 2026-10-01). Her rule, 2026-10-01: *"If it's the same,
+  keep it and keep. If it's different all the time, let's create a new place for that."* It is the same.
 - **Write a block for her to paste ONLY when it changes what another chat will BUILD, or prevents
   real damage.** Routing work to the right chat qualifies; a security hole qualifies; a decision that
   unblocks somebody qualifies. Correcting a number in our own documentation does not, and neither
@@ -170,7 +194,7 @@ were already wrong on 2026-09-21.
 | `D` | Data integrity |
 | `E` | Events |
 | `G` | Groups |
-| `H` | HTML copy |
+| `H` | HTML and email |
 | `J` | Jazz mono repo |
 | `L` | Load times |
 | `M` | Page 0 Main |
