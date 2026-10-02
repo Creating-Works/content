@@ -35,7 +35,7 @@ When she says either one, in any chat, publish (or update) a list **artifact** s
 4. **Ready to build.** Agreed but not built, each with what it waits on.
 5. **Queue and ideas, by page.** Every item explained so she can decide without scrolling back: what it is, where it shows, and what the choice is. Mark items waiting on her, on hold, or future.
 
-Never list links a second time at the bottom. Never add a "Which of these work?" question. Leave out other chats' items you aren't involved in. Update the same artifact next time rather than making a new one. The chat reply only links to it.
+**Every artifact gets a search bar right under its title** that filters the page as she types, so she can look up anything in it. Her words, 2026-10-02: *"add a sesarch bar to all artifacts made going forward so i can look up anytihng in the artifact"*, then *"right under title"*. Never list links a second time at the bottom. Never add a "Which of these work?" question. Leave out other chats' items you aren't involved in. Update the same artifact next time rather than making a new one. The chat reply only links to it.
 
 ## Working with her
 
