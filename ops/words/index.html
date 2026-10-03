@@ -1,0 +1,126 @@
+<!doctype html>
+<!--
+  Copyright 2026 DayBalancer LLC. All rights reserved.
+
+  The code and the content here power Creating.Works, DayBalancer, Appear Network,
+  and 2Gather. They are published so they can be read, audited, and dated.
+
+  Running either as a separate offering requires a license, whether you brand it as
+  ours or as your own, and whether or not money changes hands.
+
+  hello@creating.works
+-->
+<html lang="en">
+<head>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%25' stop-color='%2310B981'/><stop offset='33%25' stop-color='%233B82F6'/><stop offset='66%25' stop-color='%238B5CF6'/><stop offset='100%25' stop-color='%23F43F5E'/></linearGradient></defs><circle cx='18' cy='18' r='16' fill='transparent' stroke='url(%23g)' stroke-width='3'/></svg>">
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Cache-Control" content="no-store, max-age=0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Words to review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#1F5C86;--card:#fff;--text:#1B2733;--muted:#5B6B7C;--brand:#1F699E;--line:#E3E9EF;--warn:#B4451F;--warnbg:#FCEFE9;--tint:#E6F1FB;}
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);padding:28px 16px 80px;min-height:100vh;}
+  .wrap{max-width:760px;margin:0 auto;}
+  h1{font-size:22px;margin:0 0 4px;color:#fff;}
+  .sub{color:#CBDCEA;font-size:14px;margin:0 0 14px;}
+  .sub a{color:#fff;}
+  .find{width:100%;border:1px solid var(--line);border-radius:999px;padding:10px 16px;font-family:inherit;font-size:15px;margin:0 0 16px;}
+  .card{background:var(--card);border-radius:14px;padding:16px 18px;margin-bottom:12px;}
+  .say{font-size:14px;color:var(--muted);}
+  .say.bad{color:var(--warn);}
+  .w{font-size:18px;font-weight:700;margin:0 0 2px;overflow-wrap:anywhere;}
+  .what{font-size:14px;color:var(--muted);margin:0 0 4px;}
+  .meta{font-size:13px;color:var(--muted);margin:0;}
+  .flag{display:inline-block;background:var(--warnbg);color:var(--warn);font-size:12.5px;font-weight:700;border-radius:999px;padding:1px 9px;margin-left:6px;vertical-align:2px;}
+  .btns{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px;}
+  .btn{border:0;border-radius:22px;padding:8px 18px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;}
+  .keep{background:var(--brand);color:#fff;}
+  .rm{background:#fff;color:var(--warn);border:1.5px solid var(--warn);}
+  .btn:disabled{opacity:.5;cursor:default;}
+  .btn:focus-visible,.find:focus-visible{outline:2px solid #fff;outline-offset:2px;}
+  [hidden]{display:none!important;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Words to review</h1>
+  <p class="sub" id="count">Looking for words people added…</p>
+  <input type="search" class="find" id="find" placeholder="Search these words" aria-label="Search these words" autocomplete="off" hidden>
+  <div class="card" id="signin" hidden><p class="say">Sign in on the <a href="https://creating.works/ops/">ops dashboard</a>, then come back to this page.</p></div>
+  <div class="card" id="oops" hidden><p class="say bad" id="oopsmsg"></p><div class="btns"><button type="button" class="btn keep" id="again">Try again</button></div></div>
+  <div id="list"></div>
+</div>
+<script>
+(function(){
+  var GS='https://cw-api-gate.jessieupp.workers.dev';
+  var $=function(id){ return document.getElementById(id); };
+  var esc=function(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
+  var sess=null;
+  try{ var v=JSON.parse(localStorage.getItem('cw-ops-session')||'null'); if(v && v.id && v.tok && v.until>Date.now()) sess=v; }catch(e){}
+  if(!sess){ $('count').textContent=''; $('signin').hidden=false; return; }
+  var auth='&appearId='+encodeURIComponent(sess.id)+'&sessionToken='+encodeURIComponent(sess.tok);
+  var left=0;
+  function when(s){ var d=new Date(s); return isNaN(d)?'':d.toLocaleString([], {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}); }
+  function label(it){
+    if(it.kind==='word'){
+      var bits=[];
+      if(it.kindOf && it.kindOf.length) bits.push('a kind of '+it.kindOf.join(', '));
+      if(it.categories && it.categories.length) bits.push('in '+it.categories.join(', '));
+      return 'New word'+(bits.length?', '+bits.join(', '):'');
+    }
+    var how={category:'another category on',kindOf:'now a kind of, on',otherName:'another name for'}[it.added]||'added to';
+    return it.added==='kindOf' ? 'Added to '+it.word+': a kind of '+it.value : 'Added as '+how+' '+it.word;
+  }
+  function count(){ $('count').innerHTML=left ? left+' to review'+' · <a href="https://creating.works/ops/">Ops dashboard</a>' : 'Nothing to review. · <a href="https://creating.works/ops/">Ops dashboard</a>'; }
+  function draw(items){
+    var list=$('list'); list.innerHTML='';
+    left=items.length; count();
+    $('find').hidden=!items.length;
+    items.forEach(function(it){
+      var c=document.createElement('div'); c.className='card';
+      var shown = it.kind==='word' ? it.word : it.value;
+      c.innerHTML='<p class="w">'+esc(shown)+(it.looksLikeName?'<span class="flag">may be a first name</span>':'')+'</p>'
+        +'<p class="what">'+esc(label(it))+'</p>'
+        +'<p class="meta">Added '+esc(when(it.addedDate))+(it.askedIn?' · asked in '+esc(it.askedIn):'')+'</p>'
+        +'<div class="btns"><button type="button" class="btn keep">Keep</button><button type="button" class="btn rm">Remove</button><span class="say"></span></div>';
+      var msg=c.querySelector('.btns .say'), bs=c.querySelectorAll('.btn');
+      function decide(d){
+        bs.forEach(function(b){ b.disabled=true; }); msg.className='say'; msg.textContent='Saving…';
+        fetch(GS+'?action=reviewWord'+auth+'&ref='+encodeURIComponent(it.ref)+'&decision='+d+'&t='+Date.now())
+          .then(function(r){ return r.json(); })
+          .then(function(r){
+            if(r && r.status==='ok'){ c.remove(); left--; count(); return; }
+            bs.forEach(function(b){ b.disabled=false; }); msg.className='say bad'; msg.textContent=(r && r.message) || 'Could not save. Try again.';
+          })
+          .catch(function(){ bs.forEach(function(b){ b.disabled=false; }); msg.className='say bad'; msg.textContent='Could not reach the server. Try again.'; });
+      }
+      bs[0].addEventListener('click',function(){ decide('keep'); });
+      bs[1].addEventListener('click',function(){ decide('remove'); });
+      list.appendChild(c);
+    });
+  }
+  function load(){
+    $('oops').hidden=true; $('count').textContent='Looking for words people added…';
+    fetch(GS+'?action=getWordReview'+auth+'&t='+Date.now())
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if(d && d.status==='ok' && Array.isArray(d.items)){ draw(d.items); return; }
+        $('count').textContent=''; $('oops').hidden=false; $('oopsmsg').textContent=(d && d.message) || 'The review list did not come back. Try again.';
+      })
+      .catch(function(){ $('count').textContent=''; $('oops').hidden=false; $('oopsmsg').textContent='Could not reach the server. Try again.'; });
+  }
+  $('again').addEventListener('click',load);
+  $('find').addEventListener('input',function(){
+    var q=this.value.trim().toLowerCase();
+    Array.prototype.forEach.call($('list').children,function(c){ c.hidden = !!q && c.textContent.toLowerCase().indexOf(q)<0; });
+  });
+  load();
+})();
+</script>
+</body>
+</html>
