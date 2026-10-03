@@ -397,6 +397,7 @@
         token=d.sessionToken;
         if(d.id){ me=d.id; }
         remember(me, token);
+        if(/[?&]next=words(&|$)/.test(location.search)){ location.replace('/ops/words/'); return; }
         say('s2','');
         $('gate').classList.add('hide');
         $('docs').classList.remove('hide');
