@@ -903,9 +903,7 @@
         +['city','county','state','country'].map(function(l){ var t=permPlace(l); return t?'<button type="button" data-permwhere="'+l+'" style="'+pill(P.where===l)+'">'+esc(t)+'</button>':''; }).join('')
         +'<button type="button" data-permwhere="hidden" style="'+pill(P.where==='hidden')+'">Hidden</button>'
         +'</div>'
-        +(permPlace('city')?'':'<div style="font-size:12.5px;color:#4B5A6D;margin:-10px 0 16px;">Your city is not on file yet. Add it under <b>My info</b>, and it joins this list.</div>')
-        +'<div style="font-size:15px;font-weight:800;color:#1A2E42;margin-bottom:4px;">What shows</div>'
-        +(!/[?&]consent=0\b/.test(location.search)?'<div style="font-size:14px;line-height:1.55;color:#1A2E42;background:#F7FBFF;border:1px solid #C9DFF3;border-radius:10px;padding:10px 12px;margin:6px 0 8px;">Your info helps AI suggest resources, opportunities, people, and events that fit you - such as locally or abroad. You choose, card by card, what is shown and what is used, and you can change it any time.<div style="margin-top:8px;"><a href="https://2gather.network/ikigai/?consent=1&amp;matching=1" style="display:inline-block;font-size:13.5px;font-weight:700;color:#fff;background:#1F699E;border-radius:20px;padding:7px 16px;text-decoration:none;">Info used for matching</a></div></div>':'');
+        +(permPlace('city')?'':'<div style="font-size:12.5px;color:#4B5A6D;margin:-10px 0 16px;">Your city is not on file yet. Add it under <b>My info</b>, and it joins this list.</div>');
       if(_mailOn===null){ loadMailPref(); }
       h+='<div id="perm-mail" style="margin:22px 0 6px;"><div style="font-size:15px;font-weight:800;color:#1A2E42;margin-bottom:4px;">Notifications</div>'
         +(_mailOn===null?'<div style="font-size:13.5px;color:#4B5A6D;">Looking for your choice\u2026</div>'
