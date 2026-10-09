@@ -880,14 +880,14 @@
       var sw=function(on){ return '<span style="position:relative;display:inline-block;width:44px;height:26px;border-radius:13px;background:'+(on?'#1F699E':'#C9D3DE')+';flex:0 0 auto;"><span style="position:absolute;top:3px;left:'+(on?'21':'3')+'px;width:20px;height:20px;border-radius:50%;background:#fff;"></span></span>'; };
       var h='<h2>Global permissions</h2>';
       if(_permState==='new'){ loadPerm(); }
-      if(_permState==='looking'||_permState==='new'){ p.innerHTML=h+'<div style="font-size:14px;color:var(--soft);">Loading your choices\u2026</div>'; return; }
+      if(_permState==='looking'||_permState==='new'){ p.innerHTML=h+'<span class="cw-loading">Loading your choices</span>'; return; }
       if(_permState==='refused'){ p.innerHTML=h+'<div style="font-size:13.5px;color:#7A2410;line-height:1.55;">We could not read your permissions just now, so nothing below would be your answer. <a href="https://2gather.network/signin/?next=%2Faccount%2F%23permissions" style="color:#1F699E;font-weight:700;">Sign in again</a> and they come back.</div>'; return; }
       var inGroup=_permAud.indexOf('g:')===0, P=permFor(_permAud), n=permNames();
       var groupName=inGroup?((_permGroups.filter(function(g){ return 'g:'+g.id===_permAud; })[0]||{}).name||'this group'):'';
-      h+='<div id="perm-status" style="font-size:13px;color:#4B5A6D;min-height:18px;margin-bottom:8px;">Every change saves as you go.</div>';
+      h+='<div id="perm-status" style="font-size:13px;color:#4B5A6D;"></div>';
       if(_mailOn===null){ loadMailPref(); }
       h+='<div id="perm-mail" style="margin:22px 0 6px;"><div style="font-size:15px;font-weight:800;color:#1A2E42;margin-bottom:4px;">Notifications</div>'
-        +(_mailOn===null?'<div style="font-size:13.5px;color:#4B5A6D;">Looking for your choice\u2026</div>'
+        +(_mailOn===null?'<span class="cw-loading">Loading your choice</span>'
          :_mailOn==='x'?'<div style="font-size:13.5px;color:#7A2410;line-height:1.5;">We could not read this just now. Reload the page to try again.</div>'
          :'<button type="button" id="perm-mailon" role="switch" aria-checked="'+(_mailOn?'true':'false')+'" style="display:flex;align-items:center;justify-content:space-between;width:100%;font:inherit;font-size:14.5px;color:#1A2E42;background:#fff;border:0;border-bottom:1px solid #f0f1f5;padding:12px 2px;cursor:pointer;text-align:left;"><span>Email me when a person sends me a message I have not opened</span>'+sw(_mailOn)+'</button>'
           +'<button type="button" id="perm-mailchat" role="switch" aria-checked="'+(_mailChatOn?'true':'false')+'" style="display:flex;align-items:center;justify-content:space-between;width:100%;font:inherit;font-size:14.5px;color:#1A2E42;background:#fff;border:0;border-bottom:1px solid #f0f1f5;padding:12px 2px;cursor:pointer;text-align:left;"><span>Email me when a group chat has unread messages</span>'+sw(_mailChatOn)+'</button>')
