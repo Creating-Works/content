@@ -904,7 +904,7 @@
         +'</div>';
       p.innerHTML=h;
       var _pgo=document.getElementById('perm-go'), _pgs=document.getElementById('perm-go-group');
-      if(_pgo&&_pgs) _pgo.onclick=function(){ if(_pgs.value) location.href='https://2gather.network/group/'+encodeURIComponent(_pgs.value)+'/permissions'; };
+      if(_pgo&&_pgs) _pgo.onclick=function(){ if(_pgs.value) location.href='https://2gather.network/group/'+encodeURIComponent(_pgs.value)+'/manage#permissions'; };
       p.querySelectorAll('[data-permaud]').forEach(function(b){ b.onclick=function(){ _permAud=b.getAttribute('data-permaud'); renderPanel('permissions'); }; });
       var gsel=document.getElementById('perm-group');
       if(gsel) gsel.onchange=function(){ _permAud=gsel.value||'member'; renderPanel('permissions'); };
