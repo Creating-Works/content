@@ -491,7 +491,7 @@
     fetch(GS_URL+'?action=getMyGroups&appearId='+encodeURIComponent(meId))
       .then(function(r){ return r.json(); })
       .then(function(d){
-        _permGroups=((d&&d.groups)||[]).map(function(g){ return { id:String(g.groupID||g.groupId||g.id||'').trim(), name:String(g.groupName||g.name||'').trim() }; })
+        _permGroups=((d&&d.groups)||[]).map(function(g){ return { id:String(g.groupID||g.groupId||g.id||'').trim(), name:String(g.groupName||g.name||'').trim(), slug:String(g.slug||'').trim() }; })
           .filter(function(g){ return g.id&&g.name; });
         if(_permState==='ok') renderPanel('permissions');
       }).catch(function(){});
@@ -892,7 +892,19 @@
          :'<button type="button" id="perm-mailon" role="switch" aria-checked="'+(_mailOn?'true':'false')+'" style="display:flex;align-items:center;justify-content:space-between;width:100%;font:inherit;font-size:14.5px;color:#1A2E42;background:#fff;border:0;border-bottom:1px solid #f0f1f5;padding:12px 2px;cursor:pointer;text-align:left;"><span>Email me when a person sends me a message I have not opened</span>'+sw(_mailOn)+'</button>'
           +'<button type="button" id="perm-mailchat" role="switch" aria-checked="'+(_mailChatOn?'true':'false')+'" style="display:flex;align-items:center;justify-content:space-between;width:100%;font:inherit;font-size:14.5px;color:#1A2E42;background:#fff;border:0;border-bottom:1px solid #f0f1f5;padding:12px 2px;cursor:pointer;text-align:left;"><span>Email me when a group chat has unread messages</span>'+sw(_mailChatOn)+'</button>')
         +'</div>';
+      var _gpGo=_permGroups.filter(function(g){ return g.slug; });
+      h+='<div style="margin:26px 0 6px;"><div style="font-size:15px;font-weight:800;color:#1A2E42;margin-bottom:4px;">Group permissions</div>'
+        +(_gpGo.length
+          ?'<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px;">'
+            +'<select id="perm-go-group" aria-label="A group" style="font:inherit;font-size:14px;font-weight:700;padding:9px 14px;border-radius:9px;cursor:pointer;max-width:260px;background:#fff;color:#1F699E;border:1.5px solid #C9D6E2;">'
+            +_gpGo.map(function(g){ return '<option value="'+esc(g.slug)+'">'+esc(g.name)+'</option>'; }).join('')+'</select>'
+            +'<button type="button" id="perm-go" style="font:inherit;font-size:14px;font-weight:700;padding:9px 20px;border-radius:20px;cursor:pointer;background:#1F699E;color:#fff;border:1.5px solid #1F699E;">Go</button>'
+            +'</div>'
+          :'<div style="font-size:13.5px;color:#4B5A6D;line-height:1.5;">You are not in a group yet. Once you join one, you can choose here what people in it see.</div>')
+        +'</div>';
       p.innerHTML=h;
+      var _pgo=document.getElementById('perm-go'), _pgs=document.getElementById('perm-go-group');
+      if(_pgo&&_pgs) _pgo.onclick=function(){ if(_pgs.value) location.href='https://2gather.network/group/'+encodeURIComponent(_pgs.value)+'/permissions'; };
       p.querySelectorAll('[data-permaud]').forEach(function(b){ b.onclick=function(){ _permAud=b.getAttribute('data-permaud'); renderPanel('permissions'); }; });
       var gsel=document.getElementById('perm-group');
       if(gsel) gsel.onchange=function(){ _permAud=gsel.value||'member'; renderPanel('permissions'); };
