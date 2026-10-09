@@ -433,6 +433,29 @@
   }
 
   var _perm={}, _permState='new', _permAud='member', _permGroups=[], _permPublicOn=false;
+  var MSG_API='https://cw-messages.jessieupp.workers.dev', _mailOn=null, _mailSess='', _mailBusy=false;
+  function mailToken(){
+    try{
+      var norm=String(meId||'').split('.').join('').toLowerCase(), raw=localStorage.getItem('cw-edit-'+norm);
+      if(raw){ var o=JSON.parse(raw); if(o&&o.t) return o.t; }
+      return localStorage.getItem('cw-token')||'';
+    }catch(e){ return ''; }
+  }
+  function mailApi(path,body){
+    var h={'Content-Type':'application/json'}; if(_mailSess) h['x-msg-session']=_mailSess;
+    return fetch(MSG_API+path,{method:body?'POST':'GET',headers:h,body:body?JSON.stringify(body):undefined}).then(function(r){ return r.json(); });
+  }
+  function mailSession(){
+    if(_mailSess) return Promise.resolve(true);
+    return mailApi('/session',{id:meId,token:mailToken()}).then(function(d){ if(d&&d.status==='ok'&&d.session){ _mailSess=d.session; return true; } return false; });
+  }
+  function loadMailPref(){
+    if(_mailOn!==null||_mailBusy||!meId) return;
+    _mailBusy=true;
+    mailSession().then(function(ok){ return ok?mailApi('/prefs'):null; })
+      .then(function(d){ _mailBusy=false; _mailOn=(d&&d.status==='ok')?!!d.emailOn:'x'; renderPanel('permissions'); })
+      .catch(function(){ _mailBusy=false; _mailOn='x'; renderPanel('permissions'); });
+  }
   var PERM_ITEMS=[['photo','Your photo'],['needs','Needs'],['enjoy','Enjoys'],['skills','Skills and languages'],
     ['offers','Offerings'],['otw','Open to opportunities'],['care','What I care about and sectors'],
     ['work','Work experience I\u2019m creating'],['purpose','My purpose']];
@@ -893,7 +916,14 @@
         h+='<button type="button" data-permitem="'+it[0]+'" role="switch" aria-checked="'+(P[it[0]]?'true':'false')+'" style="display:flex;align-items:center;justify-content:space-between;width:100%;font:inherit;font-size:14.5px;color:#1A2E42;background:#fff;border:0;border-bottom:1px solid #f0f1f5;padding:12px 2px;cursor:pointer;text-align:left;">'
           +'<span>'+esc(it[1])+'</span>'+sw(P[it[0]])+'</button>';
       });
-      h+='<div style="height:18px;"></div>'
+      if(_mailOn===null){ loadMailPref(); }
+      h+='<div id="perm-mail" style="margin:22px 0 6px;"><div style="font-size:15px;font-weight:800;color:#1A2E42;margin-bottom:4px;">Notifications</div>'
+        +(_mailOn===null?'<div style="font-size:13.5px;color:#4B5A6D;">Looking for your choice\u2026</div>'
+         :_mailOn==='x'?'<div style="font-size:13.5px;color:#7A2410;line-height:1.5;">We could not read this just now. Reload the page to try again.</div>'
+         :'<button type="button" id="perm-mailon" role="switch" aria-checked="'+(_mailOn?'true':'false')+'" style="display:flex;align-items:center;justify-content:space-between;width:100%;font:inherit;font-size:14.5px;color:#1A2E42;background:#fff;border:0;border-bottom:1px solid #f0f1f5;padding:12px 2px;cursor:pointer;text-align:left;"><span>Email me when I have a message I have not opened</span>'+sw(_mailOn)+'</button>'
+          +'<div style="font-size:12.5px;color:#4B5A6D;margin:6px 0 0;line-height:1.5;">This covers one-on-one messages and every group chat you are in. Turn it off and no message emails are sent.</div>')
+        +'</div>'
+        +'<div style="height:18px;"></div>'
         +'<div style="font-size:12px;font-weight:800;color:#4B5A6D;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;">'+esc(inGroup?'What '+groupName+' sees':'What signed-in people see')+'</div>'
         +'<div style="border:1.5px solid #DDE3EA;border-radius:12px;padding:16px;">'+permPreview(P)+'</div>';
       p.innerHTML=h;
@@ -903,6 +933,14 @@
       p.querySelectorAll('[data-permname]').forEach(function(b){ b.onclick=function(){ P.name=b.getAttribute('data-permname'); renderPanel('permissions'); permSave(); }; });
       p.querySelectorAll('[data-permwhere]').forEach(function(b){ b.onclick=function(){ P.where=b.getAttribute('data-permwhere'); renderPanel('permissions'); permSave(); }; });
       p.querySelectorAll('[data-permitem]').forEach(function(b){ b.onclick=function(){ var k=b.getAttribute('data-permitem'); P[k]=!P[k]; renderPanel('permissions'); permSave(); }; });
+      var mb=document.getElementById('perm-mailon');
+      if(mb) mb.onclick=function(){
+        var want=!_mailOn; mb.disabled=true;
+        mailApi('/prefs',{emailOn:want}).then(function(d){
+          if(d&&d.status==='ok'){ _mailOn=!!d.emailOn; renderPanel('permissions'); var s2=document.getElementById('perm-status'); if(s2){ s2.style.color='#1E6B3A'; s2.textContent='Saved.'; } }
+          else { mb.disabled=false; var s3=document.getElementById('perm-status'); if(s3){ s3.style.color='#7A2410'; s3.textContent='Please press the switch again, because it did not save.'; } }
+        }).catch(function(){ mb.disabled=false; var s4=document.getElementById('perm-status'); if(s4){ s4.style.color='#7A2410'; s4.textContent='Please press the switch again, because it did not save.'; } });
+      };
       return;
     }
     var ph=D.photo?'<img class="photo" src="'+esc(D.photo)+'" alt="">':'<div class="photo"></div>';
