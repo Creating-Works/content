@@ -906,16 +906,6 @@
         +(permPlace('city')?'':'<div style="font-size:12.5px;color:#4B5A6D;margin:-10px 0 16px;">Your city is not on file yet. Add it under <b>My info</b>, and it joins this list.</div>')
         +'<div style="font-size:15px;font-weight:800;color:#1A2E42;margin-bottom:4px;">What shows</div>'
         +(!/[?&]consent=0\b/.test(location.search)?'<div style="font-size:14px;line-height:1.55;color:#1A2E42;background:#F7FBFF;border:1px solid #C9DFF3;border-radius:10px;padding:10px 12px;margin:6px 0 8px;">Your info helps AI suggest resources, opportunities, people, and events that fit you - such as locally or abroad. You choose, card by card, what is shown and what is used, and you can change it any time.<div style="margin-top:8px;"><a href="https://2gather.network/ikigai/?consent=1&amp;matching=1" style="display:inline-block;font-size:13.5px;font-weight:700;color:#fff;background:#1F699E;border-radius:20px;padding:7px 16px;text-decoration:none;">Info used for matching</a></div></div>':'');
-      PERM_ITEMS.forEach(function(it){
-        if(it[0]==='photo'){
-          h+='<div role="switch" aria-checked="true" aria-disabled="true" style="display:flex;align-items:center;justify-content:space-between;width:100%;font-size:14.5px;color:#1A2E42;border-bottom:1px solid #f0f1f5;padding:12px 2px;">'
-            +'<span>'+esc(it[1])+' <span style="font-size:12.5px;font-weight:700;color:#4B5A6D;">Always on in a group</span></span><span style="opacity:.55;">'+sw(true)+'</span></div>'
-            +'<div style="font-size:12.5px;color:#4B5A6D;margin:6px 0 4px;line-height:1.5;">People in a group can always see your face and your name. A group is people who agreed to be in a room together, and somebody nobody can put a face to is watching rather than taking part. You choose how much of your name shows, above.</div>';
-          return;
-        }
-        h+='<button type="button" data-permitem="'+it[0]+'" role="switch" aria-checked="'+(P[it[0]]?'true':'false')+'" style="display:flex;align-items:center;justify-content:space-between;width:100%;font:inherit;font-size:14.5px;color:#1A2E42;background:#fff;border:0;border-bottom:1px solid #f0f1f5;padding:12px 2px;cursor:pointer;text-align:left;">'
-          +'<span>'+esc(it[1])+'</span>'+sw(P[it[0]])+'</button>';
-      });
       if(_mailOn===null){ loadMailPref(); }
       h+='<div id="perm-mail" style="margin:22px 0 6px;"><div style="font-size:15px;font-weight:800;color:#1A2E42;margin-bottom:4px;">Notifications</div>'
         +(_mailOn===null?'<div style="font-size:13.5px;color:#4B5A6D;">Looking for your choice\u2026</div>'
