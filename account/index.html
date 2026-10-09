@@ -884,26 +884,7 @@
       if(_permState==='refused'){ p.innerHTML=h+'<div style="font-size:13.5px;color:#7A2410;line-height:1.55;">We could not read your permissions just now, so nothing below would be your answer. <a href="https://2gather.network/signin/?next=%2Faccount%2F%23permissions" style="color:#1F699E;font-weight:700;">Sign in again</a> and they come back.</div>'; return; }
       var inGroup=_permAud.indexOf('g:')===0, P=permFor(_permAud), n=permNames();
       var groupName=inGroup?((_permGroups.filter(function(g){ return 'g:'+g.id===_permAud; })[0]||{}).name||'this group'):'';
-      h+='<div id="perm-status" style="font-size:13px;color:#4B5A6D;min-height:18px;margin-bottom:8px;">Every change saves as you go.</div>'
-        +'<div style="background:#EEF2F6;border:1px solid #DDE3EA;border-radius:12px;padding:12px 14px;margin-bottom:18px;">'
-        +'<div style="font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#4B5A6D;margin-bottom:3px;">Who is looking</div>'
-        +'<div style="font-size:13px;color:#4B5A6D;margin-bottom:10px;">Set these once and they hold for every group you are in, or pick one group and set that group on its own.</div>'
-        +'<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">'
-        +'<button type="button" data-permaud="member" style="'+tab(_permAud==='member')+'">Global permissions for all groups</button>'
-        +(_permGroups.length?'<select id="perm-group" aria-label="A group" style="font:inherit;font-size:14px;font-weight:700;padding:9px 14px;border-radius:9px;cursor:pointer;width:auto;max-width:260px;'+(inGroup?'background:#1F699E;color:#fff;border:1.5px solid #1F699E;':'background:#fff;color:#1F699E;border:1.5px solid #C9D6E2;')+'"><option value="">In a group\u2026</option>'
-          +_permGroups.map(function(g){ return '<option value="g:'+esc(g.id)+'"'+('g:'+g.id===_permAud?' selected':'')+'>'+esc(g.name)+'</option>'; }).join('')+'</select>':'')
-        +'</div></div>'
-        +'<div style="text-align:right;font-size:13.5px;font-weight:700;color:#1A2E42;margin:-4px 0 18px;">'+esc(inGroup?'People in '+groupName:'These permissions will be set for all groups')+'</div>'
-        +'<div style="font-size:15px;font-weight:800;color:#1A2E42;margin-bottom:8px;">Your name</div>'
-        +'<div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px;">'
-        +[['full','Full name ('+n.full+')'],['short','First name, last initial ('+n.short+')'],['initials','Initials ('+n.initials+')']].map(function(o){ return '<button type="button" data-permname="'+o[0]+'" style="'+pill(P.name===o[0])+'">'+esc(o[1])+'</button>'; }).join('')
-        +'</div>'
-        +'<div style="font-size:15px;font-weight:800;color:#1A2E42;margin-bottom:8px;">Where you are</div>'
-        +'<div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px;">'
-        +['city','county','state','country'].map(function(l){ var t=permPlace(l); return t?'<button type="button" data-permwhere="'+l+'" style="'+pill(P.where===l)+'">'+esc(t)+'</button>':''; }).join('')
-        +'<button type="button" data-permwhere="hidden" style="'+pill(P.where==='hidden')+'">Hidden</button>'
-        +'</div>'
-        +(permPlace('city')?'':'<div style="font-size:12.5px;color:#4B5A6D;margin:-10px 0 16px;">Your city is not on file yet. Add it under <b>My info</b>, and it joins this list.</div>');
+      h+='<div id="perm-status" style="font-size:13px;color:#4B5A6D;min-height:18px;margin-bottom:8px;">Every change saves as you go.</div>';
       if(_mailOn===null){ loadMailPref(); }
       h+='<div id="perm-mail" style="margin:22px 0 6px;"><div style="font-size:15px;font-weight:800;color:#1A2E42;margin-bottom:4px;">Notifications</div>'
         +(_mailOn===null?'<div style="font-size:13.5px;color:#4B5A6D;">Looking for your choice\u2026</div>'
@@ -918,7 +899,7 @@
       p.innerHTML=h;
       p.querySelectorAll('[data-permaud]').forEach(function(b){ b.onclick=function(){ _permAud=b.getAttribute('data-permaud'); renderPanel('permissions'); }; });
       var gsel=document.getElementById('perm-group');
-      if(gsel) gsel.onchange=function(){ if(gsel.value){ _permAud=gsel.value; renderPanel('permissions'); } };
+      if(gsel) gsel.onchange=function(){ _permAud=gsel.value||'member'; renderPanel('permissions'); };
       p.querySelectorAll('[data-permname]').forEach(function(b){ b.onclick=function(){ P.name=b.getAttribute('data-permname'); renderPanel('permissions'); permSave(); }; });
       p.querySelectorAll('[data-permwhere]').forEach(function(b){ b.onclick=function(){ P.where=b.getAttribute('data-permwhere'); renderPanel('permissions'); permSave(); }; });
       p.querySelectorAll('[data-permitem]').forEach(function(b){ b.onclick=function(){ var k=b.getAttribute('data-permitem'); P[k]=!P[k]; renderPanel('permissions'); permSave(); }; });
