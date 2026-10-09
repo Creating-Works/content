@@ -890,8 +890,7 @@
         +(_mailOn===null?'<div style="font-size:13.5px;color:#4B5A6D;">Looking for your choice\u2026</div>'
          :_mailOn==='x'?'<div style="font-size:13.5px;color:#7A2410;line-height:1.5;">We could not read this just now. Reload the page to try again.</div>'
          :'<button type="button" id="perm-mailon" role="switch" aria-checked="'+(_mailOn?'true':'false')+'" style="display:flex;align-items:center;justify-content:space-between;width:100%;font:inherit;font-size:14.5px;color:#1A2E42;background:#fff;border:0;border-bottom:1px solid #f0f1f5;padding:12px 2px;cursor:pointer;text-align:left;"><span>Email me when a person sends me a message I have not opened</span>'+sw(_mailOn)+'</button>'
-          +'<button type="button" id="perm-mailchat" role="switch" aria-checked="'+(_mailChatOn?'true':'false')+'" style="display:flex;align-items:center;justify-content:space-between;width:100%;font:inherit;font-size:14.5px;color:#1A2E42;background:#fff;border:0;border-bottom:1px solid #f0f1f5;padding:12px 2px;cursor:pointer;text-align:left;"><span>Email me when a group chat has unread messages</span>'+sw(_mailChatOn)+'</button>'
-          +'<div style="font-size:12.5px;color:#4B5A6D;margin:6px 0 0;line-height:1.5;">One-on-one messages and group chats come in separate emails, and each has its own switch.</div>')
+          +'<button type="button" id="perm-mailchat" role="switch" aria-checked="'+(_mailChatOn?'true':'false')+'" style="display:flex;align-items:center;justify-content:space-between;width:100%;font:inherit;font-size:14.5px;color:#1A2E42;background:#fff;border:0;border-bottom:1px solid #f0f1f5;padding:12px 2px;cursor:pointer;text-align:left;"><span>Email me when a group chat has unread messages</span>'+sw(_mailChatOn)+'</button>')
         +'</div>';
       p.innerHTML=h;
       p.querySelectorAll('[data-permaud]').forEach(function(b){ b.onclick=function(){ _permAud=b.getAttribute('data-permaud'); renderPanel('permissions'); }; });
