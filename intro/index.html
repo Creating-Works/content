@@ -819,7 +819,7 @@
       +'&email='+encodeURIComponent(auth.email);
     fetch(u).then(function(r){ return r.json(); }).then(function(){
       var s=document.getElementById('au-sent');
-      if(s){ s.className='lead'; s.textContent='We sent a six digit code to '+auth.email+'. It expires in fifteen minutes.'; }
+      if(s){ s.className='lead'; s.textContent='We sent a six digit code to '+auth.email+'. It expires in 15 minutes.'; }
     }).catch(function(){
       auth.step=1; renderSignin(document.getElementById('panel'));
       say('The code did not send and your connection is the first thing to check.');
@@ -839,12 +839,12 @@
           return;
         }
         b.disabled=false;
-        if(s){ s.className='lead'; s.textContent='We sent a six digit code to '+auth.email+'. It expires in fifteen minutes.'; }
+        if(s){ s.className='lead'; s.textContent='We sent a six digit code to '+auth.email+'. It expires in 15 minutes.'; }
         say((d&&d.message)||'That code did not match and Send another brings a fresh one.');
       })
       .catch(function(){
         b.disabled=false;
-        if(s){ s.className='lead'; s.textContent='We sent a six digit code to '+auth.email+'. It expires in fifteen minutes.'; }
+        if(s){ s.className='lead'; s.textContent='We sent a six digit code to '+auth.email+'. It expires in 15 minutes.'; }
         say('The code did not check and your connection is the first thing to look at.');
       });
   }

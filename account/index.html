@@ -282,7 +282,7 @@
         if(!r||r.status!=='ok'){ say((r&&r.message)||'That did not work.',true); return; }
         document.getElementById('em-step1').style.display='none';
         document.getElementById('em-step2').style.display='block';
-        say('We sent a code to '+v+'. Type it here. It expires in fifteen minutes.');
+        say('We sent a code to '+v+'. Type it here. It expires in 15 minutes.');
         var c=document.getElementById('em-code'); if(c) c.focus();
       });
     };
