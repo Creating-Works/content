@@ -810,11 +810,7 @@
                        ['My groups','The groups you are in and the ones you host.','https://2gather.network/mygroups/','Open'],
                        ['My network','How you connect with others.','https://2gather.network/network/','Open']] },
       license: { name:'Creating.Works',  line:'Because creating works.', on:true,
-                 rows:[['Group page','Its own page and passcode, with only the people invited inside.','',''],
-                       ['Matching','What one person or organization offers meets what another needs, inside the group.','',''],
-                       ['Events calendar','Your gatherings in one place, with sign-up and who is coming.','',''],
-                       ['Bulletin board','Asks and offers that stay up between gatherings.','',''],
-                       ['Invitations','A passcode link that brings somebody in and lands them in the group.','','']] }
+                 rows:[] }
     };
     if(PRODUCTS[key]){
       var pr=PRODUCTS[key];
@@ -951,9 +947,9 @@
       +'<div class="f" style="margin-top:18px;"><label>Terms accepted</label>'
       +'<div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;">'
       +'<div style="font-size:13.5px;color:var(--soft);line-height:1.6;flex:1 1 320px;min-width:0;">'+termsLede()
-      +'<a href="https://creating.works/terms-of-service" style="color:#1F699E;font-weight:700;">Terms of Service</a>, '
-      +'<a href="https://creating.works/privacy-policy" style="color:#1F699E;font-weight:700;">Privacy Policy</a>, and '
-      +'<a href="https://creating.works/code-of-conduct" style="color:#1F699E;font-weight:700;">Code of Conduct</a>.</div>'
+      +'<a href="https://creating.works/terms-of-service" style="color:#1F699E;">Terms of Service</a>, '
+      +'<a href="https://creating.works/privacy-policy" style="color:#1F699E;">Privacy Policy</a>, and '
+      +'<a href="https://creating.works/code-of-conduct" style="color:#1F699E;">Code of Conduct</a>.</div>'
       +(termsStamp()?'<div style="font-size:13px;color:var(--soft);white-space:nowrap;">'+esc(termsStamp())+'</div>':'')
       +'</div></div>'
       +saveRow();
@@ -1226,7 +1222,7 @@
   html.cw-prail-on .cw-prail-main h1{color:var(--ink);font-weight:800;font-size:26px;margin-top:14px;}
   html.cw-prail-on .cw-prail-main .hello .sub, html.cw-prail-on .cw-prail-main .hello .sub a{color:var(--ink);}
 </style>
-<script src="https://2gather.network/nav/profile-rail.js?v=15"></script>
+<script src="https://2gather.network/nav/profile-rail.js?v=16"></script>
 <script>
 (function(){
   var look = ''; try { look = new URLSearchParams(location.search).get('look') || ''; } catch (e) {}
