@@ -70,7 +70,7 @@
 var GS_URL='https://cw-api-gate.jessieupp.workers.dev';
 var RESERVED=['daybalancer','creatingworks','intake','giving','2gather','events','admin','claim','dl','api','u','r','s','page'];
 function qp(k){ try{return new URLSearchParams(location.search).get(k)||'';}catch(e){return '';} }
-var _me=(qp('id')||qp('memberCard')||qp('me')).trim();
+var _me=''; try{ _me=String((window.CW&&CW.me&&CW.me().id)||'').trim(); }catch(e){}
 var _appearLink=(qp('link')||'').trim();
 if(!_me){ try{ _me=String(localStorage.getItem('appear-id')||localStorage.getItem('cw-id')||'').trim(); }catch(e){ _me=''; } }
 var slugEl=document.getElementById('slug'), slugHint=document.getElementById('slug-hint'), btn=document.getElementById('claim-btn');

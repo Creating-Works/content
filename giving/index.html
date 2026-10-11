@@ -371,9 +371,7 @@ const ACTION_CHIPS = [
 ];
 
 function getMemberId() {
-  const params = new URLSearchParams(window.location.search);
-  const urlParam = params.get('id') || params.get('memberCard');
-  if (urlParam) return urlParam;
+  try { if (window.CW && CW.me) { var m = CW.me().id; if (m) return m; } } catch(e) {}
   try { return localStorage.getItem('appear-id'); } catch(e) { return null; }
 }
 
@@ -394,10 +392,7 @@ let _ownerName     = '';
     try { localStorage.setItem('appear-id', id); } catch(e) {}
     try { localStorage.setItem('cw-id', id); } catch(e) {}
   }
-  if (urlId) {
-    _appearId = urlId;
-    _rememberBoth(_appearId);
-  } else if (_appearId) {
+  if (_appearId) {
     _rememberBoth(_appearId);
   }
 })();
