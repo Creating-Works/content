@@ -412,7 +412,7 @@
       var v=clean(box?box.value:'');
       if(!/^[a-z0-9-]{2,30}$/.test(v)){ say('Use 2 to 30 letters, numbers or dashes.',true); return; }
       if(v===clean(D.vanity)){ say('That is already your name.'); return; }
-      save.disabled=true; say('Saving…');
+      save.disabled=true; say('');
       fetch(GS_URL+'?action=saveVanity&appearId='+encodeURIComponent(meId)
         +'&editToken='+encodeURIComponent(_editToken)
         +'&slug='+encodeURIComponent(v))
@@ -499,7 +499,7 @@
   var _permT=null;
   function permSave(){
     var st=document.getElementById('perm-status');
-    if(st){ st.style.color='var(--soft)'; st.textContent='Saving\u2026'; }
+    if(st){ st.style.color='var(--soft)'; st.textContent=''; }
     var P=permFor(_permAud), aud=_permAud==='member'?'members':_permAud.replace(/^g:/,'');
     clearTimeout(_permT);
     _permT=setTimeout(function(){
@@ -509,7 +509,7 @@
       PERM_ITEMS.forEach(function(it){ q+='&'+PERM_COL[it[0]]+'='+(P[it[0]]?'true':'false'); });
       fetch(q).then(function(r){ return r.json(); }).then(function(d){
         var s2=document.getElementById('perm-status');
-        if(d&&d.status==='ok'){ if(d.permissions){ permLoad(d.permissions); } renderPanel('permissions'); s2=document.getElementById('perm-status'); if(s2){ s2.style.color='#1F699E'; s2.textContent='Saved.'; } return; }
+        if(d&&d.status==='ok'){ if(d.permissions){ permLoad(d.permissions); } renderPanel('permissions'); s2=document.getElementById('perm-status'); if(s2){ s2.style.color='#1F699E'; s2.textContent=''; } return; }
         if(s2){ s2.style.color='#7A2410'; s2.textContent=(d&&d.message)||'That did not save. Change it again to try once more.'; }
       }).catch(function(){
         var s3=document.getElementById('perm-status');
@@ -682,7 +682,7 @@
           box.parentNode.replaceChild(ni,box);
         }
       }
-      photoStat('Saving…');
+      photoStat('');
       savePhotoUrl(d.url);
     }).catch(function(){ photoStat('That did not go through.'); });
   }
@@ -693,7 +693,7 @@
       +'&guestPhotoURL='+encodeURIComponent(url))
       .then(function(r){ return r.json(); })
       .then(function(resp){
-        if(resp&&resp.status==='ok'){ photoStat('Photo saved 🌱'); setTimeout(function(){ photoStat(''); },2500); return; }
+        if(resp&&resp.status==='ok'){ photoStat(''); return; }
         _editToken=''; _tokenClear();
         showPinBar(function(){ savePhotoUrl(url); },(resp&&resp.message)||'Your hour ran out. Verify again to save the photo.');
       })
@@ -705,7 +705,7 @@
     harvestAccount();
     if(!_editToken){ showPinBar(function(){ saveAccount(); }); return; }
     var b=document.getElementById('acct-save'); if(b) b.disabled=true;
-    setStat('Saving…');
+    setStat('');
     var u=GS_URL+'?action=saveAccount&appearId='+encodeURIComponent(meId)
       +'&secure=1&editToken='+encodeURIComponent(_editToken)
       +'&postal='+encodeURIComponent(D.postal||'')
@@ -721,7 +721,7 @@
       +'&findable='+(permOn('findable')?'true':'false');
     fetch(u).then(function(r){ return r.json(); }).then(function(resp){
       if(b) b.disabled=false;
-      if(resp&&resp.status==='ok'){ _dirty=false; setStat('Saved 🌱'); setTimeout(function(){ setStat(''); },2500); return; }
+      if(resp&&resp.status==='ok'){ _dirty=false; setStat(''); return; }
       _editToken=''; _tokenClear(); setStat('');
       showPinBar(function(){ saveAccount(); },(resp&&resp.message)||'Your hour ran out. Verify again to save.');
     }).catch(function(){ if(b) b.disabled=false; setStat('Could not save. Try again.'); });
@@ -915,14 +915,14 @@
       if(mc) mc.onclick=function(){
         var wantC=!_mailChatOn; mc.disabled=true;
         mailApi('/prefs',{chatEmailOn:wantC}).then(function(d){
-          if(d&&d.status==='ok'){ _mailChatOn=!!d.chatEmailOn; renderPanel('permissions'); var s5=document.getElementById('perm-status'); if(s5){ s5.style.color='#1E6B3A'; s5.textContent='Saved.'; } }
+          if(d&&d.status==='ok'){ _mailChatOn=!!d.chatEmailOn; renderPanel('permissions'); var s5=document.getElementById('perm-status'); if(s5){ s5.style.color='#1E6B3A'; s5.textContent=''; } }
           else { mc.disabled=false; var s6=document.getElementById('perm-status'); if(s6){ s6.style.color='#7A2410'; s6.textContent='Please press the switch again, because it did not save.'; } }
         }).catch(function(){ mc.disabled=false; var s7=document.getElementById('perm-status'); if(s7){ s7.style.color='#7A2410'; s7.textContent='Please press the switch again, because it did not save.'; } });
       };
       if(mb) mb.onclick=function(){
         var want=!_mailOn; mb.disabled=true;
         mailApi('/prefs',{emailOn:want}).then(function(d){
-          if(d&&d.status==='ok'){ _mailOn=!!d.emailOn; renderPanel('permissions'); var s2=document.getElementById('perm-status'); if(s2){ s2.style.color='#1E6B3A'; s2.textContent='Saved.'; } }
+          if(d&&d.status==='ok'){ _mailOn=!!d.emailOn; renderPanel('permissions'); var s2=document.getElementById('perm-status'); if(s2){ s2.style.color='#1E6B3A'; s2.textContent=''; } }
           else { mb.disabled=false; var s3=document.getElementById('perm-status'); if(s3){ s3.style.color='#7A2410'; s3.textContent='Please press the switch again, because it did not save.'; } }
         }).catch(function(){ mb.disabled=false; var s4=document.getElementById('perm-status'); if(s4){ s4.style.color='#7A2410'; s4.textContent='Please press the switch again, because it did not save.'; } });
       };

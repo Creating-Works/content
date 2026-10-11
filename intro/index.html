@@ -643,7 +643,7 @@
     if(!signed()||!A.path||!loaded[A.path]) return;
     if(saving){ again=true; if(send) againSend=true; return; }
     var tk=token(); if(!tk){ needCode(); return; }
-    saving=true; dirty=false; flash('Saved');
+    saving=true; dirty=false; 
     var path=A.path, F=FIELDS[path];
     var u=GS_URL+'?action=saveInquiry&appearId='+encodeURIComponent(whoId())+'&editToken='+encodeURIComponent(tk)
       +'&path='+encodeURIComponent(path)+(send?'&send=1':'')
