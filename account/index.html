@@ -347,6 +347,12 @@
       ? '<div style="font-size:15px;color:var(--ink);word-break:break-all;">'
         +VHOST+'/hi/<strong>'+esc(have)+'</strong></div>'
       : '<div style="font-size:15px;color:var(--soft);">You do not have one yet.</div>';
+    var others=(Array.isArray(D.vanities)?D.vanities:[]).filter(function(n){ return n && n!==have.toLowerCase(); });
+    var othersHtml=others.map(function(n){
+      return '<div style="padding:9px 0;border-top:1px solid var(--line);display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;font-size:15px;color:var(--ink);word-break:break-all;">'
+        +VHOST+'/hi/<strong>'+esc(n)+'</strong>'
+        +'<span style="margin-left:auto;white-space:nowrap;font-size:13px;"><a href="#" data-vn-use="'+esc(n)+'" style="color:#1F699E;text-decoration:none;font-weight:700;">Use this one</a></span></div>';
+    }).join('');
     return '<div class="f" style="grid-column:1/-1;"><label>Your link</label>'
       +'<div style="font-size:12.5px;color:var(--muted);margin:-2px 0 8px;">'
       +'This is where people find your profile. Share it to connect with anyone.</div>'
@@ -355,6 +361,7 @@
       +'<span style="margin-left:auto;white-space:nowrap;font-size:13px;">'
       +'<a href="#" id="vn-open" style="color:#1F699E;text-decoration:none;font-weight:700;">'
       +(have?'Change':'Choose a name')+'</a></span></div>'
+      +othersHtml
       +'<div id="vn-form" style="display:none;margin-top:10px;">'
         +'<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">'
         +'<span style="font-size:14px;color:var(--soft);">'+VHOST+'/hi/</span>'
@@ -397,7 +404,7 @@
       say('Checking…');
       timer=setTimeout(function(){
         asked=v;
-        fetch(GS_URL+'?action=checkVanity&slug='+encodeURIComponent(v))
+        fetch(GS_URL+'?action=checkVanity&slug='+encodeURIComponent(v)+'&appearId='+encodeURIComponent(meId)+'&editToken='+encodeURIComponent(_editToken))
           .then(function(r){ return r.json(); })
           .then(function(d){
             if(clean(box.value)!==asked) return;   
@@ -430,6 +437,14 @@
         })
         .catch(function(){ save.disabled=false; say('That did not reach the server. Try once more.',true); });
     };
+    document.querySelectorAll('[data-vn-use]').forEach(function(a){
+      a.onclick=function(ev){ ev.preventDefault();
+        if(form) form.style.display='block';
+        open.style.display='none';
+        if(box) box.value=a.getAttribute('data-vn-use');
+        if(save) save.onclick();
+        return false; };
+    });
   }
 
   var _perm={}, _permState='new', _permAud='member', _permGroups=[], _permPublicOn=false;
@@ -1197,6 +1212,7 @@
         if(resp.email) D.email=resp.email;
         D.alsoEmails=Array.isArray(resp.alsoEmails)?resp.alsoEmails:[];
         D.vanity=String(resp.vanity||'');
+        D.vanities=Array.isArray(resp.vanities)?resp.vanities:[];
         try {
           if (D.vanity) {
             localStorage.setItem('cw-vanity', D.vanity);
