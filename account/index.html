@@ -778,7 +778,7 @@
 
   function paintSolutionDots(){
     var on=String(D.enabledSolution||'').split('|').map(function(x){ return x.trim(); });
-    [['balance','Balance'],['appear','Appear'],['gather','Gather'],['license','Creating']].forEach(function(p){
+    [['balance','Balance'],['appear','Appear'],['gather','Gather']].forEach(function(p){
       if(on.indexOf(p[1])<0) return;
       var d=document.querySelector('[data-prail="'+p[0]+'"] .cw-prail-dot');
       if(d && !/\bon\b/.test(d.className)) d.className+=' on';
@@ -830,7 +830,8 @@
         +(pr.on?' is enabled on this account.':' is not enabled on this account.')+'</div>'
         +'<button type="button" id="prod-enable" class="btn ghost" style="margin-left:auto;font-size:14px;padding:9px 16px;">'
         +(pr.on?'Disable':'Enable')+'</button></div>')
-        +'<div id="acct-gate"></div><div id="prod-say" style="font-size:13.5px;margin-top:8px;"></div>';
+        +'<div id="acct-gate"></div><div id="prod-say" style="font-size:13.5px;margin-top:8px;"></div>'
+        +(key==='license'?'<div style="font-size:15px;color:#1A2E42;line-height:1.55;margin-top:22px;">License is off for everyone for now. For a license inquiry, email <a href="mailto:hello@creating.works" style="color:#1F699E;font-weight:700;">hello@creating.works</a>.</div>':'');
       if(pr.note && pr.on){ h+='<div style="font-size:14.5px;color:#1A2E42;line-height:1.55;margin:16px 0 4px;">'+pr.note()+'</div>'; }
       pr.rows.forEach(function(r){
         h+='<div style="display:flex;align-items:flex-start;gap:18px;padding:16px 0;border-bottom:1px solid var(--line);">'
