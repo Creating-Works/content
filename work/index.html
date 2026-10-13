@@ -1668,7 +1668,8 @@
     var qs = cwBuildQs();
     if (qs === _cwLastQs) return;
     _cwLastQs = qs;
-    fetch(GS_URL + '?' + qs).catch(function(){ _cwLastQs = null; });
+    var qk = cwToken();
+    fetch(GS_URL + '?' + qs + (qk ? '&editToken=' + encodeURIComponent(qk) : '')).catch(function(){ _cwLastQs = null; });
   }
   function cwSend(btn){
     var stat = document.getElementById('gp-intro-status');
