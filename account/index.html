@@ -643,7 +643,8 @@
       +'<span id="acct-savestat" style="font-size:13.5px;color:var(--soft);font-weight:600;"></span>'
       +'</div><div id="acct-gate"></div>';
   }
-  function setStat(t){ var el=document.getElementById('acct-savestat'); if(el) el.textContent=t||''; }
+  function setStat(t,kind){ var el=document.getElementById('acct-savestat'); if(!el) return; el.textContent=t||''; el.style.color=kind==='ok'?'#1B5E20':kind==='bad'?'#A11F17':'#4B5A6D'; el.style.fontWeight=kind?'700':'600'; }
+  function _clock(){ var d=new Date(), h=d.getHours(), m=d.getMinutes(), ap=h>=12?'pm':'am'; h=h%12||12; return h+':'+(m<10?'0':'')+m+' '+ap; }
   function markDirty(){ _dirty=true; setStat('Not saved yet.'); }
   function bindSave(){ var b=document.getElementById('acct-save'); if(b) b.onclick=function(){ saveAccount(); }; }
 
@@ -719,8 +720,11 @@
     if(!meId) return;
     harvestAccount();
     if(!_editToken){ showPinBar(function(){ saveAccount(); }); return; }
-    var b=document.getElementById('acct-save'); if(b) b.disabled=true;
+    var b=document.getElementById('acct-save'); var _label=b?b.textContent:'Save changes';
+    if(b){ b.disabled=true; b.textContent='Saving\u2026'; }
     setStat('');
+    var _slow=setTimeout(function(){ setStat('Still saving. This can take up to a minute.',''); },8000);
+    var _done=function(){ clearTimeout(_slow); if(b){ b.disabled=false; b.textContent=_label; } };
     var u=GS_URL+'?action=saveAccount&appearId='+encodeURIComponent(meId)
       +'&secure=1&editToken='+encodeURIComponent(_editToken)
       +'&postal='+encodeURIComponent(D.postal||'')
@@ -735,11 +739,11 @@
       +'&onMap='+(permOn('onMap')?'true':'false')
       +'&findable='+(permOn('findable')?'true':'false');
     fetch(u).then(function(r){ return r.json(); }).then(function(resp){
-      if(b) b.disabled=false;
-      if(resp&&resp.status==='ok'){ _dirty=false; setStat(''); return; }
+      _done();
+      if(resp&&resp.status==='ok'){ _dirty=false; setStat('Saved at '+_clock()+'.','ok'); return; }
       _editToken=''; _tokenClear(); setStat('');
       showPinBar(function(){ saveAccount(); },(resp&&resp.message)||'Your hour ran out. Verify again to save.');
-    }).catch(function(){ if(b) b.disabled=false; setStat('Could not save. Try again.'); });
+    }).catch(function(){ _done(); setStat('That did not save. Your changes are still here, so press Save changes to try again.','bad'); });
   }
 
   function showPinBar(onOk,msg){
