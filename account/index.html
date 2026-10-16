@@ -902,10 +902,6 @@
       var inGroup=_permAud.indexOf('g:')===0, P=permFor(_permAud), n=permNames();
       var groupName=inGroup?((_permGroups.filter(function(g){ return 'g:'+g.id===_permAud; })[0]||{}).name||'this group'):'';
       h+='<div id="perm-status" style="font-size:13px;color:#4B5A6D;"></div>';
-      var _pubOn=permOn('visPublic'), _pubSw=/[?&]pubsw=1\b/.test(location.search);
-      if(_pubSw) h+='<div id="perm-public" style="margin:22px 0 6px;"><div style="font-size:15px;font-weight:800;color:#1A2E42;margin-bottom:4px;">My public profile</div>'
-        +'<button type="button" id="perm-pubon" role="switch" aria-checked="'+(_pubOn?'true':'false')+'" style="display:flex;align-items:center;justify-content:space-between;width:100%;font:inherit;font-size:14.5px;color:#1A2E42;background:#fff;border:0;border-bottom:1px solid #f0f1f5;padding:12px 2px;cursor:pointer;text-align:left;"><span>Anyone with the link to my profile can see what I choose to show</span>'+sw(_pubOn)+'</button>'
-        +'<div style="font-size:13px;color:#4B5A6D;line-height:1.5;margin-top:6px;">'+(_pubOn?'On. Anyone with your public link sees only the parts you chose to show.':'Off. Anyone opening your public link is told it is not being shared.')+'</div></div>';
       if(_mailOn===null){ loadMailPref(); }
       h+='<div id="perm-mail" style="margin:22px 0 6px;"><div style="font-size:15px;font-weight:800;color:#1A2E42;margin-bottom:4px;">Notifications</div>'
         +(_mailOn===null?'<span class="cw-loading">Loading your choice</span>'
@@ -932,16 +928,6 @@
       p.querySelectorAll('[data-permname]').forEach(function(b){ b.onclick=function(){ P.name=b.getAttribute('data-permname'); renderPanel('permissions'); permSave(); }; });
       p.querySelectorAll('[data-permwhere]').forEach(function(b){ b.onclick=function(){ P.where=b.getAttribute('data-permwhere'); renderPanel('permissions'); permSave(); }; });
       p.querySelectorAll('[data-permitem]').forEach(function(b){ b.onclick=function(){ var k=b.getAttribute('data-permitem'); P[k]=!P[k]; renderPanel('permissions'); permSave(); }; });
-      var pb=document.getElementById('perm-pubon');
-      if(pb) pb.onclick=function(){
-        var wantP=!permOn('visPublic'); pb.disabled=true;
-        var s8=document.getElementById('perm-status'); if(s8){ s8.style.color='#4B5A6D'; s8.textContent='Saving\u2026'; }
-        fetch(GS_URL+'?action=savePermissions&appearId='+encodeURIComponent(meId)+(_editToken?'&editToken='+encodeURIComponent(_editToken):'')+'&audience=public&publicOn='+(wantP?'true':'false'))
-          .then(function(r){ return r.json(); }).then(function(d){
-            if(d&&d.status==='ok'){ D.visPublic=wantP?'true':'false'; _permPublicOn=wantP; renderPanel('permissions'); var s9=document.getElementById('perm-status'); if(s9){ s9.style.color='#1E6B3A'; s9.textContent=''; } }
-            else { pb.disabled=false; var s10=document.getElementById('perm-status'); if(s10){ s10.style.color='#7A2410'; s10.textContent='Please press the switch again, because it did not save.'; } }
-          }).catch(function(){ pb.disabled=false; var s11=document.getElementById('perm-status'); if(s11){ s11.style.color='#7A2410'; s11.textContent='Please press the switch again, because it did not save.'; } });
-      };
       var mb=document.getElementById('perm-mailon'), mc=document.getElementById('perm-mailchat');
       if(mc) mc.onclick=function(){
         var wantC=!_mailChatOn; mc.disabled=true;
