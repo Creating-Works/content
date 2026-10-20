@@ -156,7 +156,7 @@
   var meId=(window.CW&&CW.me)?CW.me().id:(P('CWid')||P('id')||P('me')||P('memberCard')||P('appearId')||'').trim();
   var _placeUnread=false;
   var D={name:'',firstName:'',lastName:'',photo:'',pageLink:'',postal:'',location:'',county:'',city:'',languages:'',email:'',alsoEmails:[],vanity:'',phone:'',
-       visPublic:'',showPhoto:'',onMap:'',findable:'',ackTerms:'',dateAckTerms:'',lastInitialOnly:''};
+       visPublic:'',showPhoto:'',onMap:'',findable:'',ackTerms:'',dateAckTerms:'',lastInitialOnly:'',appearListed:''};
 
   function go(url){ window.location.href=url; }
   function groupsUrl(){ return 'https://2gather.network/mygroups'+'?ref=profile'; }
@@ -824,7 +824,7 @@
     var PRODUCTS = {
       balance: { name:'DayBalancer.com', line:'Energy in. Energy out.', on:false, rows:[],
                  note:function(){ return 'Log in to DayBalancer with '+acctEmail()+' to <a href="https://www.daybalancer.com/find-nourish-ikigai" style="color:#1F699E;font-weight:700;">explore and nourish your ikigai</a>.'; } },
-      appear:  { name:'Appear.Network',  line:'Where people, resources, and opportunities appear.', on:false,
+      appear:  { name:'2Appear', short:'2Appear', line:'Where people, resources, and opportunities appear.', on:false,
                  rows:[['Appear page','Your public page on Appear.Network.','','',
                         function(){ return 'Log in with '+acctEmail()+' to <a href="https://appear.network/dl/page/" style="color:#1F699E;font-weight:700;">build your page</a>.'; }]] },
       gather:  { name:'2Gather', short:'2Gather', line:'Gathering for the common good.', on:true,
@@ -850,8 +850,7 @@
         +'border:1px solid var(--panel-line);border-radius:14px;padding:16px 18px;margin:22px 0 6px;">'
         +'<div style="font-size:14.5px;color:var(--soft);">'+esc(pr.short || pr.name.split('.')[0])
         +(pr.on?' is enabled on this account.':' is not enabled on this account.')+'</div>'
-        +'<button type="button" id="prod-enable" class="btn ghost" style="margin-left:auto;font-size:14px;padding:9px 16px;">'
-        +(pr.on?'Disable':'Enable')+'</button></div>')
+        +(pr.on?'':'<button type="button" id="prod-enable" class="btn ghost" style="margin-left:auto;font-size:14px;padding:9px 16px;">Enable</button>')+'</div>')
         +'<div id="acct-gate"></div><div id="prod-say" style="font-size:13.5px;margin-top:8px;"></div>'
         +(key==='license'?'<div style="font-size:14.5px;color:#1A2E42;line-height:1.55;margin-top:22px;">For a license inquiry, email <a href="mailto:hello@creating.works" style="color:#1F699E;">hello@creating.works</a>.</div>':'');
       if(pr.note && pr.on){ h+='<div style="font-size:14.5px;color:#1A2E42;line-height:1.55;margin:16px 0 4px;">'+pr.note()+'</div>'; }
@@ -864,6 +863,39 @@
           +'" style="color:#1F699E;font-weight:700;text-decoration:none;">'+esc(r[3])+'</a></div>':'')+'</div>';
       });
       p.innerHTML=h;
+      if(key==='appear'){
+        var _alOn=function(){ return String(D.appearListed||'').trim().toLowerCase()==='true'; };
+        var _alHtml=function(){
+          var on=_alOn();
+          return '<div id="appear-listed-row" style="display:flex;align-items:flex-start;gap:18px;padding:16px 0;border-bottom:1px solid var(--line);">'
+            +'<div style="flex:1 1 auto;min-width:0;"><div style="font-size:16px;font-weight:700;">Show me in the 2Appear network</div>'
+            +'<div style="font-size:13.5px;color:var(--soft);margin-top:3px;">People visiting Appear see your name and only what you have allowed on your public page.</div>'
+            +'<div id="appear-listed-say" style="font-size:13.5px;margin-top:6px;"></div></div>'
+            +'<button type="button" id="appear-listed-sw" role="switch" aria-checked="'+(on?'true':'false')+'" aria-label="Show me in the 2Appear network" style="flex:0 0 auto;position:relative;display:inline-block;width:44px;height:26px;border-radius:13px;border:0;padding:0;cursor:pointer;background:'+(on?'#1F699E':'#C9D3DE')+';">'
+            +'<span style="position:absolute;top:3px;left:'+(on?'21px':'3px')+';width:20px;height:20px;border-radius:50%;background:#fff;"></span></button></div>';
+        };
+        var _alSay=function(m,bad){ var el=document.getElementById('appear-listed-say'); if(el){ el.textContent=m||''; el.style.color=bad?'#7A2410':'var(--soft)'; } };
+        var _alSave=function(want){
+          if(!_editToken){ showPinBar(function(){ _alSave(want); },'Verify it is you, then your choice is saved.'); return; }
+          _alSay('Saving…');
+          fetch(GS_URL+'?action=saveAccount&appearId='+encodeURIComponent(meId)
+            +'&secure=1&editToken='+encodeURIComponent(_editToken)
+            +'&appearListed='+(want?'true':'false'))
+            .then(function(r){ return r.json(); })
+            .then(function(resp){
+              if(resp&&resp.status==='ok'){ D.appearListed=want?'true':'false'; var row=document.getElementById('appear-listed-row'); if(row){ row.outerHTML=_alHtml(); _alWire(); } _alSay('Saved.'); return; }
+              if(resp&&/session|expired/i.test(String(resp.message||''))){
+                _editToken=''; _tokenClear(); _alSay('');
+                showPinBar(function(){ _alSave(want); },'Your hour ran out. Verify again to save.'); return;
+              }
+              _alSay((resp&&resp.message)||'That did not save. Try once more.',true);
+            })
+            .catch(function(){ _alSay('That did not reach the server. Try once more.',true); });
+        };
+        var _alWire=function(){ var b=document.getElementById('appear-listed-sw'); if(b) b.onclick=function(){ _alSave(!_alOn()); }; };
+        var _gate=document.getElementById('prod-say');
+        if(_gate){ _gate.insertAdjacentHTML('afterend',_alHtml()); _alWire(); }
+      }
       var _pe=document.getElementById('prod-enable');
       var _say=function(m,bad){ var el=document.getElementById('prod-say'); if(el){ el.textContent=m||''; el.style.color=bad?'#7A2410':'var(--soft)'; } };
       var _enable=function(){
@@ -1187,7 +1219,7 @@
       D.county=d.county||''; D.city=d.city||'';
       if(!_loc.region) _loc={region:'North America',country:'United States',state:''};
       D.enabledSolution=String(d.enabledSolution||'');
-      ['visPublic','showPhoto','onMap','findable','ackTerms','dateAckTerms','lastInitialOnly'].forEach(function(k){
+      ['visPublic','showPhoto','onMap','findable','ackTerms','dateAckTerms','lastInitialOnly','appearListed'].forEach(function(k){
         D[k]=(d[k]==null?'':String(d[k]));
       });
     }
