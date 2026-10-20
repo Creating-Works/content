@@ -850,7 +850,7 @@
         +'border:1px solid var(--panel-line);border-radius:14px;padding:16px 18px;margin:22px 0 6px;">'
         +'<div style="font-size:14.5px;color:var(--soft);">'+esc(pr.short || pr.name.split('.')[0])
         +(pr.on?' is enabled on this account.':' is not enabled on this account.')+'</div>'
-        +(pr.on?'':'<button type="button" id="prod-enable" class="btn ghost" style="margin-left:auto;font-size:14px;padding:9px 16px;">Enable</button>')+'</div>')
+        +(pr.on?'':'<button type="button" id="prod-enable" class="btn ghost" style="margin-left:auto;font-size:14px;padding:9px 16px;">Connect now</button>')+'</div>')
         +'<div id="acct-gate"></div><div id="prod-say" style="font-size:13.5px;margin-top:8px;"></div>'
         +(key==='license'?'<div style="font-size:14.5px;color:#1A2E42;line-height:1.55;margin-top:22px;">For a license inquiry, email <a href="mailto:hello@creating.works" style="color:#1F699E;">hello@creating.works</a>.</div>':'');
       if(pr.note && pr.on){ h+='<div style="font-size:14.5px;color:#1A2E42;line-height:1.55;margin:16px 0 4px;">'+pr.note()+'</div>'; }
