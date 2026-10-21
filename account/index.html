@@ -336,6 +336,7 @@
   }
 
   var VHOST='2gather.network';
+  var VN_REMOVE=false;
   function vanityBlock(){
     if(!_editToken){
       return '<div class="f" style="grid-column:1/-1;"><label>Your link</label>'
@@ -356,7 +357,7 @@
       return '<div style="padding:9px 0;border-top:1px solid var(--line);display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;font-size:15px;color:var(--ink);word-break:break-all;">'
         +'<span>'+VHOST+'/hi/<strong>'+esc(n)+'</strong></span>'
         +'<span style="margin-left:auto;white-space:nowrap;font-size:13px;"><a href="#" data-vn-use="'+esc(n)+'" style="color:#1F699E;text-decoration:none;font-weight:400;">Make primary</a>'
-        +'<a href="#" data-vn-drop="'+esc(n)+'" style="color:var(--muted);text-decoration:none;margin-left:12px;">Remove</a></span></div>';
+        +(VN_REMOVE?'<a href="#" data-vn-drop="'+esc(n)+'" style="color:var(--muted);text-decoration:none;margin-left:12px;">Remove</a>':'')+'</span></div>';
     }).join('');
     return '<div class="f" style="grid-column:1/-1;"><label>Your link</label>'
       +'<div style="font-size:12.5px;color:var(--muted);margin:-2px 0 8px;">'
