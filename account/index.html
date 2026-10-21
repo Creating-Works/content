@@ -346,7 +346,10 @@
     var have=String(D.vanity||'').trim();
     var shown=have
       ? '<div style="font-size:15px;color:var(--ink);word-break:break-all;">'
-        +VHOST+'/hi/<strong>'+esc(have)+'</strong></div>'
+        +VHOST+'/hi/<strong>'+esc(have)+'</strong>'
+        +' <span style="font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;'
+        +'color:var(--soft);border:1px solid var(--line);border-radius:999px;padding:2px 8px;'
+        +'white-space:nowrap;margin-left:6px;">Primary</span></div>'
       : '<div style="font-size:15px;color:var(--soft);">You do not have one yet.</div>';
     var others=(Array.isArray(D.vanities)?D.vanities:[]).filter(function(n){ return n && n!==have.toLowerCase(); });
     var othersHtml=others.map(function(n){
@@ -986,10 +989,10 @@
       +'<div class="fieldgrid">'
       +field('firstName','First name','text',D.firstName,'')
       +field('lastName','Last name','text',D.lastName,'')
+      +nameShowBlock()
       +emailBlock()
       +vanityBlock()
       +'</div>'
-      +nameShowBlock()
       +'<div class="f" style="margin-top:16px;"><label>Location</label>'
       +(_placeUnread
         ? '<div style="font-size:13.5px;color:#7A2410;line-height:1.5;">We could not read your place '
@@ -1020,37 +1023,36 @@
   function nameShowOn(){ return String(D.lastInitialOnly||'').trim().toLowerCase()==='true'; }
   function nameShowBlock(){
     var on=nameShowOn(), n=permNames();
-    var seg=function(val,lab){ var cur=(val==='initials')===on;
-      return '<button type="button" data-nameshow="'+val+'" aria-pressed="'+(cur?'true':'false')+'" style="font:inherit;font-size:14px;font-weight:700;padding:8px 18px;border:0;border-radius:20px;cursor:pointer;'
-        +(cur?'background:#1F699E;color:#fff;':'background:transparent;color:#1F699E;')+'">'+lab+'</button>'; };
-    return '<div class="f" id="nameshow-box" style="margin-top:16px;"><label>My name shows as</label>'
-      +'<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">'
-      +'<div role="group" aria-label="My name shows as" style="display:inline-flex;gap:2px;padding:3px;border:1.5px solid var(--panel-line);border-radius:24px;background:#fff;">'
-      +seg('full','Full name')+seg('initials','Initials')+'</div>'
-      +'<span id="nameshow-stat" style="font-size:13.5px;color:var(--soft);line-height:1.5;">Others see '+esc(on?n.short:n.full)+'.'
-      +(on?' You need your full name showing to join a group.':'')+'</span></div></div>';
+    var lab=function(t,cur){ return '<span style="font-size:14.5px;'+(cur?'font-weight:800;color:var(--ink);':'font-weight:600;color:var(--soft);')+'">'+t+'</span>'; };
+    return '<div class="f" id="nameshow-box" style="grid-column:1/-1;"><label>My name shows as</label>'
+      +'<button type="button" id="nameshow-sw" role="switch" aria-checked="'+(on?'true':'false')+'" aria-label="Show my name as initials" style="display:inline-flex;align-items:center;gap:10px;font:inherit;background:transparent;border:0;padding:4px 0;cursor:pointer;">'
+      +lab('Full name',!on)
+      +'<span style="position:relative;display:inline-block;width:44px;height:26px;border-radius:13px;background:'+(on?'#1F699E':'#C9D3DE')+';flex:0 0 auto;"><span style="position:absolute;top:3px;left:'+(on?'21':'3')+'px;width:20px;height:20px;border-radius:50%;background:#fff;"></span></span>'
+      +lab('Initials',on)+'</button>'
+      +'<div id="nameshow-stat" style="font-size:13.5px;color:var(--soft);line-height:1.5;margin-top:4px;">Others see '+esc(on?n.short:n.full)+'.'
+      +(on?' You need your full name showing to join a group.':'')+'</div></div>';
   }
   function redrawNameShow(){ var bx=document.getElementById('nameshow-box'); if(bx){ bx.outerHTML=nameShowBlock(); wireNameShow(); } }
   function wireNameShow(){
-    document.querySelectorAll('[data-nameshow]').forEach(function(b){ b.onclick=function(){
-      var wantL=b.getAttribute('data-nameshow')==='initials';
-      if(wantL===nameShowOn()) return;
+    var b=document.getElementById('nameshow-sw');
+    if(b) b.onclick=function(){
+      var wantL=!nameShowOn();
       var saveN=function(){
         var st=document.getElementById('nameshow-stat'); if(st){ st.style.color='var(--soft)'; st.textContent='Saving\u2026'; }
-        document.querySelectorAll('[data-nameshow]').forEach(function(x){ x.disabled=true; });
+        b.disabled=true;
         fetch(GS_URL+'?action=saveAccount&appearId='+encodeURIComponent(meId)+'&secure=1&editToken='+encodeURIComponent(_editToken)+'&lastInitialOnly='+(wantL?'true':'false'))
           .then(function(r){ return r.json(); }).then(function(d){
             if(d&&d.status==='ok'){ D.lastInitialOnly=wantL?'true':'false'; paintIdentity(); redrawNameShow(); return; }
             _editToken=''; _tokenClear(); redrawNameShow();
             showPinBar(function(){ saveN(); },(d&&d.message)||'Your hour ran out. Verify again to save.');
           }).catch(function(){
-            document.querySelectorAll('[data-nameshow]').forEach(function(x){ x.disabled=false; });
+            b.disabled=false;
             var sE=document.getElementById('nameshow-stat'); if(sE){ sE.style.color='#7A2410'; sE.textContent='That did not save. Press it again.'; }
           });
       };
       if(!_editToken){ showPinBar(function(){ saveN(); }); return; }
       saveN();
-    }; });
+    };
   }
 
   var REGIONS=['North America','South America','Europe','Asia','Africa','Oceania','Antarctica'];
