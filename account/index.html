@@ -1023,20 +1023,20 @@
   function nameShowOn(){ return String(D.lastInitialOnly||'').trim().toLowerCase()==='true'; }
   function nameShowBlock(){
     var on=nameShowOn(), n=permNames();
-    var lab=function(t,cur){ return '<span style="font-size:14.5px;'+(cur?'font-weight:800;color:var(--ink);':'font-weight:600;color:var(--soft);')+'">'+t+'</span>'; };
+    var seg=function(val,lab){ var cur=(val==='initials')===on;
+      return '<button type="button" data-nameshow="'+val+'" aria-pressed="'+(cur?'true':'false')+'" style="font:inherit;font-size:14px;font-weight:700;padding:8px 18px;border:0;border-radius:20px;cursor:pointer;'
+        +(cur?'background:#1F699E;color:#fff;':'background:transparent;color:#1F699E;')+'">'+lab+'</button>'; };
     return '<div class="f" id="nameshow-box" style="grid-column:1/-1;"><label>My name shows as</label>'
-      +'<button type="button" id="nameshow-sw" role="switch" aria-checked="'+(on?'true':'false')+'" aria-label="Show my name as initials" style="display:inline-flex;align-items:center;gap:10px;font:inherit;background:transparent;border:0;padding:4px 0;cursor:pointer;">'
-      +lab('Full name',!on)
-      +'<span style="position:relative;display:inline-block;width:44px;height:26px;border-radius:13px;background:'+(on?'#1F699E':'#C9D3DE')+';flex:0 0 auto;"><span style="position:absolute;top:3px;left:'+(on?'21':'3')+'px;width:20px;height:20px;border-radius:50%;background:#fff;"></span></span>'
-      +lab('Initials',on)+'</button>'
-      +'<div id="nameshow-stat" style="font-size:13.5px;color:var(--soft);line-height:1.5;margin-top:4px;">Others see '+esc(on?n.short:n.full)+'.'
-      +(on?' You need your full name showing to join a group.':'')+'</div></div>';
+      +'<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">'
+      +'<div role="group" aria-label="My name shows as" style="display:inline-flex;gap:2px;padding:3px;border:1.5px solid var(--panel-line);border-radius:24px;background:#fff;">'
+      +seg('full','Full name')+seg('initials','Initials')+'</div>'
+      +'<span id="nameshow-stat" style="font-size:13.5px;color:var(--soft);line-height:1.5;">Your name shows as '+esc(on?n.short:n.full)+'</span></div></div>';
   }
   function redrawNameShow(){ var bx=document.getElementById('nameshow-box'); if(bx){ bx.outerHTML=nameShowBlock(); wireNameShow(); } }
   function wireNameShow(){
-    var b=document.getElementById('nameshow-sw');
-    if(b) b.onclick=function(){
-      var wantL=!nameShowOn();
+    document.querySelectorAll('[data-nameshow]').forEach(function(b){ b.onclick=function(){
+      var wantL=b.getAttribute('data-nameshow')==='initials';
+      if(wantL===nameShowOn()) return;
       var saveN=function(){
         var st=document.getElementById('nameshow-stat'); if(st){ st.style.color='var(--soft)'; st.textContent='Saving\u2026'; }
         b.disabled=true;
@@ -1052,7 +1052,7 @@
       };
       if(!_editToken){ showPinBar(function(){ saveN(); }); return; }
       saveN();
-    };
+    }; });
   }
 
   var REGIONS=['North America','South America','Europe','Asia','Africa','Oceania','Antarctica'];
