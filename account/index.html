@@ -825,8 +825,7 @@
       balance: { name:'DayBalancer.com', line:'Energy in. Energy out.', on:false, rows:[],
                  note:function(){ return 'Log in to DayBalancer with '+acctEmail()+' to <a href="https://www.daybalancer.com/find-nourish-ikigai" style="color:#1F699E;font-weight:700;">explore and nourish your ikigai</a>.'; } },
       appear:  { name:'2Appear', short:'2Appear', line:'Where people, resources, and opportunities appear.', on:false,
-                 rows:[['Appear page','Your public page on Appear.Network.','','',
-                        function(){ return 'Log in with '+acctEmail()+' to <a href="https://appear.network/dl/page/" style="color:#1F699E;font-weight:700;">build your page</a>.'; }]] },
+                 rows:[['Appear page','Your public page on Appear.Network.','https://appear.network/dl/page/','Build your page']] },
       gather:  { name:'2Gather', short:'2Gather', line:'Gathering for the common good.', on:true,
                  rows:[['My events','Everything you host, share or have said you are going to.','https://2gather.network/myevents/','Open'],
                        ['My groups','The groups you are in and the ones you host.','https://2gather.network/mygroups/','Open'],
@@ -855,6 +854,7 @@
         +(key==='license'?'<div style="font-size:14.5px;color:#1A2E42;line-height:1.55;margin-top:22px;">For a license inquiry, email <a href="mailto:hello@creating.works" style="color:#1F699E;">hello@creating.works</a>.</div>':'');
       if(pr.note && pr.on){ h+='<div style="font-size:14.5px;color:#1A2E42;line-height:1.55;margin:16px 0 4px;">'+pr.note()+'</div>'; }
       pr.rows.forEach(function(r){
+        if(key==='appear' && !pr.on){ return; }
         h+='<div style="display:flex;align-items:flex-start;gap:18px;padding:16px 0;border-bottom:1px solid var(--line);">'
           +'<div style="flex:1 1 auto;min-width:0;"><div style="font-size:16px;font-weight:700;">'+esc(r[0])+'</div>'
           +(r[1]?'<div style="font-size:13.5px;color:var(--soft);margin-top:3px;">'+esc(r[1])+'</div>':'')
