@@ -934,10 +934,6 @@
       var inGroup=_permAud.indexOf('g:')===0, P=permFor(_permAud), n=permNames();
       var groupName=inGroup?((_permGroups.filter(function(g){ return 'g:'+g.id===_permAud; })[0]||{}).name||'this group'):'';
       h+='<div id="perm-status" style="font-size:13px;color:#4B5A6D;"></div>';
-      var _liOn=String(D.lastInitialOnly||'').trim().toLowerCase()==='true', _nameSw=/[?&]namesw=1\b/.test(location.search);
-      if(_nameSw) h+='<div id="perm-name" style="margin:22px 0 6px;"><div style="font-size:15px;font-weight:800;color:#1A2E42;margin-bottom:4px;">My name</div>'
-        +'<button type="button" id="perm-lastinit" role="switch" aria-checked="'+(_liOn?'true':'false')+'" style="display:flex;align-items:center;justify-content:space-between;width:100%;font:inherit;font-size:14.5px;color:#1A2E42;background:#fff;border:0;border-bottom:1px solid #f0f1f5;padding:12px 2px;cursor:pointer;text-align:left;"><span>Show my name as initial only</span>'+sw(_liOn)+'</button>'
-        +'<div style="font-size:13px;color:#4B5A6D;line-height:1.5;margin-top:6px;">'+(_liOn?'Showing as '+esc(permNames().short)+' on your <a href="'+(D.vanity?'https://2gather.network/hi/'+encodeURIComponent(D.vanity):'https://2gather.network/me/')+'" target="_blank" rel="noopener" style="color:#1F699E;font-weight:700;">profile</a>. You need your full name showing to join a group.':'Others would see '+esc(permNames().short)+'.')+'</div><div id="acct-gate"></div></div>';
       if(_mailOn===null){ loadMailPref(); }
       h+='<div id="perm-mail" style="margin:22px 0 6px;"><div style="font-size:15px;font-weight:800;color:#1A2E42;margin-bottom:4px;">Notifications</div>'
         +(_mailOn===null?'<span class="cw-loading">Loading your choice</span>'
@@ -964,22 +960,6 @@
       p.querySelectorAll('[data-permname]').forEach(function(b){ b.onclick=function(){ P.name=b.getAttribute('data-permname'); renderPanel('permissions'); permSave(); }; });
       p.querySelectorAll('[data-permwhere]').forEach(function(b){ b.onclick=function(){ P.where=b.getAttribute('data-permwhere'); renderPanel('permissions'); permSave(); }; });
       p.querySelectorAll('[data-permitem]').forEach(function(b){ b.onclick=function(){ var k=b.getAttribute('data-permitem'); P[k]=!P[k]; renderPanel('permissions'); permSave(); }; });
-      var lib=document.getElementById('perm-lastinit');
-      if(lib) lib.onclick=function(){
-        var wantL=String(D.lastInitialOnly||'').trim().toLowerCase()!=='true';
-        var saveL=function(){
-          lib.disabled=true;
-          var sL=document.getElementById('perm-status'); if(sL){ sL.style.color='#4B5A6D'; sL.textContent='Saving\u2026'; }
-          fetch(GS_URL+'?action=saveAccount&appearId='+encodeURIComponent(meId)+'&secure=1&editToken='+encodeURIComponent(_editToken)+'&lastInitialOnly='+(wantL?'true':'false'))
-            .then(function(r){ return r.json(); }).then(function(d){
-              if(d&&d.status==='ok'){ D.lastInitialOnly=wantL?'true':'false'; renderPanel('permissions'); var sO=document.getElementById('perm-status'); if(sO){ sO.style.color='#1E6B3A'; sO.textContent=''; } return; }
-              _editToken=''; _tokenClear(); renderPanel('permissions');
-              showPinBar(function(){ saveL(); },(d&&d.message)||'Your hour ran out. Verify again to save.');
-            }).catch(function(){ lib.disabled=false; var sE=document.getElementById('perm-status'); if(sE){ sE.style.color='#7A2410'; sE.textContent='Please press the switch again, because it did not save.'; } });
-        };
-        if(!_editToken){ showPinBar(function(){ saveL(); }); return; }
-        saveL();
-      };
       var mb=document.getElementById('perm-mailon'), mc=document.getElementById('perm-mailchat');
       if(mc) mc.onclick=function(){
         var wantC=!_mailChatOn; mc.disabled=true;
@@ -1009,6 +989,7 @@
       +emailBlock()
       +vanityBlock()
       +'</div>'
+      +nameShowBlock()
       +'<div class="f" style="margin-top:16px;"><label>Location</label>'
       +(_placeUnread
         ? '<div style="font-size:13.5px;color:#7A2410;line-height:1.5;">We could not read your place '
@@ -1034,6 +1015,42 @@
     p.querySelectorAll('[data-acct]').forEach(function(i){ i.addEventListener('input',markDirty); });
     wireEmails(p);
     wireVanity();
+    wireNameShow();
+  }
+  function nameShowOn(){ return String(D.lastInitialOnly||'').trim().toLowerCase()==='true'; }
+  function nameShowBlock(){
+    var on=nameShowOn(), n=permNames();
+    var seg=function(val,lab){ var cur=(val==='initials')===on;
+      return '<button type="button" data-nameshow="'+val+'" aria-pressed="'+(cur?'true':'false')+'" style="font:inherit;font-size:14px;font-weight:700;padding:8px 18px;border:0;border-radius:20px;cursor:pointer;'
+        +(cur?'background:#1F699E;color:#fff;':'background:transparent;color:#1F699E;')+'">'+lab+'</button>'; };
+    return '<div class="f" id="nameshow-box" style="margin-top:16px;"><label>My name shows as</label>'
+      +'<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">'
+      +'<div role="group" aria-label="My name shows as" style="display:inline-flex;gap:2px;padding:3px;border:1.5px solid var(--panel-line);border-radius:24px;background:#fff;">'
+      +seg('full','Full name')+seg('initials','Initials')+'</div>'
+      +'<span id="nameshow-stat" style="font-size:13.5px;color:var(--soft);line-height:1.5;">Others see '+esc(on?n.short:n.full)+'.'
+      +(on?' You need your full name showing to join a group.':'')+'</span></div></div>';
+  }
+  function redrawNameShow(){ var bx=document.getElementById('nameshow-box'); if(bx){ bx.outerHTML=nameShowBlock(); wireNameShow(); } }
+  function wireNameShow(){
+    document.querySelectorAll('[data-nameshow]').forEach(function(b){ b.onclick=function(){
+      var wantL=b.getAttribute('data-nameshow')==='initials';
+      if(wantL===nameShowOn()) return;
+      var saveN=function(){
+        var st=document.getElementById('nameshow-stat'); if(st){ st.style.color='var(--soft)'; st.textContent='Saving\u2026'; }
+        document.querySelectorAll('[data-nameshow]').forEach(function(x){ x.disabled=true; });
+        fetch(GS_URL+'?action=saveAccount&appearId='+encodeURIComponent(meId)+'&secure=1&editToken='+encodeURIComponent(_editToken)+'&lastInitialOnly='+(wantL?'true':'false'))
+          .then(function(r){ return r.json(); }).then(function(d){
+            if(d&&d.status==='ok'){ D.lastInitialOnly=wantL?'true':'false'; paintIdentity(); redrawNameShow(); return; }
+            _editToken=''; _tokenClear(); redrawNameShow();
+            showPinBar(function(){ saveN(); },(d&&d.message)||'Your hour ran out. Verify again to save.');
+          }).catch(function(){
+            document.querySelectorAll('[data-nameshow]').forEach(function(x){ x.disabled=false; });
+            var sE=document.getElementById('nameshow-stat'); if(sE){ sE.style.color='#7A2410'; sE.textContent='That did not save. Press it again.'; }
+          });
+      };
+      if(!_editToken){ showPinBar(function(){ saveN(); }); return; }
+      saveN();
+    }; });
   }
 
   var REGIONS=['North America','South America','Europe','Asia','Africa','Oceania','Antarctica'];
@@ -1180,7 +1197,7 @@
   function paintIdentity(){
     var nm=String(D.name||'').trim();
     if(!nm) return;
-    document.getElementById('hello-title').textContent=nm+' 🌱';
+    document.getElementById('hello-title').textContent=(nameShowOn()?permNames().short:nm)+' 🌱';
     try{ localStorage.setItem(nameKey,nm); }catch(e){}
   }
   (function(){ try{ var c=localStorage.getItem(nameKey); if(c) document.getElementById('hello-title').textContent=c+' 🌱'; }catch(e){} })();
