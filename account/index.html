@@ -1045,11 +1045,11 @@
   function nameShowBlock(){
     var on=nameShowOn(), n=permNames();
     var seg=function(val,lab){ var cur=(val==='initials')===on;
-      return '<button type="button" data-nameshow="'+val+'" aria-pressed="'+(cur?'true':'false')+'" style="font:inherit;font-size:14px;font-weight:700;height:38px;padding:0 16px;border:0;border-radius:24px;cursor:pointer;'
-        +(cur?'background:#1F699E;color:#fff;':'background:transparent;color:#1F699E;')+'">'+lab+'</button>'; };
+      return '<button type="button" data-nameshow="'+val+'" aria-pressed="'+(cur?'true':'false')+'" style="font:inherit;font-size:14px;font-weight:700;box-sizing:border-box;height:38px;padding:0 16px;border-radius:24px;cursor:pointer;'
+        +(cur?'background:#1F699E;color:#fff;border:1.5px solid #1F699E;':'background:#fff;color:#1F699E;border:1.5px solid var(--panel-line);')+'">'+lab+'</button>'; };
     return '<div class="f" id="nameshow-box" style="grid-column:1/-1;"><label>My name shows as</label>'
       +'<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">'
-      +'<div role="group" aria-label="My name shows as" style="display:inline-flex;gap:2px;padding:3px;border:1.5px solid var(--panel-line);border-radius:24px;background:#fff;">'
+      +'<div role="group" aria-label="My name shows as" style="display:inline-flex;gap:8px;">'
       +seg('full','Full name')+seg('initials','Initials')+'</div>'
       +'<span id="nameshow-stat" style="font-size:13.5px;color:var(--soft);line-height:1.5;">Your name shows as '+esc(on?n.short:n.full)+'</span></div></div>';
   }
