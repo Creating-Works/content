@@ -755,7 +755,7 @@
     var _done=function(){ clearTimeout(_slow); if(b){ b.disabled=false; b.textContent=_label; } };
     var u=GS_URL+'?action=saveAccount&appearId='+encodeURIComponent(meId)
       +'&secure=1&editToken='+encodeURIComponent(_editToken)
-      +'&postal='+encodeURIComponent(D.postal||'')
+      +((D.postalHeld&&!D.postalTyped)?'':'&postal='+encodeURIComponent(D.postal||''))
       +'&location='+encodeURIComponent(D.location||'')
       +'&county='+encodeURIComponent(D.county||'')
       +'&city='+encodeURIComponent(D.city||'')
@@ -1133,7 +1133,7 @@
       +' value="'+esc(D.postal||'')+'" style="flex:0 1 150px;">';
     box.innerHTML=h+'</div>';
     var pc=box.querySelector('#loc-postal');
-    if(pc) pc.addEventListener('input',function(){ D.postal=String(pc.value||'').trim(); markDirty(); });
+    if(pc) pc.addEventListener('input',function(){ D.postal=String(pc.value||'').trim(); D.postalTyped=true; markDirty(); });
     var cy=box.querySelector('#loc-county');
     if(cy) cy.onchange=function(){ D.county=cy.value; markDirty(); };
     var cit=box.querySelector('#loc-city');
@@ -1253,6 +1253,7 @@
       if(!D.name) D.name=pr.name||'';
       if(!D.photo) D.photo=pr.photo||'';
       var d=pr.data||{}; D.prof=d;
+      D.postalHeld=(d.postalHeld===true||String(d.postalHeld||'').toLowerCase()==='true'); D.postalTyped=false;
       D.postal=d.postal||''; D.languages=d.languages||''; D.phone=d.phone||'';
       D.location=d.location||''; _loc=parseLoc(D.location);
       D.county=d.county||''; D.city=d.city||'';
