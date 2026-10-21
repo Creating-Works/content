@@ -892,8 +892,6 @@
             .catch(function(){ _alSay('That did not reach the server. Try once more.',true); });
         };
         var _alWire=function(){ var b=document.getElementById('appear-listed-sw'); if(b) b.onclick=function(){ _alSave(!_alOn()); }; };
-        var _gate=document.getElementById('prod-say');
-        if(_gate){ _gate.insertAdjacentHTML('afterend',_alHtml()); _alWire(); }
       }
       var _pe=document.getElementById('prod-enable');
       var _say=function(m,bad){ var el=document.getElementById('prod-say'); if(el){ el.textContent=m||''; el.style.color=bad?'#7A2410':'var(--soft)'; } };
