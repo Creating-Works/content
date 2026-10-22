@@ -1059,7 +1059,7 @@
       var disp=nameShowOn()?permNames().short:permNames().full;
       if(!disp) return;
       window.CW_NAME=disp;
-      localStorage.setItem('cw-name',disp); localStorage.setItem('cw-name-for',String(meId||''));
+      localStorage.setItem('cw-name',disp); localStorage.setItem('cw-name-for',String(meId||'')); localStorage.setItem('cw-name-at',String(Date.now()));
       var e=document.querySelector('#cw-topbar .cwtb-me-name');
       if(e&&e.firstChild&&e.firstChild.nodeType===3){ e.firstChild.nodeValue=disp+' '; }
     }catch(x){}
