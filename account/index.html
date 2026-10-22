@@ -1054,6 +1054,16 @@
       +seg('full','Full name')+seg('initials','Initials')+'</div>'
       +'<span id="nameshow-stat" style="font-size:13.5px;color:var(--soft);line-height:1.5;">Your name shows as '+esc(on?n.short:n.full)+'</span></div></div>';
   }
+  function refreshBarName(){
+    try{
+      var disp=nameShowOn()?permNames().short:permNames().full;
+      if(!disp) return;
+      window.CW_NAME=disp;
+      localStorage.setItem('cw-name',disp); localStorage.setItem('cw-name-for',String(meId||''));
+      var e=document.querySelector('#cw-topbar .cwtb-me-name');
+      if(e&&e.firstChild&&e.firstChild.nodeType===3){ e.firstChild.nodeValue=disp+' '; }
+    }catch(x){}
+  }
   function redrawNameShow(){ var bx=document.getElementById('nameshow-box'); if(bx){ bx.outerHTML=nameShowBlock(); wireNameShow(); } }
   function wireNameShow(){
     document.querySelectorAll('[data-nameshow]').forEach(function(b){ b.onclick=function(){
@@ -1064,7 +1074,7 @@
         b.disabled=true;
         fetch(GS_URL+'?action=saveAccount&appearId='+encodeURIComponent(meId)+'&secure=1&editToken='+encodeURIComponent(_editToken)+'&lastInitialOnly='+(wantL?'true':'false'))
           .then(function(r){ return r.json(); }).then(function(d){
-            if(d&&d.status==='ok'){ D.lastInitialOnly=wantL?'true':'false'; paintIdentity(); redrawNameShow(); return; }
+            if(d&&d.status==='ok'){ D.lastInitialOnly=wantL?'true':'false'; paintIdentity(); redrawNameShow(); refreshBarName(); return; }
             _editToken=''; _tokenClear(); redrawNameShow();
             showPinBar(function(){ saveN(); },(d&&d.message)||'Your hour ran out. Verify again to save.');
           }).catch(function(){
@@ -1287,7 +1297,7 @@
       _paneSafe(key);
       try { if (PANES.indexOf(key) > -1 && history.replaceState) history.replaceState({}, '', '#' + key); } catch (e) {}
     };
-    try { paintIdentity(); } catch (e) {}
+    try { paintIdentity(); if(pr && pr.found){ refreshBarName(); } } catch (e) {}
     try { paintSolutionDots(); } catch (e) {}
     _paneSafe(startTab);
     window.addEventListener('hashchange', function(){ var k = paneFromHash(); if (k) { renderPanel(k); try { Array.prototype.forEach.call(document.querySelectorAll('[data-prail]'), function(x){ var on = x.getAttribute('data-prail') === k; x.classList.toggle('on', on); if (on) x.setAttribute('aria-current', 'page'); else x.removeAttribute('aria-current'); }); } catch (e) {} } });
