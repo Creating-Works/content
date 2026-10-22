@@ -823,6 +823,16 @@
     bar.scrollIntoView({behavior:'smooth',block:'center'});
   }
 
+  function sayConnected(key){
+    if(window.CW_CARRY_ON!==true) return;
+    var NAMES={balance:'2Balance',appear:'2Appear',gather:'2Gather'};
+    var on=String(D.enabledSolution||'').split('|').map(function(x){ return x.trim().toLowerCase(); });
+    var list=['appear','balance','gather'].filter(function(k){ return on.indexOf(k)>-1; }).map(function(k){ return NAMES[k]; });
+    if(!NAMES[key]||list.length<2) return;
+    var joined=list.length===2?list.join(' and '):list.slice(0,-1).join(', ')+', and '+list[list.length-1];
+    var el=document.getElementById('prod-say');
+    if(el){ el.style.color='var(--soft)'; el.textContent='You are signed in as yourself on '+NAMES[key]+'. '+joined+' now become one profile to be shared for ease of use.'; }
+  }
   function paintSolutionDots(){
     var on=String(D.enabledSolution||'').split('|').map(function(x){ return x.trim(); });
     [['balance','Balance'],['appear','Appear'],['gather','Gather']].forEach(function(p){
@@ -931,7 +941,7 @@
           .then(function(r){ return r.json(); })
           .then(function(resp){
             if(resp&&resp.status==='ok'&&typeof resp.enabledSolution==='string'){
-              D.enabledSolution=resp.enabledSolution; paintSolutionDots(); renderPanel(key); return;
+              D.enabledSolution=resp.enabledSolution; try{ localStorage.setItem('cw-enabled',D.enabledSolution); }catch(e){} paintSolutionDots(); renderPanel(key); sayConnected(key); return;
             }
             if(_pe){ _pe.disabled=false; }
             if(resp&&/session|expired/i.test(String(resp.message||''))){
@@ -1268,7 +1278,7 @@
       D.location=d.location||''; _loc=parseLoc(D.location);
       D.county=d.county||''; D.city=d.city||'';
       if(!_loc.region) _loc={region:'North America',country:'United States',state:''};
-      D.enabledSolution=String(d.enabledSolution||'');
+      D.enabledSolution=String(d.enabledSolution||''); try{ localStorage.setItem('cw-enabled',D.enabledSolution); }catch(e){}
       ['visPublic','showPhoto','onMap','findable','ackTerms','dateAckTerms','lastInitialOnly','appearListed'].forEach(function(k){
         D[k]=(d[k]==null?'':String(d[k]));
       });
