@@ -121,6 +121,13 @@
   .band{font-size:12px;font-weight:800;margin:0 0 10px;color:var(--muted);
         text-transform:uppercase;letter-spacing:.06em;}
   .band+.tot{margin-bottom:24px;}
+  #dbody{position:relative;padding-bottom:34px;}
+  .infodot{position:absolute;right:0;bottom:0;width:27px;height:27px;border-radius:50%;
+           border:1.5px solid var(--line);background:#fff;color:var(--muted);font-family:inherit;
+           font-size:14px;font-weight:700;line-height:1;cursor:pointer;padding:0;}
+  .infodot:hover,.infodot.on{border-color:var(--brand);color:var(--brand);}
+  #dnote{display:none;margin:4px 40px 0 0;}
+  #dnote.on{display:block;}
   #dbody .tot:last-of-type{margin-bottom:10px;}
   .key{font-size:13px;color:var(--muted);margin:0 0 14px;line-height:1.7;}
   .key b{color:var(--text);font-weight:700;}
@@ -187,6 +194,7 @@
       <h3 class="band">Always true</h3>
       <div class="tot" id="dAlways"></div>
       <p class="key" id="dnote"></p>
+      <button type="button" class="infodot" id="dinfo" aria-label="How far back these numbers reach">i</button>
     </div>
   </div>
 
@@ -200,9 +208,14 @@
       <div class="tot" id="atot"></div>
       <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin:18px 0 6px;">
         <h3 style="font-size:14px;font-weight:800;margin:0;">Latest</h3>
+        <span style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;">
         <label style="font-weight:400;font-size:13px;color:var(--muted);display:flex;align-items:center;gap:7px;margin:0;">
-          <input type="checkbox" id="aSuper" checked style="width:auto;"> Include super admins
+          <input type="checkbox" id="aSuper" style="width:auto;"> include admins
         </label>
+        <label style="font-weight:400;font-size:13px;color:var(--muted);display:flex;align-items:center;gap:7px;margin:0;">
+          <input type="checkbox" id="aTest" style="width:auto;"> include test
+        </label>
+        </span>
       </div>
       <div id="arecent"></div>
     </div>
@@ -226,7 +239,10 @@
     <div class="row" style="margin-bottom:12px;">
       <input id="q" placeholder="Search everything on a person's row" style="max-width:340px;">
       <label style="font-weight:400;font-size:14px;color:var(--muted);display:flex;align-items:center;gap:7px;margin:0;">
-        <input type="checkbox" id="onlyTest" style="width:auto;"> only test accounts
+        <input type="checkbox" id="pTest" style="width:auto;"> include test
+      </label>
+      <label style="font-weight:400;font-size:14px;color:var(--muted);display:flex;align-items:center;gap:7px;margin:0;">
+        <input type="checkbox" id="pAdmin" style="width:auto;"> include admins
       </label>
     </div>
     <div class="scroll"><table id="ptbl">
@@ -323,7 +339,7 @@
   var token='';
   var rows=[];
   var sortK='members', sortDown=true;
-  var people=[], pSortK='made', pSortDown=true, SHOW=200, pDays=0, pLegacyNot=false;
+  var people=[], pSortK='made', pSortDown=true, pShown=10, pPaging=false, pDays=0, pLegacyNot=false;
 
   var $=function(id){ return document.getElementById(id); };
   var say=function(el,msg,bad){ var n=$(el); n.textContent=msg||''; n.className='say'+(bad?' bad':''); };
@@ -715,10 +731,16 @@
   }
   var LOADERS={groups:loadGroups, activity:loadActivity, people:loadPeople, dash:loadDash};
 
-  var aRecent=[], aTotal=0, aShown=5, aFetching=false;
+  var aRecent=[], aTotal=0, aShown=10, aFetching=false;
   function paintRecent(){
-    var withSuper=$('aSuper').checked;
-    var all=aRecent.filter(function(r){ return withSuper || !r.superAdmin; });
+    var knowsTest=aRecent.some(function(r){ return 'test' in r; });
+    var tbox=$('aTest').parentNode; if(tbox) tbox.style.display = knowsTest ? '' : 'none';
+    var withSuper=$('aSuper').checked, withTest=$('aTest').checked;
+    var all=aRecent.filter(function(r){
+      if(!withSuper && r.superAdmin) return false;
+      if(!withTest && r.test) return false;
+      return true;
+    });
     if(!all.length){ $('arecent').innerHTML='<div class="tot-note">Nothing yet.</div>'; return; }
     var rows=all.slice(0, aShown);
     var hasRef=aRecent.some(function(r){ return r.from || r.target; });
@@ -739,7 +761,7 @@
       +(moreLeft ? '<a class="amore" role="button" tabindex="0" id="amoreLink">More</a>' : '');
     var ml=document.getElementById('amoreLink');
     if(ml) ml.addEventListener('click', function(){
-      aShown += 50;
+      aShown += 25;
       if(aShown > aRecent.length && aRecent.length < aTotal && !aFetching){
         aFetching=true; ml.textContent='Loading more';
         ask('getOpsActivity', GS+'?action=getOpsActivity&appearId='+encodeURIComponent(me)
@@ -754,7 +776,13 @@
       b.addEventListener('click', function(){ $('amore'+b.getAttribute('data-i')).classList.toggle('hide'); });
     });
   }
-  $('aSuper').addEventListener('change', paintRecent);
+  function arefresh(){ aShown=10; paintRecent(); }
+  $('aSuper').addEventListener('change', arefresh);
+  $('aTest').addEventListener('change', arefresh);
+  $('dinfo').addEventListener('click', function(){
+    var on=$('dnote').classList.toggle('on');
+    $('dinfo').classList.toggle('on', on);
+  });
   function showTicketPic(){
     var id=''; try{ id=new URLSearchParams(location.search).get('ticketImage')||''; }catch(e){}
     if(!/^[A-Za-z0-9_-]{21}$/.test(id)) return;
@@ -830,11 +858,14 @@
   }
 
   function ppaint(){
+    if(!pPaging) pShown=10;
+    pPaging=false;
     var q=($('q').value||'').trim().toLowerCase();
-    var onlyTest=$('onlyTest').checked;
+    var withTest=$('pTest').checked, withAdmins=$('pAdmin').checked;
     var f=colFilters('#ptbl');
     var list=people.filter(function(p){
-      if(onlyTest ? !p.test : p.test) return false;
+      if(!withTest && p.test) return false;
+      if(!withAdmins && String(p.roles||'').indexOf('superAdmin') > -1) return false;
       if(pLegacyNot && !(p.origin==='legacy' && !p.firstSignin)) return false;
       if(pDays){
         var cut=new Date(Date.now()-pDays*86400000).toISOString();
@@ -852,7 +883,7 @@
     });
     var b=document.querySelector('#ptbl tbody');
     b.innerHTML='';
-    list.slice(0,SHOW).forEach(function(p){
+    list.slice(0,pShown).forEach(function(p){
       var tr=document.createElement('tr');
       for(var i=0;i<10;i++){ tr.appendChild(document.createElement('td')); }
       tr.children[0].textContent=p.name||'(no name)';
@@ -870,13 +901,19 @@
                    tr.children[0].textContent=''; tr.children[0].appendChild(s2); }
       b.appendChild(tr);
     });
-    $('pmore').textContent = list.length>SHOW
-      ? ('Showing the first '+SHOW+' of '+list.length+'. Narrow it with the box above.')
-      : (list.length+' shown.');
+    if(list.length > pShown){
+      $('pmore').innerHTML = 'Showing '+pShown+' of '+list.length+'. '
+        + '<a class="amore" role="button" tabindex="0" id="pmoreLink">More</a>';
+      var pl=document.getElementById('pmoreLink');
+      if(pl) pl.addEventListener('click', function(){ pPaging=true; pShown+=25; ppaint(); });
+    } else {
+      $('pmore').textContent = list.length+' shown.';
+    }
   }
 
   $('q').addEventListener('input', ppaint);
-  $('onlyTest').addEventListener('change', ppaint);
+  $('pTest').addEventListener('change', ppaint);
+  $('pAdmin').addEventListener('change', ppaint);
   Array.prototype.forEach.call(document.querySelectorAll('#ptbl th'), function(th){
     th.addEventListener('click', function(){
       var k=th.getAttribute('data-k');
@@ -944,7 +981,7 @@
   $('docPick').addEventListener('change', function(){ var u=this.value; if(u) window.location.href=u; });
 
   $('preset').addEventListener('click', function(){
-    $('q').value=''; $('onlyTest').checked=false; pDays=0; pLegacyNot=false;
+    $('q').value=''; $('pTest').checked=false; $('pAdmin').checked=false; pDays=0; pLegacyNot=false;
     Array.prototype.forEach.call($('ptot').querySelectorAll('.tile'), function(x){ x.classList.remove('on'); });
     resetFilters('#ptbl', ppaint);
   });
