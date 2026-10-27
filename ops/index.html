@@ -118,6 +118,10 @@
          padding:4px 6px;font-family:inherit;}
   .reset:hover{color:var(--brand);text-decoration:underline;}
   .headrow{display:flex;align-items:baseline;justify-content:space-between;gap:12px;}
+  .band{font-size:12px;font-weight:800;margin:0 0 10px;color:var(--muted);
+        text-transform:uppercase;letter-spacing:.06em;}
+  .band+.tot{margin-bottom:24px;}
+  #dbody .tot:last-of-type{margin-bottom:10px;}
   .key{font-size:13px;color:var(--muted);margin:0 0 14px;line-height:1.7;}
   .key b{color:var(--text);font-weight:700;}
   tr.filters td{padding:4px 8px 10px;border-bottom:1px solid var(--line);}
@@ -168,6 +172,23 @@
   </div>
 
   <p class="loading hide" id="loading">Loading data...</p>
+
+  <div class="card hide" id="dboard">
+    <div class="headrow">
+      <h2><button class="fold" id="dfold" title="Hide or show">Dashboard</button></h2>
+      <button type="button" class="btn loadbtn" data-load="dash">Load</button>
+    </div>
+    <div id="dsay"></div>
+    <div id="dbody" class="hide">
+      <h3 class="band">Today</h3>
+      <div class="tot" id="dToday"></div>
+      <h3 class="band">This month</h3>
+      <div class="tot" id="dMonth"></div>
+      <h3 class="band">Always true</h3>
+      <div class="tot" id="dAlways"></div>
+      <p class="key" id="dnote"></p>
+    </div>
+  </div>
 
   <div class="card hide" id="aboard">
     <div class="headrow">
@@ -473,7 +494,8 @@
   var SECTIONS={
     groups:  {board:'board',  body:'gbody', say:'gsay', label:'groups'},
     activity:{board:'aboard', body:'abody', say:'asay', label:'engagement'},
-    people:  {board:'pboard', body:'pbody', say:'psay', label:'people'}
+    people:  {board:'pboard', body:'pbody', say:'psay', label:'people'},
+    dash:    {board:'dboard', body:'dbody', say:'dsay', label:'dashboard'}
   };
   function done_(key){
     var s=SECTIONS[key]; if(!s) return;
@@ -622,7 +644,76 @@
         done_('people');
       });
   }
-  var LOADERS={groups:loadGroups, activity:loadActivity, people:loadPeople};
+  function dTile(n, label){ return '<div><b>'+n+'</b>'+esc(label)+'</div>'; }
+  function dWhen(v){ var t=new Date(v).getTime(); return isNaN(t) ? 0 : t; }
+  function dNice(v){
+    try { return new Date(v).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}); }
+    catch(e){ return String(v||''); }
+  }
+  function paintDash(a, p){
+    var rows=a.recent||[], people=p.people||[];
+    var day=new Date(); day.setHours(0,0,0,0); day=day.getTime();
+    var mon=new Date(); mon.setDate(1); mon.setHours(0,0,0,0); mon=mon.getTime();
+
+    var band=function(from, nothing){
+      var c={}, joined=0, back=0;
+      rows.forEach(function(r){
+        var k=String(r.kind||'').trim();
+        if(!k || k==='created an account') return;
+        if(dWhen(r.at) >= from) c[k]=(c[k]||0)+1;
+      });
+      people.forEach(function(x){
+        if(dWhen(x.made) >= from) joined++;
+        if(x.firstSignin && dWhen(x.firstSignin) >= from) back++;
+      });
+      var keys=Object.keys(c).sort(function(x,y){ return c[y]-c[x]; });
+      if(!keys.length && !joined && !back) return '<div class="tot-note">'+nothing+'</div>';
+      var html=dTile(joined,'joined us');
+      if(back) html+=dTile(back,'signed in here for the first time');
+      keys.forEach(function(k){ html+=dTile(c[k], k); });
+      return html;
+    };
+    $('dToday').innerHTML = band(day, 'Nothing has happened yet today.');
+    $('dMonth').innerHTML = band(mon, 'Nothing has happened yet this month.');
+
+    var canEmail=0, finished=0, inGroup=0, hosting=0, datable=0, earliest='';
+    people.forEach(function(x){
+      if(String(x.email||'').trim()) canEmail++;
+      var st=(x.stages||[]).join(' | ');
+      if(st.indexOf('completed intro')>-1) finished++;
+      if(Number(x.groups||0)>0) inGroup++;
+      if(st.indexOf('created group')>-1) hosting++;
+      var m=String(x.made||'');
+      if(m){ datable++; if(!earliest || m<earliest) earliest=m; }
+    });
+    $('dAlways').innerHTML = dTile(people.length,'people on file')
+      + dTile(canEmail,'we can email')
+      + dTile(finished,'answered the questions')
+      + dTile(inGroup,'are in a group')
+      + dTile(hosting,'host a group');
+    $('dnote').innerHTML = (earliest
+        ? 'We can see back to <b>'+esc(dNice(earliest))+'</b>, from the '+datable+' of '
+          + people.length + ' people whose arrival we can date. '
+        : 'Nobody on file has a date we can read, so there is no way to say how far back this goes. ')
+      + 'The record of what people do holds <b>'+(a.total||0)+'</b> moments in all, '
+      + 'and it only reaches back to the day we started keeping it.';
+  }
+  function loadDash(){
+    ask('getOpsActivity', GS+'?action=getOpsActivity&appearId='+encodeURIComponent(me)
+          +'&sessionToken='+encodeURIComponent(token)+'&limit=200&t='+Date.now())
+      .then(function(a){
+        if(!a||a.status!=='ok') throw new Error((a&&a.message)||'The server gave no reason.');
+        return ask('getOpsPeople', GS+'?action=getOpsPeople&appearId='+encodeURIComponent(me)
+              +'&sessionToken='+encodeURIComponent(token)+'&t='+Date.now())
+          .then(function(p){
+            if(!p||p.status!=='ok') throw new Error((p&&p.message)||'The server gave no reason.');
+            paintDash(a, p);
+            done_('dash');
+          });
+      })
+      .catch(function(err){ fail_('dash', err); });
+  }
+  var LOADERS={groups:loadGroups, activity:loadActivity, people:loadPeople, dash:loadDash};
 
   var aRecent=[], aTotal=0, aShown=5, aFetching=false;
   function paintRecent(){
@@ -686,7 +777,7 @@
     whySession();
     showTicketPic();
     $('docs').classList.remove('hide');
-    ['aboard','pboard','board'].forEach(function(id){ $(id).classList.remove('hide'); });
+    ['dboard','aboard','pboard','board'].forEach(function(id){ $(id).classList.remove('hide'); });
   }
   Array.prototype.forEach.call(document.querySelectorAll('.loadbtn'), function(b){
     b.addEventListener('click', function(){
@@ -846,6 +937,7 @@
       $(btn).classList.toggle('shut', shut);
     });
   };
+  fold('dfold','dbody');
   fold('pfold','pbody');
   fold('afold','abody');   
 
