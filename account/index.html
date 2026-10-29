@@ -860,11 +860,11 @@
       balance: { name:'DayBalancer.com', line:'Energy in. Energy out.', on:false, rows:[],
                  note:function(){ return 'Log in to DayBalancer with '+acctEmail()+' to <a href="https://www.daybalancer.com/find-nourish-ikigai" style="color:#1F699E;font-weight:700;">explore and nourish your ikigai</a>.'; } },
       appear:  { name:'2Appear', short:'2Appear', line:'Where people, resources, and opportunities appear.', on:false,
-                 rows:[['Appear page','Your public page on Appear.Network.','','Build your page']] },
+                 rows:[['Appear page','Your public page on Appear.Network.','','Build your page'],
+                       ['My groups','The groups you are in and the ones you host.','https://2appear.network/mygroups/','Open'],
+                       ['My network','How you connect with others.','https://2appear.network/network/','Open']] },
       gather:  { name:'2Gather', short:'2Gather', line:'Gathering for the common good.', on:true,
-                 rows:[['My events','Everything you host, share or have said you are going to.','https://2gather.network/myevents/','Open'],
-                       ['My groups','The groups you are in and the ones you host.','https://2gather.network/mygroups/','Open'],
-                       ['My network','How you connect with others.','https://2gather.network/network/','Open']] },
+                 rows:[['My events','Everything you host, share or have said you are going to.','https://2gather.network/myevents/','Open']] },
       license: { name:'Creating.Works',  line:'Because creating works.', on:true,
                  rows:[] }
     };
@@ -890,7 +890,7 @@
       if(pr.note && pr.on){ h+='<div style="font-size:14.5px;color:#1A2E42;line-height:1.55;margin:16px 0 4px;">'+pr.note()+'</div>'; }
       pr.rows.forEach(function(r){
         if(key==='appear' && !pr.on){ return; }
-        if(key==='appear'){ if(!D.vanity){ return; } r=[r[0],r[1],'https://2appear.network/hi/'+encodeURIComponent(D.vanity),r[3]]; }
+        if(key==='appear' && r[0]==='Appear page'){ if(!D.vanity){ return; } r=[r[0],r[1],'https://2appear.network/hi/'+encodeURIComponent(D.vanity),r[3]]; }
         h+='<div style="display:flex;align-items:flex-start;gap:18px;padding:16px 0;border-bottom:1px solid var(--line);">'
           +'<div style="flex:1 1 auto;min-width:0;"><div style="font-size:16px;font-weight:700;">'+esc(r[0])+'</div>'
           +(r[1]?'<div style="font-size:13.5px;color:var(--soft);margin-top:3px;">'+esc(r[1])+'</div>':'')
