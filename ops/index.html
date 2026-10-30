@@ -232,7 +232,7 @@
     <div class="tot" id="ptot"></div>
     <p class="key">
       <b>knocked</b> gave an address and never came in &nbsp;·&nbsp;
-      <b>created account</b> &nbsp;·&nbsp; <b>completed intro</b> &nbsp;·&nbsp;
+      <b>created account</b> &nbsp;·&nbsp; <b>completed intro</b> &nbsp;·&nbsp; <b>finished first minute</b> &nbsp;·&nbsp;
       <b>joined group</b> &nbsp;·&nbsp; <b>created group</b>
       <br><span style="opacity:.8">The event stages come next and need the registration data.</span>
     </p>
@@ -275,6 +275,7 @@
                 <button type="button" data-v="knocked">knocked</button>
                 <button type="button" data-v="created account">created account</button>
                 <button type="button" data-v="completed intro">completed intro</button>
+                <button type="button" data-v="finished first minute">finished first minute</button>
                 <button type="button" data-v="joined group">joined group</button>
                 <button type="button" data-v="created group">created group</button>
               </div></td>
@@ -623,6 +624,7 @@
           tile(by['knocked']||0,'knocked','stage','knocked')+
           tile(by['created account']||0,'created account','stage','created account')+
           tile(by['completed intro']||0,'completed intro','stage','completed intro')+
+          tile(by['finished first minute']||0,'finished first minute','stage','finished first minute')+
           tile(by['joined group']||0,'joined group','stage','joined group')+
           tile(by['created group']||0,'created group','stage','created group')+
           (people.length && ('origin' in people[0])
