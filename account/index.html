@@ -1243,6 +1243,7 @@
       var b=document.createElement('button'); b.className='tab'+(s.key===active?' on':''); b.type='button'; b.textContent=s.label;
       b.onclick=function(){
         if(s.out){
+          if(window.CW && window.CW.signOutAll && window.CW.signOutAll()){ return; }
           try{ if(window.CW && window.CW.forget){ window.CW.forget(); } }catch(e){}
           window.location.href='https://2gather.network/signin/?out=1';
           return;
@@ -1376,7 +1377,7 @@
   html.cw-prail-on .cw-prail-main h1{color:var(--ink);font-weight:800;font-size:26px;margin-top:14px;}
   html.cw-prail-on .cw-prail-main .hello .sub, html.cw-prail-on .cw-prail-main .hello .sub a{color:var(--ink);}
 </style>
-<script src="https://2gather.network/nav/profile-rail.js?v=20"></script>
+<script src="https://2gather.network/nav/profile-rail.js?v=21"></script>
 <script>
 (function(){
   var look = ''; try { look = new URLSearchParams(location.search).get('look') || ''; } catch (e) {}
@@ -1391,6 +1392,6 @@
 })();
 </script>
 <script>try{localStorage.removeItem('cw-super')}catch(e){}</script>
-<script src="https://2gather.network/nav/topbar.js?v=6.86" defer></script>
+<script src="https://2gather.network/nav/topbar.js?v=6.87" defer></script>
 </body>
 </html>
