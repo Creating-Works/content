@@ -23,7 +23,7 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
 <style>
   :root{
-    --bg:#1F699E; --brand:#1F699E; --ink:#1A2E42; --soft:#4B5A6D; --muted:#4B5A6D;
+    --bg:#1F699E; --brand:#1F699E; --ink:#1A2E42; --soft:#2F3D4F; --muted:#2F3D4F;
     --line:#DDE4EE; --panel:#F7FBFF; --panel-line:#C9DFF3; --card:#fff;
     --done-bg:#E7F5EA; --done-ink:#1A5A2C; --err-bg:#FBE9E7; --err-line:#E8B0A5; --err-ink:#7A2410;
   }
@@ -456,7 +456,7 @@
     if(shr) shr.onclick=function(ev){ ev.preventDefault();
       var go=function(){ if(window.cwSharePanel) window.cwSharePanel({ after: shr.closest('div'), url: 'https://'+VHOST+'/hi/'+encodeURIComponent(D.vanity), heading: 'Share your link', lede: 'Anyone with this link can open your profile.', title: String(D.name||'My profile'), text: 'Find me on 2Gather', fileName: 'my-2gather-link' }); };
       if(window.cwSharePanel) return go();
-      var sc=document.createElement('script'); sc.src='https://2gather.network/nav/share-panel.js?v=2'; sc.onload=go; document.head.appendChild(sc);
+      var sc=document.createElement('script'); sc.src='https://2gather.network/nav/share-panel.js?v=4'; sc.onload=go; document.head.appendChild(sc);
       return false; };
     document.querySelectorAll('[data-vn-drop]').forEach(function(a){
       a.onclick=function(ev){ ev.preventDefault();
@@ -576,7 +576,7 @@
   }
   function permPreview(P){
     var d=D.prof||{}, n=permNames(), rows='';
-    var row=function(label,list){ if(!list.length) return; rows+='<div style="padding:10px 0;border-top:1px solid #f0f1f5;"><div style="font-size:11.5px;font-weight:800;color:#4B5A6D;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px;">'+esc(label)+'</div><div style="font-size:14px;color:#1A2E42;line-height:1.5;">'+esc(list.join(', '))+'</div></div>'; };
+    var row=function(label,list){ if(!list.length) return; rows+='<div style="padding:10px 0;border-top:1px solid #f0f1f5;"><div style="font-size:11.5px;font-weight:800;color:#2F3D4F;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px;">'+esc(label)+'</div><div style="font-size:14px;color:#1A2E42;line-height:1.5;">'+esc(list.join(', '))+'</div></div>'; };
     if(P.needs) row('Needs',permList(d.needs));
     if(P.enjoy) row('Enjoys',permList(d.interests).concat(permList(d.expression)));
     if(P.skills) row('Skills',permList(d.skills).concat(permList(String(d.languages||'').split(/[|,]/).join('|'))));
@@ -590,7 +590,7 @@
       +(D.photo?'<img src="'+esc(D.photo)+'" alt="" style="width:60px;height:60px;border-radius:50%;object-fit:cover;">'
         :'<div style="width:60px;height:60px;border-radius:50%;background:#EDF3F9;display:flex;align-items:center;justify-content:center;font-weight:800;color:#1F699E;">'+esc(n.initials)+'</div>')
       +'<div><div style="font-size:18px;font-weight:800;color:#1A2E42;">'+esc(n[P.name]||n.full)+'</div>'
-      +(where?'<div style="font-size:13.5px;color:#4B5A6D;">'+esc(where)+'</div>':'')+'</div></div>'+rows;
+      +(where?'<div style="font-size:13.5px;color:#2F3D4F;">'+esc(where)+'</div>':'')+'</div></div>'+rows;
   }
 
   function readonlyField(lab,val,note){
@@ -669,7 +669,7 @@
       +'<span id="acct-savestat" style="font-size:13.5px;color:var(--soft);font-weight:600;"></span>'
       +'</div><div id="acct-gate"></div>';
   }
-  function setStat(t,kind){ var el=document.getElementById('acct-savestat'); if(!el) return; el.textContent=t||''; el.style.color=kind==='ok'?'#1B5E20':kind==='bad'?'#A11F17':'#4B5A6D'; el.style.fontWeight=kind?'700':'600'; }
+  function setStat(t,kind){ var el=document.getElementById('acct-savestat'); if(!el) return; el.textContent=t||''; el.style.color=kind==='ok'?'#1B5E20':kind==='bad'?'#A11F17':'#2F3D4F'; el.style.fontWeight=kind?'700':'600'; }
   function _clock(){ var d=new Date(), h=d.getHours(), m=d.getMinutes(), ap=h>=12?'pm':'am'; h=h%12||12; return h+':'+(m<10?'0':'')+m+' '+ap; }
   function markDirty(){ _dirty=true; setStat('Not saved yet.'); }
   function bindSave(){ var b=document.getElementById('acct-save'); if(b) b.onclick=function(){ saveAccount(); }; }
@@ -969,7 +969,7 @@
       if(_permState==='refused'){ p.innerHTML=h+'<div style="font-size:13.5px;color:#7A2410;line-height:1.55;">We could not read your permissions just now, so nothing below would be your answer. <a href="https://2gather.network/signin/?next=%2Faccount%2F%23permissions" style="color:#1F699E;font-weight:700;">Sign in again</a> and they come back.</div>'; return; }
       var inGroup=_permAud.indexOf('g:')===0, P=permFor(_permAud), n=permNames();
       var groupName=inGroup?((_permGroups.filter(function(g){ return 'g:'+g.id===_permAud; })[0]||{}).name||'this group'):'';
-      h+='<div id="perm-status" style="font-size:13px;color:#4B5A6D;"></div>';
+      h+='<div id="perm-status" style="font-size:13px;color:#2F3D4F;"></div>';
       if(_mailOn===null){ loadMailPref(); }
       h+='<div id="perm-mail" style="margin:22px 0 6px;"><div style="font-size:15px;font-weight:800;color:#1A2E42;margin-bottom:4px;">Notifications</div>'
         +(_mailOn===null?'<span class="cw-loading">Loading your choice</span>'
@@ -985,7 +985,7 @@
             +_gpGo.map(function(g){ return '<option value="'+esc(g.slug)+'">'+esc(g.name)+'</option>'; }).join('')+'</select>'
             +'<button type="button" id="perm-go" style="font:inherit;font-size:14px;font-weight:700;padding:9px 20px;border-radius:20px;cursor:pointer;background:#1F699E;color:#fff;border:1.5px solid #1F699E;">Go</button>'
             +'</div>'
-          :'<div style="font-size:13.5px;color:#4B5A6D;line-height:1.5;">You are not in a group yet. Once you join one, you can choose here what people in it see.</div>')
+          :'<div style="font-size:13.5px;color:#2F3D4F;line-height:1.5;">You are not in a group yet. Once you join one, you can choose here what people in it see.</div>')
         +'</div>';
       p.innerHTML=h;
       var _pgo=document.getElementById('perm-go'), _pgs=document.getElementById('perm-go-group');
@@ -1376,7 +1376,7 @@
   html.cw-prail-on .cw-prail-main h1{color:var(--ink);font-weight:800;font-size:26px;margin-top:14px;}
   html.cw-prail-on .cw-prail-main .hello .sub, html.cw-prail-on .cw-prail-main .hello .sub a{color:var(--ink);}
 </style>
-<script src="https://2gather.network/nav/profile-rail.js?v=16"></script>
+<script src="https://2gather.network/nav/profile-rail.js?v=20"></script>
 <script>
 (function(){
   var look = ''; try { look = new URLSearchParams(location.search).get('look') || ''; } catch (e) {}
@@ -1391,6 +1391,6 @@
 })();
 </script>
 <script>try{localStorage.removeItem('cw-super')}catch(e){}</script>
-<script src="https://2gather.network/nav/topbar.js?v=6.85" defer></script>
+<script src="https://2gather.network/nav/topbar.js?v=6.86" defer></script>
 </body>
 </html>
