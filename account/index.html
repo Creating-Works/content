@@ -667,12 +667,44 @@
     return '<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:26px;">'
       +'<button type="button" class="btn solid" id="acct-save" style="font-size:14px;height:38px;padding:0 16px;">Save changes</button>'
       +'<span id="acct-savestat" style="font-size:13.5px;color:var(--soft);font-weight:600;"></span>'
-      +'</div><div id="acct-gate"></div>';
+      +'</div><div id="acct-gate"></div>'+devicesRow();
+  }
+  function devicesRow(){
+    if(!(window.CW && CW.jumpOn && CW.jumpOn()) || (CW.me && CW.me().viewing)) return '';
+    return '<div style="margin-top:26px;">'
+      +'<button type="button" id="dev-out" class="btn ghost" style="font-size:14px;padding:9px 16px;">Sign out of all devices</button>'
+      +'<div id="dev-ask" style="display:none;margin-top:10px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel);">'
+        +'<div style="font-size:14px;line-height:1.5;">This signs out every other phone and computer. You stay signed in here.</div>'
+        +'<div style="margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">'
+        +'<button type="button" id="dev-go" class="btn ghost" style="font-size:14px;padding:9px 16px;">Sign out the others</button>'
+        +'<button type="button" id="dev-no" class="btn ghost" style="font-size:14px;padding:9px 16px;">Cancel</button></div>'
+      +'</div><div id="dev-said" style="font-size:13.5px;color:var(--soft);font-weight:600;margin-top:10px;"></div></div>';
+  }
+  function bindDevices(){
+    var out=document.getElementById('dev-out'); if(!out) return;
+    var ask=document.getElementById('dev-ask'), said=document.getElementById('dev-said'), go=document.getElementById('dev-go');
+    out.onclick=function(){ ask.style.display=''; said.textContent=''; };
+    document.getElementById('dev-no').onclick=function(){ ask.style.display='none'; };
+    go.onclick=function(){
+      var who=CW.atKeyboard().id, tok='';
+      try{ tok=localStorage.getItem('cw-token')||''; }catch(e){}
+      go.disabled=true; said.textContent='One moment\u2026';
+      fetch('https://cw-api-gate.jessieupp.workers.dev?action=signOutAllDevices&appearId='+encodeURIComponent(who)+'&meToken='+encodeURIComponent(tok),{referrerPolicy:'no-referrer'})
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+          if(!d||d.status!=='ok'||!d.editToken){ throw new Error('refused'); }
+          localStorage.setItem('cw-token',d.editToken);
+          localStorage.setItem('cw-edit-'+CW.normalise(who),JSON.stringify({t:d.editToken,exp:d.expiresAt}));
+          ask.style.display='none'; said.textContent='Your other devices are signed out.';
+        })
+        .catch(function(){ said.textContent='That did not work. Try again.'; })
+        .then(function(){ go.disabled=false; });
+    };
   }
   function setStat(t,kind){ var el=document.getElementById('acct-savestat'); if(!el) return; el.textContent=t||''; el.style.color=kind==='ok'?'#1B5E20':kind==='bad'?'#A11F17':'#2F3D4F'; el.style.fontWeight=kind?'700':'600'; }
   function _clock(){ var d=new Date(), h=d.getHours(), m=d.getMinutes(), ap=h>=12?'pm':'am'; h=h%12||12; return h+':'+(m<10?'0':'')+m+' '+ap; }
   function markDirty(){ _dirty=true; setStat('Not saved yet.'); }
-  function bindSave(){ var b=document.getElementById('acct-save'); if(b) b.onclick=function(){ saveAccount(); }; }
+  function bindSave(){ var b=document.getElementById('acct-save'); if(b) b.onclick=function(){ saveAccount(); }; bindDevices(); }
 
   var PHOTO_URL='https://cw-photos.jessieupp.workers.dev';
   function photoStat(msg){ var n=document.getElementById('photo-note'); if(!n) return; n.textContent=msg||''; n.style.display=msg?'':'none'; }
