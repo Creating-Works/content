@@ -683,6 +683,7 @@
   function bindDevices(){
     var out=document.getElementById('dev-out'); if(!out) return;
     var ask=document.getElementById('dev-ask'), said=document.getElementById('dev-said'), go=document.getElementById('dev-go');
+    try{ if(sessionStorage.getItem('cw-dev-said')==='1'){ sessionStorage.removeItem('cw-dev-said'); said.textContent='Your other devices are signed out.'; } }catch(e){}
     out.onclick=function(){ ask.style.display=''; said.textContent=''; };
     document.getElementById('dev-no').onclick=function(){ ask.style.display='none'; };
     go.onclick=function(){
@@ -696,6 +697,8 @@
           localStorage.setItem('cw-token',d.editToken);
           localStorage.setItem('cw-edit-'+CW.normalise(who),JSON.stringify({t:d.editToken,exp:d.expiresAt}));
           ask.style.display='none'; said.textContent='Your other devices are signed out.';
+          try{ localStorage.removeItem('cw-jump-retry'); sessionStorage.setItem('cw-dev-said','1'); }catch(e){}
+          return CW.prepareSession(who,d.editToken).catch(function(){}).then(function(){ location.reload(); });
         })
         .catch(function(){ said.textContent='That did not work. Try again.'; })
         .then(function(){ go.disabled=false; });
