@@ -335,7 +335,8 @@
     });
   }
 
-  var VHOST='2gather.network';
+  var VHOST=/(^|\.)2appear\.network$/i.test(location.hostname)?'2appear.network':'2gather.network';
+  var VSITE=VHOST==='2appear.network'?'2Appear':'2Gather';
   var VN_REMOVE=false;
   function vanityBlock(){
     if(!_editToken){
@@ -454,7 +455,7 @@
     });
     var shr=document.getElementById('vn-share');
     if(shr) shr.onclick=function(ev){ ev.preventDefault();
-      var go=function(){ if(window.cwSharePanel) window.cwSharePanel({ after: shr.closest('div'), url: 'https://'+VHOST+'/hi/'+encodeURIComponent(D.vanity), heading: 'Share your link', lede: 'Anyone with this link can open your profile.', title: String(D.name||'My profile'), text: 'Find me on 2Gather', fileName: 'my-2gather-link' }); };
+      var go=function(){ if(window.cwSharePanel) window.cwSharePanel({ after: shr.closest('div'), url: 'https://'+VHOST+'/hi/'+encodeURIComponent(D.vanity), heading: 'Share your link', lede: 'Anyone with this link can open your profile.', title: String(D.name||'My profile'), text: 'Find me on '+VSITE, fileName: 'my-'+VSITE.toLowerCase()+'-link' }); };
       if(window.cwSharePanel) return go();
       var sc=document.createElement('script'); sc.src='https://2gather.network/nav/share-panel.js?v=4'; sc.onload=go; document.head.appendChild(sc);
       return false; };
