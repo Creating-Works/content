@@ -190,7 +190,7 @@
     e.preventDefault(); _acctLook=''; try{ renderPanel('account'); }catch(err){} loadEmail();
   });
   function emailBlock(){
-    if(_editToken && _acctLook!=='ok') return acctWaitBlock('Email', false);
+    if(_editToken && _acctLook!=='ok') return acctWaitBlock('Email addresses', true);
     var hint=_editToken?'':'Hidden until you verify it is you. Press Save changes to verify.';
     if(!_editToken || !D.alsoEmails.length){
       return readonlyField('Email', D.email, hint);
