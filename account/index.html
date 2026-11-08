@@ -15,7 +15,7 @@
 <script>try{var S='cw-signed-out-2026-09-20';if(localStorage.getItem(S)!=='1'){localStorage.setItem(S,'1');['cw-id','appear-id','cw-token','cw-super','cw-view-as','cw-view-as-name','cw-first','cw-photo','cw-photo-for','cw-photo-at','cw-lastEmail'].forEach(function(k){localStorage.removeItem(k)})}}catch(e){}</script>
 <meta charset="utf-8">
   <meta http-equiv="Cache-Control" content="no-store, max-age=0">
-<script src="https://2gather.network/nav/identity.js?v=58"></script>
+<script src="https://2gather.network/nav/identity.js?v=59"></script>
 <script src="/moved.js?v=2"></script>
 <meta name="robots" content="noindex, nofollow">
 <title>My account</title>
@@ -1057,7 +1057,6 @@
       +'<div class="fieldgrid">'
       +field('firstName','First name','text',D.firstName,'')
       +field('lastName','Last name','text',D.lastName,'')
-      +nameShowBlock()
       +emailBlock()
       +vanityBlock()
       +'</div>'
@@ -1087,51 +1086,16 @@
     p.querySelectorAll('[data-acct]').forEach(function(i){ i.addEventListener('input',markDirty); });
     wireEmails(p);
     wireVanity();
-    wireNameShow();
-  }
-  function nameShowOn(){ return String(D.lastInitialOnly||'').trim().toLowerCase()==='true'; }
-  function nameShowBlock(){
-    var on=nameShowOn(), n=permNames();
-    var seg=function(val,lab){ var cur=(val==='initials')===on;
-      return '<button type="button" data-nameshow="'+val+'" aria-pressed="'+(cur?'true':'false')+'" style="font:inherit;font-size:14px;font-weight:700;box-sizing:border-box;height:38px;padding:0 16px;border-radius:24px;cursor:pointer;'
-        +(cur?'background:#1F699E;color:#fff;border:1.5px solid #1F699E;':'background:#fff;color:#1F699E;border:1.5px solid var(--panel-line);')+'">'+lab+'</button>'; };
-    return '<div class="f" id="nameshow-box" style="grid-column:1/-1;"><label>My name shows as</label>'
-      +'<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">'
-      +'<div role="group" aria-label="My name shows as" style="display:inline-flex;gap:8px;">'
-      +seg('full','Full name')+seg('initials','Initials')+'</div>'
-      +'<span id="nameshow-stat" style="font-size:13.5px;color:var(--soft);line-height:1.5;">Your name shows as '+esc(on?n.short:n.full)+'</span></div></div>';
   }
   function refreshBarName(){
     try{
-      var disp=nameShowOn()?permNames().short:permNames().full;
+      var disp=permNames().full;
       if(!disp) return;
       window.CW_NAME=disp;
       localStorage.setItem('cw-name',disp); localStorage.setItem('cw-name-for',String(meId||'')); localStorage.setItem('cw-name-at',String(Date.now()));
       var e=document.querySelector('#cw-topbar .cwtb-me-name');
       if(e&&e.firstChild&&e.firstChild.nodeType===3){ e.firstChild.nodeValue=disp+' '; }
     }catch(x){}
-  }
-  function redrawNameShow(){ var bx=document.getElementById('nameshow-box'); if(bx){ bx.outerHTML=nameShowBlock(); wireNameShow(); } }
-  function wireNameShow(){
-    document.querySelectorAll('[data-nameshow]').forEach(function(b){ b.onclick=function(){
-      var wantL=b.getAttribute('data-nameshow')==='initials';
-      if(wantL===nameShowOn()) return;
-      var saveN=function(){
-        var st=document.getElementById('nameshow-stat'); if(st){ st.style.color='var(--soft)'; st.textContent='Saving\u2026'; }
-        b.disabled=true;
-        fetch(GS_URL+'?action=saveAccount&appearId='+encodeURIComponent(meId)+'&secure=1&editToken='+encodeURIComponent(_editToken)+'&lastInitialOnly='+(wantL?'true':'false'))
-          .then(function(r){ return r.json(); }).then(function(d){
-            if(d&&d.status==='ok'){ D.lastInitialOnly=wantL?'true':'false'; paintIdentity(); redrawNameShow(); refreshBarName(); return; }
-            _editToken=''; _tokenClear(); redrawNameShow();
-            showPinBar(function(){ saveN(); },(d&&d.message)||'Your hour ran out. Verify again to save.');
-          }).catch(function(){
-            b.disabled=false;
-            var sE=document.getElementById('nameshow-stat'); if(sE){ sE.style.color='#7A2410'; sE.textContent='That did not save. Press it again.'; }
-          });
-      };
-      if(!_editToken){ showPinBar(function(){ saveN(); }); return; }
-      saveN();
-    }; });
   }
 
   var REGIONS=['North America','South America','Europe','Asia','Africa','Oceania','Antarctica'];
@@ -1295,7 +1259,7 @@
   function paintIdentity(){
     var nm=String(D.name||'').trim();
     if(!nm) return;
-    document.getElementById('hello-title').textContent=(nameShowOn()?permNames().short:nm)+' 🌱';
+    document.getElementById('hello-title').textContent=nm+' 🌱';
     try{ localStorage.setItem(nameKey,nm); }catch(e){}
   }
   (function(){ try{ var c=localStorage.getItem(nameKey); if(c) document.getElementById('hello-title').textContent=c+' 🌱'; }catch(e){} })();
