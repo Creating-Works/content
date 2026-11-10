@@ -362,7 +362,7 @@
     }).join('');
     return '<div class="f" style="grid-column:1/-1;"><label>Your link</label>'
       +'<div style="font-size:12.5px;color:var(--muted);margin:-2px 0 8px;">'
-      +'This is where people find your profile. Share it to connect with anyone.</div>'
+      +(/(^|\.)2gather\.network$/i.test(location.hostname)?'This is where other event guests find your profile when you RSVP and you enable to share your photo and name for the event.':'This is where people find your profile. Share it to connect with anyone.')+'</div>'
       +'<div style="border-top:1px solid var(--line);padding:9px 0;display:flex;align-items:baseline;'
       +'gap:10px;flex-wrap:wrap;">'+shown
       +'<span style="margin-left:auto;white-space:nowrap;font-size:13px;">'
