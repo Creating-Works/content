@@ -1139,17 +1139,17 @@
     var h='<div class="locrow">'+sel('loc-region',REGIONS,l.region,'Select region…');
     if(l.region==='North America') h+=sel('loc-country',NA_COUNTRIES,l.country,'Select country…');
     if(l.region==='North America' && l.country==='United States') h+=sel('loc-state',US_STATES,l.state,'Select state…');
-    var ab=l.state?US_ABBR[l.state]:'';
+    var ab=l.state?US_ABBR[l.state]:'', ci=[];
     if(ab){
       if(_places){
         var cs=(_places.counties[ab]||[]).slice().sort();
-        var ci=(_places.cities[ab]||[]).slice().filter(function(x,i,a){ return a.indexOf(x)===i; }).sort();
+        ci=(_places.cities[ab]||[]).slice().filter(function(x,i,a){ return a.indexOf(x)===i; }).sort();
         if(D.county && cs.indexOf(D.county)<0) cs.push(D.county);
         if(cs.length) h+=sel('loc-county',cs,D.county,'County (optional)');
-        h+='<input id="loc-city" list="loc-cities" placeholder="City (optional)" value="'+esc(D.city||'')+'" style="flex:0 1 220px;min-width:150px;">'
-          +'<datalist id="loc-cities">'+ci.map(function(c){ return '<option value="'+esc(c)+'">'; }).join('')+'</datalist>';
       } else { placesOnce(); }
     }
+    h+='<input id="loc-city" list="loc-cities" placeholder="City (optional)" value="'+esc(D.city||'')+'" style="flex:0 1 220px;min-width:150px;">'
+      +'<datalist id="loc-cities">'+ci.map(function(c){ return '<option value="'+esc(c)+'">'; }).join('')+'</datalist>';
     h+='<input data-acct="postal" id="loc-postal" type="text" placeholder="Postal code"'
       +' value="'+esc(D.postal||'')+'" style="flex:0 1 150px;">';
     box.innerHTML=h+'</div>';
@@ -1164,17 +1164,17 @@
     if(rg) rg.onchange=function(){
       _loc={region:rg.value,country:'',state:''};
       if(rg.value==='North America') _loc.country='United States';
-      D.county=''; D.city='';
+      D.county='';
       D.location=locString(_loc); markDirty(); renderLoc();
     };
     var ct=box.querySelector('#loc-country');
     if(ct) ct.onchange=function(){
-      _loc.country=ct.value; _loc.state=''; D.county=''; D.city='';
+      _loc.country=ct.value; _loc.state=''; D.county='';
       D.location=locString(_loc); markDirty(); renderLoc();
     };
     var st=box.querySelector('#loc-state');
     if(st) st.onchange=function(){
-      _loc.state=st.value; D.county=''; D.city='';
+      _loc.state=st.value; D.county='';
       D.location=locString(_loc); markDirty(); renderLoc();
     };
   }
