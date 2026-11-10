@@ -17,6 +17,7 @@
   <meta charset="UTF-8">
 <script src="https://2gather.network/nav/identity.js?v=61"></script>
 <meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ways to give to me - Creating Works</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
@@ -302,7 +303,7 @@
 <div class="modal-overlay" id="gift-signin-modal" onclick="if(event.target===this)closeGiftSigninModal()">
   <div class="modal" style="text-align:center;">
     <div class="modal-title">Want to give this?</div>
-    <div class="modal-body" style="margin-bottom:16px">Sign in so they know it's you, or give with just your name.</div>
+    <div class="modal-body" style="margin-bottom:16px">Sign in so they know it's you, or give with just your name. We keep a record of the gift with the name you give.</div>
     <a href="https://appear.network/dl/giving" class="btn-primary" style="display:block;text-decoration:none;margin-bottom:10px;">Sign in to Appear</a>
     <div style="border-top:1px solid var(--border);padding-top:16px;margin-top:6px;">
       <div style="font-size:13px;color:var(--muted);margin-bottom:10px;">Or give without signing in:</div>
@@ -316,7 +317,7 @@
 <div class="modal-overlay" id="anon-modal">
   <div class="modal">
     <div class="modal-title">How do you want to give?</div>
-    <div class="modal-body" style="margin-bottom:16px">Let them know it's from you, or give anonymously.</div>
+    <div class="modal-body" style="margin-bottom:16px">Let them know it's from you, or give anonymously. Either way we keep a record that you gave it. Anonymous means they do not see your name.</div>
     <div class="anon-options">
       <button class="btn-anon" onclick="confirmGift(false)">🙋 Let them know it's from me</button>
       <button class="btn-anon" onclick="confirmGift(true)">🎁 Give anonymously</button>
@@ -378,6 +379,9 @@ function getMemberId() {
 let _appearId = getMemberId();
 let _pendingId = null;
 let _ownerAppearId = null; 
+let _ownerShare = ''; 
+let _linkGone = false; 
+let _shareNote = ''; 
 let _ownerPhoto    = '';
 let _ownerName     = '';
 
@@ -386,7 +390,7 @@ let _ownerName     = '';
   const urlId  = params.get('id') || params.get('memberCard');
   const listParam = params.get('list');
 
-  _ownerAppearId = params.get('owner') || null;
+  _ownerShare = String(params.get('share') || '').trim();
 
   function _rememberBoth(id) {
     try { localStorage.setItem('appear-id', id); } catch(e) {}
@@ -515,7 +519,7 @@ let _pendingGiftOwner = null;
 let _pendingGiftItem  = null;
 
 function giftItem(itemTitle) {
-  const ownerForGift = _ownerAppearId || (viewerData ? viewerData.name : '');
+  const ownerForGift = _ownerShare;
   if (!ownerForGift) { toast('Could not identify list owner'); return; }
   _pendingGiftOwner = ownerForGift;
   _pendingGiftItem  = itemTitle;
@@ -550,7 +554,7 @@ function giveWithName() {
   fetch(GS_URL + '?action=saveGift'
     + '&gifterAppearId=' + encodeURIComponent('')
     + '&gifterName='     + encodeURIComponent(name)
-    + '&ownerAppearId='  + encodeURIComponent(_pendingGiftOwner)
+    + '&share='          + encodeURIComponent(_pendingGiftOwner)
     + '&item='           + encodeURIComponent(_pendingGiftItem)
     + '&anonymous=false'
   ).catch(() => {});
@@ -570,7 +574,7 @@ function confirmGift(anonymous) {
   fetch(GS_URL + '?action=saveGift'
     + '&gifterAppearId=' + encodeURIComponent(_appearId)
     + '&gifterName='     + encodeURIComponent('')
-    + '&ownerAppearId='  + encodeURIComponent(_pendingGiftOwner)
+    + '&share='          + encodeURIComponent(_pendingGiftOwner)
     + '&item='           + encodeURIComponent(_pendingGiftItem)
     + '&anonymous='      + encodeURIComponent(anonymous ? 'true' : 'false')
   ).catch(() => {});
@@ -629,11 +633,12 @@ try { shareURL = localStorage.getItem('giving_shareURL') || ''; } catch(e) {}
 (function init() {
   const params    = new URLSearchParams(window.location.search);
   const ownerParam = params.get('owner');
-
-  const explicitId = params.get('id') || params.get('memberCard');
-  if (ownerParam && (!explicitId || ownerParam !== explicitId)) {
-    _ownerAppearId = ownerParam;
-    mode = 'viewer';
+  if (_ownerShare) { mode = 'viewer'; }
+  else if (ownerParam) { _linkGone = true; mode = 'viewer'; }
+  if (/[?&]owner=/.test(shareURL)) {
+    shareURL = '';
+    _shareNote = 'Links you sent before 10 November stopped working. Make a new link and send it again.';
+    try { localStorage.removeItem('giving_shareURL'); } catch (e) {}
   }
 
   if (mode === 'builder') {
@@ -669,20 +674,21 @@ async function loadSupportList() {
 }
 
 async function loadViewerList() {
-  if (!_ownerAppearId) return;
+  if (!_ownerShare) return;
   try {
-    var profilePromise = fetch(GS_URL + '?action=lookupProfile&appearId=' + encodeURIComponent(_ownerAppearId)).then(function(r) { return r.json(); });
-    var listPromise = fetch(GS_URL + '?action=getSupportList&appearId=' + encodeURIComponent(_ownerAppearId)).then(function(r) { return r.json(); });
+    var profilePromise = fetch(GS_URL + '?action=lookupProfile&share=' + encodeURIComponent(_ownerShare), { referrerPolicy: 'no-referrer' }).then(function(r) { return r.json(); });
+    var listPromise = fetch(GS_URL + '?action=getSupportList&share=' + encodeURIComponent(_ownerShare), { referrerPolicy: 'no-referrer' }).then(function(r) { return r.json(); });
     var results = await Promise.all([profilePromise, listPromise]);
     var profileData = results[0];
     var data = results[1];
     if (profileData.found) {
       _ownerPhoto = profileData.photo || '';
-      _ownerName  = profileData.name  || _ownerAppearId;
+      _ownerName  = profileData.name  || '';
     }
+    if (!profileData.found && data.status === 'ok' && !(data.items || []).length) { _linkGone = true; render(); return; }
     if (data.status === 'ok' && data.items) {
       viewerData = {
-        name: _ownerName || _ownerAppearId,
+        name: _ownerName || '',
         items: data.items.filter(function(r) { return r.gifted !== true; }).map(function(r) {
           return {
             id: r.item + '_' + (r.timestamp||''),
@@ -912,11 +918,14 @@ function renderDrawer() {
     ? `<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
         <div style="flex:1;font-size:12px;color:var(--muted);background:var(--input-bg);border:1px solid var(--border);border-radius:6px;padding:7px 10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(displayURL)}</div>
         <button onclick="copyURL()" style="flex-shrink:0;padding:7px 14px;background:var(--brand);color:white;border:none;border-radius:8px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;">Copy 🔗</button>
-      </div>`
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin:0 0 8px;line-height:1.5;">Anyone with this link sees each item, the note you wrote and when you added it.</p>
+      <div style="text-align:center;margin-bottom:12px;"><button onclick="stopSharing()" style="background:none;border:none;color:var(--brand);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:underline;">Stop sharing</button></div>`
     : `<div style="text-align:center;margin-bottom:12px;">
         <button onclick="generateLink()" style="padding:8px 16px;background:transparent;border:1.5px solid var(--border);border-radius:20px;font-size:13px;color:var(--soft);font-family:'DM Sans',sans-serif;cursor:pointer;">Generate link to share</button>
       </div>`;
 
+  const shareNoteHTML = _shareNote ? `<p style="font-size:12px;color:var(--soft);margin:0 0 10px;line-height:1.5;">${esc(_shareNote)}</p>` : '';
   const tabs = `
     <div class="drawer-tabs">
       <button class="drawer-tab${drawerTab==='list'?' active':''}" onclick="setDrawerTab('list')">My list</button>
@@ -1008,7 +1017,7 @@ function renderDrawer() {
       <button onclick="closeDrawer()" style="background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:4px 8px;line-height:1;border-radius:8px;">✕</button>
     </div>`;
 
-  qs('#gift-drawer-content').innerHTML = drawerHeader + (drawerTab === 'list' ? postalLine : '') + shareLine + tabs + body;
+  qs('#gift-drawer-content').innerHTML = drawerHeader + (drawerTab === 'list' ? postalLine : '') + shareNoteHTML + shareLine + tabs + body;
 }
 
 function formatDate(ts) {
@@ -1021,9 +1030,30 @@ function goToBuilder() { mode = 'builder'; render(); }
 
 function generateLink() {
   if (!_appearId) { toast('Sign in to generate a link'); return; }
-  shareURL = location.origin + location.pathname + '?owner=' + encodeURIComponent(_appearId);
-  try { localStorage.setItem('giving_shareURL', shareURL); } catch(e) {}
-  renderDrawer();
+  toast('Making your link');
+  fetch(GS_URL + '?action=makeGivingShare&appearId=' + encodeURIComponent(_appearId))
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      if (!d || d.status !== 'ok' || !d.code) { toast((d && d.message) || 'The link could not be made. Try again.'); return; }
+      shareURL = location.origin + location.pathname + '?share=' + encodeURIComponent(d.code);
+      if (d.first) _shareNote = 'Links you sent before 10 November stopped working. Send this new one instead.';
+      try { localStorage.setItem('giving_shareURL', shareURL); } catch(e) {}
+      renderDrawer();
+    })
+    .catch(function () { toast('The link could not be made. Try again.'); });
+}
+
+function stopSharing() {
+  if (!_appearId) return;
+  fetch(GS_URL + '?action=stopGivingShare&appearId=' + encodeURIComponent(_appearId))
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      if (!d || d.status !== 'ok') { toast((d && d.message) || 'That did not work. Try again.'); return; }
+      shareURL = ''; _shareNote = 'Your link stopped working. Make a new link when you want to share again.';
+      try { localStorage.removeItem('giving_shareURL'); } catch(e) {}
+      renderDrawer();
+    })
+    .catch(function () { toast('That did not work. Try again.'); });
 }
 
 function genShareAndReview() {
@@ -1335,6 +1365,10 @@ function reviewHTML() {
 }
 
 function viewerHTML() {
+  if (_linkGone) {
+    return '<h1 style="text-align:center;margin-bottom:6px">Ways to give to me</h1>'
+      + '<p class="subtitle" style="text-align:center">This giving list link no longer works. Ask the person who sent it for a new one.</p>';
+  }
   const vItems = viewerData.items || [];
   const name   = viewerData.name  || 'Someone';
   const photoHTML = _ownerPhoto
