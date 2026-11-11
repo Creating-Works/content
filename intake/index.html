@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Creating.Works intake</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1F5C86; --card:#fff; --text:#1B2733; --muted:#5B6B7C;
+    --brand:#1F699E; --line:#E3E9EF; --soft:#F5F8FB; --on:#E8F1F8; --note:#8A6D1F;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);
+       padding:28px 16px 80px;min-height:100vh;}
+  .wrap{max-width:760px;margin:0 auto;}
+  .top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0 0 18px;flex-wrap:wrap;}
+  .brand{color:#fff;font-weight:700;font-size:18px;}
+    .card{background:var(--card);border-radius:14px;padding:26px 24px;}
+  .step{color:var(--muted);font-size:13px;margin:0 0 6px;}
+  h1{font-size:22px;margin:0 0 6px;line-height:1.35;}
+  .sub{color:var(--muted);font-size:15px;margin:0 0 20px;line-height:1.6;}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip{border:1.5px solid var(--line);background:#fff;border-radius:22px;padding:9px 15px;
+        font-family:inherit;font-size:15px;color:var(--text);cursor:pointer;}
+  .chip.on{background:var(--brand);border-color:var(--brand);color:#fff;}
+  .group{margin:0 0 22px;}
+  .group h2{font-size:16px;margin:0 0 10px;}
+  .opt{display:flex;gap:12px;align-items:flex-start;border:1.5px solid var(--line);border-radius:10px;
+       padding:12px 14px;margin:0 0 8px;cursor:pointer;font-size:15px;line-height:1.5;}
+  .opt.on{border-color:var(--brand);background:var(--on);}
+  .opt input[type=checkbox]{margin-top:4px;width:17px;height:17px;flex:0 0 auto;}
+  .other{width:100%;border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-family:inherit;font-size:15px;color:var(--text);margin-top:8px;outline:none;}
+  .other:focus{border-color:var(--brand);}
+  .bar{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap;justify-content:flex-end;}
+  .bar .left{margin-right:auto;}
+  .btn{background:var(--brand);color:#fff;border:0;border-radius:20px;padding:7px 16px;text-decoration:none;display:inline-block;
+       font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;}
+  .btn.ghost{background:var(--soft);color:var(--text);}
+  .btn[disabled]{opacity:.45;cursor:default;}
+  .tool{background:var(--soft);border-radius:12px;padding:16px 18px;margin:0 0 10px;}
+  .tool h3{font-size:17px;margin:0 0 4px;}
+  .tool .sel{margin:0 0 10px;color:var(--muted);font-size:14.5px;line-height:1.55;}
+  .tool .sel b{color:var(--text);font-weight:500;}
+  .tool .row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;}
+  .mail{background:var(--on);border-radius:12px;padding:16px 18px;margin-top:16px;font-size:15px;line-height:1.55;}
+  .mail p{margin:0 0 10px;}
+  .hide{display:none;}
+</style>
+</head>
+<body>
+<div class="wrap" id="wrap">
+  <div class="top">
+    <div class="brand">Creating.Works</div>
+  </div>
+
+  <div class="card" id="s1">
+    <p class="step">1 of 3</p>
+    <h1>What do you most identify with right now?</h1>
+    <p class="sub">Pick any that fit.</p>
+    <div class="chips" id="titles"></div>
+    <div class="bar"><button class="btn" id="go1" disabled>Continue</button></div>
+  </div>
+
+  <div class="card hide" id="s2">
+    <p class="step">2 of 3</p>
+    <h1>What is your priority right now?</h1>
+    <p class="sub">Pick any that fit.</p>
+    <div id="needs"></div>
+    <div class="bar">
+      <button class="btn ghost left" id="back2">Back</button>
+      <button class="btn" id="go2" disabled>Continue</button>
+    </div>
+  </div>
+
+  <div class="card hide" id="s3">
+    <p class="step">3 of 3</p>
+    <h1>Here is where we would start</h1>
+    <p class="sub">Based on what you picked.</p>
+    <div id="result"></div>
+    <div id="mail"></div>
+    <div class="bar">
+      <button class="btn ghost left" id="back3">Back</button>
+      <button class="btn ghost" id="again">Start over</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var TOOLS={
+    balance:{name:'2Balance',url:'https://2balance.network/'},
+    appear:{name:'2Appear',url:'https://2appear.network/'},
+    gather:{name:'2Gather',url:'https://2gather.network/'},
+    license:{name:'Licensed for your organization',mail:true},
+    bis:{name:'Being in Systems',mail:true},
+    walk:{name:'What we are building',url:'https://creating.works/vision/'},
+    open:{name:'Open source',url:'https://github.com/Creating-Works/content'},
+    other:{name:'Something else',mail:true}
+  };
+  var T=[
+    {t:'Parent',n:[[1,'More balance between my family and myself',['balance']],[2,'Someone I can count on: a sitter, a tutor, a ride',['appear']],[2,'To know other parents near me',['appear']],[3,'Things to do with my family nearby',['gather']]]},
+    {t:'Partner or spouse',n:[[1,'To understand what I need and what we each bring',['balance']],[3,'Things to do together',['gather']]]},
+    {t:'Caregiver',n:[[2,'Help for the person I care for',['appear']],[1,'To look after myself too',['balance']]]},
+    {t:'Student',n:[[1,'To figure out what fits me',['balance']],[2,'People to study or build something with',['appear']]]},
+    {t:'Job seeker',n:[[1,'To figure out what work fits me',['balance']],[2,'To be found for paid, volunteer or trade work',['appear']]]},
+    {t:'Employee',n:[[1,'More balance, I am worn out',['balance']],[1,'To explore a different career',['balance']],[2,'To know the people I work with and what each one offers',['appear']]]},
+    {t:'Manager',n:[[5,'My team is worn out',['balance','license']],[5,'My team does not know what each person offers',['appear','license']]]},
+    {t:'Employer or business owner',n:[[5,'The right people to join us',['appear','license']],[5,'A place people want to work in',['balance','appear','gather','license']],[8,'Someone to work alongside us to set it up',['bis']]]},
+    {t:'Self-employed',n:[[2,'People who need what I offer to find me',['appear']],[2,'Someone to work on a project with me',['appear']]]},
+    {t:'Coach or practitioner',n:[[5,'To offer this to the people I serve',['balance','license']]]},
+    {t:'Organization leader',n:[[5,'Our people to know each other and what each one offers',['appear','license']],[5,'Less burnout and fewer people leaving',['balance','license']],[5,'Connection that carries on after our events',['gather','appear','license']],[5,'The right staff, volunteers or partners',['appear','license']],[5,'A place that feels welcoming and safe',['balance','appear','gather','license']],[5,'Tools that carry our own name',['license']],[8,'To see everyone we touch and what flows between us',['bis']],[8,'Someone to work alongside us to set it up',['bis']]]},
+    {t:'Board member',n:[[5,'To understand how our people are really doing',['balance','license']],[8,'To see everyone we touch and what flows between us',['bis']]]},
+    {t:'Event host',n:[[3,'The right people to hear about it',['gather']],[3,'To know who is coming before they arrive',['gather']],[3,'People to meet the people they came to meet',['gather']],[3,'A co-host, speakers or volunteers',['appear']],[3,'People to stay connected after it ends',['gather','appear']],[5,'Our events under our own name',['gather','license']]]},
+    {t:'Event attendee',n:[[3,'An event near me',['gather']],[3,'To meet the people at an event I am going to',['gather']]]},
+    {t:'Group organizer',n:[[2,'To start a group around something I care about',['appear']],[2,'To keep my group connected between meetings',['appear']]]},
+    {t:'Volunteer',n:[[3,'Somewhere to give back where I live',['gather','appear']],[2,'For my space, tools or time to be used',['appear']]]},
+    {t:'Neighbor',n:[[2,'To understand what the people I know and trust both need and have',['appear']],[3,'To meet my neighbors',['gather','appear']]]},
+    {t:'New to the area',n:[[3,'To meet my neighbors',['gather','appear']],[3,'To find what is happening nearby',['gather']]]},
+    {t:'Between chapters or retiring',n:[[4,'To see my people and my options for what is next',['balance','appear','gather']]]},
+    {t:'Supporter or funder',n:[[6,'To understand what you are building',['walk']]]},
+    {t:'Developer',n:[[9,'To use or build on the code',['open']]]},
+    {t:'Just curious',n:[]}
+  ];
+  var ORDER=['balance','appear','gather','walk','open','license','bis','other'];
+  var others={};
+  var $=function(id){return document.getElementById(id);};
+  var picked={}, chosen={};
+
+
+  T.forEach(function(x,i){
+    var b=document.createElement('button');
+    b.className='chip'; b.type='button'; b.textContent=x.t;
+    b.addEventListener('click',function(){
+      picked[i]=!picked[i]; b.classList.toggle('on',!!picked[i]);
+      $('go1').disabled=!Object.keys(picked).some(function(k){return picked[k];});
+    });
+    $('titles').appendChild(b);
+  });
+
+  function show(id){ ['s1','s2','s3'].forEach(function(s){ $(s).classList.toggle('hide',s!==id); }); window.scrollTo(0,0); }
+
+  function needsCount(){ return Object.keys(chosen).filter(function(k){return chosen[k];}).length + Object.keys(others).filter(function(k){return picked[k]&&others[k];}).length; }
+
+  $('go1').addEventListener('click',function(){
+    var box=$('needs'); box.innerHTML='';
+    T.forEach(function(x,i){
+      if(!picked[i]) return;
+      var g=document.createElement('div'); g.className='group';
+      var h=document.createElement('h2'); h.textContent=x.t; g.appendChild(h);
+      x.n.forEach(function(n,j){
+        var key=i+'-'+j;
+        var l=document.createElement('label'); l.className='opt'+(chosen[key]?' on':'');
+        var c=document.createElement('input'); c.type='checkbox'; c.checked=!!chosen[key];
+        c.addEventListener('change',function(){ chosen[key]=c.checked; l.classList.toggle('on',c.checked); $('go2').disabled=needsCount()===0; });
+        var s=document.createElement('span'); s.textContent=n[1];
+        l.appendChild(c); l.appendChild(s); g.appendChild(l);
+      });
+      var lo=document.createElement('label'); lo.className='opt'+(others[i]?' on':'');
+      var s2=document.createElement('span'); s2.style.flex='1'; s2.textContent='Other';
+      var inp=document.createElement('input'); inp.type='text'; inp.className='other'; inp.placeholder='Type your own'; inp.value=others[i]||'';
+      inp.addEventListener('input',function(){ others[i]=inp.value.trim(); lo.classList.toggle('on',!!others[i]); $('go2').disabled=needsCount()===0; });
+      s2.appendChild(inp); lo.appendChild(s2); g.appendChild(lo);
+      box.appendChild(g);
+    });
+    Object.keys(chosen).forEach(function(k){ if(!picked[k.split('-')[0]]) delete chosen[k]; });
+    $('go2').disabled=needsCount()===0;
+    show('s2');
+  });
+
+  $('back2').addEventListener('click',function(){ show('s1'); });
+  $('back3').addEventListener('click',function(){ show('s2'); });
+  $('again').addEventListener('click',function(){ location.reload(); });
+
+  $('go2').addEventListener('click',function(){
+    var hit={};
+    Object.keys(chosen).forEach(function(k){
+      if(!chosen[k]) return;
+      var p=k.split('-'), n=T[p[0]].n[p[1]];
+      n[2].forEach(function(t){ hit[t]=hit[t]||[]; if(hit[t].indexOf(n[1])<0) hit[t].push(n[1]); });
+    });
+    Object.keys(others).forEach(function(i){ if(picked[i]&&others[i]) (hit.other=hit.other||[]).push(others[i]); });
+    var box=$('result'); box.innerHTML=''; var mailing=[];
+    ORDER.forEach(function(k){
+      if(!hit[k]) return;
+      var d=document.createElement('div'); d.className='tool';
+      var r=document.createElement('div'); r.className='row';
+      var h=document.createElement('h3'); h.textContent=TOOLS[k].name; r.appendChild(h);
+      if(TOOLS[k].url){ var a=document.createElement('a'); a.className='btn'; a.href=TOOLS[k].url; a.textContent='Visit'; r.appendChild(a); }
+      else mailing.push(TOOLS[k].name+': '+hit[k].join('; '));
+      var p=document.createElement('p'); p.className='sel';
+      var b=document.createElement('b'); b.textContent=hit[k].length>1?'Selections: ':'Selection: ';
+      p.appendChild(b); p.appendChild(document.createTextNode(hit[k].join(', ')));
+      d.appendChild(r); d.appendChild(p); box.appendChild(d);
+    });
+    var m=$('mail'); m.innerHTML='';
+    if(mailing.length){
+      var w=document.createElement('div'); w.className='mail';
+      var t=document.createElement('p'); t.textContent='We would love to hear more. Send us an email and we will write back.';
+      var a=document.createElement('a'); a.className='btn'; a.textContent='Email support@creating.works';
+      a.href='mailto:support@creating.works?subject='+encodeURIComponent('Creating.Works intake')+'&body='+encodeURIComponent('What I picked:\n'+mailing.join('\n')+'\n\n');
+      w.appendChild(t); w.appendChild(a); m.appendChild(w);
+    }
+    show('s3');
+  });
+})();
+</script>
+</body>
+</html>
