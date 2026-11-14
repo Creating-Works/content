@@ -879,6 +879,7 @@
   }
   var _curPane='';
   function renderPanel(key){
+    if(key==='permissions' && /(^|\.)2gather\.network$/i.test(location.hostname)) key='account';
     _curPane=key;
     var p=document.getElementById('panel');
     if(key==='me'){
@@ -1377,7 +1378,7 @@
   html.cw-prail-on .cw-prail-main h1{color:var(--ink);font-weight:800;font-size:26px;margin-top:14px;}
   html.cw-prail-on .cw-prail-main .hello .sub, html.cw-prail-on .cw-prail-main .hello .sub a{color:var(--ink);}
 </style>
-<script src="https://2gather.network/nav/profile-rail.js?v=24"></script>
+<script src="https://2gather.network/nav/profile-rail.js?v=25"></script>
 <script>
 (function(){
   var look = ''; try { look = new URLSearchParams(location.search).get('look') || ''; } catch (e) {}
