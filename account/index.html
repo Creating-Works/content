@@ -671,10 +671,16 @@
       +'<span id="acct-savestat" style="font-size:13.5px;color:var(--soft);font-weight:600;"></span>'
       +'</div><div id="acct-gate"></div>'+devicesRow();
   }
+  function saveBox(){
+    return '<div style="display:flex;align-items:center;justify-content:flex-end;gap:14px;flex-wrap:wrap;margin-top:16px;">'
+      +'<span id="acct-savestat" style="font-size:13.5px;color:var(--soft);font-weight:600;"></span>'
+      +'<button type="button" class="btn solid" id="acct-save" style="font-size:14px;height:38px;padding:0 16px;">Save changes</button>'
+      +'</div><div id="acct-gate"></div>';
+  }
   function devicesRow(){
     if(!(window.CW && CW.jumpOn && CW.jumpOn()) || (CW.me && CW.me().viewing)) return '';
     return '<div style="margin-top:26px;">'
-      +'<button type="button" id="dev-out" class="btn ghost" style="font-size:14px;padding:9px 16px;">Sign out of all devices</button>'
+      +'<a role="button" tabindex="0" id="dev-out" style="font-size:14px;color:#1F699E;text-decoration:underline;cursor:pointer;">Sign out of all devices</a>'
       +'<div id="dev-ask" style="display:none;margin-top:10px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel);">'
         +'<div style="font-size:14px;line-height:1.5;">This signs out all devices, including desktop and mobile.</div>'
         +'<div style="margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">'
@@ -1073,6 +1079,7 @@
       +'<div id="loc-box"></div></div>'
       +'<div class="f" style="margin-top:18px;"><label>Languages</label><div id="lang-box"></div></div>'
       +'</div>'
+      +saveBox()
       +'<div class="f" style="margin-top:16px;border:1.5px solid #C9DFF3;border-radius:14px;padding:12px 20px 16px;"><label>Terms accepted</label>'
       +'<div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;">'
       +'<div style="font-size:13.5px;color:var(--soft);line-height:1.6;flex:1 1 320px;min-width:0;">'+termsLede()
@@ -1083,7 +1090,7 @@
       +'</div>'
       +'<div style="font-size:13.5px;color:var(--soft);line-height:1.6;margin-top:14px;">We honor each individual guest\'s agency, data sovereignty, identity, and privacy. This is above and beyond all else, no exceptions. This is an absolute.</div>'
       +'</div>'
-      +saveRow();
+      +devicesRow();
     var up=document.getElementById('photo-upload');
     if(up) up.onclick=choosePhoto;
     renderLoc();
