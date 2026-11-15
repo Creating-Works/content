@@ -1078,7 +1078,9 @@
       +'<a href="https://creating.works/privacy-policy" style="color:#1F699E;">Privacy Policy</a>, and '
       +'<a href="https://creating.works/code-of-conduct" style="color:#1F699E;">Code of Conduct</a>.</div>'
       +(termsStamp()?'<div style="font-size:13px;color:var(--soft);white-space:nowrap;">'+esc(termsStamp())+'</div>':'')
-      +'</div></div>'
+      +'</div>'
+      +'<div style="font-size:13.5px;color:var(--soft);line-height:1.6;margin-top:14px;">We honor each individual guest\'s agency, data sovereignty, identity, and privacy. This is above and beyond all else, no exceptions. This is an absolute.</div>'
+      +'</div>'
       +saveRow();
     var up=document.getElementById('photo-upload');
     if(up) up.onclick=choosePhoto;
@@ -1378,7 +1380,7 @@
   html.cw-prail-on .cw-prail-main h1{color:var(--ink);font-weight:800;font-size:26px;margin-top:14px;}
   html.cw-prail-on .cw-prail-main .hello .sub, html.cw-prail-on .cw-prail-main .hello .sub a{color:var(--ink);}
 </style>
-<script src="https://2gather.network/nav/profile-rail.js?v=25"></script>
+<script src="https://2gather.network/nav/profile-rail.js?v=26"></script>
 <script>
 (function(){
   var look = ''; try { look = new URLSearchParams(location.search).get('look') || ''; } catch (e) {}
