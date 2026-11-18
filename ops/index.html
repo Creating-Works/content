@@ -221,6 +221,18 @@
     </div>
   </div>
 
+  <div class="card hide" id="fboard">
+    <div class="headrow">
+      <h2><button class="fold" id="ffold" title="Hide or show">Host posts an event</button></h2>
+      <button type="button" class="btn loadbtn" data-load="flow">Load</button>
+    </div>
+    <div id="fsay"></div>
+    <div id="fbody" class="hide">
+      <div class="tot" id="ftot"></div>
+      <p class="key">Totals only. Test accounts are left out, and no names or addresses are read out.</p>
+    </div>
+  </div>
+
   <div class="card hide" id="pboard">
     <div class="headrow">
       <h2><button class="fold" id="pfold" title="Hide or show">People</button></h2>
@@ -512,7 +524,8 @@
     groups:  {board:'board',  body:'gbody', say:'gsay', label:'groups'},
     activity:{board:'aboard', body:'abody', say:'asay', label:'engagement'},
     people:  {board:'pboard', body:'pbody', say:'psay', label:'people'},
-    dash:    {board:'dboard', body:'dbody', say:'dsay', label:'dashboard'}
+    dash:    {board:'dboard', body:'dbody', say:'dsay', label:'dashboard'},
+    flow:    {board:'fboard', body:'fbody', say:'fsay', label:'host event counts'}
   };
   function done_(key){
     var s=SECTIONS[key]; if(!s) return;
@@ -731,7 +744,31 @@
       })
       .catch(function(err){ fail_('dash', err); });
   }
-  var LOADERS={groups:loadGroups, activity:loadActivity, people:loadPeople, dash:loadDash};
+  function loadFlow(){
+    ask('getOpsFlowCounts', GS+'?action=getOpsFlowCounts&appearId='+encodeURIComponent(me)
+          +'&sessionToken='+encodeURIComponent(token)+'&t='+Date.now())
+      .then(function(d){
+        if(!d||d.status!=='ok'){
+          $('fboard').classList.remove('hide');
+          $('ftot').innerHTML='<div class="tot-note">The host event counts did not load. '
+            + esc((d&&d.message)||'The server gave no reason.') + '</div>';
+          done_('flow');
+          return;
+        }
+        var t=function(n,label){ return '<div><b>'+n+'</b>'+esc(label)+'</div>'; };
+        var miss='<div class="tot-note">Could not be read just now.</div>';
+        var ev=d.events, i=d.invites, c=d.carryOver, st=d.stopInvitations;
+        $('ftot').innerHTML=
+          (ev ? t(ev.posted,'events posted')+(c ? t(c.eventsWithLobby,'with the lobby on, meaning at least one attendee is in it') : '') : miss)
+          +(i ? t(i.sent,'invitations sent')+t(i.joined,'show Joined, '+i.joinedPercent+'% of those sent')+t(i.pending,'still pending') : miss)
+          +(c ? t(c.yes,'carry-over yes')+t(c.later,'carry-over later')+t(c.no,"carry-over I'll pass")+t(c.noAnswer,'no carry-over answer')+t(c.people,'attendees counted') : miss)
+          +(st ? t(st.stopped,'stopped with the Stop invitations link') : miss);
+        $('fboard').classList.remove('hide');
+        done_('flow');
+      })
+      .catch(function(err){ fail_('flow', err); });
+  }
+  var LOADERS={groups:loadGroups, activity:loadActivity, people:loadPeople, dash:loadDash, flow:loadFlow};
 
   var aRecent=[], aTotal=0, aShown=10, aFetching=false;
   function paintRecent(){
@@ -807,7 +844,7 @@
     whySession();
     showTicketPic();
     $('docs').classList.remove('hide');
-    ['dboard','aboard','pboard','board'].forEach(function(id){ $(id).classList.remove('hide'); });
+    ['dboard','aboard','fboard','pboard','board'].forEach(function(id){ $(id).classList.remove('hide'); });
   }
   Array.prototype.forEach.call(document.querySelectorAll('.loadbtn'), function(b){
     b.addEventListener('click', function(){
