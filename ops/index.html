@@ -230,6 +230,8 @@
     <div id="fbody" class="hide">
       <div class="tot" id="ftot"></div>
       <p class="key">Totals only. Test accounts are left out, and no names or addresses are read out.</p>
+      <h3 style="font-size:14px;font-weight:800;margin:18px 0 6px;">Onboarding messages</h3>
+      <div class="tot" id="otot"></div>
     </div>
   </div>
 
@@ -763,6 +765,11 @@
           +(i ? t(i.sent,'invitations sent')+t(i.joined,'show Joined, '+i.joinedPercent+'% of those sent')+t(i.pending,'still pending') : miss)
           +(c ? t(c.yes,'carry-over yes')+t(c.later,'carry-over later')+t(c.no,"carry-over I'll pass")+t(c.noAnswer,'no carry-over answer')+t(c.people,'attendees counted') : miss)
           +(st ? t(st.stopped,'stopped with the Stop invitations link') : miss);
+        var ob=d.onboarding, OBW={'cal-not-register':'saw that Add to calendar does not register them'};
+        $('otot').innerHTML = !ob ? miss
+          : (Object.keys(ob).length ? Object.keys(ob).sort().map(function(k){
+              return t(ob[k].members,'members '+(OBW[k]||k))+t(ob[k].signedOut,'signed-out visits '+(OBW[k]||k));
+            }).join('') : '<div class="tot-note">No onboarding messages recorded yet.</div>');
         $('fboard').classList.remove('hide');
         done_('flow');
       })
