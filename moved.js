@@ -6,10 +6,7 @@
     '/account',
     '/profile',
     '/giving',
-    '/claim',
-    '/terms-of-service.html',
-    '/privacy-policy.html',
-    '/code-of-conduct.html'
+    '/claim'
   ];
 
   var here = window.location.pathname.replace(/\/index\.html$/, '/');
