@@ -1043,12 +1043,15 @@
       p.querySelectorAll('[data-permitem]').forEach(function(b){ b.onclick=function(){ var k=b.getAttribute('data-permitem'); P[k]=!P[k]; renderPanel('permissions'); permSave(); }; });
       var pb=document.getElementById('perm-pubon');
       if(pb) pb.onclick=function(){
-        var wantP=!_permPublicOn; pb.disabled=true;
+        if(window._pubSaving) return;
+        var wantP=!_permPublicOn; window._pubSaving=true;
+        _permPublicOn=wantP; renderPanel('permissions');
+        var undo=function(msg){ window._pubSaving=false; _permPublicOn=!wantP; renderPanel('permissions'); var sp2=document.getElementById('perm-status'); if(sp2){ sp2.style.color='#7A2410'; sp2.textContent=msg; } };
         fetch(GS_URL+'?action=savePermissions&appearId='+encodeURIComponent(meId)+(_editToken?'&editToken='+encodeURIComponent(_editToken):'')+'&audience=public&publicOn='+(wantP?'true':'false'))
           .then(function(r){ return r.json(); }).then(function(d){
-            if(d&&d.status==='ok'){ _permPublicOn=wantP; if(d.permissions){ permLoad(d.permissions); } renderPanel('permissions'); var sp=document.getElementById('perm-status'); if(sp){ sp.style.color='#1E6B3A'; sp.textContent=''; } }
-            else { pb.disabled=false; var sp2=document.getElementById('perm-status'); if(sp2){ sp2.style.color='#7A2410'; sp2.textContent=(d&&d.message)||'Please press the switch again, because it did not save.'; } }
-          }).catch(function(){ pb.disabled=false; var sp3=document.getElementById('perm-status'); if(sp3){ sp3.style.color='#7A2410'; sp3.textContent='Please press the switch again, because it did not save.'; } });
+            if(d&&d.status==='ok'){ window._pubSaving=false; _permPublicOn=wantP; if(d.permissions){ permLoad(d.permissions); } renderPanel('permissions'); var sp=document.getElementById('perm-status'); if(sp){ sp.style.color='#1E6B3A'; sp.textContent=''; } }
+            else { undo((d&&d.message)||'Please press the switch again, because it did not save.'); }
+          }).catch(function(){ undo('Please press the switch again, because it did not save.'); });
       };
       var mb=document.getElementById('perm-mailon'), mc=document.getElementById('perm-mailchat');
       if(mc) mc.onclick=function(){
